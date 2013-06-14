@@ -24,7 +24,7 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API_VERSION_SERVICE_TIME_SUMMARY_INDEX = "APIVersionServiceTimeSummaryIndex";
 
-    public static final String API_Resource_Path_USAGE_SUMMARY = "API_Resource_Path_USAGE_SUMMARY";
+    public static final String API_Resource_Path_USAGE_SUMMARY = "API_Resource_USAGE_SUMMARY";
 
     public static final String API_VERSION_USAGE_SUMMARY = "API_VERSION_USAGE_SUMMARY";
 
@@ -63,11 +63,11 @@ public final class APIUsageStatisticsClientConstants {
     public static final String SERVICE_TIME = "servicetime";
 
     public static final String VERSION = "version";
+
+    public static final String METHOD= "method";
     
     public static final String CONTEXT= "context";
-
-    public static final String RESOURCE= "resource";
-
+    
     public static final String RESPONSE = "total_response_count";
 
 	public static final String INVOCATION_TIME = "requesttime";
@@ -79,6 +79,12 @@ public final class APIUsageStatisticsClientConstants {
     public static final String CONSUMER_KEY = "CONSUMERKEY";
     
     public static final String USER_ID = "userid";
+
+    public static final String YEAR= "year";
+
+    public static final String DAY= "day";
+
+    public static final String TIME= "time";
     
     
     public static final String ALL_PROVIDERS = "__all_providers__";

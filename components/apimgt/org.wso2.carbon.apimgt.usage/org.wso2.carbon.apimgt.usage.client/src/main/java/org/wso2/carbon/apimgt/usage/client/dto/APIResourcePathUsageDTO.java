@@ -26,7 +26,7 @@ public class APIResourcePathUsageDTO {
 
     private String context;
 
-    private String resource;
+    private String method;
 
     private long count;
 
@@ -54,12 +54,12 @@ public class APIResourcePathUsageDTO {
         this.context = context;
     }
 
-    public String getResource() {
-        return resource;
+    public String getMethod() {
+        return method;
     }
 
-    public void setResource(String resource) {
-        this.resource = resource;
+    public void setMethod(String method) {
+        this.method = method;
     }
 
     public long getCount() {

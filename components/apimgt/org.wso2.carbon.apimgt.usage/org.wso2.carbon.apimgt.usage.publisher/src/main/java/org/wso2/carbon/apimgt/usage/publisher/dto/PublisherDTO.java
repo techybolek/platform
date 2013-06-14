@@ -35,6 +35,18 @@ public abstract class PublisherDTO {
 
     private String version;
 
+    private String hostName;
+
+    private String apiPublisher;
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
     }
@@ -97,6 +109,14 @@ public abstract class PublisherDTO {
 
     public String getVersion() {
         return version;
+    }
+
+    public void setApiPublisher(String apiPublisher) {
+        this.apiPublisher = apiPublisher;
+    }
+
+    public String getApiPublisher() {
+        return apiPublisher;
     }
 
 }

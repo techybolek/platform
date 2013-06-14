@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
@@ -40,6 +41,8 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setErrorMessage(faultPublisherDTO.getErrorMessage());
         setRequestTime((faultPublisherDTO.getRequestTime()));
         setUsername(faultPublisherDTO.getUsername());
+        setHostName(DataPublisherUtil.getHostAddress());
+        setApiPublisher(faultPublisherDTO.getApiPublisher());
     }
 
     public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
@@ -72,7 +75,9 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
                     "          {'name':'errorCode','type':'STRING'}," +
                     "          {'name':'errorMessage','type':'STRING'}," +
                     "          {'name':'requestTime','type':'STRING'}," +
-                    "          {'name':'userId','type':'STRING'}" +
+                    "          {'name':'userId','type':'STRING'}," +
+                    "          {'name':'hostName','type':'STRING'}," +
+                    "          {'name':'apiPublisher','type':'STRING'}" +
                     "  ]" +
 
                     "}");
@@ -84,6 +89,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
-                getVersion(),getErrorCode(),getErrorMessage(), String.valueOf(getRequestTime()),getUsername()};
+                getVersion(),getErrorCode(),getErrorMessage(), String.valueOf(getRequestTime()),getUsername()
+                ,getHostName(),getApiPublisher()};
     }
 }

@@ -27,9 +27,15 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.usage.agent.beans.APIManagerRequestStats;
+import org.wso2.carbon.usage.agent.util.PublisherUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,109 +51,145 @@ public class APIMgtUsageHandler extends AbstractHandler {
     private String publisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
 
     public boolean handleRequest(MessageContext mc) {
-        long currentTime = System.currentTimeMillis();
 
-        if (!enabled) {
-            return true;
-        }
+        try{
+            long currentTime = System.currentTimeMillis();
 
-        if (publisher == null) {
-            synchronized (this){
-                if (publisher == null) {
-                    try {
-                        log.debug("Instantiating Data Publisher");
-                        publisher = (APIMgtUsageDataPublisher)Class.forName(publisherClass).newInstance();
-                        publisher.init();
-                    } catch (ClassNotFoundException e) {
-                        log.error("Class not found " + publisherClass);
-                    } catch (InstantiationException e) {
-                        log.error("Error instantiating " + publisherClass);
-                    } catch (IllegalAccessException e) {
-                        log.error("Illegal access to " + publisherClass);
+            if (!enabled) {
+                return true;
+            }
+
+            if (publisher == null) {
+                synchronized (this){
+                    if (publisher == null) {
+                        try {
+                            log.debug("Instantiating Data Publisher");
+                            publisher = (APIMgtUsageDataPublisher)Class.forName(publisherClass).newInstance();
+                            publisher.init();
+                        } catch (ClassNotFoundException e) {
+                            log.error("Class not found " + publisherClass);
+                        } catch (InstantiationException e) {
+                            log.error("Error instantiating " + publisherClass);
+                        } catch (IllegalAccessException e) {
+                            log.error("Illegal access to " + publisherClass);
+                        }
                     }
                 }
             }
-        }
 
-        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(mc);
-        String consumerKey = "";
-        String username = "";
-        if (authContext != null) {
-            consumerKey = authContext.getApiKey();
-            username = authContext.getUsername();
-        }
-        String context = (String)mc.getProperty(RESTConstants.REST_API_CONTEXT);
-        String api_version =  (String)mc.getProperty(RESTConstants.SYNAPSE_REST_API);
-        int index = api_version.indexOf("--");
-        if (index != -1) {
-            api_version = api_version.substring(index + 2);
-        }
+            AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(mc);
+            String consumerKey = "";
+            String username = "";
+            if (authContext != null) {
+                consumerKey = authContext.getApiKey();
+                username = authContext.getUsername();
+            }
+            String hostName = DataPublisherUtil.getHostAddress();
+            String context = (String)mc.getProperty(RESTConstants.REST_API_CONTEXT);
+            String api_version =  (String)mc.getProperty(RESTConstants.SYNAPSE_REST_API);
+            String fullRequestPath = (String)mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+            int tenantDomainIndex = fullRequestPath.indexOf("/t/");
+            String apiPublisher = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            if (tenantDomainIndex != -1) {
+                String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
+                apiPublisher = temp.substring(0, temp.indexOf("/"));
+            }
 
-        String api = api_version.split(":")[0];
-        index = api.indexOf("--");
-        if (index != -1) {
-            api = api.substring(index + 2);
-        }
-        String version = (String)mc.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String resource = extractResource(mc);
-        String method =  (String)((Axis2MessageContext) mc).getAxis2MessageContext().getProperty(
-                Constants.Configuration.HTTP_METHOD);
+            int index = api_version.indexOf("--");
+            if (index != -1) {
+                api_version = api_version.substring(index + 2);
+            }
 
-        RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
-        requestPublisherDTO.setConsumerKey(consumerKey);
-        requestPublisherDTO.setContext(context);
-        requestPublisherDTO.setApi_version(api_version);
-        requestPublisherDTO.setApi(api);
-        requestPublisherDTO.setVersion(version);
-        requestPublisherDTO.setResource(resource);
-        requestPublisherDTO.setMethod(method);
-        requestPublisherDTO.setRequestTime(currentTime);
-        requestPublisherDTO.setUsername(username);
-        try {
+            String api = api_version.split(":")[0];
+            index = api.indexOf("--");
+            if (index != -1) {
+                api = api.substring(index + 2);
+            }
+            String version = (String)mc.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+            String resource = extractResource(mc);
+            String method =  (String)((Axis2MessageContext) mc).getAxis2MessageContext().getProperty(
+                    Constants.Configuration.HTTP_METHOD);
+
+            RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
+            requestPublisherDTO.setConsumerKey(consumerKey);
+            requestPublisherDTO.setContext(context);
+            requestPublisherDTO.setApi_version(api_version);
+            requestPublisherDTO.setApi(api);
+            requestPublisherDTO.setVersion(version);
+            requestPublisherDTO.setResource(resource);
+            requestPublisherDTO.setMethod(method);
+            requestPublisherDTO.setRequestTime(currentTime);
+            requestPublisherDTO.setUsername(username);
+            requestPublisherDTO.setHostName(hostName);
+            requestPublisherDTO.setApiPublisher(apiPublisher);
+
             publisher.publishEvent(requestPublisherDTO);
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            //We check if usage metering is enabled for billing purpose
+            if (DataPublisherUtil.isEnabledMetering()) {
+                //If usage metering enabled create new usage stat object and publish to bam
+                APIManagerRequestStats stats = new APIManagerRequestStats();
+                stats.setRequestCount(1);
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(MultitenantUtils.getTenantDomain(username));
+                stats.setTenantId(tenantId);
+                try {
+                    //Publish stat to bam
+                    PublisherUtils.publish(stats, tenantId);
+                } catch (Exception e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(e);
+                    }
+                    log.error("Error occurred while publishing request statistics. Full stacktrace available in debug logs. " + e.getMessage());
+                }
+            }
+
+            mc.setProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY, consumerKey);
+            mc.setProperty(APIMgtUsagePublisherConstants.USER_ID, username);
+            mc.setProperty(APIMgtUsagePublisherConstants.CONTEXT, context);
+            mc.setProperty(APIMgtUsagePublisherConstants.API_VERSION, api_version);
+            mc.setProperty(APIMgtUsagePublisherConstants.API, api);
+            mc.setProperty(APIMgtUsagePublisherConstants.VERSION, version);
+            mc.setProperty(APIMgtUsagePublisherConstants.RESOURCE, resource);
+            mc.setProperty(APIMgtUsagePublisherConstants.HTTP_METHOD, method);
+            mc.setProperty(APIMgtUsagePublisherConstants.REQUEST_TIME, currentTime);
+            mc.setProperty(APIMgtUsagePublisherConstants.HOST_NAME,hostName);
+            mc.setProperty(APIMgtUsagePublisherConstants.API_PUBLISHER,apiPublisher);
+
+        }catch (Throwable e){
+            log.error("Cannot publish event. " + e.getMessage(), e);
         }
-
-        mc.setProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY, consumerKey);
-        mc.setProperty(APIMgtUsagePublisherConstants.USER_ID, username);
-        mc.setProperty(APIMgtUsagePublisherConstants.CONTEXT, context);
-        mc.setProperty(APIMgtUsagePublisherConstants.API_VERSION, api_version);
-        mc.setProperty(APIMgtUsagePublisherConstants.API, api);
-        mc.setProperty(APIMgtUsagePublisherConstants.VERSION, version);
-        mc.setProperty(APIMgtUsagePublisherConstants.RESOURCE, resource);
-        mc.setProperty(APIMgtUsagePublisherConstants.HTTP_METHOD, method);
-        mc.setProperty(APIMgtUsagePublisherConstants.REQUEST_TIME, currentTime);
-
         return true;
     }
 
     public boolean handleResponse(MessageContext mc) {
-        Long currentTime = System.currentTimeMillis();
 
-        if (!enabled) {
-            return true;
-        }
-
-        Long serviceTime = currentTime - (Long) mc.getProperty(APIMgtUsagePublisherConstants.REQUEST_TIME);
-
-        ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
-        responsePublisherDTO.setConsumerKey((String)mc.getProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY));
-        responsePublisherDTO.setUsername((String)mc.getProperty(APIMgtUsagePublisherConstants.USER_ID));
-        responsePublisherDTO.setContext((String) mc.getProperty(APIMgtUsagePublisherConstants.CONTEXT));
-        responsePublisherDTO.setApi_version((String) mc.getProperty(APIMgtUsagePublisherConstants.API_VERSION));
-        responsePublisherDTO.setApi((String) mc.getProperty(APIMgtUsagePublisherConstants.API));
-        responsePublisherDTO.setVersion((String) mc.getProperty(APIMgtUsagePublisherConstants.VERSION));
-        responsePublisherDTO.setResource((String) mc.getProperty(APIMgtUsagePublisherConstants.RESOURCE));
-        responsePublisherDTO.setMethod((String)mc.getProperty(APIMgtUsagePublisherConstants.HTTP_METHOD));
-        responsePublisherDTO.setResponseTime(currentTime);
-        responsePublisherDTO.setServiceTime(serviceTime);
         try{
-            publisher.publishEvent(responsePublisherDTO);
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+            Long currentTime = System.currentTimeMillis();
 
+            if (!enabled) {
+                return true;
+            }
+
+            Long serviceTime = currentTime - (Long) mc.getProperty(APIMgtUsagePublisherConstants.REQUEST_TIME);
+
+            ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
+            responsePublisherDTO.setConsumerKey((String)mc.getProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY));
+            responsePublisherDTO.setUsername((String)mc.getProperty(APIMgtUsagePublisherConstants.USER_ID));
+            responsePublisherDTO.setContext((String) mc.getProperty(APIMgtUsagePublisherConstants.CONTEXT));
+            responsePublisherDTO.setApi_version((String) mc.getProperty(APIMgtUsagePublisherConstants.API_VERSION));
+            responsePublisherDTO.setApi((String) mc.getProperty(APIMgtUsagePublisherConstants.API));
+            responsePublisherDTO.setVersion((String) mc.getProperty(APIMgtUsagePublisherConstants.VERSION));
+            responsePublisherDTO.setResource((String) mc.getProperty(APIMgtUsagePublisherConstants.RESOURCE));
+            responsePublisherDTO.setMethod((String)mc.getProperty(APIMgtUsagePublisherConstants.HTTP_METHOD));
+            responsePublisherDTO.setResponseTime(currentTime);
+            responsePublisherDTO.setServiceTime(serviceTime);
+            responsePublisherDTO.setHostName((String)mc.getProperty(APIMgtUsagePublisherConstants.HOST_NAME));
+            responsePublisherDTO.setApiPublisher((String)mc.getProperty(APIMgtUsagePublisherConstants.API_PUBLISHER));
+
+            publisher.publishEvent(responsePublisherDTO);
+
+        }catch(Throwable e){
+            log.error("Cannot publish event. " + e.getMessage(), e);
+        }
         return true; // Should never stop the message flow
     }
 

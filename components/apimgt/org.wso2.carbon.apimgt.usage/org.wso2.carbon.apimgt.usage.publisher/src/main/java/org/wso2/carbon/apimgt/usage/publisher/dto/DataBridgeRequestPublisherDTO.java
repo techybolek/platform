@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
@@ -37,6 +38,8 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setVersion(requestPublisherDTO.getVersion());
         setRequestTime(requestPublisherDTO.getRequestTime());
         setUsername(requestPublisherDTO.getUsername());
+        setHostName(DataPublisherUtil.getHostAddress());
+        setApiPublisher(requestPublisherDTO.getApiPublisher());
     }
 
     public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
@@ -67,7 +70,9 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                                        "          {'name':'version','type':'STRING'}," +
                                        "          {'name':'request','type':'INT'}," +
                                        "          {'name':'requestTime','type':'LONG'}," +
-                                       "          {'name':'userId','type':'STRING'}" +
+                                       "          {'name':'userId','type':'STRING'}," +
+                                       "          {'name':'hostName','type':'STRING'}," +
+                                       "          {'name':'apiPublisher','type':'STRING'}" +
                                        "  ]" +
                                        "}");
         }
@@ -78,7 +83,8 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
-                            getVersion(), getRequestCount(),getRequestTime(),getUsername()};
+                            getVersion(), getRequestCount(),getRequestTime(),getUsername(),getHostName(),
+                            getApiPublisher()};
     }
 
 }

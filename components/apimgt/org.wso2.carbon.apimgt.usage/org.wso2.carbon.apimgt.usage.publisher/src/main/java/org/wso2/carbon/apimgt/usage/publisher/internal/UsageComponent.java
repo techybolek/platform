@@ -22,7 +22,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 
 /**
  * @scr.component name="api.mgt.usage.component" immediate="true"
@@ -44,6 +47,7 @@ public class UsageComponent {
             BundleContext bundleContext = ctx.getBundleContext();
             bundleContext.registerService(APIMGTConfigReaderService.class.getName(),
                                           apimgtConfigReaderService, null);
+            DataPublisherUtil.setEnabledMetering(Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("EnableMetering")));
             log.debug("API Management Usage Publisher bundle is activated ");
         } catch (Throwable e) {
             log.error("API Management Usage Publisher bundle ", e);

@@ -19,16 +19,20 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.usage.publisher.dto.*;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
-import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
+
 import java.net.MalformedURLException;
 
 public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher{
@@ -94,11 +98,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                    TransportException {
         APIMGTConfigReaderService apimgtConfigReaderService = UsageComponent.getApiMgtConfigReaderService();
         //expect to read data receiver URL something like "tcp://host:7611"
-        AgentConfiguration agentConfiguration = new AgentConfiguration();
-        Agent agent = new Agent(agentConfiguration);
         return new DataPublisher(apimgtConfigReaderService.getBamServerURL(),
             apimgtConfigReaderService.getBamServerUser(),
-            apimgtConfigReaderService.getBamServerPassword(),
-            agent);
+            apimgtConfigReaderService.getBamServerPassword());
     }
 }

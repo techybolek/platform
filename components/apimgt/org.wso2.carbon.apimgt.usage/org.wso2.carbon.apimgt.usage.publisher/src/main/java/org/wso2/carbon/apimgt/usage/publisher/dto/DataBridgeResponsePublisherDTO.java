@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
@@ -38,6 +39,8 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setResponseTime(responsePublisherDTO.getResponseTime());
         setServiceTime(responsePublisherDTO.getServiceTime());
         setUsername(responsePublisherDTO.getUsername());
+        setHostName(DataPublisherUtil.getHostAddress());
+        setApiPublisher(responsePublisherDTO.getApiPublisher());
     }
 
     public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
@@ -70,7 +73,9 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                                        "          {'name':'response','type':'INT'}," +
                                        "          {'name':'responseTime','type':'LONG'}," +
                                        "          {'name':'serviceTime','type':'LONG'}," +
-                                       "          {'name':'userId','type':'STRING'}" +
+                                       "          {'name':'userId','type':'STRING'}," +
+                                       "          {'name':'hostName','type':'STRING'}," +
+                                       "          {'name':'apiPublisher','type':'STRING'}" +
                                        "  ]" +
 
                                        "}");
@@ -82,7 +87,8 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
-                getVersion(),getResponse(),getResponseTime(),getServiceTime(),getUsername()};
+                getVersion(),getResponse(),getResponseTime(),getServiceTime(),getUsername(),getHostName(),
+                getApiPublisher()};
     }
 
 }
