@@ -17,7 +17,22 @@
  */
 package org.wso2.carbon.identity.sso.saml.ui;
 
-import java.io.IOException;
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.core.common.AuthenticationException;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.Util;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.sso.saml.SAMLSSOService;
+import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
+import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOReqValidationResponseDTO;
+import org.wso2.carbon.identity.sso.saml.dto.SAMLSSORespDTO;
+import org.wso2.carbon.identity.sso.saml.ui.logout.LogoutRequestSender;
+import org.wso2.carbon.identity.sso.saml.ui.util.SAMLSSOUIUtil;
+import org.wso2.carbon.ui.CarbonUIAuthenticator;
+import org.wso2.carbon.ui.tracker.AuthenticatorRegistry;
+import org.wso2.carbon.ui.util.CharacterEncoder;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -28,21 +43,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.authenticator.saml2.sso.common.Util;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
-import org.wso2.carbon.identity.sso.saml.SAMLSSOService;
-import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
-import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOReqValidationResponseDTO;
-import org.wso2.carbon.identity.sso.saml.dto.SAMLSSORespDTO;
-import org.wso2.carbon.identity.sso.saml.ui.logout.LogoutRequestSender;
-import org.wso2.carbon.identity.sso.saml.ui.util.SAMLSSOUIUtil;
-import org.wso2.carbon.ui.util.CharacterEncoder;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import java.io.IOException;
 
 /**
  * This is the entry point for authentication process in an SSO scenario. This servlet is registered
@@ -85,9 +86,13 @@ public class SAMLSSOProvider extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
-		String username =
-		                  CharacterEncoder.getSafeText(req.getParameter(SAMLSSOProviderConstants.USERNAME));
+
+        String username = CharacterEncoder.getSafeText(req
+                                                               .getParameter(SAMLSSOProviderConstants.USERNAME));
+        if (username == null && req.getAttribute(SAMLSSOProviderConstants.USERNAME) != null) {
+            username = req.getAttribute(SAMLSSOProviderConstants.USERNAME).toString();
+
+        }
 		String password = req.getParameter(SAMLSSOProviderConstants.PASSWORD);
 		
 		String federatedIdp = req.getParameter(SAMLSSOProviderConstants.FEDERATED_IDP);
@@ -106,7 +111,7 @@ public class SAMLSSOProvider extends HttpServlet {
 		try {
 			if (federatedIdp != null) {
 				handleFederatedLogin(req, resp);
-			} else if (username == null && password == null) {// SAMLRequest received.
+			} else if (username == null) {// SAMLRequest received.
 				// if an openid authentication or password authentication
 				String authMode = req.getParameter("authMode");
 				if (!SAMLSSOProviderConstants.AuthnModes.OPENID.equals(authMode)) {
@@ -176,7 +181,7 @@ public class SAMLSSOProvider extends HttpServlet {
 		req.setAttribute(SAMLSSOProviderConstants.STATUS, status);
 		req.setAttribute(SAMLSSOProviderConstants.STATUS_MSG, message);
 		RequestDispatcher reqDispatcher = getServletContext().getRequestDispatcher(
-				"/carbon/sso-saml/notification_ajaxprocessor.jsp");
+                "/carbon/sso-saml/notification_ajaxprocessor.jsp");
 		reqDispatcher.forward(req, resp);
 	}
 
@@ -272,6 +277,8 @@ public class SAMLSSOProvider extends HttpServlet {
 			SAMLSSOReqValidationResponseDTO signInRespDTO, String relayState)
 			throws ServletException, IOException {
 		// keeping the query string in the session
+        String loginPage = "";
+        boolean isCustomLoginPage = false;
 		req.getSession().setAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING,
 				req.getQueryString());
 		req.setAttribute(SAMLSSOProviderConstants.RELAY_STATE, relayState);
@@ -283,17 +290,49 @@ public class SAMLSSOProvider extends HttpServlet {
 		req.setAttribute(SAMLSSOProviderConstants.RP_SESSION_ID, signInRespDTO.getRpSessionId());
 		req.setAttribute(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL,
 				signInRespDTO.getAssertionConsumerURL());
-		String forwardingPath = getLoginPage(signInRespDTO.getLoginPageURL());
+        loginPage = signInRespDTO.getLoginPageURL();
+       if(loginPage != null && loginPage.length() > 0){
+           isCustomLoginPage = true;
+        req.setAttribute(SAMLSSOProviderConstants.LOGIN_PAGE, loginPage);
+       }
+		String forwardingPath = getLoginPage(isCustomLoginPage);
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(forwardingPath);
 		dispatcher.forward(req, resp);
 	}
+
+    /**
+     * Sends the user for authentication to the login page
+     *
+     * @param req
+     * @param resp
+     * @param errorMsg
+     * @param loginPageURL
+     * @throws ServletException
+     * @throws IOException
+     */
+    private void sendToReAuthenticate(HttpServletRequest req, ServletResponse resp, String errorMsg,
+                                      String loginPageURL)
+            throws ServletException, IOException {
+
+        boolean isCustomLoginPage = false;
+        req.setAttribute(SAMLSSOProviderConstants.AUTH_FAILURE, Boolean.parseBoolean("true"));
+        req.setAttribute(SAMLSSOProviderConstants.AUTH_FAILURE_MSG, errorMsg);
+        populateReAuthenticationRequest(req);
+        // send back to the login.page for the next authentication attempt.
+
+        if (loginPageURL != null && loginPageURL.length() > 0) {
+            isCustomLoginPage = true;
+        }
+        String forwardingPath = getLoginPage(isCustomLoginPage);
+        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(forwardingPath);
+        dispatcher.forward(req, resp);
+    }
 
 	/**
 	 * Sends the Response message back to the Service Provider.
 	 * 
 	 * @param req
 	 * @param resp
-	 * @param signInRespDTO
 	 * @param relayState
 	 * @throws ServletException
 	 * @throws IOException
@@ -321,42 +360,52 @@ public class SAMLSSOProvider extends HttpServlet {
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void handleRequestFromLoginPage(HttpServletRequest req, HttpServletResponse resp,
-			String ssoTokenID) throws IdentityException, IOException, ServletException {
+    private void handleRequestFromLoginPage(HttpServletRequest req, HttpServletResponse resp,
+                                            String ssoTokenID)
+            throws IdentityException, IOException, ServletException {
 
-		String relayState = req.getParameter(SAMLSSOProviderConstants.RELAY_STATE);
-		SAMLSSOAuthnReqDTO authnReqDTO = new SAMLSSOAuthnReqDTO();
-		populateAuthnReqDTO(req, authnReqDTO);
-		SAMLSSOService ssoServiceClient = getSAMLSSOServiceClient(req);
+        String relayState = req.getParameter(SAMLSSOProviderConstants.RELAY_STATE);
+        SAMLSSOAuthnReqDTO authnReqDTO = new SAMLSSOAuthnReqDTO();
+        populateAuthnReqDTO(req, authnReqDTO);
+
+        CarbonUIAuthenticator authenticator = AuthenticatorRegistry.getCarbonAuthenticator(req);
+
+        SAMLSSOService ssoServiceClient = getSAMLSSOServiceClient(req);
         SAMLSSORespDTO authRespDTO = null;
-        if(ssoServiceClient.isOpenIDLoginAccepted() && req.getSession().getAttribute("authenticatedOpenID") != null){
+        // No Authentication needed for OpenID authenticated request
+        if (ssoServiceClient.isOpenIDLoginAccepted() && req.getSession().getAttribute("authenticatedOpenID") != null) {
             authnReqDTO.setUsername(SAMLSSOUIUtil.getUserNameFromOpenID(
-                    (String)req.getSession().getAttribute("authenticatedOpenID")));
-            authRespDTO = ssoServiceClient.authenticate(authnReqDTO, ssoTokenID, true, SAMLSSOConstants.AuthnModes.OPENID);
+                    (String) req.getSession().getAttribute("authenticatedOpenID")));
+            authRespDTO = ssoServiceClient.processAuthentication(authnReqDTO, ssoTokenID);
         } else {
-            authRespDTO = ssoServiceClient.authenticate(authnReqDTO, ssoTokenID, false, SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD);
+            try {
+                // Get Authenticated the user
+                authenticator.authenticate(req);
+            } catch (AuthenticationException e) {
+
+                log.warn(e.getMessage());
+                sendToReAuthenticate(req, resp, e.getMessage(), authnReqDTO.getLoginPageURL());
+
+            }
+            authRespDTO = ssoServiceClient.processAuthentication(authnReqDTO, ssoTokenID);
         }
 
-		if (authRespDTO.isSessionEstablished()) { // authenticated
-            if(req.getParameter("chkRemember") != null && req.getParameter("chkRemember").equals("on")){
+        if (authRespDTO.isSessionEstablished()) { // authenticated
+            if (req.getParameter("chkRemember") != null && req.getParameter("chkRemember").equals("on")) {
                 storeSSOTokenCookie(ssoTokenID, req, resp, ssoServiceClient.getSSOSessionTimeout());
             }
-            if(ssoServiceClient.isSAMLSSOLoginAccepted()){
-                req.getSession().setAttribute("authenticatedOpenID",SAMLSSOUIUtil.getOpenID(authRespDTO.getSubject()));
+            if (ssoServiceClient.isSAMLSSOLoginAccepted()) {
+                req.getSession().setAttribute("authenticatedOpenID", SAMLSSOUIUtil.getOpenID(authRespDTO.getSubject()));
                 req.getSession().setAttribute("openId",SAMLSSOUIUtil.getOpenID(authRespDTO.getSubject()));
             }
             sendResponse(req, resp, relayState, authRespDTO.getRespString(),
-					authRespDTO.getAssertionConsumerURL(), authRespDTO.getSubject());
-		} else { // authentication FAILURE
-			req.setAttribute(SAMLSSOProviderConstants.AUTH_FAILURE, Boolean.parseBoolean("true"));
-            req.setAttribute(SAMLSSOProviderConstants.AUTH_FAILURE_MSG, authRespDTO.getErrorMsg());
-            populateReAuthenticationRequest(req);
-            // send back to the login.page for the next authentication attempt.
-            String forwardingPath = getLoginPage(authRespDTO.getLoginPageURL());
-            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(forwardingPath);
-            dispatcher.forward(req, resp);
-		}
-	}
+                         authRespDTO.getAssertionConsumerURL(), authRespDTO.getSubject());
+        } else { // authentication FAILURE
+            sendToReAuthenticate(req, resp, authRespDTO.getErrorMsg(), authRespDTO.getLoginPageURL());
+        }
+
+
+    }
 
 	/**
 	 * 
@@ -386,19 +435,19 @@ public class SAMLSSOProvider extends HttpServlet {
 	 */
 	private void populateReAuthenticationRequest(HttpServletRequest req) {
 		req.setAttribute(SAMLSSOProviderConstants.ISSUER,
-				req.getParameter(SAMLSSOProviderConstants.ISSUER));
+                         req.getParameter(SAMLSSOProviderConstants.ISSUER));
 		req.setAttribute(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL,
-				req.getParameter(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL));
+                         req.getParameter(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL));
 		req.setAttribute(SAMLSSOProviderConstants.REQ_ID,
-				req.getParameter(SAMLSSOProviderConstants.REQ_ID));
+                         req.getParameter(SAMLSSOProviderConstants.REQ_ID));
 		req.setAttribute(SAMLSSOProviderConstants.SUBJECT,
-				req.getParameter(SAMLSSOProviderConstants.SUBJECT));
+                         req.getParameter(SAMLSSOProviderConstants.SUBJECT));
 		req.setAttribute(SAMLSSOProviderConstants.RP_SESSION_ID,
-				req.getParameter(SAMLSSOProviderConstants.RP_SESSION_ID));
+                         req.getParameter(SAMLSSOProviderConstants.RP_SESSION_ID));
 		req.setAttribute(SAMLSSOProviderConstants.REQ_MSG_STR,
-				req.getParameter(SAMLSSOProviderConstants.REQ_MSG_STR));
+                         req.getParameter(SAMLSSOProviderConstants.REQ_MSG_STR));
 		req.setAttribute(SAMLSSOProviderConstants.RELAY_STATE,
-				req.getParameter(SAMLSSOProviderConstants.RELAY_STATE));
+                         req.getParameter(SAMLSSOProviderConstants.RELAY_STATE));
 	}
 
 	/**
@@ -434,20 +483,20 @@ public class SAMLSSOProvider extends HttpServlet {
 		resp.addCookie(ssoTokenCookie);
 	}
 
-	/**
-	 * 
-	 * @param customLoginPage
-	 * @return
-	 */
-	private String getLoginPage(String customLoginPage) {
-		if (customLoginPage != null) {
-			return "/carbon/" + customLoginPage.trim();
-		} else {
-			return "/carbon/" + "sso-saml/samlsso_auth_ajaxprocessor.jsp";
-		}
-	}
+    /**
+     * @param isCustomLoginPage
+     * @return
+     */
+    private String getLoginPage(boolean isCustomLoginPage) {
+        if (isCustomLoginPage) {
+            return "/carbon/" + "sso-saml/samlsso_auth_redirect_ajaxprocessor.jsp";
 
-	/**
+        } else {
+            return "/carbon/" + "sso-saml/samlsso_auth_ajaxprocessor.jsp";
+        }
+    }
+
+    /**
 	 * 
 	 * @param req
 	 * @param paramName
@@ -474,7 +523,7 @@ public class SAMLSSOProvider extends HttpServlet {
         req.setAttribute(SAMLSSOProviderConstants.SUBJECT, signInRespDTO.getSubject());
         req.setAttribute(SAMLSSOProviderConstants.RP_SESSION_ID, signInRespDTO.getRpSessionId());
         req.setAttribute(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL, signInRespDTO.getAssertionConsumerURL());
-        handleRequestFromLoginPage(req,resp,ssoTokenId);
+        handleRequestFromLoginPage(req, resp, ssoTokenId);
     }
 
 }
