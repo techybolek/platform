@@ -108,11 +108,11 @@ public class SAMLSSOService {
 	 * @return
 	 * @throws IdentityException
 	 */
-	public SAMLSSORespDTO authenticate(SAMLSSOAuthnReqDTO authReqDTO, String sessionId, boolean authenticated, String authMode)
-	                                                                                   throws IdentityException {
+	public SAMLSSORespDTO processAuthentication(SAMLSSOAuthnReqDTO authReqDTO, String sessionId) throws IdentityException {
 		AuthnRequestProcessor authnRequestProcessor = new AuthnRequestProcessor();
 		try {
-			return authnRequestProcessor.process(authReqDTO, sessionId, authenticated, authMode);
+//			return authnRequestProcessor.process(authReqDTO, sessionId, authenticated, authMode);
+            return authnRequestProcessor.process(authReqDTO, sessionId );
 		} catch (Exception e) {
 			throw new IdentityException("Error when authenticating the users", e);
 		}
