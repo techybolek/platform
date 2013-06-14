@@ -212,7 +212,6 @@
         <google.step2.wso2.version>1.0.wso2v1</google.step2.wso2.version>
         <google.guice.wso2.version>3.0.wso2v1</google.guice.wso2.version>
         <jdom.wso2.version>1.0.0.wso2v1</jdom.wso2.version>
-        <synapse.version>2.1.1-wso2v3</synapse.version>
         <scxml.version>0.9.0.wso2v1</scxml.version>
         <wsdl.validator.version>1.2.0.wso2v1</wsdl.validator.version>
         <zookeeper.wso2.version>3.3.5.wso2v1</zookeeper.wso2.version>
