@@ -1,15 +1,17 @@
 package org.wso2.carbon.databridge.commons.utils;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.wso2.carbon.databridge.commons.Attribute;
+import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedEventException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -216,6 +218,91 @@ public class EventConverterUtils {
         }
         return eventList;
 
+    }
+
+    public static List<Event> convertFromJson(String json, String streamId, StreamDefinition streamDefinition) {
+        if ((streamId == null || streamId.equals(""))) {
+            String errorMsg = "Stream name cannot be null or empty";
+            MalformedEventException malformedEventException = new MalformedEventException();
+            if (log.isDebugEnabled()) {
+                log.error(errorMsg, malformedEventException);
+            } else {
+                log.error(errorMsg);
+            }
+            throw malformedEventException;
+        }
+        List<Event> eventList = new ArrayList<Event>();
+        try {
+            JsonParser jsonParser  = new JsonParser();
+            JSONArray eventObjects = new JSONArray(json);
+            for (int i = 0; i < eventObjects.length(); i++) {
+                Event event = new Event();
+                JsonElement jsonElement = jsonParser.parse(eventObjects.get(i).toString());
+
+                JsonObject jsonObject = (JsonObject) jsonElement;
+
+                Set<Map.Entry<String,JsonElement>> entries = jsonObject.entrySet();
+
+                for(Map.Entry<String,JsonElement> entry : entries) {
+                    String key = entry.getKey();
+
+                    if(entry.getValue() instanceof JsonArray) {
+                        streamDefinition.getStreamId();
+                        List<Attribute> attributeList = streamDefinition.getAttributeListForKey(key);
+                        if(attributeList == null)
+                            continue;
+
+                        JsonArray jsonArray = (JsonArray) entry.getValue();
+                        Iterator it = jsonArray.iterator();
+
+                        List list = new ArrayList();
+                        int pos = 0;
+                        while (it.hasNext()) {
+                            Object value = getValue(it.next().toString(), attributeList.get(pos).getType());
+                            list.add(value);
+                            pos++;
+                        }
+                        event.setData(key,list.toArray());
+                    }
+                }
+                event.setStreamId(streamId);
+                eventList.add(event);
+            }
+        } catch (JSONException e) {
+            String errorMsg = "Error converting JSON to event, for JSON : " + json;
+            MalformedEventException malformedEventException = new MalformedEventException(errorMsg, e);
+            if (log.isDebugEnabled()) {
+                log.error(errorMsg, malformedEventException);
+            } else {
+                log.error(errorMsg);
+            }
+            throw malformedEventException;
+        }
+        return eventList;
+    }
+
+    public static Object getValue(String val, AttributeType attributeType) {
+        switch (attributeType) {
+            case BOOL: {
+                return Boolean.parseBoolean(val);
+            }
+            case INT: {
+                return Integer.parseInt(val);
+            }
+            case DOUBLE: {
+                return Double.parseDouble(val);
+            }
+            case FLOAT: {
+                return Float.parseFloat(val);
+            }
+            case LONG: {
+                return Long.parseLong(val);
+            }
+            case STRING: {
+                return val;
+            }
+        }
+        return "";
     }
 
 }

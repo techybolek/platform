@@ -168,6 +168,25 @@ public class EventDispatcher {
         }
     }
 
+    public void updateStreamDefinitionHolder(Credentials credentials) {
+        StreamTypeHolder streamTypeHolder = domainNameStreamTypeHolderCache.get(credentials.getDomainName());
+
+        if (streamTypeHolder != null) {
+            if (log.isDebugEnabled()) {
+                String logMsg = "Event stream holder for domain name : " + credentials.getDomainName() + " : \n ";
+                logMsg += "Meta, Correlation & Payload Data Type Map : ";
+                for (Map.Entry entry : streamTypeHolder.getAttributeCompositeMap().entrySet()) {
+                    logMsg += "StreamID=" + entry.getKey() + " :  ";
+                    logMsg += "Meta= " + Arrays.deepToString(((StreamAttributeComposite) entry.getValue()).getAttributeTypes()[0]) + " :  ";
+                    logMsg += "Correlation= " + Arrays.deepToString(((StreamAttributeComposite) entry.getValue()).getAttributeTypes()[1]) + " :  ";
+                    logMsg += "Payload= " + Arrays.deepToString(((StreamAttributeComposite) entry.getValue()).getAttributeTypes()[2]) + "\n";
+                }
+                log.debug(logMsg);
+            }
+            updateDomainNameStreamTypeHolderCache(credentials);
+        }
+    }
+
     private synchronized void updateDomainNameStreamTypeHolderCache(
             StreamDefinition streamDefinition, Credentials credentials) {
         StreamTypeHolder streamTypeHolder = getStreamDefinitionHolder(credentials);
@@ -189,6 +208,30 @@ public class EventDispatcher {
                     }
                     for (RawDataAgentCallback agentCallback : rawDataSubscribers) {
                         agentCallback.definedStream(aStreamDefinition, credentials);
+                    }
+                }
+            }
+            domainNameStreamTypeHolderCache.put(credentials.getDomainName(), streamTypeHolder);
+        }
+        return streamTypeHolder;
+    }
+
+    private synchronized StreamTypeHolder updateDomainNameStreamTypeHolderCache(
+            Credentials credentials) {
+        StreamTypeHolder streamTypeHolder = domainNameStreamTypeHolderCache.get(credentials.getDomainName());
+        if (null != streamTypeHolder) {
+            Collection<StreamDefinition> allStreamDefinitions =
+                    streamDefinitionStore.getAllStreamDefinitions(credentials);
+            if (null != allStreamDefinitions) {
+                for (StreamDefinition aStreamDefinition : allStreamDefinitions) {
+                    if(streamTypeHolder.getAttributeComposite(aStreamDefinition.getStreamId()) == null) {
+                        streamTypeHolder.putStreamDefinition(aStreamDefinition);
+                        for (AgentCallback agentCallback : subscribers) {
+                            agentCallback.definedStream(aStreamDefinition, credentials);
+                        }
+                        for (RawDataAgentCallback agentCallback : rawDataSubscribers) {
+                            agentCallback.definedStream(aStreamDefinition, credentials);
+                        }
                     }
                 }
             }

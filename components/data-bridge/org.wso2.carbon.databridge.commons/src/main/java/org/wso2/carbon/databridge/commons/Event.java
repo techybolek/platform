@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class Event {
-
     private String streamId;
 
     private long timeStamp;
@@ -111,6 +110,15 @@ public class Event {
         this.arbitraryDataMap = arbitraryDataMap;
     }
 
+    public void setData(String key, Object[] dataObjArray) {
+        if(key.equals("metaData")) {
+            metaData = dataObjArray;
+        } else if(key.equals("correlationData")) {
+            correlationData = dataObjArray;
+        } else if(key.equals("payloadData")) {
+            payloadData = dataObjArray;
+        }
+    }
 
     @Override
     public String toString() {

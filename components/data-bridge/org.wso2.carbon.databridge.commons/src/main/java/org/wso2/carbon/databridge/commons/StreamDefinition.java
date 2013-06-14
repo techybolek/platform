@@ -136,6 +136,17 @@ public class StreamDefinition {
         return payloadData;
     }
 
+    public List<Attribute> getAttributeListForKey(String key) {
+        if(key.equals("metaData")) {
+            return metaData;
+        } else if(key.equals("correlationData")) {
+            return correlationData;
+        } else if(key.equals("payloadData")) {
+            return payloadData;
+        }
+        return null;
+    }
+
     /**
      * Stream Id is not used for comparing definitions
      * This is because this method is used to identify duplicates

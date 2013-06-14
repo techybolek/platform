@@ -100,7 +100,7 @@ public class StreamsService {
                             .getOSGiService(DataBridgeReceiverService.class);
 
             dataBridgeReceiverService.deleteStream(RESTUtils.getSessionId(request), streamName,version);
-
+            RESTUtils.deleteStreamDefinition(RESTUtils.extractAuthHeaders(request), streamName, version);
             return Response.status(Response.Status.ACCEPTED).build();
 
         } catch (SessionTimeoutException e) {

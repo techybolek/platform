@@ -64,6 +64,7 @@ import org.wso2.carbon.databridge.persistence.cassandra.inserter.LongInserter;
 import org.wso2.carbon.databridge.persistence.cassandra.inserter.StringInserter;
 import org.wso2.carbon.databridge.persistence.cassandra.inserter.TypeInserter;
 import org.wso2.carbon.databridge.persistence.cassandra.internal.util.AppendUtils;
+import org.wso2.carbon.databridge.persistence.cassandra.Utils.KeySpaceUtils;
 import org.wso2.carbon.databridge.persistence.cassandra.internal.util.ServiceHolder;
 import org.wso2.carbon.databridge.persistence.cassandra.internal.util.Utils;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -324,7 +325,7 @@ public class CassandraConnector {
 
 
             if (log.isTraceEnabled()) {
-                KeyspaceDefinition keyspaceDefinition = cluster.describeKeyspace(BAM_EVENT_DATA_KEYSPACE);
+                KeyspaceDefinition keyspaceDefinition = cluster.describeKeyspace(KeySpaceUtils.getKeySpaceName());
                 log.trace("Keyspace desc. : " + keyspaceDefinition);
 
                 String CFInfo = "CFs present \n";
@@ -461,7 +462,13 @@ public class CassandraConnector {
                 columnDefinition.setValidationClass(attributeComparatorMap.get(
                         attribute.getType()));
 
+                try{
                 columnFamilyDefinition.addColumnDefinition(columnDefinition);
+                }catch (UnsupportedOperationException exception){
+                   if(log.isDebugEnabled()){
+                       log.debug("Cannot add the meta information to column family.",exception);
+                   }
+                }
             }
         }
     }
@@ -555,8 +562,8 @@ public class CassandraConnector {
 
         try {
             //todo move this to defineStream
-            if (!CFCache.getCF(cluster, BAM_EVENT_DATA_KEYSPACE, CFName)) {
-                createColumnFamily(cluster, BAM_EVENT_DATA_KEYSPACE, CFName, streamDefinition);
+            if (!CFCache.getCF(cluster, KeySpaceUtils.getKeySpaceName(), CFName)) {
+                createColumnFamily(cluster, KeySpaceUtils.getKeySpaceName(), CFName, streamDefinition);
             }
 
 
@@ -633,7 +640,7 @@ public class CassandraConnector {
 
     private void deleteDataFromStreamDefinition(Credentials credentials, Cluster cluster,
                                                 String streamId) {
-        Keyspace keyspace = getKeyspace(BAM_EVENT_DATA_KEYSPACE, cluster);
+        Keyspace keyspace = getKeyspace(KeySpaceUtils.getKeySpaceName(), cluster);
 
         String CFName = CassandraSDSUtils.convertStreamNameToCFName(
                 DataBridgeCommonsUtils.getStreamNameFromStreamId(streamId));
@@ -757,14 +764,14 @@ public class CassandraConnector {
 
         ColumnFamilyDefinition cfDef = null;
         try {
-            cfDef = getColumnFamily(cluster, BAM_EVENT_DATA_KEYSPACE, CFName);
-            if (!CFCache.getCF(cluster, BAM_EVENT_DATA_KEYSPACE, CFName)) {
+            cfDef = getColumnFamily(cluster, KeySpaceUtils.getKeySpaceName(), CFName);
+            if (!CFCache.getCF(cluster, KeySpaceUtils.getKeySpaceName(), CFName)) {
                 if (cfDef == null) {
-                    cfDef = createColumnFamily(cluster, BAM_EVENT_DATA_KEYSPACE, CFName,
+                    cfDef = createColumnFamily(cluster, KeySpaceUtils.getKeySpaceName(), CFName,
                                                streamDefinition);
                     return;
                 } else {
-                    CFCache.putCF(cluster, BAM_EVENT_DATA_KEYSPACE, CFName, true);
+                    CFCache.putCF(cluster, KeySpaceUtils.getKeySpaceName(), CFName, true);
                 }
             }
 
@@ -999,7 +1006,7 @@ public class CassandraConnector {
         return streamDefinitions;
     }
 
-    // Default access methods shared with unit tests
+    // Default access methods shared witloadh unit tests
 
     void insertVariableFields(String streamColumnFamily, String rowKey,
                               Mutator<String> mutator,
@@ -1036,7 +1043,7 @@ public class CassandraConnector {
     }
 
     Mutator<String> getMutator(Cluster cluster) throws StreamDefinitionStoreException {
-        Keyspace keyspace = getKeyspace(BAM_EVENT_DATA_KEYSPACE, cluster);
+        Keyspace keyspace = getKeyspace(KeySpaceUtils.getKeySpaceName(), cluster);
         return HFactory.createMutator(keyspace, stringSerializer);
     }
 

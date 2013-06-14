@@ -51,7 +51,12 @@
             <version>${version.javax.servlet}</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+            <version>${carbon.platform.patch.version.412}</version>
+            <scope>provided</scope>
+        </dependency>
 
 
 
@@ -152,6 +157,7 @@
 
     <properties>
         <cxf.wso2.version.databridge>${orbit.version.cxf}</cxf.wso2.version.databridge>
+ 	<carbon.platform.patch.version.412>4.1.2</carbon.platform.patch.version.412>
         <!--<cxf.test.version>2.6.0</cxf.test.version>-->
         <!--<httpclient.test.version>3.1</httpclient.test.version>-->
         <!--<jaxrs.test.version>1.1.1</jaxrs.test.version>-->

@@ -16,6 +16,9 @@ package org.wso2.carbon.databridge.persistence.cassandra;
  * limitations under the License.
  */
 public class CassandraTestConstants {
+
+    public static final String BAM_EVENT_DATA_KEYSPACE = "EVENT_KS";
+
     public static final String properEvent = "[\n" +
                                              "     {\n" +
                                              "      \"payloadData\" : [\"IBM\", 26.0, 848, 43.33, 2.3] ,\n" +

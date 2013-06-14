@@ -14,6 +14,7 @@ import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.persistence.cassandra.Utils.CassandraSDSUtils;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.BaseCassandraSDSTest;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector;
+import org.wso2.carbon.databridge.persistence.cassandra.Utils.KeySpaceUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.*;
@@ -47,7 +48,7 @@ public class CassandraDefnStoreTest extends BaseCassandraSDSTest {
             fail();
         }
         ColumnFamilyDefinition columnFamilyDefinition =
-                HFactory.createColumnFamilyDefinition(CassandraConnector.BAM_EVENT_DATA_KEYSPACE,
+                HFactory.createColumnFamilyDefinition(CassandraTestConstants.BAM_EVENT_DATA_KEYSPACE,
                                                       CassandraSDSUtils.convertStreamNameToCFName(streamDefinition1.getName()));
         cluster.addColumnFamily(columnFamilyDefinition);
     }

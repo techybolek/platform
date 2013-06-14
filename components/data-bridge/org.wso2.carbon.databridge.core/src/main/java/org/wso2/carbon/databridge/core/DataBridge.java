@@ -218,6 +218,8 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
             throw new SessionTimeoutException(sessionId + " expired");
         }
         saveStreamDefinition(agentSession.getCredentials(), streamDefinition);
+        eventDispatcher.updateStreamDefinitionHolder(agentSession.getCredentials());
+
     }
 
 

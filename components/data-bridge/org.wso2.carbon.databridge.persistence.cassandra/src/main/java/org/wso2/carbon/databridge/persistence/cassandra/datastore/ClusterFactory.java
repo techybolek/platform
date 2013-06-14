@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.cassandra.dataaccess.ClusterInformation;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
+import org.wso2.carbon.databridge.persistence.cassandra.Utils.KeySpaceUtils;
 import org.wso2.carbon.databridge.persistence.cassandra.internal.util.ServiceHolder;
 
 import java.util.concurrent.TimeUnit;
@@ -82,7 +83,7 @@ public class ClusterFactory {
         CassandraConnector connector = ServiceHolder.getCassandraConnector();
         connector.createKeySpaceIfNotExisting(cluster, CassandraConnector.BAM_META_KEYSPACE);
 
-        connector.createKeySpaceIfNotExisting(cluster, CassandraConnector.BAM_EVENT_DATA_KEYSPACE);
+        connector.createKeySpaceIfNotExisting(cluster, KeySpaceUtils.getKeySpaceName());
 
 
         // Create BAM meta column families if not existing

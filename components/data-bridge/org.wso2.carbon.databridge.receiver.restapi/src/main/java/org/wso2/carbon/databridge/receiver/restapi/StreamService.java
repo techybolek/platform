@@ -2,6 +2,7 @@ package org.wso2.carbon.databridge.receiver.restapi;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
 import org.wso2.carbon.databridge.commons.exception.SessionTimeoutException;
 import org.wso2.carbon.databridge.commons.exception.UndefinedEventTypeException;
@@ -9,6 +10,8 @@ import org.wso2.carbon.databridge.commons.utils.EventConverterUtils;
 import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
 import org.wso2.carbon.databridge.core.EventConverter;
 import org.wso2.carbon.databridge.core.StreamTypeHolder;
+import org.wso2.carbon.databridge.core.exception.StreamDefinitionNotFoundException;
+import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.receiver.restapi.utils.RESTUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +53,8 @@ public class StreamService {
             final String streamId =
                     dataBridgeReceiverService.findStreamId(RESTUtils.getSessionId(request), streamName
                             , version);
+            final StreamDefinition streamDefinition = RESTUtils.getStreamDefinition(
+                    RESTUtils.getSessionId(request), RESTUtils.extractAuthHeaders(request), streamName, version);
             if(streamId==null){
                 throw new WebApplicationException(new RuntimeException("No stream definitions exist for "+streamName+" "+version+", to process "+requestBody));
             }
@@ -58,7 +63,7 @@ public class StreamService {
                         @Override
                         public List<Event> toEventList(Object jsonEvents,
                                                        StreamTypeHolder streamTypeHolder) {
-                            return EventConverterUtils.convertFromJson((String) jsonEvents, streamId);
+                            return EventConverterUtils.convertFromJson((String) jsonEvents, streamId, streamDefinition);
                         }
                     });
             return Response.status(Response.Status.ACCEPTED).build();
@@ -67,6 +72,10 @@ public class StreamService {
         } catch (SessionTimeoutException e) {
             throw new WebApplicationException(e);
         } catch (AuthenticationException e) {
+            throw new WebApplicationException(e);
+        } catch (StreamDefinitionStoreException e) {
+            throw new WebApplicationException(e);
+        } catch (StreamDefinitionNotFoundException e) {
             throw new WebApplicationException(e);
         }
 

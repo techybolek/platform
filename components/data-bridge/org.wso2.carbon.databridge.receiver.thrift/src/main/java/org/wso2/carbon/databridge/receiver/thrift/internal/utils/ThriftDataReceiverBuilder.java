@@ -45,7 +45,8 @@ public final class ThriftDataReceiverBuilder {
                           ThriftDataReceiverConstants.SECURE_PORT_ELEMENT));
         if (secureDataReceiverPort != null) {
             try {
-                thriftDataReceiverConfiguration.setSecureDataReceiverPort(Integer.parseInt(secureDataReceiverPort.getText()) + portOffset);
+                thriftDataReceiverConfiguration.setSecureDataReceiverPort(Integer
+                        .parseInt(secureDataReceiverPort.getText()) + portOffset);
             } catch (NumberFormatException ignored) {
 
             }
@@ -55,7 +56,8 @@ public final class ThriftDataReceiverBuilder {
                           ThriftDataReceiverConstants.PORT_ELEMENT));
         if (receiverPort != null) {
             try {
-                thriftDataReceiverConfiguration.setDataReceiverPort(Integer.parseInt(receiverPort.getText()) + portOffset);
+                thriftDataReceiverConfiguration.setDataReceiverPort(Integer
+                        .parseInt(receiverPort.getText()) + portOffset);
             } catch (NumberFormatException ignored) {
 
             }
@@ -75,7 +77,8 @@ public final class ThriftDataReceiverBuilder {
 
 
     public static int readPortOffset() {
-       return CarbonUtils.getPortFromServerConfig(ThriftDataReceiverConstants.CARBON_CONFIG_PORT_OFFSET_NODE)+1;
+       return CarbonUtils.
+                getPortFromServerConfig(ThriftDataReceiverConstants.CARBON_CONFIG_PORT_OFFSET_NODE)+1;
     }
 
 

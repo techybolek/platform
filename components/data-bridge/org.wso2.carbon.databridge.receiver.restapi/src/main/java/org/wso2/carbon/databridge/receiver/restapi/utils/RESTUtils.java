@@ -3,13 +3,19 @@ package org.wso2.carbon.databridge.receiver.restapi.utils;
 import org.apache.commons.codec.binary.Base64;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Credentials;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
+import org.wso2.carbon.databridge.commons.exception.SessionTimeoutException;
 import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
+import org.wso2.carbon.databridge.core.exception.StreamDefinitionNotFoundException;
+import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.restapi.RESTAPIConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -27,6 +33,8 @@ import javax.servlet.http.HttpSession;
  * limitations under the License.
  */
 public class RESTUtils {
+
+    public static Map<String, StreamDefinition> streamDefinitionMap = new HashMap<String, StreamDefinition>();
 
     public static Credentials extractAuthHeaders(HttpServletRequest request) {
         String authzHeader = request.getHeader("Authorization");
@@ -66,5 +74,28 @@ public class RESTUtils {
             authenticate(request);
         }
         return (String) request.getSession().getAttribute(RESTAPIConstants.SESSION_ID);
+    }
+
+    public static StreamDefinition getStreamDefinition(String sessionId, Credentials credentials,
+                                                       String streamName, String streamVersion)
+            throws SessionTimeoutException, StreamDefinitionNotFoundException, StreamDefinitionStoreException {
+        StreamDefinition streamDefinition = null;
+        String key = credentials.getUsername() + ":" + streamName + ":" + streamVersion;
+
+        if(streamDefinitionMap.containsKey(key)) {
+            return streamDefinitionMap.get(key);
+        } else {
+            DataBridgeReceiverService dataBridgeReceiverService =
+                    (DataBridgeReceiverService) PrivilegedCarbonContext.getCurrentContext()
+                            .getOSGiService(DataBridgeReceiverService.class);
+            streamDefinition = dataBridgeReceiverService.getStreamDefinition(sessionId, streamName, streamVersion);
+            streamDefinitionMap.put(key, streamDefinition);
+            return streamDefinition;
+        }
+    }
+
+    public static void deleteStreamDefinition(Credentials credentials, String streamName, String streamVersion) {
+        String key = credentials.getUsername() + ":" + streamName + ":" + streamVersion;
+        streamDefinitionMap.remove(key);
     }
 }
