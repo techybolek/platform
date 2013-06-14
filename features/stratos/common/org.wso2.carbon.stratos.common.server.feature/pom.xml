@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-tasks</artifactId>
-            <version>${synapse.patch.version.211-wso2v2}</version>
+            <version>${synapse.version}</version>
         </dependency>
 
 		<!--  Tenant Mgmt -->
@@ -241,7 +241,6 @@
     </build>
 
     <properties>
-	<synapse.patch.version.211-wso2v2>2.1.1-wso2v3</synapse.patch.version.211-wso2v2>
 	<json.patch.version.200-wso2v1>2.0.0.wso2v1</json.patch.version.200-wso2v1>
 	<kaptcha.patch.version.230-wso2v1>2.3.0.wso2v1</kaptcha.patch.version.230-wso2v1>
 	<carbon.version>4.2.0-SNAPSHOT</carbon.version>
