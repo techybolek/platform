@@ -297,7 +297,7 @@ public class XSLTMediator extends AbstractMediator {
             // get the result OMElement
             OMElement result = null;
             try {
-                resultBuilder.getNode(encoding == null ? null : Charset.forName(encoding));
+                result = resultBuilder.getNode(encoding == null ? null : Charset.forName(encoding));
             } catch (Exception e) {
                 throw new SynapseException("Unable to create an OMElement using XSLT result ",e);
             }
