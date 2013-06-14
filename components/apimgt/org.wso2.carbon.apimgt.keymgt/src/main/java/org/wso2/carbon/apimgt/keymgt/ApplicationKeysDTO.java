@@ -24,6 +24,7 @@ public class ApplicationKeysDTO {
     private String applicationAccessToken;
     private String consumerKey;
     private String consumerSecret;
+    private String[] accessAllowDomains;
 
     public String getApplicationAccessToken() {
         return applicationAccessToken;
@@ -47,5 +48,13 @@ public class ApplicationKeysDTO {
 
     public void setConsumerSecret(String consumerSecret) {
         this.consumerSecret = consumerSecret;
+    }
+
+    public String[] getAccessAllowDomains() {
+        return accessAllowDomains;
+    }
+
+    public void setAccessAllowDomains(String[] accessAllowDomains) {
+        this.accessAllowDomains = accessAllowDomains;
     }
 }

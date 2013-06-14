@@ -113,13 +113,19 @@ public class APIKeyMgtUtil {
         timestampSkew = OAuthServerConfiguration.getInstance().
                 getDefaultTimeStampSkewInSeconds() * 1000;
         currentTime = System.currentTimeMillis();
-        //check the validity of cached OAuth2AccessToken Response
-        if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
-            accessTokenDO.setValidationStatus(
-                    APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
-            log.info("Token "+accessTokenDO.getEndUserToken() +" expired.");
-            return true;
+
+        //If the validity period is not an never expiring value
+        if (validityPeriod != Long.MAX_VALUE) {
+            //check the validity of cached OAuth2AccessToken Response
+            if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
+                accessTokenDO.setValidationStatus(
+                        APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
+                log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
+                return true;
+            }
         }
+
+
         return false;
     }
 }

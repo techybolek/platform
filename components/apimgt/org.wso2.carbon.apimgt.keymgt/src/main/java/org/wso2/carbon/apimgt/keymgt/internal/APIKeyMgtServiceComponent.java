@@ -173,6 +173,15 @@ public class APIKeyMgtServiceComponent {
                 log.info("Setting default port for thrift key management service: " + "10398");
             }
 
+            String thriftHostString =
+                    APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
+                    APIConstants.API_KEY_MANGER_THRIFT_SERVER_HOST);
+
+            if(thriftHostString == null){
+                thriftHostString = NetworkUtils.getLocalHostname();
+                log.info("Setting default carbon host for thrift key management service: " + thriftHostString);
+            }
+
             String thriftClientTimeOut =
                     APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
                     APIConstants.API_KEY_MANGER_CONNECTION_TIMEOUT);
@@ -188,7 +197,7 @@ public class APIKeyMgtServiceComponent {
             TServerSocket serverTransport =
                     TSSLTransportFactory.getServerSocket(receivePort,
                                                          clientTimeOut,
-                                                         getHostAddress(NetworkUtils.getLocalHostname()),
+                                                         getHostAddress(thriftHostString),
                                                          transportParam);
 
 
@@ -246,7 +255,7 @@ public class APIKeyMgtServiceComponent {
         String[] splittedString = host.split("\\.");
         boolean value = checkIfIP(splittedString);
         if (!value) {
-            return InetAddress.getByName(splittedString[0]);
+            return InetAddress.getByName(host);
         }
 
         byte[] byteAddress = new byte[4];

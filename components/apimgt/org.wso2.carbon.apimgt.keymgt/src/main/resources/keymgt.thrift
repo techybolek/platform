@@ -21,6 +21,16 @@ struct APIKeyValidationInfoDTO {
     10: optional string applicationTier;
 }
 
+struct URITemplate {
+    1: optional string uriTemplate;
+    2: optional string resourceURI;
+    3: optional string resourceSandboxURI;
+    4: optional string httpVerb;
+    5: optional string authType;
+}
+
+
 service APIKeyValidationService {
-APIKeyValidationInfoDTO validateKey(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId, 5:required string requiredAuthenticationLevel) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
+APIKeyValidationInfoDTO validateKey(1:required string context, 2:required string version, 3:required string accessToken, 4:required string sessionId, 5:required string requiredAuthenticationLevel, 6:optional string clientDomain) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
+list<URITemplate> getAllURITemplates(1:required string context, 2:required string apiVersion) throws (1:APIKeyMgtException apiKeyMgtException, 2:APIManagementException apiMgtException)
 }

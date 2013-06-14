@@ -66,16 +66,16 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
      */
     public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
-                                 String applicationName, String tokenType) throws APIKeyMgtException,
+                                 String applicationName, String tokenType, String callbackUrl) throws APIKeyMgtException,
             APIManagementException, IdentityException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         String accessToken = apiMgtDAO.getAccessKeyForAPI(userId, applicationName, apiInfoDTO, tokenType);
         if (accessToken == null){
             //get the tenant id for the corresponding domain
-            String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(userId);
+            String tenantAwareUserId = userId;
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
 
-            String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName);
+            String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
 
             accessToken = apiMgtDAO.registerAccessToken(credentials[0],applicationName,
                     tenantAwareUserId, tenantId, apiInfoDTO, tokenType);
@@ -93,7 +93,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @return Access token
      * @throws APIKeyMgtException on error
      */
-    public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType)
+    public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
+    		String callbackUrl, String[] allowedDomains)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -101,11 +102,11 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
         if (accessToken == null) {
             //get the tenant id for the corresponding domain
-            String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(userId);
+            String tenantAwareUserId = userId;
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
-            credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName);
+            credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
             accessToken = apiMgtDAO.registerApplicationAccessToken(credentials[0], applicationName,
-                    tenantAwareUserId, tenantId, tokenType);
+                    tenantAwareUserId, tenantId, tokenType, allowedDomains);
 
         } else if (credentials == null) {
             credentials = apiMgtDAO.getOAuthCredentials(accessToken, tokenType);
@@ -134,10 +135,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         return ApiMgtDAO.getSubscribedAPIsOfUser(userId);
     }
 
-    public String renewAccessToken(String tokenType, String oldAccessToken)
+    public String renewAccessToken(String tokenType, String oldAccessToken, String[] allowedDomains)
             throws Exception {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        return apiMgtDAO.refreshAccessToken(tokenType, oldAccessToken);
+        return apiMgtDAO.refreshAccessToken(tokenType, oldAccessToken, allowedDomains);
 
     }
 

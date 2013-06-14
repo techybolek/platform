@@ -26,6 +26,9 @@ import org.wso2.carbon.utils.ThriftSession;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class APIKeyValidationServiceImpl extends AbstractAdmin
         implements APIKeyValidationService.Iface {
     private static Log log = LogFactory.getLog(APIKeyValidationServiceImpl.class);
@@ -73,7 +76,8 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
     }
 
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
-                                               String sessionId,String requiredAuthenticationLevel )
+                                               String sessionId,String requiredAuthenticationLevel,
+                                               String allowedDomains)
             throws APIKeyMgtException, APIManagementException, TException {
         APIKeyValidationInfoDTO thriftKeyValidationInfoDTO = null;
         try {
@@ -100,7 +104,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                                                                     currentSession);
 
                         org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO keyValidationInfoDTO =
-                                apiKeyValidationService.validateKey(context, version, accessToken,requiredAuthenticationLevel);
+                                apiKeyValidationService.validateKey(context, version, accessToken,requiredAuthenticationLevel,allowedDomains);
 
                         thriftKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
                         thriftKeyValidationInfoDTO.setAuthorized(keyValidationInfoDTO.isAuthorized());
@@ -138,4 +142,77 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
         }
         return thriftKeyValidationInfoDTO;
     }
+    @Override
+    public List<URITemplate> getAllURITemplates(String context, String apiVersion, String sessionId)
+            throws APIKeyMgtException, APIManagementException, TException {
+        ArrayList<URITemplate> templates=new ArrayList<URITemplate>();
+        try {
+            if (thriftAuthenticatorService != null && apiKeyValidationService != null) {
+
+                if (thriftAuthenticatorService.isAuthenticated(sessionId)) {
+
+                    //obtain the thrift session for this session id
+                    ThriftSession currentSession = thriftAuthenticatorService.getSessionInfo(sessionId);
+
+                    //obtain a dummy carbon context holder
+                    PrivilegedCarbonContext carbonContextHolder = PrivilegedCarbonContext.getCurrentContext();
+
+
+                    /*start tenant flow to stack up any existing carbon context holder base,
+                    and initialize a raw one*/
+                    PrivilegedCarbonContext.startTenantFlow();
+
+                    try {
+
+                        // need to populate current carbon context from the one created at
+                        // authentication
+                        populateCurrentCarbonContextFromAuthSession(carbonContextHolder,
+                                                                    currentSession);
+
+                        ArrayList<org.wso2.carbon.apimgt.api.model.URITemplate> uriTemplates =
+                                apiKeyValidationService.getAllURITemplates(context, apiVersion);
+
+                        for (org.wso2.carbon.apimgt.api.model.URITemplate aDto : uriTemplates) {
+                            URITemplate temp = toTemplates(aDto);
+                            templates.add(temp);
+                        }
+
+
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+
+                } else {
+                    String authErrorMsg = "Invalid session id for thrift authenticator.";
+                    log.warn(authErrorMsg);
+                    throw new APIKeyMgtException(authErrorMsg);
+                }
+
+            } else {
+                String initErrorMsg = "Thrift Authenticator or APIKeyValidationService is not initialized.";
+                log.error(initErrorMsg);
+                throw new APIKeyMgtException(initErrorMsg);
+            }
+
+        } catch (org.wso2.carbon.apimgt.keymgt.APIKeyMgtException e) {
+            log.error("Error in invoking validate key via thrift..");
+            throw new org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyMgtException(e.getMessage());
+        } catch (org.wso2.carbon.apimgt.api.APIManagementException e) {
+            log.error("Error in invoking validate key via thrift..");
+            throw new APIManagementException(e.getMessage());
+        }
+        return templates;
+    }
+
+    private URITemplate toTemplates(
+            org.wso2.carbon.apimgt.api.model.URITemplate dto) {
+        URITemplate template = new URITemplate();
+        template.setAuthType(dto.getAuthType());
+        template.setHttpVerb(dto.getHTTPVerb());
+        template.setResourceSandboxURI(dto.getResourceSandboxURI());
+        template.setUriTemplate(dto.getUriTemplate());
+        return template;
+    }
+
+
 }

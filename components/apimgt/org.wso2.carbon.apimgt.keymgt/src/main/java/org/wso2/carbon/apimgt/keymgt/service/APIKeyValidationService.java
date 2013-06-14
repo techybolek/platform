@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.keymgt.service;
 
 import net.sf.jsr107cache.Cache;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
@@ -30,6 +31,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+
+import java.util.ArrayList;
 
 /**
  *
@@ -46,13 +49,24 @@ public class APIKeyValidationService extends AbstractAdmin {
      *         authorized, tier information will be <pre>null</pre>
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
-    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,String requiredAuthenticationLevel)
+    public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,String requiredAuthenticationLevel, String clientDomain)
             throws APIKeyMgtException, APIManagementException {
         Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
-        String cacheKey = accessToken + ":" + context + ":" + version;
+        String cacheKey = accessToken + ":" + context + ":" + version+":"+requiredAuthenticationLevel;
         APIKeyValidationInfoDTO info;
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         Boolean keyCacheEnabledGateway = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
+
+        // first check whether client domain is authorized
+        if (accessToken !=null && ApiMgtDAO.findConsumerKeyFromAccessToken(accessToken) != null &&
+                ApiMgtDAO.isDomainRestricted(accessToken, clientDomain)) {
+            String authorizedDomains = ApiMgtDAO.getAuthorizedDomains(accessToken);
+            log.error("Unauthorized client domain :" + clientDomain +
+                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+            throw new APIManagementException("Unauthorized client domain :" + clientDomain +
+                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+        }
+
         //If gateway key cache enabled only we retrieve key validation info or JWT token form cache
         if (keyCacheEnabledGateway) {
             info = (APIKeyValidationInfoDTO) cache.get(cacheKey);
@@ -70,10 +84,10 @@ public class APIKeyValidationService extends AbstractAdmin {
                     if (!APIKeyMgtDataHolder.getJWTCacheEnabledKeyMgt() && info.isAuthorized()) {
                         String JWTString;
                         if (info.getUserType().equalsIgnoreCase(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION)) {
-                            JWTString = ApiMgtDAO.createJWTTokenString(context, version, info.getSubscriber(),
+                            JWTString = apiMgtDAO.createJWTTokenString(context, version, info.getSubscriber(),
                                     info.getApplicationName(), info.getTier(), "null");
                         } else {
-                            JWTString = ApiMgtDAO.createJWTTokenString(context, version, info.getSubscriber(),
+                            JWTString = apiMgtDAO.createJWTTokenString(context, version, info.getSubscriber(),
                                     info.getApplicationName(), info.getTier(), info.getEndUserName());
                         }
                         info.setEndUserToken(JWTString);
@@ -85,13 +99,29 @@ public class APIKeyValidationService extends AbstractAdmin {
             }
         }
         //If validation info is not cached creates fresh api key validation information object and returns it
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = ApiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
         //If key validation information is not null and key validation enabled at keyMgt we put validation
         //information into cache
         if (apiKeyValidationInfoDTO != null && keyCacheEnabledGateway) {
             cache.put(cacheKey, apiKeyValidationInfoDTO);
         }
         return apiKeyValidationInfoDTO;
+    }
+
+    /**
+     * Return the URI Templates for an API
+     *
+     * @param context Requested context
+     * @param version API Version
+     * @return APIKeyValidationInfoDTO with authorization info and tier info if authorized. If it is not
+     *         authorized, tier information will be <pre>null</pre>
+     * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
+     */
+    public ArrayList<URITemplate> getAllURITemplates(String context, String version)
+            throws APIKeyMgtException, APIManagementException {
+
+        return ApiMgtDAO.getAllURITemplates(context, version);
+
     }
 
 
