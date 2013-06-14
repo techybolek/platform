@@ -21,8 +21,11 @@
     <workerThreads>10</workerThreads>
     <eventBufferCapacity>10000</eventBufferCapacity>
     <clientTimeoutMS>30000</clientTimeoutMS>
+    <keySpaceName>EVENT_KS</keySpaceName>
 
+<!-- Default configuration for thriftDataReceiver -->
     <thriftDataReceiver>
+    <!--<hostName>localhost</hostName>-->
         <port>7611</port>
         <securePort>7711</securePort>
     </thriftDataReceiver>
