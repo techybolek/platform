@@ -333,6 +333,12 @@ public class SynapseConfiguration implements ManagedLifecycle, SynapseArtifact {
         if (!apiTable.containsKey(name)) {
             handleException("No API exists by the name: " + name);
         } else {
+            for (API existingAPI : apiTable.values()) {
+                if (!api.getName().equals(existingAPI.getName()) && api.getVersion().equals(existingAPI.getVersion()) && existingAPI.getContext().equals(api.getContext())) {
+                    handleException("URL context: " + api.getContext() + " is already registered" +
+                                    " with the API: " + existingAPI.getName());
+                }
+            }        	
             apiTable.put(name, api);
         }
     }
