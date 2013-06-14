@@ -68,18 +68,18 @@ public class SubscriberKeyMgtClient {
     }
 
     public String getAccessKey(String userId, APIInfoDTO apiInfoDTO,
-                               String applicationName, String keyType) throws Exception {
-        return subscriberServiceStub.getAccessToken(userId, apiInfoDTO, applicationName, keyType);
+                               String applicationName, String keyType, String callbackUrl) throws Exception {
+        return subscriberServiceStub.getAccessToken(userId, apiInfoDTO, applicationName, keyType, callbackUrl);
     }
 
     public ApplicationKeysDTO getApplicationAccessKey(String userId, String applicationName,
-                                                      String keyType) throws Exception {
-        return subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType);
+                                                      String keyType, String callbackUrl, String[] allowedDomains) throws Exception {
+        return subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains);
     }
 
-    public String regenerateApplicationAccessKey(String keyType, String oldAccessToken)
+    public String regenerateApplicationAccessKey(String keyType, String oldAccessToken, String[] allowedDomains)
             throws Exception {
-        return subscriberServiceStub.renewAccessToken(keyType, oldAccessToken);
+        return subscriberServiceStub.renewAccessToken(keyType, oldAccessToken, allowedDomains);
 
     }
 
