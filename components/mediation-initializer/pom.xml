@@ -116,7 +116,7 @@
 
     <properties>
         <wso2carbon.version.mediation-initializer>${wso2carbon.version}</wso2carbon.version.mediation-initializer>
-        <synapse.version.mediation-initializer>2.1.1-wso2v3</synapse.version.mediation-initializer>
+        <synapse.version.mediation-initializer>${synapse.version}</synapse.version.mediation-initializer>
     </properties>
     
 </project>
