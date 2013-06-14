@@ -141,7 +141,7 @@ public class OAuthUIUtil {
 		String errorPageURL = null;
 		String errorPageInSession = (String) req.getSession().getAttribute("errorPageURL");
 		// if there is a configured custom page, then user it
-		if (clienDTO != null && clienDTO.getErrorPageURL() != null || errorPageInSession != null) {
+		if (clienDTO != null && clienDTO.getErrorPageURL() != null || errorPageInSession != null || !clienDTO.getErrorPageURL().equals("null")) {
 			errorPageURL = clienDTO.getErrorPageURL();
 			if(errorPageURL == null) {
 				errorPageURL = errorPageInSession;
@@ -177,8 +177,10 @@ public class OAuthUIUtil {
 	public static String getLoginPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clientDTO,
 	                                     OAuth2Parameters params) {
 		String loginPage = null;
-		// if there is a configured custom page, then use it 
-		if (clientDTO != null && clientDTO.getLoginPageURL() != null) {
+		// if there is a configured custom page, then use it
+		if (clientDTO != null && clientDTO.getLoginPageURL() != null &&
+		    !clientDTO.getLoginPageURL().equals("null")) {
+			
 			loginPage = clientDTO.getLoginPageURL();
 			try {
 				loginPage =
@@ -186,9 +188,9 @@ public class OAuthUIUtil {
 				                    URLEncoder.encode(getScope(params), "UTF-8") + "&" + "application" + "=" +
 				                    URLEncoder.encode(params.getApplicationName(), "UTF-8");
 			} catch (UnsupportedEncodingException e) {
-				// ignore
+				// ignore, this is not going to happen 
 			}
-		} else { // else use the default 
+		} else { // else use the default
 			loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_authn_ajaxprocessor.jsp";
 			loginPage = loginPage.replace("/oauth2/authorize", "");
 		}
@@ -211,8 +213,8 @@ public class OAuthUIUtil {
 	                                     OAuth2Parameters params, String loggedInUser, String redirectUrl) {
 		String consentPage = null;
 		// if there is a configured custom page, then use it 
-		if (clientDTO != null && false) {
-			// read from the dto
+		if (clientDTO != null && clientDTO.getConsentPageUrl() != null && !clientDTO.getConsentPageUrl().equals("null")) {
+			consentPage = clientDTO.getConsentPageUrl();
 		} else { // else use the default 
 			consentPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_consent_ajaxprocessor.jsp";
 			consentPage = consentPage.replace("/oauth2/authenticate", "");
