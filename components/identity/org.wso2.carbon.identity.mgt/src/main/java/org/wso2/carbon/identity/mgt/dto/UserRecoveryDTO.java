@@ -23,7 +23,7 @@ public class UserRecoveryDTO {
 	private String notification;
 
 	public UserRecoveryDTO(UserDTO userDTO) {
-		this.userId = userDTO.getTenantDomain();
+		this.userId = userDTO.getUserId();
         this.tenantDomain = userDTO.getTenantDomain();
         this.tenantId = userDTO.getTenantId();
 	}

@@ -62,7 +62,7 @@ public class VerificationBean {
     }
 
     public VerificationBean(boolean verified) {
-        this.verified = this.verified;
+        this.verified = verified;
     }
 
     public VerificationBean(String userId, String key) {

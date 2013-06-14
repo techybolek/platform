@@ -27,6 +27,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.caching.core.CacheInvalidator;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
@@ -195,6 +196,13 @@ public class IdentityMgtServiceComponent {
             dto.setPromoteQuestion(true);
             dto.setQuestionSetId(IdentityMgtConstants.DEFAULT_CHALLENGE_QUESTION_URI02);
             questionSetDTOs.add(dto);
+        }
+
+        try {
+            recoveryProcessor.getQuestionProcessor().setChallengeQuestions(questionSetDTOs.
+                    toArray(new ChallengeQuestionDTO[questionSetDTOs.size()]));
+        } catch (IdentityException e) {
+            log.error("Error while promoting default challenge questions", e);
         }
 
     }

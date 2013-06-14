@@ -52,11 +52,15 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 
 		String emailAddress = notificationData.getNotificationAddress();
 		userParameters.put("user-id", notificationData.getUserId());
+        if(notificationData.getFirstName() == null){
+            userParameters.put("first-name", notificationData.getUserId());
+        } else {
+            userParameters.put("first-name", notificationData.getFirstName());
+        }
         String notification = notificationData.getNotification();
         if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)){
 		    userParameters.put("temporary-password", notificationData.getNotificationCode());
         }
-		userParameters.put("confirmation-code", notificationData.getNotificationCode());
 
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
@@ -115,21 +119,19 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 	public String getRequestMessage(EmailConfig emailConfig) {
 
 		String msg;
-		NotificationDataDTO dataDTO = new NotificationDataDTO();
-
 		String targetEpr = emailConfig.getTargetEpr();
 		if (emailConfig.getEmailBody().length() == 0) {
 			msg = EmailConfig.DEFAULT_VALUE_MESSAGE + "\n";
-			if (dataDTO.getNotificationCode() != null) {
+			if (notificationData.getNotificationCode() != null) {
 				msg =
-				      msg + targetEpr + "?" + CONF_STRING + "=" + dataDTO.getNotificationCode() +
+				      msg + targetEpr + "?" + CONF_STRING + "=" + notificationData.getNotificationCode() +
 				              "\n";
 			}
 		} else {
 			msg = emailConfig.getEmailBody() + "\n";
-			if (dataDTO.getNotificationCode() != null) {
+			if (notificationData.getNotificationCode() != null) {
 				msg =
-				      msg + targetEpr + "?" + CONF_STRING + "=" + dataDTO.getNotificationCode() +
+				      msg + targetEpr + "?" + CONF_STRING + "=" + notificationData.getNotificationCode() +
 				              "\n";
 			}
 		}

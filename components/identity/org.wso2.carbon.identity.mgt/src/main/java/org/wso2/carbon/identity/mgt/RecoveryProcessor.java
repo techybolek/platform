@@ -118,15 +118,15 @@ public class RecoveryProcessor {
         //userMgtBean.setEmail(email);
 
         if(recoveryDTO.getNotification() != null){
-            String recoveryType = recoveryDTO.getNotification().trim();
-
-            if(IdentityMgtConstants.Notification.ACCOUNT_CONFORM.equals(recoveryType) ||
-                    IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(recoveryType)){
+            String notification = recoveryDTO.getNotification().trim();
+            notificationData.setNotification(notification);
+            if(IdentityMgtConstants.Notification.ACCOUNT_CONFORM.equals(notification) ||
+                    IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)){
 
                 confirmationKey = UUIDGenerator.generateUUID();
                 secretKey = UUIDGenerator.generateUUID();
                 notificationData.setNotificationCode(confirmationKey);
-            } else if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(recoveryType)){
+            } else if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)){
                 String temporaryPassword = recoveryDTO.getTemporaryPassword();  // TODO
                 if(temporaryPassword == null || temporaryPassword.trim().length() < 1){
                     char[] chars = IdentityMgtConfig.getInstance().getPasswordGenerator().generatePassword();
@@ -135,8 +135,8 @@ public class RecoveryProcessor {
                 Utils.updatePassword(userId, tenantId, temporaryPassword);
                 notificationData.setNotificationCode(temporaryPassword);
                 persistData = false;
-            } else if(IdentityMgtConstants.Notification.ACCOUNT_UNLOCK.equals(recoveryType) ||
-                    IdentityMgtConstants.Notification.ACCOUNT_ID_RECOVERY.equals(recoveryType)){
+            } else if(IdentityMgtConstants.Notification.ACCOUNT_UNLOCK.equals(notification) ||
+                    IdentityMgtConstants.Notification.ACCOUNT_ID_RECOVERY.equals(notification)){
                 persistData = false;
             }
         }
@@ -145,6 +145,7 @@ public class RecoveryProcessor {
         notificationData.setNotificationAddress(notificationAddress);
         notificationData.setUserId(userId);
         notificationData.setDomainName(domainName);
+
 
         if(persistData){
             UserRecoveryDataDO recoveryDataDO =
@@ -204,7 +205,7 @@ public class RecoveryProcessor {
 
         String userId = userDTO.getUserId();
         int tenantId = userDTO.getTenantId();
-
+        boolean success = false;
         try {
             UserStoreManager userStoreManager = IdentityMgtServiceComponent.getRealmService().
                     getTenantUserRealm(tenantId).getUserStoreManager();
@@ -217,30 +218,28 @@ public class RecoveryProcessor {
                         String accountLock = userStoreManager.
                                 getUserClaimValue(userId, UserIdentityDataStore.ACCOUNT_LOCK, null);
                         if(!Boolean.parseBoolean(accountLock)){
-                            String code = UUID.randomUUID().toString();
-                            String key = UUID.randomUUID().toString();
-                            UserRecoveryDataDO  dataDO =
-                                            new UserRecoveryDataDO(userId, tenantId, code, key);
-                            dataStore.store(dataDO);
-                            log.info("User verification successful for user : " + userId +
-                                    " from tenant domain " + userDTO.getTenantDomain());
-                            return new VerificationBean(userId, code);
+                            success = true;
                         }
+                    } else {
+                        success = true;
                     }
                 }
             } else if (tenantId > 0) {
                 if(userStoreManager.isExistingUser(userId)){
                     if(userId.equals(tenantManager.getTenant(tenantId).getAdminName())){
-                        String code = UUID.randomUUID().toString();
-                        String key = UUID.randomUUID().toString();
-                        UserRecoveryDataDO  dataDO =
-                                new UserRecoveryDataDO(userId, tenantId, code, key);
-                        dataStore.store(dataDO);
-                        log.info("User verification successful for user : " + userId +
-                                " from tenant domain " + userDTO.getTenantDomain());
-                        return new VerificationBean(userId, code);
+                        success = true;
                     }
                 }
+            }
+            if(success){
+                String code = UUID.randomUUID().toString();
+                String key = UUID.randomUUID().toString();
+                UserRecoveryDataDO  dataDO =
+                        new UserRecoveryDataDO(userId, tenantId, code, key);
+                dataStore.store(dataDO);
+                log.info("User verification successful for user : " + userId +
+                        " from tenant domain " + userDTO.getTenantDomain());
+                return new VerificationBean(userId, code);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
