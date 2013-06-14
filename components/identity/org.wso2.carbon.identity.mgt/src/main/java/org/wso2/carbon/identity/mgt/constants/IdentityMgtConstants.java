@@ -163,6 +163,12 @@ public class IdentityMgtConstants {
         public static final String  EXTENSION_NOTIFICATION_SENDING_MODULE = "Identity.Mgt.Notification.Sending.Module";
         
         public static final String  NOTIFICATION_LINK_EXPIRE_TIME = "Notification.Expire.Time";
+
+        public static final String  PASSWORD_POLICY_EXTENSIONS = "Password.policy.extensions";
+
+        public static final String PASSWORD_LENGTH_MIN = "Password.policy.min.length";
+
+        public static final String PASSWORD_LENGTH_MAX = "Password.policy.max.length";
     }
 
 

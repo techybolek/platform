@@ -31,6 +31,8 @@ import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.mail.DefaultEmailSendingModule;
 import org.wso2.carbon.identity.mgt.password.DefaultPasswordGenerator;
 import org.wso2.carbon.identity.mgt.password.RandomPasswordGenerator;
+import org.wso2.carbon.identity.mgt.policy.PolicyEnforcer;
+import org.wso2.carbon.identity.mgt.policy.PolicyRegistry;
 import org.wso2.carbon.identity.mgt.store.RegistryRecoveryDataStore;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.identity.mgt.store.UserRecoveryDataStore;
@@ -108,6 +110,12 @@ public class IdentityMgtConfig {
     private List<String> notificationTypes = new ArrayList<String>();
 
 	private String recoveryClaim;
+
+    private PolicyRegistry policyRegistry = new PolicyRegistry();
+
+    private int passwordLengthMin;
+
+    private int passwordLengthMax;
 
     private static final Log log = LogFactory.getLog(IdentityMgtConfig.class);
 
@@ -359,8 +367,30 @@ public class IdentityMgtConfig {
                 }
                 i++;
             }
-            
 
+            String passwordPolicyExtensions = properties.getProperty(IdentityMgtConstants.PropertyConfig.PASSWORD_POLICY_EXTENSIONS);
+            if(passwordPolicyExtensions != null && passwordPolicyExtensions.trim().length() > 0) {
+
+                String[] classNames = passwordPolicyExtensions.split(",");
+                try{
+                    for (String className : classNames) {
+                        Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                        this.policyRegistry.addPolicy((PolicyEnforcer) clazz.newInstance());
+                    }
+                }catch(Exception e) {
+                    log.error("Error while loading password policy classes ", e);
+                }
+            }
+
+            String passwordLengthMin = properties.getProperty(IdentityMgtConstants.PropertyConfig.PASSWORD_LENGTH_MIN);
+            if(passwordLengthMin != null && passwordLengthMin.trim().length() > 0) {
+                this.passwordLengthMin = Integer.valueOf(passwordLengthMin);
+            }
+
+            String passwordLengthMax = properties.getProperty(IdentityMgtConstants.PropertyConfig.PASSWORD_LENGTH_MAX);
+            if(passwordLengthMax != null && passwordLengthMax.trim().length() > 0) {
+                this.passwordLengthMax = Integer.valueOf(passwordLengthMax);
+            }
 
             if(this.passwordGenerator == null){
                 this.passwordGenerator = new DefaultPasswordGenerator();
@@ -527,5 +557,17 @@ public class IdentityMgtConfig {
 
     public UserRecoveryDataStore getRecoveryDataStore() {
         return recoveryDataStore;
+    }
+
+    public PolicyRegistry getPolicyRegistry() {
+        return policyRegistry;
+    }
+
+    public int getPasswordLengthMax(){
+        return passwordLengthMax;
+    }
+
+    public int getPasswordLengthMin(){
+        return passwordLengthMin;
     }
 }

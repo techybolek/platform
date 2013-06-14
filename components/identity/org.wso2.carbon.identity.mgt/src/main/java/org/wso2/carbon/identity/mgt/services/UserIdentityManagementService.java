@@ -281,22 +281,22 @@ public class UserIdentityManagementService {
 	 * @return
 	 * @throws IdentityMgtServiceException
 	 */
-	public boolean verifyUserID(String userName) throws IdentityMgtServiceException {
-		try {
-			int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
-			UserStoreManager userStoreManager =
-			                                    IdentityMgtServiceComponent.getRealmService()
-			                                                               .getTenantUserRealm(tenantId)
-			                                                               .getUserStoreManager();
-			return userStoreManager.isExistingUser(userName);
-		} catch (UserStoreException e) {
-			log.error("Error while reading identity claims", e);
-			throw new IdentityMgtServiceException("Error while reading identity claims");
-		} catch (IdentityException e) {
-            log.error("Error while reading identity claims", e);
-            throw new IdentityMgtServiceException("Error while reading identity claims");
-        }
-    }
+//	public boolean verifyUserID(String userName) throws IdentityMgtServiceException {
+//		try {
+//			int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
+//			UserStoreManager userStoreManager =
+//			                                    IdentityMgtServiceComponent.getRealmService()
+//			                                                               .getTenantUserRealm(tenantId)
+//			                                                               .getUserStoreManager();
+//			return userStoreManager.isExistingUser(userName);
+//		} catch (UserStoreException e) {
+//			log.error("Error while reading identity claims", e);
+//			throw new IdentityMgtServiceException("Error while reading identity claims");
+//		} catch (IdentityException e) {
+//            log.error("Error while reading identity claims", e);
+//            throw new IdentityMgtServiceException("Error while reading identity claims");
+//        }
+//    }
 
 
 
