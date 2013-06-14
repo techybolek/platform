@@ -18,17 +18,27 @@ package org.wso2.carbon.identity.mgt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.mgt.beans.VerificationBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.NotificationDataDTO;
+import org.wso2.carbon.identity.mgt.dto.UserDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
+import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
+import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.identity.mgt.store.UserRecoveryDataStore;
 import org.wso2.carbon.identity.mgt.util.Utils;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -71,12 +81,10 @@ public class RecoveryProcessor {
      * Processing recovery
      *
      * @param recoveryDTO class that contains user and tenant Information
-     * @param tenantId  tenant id
      * @return true if the reset request is processed successfully.
      * @throws IdentityException  if fails
      */
-    public NotificationDataDTO processRecoveryWithNotification(UserRecoveryDTO recoveryDTO, int tenantId)
-            throws IdentityException {
+    public NotificationDataDTO recoverWithNotification(UserRecoveryDTO recoveryDTO) throws IdentityException {
 
         if(!IdentityMgtConfig.getInstance().isNotificationSending()){
             //return new NotificationDataDTO("Email sending is disabled");
@@ -89,6 +97,7 @@ public class RecoveryProcessor {
         boolean persistData = true;
         String userId = recoveryDTO.getUserId();
         String domainName = recoveryDTO.getTenantDomain();
+        int tenantId = recoveryDTO.getTenantId();
         NotificationDataDTO notificationData = new NotificationDataDTO();
         
         String type = recoveryDTO.getNotificationType();
@@ -108,8 +117,8 @@ public class RecoveryProcessor {
 
         //userMgtBean.setEmail(email);
 
-        if(recoveryDTO.getRecoveryType() != null){
-            String recoveryType = recoveryDTO.getRecoveryType().trim();
+        if(recoveryDTO.getNotification() != null){
+            String recoveryType = recoveryDTO.getNotification().trim();
 
             if(IdentityMgtConstants.Notification.ACCOUNT_CONFORM.equals(recoveryType) ||
                     IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(recoveryType)){
@@ -147,11 +156,111 @@ public class RecoveryProcessor {
         if(IdentityMgtConfig.getInstance().isNotificationInternallyManaged()){ // TODO?
             module.setNotificationData(notificationData);
             notificationSender.sendNotification(module);
+            notificationData.setNotificationSent(true);
+        } else {
+            notificationData.setNotificationSent(false);
         }
 
         return notificationData; // TODO
     }
 
+    /**
+     * Confirm that confirmation key has been sent to the same user.
+     *
+     * @param confirmationKey confirmation key from the user
+     * @return verification result as a bean
+     */
+    public VerificationBean verifyConfirmationKey(String confirmationKey) {
+
+        UserRecoveryDataDO dataDO = null;
+
+        try {
+            dataDO = dataStore.load(confirmationKey);
+        } catch (IdentityException e) {
+            return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_USER);
+        }
+
+
+        if(dataDO == null){
+            return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_CODE);
+        }
+
+        if(dataDO.isValid()){
+            return new VerificationBean(VerificationBean.ERROR_CODE_EXPIRED_CODE);
+        } else {
+            return new VerificationBean(dataDO.getUserName(), dataDO.getSecret());
+        }
+
+    }
+
+    /**
+     * Verifies user id with underline user store
+     *
+     * @param userDTO  bean class that contains user and tenant Information
+     * @return true/false whether user is verified or not. If user is a tenant
+     *         user then always return false
+     */
+    public VerificationBean verifyUserForRecovery(UserDTO userDTO) {
+
+        String userId = userDTO.getUserId();
+        int tenantId = userDTO.getTenantId();
+
+        try {
+            UserStoreManager userStoreManager = IdentityMgtServiceComponent.getRealmService().
+                    getTenantUserRealm(tenantId).getUserStoreManager();
+            TenantManager tenantManager = IdentityMgtServiceComponent.getRealmService().
+                    getTenantManager();
+
+            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                if(userStoreManager.isExistingUser(userId)){
+                    if(IdentityMgtConfig.getInstance().isAuthPolicyAccountLockCheck()){
+                        String accountLock = userStoreManager.
+                                getUserClaimValue(userId, UserIdentityDataStore.ACCOUNT_LOCK, null);
+                        if(!Boolean.parseBoolean(accountLock)){
+                            String code = UUID.randomUUID().toString();
+                            String key = UUID.randomUUID().toString();
+                            UserRecoveryDataDO  dataDO =
+                                            new UserRecoveryDataDO(userId, tenantId, code, key);
+                            dataStore.store(dataDO);
+                            log.info("User verification successful for user : " + userId +
+                                    " from tenant domain " + userDTO.getTenantDomain());
+                            return new VerificationBean(userId, code);
+                        }
+                    }
+                }
+            } else if (tenantId > 0) {
+                if(userStoreManager.isExistingUser(userId)){
+                    if(userId.equals(tenantManager.getTenant(tenantId).getAdminName())){
+                        String code = UUID.randomUUID().toString();
+                        String key = UUID.randomUUID().toString();
+                        UserRecoveryDataDO  dataDO =
+                                new UserRecoveryDataDO(userId, tenantId, code, key);
+                        dataStore.store(dataDO);
+                        log.info("User verification successful for user : " + userId +
+                                " from tenant domain " + userDTO.getTenantDomain());
+                        return new VerificationBean(userId, code);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return  new VerificationBean(VerificationBean.ERROR_CODE_UN_EXPECTED);
+        }
+
+        log.error("User verification failed for user : " + userId +
+                " from tenant domain " + userDTO.getTenantDomain());
+
+        return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_USER);
+    }
+    
+    public void createConfirmationCode(UserDTO userDTO, String code) throws IdentityException {
+        String key = UUID.randomUUID().toString();
+        UserRecoveryDataDO  dataDO =
+                new UserRecoveryDataDO(userDTO.getUserId(), userDTO.getTenantId(), code, key);
+        dataStore.store(dataDO);
+    }
+    
+    
     public ChallengeQuestionProcessor getQuestionProcessor() {
         return questionProcessor;
     }

@@ -31,9 +31,9 @@ public interface UserRecoveryDataStore {
 
     public void store(UserRecoveryDataDO[] recoveryDataDOs) throws IdentityException;
 
-    public UserRecoveryDataDO[] load(String userName, int tenantId) throws IdentityException;
+    public UserRecoveryDataDO load(String code) throws IdentityException;
 
-    public UserRecoveryDataDO load(String userName, int tenantId, String code)
+    public UserRecoveryDataDO[] load(String userName, int tenantId)
             throws IdentityException;
 
     public void invalidate(UserRecoveryDataDO recoveryDataDO) throws IdentityException;

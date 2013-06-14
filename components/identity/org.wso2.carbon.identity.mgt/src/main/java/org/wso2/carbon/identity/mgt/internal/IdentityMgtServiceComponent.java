@@ -30,6 +30,7 @@ import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
+import org.wso2.carbon.identity.mgt.RecoveryProcessor;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
 import org.wso2.carbon.registry.core.Collection;
@@ -72,6 +73,8 @@ public class IdentityMgtServiceComponent {
     private ServiceRegistration serviceRegistration = null;
     
     private static IdentityMgtEventListener listener = null;
+
+    private static RecoveryProcessor recoveryProcessor;
 
     protected void activate(ComponentContext context) {
 
@@ -151,10 +154,15 @@ public class IdentityMgtServiceComponent {
     public static CacheInvalidator getCacheInvalidator() {
     	return cacheInvalidator;
     }
-    
+
+    public static RecoveryProcessor getRecoveryProcessor() {
+        return recoveryProcessor;
+    }
+
     private static void init(){
 
         Registry registry;
+        recoveryProcessor = new RecoveryProcessor();
         IdentityMgtConfig.getInstance(realmService.getBootstrapRealmConfiguration());
         try {
             registry = IdentityMgtServiceComponent.getRegistryService().getConfigSystemRegistry();

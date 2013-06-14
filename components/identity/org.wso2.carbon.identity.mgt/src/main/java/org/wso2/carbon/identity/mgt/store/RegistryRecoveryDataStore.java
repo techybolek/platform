@@ -1,15 +1,19 @@
 package org.wso2.carbon.identity.mgt.store;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -17,12 +21,14 @@ import java.util.UUID;
  */
 public class RegistryRecoveryDataStore implements UserRecoveryDataStore{
 
+    private static final Log log = LogFactory.getLog(RegistryRecoveryDataStore.class);
+
     @Override
     public void store(UserRecoveryDataDO recoveryDataDO) throws IdentityException {
 
         try{
             Registry registry = IdentityMgtServiceComponent.getRegistryService().
-                    getConfigSystemRegistry(recoveryDataDO.getTenantId());
+                    getConfigSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
             Resource resource = registry.newResource();
             resource.setProperty(SECRET_KEY, recoveryDataDO.getSecret());
             resource.setProperty(USER_ID, recoveryDataDO.getUserName());
@@ -31,6 +37,7 @@ public class RegistryRecoveryDataStore implements UserRecoveryDataStore{
             String confirmationKeyPath = IdentityMgtConstants.IDENTITY_MANAGEMENT_DATA + "/" + recoveryDataDO.getCode();
             registry.put(confirmationKeyPath, resource);
         } catch (RegistryException e) {
+            log.error(e);
             throw new IdentityException("Error while persisting user recovery data for user : " +
                     recoveryDataDO.getUserName());
         }
@@ -42,14 +49,58 @@ public class RegistryRecoveryDataStore implements UserRecoveryDataStore{
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    public UserRecoveryDataDO[] load(String userName, int tenantId) throws IdentityException {
-        return new UserRecoveryDataDO[0];  //To change body of implemented methods use File | Settings | File Templates.
-    }
 
     @Override
-    public UserRecoveryDataDO load(String userName, int tenantId, String code) throws IdentityException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public UserRecoveryDataDO load(String code) throws IdentityException {
+
+        Registry registry = null;
+        UserRecoveryDataDO dataDO = new UserRecoveryDataDO();
+
+        try {
+
+            registry = IdentityMgtServiceComponent.getRegistryService().
+                    getConfigSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+
+            registry.beginTransaction();
+
+            String secretKeyPath = IdentityMgtConstants.IDENTITY_MANAGEMENT_DATA +
+                    RegistryConstants.PATH_SEPARATOR + code;
+            if (registry.resourceExists(secretKeyPath)) {
+                Resource resource = registry.get(secretKeyPath);
+                Properties props = resource.getProperties();
+                for (Object o : props.keySet()) {
+                    String key = (String) o;
+                    if (key.equals(USER_ID)) {
+                        dataDO.setUserName(resource.getProperty(key));
+                    } else if (key.equals(SECRET_KEY)) {
+                        dataDO.setSecret(resource.getProperty(key));
+                    } else if (key.equals(EXPIRE_TIME)){
+                        String time = resource.getProperty(key);
+                        if(System.currentTimeMillis() > Long.parseLong(time)){
+                            dataDO.setValid(false);
+                            break;
+                        }
+
+                    }
+                }
+                registry.delete(resource.getPath());
+            } else {
+                return null;
+            }
+        } catch (RegistryException e) {
+            log.error(e);
+            throw new IdentityException("Error while loading user recovery data for code : " + code);
+        } finally {
+            if(registry != null){
+                try{
+                    registry.commitTransaction();
+                } catch (RegistryException e) {
+                    log.error("Error while processing registry transaction", e);
+                }
+            }
+        }
+
+        return dataDO;
     }
 
     @Override
@@ -60,5 +111,10 @@ public class RegistryRecoveryDataStore implements UserRecoveryDataStore{
     @Override
     public void invalidate(String userId, int tenantId) throws IdentityException {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public UserRecoveryDataDO[] load(String userName, int tenantId) throws IdentityException {
+        return new UserRecoveryDataDO[0];  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

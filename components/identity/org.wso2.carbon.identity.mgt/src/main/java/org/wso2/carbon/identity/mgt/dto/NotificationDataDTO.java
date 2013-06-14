@@ -38,6 +38,8 @@ public class NotificationDataDTO {
 
     private String notificationType;
 
+    private boolean notificationSent;
+
     public NotificationDataDTO() {
     }
 
@@ -95,5 +97,13 @@ public class NotificationDataDTO {
 
     public void setNotification(String notification) {
         this.notification = notification;
+    }
+
+    public boolean isNotificationSent() {
+        return notificationSent;
+    }
+
+    public void setNotificationSent(boolean notificationSent) {
+        this.notificationSent = notificationSent;
     }
 }

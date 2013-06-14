@@ -1,5 +1,7 @@
 package org.wso2.carbon.identity.mgt.dto;
 
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
 /**
  * This object contains the information of the created user account. This
  * information can be sent to the user to complete the user registration
@@ -11,16 +13,27 @@ package org.wso2.carbon.identity.mgt.dto;
  */
 public class UserRecoveryDTO {
 
-	private String userId;
+
+    private String userId;
     private String tenantDomain;
+    private int tenantId;
 	private String temporaryPassword;
 	private String confirmationCode;
 	private String notificationType;
-	private String recoveryType;
+	private String notification;
 
-	public UserRecoveryDTO(String userName) {
-		this.userId = userName;
+	public UserRecoveryDTO(UserDTO userDTO) {
+		this.userId = userDTO.getTenantDomain();
+        this.tenantDomain = userDTO.getTenantDomain();
+        this.tenantId = userDTO.getTenantId();
 	}
+
+    public UserRecoveryDTO(String userId) {
+        this.userId = userId;
+        this.tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        this.tenantId = MultitenantConstants.SUPER_TENANT_ID;
+    }
+
 
 	/**
 	 * Returns the temporary password of the created account
@@ -48,13 +61,12 @@ public class UserRecoveryDTO {
 		return this;
 	}
 
-	public String getUserId() {
-	    return userId;
+    public String getUserId() {
+        return userId;
     }
 
-	public UserRecoveryDTO setUserId(String userId) {
-	    this.userId = userId;
-	    return this;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getTenantDomain() {
@@ -65,6 +77,14 @@ public class UserRecoveryDTO {
         this.tenantDomain = tenantDomain;
     }
 
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
+
     public String getNotificationType() {
         return notificationType;
     }
@@ -73,11 +93,11 @@ public class UserRecoveryDTO {
         this.notificationType = notificationType;
     }
 
-    public String getRecoveryType() {
-        return recoveryType;
+    public String getNotification() {
+        return notification;
     }
 
-    public void setRecoveryType(String recoveryType) {
-        this.recoveryType = recoveryType;
+    public void setNotification(String notification) {
+        this.notification = notification;
     }
 }

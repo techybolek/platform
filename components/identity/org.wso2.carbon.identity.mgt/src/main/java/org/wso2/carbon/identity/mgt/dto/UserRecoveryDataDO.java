@@ -34,17 +34,18 @@ public class UserRecoveryDataDO {
 	private String code;
 	private String secret;
 	private String expireTime;
-	private boolean isValid = true;
+	private boolean isValid;
 
 
     public UserRecoveryDataDO() {
     }
 
-    public UserRecoveryDataDO(int tenantId, String userName) {
+    public UserRecoveryDataDO(String userName, int tenantId) {
         this.tenantId = tenantId;
         this.userName = userName;
         int expireTime = IdentityMgtConfig.getInstance().getNotificationExpireTime();
         this.expireTime = Long.toString(System.currentTimeMillis() + (expireTime*60*1000));
+        this.isValid = true;
     }
 
     public UserRecoveryDataDO(String userName, int tenantId, String code, String secret) {
@@ -54,6 +55,7 @@ public class UserRecoveryDataDO {
         this.secret = secret;
         int expireTime = IdentityMgtConfig.getInstance().getNotificationExpireTime();
         this.expireTime = Long.toString(System.currentTimeMillis() + (expireTime*60*1000));
+        this.isValid = true;
     }
 
 

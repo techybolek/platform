@@ -150,40 +150,11 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 	 * duplicate entries found.
 	 * This can be used to check if the given metada exist in the database or to
 	 * check the validity.
-	 * 
-	 * @param userName
-	 * @param tenantId
+	 *
 	 * @return
 	 * @throws IdentityException
 	 */
 
-	public UserRecoveryDataDO load(String userName, int tenantId, String code) throws IdentityException {
-		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
-		PreparedStatement prepStmt = null;
-		ResultSet results = null;
-		try {
-			prepStmt = connection.prepareStatement(SQLQuery.LOAD_META_DATA);
-			prepStmt.setString(1, userName);
-			prepStmt.setInt(2, tenantId);
-			prepStmt.setString(3, code);
-			results = prepStmt.executeQuery();
-
-			if (results.next()) {
-				return new UserRecoveryDataDO(results.getString(1), results.getInt(2),
-				                                  results.getString(3), results.getString(4));
-			}
-			if (results.next()) {
-				throw new IdentityException("Duplicate entry found for code : " + code);
-			}
-			return null;
-		} catch (SQLException e) {
-			throw new IdentityException("Error while reading user identity data", e);
-		} finally {
-			IdentityDatabaseUtil.closeResultSet(results);
-			IdentityDatabaseUtil.closeStatement(prepStmt);
-			IdentityDatabaseUtil.closeConnection(connection);
-		}
-	}
 
 	/**
 	 * 
@@ -218,7 +189,12 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 		}
 	}
 
-//	/**
+    @Override
+    public UserRecoveryDataDO load(String code) throws IdentityException {
+        return null;
+    }
+
+    //	/**
 //	 * Can be used to return primary security questions etc
 //	 *
 //	 * @param userName

@@ -57,7 +57,7 @@ public class UserIdentityManagementUtil {
 		UserRecoveryDTO registrationDTO = new UserRecoveryDTO(userName);
 		// 
 		for (UserRecoveryDataDO metadata : metadataDO) {
-			// only valid metadata should be returned
+			//only valid metadata should be returned
 //			if (UserRecoveryDataDO.METADATA_CONFIRMATION_CODE.equals(metadata.getMetadataType()) &&
 //			    metadata.isValid()) {
 //				registrationDTO.setConfirmationCode(metadata.getMetadata());
@@ -276,7 +276,7 @@ public class UserIdentityManagementUtil {
 	public static boolean isValidIdentityMetadata(String userName, int tenantId, String metadataType,
 	                                                   String metadata) throws IdentityException {
 		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
-		UserRecoveryDataDO metadataDO = store.load(userName, tenantId, metadataType);
+		UserRecoveryDataDO metadataDO = null;//store.load(userName, tenantId, metadataType);
 		if (metadataDO != null && metadataDO.isValid()) {
 			return true;
 		} else {
@@ -336,8 +336,13 @@ public class UserIdentityManagementUtil {
 	 */
 	public static UserIdentityClaimDTO[] getAllUserIdentityClaims(String userName)
 	                                                                              throws IdentityMgtServiceException {
-		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
-		try {
+        int tenantId = 0;
+        try {
+            tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
+        } catch (IdentityException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        try {
 			UserStoreManager userStoreManager =
 			                                    IdentityMgtServiceComponent.getRealmService()
 			                                                               .getTenantUserRealm(tenantId)

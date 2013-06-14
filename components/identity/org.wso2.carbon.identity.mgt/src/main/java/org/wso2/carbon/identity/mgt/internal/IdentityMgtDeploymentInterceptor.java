@@ -50,7 +50,7 @@ public class IdentityMgtDeploymentInterceptor implements AxisObserver {
           // TODO
 //        int eventType = axisEvent.getEventType();
 //        if (eventType == AxisEvent.SERVICE_DEPLOY &&
-//                                    "IdentityManagementService".equals(axisService.getName())) {
+//                                    "UserIdentityManagementService".equals(axisService.getName())) {
 //            try {
 //                String serverURL = CarbonUtils.getServerConfiguration().getFirstProperty("ServerURL");
 //                if(!serverURL.startsWith("local")) {
@@ -58,7 +58,7 @@ public class IdentityMgtDeploymentInterceptor implements AxisObserver {
 //                    axisService.addModuleref("rampart");
 //                }
 //            } catch (AxisFault axisFault) {
-//                log.error("Security can not be applied for IdentityManagementService", axisFault);
+//                log.error("Security can not be applied for UserIdentityManagementService", axisFault);
 //            }
 //        }
     }
