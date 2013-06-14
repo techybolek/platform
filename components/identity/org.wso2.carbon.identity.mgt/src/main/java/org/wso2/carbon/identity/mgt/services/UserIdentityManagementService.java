@@ -431,7 +431,7 @@ public class UserIdentityManagementService {
      * @return array of challenges  if null, return empty array
      * @throws IdentityException  if fails
      */
-    public UserChallengesDTO[] getChallengeQuestionsOfUser(String userName, String confirmation)
+    public UserChallengesDTO[] getChallengeQuestionsForUser(String userName, String confirmation)
             throws IdentityMgtServiceException {
 
         UserDTO userDTO = null;

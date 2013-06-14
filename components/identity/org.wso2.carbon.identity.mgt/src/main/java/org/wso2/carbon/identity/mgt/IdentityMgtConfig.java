@@ -376,6 +376,7 @@ public class IdentityMgtConfig {
 
             if(this.sendingModules.isEmpty()){
                 NotificationSendingModule module = new DefaultEmailSendingModule();
+                module.init();
                 this.sendingModules.add(module);
                 this.notificationTypes.add(module.getNotificationType());
             }

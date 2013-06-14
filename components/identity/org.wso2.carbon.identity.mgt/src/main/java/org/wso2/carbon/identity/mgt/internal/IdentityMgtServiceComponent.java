@@ -162,8 +162,8 @@ public class IdentityMgtServiceComponent {
     private static void init(){
 
         Registry registry;
-        recoveryProcessor = new RecoveryProcessor();
         IdentityMgtConfig.getInstance(realmService.getBootstrapRealmConfiguration());
+        recoveryProcessor = new RecoveryProcessor();
         try {
             registry = IdentityMgtServiceComponent.getRegistryService().getConfigSystemRegistry();
             if(!registry.resourceExists(IdentityMgtConstants.IDENTITY_MANAGEMENT_PATH)){
