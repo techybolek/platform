@@ -104,6 +104,7 @@
         <module>webapp-mgt</module>
         <module>jaxws-webapp-mgt</module>
 	<module>url-mapper</module>
+	<module>user-manager</module>
 	<module>identity</module>
         <module>application-mgt</module>
         <module>application-deployers</module>
