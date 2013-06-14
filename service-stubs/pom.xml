@@ -108,6 +108,7 @@
 				<module>org.wso2.carbon.identity.authenticator.webseal.stub</module>
 				<module>org.wso2.carbon.identity.scim.common.stub</module>
 				<module>org.wso2.carbon.identity.mgt.stub</module>
+				<module>org.wso2.carbon.user.mgt.stub</module>
 				<module>org.wso2.carbon.jarservices.stub</module>
 				<module>org.wso2.carbon.jaxwsservices.stub</module>
 				<module>org.wso2.carbon.localentry.stub</module>
