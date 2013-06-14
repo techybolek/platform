@@ -30,7 +30,7 @@
     <artifactId>org.apache.synapse.samples.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Synapse Samples Feature</name>
-    <version>2.1.1-wso2v3</version>
+    <version>${synapse.version}</version>
     <url>http://wso2.org</url>
     <description>This feature contains the synapse samples</description>
 
