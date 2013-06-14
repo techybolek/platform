@@ -414,8 +414,8 @@ public class WSDLMediaTypeHandler extends Handler {
             }
 
             requestContext.setProcessingComplete(true);
-
-            if (wsdlProcessor != null && CommonConstants.ENABLE.equals(System.getProperty(CommonConstants.UDDI_SYSTEM_PROPERTY))) {
+            if (wsdlProcessor != null && CommonConstants.ENABLE.equals(System.getProperty(CommonConstants.UDDI_SYSTEM_PROPERTY))
+                                      && !org.wso2.carbon.registry.common.CommonConstants.isExternalUDDIInvoke.get()) {
                 BusinessServiceInfo businessServiceInfo = new BusinessServiceInfo();
                 WSDLInfo wsdlInfo = wsdlProcessor.getMasterWSDLInfo();
                 businessServiceInfo.setServiceWSDLInfo(wsdlInfo);
@@ -509,8 +509,8 @@ public class WSDLMediaTypeHandler extends Handler {
             }
 
             requestContext.setProcessingComplete(true);
-
-            if (wsdlProcessor != null && CommonConstants.ENABLE.equals(System.getProperty(CommonConstants.UDDI_SYSTEM_PROPERTY))) {
+            if (wsdlProcessor != null && CommonConstants.ENABLE.equals(System.getProperty(CommonConstants.UDDI_SYSTEM_PROPERTY))
+                                      && !org.wso2.carbon.registry.common.CommonConstants.isExternalUDDIInvoke.get()) {
                 BusinessServiceInfo businessServiceInfo = new BusinessServiceInfo();
                 businessServiceInfo.setServiceWSDLInfo(wsdlProcessor.getMasterWSDLInfo());
                 UDDIPublisher publisher = new UDDIPublisher(businessServiceInfo);
