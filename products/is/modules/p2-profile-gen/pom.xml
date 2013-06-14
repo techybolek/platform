@@ -117,6 +117,7 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.scim.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authorization.feature:4.2.0-SNAPSHOT</featureArtifactDef-->
 								<!-- Features related to Cloud Identity -->
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:2.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.identity:org.wso2.identity.ui.feature:4.5.0-SNAPSHOT</featureArtifactDef>
 								<!--featureArtifactDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.feature:2.0.5</featureArtifactDef-->
@@ -335,6 +336,10 @@
                                    					 <id>org.wso2.carbon.stratos.deployment.feature.group</id>
 				                                         <version>2.2.0-SNAPSHOT</version>
 				                                </feature>
+								<feature>
+									<id>org.wso2.carbon.user.mgt.feature.group</id>
+									<version>4.2.0-SNAPSHOT</version>
+								</feature>
 								<!--feature>
                                    					 <id>org.wso2.carbon.user.cassandra.feature.group</id>
 				                                         <version>4.2.0-SNAPSHOT</version>
