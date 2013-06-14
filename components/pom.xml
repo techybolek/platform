@@ -68,7 +68,8 @@
                  <module>event</module>
                  <module>governance</module>
                 <!--<module>health-monitor</module>-->
-                <module>identity</module>
+                <module>user-manager</module>
+		<module>identity</module>
                 <module>jar-services</module>
                 <module>java2wsdl</module>
                 <module>jaxws</module>
