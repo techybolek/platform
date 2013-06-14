@@ -37,7 +37,7 @@ import java.rmi.RemoteException;
  * hosted in the API gateway. This implementation loads the necessary admin service
  * credentials and the API gateway connection settings from the APIManagerConfiguration.
  */
-public abstract class AbstractAPIGatewayAdminClient {    
+public abstract class AbstractAPIGatewayAdminClient {
 
     /**
      * Log into the API gateway as an admin, and initialize the specified client stub using
@@ -102,7 +102,7 @@ public abstract class AbstractAPIGatewayAdminClient {
 
     /**
      * Compute the endpoint of the given API gateway admin service
-     * 
+     *
      * @param serviceName Name of the admin service
      * @return A String representation of the service endpoint
      */

@@ -23,6 +23,10 @@ import org.apache.axiom.om.OMXMLParserWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -77,8 +81,18 @@ public class TemplateLoader {
     }
 
     private String loadTemplate(String type) throws APITemplateException {
-        String fileName = TEMPLATE_FILE_PREFIX + type + ".xml";
-        InputStream in = getClass().getResourceAsStream(fileName);
+        String path =  "repository"+ File.separator +"resources"+ File.separator +"api_templates";
+
+        String fileName = path + TEMPLATE_FILE_PREFIX + type + ".xml";
+        //InputStream in = getClass().getResourceAsStream(fileName);
+        InputStream in = null;
+        try {
+            //in = new FileInputStream(fileName);
+            in = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new APITemplateException("Error while loading template. File not found at path : "+ fileName);
+        }
         if (in != null) {
             OMXMLParserWrapper builder = null;
             try {

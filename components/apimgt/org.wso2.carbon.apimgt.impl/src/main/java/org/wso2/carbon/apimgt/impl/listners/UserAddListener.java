@@ -78,7 +78,6 @@ public class UserAddListener extends AbstractUserStoreManagerListener {
             //client.engageModule("addressing");
             //client.engageModule("rampart");
             String temp = client.sendReceive(getPayload(userName)).toString();
-            System.out.println("==============================================================" + temp);
         } catch (Exception e) {
             String message = "Error while invoking external business process";
             log.error(message + e.toString());

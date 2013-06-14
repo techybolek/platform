@@ -23,7 +23,11 @@ import org.wso2.carbon.apimgt.impl.utils.ClaimCache;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
 import org.wso2.carbon.apimgt.impl.utils.UserClaims;
 import org.wso2.carbon.caching.core.CacheKey;
-import org.wso2.carbon.user.api.*;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
+import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -70,7 +74,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                 ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantId).getClaimManager();
                 ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
-                String[] claimURIs = claim_mapping_to_uri(claims);
+                String[] claimURIs = claim_to_string(claims);
                 UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantId).getUserStoreManager();
                 claimValues = new TreeMap(userStoreManager.getUserClaimValues(endUserName, claimURIs, null));
@@ -97,11 +101,11 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
      * Helper method to convert array of <code>Claim</code> object to
      * array of <code>String</code> objects corresponding to the ClaimURI values.
      */
-    private String[] claim_mapping_to_uri(ClaimMapping[] claimMappings) {
-
-        String[] temp = new String[claimMappings.length];
-        for (int i = 0; i < claimMappings.length; i++) {
-            temp[i] = claimMappings[i].getClaim().getClaimUri();
+    private String[] claim_to_string(ClaimMapping[] claims) {
+        String[] temp = new String[claims.length];
+        for (int i = 0; i < claims.length; i++) {
+          //  temp[i] = claims[i].getClaim(); CHECK THIS< INTERFACE CHNAGED
+       
         }
         return temp;
     }

@@ -60,9 +60,21 @@ public final class APIConstants {
 
     //registry location for consumer
     public static final String API_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
+    
+    //registry location for API documentation
+    public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
+    
+    public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
+    
+    public static final String API_DEFINITION_DOC_NAME = "API Definition";
 
     public static final String API_ICON_IMAGE = "icon";
+    
+    public static final String API_GLOBAL_VISIBILITY = "public";
+
     public static final String API_RESTRICTED_VISIBILITY = "restricted";
+
+    public static final String API_CONTROLLED_VISIBILITY = "controlled";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
 
@@ -88,6 +100,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_BUSS_OWNER_EMAIL ="overview_businessOwnerEmail";
     public static final String API_OVERVIEW_VISIBILITY ="overview_visibility";
     public static final String API_OVERVIEW_VISIBLE_ROLES ="overview_visibleRoles";
+    public static final String API_OVERVIEW_VISIBLE_TENANTS ="overview_visibleTenants";
     public static final String API_STATUS = "STATUS";
     public static final String API_URI_PATTERN ="URITemplate_urlPattern";
     public static final String API_URI_HTTP_METHOD ="URITemplate_httpVerb";
@@ -112,6 +125,7 @@ public final class APIConstants {
     public static final String SUBSCRIPTION_FIELD_API_ID = "API_ID";
     public static final String SUBSCRIPTION_FIELD_ACCESS_TOKEN = "ACCESS_TOKEN";
     public static final String SUBSCRIPTION_FIELD_LAST_ACCESS = "LAST_ACCESSED";
+    public static final String SUBSCRIPTION_FIELD_SUB_STATUS = "SUB_STATUS";
 
     public static final String SUBSCRIPTION_KEY_TYPE = "KEY_TYPE";
     public static final String SUBSCRIPTION_USER_TYPE = "USER_TYPE";
@@ -153,6 +167,10 @@ public final class APIConstants {
         public static final String BLOCKED = "BLOCKED";
         public static final String REVOKED = "REVOKED";
     }
+    public static class SubscriptionStatus {
+        public static final String BLOCKED = "BLOCKED";
+        public static final String UNBLOCKED = "UNBLOCKED";
+    }
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
     public static final int TOP_TATE_MARGIN = 4;
@@ -169,13 +187,16 @@ public final class APIConstants {
     public static final String API_GATEWAY_PASSWORD = API_GATEWAY + "Password";
     public static final String API_GATEWAY_KEY_CACHE_ENABLED = API_GATEWAY + "EnableGatewayKeyCache";
     public static final String API_GATEWAY_API_ENDPOINT = API_GATEWAY + "APIEndpointURL";
+    public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String API_KEY_MANAGER_URL = API_KEY_MANAGER + "ServerURL";
     public static final String API_KEY_MANAGER_USERNAME = API_KEY_MANAGER + "Username";
     public static final String API_KEY_MANAGER_PASSWORD = API_KEY_MANAGER + "Password";
+    public static final String API_KEY_MANAGER_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_MANAGER + "ApplicationTokenDefaultValidityPeriod";
     public static final String API_KEY_MANGER_THRIFT_CLIENT_PORT = API_KEY_MANAGER + "ThriftClientPort";
     public static final String API_KEY_MANGER_THRIFT_SERVER_PORT = API_KEY_MANAGER + "ThriftServerPort";
+    public static final String API_KEY_MANGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
     public static final String API_KEY_MANGER_CONNECTION_TIMEOUT = API_KEY_MANAGER + "ThriftClientConnectionTimeOut";
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_MANAGER + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_MANAGER + "KeyValidatorClientType";
@@ -207,7 +228,6 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
     public static final String SELF_SIGN_UP_CREATE_ROLE = SELF_SIGN_UP + "CreateSubscriberRole";
 
-    public static final String GLOBAL_API_PUBLISHER_ROLE = "globalAPIPublisher";
     public static final String STATUS_OBSERVERS = "StatusObservers.";
     public static final String OBSERVER = STATUS_OBSERVERS + "Observer";
     
@@ -263,6 +283,7 @@ public final class APIConstants {
         public static final int API_AUTH_ACCESS_TOKEN_INACTIVE = 900904;
         public static final int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
         public static final int API_AUTH_INCORRECT_API_RESOURCE = 900906;
+        public static final int API_BLOCKED = 900907;
     }
 
     public static final String EMAIL_DOMAIN_SEPARATOR = "@";
@@ -285,4 +306,26 @@ public final class APIConstants {
     public static final String DELETE_ACTION = "4";
     public static final String PERMISSION_ENABLED = "1";
     public static final String PERMISSION_DISABLED = "0";
+    
+    public static final String SWAGGER_VERSION = "1.1";
+    
+    public static class AuthParameter {
+    	public static final String AUTH_PARAM_NAME = "Authorization";
+    	public static final String AUTH_PARAM_DESCRIPTION = "Access Token";
+    	public static final String AUTH_PARAM_TYPE = "header";
+    	public static final String PAYLOAD_PARAM_NAME = "Payload";
+    	public static final String PAYLOAD_PARAM_DESCRIPTION = "Request Payload";
+    	public static final String PAYLOAD_PARAM_TYPE = "body";
+    }
+    
+    public static class CORSHeaders {
+    	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+    	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+    	
+    	public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
+    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,OPTIONS";
+    }
+
+    public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
 }

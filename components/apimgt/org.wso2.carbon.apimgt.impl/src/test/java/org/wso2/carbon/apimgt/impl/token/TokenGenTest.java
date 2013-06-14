@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.test.TestRealmService;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 //import org.wso2.carbon.apimgt.impl.utils.TokenGenUtil;
@@ -45,7 +46,13 @@ public class TokenGenTest extends TestCase {
     //    TODO: Have to convert to work with new JWT generation and signing
     public void testJWTGeneration() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator(false, false);
-        String token = jwtGen.generateToken("sastry", "hubapp", "cricScore", "1.9.0", "Bronze", "denis");
+        APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
+        dto.setSubscriber("sastry");
+        dto.setApplicationName("hubapp");
+        dto.setApplicationId("1");
+        dto.setApplicationTier("UNLIMITED");
+        dto.setEndUserName("denis");
+        String token = jwtGen.generateToken(dto, "cricScore", "1.9.0", true);
         System.out.println("Generated Token: " + token);
         String header = token.split("\\.")[0];
         String decodedHeader = new String(Base64Utils.decode(header));

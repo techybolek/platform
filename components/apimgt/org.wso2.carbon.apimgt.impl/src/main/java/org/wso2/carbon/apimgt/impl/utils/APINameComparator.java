@@ -26,9 +26,24 @@ import java.util.Comparator;
 /**
  * This comparator used to order APIs by name.
  */
-public class APINameComparator implements Comparator<API> ,Serializable{
+
+/**
+ * TODO add logic to put weight on each parameter. compare by provider and then by name and finally by version
+ */
+public class APINameComparator implements Comparator<API>, Serializable {
 
     public int compare(API api1, API api2) {
-        return api1.getId().getApiName().compareToIgnoreCase(api2.getId().getApiName());
+        if (api1.getId().getProviderName().equals(api2.getId().getProviderName())) {
+            if (api1.getId().getApiName().equals(api2.getId().getApiName())) {
+                //only compare version
+                return api1.getId().getVersion().compareToIgnoreCase(api2.getId().getVersion());
+            } else {
+                //only compare API name
+                return api1.getId().getApiName().compareToIgnoreCase(api2.getId().getApiName());
+            }
+        } else {
+            //only compare provider name
+            return api1.getId().getProviderName().compareToIgnoreCase(api2.getId().getProviderName());
+        }
     }
 }

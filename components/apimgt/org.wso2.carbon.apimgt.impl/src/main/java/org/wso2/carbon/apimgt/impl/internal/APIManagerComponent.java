@@ -30,7 +30,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.core.CacheInvalidator;
@@ -40,18 +42,20 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.listener.UserStoreManagerListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
@@ -60,7 +64,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
 
 
 /**
@@ -83,6 +86,11 @@ import java.util.Properties;
  *                cardinality="0..1" policy="dynamic"
  *                bind="setCacheInvalidator"
  *                unbind="removeCacheInvalidator"
+ *@scr.reference name="tenant.registryloader"
+ * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setTenantRegistryLoader"
+ * unbind="unsetTenantRegistryLoader"
 
  */
 public class APIManagerComponent {
@@ -91,6 +99,8 @@ public class APIManagerComponent {
 
     private ServiceRegistration registration;
     private static CacheInvalidator cacheInvalidator;
+
+    private static TenantRegistryLoader tenantRegistryLoader;
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
@@ -101,6 +111,10 @@ public class APIManagerComponent {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
             addTierPolicies();
+            //Register Tenant service creator to deploy tenant specific common synapse configurations
+            TenantServiceCreator listener = new TenantServiceCreator();
+            bundleContext.registerService(
+                    Axis2ConfigurationContextObserver.class.getName(), listener, null);
 
             APIManagerConfiguration configuration = new APIManagerConfiguration();
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
@@ -112,8 +126,7 @@ public class APIManagerComponent {
             registration = componentContext.getBundleContext().registerService(
                     APIManagerConfigurationService.class.getName(),
                     configurationService, null);
-            setupSelfRegistration(configuration);
-            generateAPICreatorRole();
+            new APIUtil().setupSelfRegistration(configuration,MultitenantConstants.SUPER_TENANT_ID);
             APIStatusObserverList.getInstance().init(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
@@ -312,16 +325,12 @@ public class APIManagerComponent {
                 UserRealm realm = realmService.getBootstrapRealm();
                 UserStoreManager manager = realm.getUserStoreManager();
                 if (!manager.isExistingRole(role)) {
-                    AuthorizationManager authorizationManager = realm.getAuthorizationManager();
-                    authorizationManager.clearRoleActionOnAllResources(role, UserMgtConstants.EXECUTE_ACTION);
-                    for (String permission : permissions) {
-                        authorizationManager.authorizeRole(role, permission, UserMgtConstants.EXECUTE_ACTION);
-                    }
-
                     if (log.isDebugEnabled()) {
                         log.debug("Creating subscriber role: " + role);
                     }
-                    manager.addRole(role, null, null);
+                    Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login",UserMgtConstants.EXECUTE_ACTION),
+                            new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
+                    manager.addRole(role, null, subscriberPermissions);
                 }
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
@@ -330,49 +339,7 @@ public class APIManagerComponent {
         }
     }
 
-    private void generateAPICreatorRole()
-            throws APIManagementException {
-        String role = APIConstants.GLOBAL_API_PUBLISHER_ROLE;
 
-
-        String[] permissions = new String[]{
-                "/permission/admin/login","/permission/admin/manage/resources","/permission/admin/configure/governance",
-                APIConstants.Permissions.API_CREATE, APIConstants.Permissions.API_PUBLISH
-        };
-
-        String[] actions = new String[]{
-                ActionConstants.GET,ActionConstants.PUT,ActionConstants.DELETE
-        };
-
-        String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-
-        try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserRealm realm = realmService.getBootstrapRealm();
-            UserStoreManager manager = realm.getUserStoreManager();
-            RegistryAuthorizationManager regManager=new RegistryAuthorizationManager(realm);
-            if (!manager.isExistingRole(role)) {
-                AuthorizationManager authorizationManager = realm.getAuthorizationManager();
-                authorizationManager.clearRoleActionOnAllResources(role, UserMgtConstants.EXECUTE_ACTION);
-                for (String permission : permissions) {
-                    authorizationManager.authorizeRole(role, permission, UserMgtConstants.EXECUTE_ACTION);
-
-                }
-                for (String action : actions) {
-                    regManager.authorizeRole(role, resourcePath,  action);
-
-                }
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Creating API Creator role: " + role);
-                }
-                manager.addRole(role, null, null);
-            }
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while creating API Creator role: " + role, e);
-        }
-    }
 
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(contextService);
@@ -392,5 +359,17 @@ public class APIManagerComponent {
 
     public static CacheInvalidator getCacheInvalidator() {
         return cacheInvalidator;
+    }
+
+    protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
+        this.tenantRegistryLoader = tenantRegistryLoader;
+    }
+
+    protected void unsetTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
+        this.tenantRegistryLoader = null;
+    }
+
+    public static TenantRegistryLoader getTenantRegistryLoader(){
+        return tenantRegistryLoader;
     }
 }

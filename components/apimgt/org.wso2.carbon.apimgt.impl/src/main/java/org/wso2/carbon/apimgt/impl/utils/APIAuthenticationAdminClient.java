@@ -64,6 +64,15 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
         }
     }
 
+    public void invalidateResourceCache(String apiContext, String apiVersion,
+                                        String resourceURLContext, String httpVerb) throws AxisFault {
+        try {
+            stub.invalidateResourceCache(apiContext,apiVersion,resourceURLContext,httpVerb);
+        } catch (Exception e) {
+            throw new AxisFault("Error while invalidating API keys", e);
+        }
+    }
+
     /**
      * Log into the API gateway or keyMgt as an admin, and initialize the specified client stub using
      * the established authentication session. This method will also set some timeout

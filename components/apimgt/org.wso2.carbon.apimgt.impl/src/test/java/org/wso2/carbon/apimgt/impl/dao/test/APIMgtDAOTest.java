@@ -164,11 +164,11 @@ public class APIMgtDAOTest extends TestCase {
     }
 
     public String[] testRegisterApplicationAccessToken()throws  Exception{
-        apiMgtDAO.registerApplicationAccessToken("CON1","APPLICATION3","PRABATH",MultitenantConstants.SUPER_TENANT_ID,"PRODUCTION");
+        apiMgtDAO.registerApplicationAccessToken("CON1","APPLICATION3","PRABATH",MultitenantConstants.SUPER_TENANT_ID,"PRODUCTION", null);
         String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
         assertNotNull(key1);
 
-        apiMgtDAO.registerApplicationAccessToken("CON2","APPLICATION4","PRABATH",MultitenantConstants.SUPER_TENANT_ID,"SANDBOX");
+        apiMgtDAO.registerApplicationAccessToken("CON2","APPLICATION4","PRABATH",MultitenantConstants.SUPER_TENANT_ID,"SANDBOX", null);
         String key2 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
         assertNotNull(key2);
 
@@ -326,11 +326,11 @@ public class APIMgtDAOTest extends TestCase {
     }
 
     public void testRefreshAccessToken() throws Exception {
-        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[0]);
+        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[0], null);
         String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
         assertNotNull(key1);
 
-        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[1]);
+        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[1], null);
         String key2 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
         assertNotNull(key1);
         assertTrue(!key1.equals(key2));

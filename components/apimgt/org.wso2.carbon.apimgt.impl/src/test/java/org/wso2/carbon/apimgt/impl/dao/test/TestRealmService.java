@@ -65,4 +65,9 @@ public class TestRealmService implements RealmService {
     public TenantMgtConfiguration getTenantMgtConfiguration() {
         return null;
     }
+
+	@Override
+	public void clearCachedUserRealm(int arg0) throws UserStoreException {
+	
+	}
 }

@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.rest.api.stub.RestApiAdminStub;
 import org.wso2.carbon.rest.api.stub.types.carbon.APIData;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 
@@ -30,41 +31,90 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
     public RESTAPIAdminClient(APIIdentifier apiId) throws AxisFault {
         this.qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() +
                 ":v" + apiId.getVersion();
+        String providerDomain = apiId.getProviderName();
+        providerDomain=providerDomain.replace("-AT-", "@");
         restApiAdminStub = new RestApiAdminStub(null, getServiceEndpoint("RestApiAdmin"));
         setup(restApiAdminStub);
     }
-
-    public void addApi(APITemplateBuilder builder) throws AxisFault {
+    
+	/**
+	 * Add the API to the gateway
+	 * @param builder
+	 * @param tenantDomain
+	 * @throws AxisFault
+	 */
+	public void addApi(APITemplateBuilder builder, String tenantDomain ) throws AxisFault {
         try {
-            String apiConfig = builder.getConfigStringForTemplate();
-            restApiAdminStub.addApiFromString(apiConfig);
+            String apiConfig = builder.getConfigStringForTemplate();     
+            if (tenantDomain != null && !("").equals(tenantDomain)
+                    && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            	restApiAdminStub.addApiForTenant(apiConfig, tenantDomain);
+            }else {
+            	 restApiAdminStub.addApiFromString(apiConfig);	
+            }
         } catch (Exception e) {
             throw new AxisFault("Error while adding new API", e);
         }
-    }
+	}
 
-    public APIData getApi() throws AxisFault {
+	/**
+	 * Get API from the gateway
+	 * @param tenantDomain
+	 * @return
+	 * @throws AxisFault
+	 */
+    public APIData getApi(String tenantDomain) throws AxisFault {
         try {
-            return restApiAdminStub.getApiByName(qualifiedName);
+        	APIData apiData;
+        	 if (tenantDomain != null && !("").equals(tenantDomain)
+                     && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+        		 apiData = restApiAdminStub.getApiForTenant(qualifiedName,tenantDomain);
+             }else {
+            	 apiData = restApiAdminStub.getApiByName(qualifiedName);	
+             }
+            return (APIData) apiData;
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining API information from gateway", e);
         }
     }
 
-    public void updateApi(APITemplateBuilder builder) throws AxisFault{
-        try {
-            String apiConfig = builder.getConfigStringForTemplate();
-            restApiAdminStub.updateApiFromString(qualifiedName, apiConfig);
-        } catch (Exception e) {
-            throw new AxisFault("Error while updating API", e);
-        }
-    }
+    /**
+     * Update the API in the Gateway
+     * @param builder
+     * @param tenantDomain
+     * @throws AxisFault
+     */
+	public void updateApi(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
+		try {
+			String apiConfig = builder.getConfigStringForTemplate();
+			if (tenantDomain != null && !("").equals(tenantDomain) &&
+			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
 
-    public void deleteApi() throws AxisFault{
-        try {
-            restApiAdminStub.deleteApi(qualifiedName);
-        } catch (Exception e) {
-            throw new AxisFault("Error while deleting API", e);
-        }
-    }
+				restApiAdminStub.updateApiForTenant(qualifiedName, apiConfig, tenantDomain);
+			} else {
+				restApiAdminStub.updateApiFromString(qualifiedName, apiConfig);
+			}
+		} catch (Exception e) {
+			throw new AxisFault("Error while updating API", e);
+		}
+	}
+
+	/**
+	 * Delete the API from Gateway
+	 * @param tenantDomain
+	 * @throws AxisFault
+	 */
+	public void deleteApi(String tenantDomain) throws AxisFault {
+		try {
+			if (tenantDomain != null && !("").equals(tenantDomain) &&
+			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+				restApiAdminStub.deleteApiForTenant(qualifiedName, tenantDomain);
+			} else {
+				restApiAdminStub.deleteApi(qualifiedName);
+			}
+			
+		} catch (Exception e) {
+			throw new AxisFault("Error while deleting API", e);
+		}
+	}
 }

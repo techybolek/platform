@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -142,17 +143,15 @@ public class JWTGenerator {
   /**
      * Method that generates the JWT.
      *
-     * @param subscriber
-     * @param applicationName
+     * @param keyValidationInfoDTO
      * @param apiContext
      * @param version
-     * @param tier
-     * @param endUserName
+     * @param includeEndUserName
      * @return signed JWT token
      * @throws APIManagementException
      */
-    public String generateToken(String subscriber, String applicationName, String apiContext,
-                     String version, String tier, String endUserName) throws APIManagementException{
+    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,
+                     String version, boolean includeEndUserName) throws APIManagementException{
 
         //generating expiring timestamp
         long currentTime = Calendar.getInstance().getTimeInMillis();
@@ -162,11 +161,22 @@ public class JWTGenerator {
         String dialect;
         if(claimsRetriever != null){
             //jwtBody = JWT_INITIAL_BODY.replaceAll("\\[0\\]", claimsRetriever.getDialectURI(endUserName));
-            dialect = claimsRetriever.getDialectURI(endUserName);
+            dialect = claimsRetriever.getDialectURI(keyValidationInfoDTO.getEndUserName());
         }else{
             //jwtBody = JWT_INITIAL_BODY.replaceAll("\\[0\\]", dialectURI);
             dialect = dialectURI;
         }
+        
+        String subscriber = keyValidationInfoDTO.getSubscriber();
+        String applicationName = keyValidationInfoDTO.getApplicationName();
+        String applicationId = keyValidationInfoDTO.getApplicationId();
+        String tier = keyValidationInfoDTO.getTier();
+        String endUserName = includeEndUserName ? keyValidationInfoDTO.getEndUserName() : null;
+        String keyType = keyValidationInfoDTO.getType();
+        String userType = keyValidationInfoDTO.getUserType();
+        String applicationTier = keyValidationInfoDTO.getApplicationTier();
+        String enduserTenantId = includeEndUserName ? String.valueOf(getTenantId(endUserName)) : null;
+        
 //        jwtBody = jwtBody.replaceAll("\\[1\\]", API_GATEWAY_ID);
 //        jwtBody = jwtBody.replaceAll("\\[2\\]", String.valueOf(expireIn));
 //        jwtBody = jwtBody.replaceAll("\\[3\\]", subscriber);
@@ -201,10 +211,21 @@ public class JWTGenerator {
 
         jwtBuilder.append("\"");
         jwtBuilder.append(dialect);
+        jwtBuilder.append("/applicationid\":\"");
+        jwtBuilder.append(applicationId);
+        jwtBuilder.append("\",");
+
+        jwtBuilder.append("\"");
+        jwtBuilder.append(dialect);
         jwtBuilder.append("/applicationname\":\"");
         jwtBuilder.append(applicationName);
         jwtBuilder.append("\",");
 
+        jwtBuilder.append("\"");
+        jwtBuilder.append(dialect);
+        jwtBuilder.append("/applicationtier\":\"");
+        jwtBuilder.append(applicationTier);
+        jwtBuilder.append("\",");
 
         jwtBuilder.append("\"");
         jwtBuilder.append(dialect);
@@ -226,8 +247,26 @@ public class JWTGenerator {
 
         jwtBuilder.append("\"");
         jwtBuilder.append(dialect);
+        jwtBuilder.append("/keytype\":\"");
+        jwtBuilder.append(keyType);
+        jwtBuilder.append("\",");
+
+        jwtBuilder.append("\"");
+        jwtBuilder.append(dialect);
+        jwtBuilder.append("/usertype\":\"");
+        jwtBuilder.append(userType);
+        jwtBuilder.append("\",");
+
+        jwtBuilder.append("\"");
+        jwtBuilder.append(dialect);
         jwtBuilder.append("/enduser\":\"");
         jwtBuilder.append(endUserName);
+        jwtBuilder.append("\",");
+
+        jwtBuilder.append("\"");
+        jwtBuilder.append(dialect);
+        jwtBuilder.append("/enduserTenantId\":\"");
+        jwtBuilder.append(enduserTenantId);
         jwtBuilder.append("\"");
 
         if(claimsRetriever != null){
@@ -464,6 +503,11 @@ public class JWTGenerator {
         //get tenant domain from user name
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+
+        if(realmService == null){
+            return MultitenantConstants.SUPER_TENANT_ID;
+        }
+
         try {
             int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
             return tenantId;
