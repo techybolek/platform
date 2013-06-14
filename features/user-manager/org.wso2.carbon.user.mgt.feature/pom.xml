@@ -62,7 +62,7 @@
 							<goal>p2-feature-gen</goal>
 						</goals>
 						<configuration>
-							<id>org.wso2.carbon.user.mgt.feature</id>
+							<id>org.wso2.carbon.user.mgt</id>
 							<propertiesFile>../../../../etc/feature.properties</propertiesFile>
 		
                            				 <includedFeatures>
