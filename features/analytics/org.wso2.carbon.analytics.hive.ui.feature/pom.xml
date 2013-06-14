@@ -71,7 +71,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.analytics.hive.ui:${project.version}
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.analytics.hive.ui:${carbon.platform.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.analytics.hive.stub</bundleDef>
                             </bundles>

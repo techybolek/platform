@@ -41,6 +41,15 @@
         </dependency>
     </dependencies>-->
 
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.analytics.hive.ui.feature</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+
     <build>
 	<plugins>
             <plugin>
