@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDTO;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityRecoveryDTO;
+import org.wso2.carbon.identity.mgt.dto.UserRecoveryDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.UserIdentityManagementUtil;
 import org.wso2.carbon.identity.mgt.util.Utils;
@@ -33,7 +33,7 @@ public class UserIdentityManagementAdminService {
 
 /*	*//**
 	 * Admin adds a user to the system. The returning
-	 * {@code UserIdentityRecoveryDTO} contains the temporary password or the
+	 * {@code UserRecoveryDTO} contains the temporary password or the
 	 * account confirmation code to be sent to the user to complete the
 	 * registration process.
 	 * 
@@ -45,7 +45,7 @@ public class UserIdentityManagementAdminService {
 	 * @return
 	 * @throws IdentityMgtServiceException
 	 *//*
-	public UserIdentityRecoveryDTO addUser(String userName, String credential, String[] roleList,
+	public UserRecoveryDTO addUser(String userName, String credential, String[] roleList,
 	                                       UserIdentityClaimDTO[] claims, String profileName)
 	                                                                                         throws IdentityMgtServiceException {
 		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
@@ -78,14 +78,14 @@ public class UserIdentityManagementAdminService {
 	/**
 	 * Admin can get the user account registration data if it was not read from
 	 * the above {@link addUser()} method. The returning
-	 * {@code UserIdentityRecoveryDTO} contains the temporary password or the
+	 * {@code UserRecoveryDTO} contains the temporary password or the
 	 * confirmation code.
 	 * 
 	 * @param userName
 	 * @return
 	 * @throws IdentityMgtServiceException
 	 */
-	public UserIdentityRecoveryDTO getUserIdentityRegistrationData(String userName)
+	public UserRecoveryDTO getUserIdentityRegistrationData(String userName)
 	                                                                               throws IdentityMgtServiceException {
 		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
 		try {

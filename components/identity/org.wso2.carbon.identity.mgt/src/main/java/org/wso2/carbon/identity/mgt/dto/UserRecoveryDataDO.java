@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.identity.mgt.dto;
 
+import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
+
 /**
  * This object represents an entry of the identity metadata database.
  * 
@@ -29,30 +31,31 @@ public class UserRecoveryDataDO {
 
 	private String userName;
 	private int tenantId;
-	private String metadataType;
-	private String metadata;
+	private String code;
+	private String secret;
+	private String expireTime;
 	private boolean isValid = true;
 
-	public UserRecoveryDataDO() {
 
-	}
+    public UserRecoveryDataDO() {
+    }
 
-	/**
-	 * 
-	 * @param userName
-	 * @param tenantId
-	 * @param metadataType
-	 * @param metadata
-	 * @param isValid
-	 */
-	public UserRecoveryDataDO(String userName, int tenantId, String metadataType,
-                              String metadata, boolean isValid) {
-		this.setUserName(userName);
-		this.setTenantId(tenantId);
-		this.setMetadataType(metadataType);
-		this.setMetadata(metadata);
-		this.setValid(isValid);
-	}
+    public UserRecoveryDataDO(int tenantId, String userName) {
+        this.tenantId = tenantId;
+        this.userName = userName;
+        int expireTime = IdentityMgtConfig.getInstance().getNotificationExpireTime();
+        this.expireTime = Long.toString(System.currentTimeMillis() + (expireTime*60*1000));
+    }
+
+    public UserRecoveryDataDO(String userName, int tenantId, String code, String secret) {
+        this.userName = userName;
+        this.tenantId = tenantId;
+        this.code = code;
+        this.secret = secret;
+        int expireTime = IdentityMgtConfig.getInstance().getNotificationExpireTime();
+        this.expireTime = Long.toString(System.currentTimeMillis() + (expireTime*60*1000));
+    }
+
 
 	/**
 	 * @return the userName
@@ -89,40 +92,6 @@ public class UserRecoveryDataDO {
 	}
 
 	/**
-	 * @return the metadataType
-	 */
-	public String getMetadataType() {
-		return metadataType;
-	}
-
-	/**
-	 * @param metadataType
-	 *            the metadataType to set
-	 * @return 
-	 */
-	public UserRecoveryDataDO setMetadataType(String metadataType) {
-		this.metadataType = metadataType;
-		return this;
-	}
-
-	/**
-	 * @return the metadata
-	 */
-	public String getMetadata() {
-		return metadata;
-	}
-
-	/**
-	 * @param metadata
-	 *            the metadata to set
-	 * @return 
-	 */
-	public UserRecoveryDataDO setMetadata(String metadata) {
-		this.metadata = metadata;
-		return this;
-	}
-
-	/**
 	 * @return the isValid
 	 */
 	public boolean isValid() {
@@ -137,4 +106,23 @@ public class UserRecoveryDataDO {
 		this.isValid = isValid;
 	}
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public String getExpireTime() {
+        return expireTime;
+    }
 }

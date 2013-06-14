@@ -110,13 +110,13 @@ public class IdentityMgtConstants {
 
         public static final String  CONFIG_FILE_NAME = "identity-mgt.properties";
 
-        public static final String  EMAIL_SEND_ENABLE = "Email.Sending.Enable";
+        public static final String  NOTIFICATION_SEND_ENABLE = "Notification.Sending.Enable";
         
         public static final String 	RECOVERY_CLAIM = "Recovery.Claim";
 
         public static final String  IDENTITY_LISTENER_ENABLE = "Identity.Listener.Enable";
         
-        public static final String  EMAIL_SEND_INTERNALLY = "Email.Sending.Internally.Managed";
+        public static final String  NOTIFICATION_SEND_INTERNALLY = "Notification.Sending.Internally.Managed";
 
         public static final String  ACCOUNT_VERIFICATION_ENABLE = "UserAccount.Verification.Enable";
 
@@ -157,14 +157,16 @@ public class IdentityMgtConstants {
         public static final String  EXTENSION_PASSWORD_GENERATOR = "Identity.Mgt.Random.Password.Generator";
 
         public static final String  EXTENSION_USER_DATA_STORE = "Identity.Mgt.User.Data.Store";
+
+        public static final String  EXTENSION_USER_RECOVERY_DATA_STORE = "Identity.Mgt.User.Recovery.Data.Store";
+
+        public static final String  EXTENSION_NOTIFICATION_SENDING_MODULE = "Identity.Mgt.Notification.Sending.Module";
         
-        public static final String  EXTENSION_EMAIL_SENDING_MODULE = "Identity.Mgt.Email.Sending.Module";
-        
-        public static final String  EMAIL_LINK_EXPIRE_TIME = "Email.Link.Expire.Time";
+        public static final String  NOTIFICATION_LINK_EXPIRE_TIME = "Notification.Expire.Time";
     }
 
 
-    public  class NotificationType {
+    public  class Notification {
 
         public static  final String PASSWORD_RESET_RECOVERY = "passwordReset";
 

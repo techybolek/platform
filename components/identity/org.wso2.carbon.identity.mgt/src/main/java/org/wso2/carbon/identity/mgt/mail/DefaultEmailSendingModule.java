@@ -32,35 +32,41 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
-import org.wso2.carbon.identity.mgt.dto.RecoveryDataDTO;
+import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
+import org.wso2.carbon.identity.mgt.NotificationSendingModule;
+import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
+import org.wso2.carbon.identity.mgt.dto.NotificationDataDTO;
 
 /**
  * default email sending implementation
  */
-public class DefaultEmailSendingModule extends EmailSendingModule {
+public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 
 	public static final String CONF_STRING = "confirmation";
 	private static Log log = LogFactory.getLog(DefaultEmailSendingModule.class);
 
-	public void prepareEmail() {
+	public void sendEmail(EmailConfig emailConfig) {
 
 		Map<String, String> userParameters = new HashMap<String, String>();
 		Map<String, String> headerMap = new HashMap<String, String>();
 
-		String emailAddress = bean.getEmail();
-		userParameters.put("user-id", bean.getUserId());
-		userParameters.put("temporary-password", bean.getUserTemporaryPassword());
-		userParameters.put("confirmation-code", bean.getConfirmationCode());
+		String emailAddress = notificationData.getNotificationAddress();
+		userParameters.put("user-id", notificationData.getUserId());
+        String notification = notificationData.getNotification();
+        if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)){
+		    userParameters.put("temporary-password", notificationData.getNotificationCode());
+        }
+		userParameters.put("confirmation-code", notificationData.getNotificationCode());
 
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			if (bean.getUserId().length() == 0) {
+			if (notificationData.getUserId().length() == 0) {
 				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, EmailConfig.DEFAULT_VALUE_SUBJECT);
 			} else {
-				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, bean.getUserId());
+				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, notificationData.getUserId());
 			}
 
-			String requestMessage = getEmailMessage(userParameters);
+            String requestMessage = replacePlaceHolders(getRequestMessage(emailConfig), userParameters);
 
 			OMElement payload =
 			                    OMAbstractFactory.getOMFactory()
@@ -106,31 +112,29 @@ public class DefaultEmailSendingModule extends EmailSendingModule {
 		return message.toString();
 	}
 
-	@Deprecated
-	public String getRequestMessage() {
+	public String getRequestMessage(EmailConfig emailConfig) {
 
 		String msg;
-		RecoveryDataDTO emailDataDTO = new RecoveryDataDTO();
-		EmailConfig config = emailDataDTO.getEmailConfig();
+		NotificationDataDTO dataDTO = new NotificationDataDTO();
 
-		String targetEpr = config.getTargetEpr();
-		if (config.getEmailBody().length() == 0) {
+		String targetEpr = emailConfig.getTargetEpr();
+		if (emailConfig.getEmailBody().length() == 0) {
 			msg = EmailConfig.DEFAULT_VALUE_MESSAGE + "\n";
-			if (emailDataDTO.getConfirmation() != null) {
+			if (dataDTO.getNotificationCode() != null) {
 				msg =
-				      msg + targetEpr + "?" + CONF_STRING + "=" + emailDataDTO.getConfirmation() +
+				      msg + targetEpr + "?" + CONF_STRING + "=" + dataDTO.getNotificationCode() +
 				              "\n";
 			}
 		} else {
-			msg = config.getEmailBody() + "\n";
-			if (emailDataDTO.getConfirmation() != null) {
+			msg = emailConfig.getEmailBody() + "\n";
+			if (dataDTO.getNotificationCode() != null) {
 				msg =
-				      msg + targetEpr + "?" + CONF_STRING + "=" + emailDataDTO.getConfirmation() +
+				      msg + targetEpr + "?" + CONF_STRING + "=" + dataDTO.getNotificationCode() +
 				              "\n";
 			}
 		}
-		if (config.getEmailFooter() != null) {
-			msg = msg + "\n" + config.getEmailFooter();
+		if (emailConfig.getEmailFooter() != null) {
+			msg = msg + "\n" + emailConfig.getEmailFooter();
 		}
 		return msg;
 	}
@@ -145,7 +149,6 @@ public class DefaultEmailSendingModule extends EmailSendingModule {
 	 *            mapping of the key and its value
 	 * @return the final text to be sent in the email
 	 */
-	@Deprecated
 	public static String replacePlaceHolders(String text, Map<String, String> userParameters) {
 		if (userParameters != null) {
 			for (Map.Entry<String, String> entry : userParameters.entrySet()) {

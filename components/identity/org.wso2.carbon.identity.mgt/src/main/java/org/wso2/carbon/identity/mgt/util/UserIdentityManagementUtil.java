@@ -11,14 +11,14 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
+import org.wso2.carbon.identity.mgt.NotificationSender;
 import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
+import org.wso2.carbon.identity.mgt.dto.UserRecoveryDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDTO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityRecoveryDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
-import org.wso2.carbon.identity.mgt.mail.EmailSender;
-import org.wso2.carbon.identity.mgt.mail.EmailSendingModule;
+import org.wso2.carbon.identity.mgt.mail.AbstractEmailSendingModule;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.identity.mgt.store.JDBCUserRecoveryDataStore;
 import org.wso2.carbon.user.api.Claim;
@@ -47,24 +47,24 @@ public class UserIdentityManagementUtil {
 	 * @return
 	 * @throws IdentityException
 	 */
-	public static UserIdentityRecoveryDTO getUserIdentityRecoveryData(String userName,
+	public static UserRecoveryDTO getUserIdentityRecoveryData(String userName,
 	                                                                  UserStoreManager userStoreManager,
 	                                                                  int tenantId)
 	                                                                               throws IdentityException {
 
 		JDBCUserRecoveryDataStore metadatStore = new JDBCUserRecoveryDataStore();
 		UserRecoveryDataDO[] metadataDO = metadatStore.load(userName, tenantId);
-		UserIdentityRecoveryDTO registrationDTO = new UserIdentityRecoveryDTO(userName);
+		UserRecoveryDTO registrationDTO = new UserRecoveryDTO(userName);
 		// 
 		for (UserRecoveryDataDO metadata : metadataDO) {
 			// only valid metadata should be returned
-			if (UserRecoveryDataDO.METADATA_CONFIRMATION_CODE.equals(metadata.getMetadataType()) &&
-			    metadata.isValid()) {
-				registrationDTO.setConfirmationCode(metadata.getMetadata());
-			} else if (UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL.equals(metadata.getMetadataType()) &&
-			           metadata.isValid()) {
-				registrationDTO.setTemporaryPassword(metadata.getMetadata());
-			}
+//			if (UserRecoveryDataDO.METADATA_CONFIRMATION_CODE.equals(metadata.getMetadataType()) &&
+//			    metadata.isValid()) {
+//				registrationDTO.setConfirmationCode(metadata.getMetadata());
+//			} else if (UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL.equals(metadata.getMetadataType()) &&
+//			           metadata.isValid()) {
+//				registrationDTO.setTemporaryPassword(metadata.getMetadata());
+//			}
 		}
 		return registrationDTO;
 	}
@@ -124,9 +124,9 @@ public class UserIdentityManagementUtil {
 		List<String> validSecurityQuestions = new ArrayList<String>();
 		for (UserRecoveryDataDO metadataDO : metadata) {
 			// only valid primary security questions are returned
-			if(UserRecoveryDataDO.METADATA_PRIMARAY_SECURITY_QUESTION.equals(metadataDO.getMetadataType()) && metadataDO.isValid()) {
-				validSecurityQuestions.add(metadataDO.getMetadata());
-			}
+//			if(UserRecoveryDataDO.METADATA_PRIMARAY_SECURITY_QUESTION.equals(metadataDO.getMetadataType()) && metadataDO.isValid()) {
+//				validSecurityQuestions.add(metadataDO.getMetadata());
+//			}
 		}
 		String[] questionsList = new String[validSecurityQuestions.size()];
 		return validSecurityQuestions.toArray(questionsList);
@@ -151,7 +151,7 @@ public class UserIdentityManagementUtil {
 			metadata[i++] =
 			                new UserRecoveryDataDO("TENANT", tenantId,
 			                                       UserRecoveryDataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
-			                                       secQuestion, true);
+			                                       secQuestion);
 		}
 		store.store(metadata);
 	}
@@ -174,9 +174,9 @@ public class UserIdentityManagementUtil {
 			metadata[i++] =
 			                new UserRecoveryDataDO("TENANT", tenantId,
 			                                       UserRecoveryDataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
-			                                       secQuestion, true);
+			                                       secQuestion);
 		}
-		store.invalidate(metadata);
+
 	}
 
 	// ---- Util methods for authenticated users ----///
@@ -276,7 +276,7 @@ public class UserIdentityManagementUtil {
 	public static boolean isValidIdentityMetadata(String userName, int tenantId, String metadataType,
 	                                                   String metadata) throws IdentityException {
 		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
-		UserRecoveryDataDO metadataDO = store.load(userName, tenantId, metadataType, metadata);
+		UserRecoveryDataDO metadataDO = store.load(userName, tenantId, metadataType);
 		if (metadataDO != null && metadataDO.isValid()) {
 			return true;
 		} else {
@@ -298,7 +298,7 @@ public class UserIdentityManagementUtil {
 		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
 		UserRecoveryDataDO metadataDO =
 		                                    new UserRecoveryDataDO(userName, tenantId, metadataType,
-		                                                               metadata, false);
+		                                                               metadata);
 		store.invalidate(metadataDO);
 
 	}
@@ -362,12 +362,12 @@ public class UserIdentityManagementUtil {
 
 	
 
-	public static void notifyViaEmail(UserIdentityMgtBean bean) {
+	public static void notifyViaEmail(UserIdentityMgtBean bean) { //TODO
 		// if not module is defined, the default will be loaded
-		EmailSendingModule emailModule = IdentityMgtConfig.getInstance().getEmailSendingModule();
-		emailModule.setBean(bean);
-		EmailSender sender = new EmailSender();
-		sender.sendEmail(emailModule);
+		//AbstractEmailSendingModule emailModule = IdentityMgtConfig.getInstance().getEmailSendingModule();
+		//emailModule.setBean(bean);
+		NotificationSender sender = new NotificationSender();
+		//sender.sendNotification(emailModule);
 	}
 
 	// ------ other Util methods

@@ -289,8 +289,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 				// store identity metadata
 				UserRecoveryDataDO metadataDO = new UserRecoveryDataDO();
 				metadataDO.setUserName(userName).setTenantId(userStoreManager.getTenantId())
-				          .setMetadataType(UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL)
-				          .setMetadata((String) credential);
+				          .setCode((String) credential);
 				try {
 	                UserIdentityManagementUtil.storeUserIdentityMetadata(metadataDO);
                 } catch (IdentityException e) {
@@ -299,7 +298,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 				// preparing a bean to send the email
 				UserIdentityMgtBean bean = new UserIdentityMgtBean();
 				bean.setUserId(userName).setUserTemporaryPassword(credential)
-				    .setRecoveryType(IdentityMgtConstants.NotificationType.TEMPORARY_PASSWORD)
+				    .setRecoveryType(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD)
 				    .setEmail(claims.get(config.getAccountRecoveryClaim()));
 				// sending email
 				UserIdentityManagementUtil.notifyViaEmail(bean);
@@ -317,8 +316,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 				// store identity metadata
 				UserRecoveryDataDO metadataDO = new UserRecoveryDataDO();
 				metadataDO.setUserName(userName).setTenantId(userStoreManager.getTenantId())
-				          .setMetadataType(UserRecoveryDataDO.METADATA_CONFIRMATION_CODE)
-				          .setMetadata(confirmationCode);
+				          .setCode(confirmationCode);
 				try {
 	                UserIdentityManagementUtil.storeUserIdentityMetadata(metadataDO);
                 } catch (IdentityException e) {
@@ -327,7 +325,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 				// sending a mail with the confirmation code
 				UserIdentityMgtBean bean = new UserIdentityMgtBean();
 				bean.setUserId(userName)
-				    .setRecoveryType(IdentityMgtConstants.NotificationType.ACCOUNT_CONFORM)
+				    .setRecoveryType(IdentityMgtConstants.Notification.ACCOUNT_CONFORM)
 				    .setConfirmationCode(confirmationCode);
 				UserIdentityManagementUtil.notifyViaEmail(bean);
 				return true;
@@ -384,7 +382,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 			UserIdentityMgtBean bean = new UserIdentityMgtBean();
 			bean.setUserId(userName);
 			bean.setConfirmationCode(newCredential.toString());
-			bean.setRecoveryType(IdentityMgtConstants.NotificationType.TEMPORARY_PASSWORD);
+			bean.setRecoveryType(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD);
 			log.debug("Sending the tempory password to the user " + userName);
 			UserIdentityManagementUtil.notifyViaEmail(bean);
 		} else {

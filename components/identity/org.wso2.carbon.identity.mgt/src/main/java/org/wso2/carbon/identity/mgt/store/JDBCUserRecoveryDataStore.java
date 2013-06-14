@@ -41,21 +41,19 @@ import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 
 	/**
-	 * Set the validity to invalid
+	 * invalidate recovery data. it means delete user recovery data entry from store
 	 * 
-	 * @param metadata
-	 *            TODO
+	 * @param recoveryDataDO
 	 * @throws IdentityException
 	 */
-	public void invalidate(UserRecoveryDataDO metadata) throws IdentityException {
+	public void invalidate(UserRecoveryDataDO recoveryDataDO) throws IdentityException {
 		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
 		PreparedStatement prepStmt = null;
 		try {
-			prepStmt = connection.prepareStatement(SQLQuery.INVALIDATE_METADATA);
-			prepStmt.setString(1, metadata.getUserName());
-			prepStmt.setInt(2, metadata.getTenantId());
-			prepStmt.setString(3, metadata.getMetadataType());
-			prepStmt.setString(4, metadata.getMetadata());
+			prepStmt = connection.prepareStatement(SQLQuery.INVALIDATE_METADATA); // TODO Delete entry
+			prepStmt.setString(1, recoveryDataDO.getUserName());
+			prepStmt.setInt(2, recoveryDataDO.getTenantId());
+			prepStmt.setString(3, recoveryDataDO.getCode());
 			prepStmt.execute();
 			connection.setAutoCommit(false);
 			connection.commit();
@@ -69,22 +67,18 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 	
 	/**
 	 * 
-	 * @param metadataSet
-	 * @throws IdentityException
+
+	 * @param userId
+     * @param tenant
+     * @throws IdentityException
 	 */
-	public void invalidate(UserRecoveryDataDO[] metadataSet) throws IdentityException {
+	public void invalidate(String userId, int tenant) throws IdentityException {
 		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
 		PreparedStatement prepStmt = null;
 		try {
 			prepStmt = connection.prepareStatement(SQLQuery.INVALIDATE_METADATA);
-			for (UserRecoveryDataDO metadata : metadataSet) {
-				prepStmt.setString(1, metadata.getUserName());
-				prepStmt.setInt(2, metadata.getTenantId());
-				prepStmt.setString(3, metadata.getMetadataType());
-				prepStmt.setString(4, metadata.getMetadata());
-				prepStmt.addBatch();
-			}
-			prepStmt.executeBatch();
+            prepStmt.setString(1, userId);
+            prepStmt.setInt(2, tenant);
 			connection.setAutoCommit(false);
 			connection.commit();
 		} catch (SQLException e) {
@@ -99,20 +93,18 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 	/**
 	 * Stores identity data.
 	 * 
-	 * @param metadata
-	 * 
+	 *
 	 * @throws IdentityException
 	 */
-	public void store(UserRecoveryDataDO metadata) throws IdentityException {
+	public void store(UserRecoveryDataDO recoveryDataDO) throws IdentityException {
 		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
 		PreparedStatement prepStmt = null;
 		try {
 			prepStmt = connection.prepareStatement(SQLQuery.STORE_META_DATA);
-			prepStmt.setString(1, metadata.getUserName());
-			prepStmt.setInt(2, metadata.getTenantId());
-			prepStmt.setString(3, metadata.getMetadataType());
-			prepStmt.setString(4, metadata.getMetadata());
-			prepStmt.setString(5, Boolean.toString(metadata.isValid()));
+			prepStmt.setString(1, recoveryDataDO.getUserName());
+			prepStmt.setInt(2, recoveryDataDO.getTenantId());
+			prepStmt.setString(3, recoveryDataDO.getCode());
+			prepStmt.setString(4, recoveryDataDO.getSecret());
 			prepStmt.execute();
 			connection.setAutoCommit(false);
 			connection.commit();
@@ -126,23 +118,21 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 
 	/**
 	 * Stores identity data set.
-	 * 
-	 * @param metadataSet
+	 *
 	 * 
 	 * @throws IdentityException
 	 */
-	public void store(UserRecoveryDataDO[] metadataSet) throws IdentityException {
+	public void store(UserRecoveryDataDO[] recoveryDataDOs) throws IdentityException {
 		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
 		PreparedStatement prepStmt = null;
 		try {
 			connection.setAutoCommit(false);
 			prepStmt = connection.prepareStatement(SQLQuery.STORE_META_DATA);
-			for (UserRecoveryDataDO metadata : metadataSet) {
-				prepStmt.setString(1, metadata.getUserName());
-				prepStmt.setInt(2, metadata.getTenantId());
-				prepStmt.setString(3, metadata.getMetadataType());
-				prepStmt.setString(4, metadata.getMetadata());
-				prepStmt.setString(5, Boolean.toString(metadata.isValid()));
+			for (UserRecoveryDataDO dataDO : recoveryDataDOs) {
+				prepStmt.setString(1, dataDO.getUserName());
+				prepStmt.setInt(2, dataDO.getTenantId());
+				prepStmt.setString(3, dataDO.getCode());
+				prepStmt.setString(4, dataDO.getSecret());
 				prepStmt.addBatch();
 			}
 			prepStmt.executeBatch();
@@ -163,13 +153,11 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 	 * 
 	 * @param userName
 	 * @param tenantId
-	 * @param metadataType
-	 * @param metadata
 	 * @return
 	 * @throws IdentityException
 	 */
-	public UserRecoveryDataDO load(String userName, int tenantId, String metadataType,
-	                                           String metadata) throws IdentityException {
+
+	public UserRecoveryDataDO load(String userName, int tenantId, String code) throws IdentityException {
 		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
 		PreparedStatement prepStmt = null;
 		ResultSet results = null;
@@ -177,17 +165,15 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 			prepStmt = connection.prepareStatement(SQLQuery.LOAD_META_DATA);
 			prepStmt.setString(1, userName);
 			prepStmt.setInt(2, tenantId);
-			prepStmt.setString(3, metadataType);
-			prepStmt.setString(4, metadata);
+			prepStmt.setString(3, code);
 			results = prepStmt.executeQuery();
 
 			if (results.next()) {
 				return new UserRecoveryDataDO(results.getString(1), results.getInt(2),
-				                                  results.getString(3), results.getString(4),
-				                                  Boolean.parseBoolean(results.getString(5)));
+				                                  results.getString(3), results.getString(4));
 			}
 			if (results.next()) {
-				throw new IdentityException("Duplicate entry found for " + metadataType);
+				throw new IdentityException("Duplicate entry found for code : " + code);
 			}
 			return null;
 		} catch (SQLException e) {
@@ -206,8 +192,7 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 	 * @return
 	 * @throws IdentityException
 	 */
-	public UserRecoveryDataDO[] load(String userName, int tenantId)
-	                                                                           throws IdentityException {
+	public UserRecoveryDataDO[] load(String userName, int tenantId)throws IdentityException {
 		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
 		PreparedStatement prepStmt = null;
 		ResultSet results = null;
@@ -220,8 +205,7 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 			List<UserRecoveryDataDO> metada = new ArrayList<UserRecoveryDataDO>();
 			while (results.next()) {
 				metada.add(new UserRecoveryDataDO(results.getString(1), results.getInt(2),
-				                                      results.getString(3), results.getString(4),
-				                                      Boolean.parseBoolean(results.getString(5))));
+				                                      results.getString(3), results.getString(4)));
 			}
 			UserRecoveryDataDO[] resultMetadata = new UserRecoveryDataDO[metada.size()];
 			return metada.toArray(resultMetadata);
@@ -234,41 +218,41 @@ public class JDBCUserRecoveryDataStore implements UserRecoveryDataStore{
 		}
 	}
 
-	/**
-	 * Can be used to return primary security questions etc
-	 * 
-	 * @param userName
-	 * @param tenantId
-	 * @param metadataType
-	 * @return
-	 * @throws IdentityException
-	 */
-	public UserRecoveryDataDO[] load(String userName, int tenantId, String metadataType)
-                                                                            throws IdentityException {
-		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
-		PreparedStatement prepStmt = null;
-		ResultSet results = null;
-		try {
-			prepStmt = connection.prepareStatement(SQLQuery.LOAD_TENANT_METADATA);
-			prepStmt.setInt(1, tenantId);
-			prepStmt.setString(2, metadataType);
-			results = prepStmt.executeQuery();
-			List<UserRecoveryDataDO> metada = new ArrayList<UserRecoveryDataDO>();
-			while (results.next()) {
-				metada.add(new UserRecoveryDataDO(results.getString(1), results.getInt(2),
-				                                      results.getString(3), results.getString(4),
-				                                      Boolean.parseBoolean(results.getString(5))));
-			}
-			UserRecoveryDataDO[] resultMetadata = new UserRecoveryDataDO[metada.size()];
-			return metada.toArray(resultMetadata);
-		} catch (SQLException e) {
-			throw new IdentityException("Error while reading user identity data", e);
-		} finally {
-			IdentityDatabaseUtil.closeResultSet(results);
-			IdentityDatabaseUtil.closeStatement(prepStmt);
-			IdentityDatabaseUtil.closeConnection(connection);
-		}
-	}
+//	/**
+//	 * Can be used to return primary security questions etc
+//	 *
+//	 * @param userName
+//	 * @param tenantId
+//	 * @param metadataType
+//	 * @return
+//	 * @throws IdentityException
+//	 */
+//	public UserRecoveryDataDO[] load(String userName, int tenantId, String metadataType)
+//                                                                            throws IdentityException {
+//		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
+//		PreparedStatement prepStmt = null;
+//		ResultSet results = null;
+//		try {
+//			prepStmt = connection.prepareStatement(SQLQuery.LOAD_TENANT_METADATA);
+//			prepStmt.setInt(1, tenantId);
+//			prepStmt.setString(2, metadataType);
+//			results = prepStmt.executeQuery();
+//			List<UserRecoveryDataDO> metada = new ArrayList<UserRecoveryDataDO>();
+//			while (results.next()) {
+//				metada.add(new UserRecoveryDataDO(results.getString(1), results.getInt(2),
+//				                                      results.getString(3), results.getString(4),
+//				                                      Boolean.parseBoolean(results.getString(5))));
+//			}
+//			UserRecoveryDataDO[] resultMetadata = new UserRecoveryDataDO[metada.size()];
+//			return metada.toArray(resultMetadata);
+//		} catch (SQLException e) {
+//			throw new IdentityException("Error while reading user identity data", e);
+//		} finally {
+//			IdentityDatabaseUtil.closeResultSet(results);
+//			IdentityDatabaseUtil.closeStatement(prepStmt);
+//			IdentityDatabaseUtil.closeConnection(connection);
+//		}
+//	}
 
 	/**
 	 * This class contains the SQL queries.

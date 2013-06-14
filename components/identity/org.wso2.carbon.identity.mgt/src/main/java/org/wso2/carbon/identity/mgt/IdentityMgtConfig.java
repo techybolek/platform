@@ -21,16 +21,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.mail.DefaultEmailSendingModule;
-import org.wso2.carbon.identity.mgt.mail.EmailSendingModule;
 import org.wso2.carbon.identity.mgt.password.DefaultPasswordGenerator;
 import org.wso2.carbon.identity.mgt.password.RandomPasswordGenerator;
+import org.wso2.carbon.identity.mgt.store.RegistryRecoveryDataStore;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
+import org.wso2.carbon.identity.mgt.store.UserRecoveryDataStore;
 import org.wso2.carbon.identity.mgt.store.UserStoreBasedIdentityDataStore;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
@@ -47,7 +50,7 @@ public class IdentityMgtConfig {
     
     private int noOfUserChallenges;
     
-    private boolean emailSendingInternallyManaged;
+    private boolean notificationInternallyManaged;
 
     private boolean captchaVerificationInternallyManaged;
 
@@ -71,7 +74,7 @@ public class IdentityMgtConfig {
 
     private int authPolicyPasswordExpireTime;
 
-    private int emailLinkExpireTime;
+    private int notificationExpireTime;
 
     private boolean authPolicyAccountLockCheck;
 
@@ -89,7 +92,7 @@ public class IdentityMgtConfig {
 
     private String userAccountVerificationRole;
 
-    private boolean enableEmailSending;
+    private boolean notificationSending;
 
     private String digsestFunction;
 
@@ -97,7 +100,12 @@ public class IdentityMgtConfig {
 
     private UserIdentityDataStore identityDataStore;
 
-    private EmailSendingModule emailSendingModule;
+    private UserRecoveryDataStore recoveryDataStore;
+
+    private List<NotificationSendingModule> sendingModules =
+                                                    new ArrayList<NotificationSendingModule>();
+
+    private List<String> notificationTypes = new ArrayList<String>();
 
 	private String recoveryClaim;
 
@@ -130,11 +138,11 @@ public class IdentityMgtConfig {
         }
 
         try {
-            String emailSendingInternallyManaged = properties.
-                        getProperty(IdentityMgtConstants.PropertyConfig.EMAIL_SEND_INTERNALLY);
-            if(emailSendingInternallyManaged != null){
-                this.emailSendingInternallyManaged = Boolean.
-                                            parseBoolean(emailSendingInternallyManaged.trim());
+            String notificationInternallyManaged = properties.
+                        getProperty(IdentityMgtConstants.PropertyConfig.NOTIFICATION_SEND_INTERNALLY);
+            if(notificationInternallyManaged != null){
+                this.notificationInternallyManaged = Boolean.
+                                            parseBoolean(notificationInternallyManaged.trim());
             }
 
             String listenerEnable = properties.
@@ -143,10 +151,10 @@ public class IdentityMgtConfig {
                 this.listenerEnable = Boolean.parseBoolean(listenerEnable.trim());
             }
 
-            String  enableEmailSending = properties.
-                    getProperty(IdentityMgtConstants.PropertyConfig.EMAIL_SEND_ENABLE);
-            if(enableEmailSending != null){
-                this.enableEmailSending = Boolean.parseBoolean(enableEmailSending.trim());
+            String  notificationSending = properties.
+                    getProperty(IdentityMgtConstants.PropertyConfig.NOTIFICATION_SEND_ENABLE);
+            if(notificationSending != null){
+                this.notificationSending = Boolean.parseBoolean(notificationSending.trim());
             }
             
             String  recoveryClaim = properties.
@@ -242,10 +250,10 @@ public class IdentityMgtConfig {
                 this.authPolicyPasswordExpireTime = Integer.parseInt(authPolicyPasswordExpireTime.trim());
             }
 
-            String emailLinkExpireTime = properties.
-                    getProperty(IdentityMgtConstants.PropertyConfig.EMAIL_LINK_EXPIRE_TIME);
-            if(emailLinkExpireTime != null){
-                this.emailLinkExpireTime = Integer.parseInt(emailLinkExpireTime.trim());
+            String notificationExpireTime = properties.
+                    getProperty(IdentityMgtConstants.PropertyConfig.NOTIFICATION_LINK_EXPIRE_TIME);
+            if(notificationExpireTime != null){
+                this.notificationExpireTime = Integer.parseInt(notificationExpireTime.trim());
             }            
 
             String  authPolicyAccountLockCheck = properties.
@@ -309,17 +317,50 @@ public class IdentityMgtConfig {
                 }
             }
 
-            String emailSendingModule = properties.
-                        getProperty(IdentityMgtConstants.PropertyConfig.EXTENSION_EMAIL_SENDING_MODULE);
-            if(emailSendingModule != null && emailSendingModule.trim().length() > 0){
+            String recoveryPersistModule = properties.
+                    getProperty(IdentityMgtConstants.PropertyConfig.EXTENSION_USER_RECOVERY_DATA_STORE);
+            if(dataPersistModule != null && dataPersistModule.trim().length() > 0){
                 try{
-                    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(emailSendingModule);
-                    this.emailSendingModule = (EmailSendingModule) clazz.newInstance();
+                    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(recoveryPersistModule);
+                    this.recoveryDataStore = (UserRecoveryDataStore) clazz.newInstance();
                 } catch (Exception e) {
-                    log.error("Error while loading email sending class  " + emailSendingModule +
+                    log.error("Error while loading user recovery data persist class. " + dataPersistModule +
                             " Default module would be used",e);
                 }
             }
+
+            int i = 1;
+            while(true){
+                String module = properties.
+                    getProperty(IdentityMgtConstants.PropertyConfig.EXTENSION_NOTIFICATION_SENDING_MODULE + "." + i);
+                if(module == null){
+                    break;
+                }
+                if(module != null && module.trim().length() > 0){
+                    try{
+                        Class clazz = Thread.currentThread().getContextClassLoader().loadClass(module);
+                        NotificationSendingModule sendingModule = (NotificationSendingModule) clazz.newInstance();
+                        String type = sendingModule.getNotificationType();
+                        if(type == null || type.trim().length() == 0){
+                            log.error("Notification type can not be null. Module " + module +  "  is not loaded.");
+                        } else {
+                            if(notificationTypes.contains(type)){
+                                log.error("Same Notification type can not be supported by more than " +
+                                        "one module. Module " + module +  "  is not loaded.");
+                            } else {
+                                notificationTypes.add(type);
+                                sendingModule.init();
+                                sendingModules.add(sendingModule);
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("Error while loading notification sending class  " + module ,e);
+                    }
+                }
+                i++;
+            }
+            
+
 
             if(this.passwordGenerator == null){
                 this.passwordGenerator = new DefaultPasswordGenerator();
@@ -329,10 +370,16 @@ public class IdentityMgtConfig {
                 this.identityDataStore = new UserStoreBasedIdentityDataStore();
             }
 
-            if(this.emailSendingModule == null){
-                this.emailSendingModule = new DefaultEmailSendingModule();
+            if(this.recoveryDataStore == null){
+                this.recoveryDataStore = new RegistryRecoveryDataStore();
             }
 
+            if(this.sendingModules.isEmpty()){
+                NotificationSendingModule module = new DefaultEmailSendingModule();
+                this.sendingModules.add(module);
+                this.notificationTypes.add(module.getNotificationType());
+            }
+            
         } catch (Exception e) {
             log.error("Error while loading identity mgt configurations", e);    
         }
@@ -360,8 +407,8 @@ public class IdentityMgtConfig {
         return noOfUserChallenges;
     }
 
-    public boolean isEmailSendingInternallyManaged() {
-        return emailSendingInternallyManaged;
+    public boolean isNotificationInternallyManaged() {
+        return notificationInternallyManaged;
     }
 
     public boolean isCaptchaVerificationInternallyManaged() {
@@ -437,8 +484,8 @@ public class IdentityMgtConfig {
         return identityDataStore;
     }
 
-    public boolean isEnableEmailSending() {
-        return enableEmailSending;
+    public boolean isNotificationSending() {
+        return notificationSending;
     }
 
     public boolean isAuthPolicyAccountExistCheck() {
@@ -457,20 +504,27 @@ public class IdentityMgtConfig {
         return authPolicyAccountLockOnCreation;
     }
 
-    public int getEmailLinkExpireTime() {
-        return emailLinkExpireTime;
+    public int getNotificationExpireTime() {
+        return notificationExpireTime;
     }
 
     public boolean isListenerEnable() {
         return listenerEnable;
     }
-    
-    public EmailSendingModule getEmailSendingModule() {
-    	return emailSendingModule;
+
+    public List<NotificationSendingModule> getNotificationSendingModules() {
+        return sendingModules;
     }
 
-	public String getAccountRecoveryClaim() {
+    public String getAccountRecoveryClaim() {
 	    return recoveryClaim;
     }
-    
+
+    public List<String> getNotificationTypes() {
+        return notificationTypes;
+    }
+
+    public UserRecoveryDataStore getRecoveryDataStore() {
+        return recoveryDataStore;
+    }
 }

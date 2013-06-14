@@ -173,8 +173,7 @@ public class UserIdentityManagementService {
 
 			// store the temp password as a Metadata
 			UserRecoveryDataDO metadataDO = new UserRecoveryDataDO();
-			metadataDO.setUserName(userName).setTenantId(tenantId).setMetadata(new String(tempPassword))
-			          .setMetadataType(UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL);
+			metadataDO.setUserName(userName).setTenantId(tenantId).setCode(new String(tempPassword));
 			UserIdentityManagementUtil.storeUserIdentityMetadata(metadataDO);
 
 			// sending an email to the user

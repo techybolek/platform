@@ -23,16 +23,20 @@ import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
  */
 public interface UserRecoveryDataStore {
 
+    public static  final String EXPIRE_TIME = "expireTime";
+    public static  final String SECRET_KEY = "secretKey";
+    public static  final String USER_ID = "userId";
+
     public void store(UserRecoveryDataDO recoveryDataDO) throws IdentityException;
 
     public void store(UserRecoveryDataDO[] recoveryDataDOs) throws IdentityException;
 
     public UserRecoveryDataDO[] load(String userName, int tenantId) throws IdentityException;
 
-    public UserRecoveryDataDO[] load(String userName, int tenantId, String metadataType)
+    public UserRecoveryDataDO load(String userName, int tenantId, String code)
             throws IdentityException;
 
     public void invalidate(UserRecoveryDataDO recoveryDataDO) throws IdentityException;
 
-    public void invalidate(UserRecoveryDataDO[] recoveryDataDOs) throws IdentityException;
+    public void invalidate(String userId, int tenantId) throws IdentityException;
 }
