@@ -61,8 +61,8 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.user.core.UserRealm;
+//import org.wso2.carbon.user.mgt.stub.AddUserUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
-import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 
@@ -1441,8 +1441,8 @@ public class AssetStoreHostObject extends ScriptableObject {
             handleException("Self sign up has been disabled on this server");
         }
         String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
-        String adminUsername = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
-        String adminPassword = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
+        String adminUsername = username;
+        String adminPassword = password;
         if (serverURL == null || adminUsername == null || adminPassword == null) {
             handleException("Required parameter missing to connect to the" +
                     " authentication manager");
@@ -1462,9 +1462,13 @@ public class AssetStoreHostObject extends ScriptableObject {
             stub.addUser(username, password, new String[] { role }, null, null);
         } catch (RemoteException e) {
             handleException(e.getMessage(), e);
-        } catch (UserAdminUserAdminException e) {
-            handleException("Error occurred while adding the user", e);
+        }catch (Exception e) {
+            handleException("Error while adding the user: " + username, e);
         }
+
+	//	catch (AddUserUserAdminExceptionException e) {
+    //        handleException("Error while adding the user: " + username, e);
+    //    }
     }
 
     public static NativeArray jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
@@ -1571,136 +1575,6 @@ public class AssetStoreHostObject extends ScriptableObject {
     /////////// Functionality related to Sample Data
     /////////////////////////////////////////////////////////////////////////////////
 
-    public static NativeArray jsFunction_ListProviders(Context cx,
-                                                       Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException {
-        NativeArray myn = new NativeArray(0);
-        String[] providers = SampleData.providers;
-        for (int i = 0; i < providers.length; i++) {
-            myn.put(i, myn, providers[i]);
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_ListApplications(Context cx,
-                                                          Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException {
-        NativeArray myn = new NativeArray(0);
-        String[] application = SampleData.application;
-        for (int i = 0; i < application.length; i++) {
-            myn.put(i, myn, application[i]);
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_ListAPIServices()
-            throws ScriptException {
-        NativeArray myn = new NativeArray(0);
-
-        Services[] serviceList = SampleData.listSerives;
-        for (int i = 0; i < serviceList.length; i++) {
-
-            NativeObject row = new NativeObject();
-            Object o = serviceList[i].getName();
-            row.put("name", row, o);
-            row.put("rates", row, serviceList[i].getRating());
-            row.put("author", row, serviceList[i].getAuthor());
-            myn.put(i, myn, row);
-
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_ListProvidersNames()
-            throws ScriptException {
-        NativeArray providersN = new NativeArray(0);
-
-        String[] providers = SampleData.providers;
-        for (int i = 0; i < providers.length; i++) {
-            Object o = providers[i];
-            providersN.put(i, providersN, o);
-        }
-        return providersN;
-    }
-
-    // used for greg model data
-    static SampleData sampleData = new SampleData();
-
-    public static NativeArray jsFunction_getTopRatedAPIs1(Context cx,
-                                                          Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException {
-        NativeArray myn = new NativeArray(0);
-        String limitArg;
-        int limit = 0;
-        APIIdentifier[] serviceList = sampleData.giveAPIIdentifiers();
-        if (isStringArray(args)) {
-            limitArg = args[0].toString();
-            limit = Integer.parseInt(limitArg);
-        }
-
-        for (int i = 0; i < limit; i++) {
-            NativeObject row = new NativeObject();
-            row.put("name", row, serviceList[i].getApiName());
-            row.put("provider", row, serviceList[i].getProviderName());
-            row.put("version", row, serviceList[i].getVersion());
-            myn.put(i, myn, row);
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_giveAPIIdentifiers()
-            throws ScriptException {
-        NativeArray myn = new NativeArray(0);
-
-        APIIdentifier[] serviceList = sampleData.giveAPIIdentifiers();
-        for (int i = 0; i < serviceList.length; i++) {
-
-            NativeObject row = new NativeObject();
-            row.put("name", row, serviceList[i].getApiName());
-            row.put("provider", row, serviceList[i].getProviderName());
-            row.put("version", row, serviceList[i].getVersion());
-            myn.put(i, myn, row);
-
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getSubscribedAPIs()
-            throws ScriptException {
-        NativeArray purchases = new NativeArray(0);
-
-        purchasedServices[] purchasedlist = SampleData.purchasedServiceList;
-        for (int i = 0; i < purchasedlist.length; i++) {
-
-            NativeObject row = new NativeObject();
-            Object name = purchasedlist[i].getName();
-            Object author = purchasedlist[i].getAuthor();
-            Object rate = purchasedlist[i].getRating();
-            Object canDel = purchasedlist[i].getCanDelete();
-            Object descrp = purchasedlist[i].getDescription();
-            Object namespace = purchasedlist[i].getNamespace();
-            Object path = purchasedlist[i].getPath();
-            Object purchased = purchasedlist[i].getPurchased();
-            Object supportUrl = purchasedlist[i].getSupportForumURL();
-            Object thumbUrl = purchasedlist[i].getThumbURL();
-            Object version = purchasedlist[i].getVersion();
-            row.put("name", row, name);
-            row.put("path", row, path);
-            row.put("author", row, author);
-            row.put("purchased", row, purchased);
-            row.put("description", row, descrp);
-            row.put("supportForumURL", row, supportUrl);
-            row.put("version", row, version);
-            row.put("rates", row, rate);
-            row.put("namespace", row, namespace);
-            row.put("canDelete", row, canDel);
-            row.put("thumbnailurl", row, thumbUrl);
-            purchases.put(i, purchases, row);
-            // return row;
-        }
-        return purchases;
-
-    }
 
     /*/////////////////////////////////////////////////////////////////////////////////
     /////////// Functionality related to Subscriptions
