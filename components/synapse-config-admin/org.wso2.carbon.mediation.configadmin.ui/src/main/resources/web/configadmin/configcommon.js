@@ -24,8 +24,25 @@ function submitconform(action, form) {
     document.getElementById("rawConfig").value = editAreaLoader.getValue("rawConfig");
     form.action = 'saveconfig.jsp';
     CARBON.showLoadingDialog('Configuration is Updating. It may take few moments. Please wait..');
-    form.submit();
-    return true;
+
+    var url = 'validate-conf-ajaxprocessor.jsp';
+
+    jQuery.post(url, ({synConfig : theString}),           // Copy Pasted Need modifications
+        function(data, status) {
+            if (status != "success") {
+                CARBON.showWarningDialog(configjsi18n['error.occurred']);
+            } else {
+                if(data.trim()=="valid"){
+                    form.submit();
+                    return true;
+                }  else{
+                    CARBON.showErrorDialog(configjsi18n["invalid.conf"]);
+                    return false;
+
+                }
+            }
+        });
+
 }
 
 function submitWithForce(action, form) {
