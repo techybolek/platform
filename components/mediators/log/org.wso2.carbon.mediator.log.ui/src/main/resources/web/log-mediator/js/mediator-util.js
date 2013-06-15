@@ -117,6 +117,7 @@ function createproperttypecombobox(id, i, name) {
 }
 
 function deleteproperty(i) {
+    CARBON.showConfirmationDialog(logi18n["mediator.log.delete.confirm"],function(){
     var propRow = document.getElementById("propertyRaw" + i);
     if (propRow != undefined && propRow != null) {
         var parentTBody = propRow.parentNode;
@@ -128,6 +129,7 @@ function deleteproperty(i) {
             }
         }
     }
+    });
 }
 
 function isContainRaw(tbody) {
