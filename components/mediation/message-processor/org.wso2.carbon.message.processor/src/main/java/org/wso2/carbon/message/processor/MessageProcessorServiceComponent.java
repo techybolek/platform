@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @scr.component name="org.wso2.carbon.messageStore" immediate="true"
+ * @scr.component name="org.wso2.carbon.message.processor" immediate="true"
  * @scr.reference name="configuration.context.service"
  * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1"
  * policy="dynamic" bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
