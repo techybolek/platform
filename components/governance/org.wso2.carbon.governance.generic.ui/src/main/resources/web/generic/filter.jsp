@@ -57,6 +57,7 @@
     String[] unboundedNameList = gen.getUnboundedNameList(uiconfig);
     String[] unboundedWidgetList = gen.getUnboundedWidgetList(uiconfig);
     String[][] unboundedValues = gen.getUnboundedValues(uiconfig, request, config);
+    String[][] dateIdAndNameList = gen.getDateIdAndNameList(uiconfig, null, false);
 
 %>
 <br/>
@@ -90,6 +91,15 @@
             SelectAreas[i].selectedIndex = 0;
         }
     }
+    
+    jQuery(document).ready(function() {
+        <%
+            // date fields are loaded with jquery datepicks on JS page load
+        for (int i=0; i<dateIdAndNameList.length; ++i) { %>
+            jQuery('#<%=dateIdAndNameList[i][0]%>').datepicker();
+        <%}
+        %>
+    });
 
     <%
        if(unboundedNameList != null && unboundedWidgetList != null && unboundedValues != null){
@@ -142,6 +152,8 @@
 <%      }
 
    }%>
+   
+   <%=gen.getUnboundedWidgets(uiconfig, request,config)%>
   
 </script>
 <div id="middle">

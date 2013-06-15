@@ -12,24 +12,24 @@ public class OptionText extends UIComponent {
 	private String originalName;
 	private int index;
 	private String[] values;
-	private String option; 
-	private String text; 
-	private boolean isURL; 
+	private String option;
+	private String text;
+	private boolean isURL;
 	private String urlTemplate;
 	private boolean isPath;
 	private String startsWith;
 	private HttpServletRequest request;
 	
-	public OptionText(String originalName, int index,String label, String name, String[] values, String widget,
+	public OptionText(String originalName, int index,String label, String name, String id,  String[] values, String widget,
                       String option, String text, boolean isURL, String urlTemplate,
-                      boolean isPath, String tooltip, String startsWith, HttpServletRequest request) {
-	    super(label, name, null, widget, false, tooltip);
-	    this.originalName = originalName;
+                      boolean isPath, String tooltip, String startsWith, HttpServletRequest request,boolean isJSGenerate) {
+		super(label, name, id, null, widget, false, tooltip, isJSGenerate);
+		this.originalName = originalName;
 		this.index = index;
 		this.values = values;
-		this.option = option; 
-		this.text = text; 
-		this.isURL = isURL; 
+		this.option = option;
+		this.text = text;
+		this.isURL = isURL;
 		this.urlTemplate = urlTemplate;
 		this.isPath = isPath;
 		this.startsWith = startsWith;
@@ -39,13 +39,18 @@ public class OptionText extends UIComponent {
 	@Override
 	public String generate() {
 		
-		if(name == null){
+		if (name == null) {
 			name = originalName + index;
 		}
 		StringBuilder dropDown = new StringBuilder();
         dropDown.append("<tr><td class=\"leftCol\"><select name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\">");
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
+                "") + "_" + name.replaceAll(" ", "") + "\" title=\"" + tooltip + "\">");
+        String id;		
+		if (this.id == null) {
+			id = "id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
+		} else {
+			id = this.id;
+		}
         for (int i = 0; i < values.length; i++) {
             dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
                     "\"");
@@ -82,8 +87,8 @@ public class OptionText extends UIComponent {
                     "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
                     "\" " +
                     "class=\"icon-link\" style=\"background-image: url('../admin/images/edit.gif');float: none\"></a></div>";
-            dropDown.append("<td>" + div + "<input style=\"display:none\" type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
-                    + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" value=\"" +
+            dropDown.append("<td>" + div + "<input style=\"display:none\" type=\"text\" name=\"" + widget.replaceAll(" ", "") + UIGeneratorConstants.TEXT_FIELD
+                    + "_" + name.replaceAll(" ", "") + "\" title=\"" + tooltip + "\" value=\"" +
                     StringEscapeUtils.escapeHtml(text)
                     + "\" id=\""
                     + id +"\" style=\"width:400px\"/>" + (isPath ? selectResource : "") + "</td>");
@@ -93,12 +98,12 @@ public class OptionText extends UIComponent {
                 selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
                         "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
             }
-            dropDown.append("<td width=500px><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
-                    + "_" + name.replaceAll(" ", "-") + "\"  title=\"" + tooltip + "\" "+(text != null ? " value=\"" +StringEscapeUtils.escapeHtml(text) : "") + "\" id=\"" + id +
+            dropDown.append("<td width=500px><input type=\"text\" name=\"" + widget.replaceAll(" ", "") + UIGeneratorConstants.TEXT_FIELD
+                    + "_" + name.replaceAll(" ", "") + "\"  title=\"" + tooltip + "\" "+(text != null ? " value=\"" +StringEscapeUtils.escapeHtml(text) : "") + "\" id=\"" + id +
                     "\" style=\"width:400px\"/>" + (isPath ? selectResource : "") + "</td>");
         }
         if (originalName != null && widget != null) {
-        	dropDown.append("<td><a class=\"icon-link\" title=\"delete\" onclick=\"" + "delete" + originalName.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(this.parentNode.parentNode.rowIndex)\" style=\"background-image:url(../admin/images/delete.gif);\">Delete</a></td>");
+        	dropDown.append("<td><a class=\"icon-link\" title=\"delete\" onclick=\"" + "delete" + originalName.replaceAll(" ", "") + "_" + widget.replaceAll(" ", "") + "(this.parentNode.parentNode.rowIndex)\" style=\"background-image:url(../admin/images/delete.gif);\">Delete</a></td>");
         }
         dropDown.append("</tr>");
         return dropDown.toString();

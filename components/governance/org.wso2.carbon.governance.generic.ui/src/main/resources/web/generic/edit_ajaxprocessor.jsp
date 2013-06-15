@@ -106,7 +106,7 @@
     String[] unboundedWidgetList = gen.getUnboundedWidgetList(uiconfig);
     String[] unboundedTooltipList = gen.getUnboundedTooltipList(uiconfig);
     String[][] unboundedValues = gen.getUnboundedValues(uiconfig, request, config);
-    String[][] dateIdAndNameList = gen.getDateIdAndNameList(uiconfig, true);
+    String[][] dateIdAndNameList = gen.getDateIdAndNameList(uiconfig, data, true);
 %>
 
 <br/>
@@ -132,9 +132,11 @@
             <%
                 //validate date fields
                 for (int i=0; i<dateIdAndNameList.length; ++i) { %>
+                if (document.getElementById('<%=dateIdAndNameList[i][0]%>') != null) {
             reason
                     += validateDate(document.getElementById('<%=dateIdAndNameList[i][0]%>'),
                     "<%=dateIdAndNameList[i][1]%>");
+                }
             <%}
             %>
 
@@ -206,8 +208,8 @@
        if(unboundedNameList != null && unboundedWidgetList != null && unboundedValues != null){
        for(int i=0;i<unboundedNameList.length;i++){%>
 
-        function delete<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(index) {
-            var endpointMgt = document.getElementById('<%=unboundedNameList[i]%>Mgt');
+        function delete<%=unboundedNameList[i].replaceAll(" ", "")%>_<%=unboundedWidgetList[i].replaceAll(" ", "")%>(index) {
+            var endpointMgt = document.getElementById('<%=unboundedNameList[i].replaceAll(" ", "")%>Mgt');
             endpointMgt.parentNode.style.display = "";
             endpointMgt.parentNode.deleteRow(index);
 
@@ -218,7 +220,7 @@
                 endpointMgt.parentNode.style.display = "none";
             }
         }
-        function add<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(inputParam,startWith){
+        function add<%=unboundedNameList[i].replaceAll(" ", "")%>_<%=unboundedWidgetList[i].replaceAll(" ", "")%>(inputParam,startWith){
            
         <%String[] valuelist = unboundedValues[i];%>
             var epOptions = '<%for(int j=0;j<valuelist.length;j++){%><option value="<%=valuelist[j]%>"><%=valuelist[j]%></option><%}%>';
@@ -235,29 +237,29 @@
                     }
                 }
             }
-            var epCountTaker = document.getElementById('<%=unboundedNameList[i]%>CountTaker');
-            var <%=unboundedNameList[i]%>Count = parseInt(epCountTaker.value);
-            <%=unboundedNameList[i]%>Count++;
-            epCountTaker.value = "" + <%=unboundedNameList[i]%>Count;
+            var epCountTaker = document.getElementById('<%=unboundedNameList[i].replaceAll(" ", "")%>CountTaker');
+            var <%=unboundedNameList[i].replaceAll(" ", "")%>Count = parseInt(epCountTaker.value);
+            <%=unboundedNameList[i].replaceAll(" ", "")%>Count++;
+            epCountTaker.value = "" + <%=unboundedNameList[i].replaceAll(" ", "")%>Count;
             var theTr = document.createElement("TR");
             var theTd1 = document.createElement("TD");
             var theTd2 = document.createElement("TD");
             var theTd3 = document.createElement("TD");
-            var td1Inner = '<select name="<%=(unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-"))%>'+<%=unboundedNameList[i]%>Count+
+            var td1Inner = '<select name="<%=(unboundedWidgetList[i].replaceAll(" ","") + "_" + unboundedNameList[i].replaceAll(" ",""))%>'+<%=unboundedNameList[i].replaceAll(" ", "")%>Count+
                     '" title="<%=unboundedTooltipList[i]%>" >' + epOptions + '</select>';
             var selectResource = "";
             if (inputParam == "path") {
             	if(startWith !=null){
-            		selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTreeWithCustomPath(\'id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>' + <%=unboundedNameList[i]%>Count + "'" +  "," + "'" + startWith + '\');"/>';
+            		selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTreeWithCustomPath(\'id_<%=unboundedWidgetList[i].replaceAll(" ","") + "_" + unboundedNameList[i].replaceAll(" ","")%>' + <%=unboundedNameList[i].replaceAll(" ", "")%>Count + "'" +  "," + "'" + startWith + '\');"/>';
             	} else {
-            		selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTree(\'id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'\');"/>';
+            		selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTree(\'id_<%=unboundedWidgetList[i].replaceAll(" ","") + "_" + unboundedNameList[i].replaceAll(" ","")%>'+<%=unboundedNameList[i].replaceAll(" ", "")%>Count+'\');"/>';
             	}
                 
             }
-            var td2Inner = '<input id="id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'" type="text" name="<%=unboundedWidgetList[i].replaceAll(" ","-") + UIGeneratorConstants.TEXT_FIELD + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count
+            var td2Inner = '<input id="id_<%=unboundedWidgetList[i].replaceAll(" ","") + "_" + unboundedNameList[i].replaceAll(" ","")%>'+<%=unboundedNameList[i].replaceAll(" ", "")%>Count+'" type="text" name="<%=unboundedWidgetList[i].replaceAll(" ","") + UIGeneratorConstants.TEXT_FIELD + "_" + unboundedNameList[i].replaceAll(" ","")%>'+<%=unboundedNameList[i].replaceAll(" ", "")%>Count
                     +'" style="width:400px" title="<%=unboundedTooltipList[i]%>"/>' +
                     selectResource;
-            var td3Inner = '<a class="icon-link" title="delete" onclick="delete<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(this.parentNode.parentNode.rowIndex)" style="background-image:url(../admin/images/delete.gif);">Delete</a>';
+            var td3Inner = '<a class="icon-link" title="delete" onclick="delete<%=unboundedNameList[i].replaceAll(" ", "")%>_<%=unboundedWidgetList[i].replaceAll(" ", "")%>(this.parentNode.parentNode.rowIndex)" style="background-image:url(../admin/images/delete.gif);">Delete</a>';
 
             theTd1.innerHTML = td1Inner;
             theTd2.innerHTML = td2Inner;
@@ -276,6 +278,8 @@
 <%      }
 
    }%>
+   
+   <%=gen.getUnboundedWidgets(uiconfig, request, config)%>
 
 </script>
 

@@ -17,11 +17,11 @@ public class TextField extends UIComponent {
 	protected boolean isPath;
 	private HttpServletRequest request;
 	
-	public TextField(String label, String name, String mandatory, String widget,
+	public TextField(String label, String name,String id, String mandatory, String widget,
                            String value, boolean isURL, String urlTemplate, boolean isPath,
                            boolean isReadOnly, boolean hasValue, String tooltip, String startsWith,
-                           HttpServletRequest request){
-		super(label, name, mandatory, widget,isReadOnly,tooltip);		
+                           HttpServletRequest request,boolean isJSGenerate){
+		super(label, name,id, mandatory, widget,isReadOnly,tooltip,isJSGenerate);		
 		this.value = value;
 		this.isURL = isURL;
 		this.urlTemplate = urlTemplate;		
@@ -35,7 +35,14 @@ public class TextField extends UIComponent {
 	public String generate() {
 				
 		StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
+		
+		String id;		
+		if (this.id == null) {
+			id = "id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
+		} else {
+			id = this.id;
+		}
+
         String selectResource = "";
         String selectResourceButton = "$('" + id + "_button').style.display='';";
         if (value != null) {
@@ -45,10 +52,10 @@ public class TextField extends UIComponent {
         if (isPath) {
         	if (startsWith != null ) {
         		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\"   "+ (isJSGenerate ? "onclick=\"showGovernanceResourceTreeWithCustomPath(\\'" + id + "\\',\\'" + startsWith + "\\')" :"onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "')")+";\"/>";
         	} else {
         		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" "+(isJSGenerate ? "onclick=\"showGovernanceResourceTree(\\'" + id + "\\')" :"onclick=\"showGovernanceResourceTree(\'" + id + "\')")+";\"/>";
         	}            
         }
 
@@ -56,13 +63,23 @@ public class TextField extends UIComponent {
 
         String div = null;
         if (isURL && value != null) {
-        	 div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
-                     "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
-                     "')." +
-                     "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
-                     "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
-                     "\" " +
-                     "class=\"icon-link\" style=\"background-image: url('../admin/images/edit.gif');float: none\"></a>" : "") + "</div>";
+        	if (isJSGenerate) {
+        		div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
+                        "&nbsp;" + (!isReadOnly ? "<a onclick=\"$(\\'" + id + "_link\\').style.display=\\'none\\';$(\\'" + id +
+                        "\\')." +
+                        "style.display=\\'\\';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
+                        "\" " +
+                        "class=\"icon-link\" style=\"background-image: url(\\'../admin/images/edit.gif\\');float: none\"></a>" : "") + "</div>";
+        	} else {
+        		div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
+                        "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
+                        "')." +
+                        "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
+                        "\" " +
+                        "class=\"icon-link\" style=\"background-image: url('../admin/images/edit.gif');float: none\"></a>" : "") + "</div>";
+        	} 
         }
        
         //+ (hasValue ? "value=\"" + value + "\"" : "") +
@@ -70,10 +87,10 @@ public class TextField extends UIComponent {
         	if (label != null) {
         		 element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n");
         	}        	
-            element.append(" <td>" + (isURL && div != null ? div : "") + "<input" + (isURL && hasValue && value != null ? " style=\"display:none\"" : "") + " type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
+            element.append(" <td>" + (isURL && div != null ? div : "") + "<input" + (isURL && hasValue && value != null ? " style=\"display:none\"" : "") + " type=\"text\" name=\"" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "")
                     + "\" title=\"" + tooltip + "\" " + (hasValue && value != null ?  "value=\"" + value + "\"" :
                     "") + " id=\"" + id + "\" " +
-                    "style=\"width:" + UIGeneratorConstants.DEFAULT_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td>");
+                    "style=\"width:200px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td>");
             if (label != null) {
        		 	element.append("</tr>");
         	}
@@ -81,10 +98,10 @@ public class TextField extends UIComponent {
         	if (label != null) {
        		 	element.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n");
         	} 
-            element.append(" <td>" + (isURL && div != null ? div : "") + "<input" + (isURL && hasValue && value != null ? " style=\"display:none\"" : "") + " type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
+            element.append(" <td>" + (isURL && div != null ? div : "") + "<input" + (isURL && hasValue && value != null ? " style=\"display:none\"" : "") + " type=\"text\" name=\"" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "")
                     + "\"  title=\"" + tooltip + "\" "  + (hasValue && value != null ? "value=\"" + value + "\"" :
                     "") + " id=\"" + id + "\" " +
-                    "style=\"width:" + UIGeneratorConstants.DEFAULT_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td>");
+                    "style=\"width:200px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td>");
             if (label != null) {
        		 	element.append("</tr>");
         	} 

@@ -560,6 +560,20 @@ public class GenericUtil {
         }
         return child;
     }
+    
+    public static List<OMElement> getChildsWithName(OMElement head, String widgetName, String namespace) {
+		String adjustedName = getDataElementName(widgetName);
+		if (adjustedName == null) {
+			return null;
+		}
+		List<OMElement> list = new ArrayList<OMElement>();
+		Iterator headingList = head.getChildrenWithName(new QName(namespace, adjustedName));
+		while (headingList.hasNext()) {
+			OMElement subheading = (OMElement) headingList.next();
+			list.add(subheading);
+		}
+		return list;
+    }
 
     public static String decorateVersionElement(String version, String basicVersionElement,
                                                 String path, String type, String append,

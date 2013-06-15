@@ -110,7 +110,7 @@
         } else {
             start = 1;
         }
-        PaginationContext.init(start, count, sortOrder, sortBy);
+        PaginationContext.init(start, count, sortOrder, sortBy,1500);
         ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config, session);
 
         if(!filter) {
@@ -312,7 +312,7 @@
 
                         <td style="width:1px;">
                             <select id="lifeCycleList" onchange="changeLC()">
-                                <option value="Select">Any</option>
+                                <option value="Any">Any</option>
                                 <%
                                     boolean once = true;
                                     for (String next:temp) {

@@ -65,7 +65,7 @@ function changeLC() {
         var visible = $('lifeCycleList').value;
         var inout = $('inoutListLC').value;
         var lc_state = document.getElementById('searchVal3').getValue();
-        if(visible == "Select"|| inout=="out" ){
+        if(visible == "Any"|| inout=="out" ){
             $('stateList').style.display = "none";
             $('inoutListLCState').style.display = "none";
         }else{

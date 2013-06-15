@@ -70,7 +70,7 @@
     String[] addWidget = uigen.getUnboundedWidgetList(head);
     String[] addTooltip = uigen.getUnboundedTooltipList(head);
     String[][] selectValueList = uigen.getUnboundedValues(head, request, config);
-    String[][] dateIdAndNameList = uigen.getDateIdAndNameList(head, false);
+    String[][] dateIdAndNameList = uigen.getDateIdAndNameList(head, null, false);
 %>
 <fmt:bundle basename="org.wso2.carbon.governance.generic.ui.i18n.Resources">
 <carbon:breadcrumb
@@ -95,7 +95,8 @@
         <% if (request.getParameter("wsdlError") != null) { %>
             CARBON.showErrorDialog(decodeURIComponent("<%=request.getParameter("wsdlError")%>"));
         <% } %>
-        function addEditArtifact(){         
+        function addEditArtifact(){      
+        	
         sessionAwareFunction(function() {
             var versionElement = document.getElementById('id_Overview_Version');
             if (versionElement) {
@@ -109,23 +110,27 @@
                         return;
                     }
                 }
-            }	    
+            }	  
+            
                 getArtifactName();
                 var reason = "";
             <%for(int i=0;i<mandatory.length;i++){%>
                 reason += validateEmpty(document.getElementById('<%=mandatory[i]%>'),
                         "<%=name[i]%>");
             <%}%>
-
+            
             <%
                 //validate date fields
                 for (int i=0; i<dateIdAndNameList.length; ++i) { %>
-                    reason
-                    += validateDate(document.getElementById('<%=dateIdAndNameList[i][0]%>'),
-                       "<%=dateIdAndNameList[i][1]%>");
+	                if (document.getElementById('<%=dateIdAndNameList[i][0]%>') != null) {
+	                	reason
+	                    += validateDate(document.getElementById('<%=dateIdAndNameList[i][0]%>'),
+	                       "<%=dateIdAndNameList[i][1]%>");
+	                }
+                    
                 <%}
             %>
-
+            
             var eleArr = null, ele = null;
             <%
                 for (int i=0; i<validatationAttributes.size(); i++) {
@@ -221,11 +226,11 @@
        %>
         jQuery(document).ready(function() {
             for (var i = 0; i < 0; i++) {
-                add<%=addName[i]%>_<%=addWidget[i]%>("");
+                add<%=addName[i].replaceAll(" ", "")%>_<%=addWidget[i].replaceAll(" ", "")%>("");
             }
         });
-        function delete<%=addName[i]%>_<%=addWidget[i]%>(index) {
-            var endpointMgt = document.getElementById('<%=addName[i]%>Mgt');
+        function delete<%=addName[i].replaceAll(" ", "")%>_<%=addWidget[i].replaceAll(" ", "")%>(index) {
+            var endpointMgt = document.getElementById('<%=addName[i].replaceAll(" ", "")%>Mgt');
             endpointMgt.parentNode.style.display = "";
             endpointMgt.parentNode.deleteRow(index);
 
@@ -236,11 +241,11 @@
                 endpointMgt.parentNode.style.display = "none";
             }
         }
-        function add<%=addName[i]%>_<%=addWidget[i]%>(inputParam, startWith) {
+        function add<%=addName[i].replaceAll(" ", "")%>_<%=addWidget[i].replaceAll(" ", "")%>(inputParam, startWith) {
             
         <%String[] valuelist = selectValueList[i];%>
             var epOptions = '<%for(int j=0;j<valuelist.length;j++){%><option value="<%=valuelist[j]%>"><%=valuelist[j]%></option><%}%>';
-            var endpointMgt = document.getElementById('<%=addName[i]%>Mgt');
+            var endpointMgt = document.getElementById('<%=addName[i].replaceAll(" ", "")%>Mgt');
             endpointMgt.parentNode.style.display = "";
 
             var table = endpointMgt.parentNode;
@@ -254,30 +259,30 @@
                     }
                 }
             }
-            var epCountTaker = document.getElementById('<%=addName[i]%>CountTaker');
-            var <%=addName[i]%>Count = parseInt(epCountTaker.value);
-            <%=addName[i]%>Count++;
-            epCountTaker.value = "" + <%=addName[i]%>Count;
+            var epCountTaker = document.getElementById('<%=addName[i].replaceAll(" ", "")%>CountTaker');
+            var <%=addName[i].replaceAll(" ", "")%>Count = parseInt(epCountTaker.value);
+            <%=addName[i].replaceAll(" ", "")%>Count++;
+            epCountTaker.value = "" + <%=addName[i].replaceAll(" ", "")%>Count;
             var theTr = document.createElement("TR");
             var theTd1 = document.createElement("TD");
             var theTd2 = document.createElement("TD");
             var theTd3 = document.createElement("TD");
-            var td1Inner = '<select name="<%=(addWidget[i].replaceAll(" ","_") + "_" + addName[i].replaceAll(" ","-"))%>'
-                    + <%=addName[i]%>Count + '" title="<%=addTooltip[i]%>" >'
+            var td1Inner = '<select name="<%=(addWidget[i].replaceAll(" ", "") + "_" + addName[i].replaceAll(" ", ""))%>'
+                    + <%=addName[i].replaceAll(" ", "")%>Count + '" title="<%=addTooltip[i]%>" >'
                     + epOptions + '</select>';
             var selectResource = "";
             if (inputParam == "path") {
                 if(startWith !=null){
-                    selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTreeWithCustomPath(\'id_<%=addWidget[i].replaceAll(" ","_") + "_" + addName[i].replaceAll(" ","-")%>' + <%=addName[i]%>Count + "'" +  "," + "'" + startWith + '\');"/>';
+                    selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTreeWithCustomPath(\'id_<%=addWidget[i].replaceAll(" ","") + "_" + addName[i].replaceAll(" ","")%>' + <%=addName[i].replaceAll(" ", "")%>Count + "'" +  "," + "'" + startWith + '\');"/>';
                 } else{
 
-                    selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTree(\'id_<%=addWidget[i].replaceAll(" ","_") + "_" + addName[i].replaceAll(" ","-")%>' + <%=addName[i]%>Count + '\');"/>';
+                    selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTree(\'id_<%=addWidget[i].replaceAll(" ","") + "_" + addName[i].replaceAll(" ","")%>' + <%=addName[i].replaceAll(" ", "")%>Count + '\');"/>';
                 }
             }
-            var td2Inner = '<input id="id_<%=addWidget[i].replaceAll(" ","_") + "_" + addName[i].replaceAll(" ","-")%>' + <%=addName[i]%>Count + '" type="text" name="<%=addWidget[i].replaceAll(" ","_") + UIGeneratorConstants.TEXT_FIELD + "_" + addName[i].replaceAll(" ","-")%>' + <%=addName[i]%>Count +
+            var td2Inner = '<input id="id_<%=addWidget[i].replaceAll(" ","") + "_" + addName[i].replaceAll(" ","")%>' + <%=addName[i].replaceAll(" ", "")%>Count + '" type="text" name="<%=addWidget[i].replaceAll(" ","") + UIGeneratorConstants.TEXT_FIELD + "_" + addName[i].replaceAll(" ","")%>' + <%=addName[i].replaceAll(" ", "")%>Count +
                     '" style="width:400px" title="<%=addTooltip[i]%>" />'
                     + selectResource;
-            var td3Inner = '<a class="icon-link" title="delete" onclick="delete<%=addName[i]%>_<%=addWidget[i]%>(this.parentNode.parentNode.rowIndex)" style="background-image:url(../admin/images/delete.gif);">Delete</a>';
+            var td3Inner = '<a class="icon-link" title="delete" onclick="delete<%=addName[i].replaceAll(" ", "")%>_<%=addWidget[i].replaceAll(" ", "")%>(this.parentNode.parentNode.rowIndex)" style="background-image:url(../admin/images/delete.gif);">Delete</a>';
 
             theTd1.innerHTML = td1Inner;
             theTd2.innerHTML = td2Inner;
@@ -298,7 +303,9 @@
 
         }
         %>
-
+        
+		<%=uigen.getUnboundedWidgets(head, request,config)%>
+		
     </script>
     <%
         if(table != null){

@@ -33,6 +33,7 @@ import org.wso2.carbon.governance.generic.ui.common.dataobjects.OptionText;
 import org.wso2.carbon.governance.generic.ui.common.dataobjects.TextArea;
 import org.wso2.carbon.governance.generic.ui.common.dataobjects.TextField;
 import org.wso2.carbon.governance.generic.ui.common.dataobjects.UIComponent;
+import org.wso2.carbon.ui.CarbonUIUtil;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -130,7 +131,11 @@ public class GenericUIGenerator {
             }
         }
         table.append(printMainHeader(widgetName, columns));
-        if (subList.size() > 2) {
+
+        String widgetMaxOccurs = widget.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT));
+        //skip print heading for unbounded area
+        
+        if (subList.size() > 2 && widgetMaxOccurs == null) {
             //if the column size is not 2 we print sub-headers first before going in to loop
             //In this table there should not be any field with maxOccurs unbounded//
             table.append(printSubHeaders(subList.toArray(new String[subList.size()])));
@@ -139,425 +144,573 @@ public class GenericUIGenerator {
         int columnCount = 0;
         int rowCount = 0;
         OMElement inner = null;
-        while (arguments.hasNext()) {
-            OMElement arg = (OMElement) arguments.next();
-            String maxOccurs = "";
-            if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
-                if (isFilterOperation && Boolean.toString(false).equals(
-                        arg.getAttributeValue(new QName(null, UIGeneratorConstants.FILTER_ATTRIBUTE)))) {
-                    continue;
+        
+
+        if (widgetMaxOccurs != null){
+        	if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(widgetMaxOccurs)) {
+        		
+        		List<OMElement> dataElements =  new ArrayList<OMElement>();
+        		if (data != null) {
+        			dataElements = GenericUtil.getChildsWithName(data, widgetName, dataNamespace);
+        		}
+        		
+        		// Here generating map with RXT table name --> Field names --> Values
+        		List<Map<String, String>> addedValues = new ArrayList<Map<String, String>>();
+        		int addedItemsCount = 0;
+        		for (int i = 0; i < dataElements.size(); i++) {
+        			OMElement dataHeadElements = dataElements.get(i);
+        			Iterator itemChildIt = dataHeadElements.getChildElements();
+                    int a = 0;
+                    Map<String, String> values = new HashMap<String,String>();
+                    while (itemChildIt.hasNext()) {
+                        // get all the filled values to the newly added fields
+                        Object itemChildObj = itemChildIt.next();
+                        if (!(itemChildObj instanceof OMElement)) {
+                            continue;
+                        }
+                        OMElement itemChildEle = (OMElement) itemChildObj;
+                        values.put(itemChildEle.getLocalName(),itemChildEle.getText());                        
+                        a++;
+                    }  
+                    addedValues.add(values);
+                    addedItemsCount++;
+				}
+        		
+                boolean isDisplay = false;                
+        		if(addedItemsCount != 0){        			
+	        		isDisplay = true;        			
+        		}
+        		
+        		// Generating headers if user not specify the headers
+                if (subList.size() == 0) {
+                	Iterator headerElements = widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
+	                while (headerElements.hasNext()) {
+	                	 OMElement arg = (OMElement) headerElements.next();
+	                	 String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+	                	 if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+	                		 String label = arg.getAttributeValue(new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+	                         if (label == null) {
+	                        	 label = name;
+	                         }
+	                         subList.add(label);	                         
+	                	 }
+	                }	                
                 }
-                rowCount++; //this variable used to find the which raw is in and use this to print the sub header
-                String elementType = arg.getAttributeValue(new QName(null, UIGeneratorConstants.TYPE_ATTRIBUTE));
-                String tooltip = arg.getAttributeValue(new QName(null,
-                        UIGeneratorConstants.TOOLTIP_ATTRIBUTE));
-                if (tooltip == null) {
-                    tooltip = "";
-                }
-                tooltip = StringEscapeUtils.escapeHtml(tooltip);
-                //Read the maxOccurs value
-                maxOccurs = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT));
-                if (maxOccurs != null) {
-                    if (!UIGeneratorConstants.MAXOCCUR_BOUNDED.equals(maxOccurs) && !UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(maxOccurs)) {
-                        //if user has given something else other than unbounded
-                        return ""; //TODO: throw an exception
-                    }
-                    if (!UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(maxOccurs)) {
-                        //if maxOccurs is not unbounded then print the sub header otherwise we will show the adding link
-                        if (rowCount == 1) {
-                            // We print the sub header only when we parse the first element otherwise we'll print sub header for each field element
-                            table.append(printSubHeaders(subList.toArray(new String[subList.size()])));
-                        }
-                    }
-                } else {
-                    if (subList.size() == 2 && rowCount == 1) {
-                        // We print the sub header only when we parse the first element otherwise we'll print sub header for each field element
-                        // sub headers are printed in this position only if column number is exactly 2//
-                        table.append(printSubHeaders(subList.toArray(new String[subList.size()])));
-                    }
-                }
-                if (dataHead != null) {
-                    //if the data xml contains the main element then get the element contains value
-                    inner = GenericUtil.getChildWithName(dataHead, arg.getFirstChildWithName
-                            (new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText().replaceAll(" ", "-"),
-                            dataNamespace);
-                }
-                String value = null;
-                String optionValue = null;
-                if (UIGeneratorConstants.TEXT_FIELD.equals(elementType)) {
-                    String mandat = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
-
-                    boolean isReadOnly = false;
-
-                    if (markReadonly && "true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
-                        isReadOnly = true;
-                    }
-                    if (isFilterOperation) {
-                        mandat = "false";
-                    }
-                    boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(
-                            new QName(null, UIGeneratorConstants.URL_ATTRIBUTE)));
-                    String urlTemplate = arg.getAttributeValue(
-                            new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
-                    boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
-                            new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
-                    String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
-                    if (inner != null) {
-                        //if the element contains value is not null get the value
-                        value = inner.getText();
-                    } else {
-                        value = arg.getAttributeValue(new QName(null, UIGeneratorConstants.DEFAULT_ATTRIBUTE));
-                    }
-                    if (columns > 2) {
-                        if (columnCount == 0) {
-                            table.append("<tr>");
-                        }
-                        UIComponent textField = new TextField(null, arg.getFirstChildWithName(new QName(null,
-                                    UIGeneratorConstants.ARGUMENT_NAME)).getText(),null, widgetName,
-                                    value, isURL, urlTemplate, isPath, isReadOnly,
-                                    hasValue, tooltip, startsWith, request);
-                        table.append(textField.generate());
-                
-                        columnCount++;
-                        if (columnCount == columns) {
-                            table.append("</tr>");
-                            columnCount = 0;
-                        }
-
-                    } else {
-                        OMElement firstChildWithName = arg.getFirstChildWithName(
-                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
-                        String name = firstChildWithName.getText();
-                        String label = firstChildWithName.getAttributeValue(
-                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
-
-                        if (label == null) {
-                            label = name;
-                        }
-                        UIComponent text =  new TextField(label, name, mandat, widgetName, value,
-                        			isURL, urlTemplate, isPath, isReadOnly, hasValue,
-                                    tooltip, startsWith, request);
-                        table.append(text.generate());
-                    }
-                } else if (UIGeneratorConstants.DATE_FIELD.equals(elementType)) {
-                    String mandet = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
-                    boolean isReadOnly = false;
-
-                    if (markReadonly && "true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
-                        isReadOnly = true;
-                    }
-                    if (isFilterOperation) {
-                        mandet = "false";
-                    }
-                    if (inner != null) {
-                        //if the element contains value is not null get the value
-                        value = inner.getText();
-                    }
-
-                    if (columns > 2) {
-                        if (columnCount == 0) {
-                            table.append("<tr>");
-                        }
-                        UIComponent dateField = new DateField(null,arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(),null,widgetName, value, isReadOnly, tooltip,false);
-                        table.append(dateField.generate());
+        		
+        		UIComponent addLink =  new AddLink(widgetName, widgetName,null, UIGeneratorConstants.ADD_ICON_PATH,
+                         widgetName, subList.toArray(new String[subList.size() + 1]), false, null, isDisplay,false);             	
+                table.append(addLink.generate()); 
+        		
+        		for (int i = 0; i < addedItemsCount; i++) {        			
+        			Iterator argument = widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
+        			int a = 0;
+        			table.append("<tr>");
+        			        			
+        			while (argument.hasNext()) {
+                        OMElement arg = (OMElement) argument.next();
+                        String elementType = arg.getAttributeValue(new QName(null, UIGeneratorConstants.TYPE_ATTRIBUTE)); 
                         
-                        columnCount++;
-                        if (columnCount == columns) {
-                            table.append("</tr>");
-                            columnCount = 0;
-                        }
-                    } else {
-                        OMElement firstChildWithName = arg.getFirstChildWithName(
-                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
-                        String name = firstChildWithName.getText();
-                        String label = firstChildWithName.getAttributeValue(
-                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
-
-                        if (label == null) {
-                            label = name;
-                        }
-
-                        UIComponent dateField = new DateField(label, name, mandet, widgetName, value,isReadOnly, tooltip,true);
-                        table.append(dateField.generate());
-                    }
-                } else if (UIGeneratorConstants.OPTION_FIELD.equals(elementType)) {
-                    OMElement firstChildWithName = arg.getFirstChildWithName(
-                            new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
-                    String mandat = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
-                    String name = firstChildWithName.getText();
-                    String label = firstChildWithName.getAttributeValue(
-                            new QName(UIGeneratorConstants.ARGUMENT_LABEL));
-
-                    if (label == null) {
-                        label = name;
-                    }
-
-                    if (inner != null) {
-                        //if the element contains value is not null get the value
-                        optionValue = inner.getText();
-                    }
-                    List<String> optionValues = getOptionValues(arg, request, config);
-                    if (isFilterOperation) {
-                        optionValues.add(0, "");
-                    }
-                    if (columns > 2) {
-                        if (columnCount == 0) {
-                            table.append("<tr>");
-                        }
-                        UIComponent dropDown = new DropDown(null,name, null,optionValues.toArray(new String[optionValues.size()]),
-                        	                                    widgetName, optionValue, tooltip);
-                        table.append(dropDown.generate());
-                        
-                        columnCount++;
-                        if (columnCount == columns) {
-                            table.append("</tr>");
-                            columnCount = 0;
-                        }
-
-                    } else {
-                    	UIComponent dropDown = new DropDown(label, name, mandat,
-                                    optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, optionValue, tooltip);
-                        table.append(dropDown.generate());
-                    }
-                } else if (UIGeneratorConstants.CHECKBOX_FIELD.equals(elementType)) {
-                    String name = arg.getFirstChildWithName(
-                            new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
-                    if (inner != null) {
-                        //if the element contains value is not null get the value
-                        optionValue = inner.getText();
-                    }
-                    if (columns > 2) {
-                        if (columnCount == 0) {
-                            table.append("<tr>");
-                        }
-                        UIComponent checkBox  = new CheckBox(name, widgetName, optionValue,tooltip,true);
-                        table.append(checkBox.generate());
-                        columnCount++;
-                        if (columnCount == columns) {
-                            table.append("</tr>");
-                            columnCount = 0;
-                        }
-
-                    } else {
-                    	UIComponent checkBox  = new CheckBox(name, widgetName, optionValue,tooltip,false);
-                        table.append(checkBox.generate());
-                    }
-                } else if (UIGeneratorConstants.TEXT_AREA_FIELD.equals(elementType)) {
-                    String mandet = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
-                    String richText = arg.getAttributeValue(new QName(null, UIGeneratorConstants.IS_RICH_TEXT));
-
-                    boolean isReadOnly = false;
-
-                    if (markReadonly && "true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
-                        isReadOnly = true;
-                    }
-
-                    boolean isRichText = false; //By default rich text is off
-                    if (richText != null) {
-                        isRichText = Boolean.valueOf(richText);
-                    }
-
-                    if (isFilterOperation) {
-                        mandet = "false";
-                    }
-                    if (inner != null) {
-                        //if the element contains value is not null get the value
-                        value = inner.getText();
-                    }
-                    int height = -1;
-                    int width = -1;
-                    String heightString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.HEIGHT_ATTRIBUTE));
-                    if (heightString != null) {
-                        try {
-                            height = Integer.parseInt(heightString);
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                    String widthString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.WIDTH_ATTRIBUTE));
-                    if (widthString != null) {
-                        try {
-                            width = Integer.parseInt(widthString);
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                    if (columns > 2) {
-                        if (columnCount == 0) {
-                            table.append("<tr>");
-                        }
-                        UIComponent textArea = new TextArea(null, arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(), null, widgetName, value, height, width, isReadOnly, false, tooltip, true);
-                        table.append(textArea.generate());
-                       
-                        columnCount++;
-                        if (columnCount == columns) {
-                            table.append("</tr>");
-                            columnCount = 0;
-                        }
-                    } else {
-                        OMElement firstChildWithName = arg.getFirstChildWithName(
-                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
-                        String name = firstChildWithName.getText();
-                        String label = firstChildWithName.getAttributeValue(
-                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
-
-                        if (label == null) {
-                            label = name;
-                        }
-
-                        UIComponent textArea = new TextArea(label, name, mandet, widgetName, value,
-                     	                                    height, width, isReadOnly, isRichText, tooltip,false);
-                        table.append(textArea.generate());
-                        
-                    }
-                } else if (UIGeneratorConstants.OPTION_TEXT_FIELD.equals(elementType)) {
-                    if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(maxOccurs)) {
-                        // This is the code segment to run in maxoccur unbounded situation
-//                        String addedItems = "0";
-//                        if(dataHead != null){
-//                            addedItems = dataHead.getFirstChildWithName(new QName(null,UIGeneratorConstants.COUNT)).getText();
-//                        }
-                        OMElement firstChildWithName = arg.getFirstChildWithName(
-                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
-                        String name = firstChildWithName.getText();
-                        String label = firstChildWithName.getAttributeValue(
-                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
-
-                        if (label == null) {
-                            label = name;
-                        }
-                        boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(
-                                new QName(null, UIGeneratorConstants.URL_ATTRIBUTE)));
-                        String urlTemplate = arg.getAttributeValue(
-                                new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
-                        boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
-                                new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
-
-                        String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
-
-//                        String addedOptionValues [] = new String[Integer.parseInt(addedItems)];
-//                        String addedValues[] = new String[Integer.parseInt(addedItems)];
-                        List<String> addedOptionValues = new ArrayList<String>();
-                        List<String> addedValues = new ArrayList<String>();
-                        int addedItemsCount = 0;
-                        if (dataHead != null) {
-                            //if the element contains value is not null get the value
-                            // with option-text field we put text value like this text_value.replaceAll(" ","-")
-                            Iterator itemChildIt = dataHead.getChildElements();
-                            int i = 0;
-                            while (itemChildIt.hasNext()) {
-                                // get all the filled values to the newly added fields
-                                Object itemChildObj = itemChildIt.next();
-                                if (!(itemChildObj instanceof OMElement)) {
-                                    continue;
-                                }
-                                OMElement itemChildEle = (OMElement) itemChildObj;
-
-                                if (!(itemChildEle.getQName().equals(new QName(dataNamespace,
-                                        UIGeneratorConstants.ENTRY_FIELD)))) {
-                                    continue;
-                                }
-
-                                String entryText = itemChildEle.getText();
-                                String entryKey = null;
-                                String entryVal;
-                                int colonIndex = entryText.indexOf(":");
-                                if (colonIndex < entryText.length() - 1) {
-                                    entryKey = entryText.substring(0, colonIndex);
-                                    entryText = entryText.substring(colonIndex + 1);
-                                }
-                                entryVal = entryText;
-
-                                if (entryKey != null && !entryKey.equals("")) {
-                                    addedOptionValues.add(entryKey);
-                                } else {
-                                    addedOptionValues.add("0");
-                                }
-
-                                if (entryVal != null) {
-                                    addedValues.add(entryVal);
-                                }
-
-                                i++;
+                        if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+                        	String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+                        	
+                        	String label = null;
+                            if (subList.size() == 0){
+                            	label = arg.getAttributeValue(new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+                            	if (label == null) {
+                            		label = name;
+                            	}                            	
                             }
-                            addedItemsCount = i;
-                        }
-                        /* if there are no added items headings of the table will hide,else display */
-                        boolean isDisplay = false;
-                        
-                        if (addedItemsCount == 0) {
-                        	isDisplay = false;                        	
-                        } else if (addedItemsCount > 0) {
-                        	isDisplay = true;                        	                    
-                        }
-                        UIComponent addLink =  new AddLink(label, name, UIGeneratorConstants.ADD_ICON_PATH,
-                                widgetName, subList.toArray(new String[subList.size() + 1]), isPath, startsWith, isDisplay);
-                    	
-                        table.append(addLink.generate());  
-                        List<String> optionValues = getOptionValues(arg, request, config);
-                        if (addedItemsCount > 0) {
-                            // This is the place where we fill already added entries
-                            for (int i = 0; i < addedItemsCount; i++) {
-                                String addedOptionValue = addedOptionValues.get(i);
-                                String addedValue = addedValues.get(i);
-                                if (addedOptionValue != null && addedValue != null) {
-                                	UIComponent optionText = new OptionText(name, (i + 1),null,null,
-                                                                           optionValues.toArray(new String[optionValues.size()]),
-                                                                           widgetName,
-                                                                           addedOptionValue,
-                                                                           addedValue,
-                                                                           isURL, urlTemplate, isPath, tooltip, startsWith, request);
-                                    table.append(optionText.generate());
-                                }
+                            
+                            String value = arg.getAttributeValue(new QName(null, UIGeneratorConstants.DEFAULT_ATTRIBUTE));    		                
+                            if(value == null){                            	
+                            	String key = GenericUtil.getDataElementName(name);
+                            	value = addedValues.get(i).get(key);
                             }
-                        }
-                        UIComponent closeAddLink = new CloseAddLink(name, addedItemsCount);
-                        table.append(closeAddLink.generate()); // add the previously added items and then close the tbody
-                    } else {
-                        OMElement firstChildWithName = arg.getFirstChildWithName(
-                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
-                        String name = firstChildWithName.getText();
-                        String label = firstChildWithName.getAttributeValue(
-                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
-
-                        String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
-
-                        if (label == null) {
-                            label = name;
-                        }
-
-                        boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(
-                                new QName(null, UIGeneratorConstants.URL_ATTRIBUTE)));
-                        String urlTemplate = arg.getAttributeValue(
-                                new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
-                        boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
-                                new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
-                        if (dataHead != null) {
-                            //if the element contains value is not null get the value
-                            // with option-text field we put text value like this text_value.replaceAll(" ","-")
-
-                            inner = GenericUtil.getChildWithName(dataHead, UIGeneratorConstants.TEXT_FIELD +
-                                    arg.getFirstChildWithName(
-                                            new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(),
-                                    dataNamespace);
-                            if (inner != null) {
-                                value = inner.getText();
+                        	
+                        	String elementId = "id_"+widgetName.replaceAll(" ", "") + "_" + name.replaceAll(" ", "")+"_"+(i+1);
+                        	name = name.replaceAll(" ", "")+ "_" + (i+1);
+                        	
+                            boolean isReadOnly = false;
+                        	
+    	                    if ("true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
+    	                        isReadOnly = true;
+    	                    }
+    	                    String tooltip = arg.getAttributeValue(new QName(null, UIGeneratorConstants.TOOLTIP_ATTRIBUTE));
+    		                if (tooltip == null) {
+    		                    tooltip = "";
+    		                }
+    		                tooltip = StringEscapeUtils.escapeHtml(tooltip);
+    		                
+                            if(UIGeneratorConstants.DATE_FIELD.equals(elementType)){                        		
+                        		UIComponent dateField = new DateField(label,name,elementId,null,widgetName, value, isReadOnly, tooltip,false,false);                        		
+                        		table.append(dateField.generate());
+                            } else if (UIGeneratorConstants.CHECKBOX_FIELD.equals(elementType)) {                            	
+                            	UIComponent checkBox  = new CheckBox(name,elementId, widgetName, null,tooltip,false,false);    	                        
+                            	table.append(checkBox.generate());
+    	                        
+                            } else if (UIGeneratorConstants.OPTION_FIELD.equals(elementType)) { 
+                            	List<String> optionValues = getOptionValues(arg, request, config);    	
+    	                        DropDown dropDown = new DropDown(label, name,elementId, null,optionValues.toArray(new String[optionValues.size()]), widgetName, value, tooltip,false);
+    	                        table.append(dropDown.generate());    	                        
+                            }else if (UIGeneratorConstants.TEXT_AREA_FIELD.equals(elementType)) {
+                            	int height = -1;
+        	                    int width = 200;
+        	                    String heightString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.HEIGHT_ATTRIBUTE));
+        	                    if (heightString != null) {
+        	                        try {
+        	                            height = Integer.parseInt(heightString);
+        	                        } catch (NumberFormatException ignored) {
+        	                        }
+        	                    }
+        	                    String widthString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.WIDTH_ATTRIBUTE));
+        	                    if (widthString != null) {
+        	                        try {
+        	                            width = Integer.parseInt(widthString);
+        	                        } catch (NumberFormatException ignored) {
+        	                        }
+        	                    }        	                    
+        	                    UIComponent textArea  = new TextArea(label, name,elementId, null, widgetName, value, height, width, isReadOnly, false, tooltip, false,false);
+        	                    table.append(textArea.generate());
+                            } else {
+                            	
+                            	boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(new QName(null, 
+                            			UIGeneratorConstants.URL_ATTRIBUTE)));
+         	                    String urlTemplate = arg.getAttributeValue(
+         	                            new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
+         	                    boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
+         	                            new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
+         	                    String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));                            	
+                            	UIComponent textField  = new TextField(label, name, elementId, null, widgetName, value, isURL, urlTemplate, isPath, isReadOnly, true, tooltip, startsWith, request,false);
+                            	table.append(textField.generate());                            	
                             }
-                            OMElement optionValueElement = GenericUtil.getChildWithName(dataHead, arg.getFirstChildWithName
-                                    (new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(),
-                                    dataNamespace);
-                            if (optionValueElement != null) {
-                                optionValue = optionValueElement.getText();
-                            }
-
-                        }
-                        List<String> optionValues = getOptionValues(arg, request, config);
-                        UIComponent optionText = new OptionText(null, 0,label, name,optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, optionValue, value, isURL, urlTemplate, isPath,
-                                    tooltip, startsWith, request);
-                        table.append(optionText.generate());                        
-                    }
-                }
-            }
+                        }   
+                        a++;
+        			}
+        			table.append(printDeleteWidget(widgetName));
+        			table.append("</tr>");
+				}       		
+        		table.append(printCloseAddLink(widgetName, addedItemsCount));        		
+        	}
+        }else{        
+	        while (arguments.hasNext()) {
+	            OMElement arg = (OMElement) arguments.next();
+	            String maxOccurs = "";
+	            if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+	                if (isFilterOperation && Boolean.toString(false).equals(
+	                        arg.getAttributeValue(new QName(null, UIGeneratorConstants.FILTER_ATTRIBUTE)))) {
+	                    continue;
+	                }
+	                rowCount++; //this variable used to find the which raw is in and use this to print the sub header
+	                String elementType = arg.getAttributeValue(new QName(null, UIGeneratorConstants.TYPE_ATTRIBUTE));
+	                String tooltip = arg.getAttributeValue(new QName(null,
+	                        UIGeneratorConstants.TOOLTIP_ATTRIBUTE));
+	                if (tooltip == null) {
+	                    tooltip = "";
+	                }
+	                tooltip = StringEscapeUtils.escapeHtml(tooltip);
+	                //Read the maxOccurs value
+	                maxOccurs = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT));
+	                if (maxOccurs != null) {
+	                    if (!UIGeneratorConstants.MAXOCCUR_BOUNDED.equals(maxOccurs) && !UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(maxOccurs)) {
+	                        //if user has given something else other than unbounded
+	                        return ""; //TODO: throw an exception
+	                    }
+	                    if (!UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(maxOccurs)) {
+	                        //if maxOccurs is not unbounded then print the sub header otherwise we will show the adding link
+	                        if (rowCount == 1) {
+	                            // We print the sub header only when we parse the first element otherwise we'll print sub header for each field element
+	                            table.append(printSubHeaders(subList.toArray(new String[subList.size()])));
+	                        }
+	                    }
+	                } else {
+						if (subList.size() == 2 && rowCount == 1) {
+	                        // We print the sub header only when we parse the first element otherwise we'll print sub header for each field element
+	                        // sub headers are printed in this position only if column number is exactly 2//
+	                        table.append(printSubHeaders(subList.toArray(new String[subList.size()])));
+	                    }
+	                }
+					if (dataHead != null) {
+	                    //if the data xml contains the main element then get the element contains value
+	                    inner = GenericUtil.getChildWithName(dataHead, arg.getFirstChildWithName
+	                            (new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText().replaceAll(" ", "-"),
+	                            dataNamespace);
+	                }
+	                String value = null;
+	                String optionValue = null;
+	                if (UIGeneratorConstants.TEXT_FIELD.equals(elementType)) {
+	                    String mandat = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
+	
+	                    boolean isReadOnly = false;
+	
+	                    if (markReadonly && "true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
+	                        isReadOnly = true;
+	                    }
+						if (isFilterOperation) {
+							mandat = "false";
+						}
+	                    boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(
+	                            new QName(null, UIGeneratorConstants.URL_ATTRIBUTE)));
+	                    String urlTemplate = arg.getAttributeValue(
+	                            new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
+	                    boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
+	                            new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
+	                    String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
+	                    if (inner != null) {
+	                        //if the element contains value is not null get the value
+	                        value = inner.getText();
+	                    } else {
+	                        value = arg.getAttributeValue(new QName(null, UIGeneratorConstants.DEFAULT_ATTRIBUTE));
+	                    }
+	                    if (columns > 2) {
+	                        if (columnCount == 0) {
+	                            table.append("<tr>");
+	                        }
+	                        UIComponent textField = new TextField(null, arg.getFirstChildWithName(new QName(null,
+	                                    UIGeneratorConstants.ARGUMENT_NAME)).getText(),null,null, widgetName,
+	                                    value, isURL, urlTemplate, isPath, isReadOnly,
+	                                    hasValue, tooltip, startsWith, request,false);
+	                        table.append(textField.generate());
+	                
+	                        columnCount++;
+	                        if (columnCount == columns) {
+	                            table.append("</tr>");
+	                            columnCount = 0;
+	                        }
+	
+	                    } else {
+	                        OMElement firstChildWithName = arg.getFirstChildWithName(
+	                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
+	                        String name = firstChildWithName.getText();
+	                        String label = firstChildWithName.getAttributeValue(
+	                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+	
+	                        if (label == null) {
+	                            label = name;
+	                        }
+	                        UIComponent text =  new TextField(label, name, null, mandat, widgetName, value,
+	                        			isURL, urlTemplate, isPath, isReadOnly, hasValue,
+	                                    tooltip, startsWith, request,false);
+	                        table.append(text.generate());
+	                    }
+	                } else if (UIGeneratorConstants.DATE_FIELD.equals(elementType)) {
+	                    String mandet = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
+	                    boolean isReadOnly = false;
+	
+	                    if (markReadonly && "true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
+	                        isReadOnly = true;
+	                    }
+	                    if (isFilterOperation) {
+	                        mandet = "false";
+	                    }
+	                    if (inner != null) {
+	                        //if the element contains value is not null get the value
+	                        value = inner.getText();
+	                    }
+	
+	                    if (columns > 2) {
+	                        if (columnCount == 0) {
+	                            table.append("<tr>");
+	                        }
+	                        UIComponent dateField = new DateField(null,arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(),null,null,widgetName, value, isReadOnly, tooltip,false,false);
+	                        table.append(dateField.generate());
+	                        
+	                        columnCount++;
+	                        if (columnCount == columns) {
+	                            table.append("</tr>");
+	                            columnCount = 0;
+	                        }
+	                    } else {
+	                        OMElement firstChildWithName = arg.getFirstChildWithName(
+	                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
+	                        String name = firstChildWithName.getText();
+	                        String label = firstChildWithName.getAttributeValue(
+	                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+	
+	                        if (label == null) {
+	                            label = name;
+	                        }
+	
+	                        UIComponent dateField = new DateField(label, name, null, mandet, widgetName, value,isReadOnly, tooltip,true,false);
+	                        table.append(dateField.generate());
+	                    }
+	                } else if (UIGeneratorConstants.OPTION_FIELD.equals(elementType)) {
+	                    OMElement firstChildWithName = arg.getFirstChildWithName(
+	                            new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
+	                    String mandat = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
+	                    String name = firstChildWithName.getText();
+	                    String label = firstChildWithName.getAttributeValue(
+	                            new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+	
+	                    if (label == null) {
+	                        label = name;
+	                    }
+	
+	                    if (inner != null) {
+	                        //if the element contains value is not null get the value
+	                        optionValue = inner.getText();
+	                    }
+	                    List<String> optionValues = getOptionValues(arg, request, config);
+	                    if (isFilterOperation) {
+	                        optionValues.add(0, "");
+	                    }
+	                    if (columns > 2) {
+	                        if (columnCount == 0) {
+	                            table.append("<tr>");
+	                        }
+	                        UIComponent dropDown = new DropDown(null,name,null, null,optionValues.toArray(new String[optionValues.size()]),
+	                        	                                    widgetName, optionValue, tooltip,false);
+	                        table.append(dropDown.generate());
+	                        
+	                        columnCount++;
+	                        if (columnCount == columns) {
+	                            table.append("</tr>");
+	                            columnCount = 0;
+	                        }
+	
+	                    } else {
+	                    	UIComponent dropDown = new DropDown(label, name, null, mandat,
+	                                    optionValues.toArray(new String[optionValues.size()]),
+	                                    widgetName, optionValue, tooltip,false);
+	                        table.append(dropDown.generate());
+	                    }
+	                } else if (UIGeneratorConstants.CHECKBOX_FIELD.equals(elementType)) {
+	                    String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+	                    if (inner != null) {
+	                        //if the element contains value is not null get the value
+	                        optionValue = inner.getText();
+	                    }
+	                    if (columns > 2) {
+	                        if (columnCount == 0) {
+	                            table.append("<tr>");
+	                        }
+	                        UIComponent checkBox  = new CheckBox(name, widgetName, null, optionValue,tooltip,true,false);
+	                        table.append(checkBox.generate());
+	                        columnCount++;
+	                        if (columnCount == columns) {
+	                            table.append("</tr>");
+	                            columnCount = 0;
+	                        }
+	
+	                    } else {
+	                    	UIComponent checkBox  = new CheckBox(name, widgetName, null, optionValue,tooltip,false,false);
+	                        table.append(checkBox.generate());
+	                    }
+	                } else if (UIGeneratorConstants.TEXT_AREA_FIELD.equals(elementType)) {
+	                    String mandet = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
+	                    String richText = arg.getAttributeValue(new QName(null, UIGeneratorConstants.IS_RICH_TEXT));
+	
+	                    boolean isReadOnly = false;
+	
+	                    if (markReadonly && "true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
+	                        isReadOnly = true;
+	                    }
+	
+	                    boolean isRichText = false; //By default rich text is off
+	                    if (richText != null) {
+	                        isRichText = Boolean.valueOf(richText);
+	                    }
+	
+	                    if (isFilterOperation) {
+	                        mandet = "false";
+	                    }
+	                    if (inner != null) {
+	                        //if the element contains value is not null get the value
+	                        value = inner.getText();
+	                    }
+	                    int height = -1;
+	                    int width = -1;
+	                    String heightString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.HEIGHT_ATTRIBUTE));
+	                    if (heightString != null) {
+	                        try {
+	                            height = Integer.parseInt(heightString);
+	                        } catch (NumberFormatException ignored) {
+	                        }
+	                    }
+	                    String widthString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.WIDTH_ATTRIBUTE));
+	                    if (widthString != null) {
+	                        try {
+	                            width = Integer.parseInt(widthString);
+	                        } catch (NumberFormatException ignored) {
+	                        }
+	                    }
+	                    if (columns > 2) {
+	                        if (columnCount == 0) {
+	                            table.append("<tr>");
+	                        }
+	                        UIComponent textArea = new TextArea(null, arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(), null, null, widgetName, value, height, width, isReadOnly, false, tooltip, true,false);
+	                        table.append(textArea.generate());
+	                       
+	                        columnCount++;
+	                        if (columnCount == columns) {
+	                            table.append("</tr>");
+	                            columnCount = 0;
+	                        }
+	                    } else {
+	                        OMElement firstChildWithName = arg.getFirstChildWithName(
+	                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
+	                        String name = firstChildWithName.getText();
+	                        String label = firstChildWithName.getAttributeValue(
+	                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+	
+	                        if (label == null) {
+	                            label = name;
+	                        }
+	
+	                        UIComponent textArea = new TextArea(label, name, null, mandet, widgetName, value,
+	                     	                                    height, width, isReadOnly, isRichText, tooltip,false,false);
+	                        table.append(textArea.generate());
+	                        
+	                    }
+	                } else if (UIGeneratorConstants.OPTION_TEXT_FIELD.equals(elementType)) {
+	                    if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(maxOccurs)) {
+	                        // This is the code segment to run in maxoccur unbounded situation
+	//                        String addedItems = "0";
+	//                        if(dataHead != null){
+	//                            addedItems = dataHead.getFirstChildWithName(new QName(null,UIGeneratorConstants.COUNT)).getText();
+	//                        }
+	                        OMElement firstChildWithName = arg.getFirstChildWithName(
+	                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
+	                        String name = firstChildWithName.getText();
+	                        String label = firstChildWithName.getAttributeValue(
+	                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+	
+	                        if (label == null) {
+	                            label = name;
+	                        }
+	                        boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(
+	                                new QName(null, UIGeneratorConstants.URL_ATTRIBUTE)));
+	                        String urlTemplate = arg.getAttributeValue(
+	                                new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
+	                        boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
+	                                new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
+	
+	                        String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
+	
+	//                        String addedOptionValues [] = new String[Integer.parseInt(addedItems)];
+	//                        String addedValues[] = new String[Integer.parseInt(addedItems)];
+	                        List<String> addedOptionValues = new ArrayList<String>();
+	                        List<String> addedValues = new ArrayList<String>();
+	                        int addedItemsCount = 0;
+	                        if (dataHead != null) {
+	                            //if the element contains value is not null get the value
+	                            // with option-text field we put text value like this text_value.replaceAll(" ","-")
+	                            Iterator itemChildIt = dataHead.getChildElements();
+	                            int i = 0;
+	                            while (itemChildIt.hasNext()) {
+	                                // get all the filled values to the newly added fields
+	                                Object itemChildObj = itemChildIt.next();
+	                                if (!(itemChildObj instanceof OMElement)) {
+	                                    continue;
+	                                }
+	                                OMElement itemChildEle = (OMElement) itemChildObj;
+	
+	                                if (!(itemChildEle.getQName().equals(new QName(dataNamespace,
+	                                        UIGeneratorConstants.ENTRY_FIELD)))) {
+	                                    continue;
+	                                }
+	
+	                                String entryText = itemChildEle.getText();
+	                                String entryKey = null;
+	                                String entryVal;
+	                                int colonIndex = entryText.indexOf(":");
+	                                if (colonIndex < entryText.length() - 1) {
+	                                    entryKey = entryText.substring(0, colonIndex);
+	                                    entryText = entryText.substring(colonIndex + 1);
+	                                }
+	                                entryVal = entryText;
+	
+	                                if (entryKey != null && !entryKey.equals("")) {
+	                                    addedOptionValues.add(entryKey);
+	                                } else {
+	                                    addedOptionValues.add("0");
+	                                }
+	
+	                                if (entryVal != null) {
+	                                    addedValues.add(entryVal);
+	                                }
+	
+	                                i++;
+	                            }
+	                            addedItemsCount = i;
+	                        }
+	                        /* if there are no added items headings of the table will hide,else display */
+	                        boolean isDisplay = false;
+	                        
+	                        if (addedItemsCount == 0) {
+	                        	isDisplay = false;                        	
+	                        } else if (addedItemsCount > 0) {
+	                        	isDisplay = true;                        	                    
+	                        }
+	                        UIComponent addLink =  new AddLink(label, name, null, UIGeneratorConstants.ADD_ICON_PATH,
+	                                widgetName, subList.toArray(new String[subList.size() + 1]), isPath, startsWith, isDisplay,false);
+	                    	
+	                        table.append(addLink.generate());  
+	                        List<String> optionValues = getOptionValues(arg, request, config);
+	                        if (addedItemsCount > 0) {
+	                            // This is the place where we fill already added entries
+	                            for (int i = 0; i < addedItemsCount; i++) {
+	                                String addedOptionValue = addedOptionValues.get(i);
+	                                String addedValue = addedValues.get(i);
+	                                if (addedOptionValue != null && addedValue != null) {
+	                                	UIComponent optionText = new OptionText(name, (i + 1),null,null,null,
+	                                                                           optionValues.toArray(new String[optionValues.size()]),
+	                                                                           widgetName,
+	                                                                           addedOptionValue,
+	                                                                           addedValue,
+	                                                                           isURL, urlTemplate, isPath, tooltip, startsWith, request,false);
+	                                    table.append(optionText.generate());
+	                                }
+	                            }
+	                        }
+	                        UIComponent closeAddLink = new CloseAddLink(name, addedItemsCount,false);
+	                        table.append(closeAddLink.generate()); // add the previously added items and then close the tbody
+	                    } else {
+	                        OMElement firstChildWithName = arg.getFirstChildWithName(
+	                                new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
+	                        String name = firstChildWithName.getText();
+	                        String label = firstChildWithName.getAttributeValue(
+	                                new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+	
+	                        String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
+	
+	                        if (label == null) {
+	                            label = name;
+	                        }
+	
+	                        boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(
+	                                new QName(null, UIGeneratorConstants.URL_ATTRIBUTE)));
+	                        String urlTemplate = arg.getAttributeValue(
+	                                new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
+	                        boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
+	                                new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
+	                        if (dataHead != null) {
+	                            //if the element contains value is not null get the value
+	                            // with option-text field we put text value like this text_value.replaceAll(" ","-")
+	
+	                            inner = GenericUtil.getChildWithName(dataHead, UIGeneratorConstants.TEXT_FIELD +
+	                                    arg.getFirstChildWithName(
+	                                            new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(),
+	                                    dataNamespace);
+	                            if (inner != null) {
+	                                value = inner.getText();
+	                            }
+	                            OMElement optionValueElement = GenericUtil.getChildWithName(dataHead, arg.getFirstChildWithName
+	                                    (new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(),
+	                                    dataNamespace);
+	                            if (optionValueElement != null) {
+	                                optionValue = optionValueElement.getText();
+	                            }
+	
+	                        }
+	                        List<String> optionValues = getOptionValues(arg, request, config);
+	                        UIComponent optionText = new OptionText(null, 0,label, name, null, optionValues.toArray(new String[optionValues.size()]),
+	                                    widgetName, optionValue, value, isURL, urlTemplate, isPath,
+	                                    tooltip, startsWith, request,false);
+	                        table.append(optionText.generate());                        
+	                    }
+	                }
+	            }
+	        }
         }
         table.append("</table></div>");
         return table.toString();
@@ -586,11 +739,13 @@ public class GenericUIGenerator {
     }
 
     public String printCloseAddLink(String name, int count) {
+    	name = name.replaceAll("-", "");
+    	name = name.replaceAll(" ", "");
         StringBuilder link = new StringBuilder();
         link.append("</tbody></table>");
-        link.append("<input id=\"" + name.replaceAll(" ", "-") + "CountTaker\" type=\"hidden\" value=\"" +
+        link.append("<input id=\"" + name.replaceAll(" ", "").replaceAll("-", "") + "CountTaker\" type=\"hidden\" value=\"" +
                 count + "\" name=\"");
-        link.append(name.replaceAll(" ", "-") + UIGeneratorConstants.COUNT + "\"/>\n");
+        link.append(name.replaceAll(" ", "").replaceAll("-", "") + UIGeneratorConstants.COUNT + "\"/>\n");
 
         link.append("</td></tr>");
         return link.toString();
@@ -609,88 +764,122 @@ public class GenericUIGenerator {
                     namespace);
             Iterator arguments = widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
             OMElement arg = null;
-            while (arguments.hasNext()) {
-                arg = (OMElement) arguments.next();
-                if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
-                    String elementType = arg.getAttributeValue(new QName(null, UIGeneratorConstants.TYPE_ATTRIBUTE));
-                    String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
-                    if (UIGeneratorConstants.OPTION_TEXT_FIELD.equals(elementType)) {
-                        if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(
-                                arg.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT)))) {
-                            //implement the new way of extracting data if the maxoccurs unbounded happend in option-text field
-                            String count = request.getParameter(name.replaceAll(" ", "-") + UIGeneratorConstants.COUNT);
+            
 
-                            for (int i = 0; i < Integer.parseInt(count); i++) {
-                                String entryValue = "";
-                                String input = request.getParameter(widgetName.replaceAll(" ", "_") +
-                                        "_" + name.replaceAll(" ", "-") + (i + 1));
-                                if (input != null && !("".equals(input))) {
-                                    entryValue += input;
-                                }
-                                entryValue += ":";
-                                String inputTextValue = request.getParameter(widgetName.replaceAll(" ", "_") +
-                                        UIGeneratorConstants.TEXT_FIELD +
-                                        "_" + name.replaceAll(" ", "-") + (i + 1));
-                                if (inputTextValue != null && !("".equals(inputTextValue))) {
-                                    entryValue += inputTextValue;
-                                }
-                                if (!":".equals(entryValue)) {
-                                    OMElement entryElement = fac.createOMElement(UIGeneratorConstants.ENTRY_FIELD,
-                                            namespace);
-                                    entryElement.setText(entryValue);
-                                    widgetData.addChild(entryElement);
-                                }
-                            }
-
-                        }
-                        // if maxoccurs unbounded is not mentioned use the default behaviour
-                        else {
-                            String input = request.getParameter(widgetName.replaceAll(" ", "_") + "_" +
-                                    name.replaceAll(" ", "-"));
-                            if (input != null && !("".equals(input))) {
-                                OMElement text = fac.createOMElement(GenericUtil.getDataElementName(name),
-                                        namespace);
-                                text.setText(input);
-                                widgetData.addChild(text);
-                            }
-                            String inputOption = request.getParameter(widgetName.replaceAll(" ", "_") +
-                                    UIGeneratorConstants.TEXT_FIELD +
-                                    "_" + name.replaceAll(" ", "-"));
-                            if (inputOption != null && !("".equals(inputOption))) {
-                                OMElement value = fac.createOMElement(
-                                        GenericUtil.getDataElementName(UIGeneratorConstants.TEXT_FIELD + name),
-                                        namespace);
-                                value.setText(inputOption);
-                                widgetData.addChild(value);
-                            }
-                        }
-                    } else {
-                        String input = request.getParameter(widgetName.replaceAll(" ", "_") + "_" +
-                                name.replaceAll(" ", "-"));
-                        OMElement text = null;
-
-                        if (input != null && !("".equals(input))) {
-                            text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
-                            text.setText(input);
-                            widgetData.addChild(text);
-
-                        } else {
-                            if (name.equals("Name")) {
-                                text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
-                                text.setText(GovernanceConstants.DEFAULT_SERVICE_NAME);
-                                widgetData.addChild(text);
-                            }
-                            if (name.equals("Namespace")) {
-                                text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
-                                text.setText(UIGeneratorConstants.DEFAULT_NAMESPACE);
-                                widgetData.addChild(text);
-                            }
-                        }
-
-                    }
-                }
+            String widgetMaxOccurs = widget.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT));
+			if (widgetMaxOccurs != null) {
+				if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(widgetMaxOccurs)) {
+					String count = request.getParameter(widgetName.replaceAll(" ", "") +UIGeneratorConstants.COUNT);
+					for (int i = 0; i < Integer.parseInt(count); i++) {  			 
+						arguments =  widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
+            			int a = 0;
+            			OMElement entryElement = fac.createOMElement(GenericUtil.getDataElementName(widgetName),namespace);
+            			boolean isAllBlank  = true;
+						while (arguments.hasNext()) {
+							arg = (OMElement) arguments.next();
+							String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+							String elementType = name.replaceAll(" ", "");
+							String webElement = widgetName.replaceAll(" ", "") + "_" + elementType.replaceAll(" ", "") + "_" + (i + 1);
+							String input = request.getParameter(webElement);
+							//String input2 = request.getParameter(widgetName + "_" + elementType + "_" + (i + 1));
+							if (input == null) {
+								input = "";
+							} else {
+								isAllBlank = false;
+							}
+							OMElement innerElemnt = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
+							innerElemnt.setText(input);
+							entryElement.addChild(innerElemnt);
+							a++;
+						}
+						// widgetData.addChild(entryElement);
+						if (!isAllBlank) {
+							data.addChild(entryElement);
+						}           				 
+            		 } 		
+            	}
+            }else{                        
+	            while (arguments.hasNext()) {
+	                arg = (OMElement) arguments.next();
+	                if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+	                    String elementType = arg.getAttributeValue(new QName(null, UIGeneratorConstants.TYPE_ATTRIBUTE));
+	                    String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+	                    if (UIGeneratorConstants.OPTION_TEXT_FIELD.equals(elementType)) {
+	                        if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(
+	                                arg.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT)))) {
+	                            //implement the new way of extracting data if the maxoccurs unbounded happend in option-text field
+	                            String count = request.getParameter(name.replaceAll(" ", "") + UIGeneratorConstants.COUNT);
+	
+								for (int i = 0; i < Integer.parseInt(count); i++) {
+									String entryValue = "";
+									String input = request.getParameter(widgetName.replaceAll(" ", "") + "_" + name.replaceAll(" ", "") + (i + 1));
+									if (input != null && !("".equals(input))) {
+										entryValue += input;
+									}
+									entryValue += ":";
+									String inputTextValue = request.getParameter(widgetName.replaceAll(" ", "") + 
+									                                             UIGeneratorConstants.TEXT_FIELD +
+									                                             "_" + name.replaceAll(" ", "") + (i + 1));
+									if (inputTextValue != null && !("".equals(inputTextValue))) {
+										entryValue += inputTextValue;
+									}
+									if (!":".equals(entryValue)) {
+										OMElement entryElement = fac.createOMElement(UIGeneratorConstants.ENTRY_FIELD,
+										                                             namespace);
+										entryElement.setText(entryValue);
+										widgetData.addChild(entryElement);
+									}
+								}
+	
+	                        }
+	                        // if maxoccurs unbounded is not mentioned use the default behaviour
+	                        else {
+	                            String input = request.getParameter(widgetName.replaceAll(" ", "") + "_" +
+	                                    name.replaceAll(" ", ""));
+	                            if (input != null && !("".equals(input))) {
+									OMElement text = fac.createOMElement(GenericUtil.getDataElementName(name),
+									                                     namespace);
+	                                text.setText(input);
+	                                widgetData.addChild(text);
+	                            }
+	                            String inputOption = request.getParameter(widgetName.replaceAll(" ", "") +
+	                                    UIGeneratorConstants.TEXT_FIELD +  "_" + name.replaceAll(" ", ""));
+	                            if (inputOption != null && !("".equals(inputOption))) {
+	                                OMElement value = fac.createOMElement(
+	                                        GenericUtil.getDataElementName(UIGeneratorConstants.TEXT_FIELD + name),
+	                                        namespace);
+	                                value.setText(inputOption);
+	                                widgetData.addChild(value);
+	                            }
+	                        }
+	                    } else {
+	                        String input = request.getParameter(widgetName.replaceAll(" ", "") + "_" +
+	                                name.replaceAll(" ", ""));
+	                        OMElement text = null;
+	
+	                        if (input != null && !("".equals(input))) {
+	                            text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
+	                            text.setText(input);
+	                            widgetData.addChild(text);	
+	                        } else {
+	                            if (name.equals("Name")) {
+	                                text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
+	                                text.setText(GovernanceConstants.DEFAULT_SERVICE_NAME);
+	                                widgetData.addChild(text);
+	                            }
+	                            if (name.equals("Namespace")) {
+	                                text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
+	                                text.setText(UIGeneratorConstants.DEFAULT_NAMESPACE);
+	                                widgetData.addChild(text);
+	                            }
+	                        }
+	
+	                    }
+	                }
+	            }
+	            data.addChild(widgetData);
             }
-            data.addChild(widgetData);
+           
         }
         return GenericUtil.addExtraElements(data, request);
     }
@@ -908,7 +1097,7 @@ public class GenericUIGenerator {
                     //check the mandatory fields and get the id's of them
                     String mandatory = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
                     if (mandatory != null && "true".equals(mandatory)) {
-                        id.add("id_" + widgetName.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-"));
+                        id.add("id_" + widgetName.replaceAll(" ", "") + "_" + name.replaceAll(" ", ""));
                     }
                 }
             }
@@ -930,7 +1119,7 @@ public class GenericUIGenerator {
                 arg = (OMElement) arguments.next();
                 if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
                     String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
-                    String key = widgetName.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
+                    String key = widgetName.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
                         if(Arrays.asList(keys).contains(key.toLowerCase())){
                         id.add(key);
                         }
@@ -1038,32 +1227,89 @@ public class GenericUIGenerator {
         return widgetList.toArray(new String[widgetList.size()]);
     }
 
-    public String[][] getDateIdAndNameList(OMElement head, boolean markReadOnly) {
+    public String[][] getDateIdAndNameList(OMElement head, OMElement data, boolean markReadOnly) {
         List<String[]> result = new ArrayList<String[]>();
         Iterator it = head.getChildrenWithName(new QName(UIGeneratorConstants.WIDGET_ELEMENT));
         while (it.hasNext()) {
             OMElement widget = (OMElement) it.next();
             String widgetName = widget.getAttributeValue(new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
-            Iterator arguments = widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
+            
+            String widgetMaxOccurs = widget.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT));
             OMElement arg = null;
-            while (arguments.hasNext()) {
-                arg = (OMElement) arguments.next();
-                if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
-                    if (UIGeneratorConstants.DATE_FIELD.equals(arg.getAttributeValue(new QName
-                            (null, UIGeneratorConstants.TYPE_ATTRIBUTE)))) {
-                        if (markReadOnly && "true".equals(arg.getAttributeValue(new QName(null,
-                                UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
-                            continue;
+            
+            if (widgetMaxOccurs != null ){
+            	List<OMElement> dataElements =  new ArrayList<OMElement>();
+                if (data != null) {
+                   dataElements = GenericUtil.getChildsWithName(data, widgetName, dataNamespace);
+                }
+
+    			List<String[]> addedValues = new ArrayList<String[]>();
+    			int addedItemsCount = 0;
+    			for (int i = 0; i < dataElements.size(); i++) {
+    				OMElement dataHeadElements = dataElements.get(i);
+    				Iterator itemChildIt = dataHeadElements.getChildElements();
+    				int a = 0;
+    				List<String> values = new ArrayList<String>();
+    				while (itemChildIt.hasNext()) {					
+    					Object itemChildObj = itemChildIt.next();
+    					if (!(itemChildObj instanceof OMElement)) {
+    						continue;
+    					}
+    					OMElement itemChildEle = (OMElement) itemChildObj;
+    					values.add(itemChildEle.getText());
+    					a++;
+    				}
+    				addedValues.add(values.toArray(new String[values.size()]));
+    				addedItemsCount++;
+    			}
+    			for (int i = 0; i < addedItemsCount; i++) {
+    				Iterator arguments = widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
+    				while (arguments.hasNext()) {
+    					arg = (OMElement) arguments.next();
+    					if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+                            if (UIGeneratorConstants.DATE_FIELD.equals(arg.getAttributeValue(new QName
+                                    (null, UIGeneratorConstants.TYPE_ATTRIBUTE)))) {
+                            	if (markReadOnly && "true".equals(arg.getAttributeValue(new QName(null,
+                                        UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
+                                    continue;
+                                }
+                            	
+                            	String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+                            	String elementId = widgetName.replaceAll(" ", "") + "_" + name.replaceAll(" ", "")+"_"+(i+1);
+                                String[] idAndName = new String[2];
+                                idAndName[0] = "id_" + elementId;
+                                idAndName[1] = name;
+                                result.add(idAndName);             
+                            }
+    					}
+    				}
+				} 
+    			
+            } else {
+            	Iterator arguments = widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
+            	while (arguments.hasNext()) {
+                    arg = (OMElement) arguments.next();
+                    if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+                        if (UIGeneratorConstants.DATE_FIELD.equals(arg.getAttributeValue(new QName
+                                (null, UIGeneratorConstants.TYPE_ATTRIBUTE)))) {
+                            if (markReadOnly && "true".equals(arg.getAttributeValue(new QName(null,
+                                    UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
+                                continue;
+                            }
+                            String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+                            String[] idAndName = new String[2];
+                            idAndName[0] = "id_" + widgetName.replaceAll(" ",
+                                        "") + "_" + name.replaceAll(" ", "");
+                            idAndName[1] = name;
+                            result.add(idAndName);                        
                         }
-                        String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
-                        String[] idAndName = new String[2];
-                        idAndName[0] = "id_" + widgetName.replaceAll(" ",
-                                "_") + "_" + name.replaceAll(" ", "-");
-                        idAndName[1] = name;
-                        result.add(idAndName);
                     }
                 }
             }
+            
+            
+            
+            
         }
         return result.toArray(new String[result.size()][2]);
     }
@@ -1125,5 +1371,253 @@ public class GenericUIGenerator {
         }
         return inner;
     }
+    
+    public String getUnboundedWidgets(OMElement head, HttpServletRequest request, ServletConfig config) {
+        Iterator it = head.getChildrenWithName(new QName(UIGeneratorConstants.WIDGET_ELEMENT));
+        StringBuilder builder = new StringBuilder();
+        while (it.hasNext()) {
+            OMElement widget = (OMElement) it.next();
+            String widgetMaxOccurs = widget.getAttributeValue(new QName(null, UIGeneratorConstants.MAXOCCUR_ELEMENT));
+            String widgetName = widget.getAttributeValue(new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
+            if(widgetMaxOccurs != null){
+            	if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(widgetMaxOccurs)) {
+            		
+            		builder.append("function add"+widgetName.replaceAll(" ", "") + "_" + widgetName.replaceAll(" ", "")+"(){");
+            		widgetName = widgetName.replaceAll(" ", "");
+            		builder.append("var endpointMgt = document.getElementById('"+widgetName+"Mgt');");
+            		builder.append("endpointMgt.parentNode.style.display = '';");
+            		builder.append("var epCountTaker = document.getElementById('"+widgetName+"CountTaker'); ");
+            		builder.append("var "+widgetName+"Count = parseInt(epCountTaker.value);");
+            		builder.append(""+widgetName+"Count++;");
+            		builder.append("epCountTaker.value = "+widgetName+"Count;");
+                    builder.append("var theTr = document.createElement('TR');");
+                    
+                    Iterator arguments = widget.getChildrenWithLocalName(UIGeneratorConstants.ARGUMENT_ELMENT);
+                    OMElement arg = null;
+                    int a = 0;
+                    boolean isDateFieldAdded = false;
+                    while (arguments.hasNext()) {
+                    	
+                        arg = (OMElement) arguments.next();
+                        String elementType = arg.getAttributeValue(new QName(null, UIGeneratorConstants.TYPE_ATTRIBUTE));
+                        boolean isReadOnly = false;
+                    	
+	                    if ("true".equals(arg.getAttributeValue(new QName(null, UIGeneratorConstants.READONLY_ATTRIBUTE)))) {
+	                        isReadOnly = true;
+	                    }
+	                    String tooltip = arg.getAttributeValue(new QName(null,
+		                        UIGeneratorConstants.TOOLTIP_ATTRIBUTE));
+		                if (tooltip == null) {
+		                    tooltip = "";
+		                }
+		                tooltip = StringEscapeUtils.escapeHtml(tooltip);
+		                
+		                String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
+                        
+                        if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+                        	builder.append("var theTd"+a+" = document.createElement('TD');");
+                        	builder.append("var rowId = '"+widgetName+"Count"+elementType+"_"+a+"_'+(epCountTaker.value -1);");
+                        	
+                        	if(UIGeneratorConstants.DATE_FIELD.equals(elementType)){
+                        		 
+                        		UIComponent dateField = new DateField(null,name, null, null,widgetName, null, false, tooltip,false,true);
+                        		builder.append("theTd"+a+".innerHTML = '" + dateField.generate() + "';");
+                        		isDateFieldAdded = true;
+                        		
+                            } else if (UIGeneratorConstants.CHECKBOX_FIELD.equals(elementType)) {
+                            	
+                            	UIComponent checkBox  = new CheckBox(name, widgetName, null, null,tooltip,false,true);    	                        
+    	                        builder.append("theTd"+a+".innerHTML = '" + checkBox.generate() + "';");
+    	                        
+                            } else if (UIGeneratorConstants.OPTION_FIELD.equals(elementType)) {                          	
+                            	
+                            	String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
+                            	List<String> optionValues = getOptionValues(arg, request, config);
+    	
+    	                        DropDown dropDown = new DropDown(null, name, null, null,optionValues.toArray(new String[optionValues.size()]), widgetName, null, tooltip,true);
+                            	builder.append("theTd"+a+".innerHTML = '" + dropDown.generate() + "';");
+    	                        
+                            }else if (UIGeneratorConstants.TEXT_AREA_FIELD.equals(elementType)) {
+                            	int height = -1;
+        	                    int width = 200;
+        	                    String heightString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.HEIGHT_ATTRIBUTE));
+        	                    if (heightString != null) {
+        	                        try {
+        	                            height = Integer.parseInt(heightString);
+        	                        } catch (NumberFormatException ignored) {
+        	                        }
+        	                    }
+        	                    String widthString = arg.getAttributeValue(new QName(null, UIGeneratorConstants.WIDTH_ATTRIBUTE));
+        	                    if (widthString != null) {
+        	                        try {
+        	                            width = Integer.parseInt(widthString);
+        	                        } catch (NumberFormatException ignored) {
+        	                        }
+        	                    }
+        	                    
+        	                    UIComponent textArea  = new TextArea(null, name, null, null, widgetName, null, height, width, isReadOnly, false, tooltip, false,true);
+        	                    builder.append("theTd"+a+".innerHTML = '" + textArea.generate() + "';");
+                            } else {
+                            	
+                            	 boolean isURL = Boolean.toString(true).equals(arg.getAttributeValue(
+         	                            new QName(null, UIGeneratorConstants.URL_ATTRIBUTE)));
+         	                    String urlTemplate = arg.getAttributeValue(
+         	                            new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
+         	                    boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
+         	                            new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
+         	                    String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
+                            	
+                            	UIComponent textArea  = new TextField(null, name, null, null, widgetName, null, isURL, urlTemplate, isPath, isReadOnly, false, tooltip, startsWith, request,true);
+                            	
+                            	builder.append("theTd"+a+".innerHTML = '" + textArea.generate() + "';");
+                            }
+                        	
+                        	//check the unbounded fields and get the widget names of them    
+                        	builder.append("theTr.appendChild(theTd"+a+");");
+                        }
+                        a++;
+                    }
+                    builder.append("var theTddelete = document.createElement('TD');");
+                	builder.append("var td3Inner = '<a class=\"icon-link\" title=\"delete\" onclick=\"delete"+widgetName+"_"+widgetName+"(this.parentNode.parentNode.rowIndex)\" style=\"background-image:url(../admin/images/delete.gif);\">Delete</a>';");
+                	builder.append("theTddelete.innerHTML = td3Inner;");
+                	builder.append("theTr.appendChild(theTddelete);");
+                	
+                	
+                	builder.append("var elem=theTr.getElementsByTagName('*'), i=0, e;");
+                	builder.append("var dateArr = new Array();");
+                	builder.append("var dateArrSize = 0;");
+                	builder.append("for (var i = 0; i < elem.length; ++i) {");
+                	
+                	builder.append("if (elem[i].id) {var idNewValue = elem[i].id + '_' + "+widgetName+"Count;var jdateId = '#' + elem[i].id;if (theTr.innerHTML.indexOf(jdateId) !== -1) {dateArr[dateArrSize] = idNewValue;dateArrSize++;}var reg = new RegExp(elem[i].id.toLowerCase(), 'g');theTr.innerHTML = theTr.innerHTML.replace(reg,idNewValue);reg = new RegExp(elem[i].id, 'g');theTr.innerHTML = theTr.innerHTML.replace(reg, idNewValue);}");
+                	builder.append("if(elem[i].name){var idNewValue = elem[i].name +'_'+ "+widgetName+"Count;	elem[i].name = idNewValue;}");
+                	                	
+                	builder.append("}");
+                	
+                	
+                    builder.append("endpointMgt.appendChild(theTr);");
+                    
+                    if(isDateFieldAdded){
+                    	 builder.append("for (var i = 0; i < dateArr.length; ++i) {var elementId = dateArr[i];var datePickValue = \"#\"+elementId;jQuery(datePickValue).datepicker();}");
+                    }
+                    
+                    builder.append("}");
+                    
+                    builder.append("function delete"+widgetName+"_"+widgetName+"(index){");
+                    builder.append("var endpointMgt = document.getElementById('"+widgetName+"Mgt');");
+                    builder.append("endpointMgt.parentNode.style.display = '';");
+                    builder.append("endpointMgt.parentNode.deleteRow(index);");
+
+                    builder.append("var table = endpointMgt.parentNode;");
+                    builder.append("var rows = table.getElementsByTagName('input');");
+
+                    builder.append("if (rows != null & rows.length == 0) {");
+                    builder.append("    endpointMgt.parentNode.style.display = 'none';");
+                    builder.append("}");
+                    builder.append("}");
+            	}
+            }            
+        }
+        return builder.toString();
+    }
+    
+	public String printWidget(String widget,String values,String id) {
+		
+		StringBuilder content = new StringBuilder();
+		if(UIGeneratorConstants.DATE_FIELD.equals(widget)){
+			content.append("<td><a class=\"icon-link\" style=\"background-image: url( ../admin/images/calendar.gif);\" onclick=\"jQuery('#" + id + "').datepicker( 'show' );\" href=\"javascript:void(0)\"></a>");
+			content.append("<input type=\"text\" name=\"" + id + "\" value=\""+ values +"\" id=\"" + id + "\" style=\"width:200px\"/></td>");			
+		} else if(UIGeneratorConstants.TEXT_AREA_FIELD.equals(widget)){
+			content.append("<td><textarea type=\"text\" name=\"" + id + "\" id=\"" + id + "\" style=\"width:200px\">"+ values +"</textarea></td>");			
+		} else if(UIGeneratorConstants.TEXT_FIELD.equals(widget)){
+			content.append("<td><input type=\"text\" name=\"" + id + "\" value=\""+ values +"\" id=\"" + id + "\" style=\"width:200px\"/></td>");			
+		} else if(UIGeneratorConstants.CHECKBOX_FIELD.equals(widget)){
+			content.append("<td><input type=\"checkbox\" name=\"" + id + "\" value=\""+ values +"\" id=\"" + id + "\" style=\"width:200px\"/></td>");			
+		} else{
+			content.append("<td><input type=\"text\" name=\"" + id + "\" value=\""+ values +"\" id=\"" + id + "\" style=\"width:200px\"/></td>");			
+		}
+			
+		return content.toString();
+	}
+	
+	public String printTextFieldX(String id, String mandatory,boolean isPath, boolean isReadOnly,
+            String tooltip, String startsWith,String value, HttpServletRequest request) {
+		StringBuilder element = new StringBuilder();
+        String selectResource = "";       
+        if (isPath) {
+            if (startsWith != null) {
+                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.services.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "' ,'" + startsWith + "');\"/>";
+            } else {
+                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.services.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+            }
+        }
+        if ("true".equals(mandatory)) {
+            element.append("<td><span class=\"required\">*</span><input type=\"text\" name=\"" + id
+                    + "\" title=\"" + tooltip + "\" id=\"" + id + "\" " + (value != null ?  "value=\"" + value + "\"" :"") +" style=\"width:" + 
+                    UIGeneratorConstants
+                    .DEFAULT_WIDTH+ "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td>");
+        } else {
+            element.append("<td><input type=\"text\" name=\"" + id
+                    + "\" title=\"" + tooltip + "\" id=\"" + id + "\" " + (value != null ?  "value=\"" + value + "\"" :"") +" style=\"width:" + (value != null ?  "value=\"" + value + "\"" :"") +
+                    UIGeneratorConstants
+                    .DEFAULT_WIDTH+ "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td>");
+        }        
+        return element.toString();
+	}
+	
+	public String printDateFeild(String id, String value, boolean isReadOnly,String tooltip) {
+		 StringBuilder element = new StringBuilder();
+		 value = StringEscapeUtils.escapeHtml(value);
+		 element.append("<td>");
+	        if (!isReadOnly) {
+	            element.append("<a class=\"icon-link\" style=\"background-image: " +
+	                    "url( ../admin/images/calendar.gif);\" onclick=\"jQuery('#" + id + "')" +
+	                    ".datepicker( 'show' );\" href=\"javascript:void(0)\"></a>");
+
+	        }
+	     element.append("<input type=\"text\" name=\"" + id + "\" title=\"" + tooltip + "\" style=\"width:" + UIGeneratorConstants.DATE_WIDTH 
+	        		+ "px\"" + (isReadOnly ? " readonly" : "") + " id=\"" + id + "\" " 
+	        		+ "value=\"" + value + "\" />" + "</td>");
+		 return element.toString();		
+	}
+	
+	public String printDropDownFeild(String id, String[] values,String value, String tooltip) {
+		StringBuilder dropDown = new StringBuilder();
+		dropDown.append("<td><select id=\"id_" + id + "\" " +
+                "name=\"" + id + "\" title=\"" + tooltip + "\">");
+
+        for (int i = 0; i < values.length; i++) {
+            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
+                    "\"");
+            if (values[i].equals(value)) {
+                dropDown.append(" selected>");
+            } else {
+                dropDown.append(">");
+            }
+            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
+            dropDown.append("</option>");
+        }
+        dropDown.append("</select></td>");
+		return dropDown.toString();
+	}
+	
+	public String printCheckboxFeild(String id, String value, String tooltip) {
+		if (Boolean.toString(true).equals(value)) {
+            return "<td><input type=\"checkbox\" checked=\"checked\" name=\"" + id +
+                    "\" value=\"true\" title=\"" + tooltip + "\"/></td>";
+        } else {
+            return "<td><input type=\"checkbox\" name=\"" + id +
+            		"\" value=\"true\" title=\"" + tooltip + "\"/></td>";
+        }
+	}
+	
+	
+	public String printDeleteWidget(String widget) {
+		
+		StringBuilder content = new StringBuilder();		
+		content.append("<td><a class=\"icon-link\" title=\"delete\" onclick=\"delete"+widget.replaceAll(" ", "")+"_"+widget.replaceAll(" ", "")+"(this.parentNode.parentNode.rowIndex)\" style=\"background-image:url(../admin/images/delete.gif);\">Delete</a></td>");			
+		return content.toString();
+	}
 
 }

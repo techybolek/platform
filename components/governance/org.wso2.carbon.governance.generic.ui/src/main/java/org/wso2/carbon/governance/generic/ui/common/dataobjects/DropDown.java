@@ -7,26 +7,33 @@ public class DropDown extends UIComponent {
 	private String[] values;
 	private String value;
 
-	public DropDown(String label, String name, String mandatory, String[] values,
-                                String widget, String value, String tooltip) {
-	    super(label, name, mandatory, widget, false, tooltip);
+	public DropDown(String label, String name,String id, String mandatory, String[] values,
+                                String widget, String value, String tooltip,boolean isJSGenerate) {
+	    super(label, name, id, mandatory, widget, false, tooltip, isJSGenerate);
 	    this.values = values;
 		this.value = value;
     }
 
 	@Override
 	public String generate() {
+		String id;		
+		if (this.id == null) {
+			id = "id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
+		} else {
+			id = this.id;
+		}
+		
 		StringBuilder dropDown = new StringBuilder();
         if ("true".equals(mandatory)) {
-            dropDown.append((label != null ? "<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" : "") +
-                    "<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                    "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                    "-") + "\" title=\"" + tooltip + "\">");
+            dropDown.append((label != null ? "<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>" : "") +
+                    "<td><select id=\"" + id + "\" " +
+                    "name=\"" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ",
+                    "") + "\" title=\"" + tooltip + "\">");
         } else {
-            dropDown.append((label != null ? "<tr><td class=\"leftCol-big\">" + label + "</td>\n" :"")+
-                    "<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                    "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                    "-") + "\" title=\"" + tooltip + "\">");
+            dropDown.append((label != null ? "<tr><td class=\"leftCol-big\">" + label + "</td>" :"")+
+                    "<td><select id=\"" + id + "\" " +
+                    "name=\"" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ",
+                    "") + "\" title=\"" + tooltip + "\">");
         }
 
         for (int i = 0; i < values.length; i++) {
