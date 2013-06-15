@@ -16,7 +16,6 @@
  */
 package org.wso2.carbon.governance.client.internal;
 
-import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.governance.client.WSRegistrySearchUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 /**
@@ -30,15 +29,11 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  */
 public class WSRegistrySearchComponent {
 
-    private ConfigurationContext configurationContext;
-
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
-        configurationContext = contextService.getClientConfigContext();
-        WSRegistrySearchUtils.setConfigurationContext(contextService.getServerConfigContext());
+        WSRegistrySearchUtils.setConfigurationContext(contextService.getClientConfigContext());
     }
 
     protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
-        configurationContext = null;
         WSRegistrySearchUtils.setConfigurationContext(null);
     }
 }
