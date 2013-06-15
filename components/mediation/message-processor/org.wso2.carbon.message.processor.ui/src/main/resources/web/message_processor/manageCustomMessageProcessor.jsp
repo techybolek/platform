@@ -545,7 +545,7 @@ function switchToSource() {
             <input type="submit" value="<fmt:message key="save"/>" class="button"
                    onclick="submitTextContent(document.Submit);"/>
             <input type="button" value="<fmt:message key="cancel"/>"
-                   onclick="javascript:document.location.href='index.jsp'"
+                   onclick="javascript:document.location.href='../message_processor/index.jsp?region=region1&item=messageProcessor_menu&ordinal=0'"
                    class="button"/>
         </td>
     </tr>
