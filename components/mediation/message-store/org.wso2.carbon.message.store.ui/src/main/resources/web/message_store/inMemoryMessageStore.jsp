@@ -34,7 +34,7 @@
 <carbon:breadcrumb
         label="in.memory.message.store"
         resourceBundle="org.wso2.carbon.message.store.ui.i18n.Resources"
-        topPage="false"
+        topPage="true"
         request="<%=request%>"/>
 
 <%
