@@ -130,6 +130,7 @@
                 <OpenIDConnect>
                          <IDTokenBuilder>org.wso2.carbon.identity.openidconnect.DefaultIDTokenBuilder</IDTokenBuilder>
                          <IDTokenIssuerID>https://localhost:9443/oauth2endpoints/token</IDTokenIssuerID>
+                         <IDTokenSubjectClaim>http://wso2.org/claims/fullname</IDTokenSubjectClaim>
                          <IDTokenExpiration>3600</IDTokenExpiration>
                          <UserInfoEndpointClaimDialect>http://wso2.org/claims</UserInfoEndpointClaimDialect>
                          <UserInfoEndpointClaimRetriever>org.wso2.carbon.identity.oauth.endpoint.user.impl.UserInfoUserStoreClaimRetriever</UserInfoEndpointClaimRetriever>
