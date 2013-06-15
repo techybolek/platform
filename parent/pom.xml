@@ -291,8 +291,8 @@
         <version.axis2.client>${orbit.version.axis2}</version.axis2.client>
         <version.axis2.jaxbri>${orbit.version.axis2}</version.axis2.jaxbri>
         <version.axis2.jibx>${orbit.version.axis2}</version.axis2.jibx>
-        <synapse.version>2.1.1-wso2v3</synapse.version>
-        <version.synapse>2.1.1-wso2v3</version.synapse>
+        <synapse.version>2.1.1-wso2v7</synapse.version>
+        <version.synapse>2.1.1-wso2v7</version.synapse>
         <version.lucene.core>2.3.2</version.lucene.core>
         <version.tomcat>7.0.34</version.tomcat>
         <version.apacheds.shared.ldap>0.9.18</version.apacheds.shared.ldap>
