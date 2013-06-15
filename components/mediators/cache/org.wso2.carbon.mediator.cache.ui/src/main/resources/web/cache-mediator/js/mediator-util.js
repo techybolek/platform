@@ -59,7 +59,6 @@ else{
 }
 
 function collectorSelector(dpBox){
-   
     var hasGenDiv = document.getElementById("hasGen");
     var hasGenValDiv = document.getElementById("hasGehVal");
     var timeoutDiv = document.getElementById("timeout");
@@ -99,21 +98,27 @@ function hideDivs(){
     var msgSizeValDiv = document.getElementById("msgSizeVal");
     var cacheDiv = document.getElementById("hideCacheDetails");
     var cacheHitDiv = document.getElementById("hideCachHit");
-   
-        hasGenDiv.style.display="none";
-        hasGenValDiv.style.display="none";
-        timeoutDiv.style.display="none";
-        timeoutValDiv.style.display="none";
-        msgSizeDiv.style.display="none";
-        msgSizeValDiv.style.display="none";
-        cacheDiv.style.display="none";
-        cacheHitDiv.style.display="none";
+
+    hasGenDiv.parentNode.parentNode.style.display="none";
+    // hasGenValDiv.style.display="none";
+    timeoutDiv.parentNode.parentNode.style.display="none";
+    //timeoutValDiv.style.display="none";
+    msgSizeDiv.parentNode.parentNode.style.display="none";
+    //msgSizeValDiv.style.display="none";
+    cacheDiv.parentNode.parentNode.style.display="none";
+    cacheHitDiv.parentNode.parentNode.style.display="none";
 
 }
 
 
 function cacheMediatorValidate() {
 
+
+
+	var cacheType = document.getElementsByName("cacheType");
+    if(cacheType[0].value == "Collector") {
+        return true;
+    }
 	var cacheTimeout = document.getElementsByName("cacheTimeout");
 	var maxMsgSize = document.getElementsByName("maxMsgSize");
 	var maxSize = document.getElementsByName("maxSize");
@@ -131,7 +136,7 @@ function cacheMediatorValidate() {
 		}
 	}
 
-	if (maxMsgSize[0].value != null) {
+	if (maxMsgSize[0].value != null && maxMsgSize[0].value != '') {
 		if (!isNumber(maxMsgSize[0].value)) {
 			CARBON.showErrorDialog(cachejsi18n["mediator.cache.maxmessage.error.only.integers"]);
 			return false
