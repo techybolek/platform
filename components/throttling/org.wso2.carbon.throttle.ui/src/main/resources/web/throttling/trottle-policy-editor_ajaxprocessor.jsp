@@ -262,11 +262,11 @@ function submitForm() {
         }
     }
     if (rows == 0 && document.getElementById("maxAccess").value == "") {
-        CARBON.showInfoDialog("<fmt:message key="throttling.no.config"/>");
+        CARBON.showErrorDialog("<fmt:message key="throttling.no.config"/>");
     } else if (rangeEmpty) {
-        CARBON.showInfoDialog("<fmt:message key="throttling.range.empty"/>");
+        CARBON.showErrorDialog("<fmt:message key="throttling.range.empty"/>");
     } else if (controlError) {
-        CARBON.showInfoDialog("<fmt:message key="throttling.no.max.req.count"/>");
+        CARBON.showErrorDialog("<fmt:message key="throttling.no.max.req.count"/>");
     } else {
         var referenceString = collectionFormData();
         var url = "../throttling/trottle-policy-update_ajaxprocessor.jsp?enable=Yes&<%= param%>" + referenceString;
