@@ -77,7 +77,7 @@ public class DBReportMediatorClient {
 
         for(WSDataSourceInfo info : wsDataSourceInfo){
 //            sourceList.add(info.getDsMetaInfo().getJndiConfig().getName());
-            sourceList.add(info.getDsMetaInfo().getName());
+            sourceList.add(info.getDsMetaInfo().getJndiConfig().getName());
         }
 
         return sourceList;
