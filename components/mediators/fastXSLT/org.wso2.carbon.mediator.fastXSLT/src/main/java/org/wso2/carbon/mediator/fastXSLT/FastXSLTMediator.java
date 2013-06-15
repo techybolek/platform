@@ -66,7 +66,7 @@ public class FastXSLTMediator extends AbstractMediator implements ManagedLifecyc
 	private static final String SOAP_11_ENV_ST = "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body>";
     private static final String SOAP_12_ENV_ST="<?xml version='1.0' encoding='utf-8'?><soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"><soap:Body>";
     private static final String SOAP_ENV_END_11 = "</soapenv:Body></soapenv:Envelope>";
-    private static final String SOAP_ENV_END_12 = "</<soap:Body></soap:Envelope>";
+    private static final String SOAP_ENV_END_12 = "</soap:Body></soap:Envelope>";
     
 	/**
      * The feature for which deciding switching between DOM and Stream during the
@@ -359,7 +359,7 @@ public class FastXSLTMediator extends AbstractMediator implements ManagedLifecyc
     private boolean isCreationOrRecreationRequired(MessageContext synCtx) {
 
         // Derive actual key from message context
-        String generatedXsltKey = xsltKey.getKeyValue();
+        String generatedXsltKey = xsltKey.evaluateValue(synCtx);
 
         // if there are no cachedTemplates inside cachedTemplatesMap or
         // if the template related to this generated key is not cached
