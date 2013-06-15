@@ -73,6 +73,9 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
             GenericArtifactManager manager = new GenericArtifactManager(registry, key);
             GenericArtifact artifact = manager.newGovernanceArtifact(
                     new StAXOMBuilder(reader).getDocumentElement());
+            
+            // want to save original content, so set content here
+            artifact.setContent(info.getBytes());
 
             manager.addGenericArtifact(artifact);
             if (lifecycleAttribute != null) {
@@ -617,6 +620,10 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
                     throw new Exception(msg);
                 }
                 artifact.setId(oldArtifact.getId());
+                
+                // want to save original content 
+                artifact.setContent(info.getBytes());
+                
                 manager.updateGenericArtifact(artifact);
             } else {
                 manager.addGenericArtifact(artifact);
