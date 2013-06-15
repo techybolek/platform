@@ -63,6 +63,7 @@ under the License.
                 method: 'post',
                 parameters: {id: id},
                 onSuccess: function(transport) {
+                	updateNotifications();
                 },
                 onFailure: function(transport) {
                     showRegistryError(transport.responseText);
@@ -70,8 +71,16 @@ under the License.
             });
         }, org_wso2_carbon_governance_notifications_ui_jsi18n["session.timed.out"]);
         jQuery('#notificationPopupView').toggle('slow');
-		updateNotifications();
     }
+    function updateNotifications() {
+    	 new Ajax.Request('../worklist/view-notifications-ajaxprocessor.jsp', {
+    		method: 'post',
+         	onSuccess: function(transport) {
+         		jQuery('#view-notifications-container').html(transport.responseText);
+             }        	
+         });
+    }
+    
 </script>
 
 <fmt:bundle basename="org.wso2.carbon.governance.notifications.ui.i18n.Resources">
