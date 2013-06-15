@@ -23,10 +23,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.openidconnect.as.messages.IDTokenBuilder;
 import org.apache.oltu.openidconnect.as.messages.IDTokenException;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * This is the IDToken generator for the OpenID Connect Implementation. This
@@ -41,19 +43,34 @@ public class DefaultIDTokenBuilder implements org.wso2.carbon.identity.openidcon
 	public String buildIDToken(OAuthTokenReqMessageContext request, OAuth2AccessTokenRespDTO tokenRespDTO)
 	                                                                                                      throws IdentityOAuth2Exception {
 		OAuthServerConfiguration config = OAuthServerConfiguration.getInstance();
-		String issuer = config.getOpenIDConnectIDTokenIssuer();
+		String issuer = config.getOpenIDConnectIDTokenIssuerIdentifier();
 		int lifetime = Integer.parseInt(config.getOpenIDConnectIDTokenExpiration()) * 1000;
 		int curTime = (int) Calendar.getInstance().getTimeInMillis();
+		// setting subject 
+		String subject = request.getAuthorizedUser();
+		String claim = config.getOpenIDConnectIDTokenSubClaim();
+		if (claim != null) {
+			String tenantUser = MultitenantUtils.getTenantAwareUsername(request.getAuthorizedUser());
+			String domainName = MultitenantUtils.getTenantDomain(request.getAuthorizedUser());
+			try {
+				subject =
+				          IdentityTenantUtil.getRealm(domainName, tenantUser).getUserStoreManager()
+				                            .getUserClaimValue(tenantUser, claim, null);
+			} catch (Exception e) {
+				throw new IdentityOAuth2Exception("Erro while generating the IDToken", e);
+			}
+		}
 
 		if (DEBUG) {
 			log.debug("Using issuer " + issuer);
+			log.debug("Subject " + subject);
 			log.debug("ID Token expiration seconds" + lifetime);
 			log.debug("Current time " + curTime);
 		}
 
 		try {
 			return new IDTokenBuilder().setIssuer(issuer)
-			                           .setSubject(request.getAuthorizedUser())
+			                           .setSubject(subject)
 			                           .setAudience(request.getOauth2AccessTokenReqDTO().getClientId())
 			                           .setAuthorizedParty(request.getOauth2AccessTokenReqDTO().getClientId())
 			                           .setExpiration(curTime + lifetime).setIssuedAt(curTime).buildIDToken();

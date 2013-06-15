@@ -136,6 +136,7 @@ public class OAuthServerConfiguration {
 		// OpenIDConnect confiurations
 		public static final String OPENID_CONNECT = "OpenIDConnect";
 		public static final String OPENID_CONNECT_IDTOKEN_BUILDER = "IDTokenBuilder";
+		public static final String OPENID_CONNECT_IDTOKEN_SUB_CLAIM = "IDTokenSubjectClaim";
 		public static final String OPENID_CONNECT_IDTOKEN_ISSUER_ID = "IDTokenIssuerID";
 		public static final String OPENID_CONNECT_IDTOKEN_EXPIRATION = "IDTokenExpiration";
 		public static final String OPENID_CONNECT_USERINFO_ENDPOINT_CLAIM_DIALECT =
@@ -223,7 +224,9 @@ public class OAuthServerConfiguration {
 	
 	private IDTokenBuilder openIDConnectIDTokenBuilder = null;
 	
-	private String openIDConnectIDTokenIssuer = "OIDCAuthzServer";
+	private String openIDConnectIDTokenIssuerIdentifier = "OIDCAuthzServer";
+	
+	private String openIDConnectIDTokenSubClaim = "http://wso2.org/claims/fullname";
 
 	private String openIDConnectIDTokenExpiration = "300";
 
@@ -509,8 +512,12 @@ public class OAuthServerConfiguration {
 	/**
 	 * @return the openIDConnectIDTokenIssuer
 	 */
-	public String getOpenIDConnectIDTokenIssuer() {
-		return openIDConnectIDTokenIssuer;
+	public String getOpenIDConnectIDTokenIssuerIdentifier() {
+		return openIDConnectIDTokenIssuerIdentifier;
+	}
+	
+	public String getOpenIDConnectIDTokenSubClaim() {
+		return openIDConnectIDTokenSubClaim;
 	}
 
 	/**
@@ -1072,8 +1079,13 @@ public class OAuthServerConfiguration {
 				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_BUILDER))
 				                                                    .getText().trim();
 			}
+			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_SUB_CLAIM)) != null) {
+				openIDConnectIDTokenSubClaim =
+				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_SUB_CLAIM))
+				                                                    .getText().trim();
+			}
 			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER_ID)) != null) {
-				openIDConnectIDTokenIssuer =
+				openIDConnectIDTokenIssuerIdentifier =
 				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER_ID))
 				                                                    .getText().trim();
 			}
