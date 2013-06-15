@@ -22,6 +22,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.CheckListItemCheckedEvent;
 import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.CheckListItemUncheckedEvent;
+import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleApprovalNeededEvent;
+import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleApprovalWithdrawnEvent;
+import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleApprovedEvent;
 import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleCreatedEvent;
 import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleDeletedEvent;
 import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleStateChangedEvent;
@@ -71,6 +74,9 @@ public class GovernanceEventingHandler extends Handler {
             /*Utils.getRegistryNotificationService().registerEventTypeExclusion("lifecycle.created", "/");
             Utils.getRegistryNotificationService().registerEventTypeExclusion("lifecycle.created", "/system");
             Utils.getRegistryNotificationService().registerEventTypeExclusion("lifecycle.created", "/system/.*");*/
+            Utils.getRegistryNotificationService().registerEventType("lifecycle.approved", LifeCycleApprovedEvent.EVENT_NAME, LifeCycleApprovedEvent.EVENT_NAME);
+            Utils.getRegistryNotificationService().registerEventType("lifecycle.approval.need", LifeCycleApprovalNeededEvent.EVENT_NAME, LifeCycleApprovalNeededEvent.EVENT_NAME);
+            Utils.getRegistryNotificationService().registerEventType("lifecycle.approval.withdrawn", LifeCycleApprovalWithdrawnEvent.EVENT_NAME, LifeCycleApprovalWithdrawnEvent.EVENT_NAME);
         } catch (Exception e) {
             handleException("Unable to register Event Types", e);
         }
@@ -91,7 +97,7 @@ public class GovernanceEventingHandler extends Handler {
         String lcName = newResource.getProperty("registry.LC.name");
         String oldLcName = oldResource.getProperty("registry.LC.name");
         if (lcName == null && oldLcName != null) {
-            RegistryEvent event = new LifeCycleDeletedEvent<String>(
+            RegistryEvent<String> event = new LifeCycleDeletedEvent<String>(
                     "[" + oldLcName + "] The LifeCycle was deleted for resource at "+relativePath+".");
             ((LifeCycleDeletedEvent)event).setResourcePath(relativePath);
             event.setParameter("LifecycleName", oldLcName);
@@ -103,7 +109,7 @@ public class GovernanceEventingHandler extends Handler {
             }
             return;
         } else if (lcName != null && oldLcName == null) {
-            RegistryEvent event = new LifeCycleCreatedEvent<String>(
+            RegistryEvent<String> event = new LifeCycleCreatedEvent<String>(
                     "[" + lcName + "] The LifeCycle was created for resource at "+relativePath+".");
             ((LifeCycleCreatedEvent)event).setResourcePath(relativePath);
             event.setParameter("LifecycleName", lcName);
@@ -113,8 +119,24 @@ public class GovernanceEventingHandler extends Handler {
             } catch (Exception e) {
                 handleException("Unable to send notification for Put Operation", e);
             }
+            // Below notification send when lifecycle assigned assert and at least one approval doesn't required 
+            // Preconditioned checklistitem check. 
+            if(sendInitialNotification(requestContext, relativePath)){
+            	RegistryEvent<String> approvalEvent = new LifeCycleApprovalNeededEvent<String>(
+                        "[" + lcName + "] The LifeCycle was created and some transitions are awating for approval, resource locate at "+ relativePath +".");
+           				((LifeCycleApprovalNeededEvent)approvalEvent).setResourcePath(relativePath);
+           		approvalEvent.setParameter("LifecycleName", lcName);
+           		approvalEvent.setTenantId(CurrentSession.getCallerTenantId());
+           		try {
+           			notify(approvalEvent, requestContext.getRegistry(), relativePath);
+                } catch (Exception e) {
+                	handleException("Unable to send notification for Put Operation", e);
+                }
+           		return;
+            }                  
             return;
         }
+        
         for (Map.Entry<Object, Object> e : props.entrySet()) {
             String propKey = (String) e.getKey();
             if (propKey.matches("registry\\p{Punct}.*\\p{Punct}checklist\\p{Punct}.*")) {
@@ -128,7 +150,7 @@ public class GovernanceEventingHandler extends Handler {
                     String oldLifeCycleState = null;
                     String newName = null;
                     String newValue = null;
-                    String newLifeCycleState = null;
+                    String newLifeCycleState = null;                   
                     for (String param : propValues) {
                         if (param.startsWith("status:")) {
                             oldLifeCycleState = param.substring(7);
@@ -152,8 +174,7 @@ public class GovernanceEventingHandler extends Handler {
                         !oldValue.equalsIgnoreCase(newValue)) {
                         RegistryEvent<String> event = null;
                         if (oldValue.equals(Boolean.toString(Boolean.TRUE)) ||
-                            oldValue.equals(Boolean.toString(Boolean.FALSE))) {
-                            String checkedState = null;
+                            oldValue.equals(Boolean.toString(Boolean.FALSE))) {                            
                             if (oldValue.equals(Boolean.toString(Boolean.TRUE))) {
                                 event = new CheckListItemUncheckedEvent<String>(
                                     "[" + lcName + "] The CheckList item '" + oldName + "' of LifeCycle State '" +
@@ -185,9 +206,10 @@ public class GovernanceEventingHandler extends Handler {
                 }
             }
         }
+        invokeApprovalNotification(requestContext, relativePath);
     }
 
-    @SuppressWarnings("unchecked")
+   @SuppressWarnings("unchecked")
     public void invokeAspect(RequestContext requestContext) throws RegistryException {
         Map<String, String> parameters = new HashMap<String, String>();
         Resource resource = requestContext.getOldResource();
@@ -276,6 +298,26 @@ public class GovernanceEventingHandler extends Handler {
         } catch (Exception e) {
             handleException("Unable to send notification for Aspect Invoke Operation", e);
         }
+        // When LC move one stage to another, Approval notification may send to user
+        if(sendInitialNotification(requestContext, relativePath)){        	
+        	RegistryEvent<String> approveEvent = new LifeCycleApprovalNeededEvent<String>(
+        			"[" + lcName + "] The LifeCycle State '" + newState +
+                    "' required approval for state transitions, for resource locate at "+relativePath +".");
+        	approveEvent.setParameter("LifecycleName", lcName);
+        	approveEvent.setParameter("OldLifecycleState", oldState);
+        	approveEvent.setParameter("NewLifecycleState", newState);
+            if(isEnvironmentChange){
+                ((LifeCycleApprovalNeededEvent)approveEvent).setResourcePath(relativeOldPath);
+            }else{
+                ((LifeCycleApprovalNeededEvent)approveEvent).setResourcePath(relativePath);
+            }
+            approveEvent.setTenantId(CurrentSession.getCallerTenantId());
+       		try {
+                notify(approveEvent, requestContext.getRegistry(), relativePath);
+            } catch (Exception e) {
+            	handleException("Unable to send notification for Put Operation", e);
+            }
+        }                  
     }
 
     protected void notify(RegistryEvent event, Registry registry, String path) throws Exception {
@@ -305,5 +347,119 @@ public class GovernanceEventingHandler extends Handler {
     private void handleException(String message, Exception e) {
         log.error(message, e);
     }
+    /**
+     * Send notification when Approval voting happened /approval notification removed
+     * 		Or when approval is enabled(after user click on checklist)
+     * @param requestContext
+     * @param relativePath
+     */
+    private void invokeApprovalNotification(RequestContext requestContext, String relativePath ){
+    	Resource oldResource = requestContext.getOldResource();
+        Resource newResource = requestContext.getResource();
+        
+        Properties props = oldResource.getProperties();
+        Properties newProps = newResource.getProperties();
+        
+    	String lcName = newResource.getProperty("registry.LC.name");
+       
+        
+    	for (Map.Entry<Object, Object> e : props.entrySet()) {
+            String propKey = (String) e.getKey();            
+            if(propKey.matches("registry\\p{Punct}.*\\p{Punct}votes\\p{Punct}.*")){
+            	 List<String> propValues = (List<String>) e.getValue();
+                 List<String> newPropValues = (List<String>) newProps.get(propKey);
+                 if ((propValues == null) || (newPropValues == null))
+                     continue;
+                 if ((propValues.size() > 2) && (newPropValues.size() > 2)) {
+	                 String oldName = null;
+	                 String oldValue = null;
+	                 int oldVote = 0;
+	                 String oldLifeCycleState = null;
+	                 String newName = null;
+	                 String newValue = null;
+	                 int newVote = 0;
+	                 String newLifeCycleState = null;
+	                 for (String param : propValues) {
+	                     if (param.startsWith("status:")) {
+	                         oldLifeCycleState = param.substring(7);
+	                     } else if (param.startsWith("name:")) {
+	                         oldName = param.substring(5);
+	                     } else if (param.startsWith("current:")) {
+	                         oldValue = param.substring(8);
+	                         oldVote = Integer.parseInt(oldValue);
+	                     }
+	                 }
+	                 for (String param : newPropValues) {
+	                     if (param.startsWith("status:")) {
+	                         newLifeCycleState = param.substring(7);
+	                     } else if (param.startsWith("name:")) {
+	                         newName = param.substring(5);
+	                     } else if (param.startsWith("current:")) {
+	                         newValue = param.substring(8);
+	                         newVote = Integer.parseInt(newValue);
+	                     }
+	                 }
+	                 if (oldName.equalsIgnoreCase(newName) &&
+	                         oldLifeCycleState.equalsIgnoreCase(newLifeCycleState) &&
+	                         !oldValue.equalsIgnoreCase(newValue)) {
+	                	 RegistryEvent<String> event = null;
+	                	 if(newVote > oldVote){
+	                		 event = new LifeCycleApprovedEvent<String>(
+	                                 "[" + lcName + "] LifeCycle State '" + oldLifeCycleState + "', transitions event '" + oldName + "'" +
+	                                 		 " was approved for resource at "+relativePath +".");
+	                             ((LifeCycleApprovedEvent)event).setResourcePath(relativePath);
+	                	 }else{
+	                		 event = new LifeCycleApprovalWithdrawnEvent<String>(
+	                				 "[" + lcName + "] LifeCycle State '" + oldLifeCycleState + "' transitions event '" + oldName + "'" +
+	                                 		 " approvel was removed for resource at "+relativePath +".");
+	                             ((LifeCycleApprovalWithdrawnEvent)event).setResourcePath(relativePath);
+	                	 }
+	                	 event.setParameter("LifecycleName", lcName);
+	                     event.setParameter("LifecycleState", oldLifeCycleState);
+	                     event.setParameter("CheckItem", oldName);
+	                     event.setTenantId(CurrentSession.getCallerTenantId());
+	                     try {
+	                         notify(event, requestContext.getRegistry(), relativePath);
+	                     } catch (Exception ex) {
+	                         handleException("Unable to send notification for Put Operation", ex);
+	                     }                	 
+	                 }
+                 }  
+            }
+    	}
+    }
+    
+    /**
+     * 
+     * @param requestContext
+     * @param relativePath
+     * @return boolean True value return when at least one approval doesn't dependent on check list.
+     */
+    private boolean sendInitialNotification(RequestContext requestContext, String relativePath) {    	
+        Resource newResource = requestContext.getResource(); 
+        Properties newProps = newResource.getProperties();    	
+    	boolean sendNotification =  false;    	
+    	for (Map.Entry<Object, Object> e : newProps.entrySet()) {
+            String propKey = (String) e.getKey();
+            if (propKey.matches("registry\\p{Punct}.*\\p{Punct}votes\\p{Punct}.*")) {               
+                List<String> newPropValues = (List<String>) newProps.get(propKey);
+                if (newPropValues == null)
+                    continue;
+                if (newPropValues.size() > 2) {                   
+                    String newName = null;
+                    for (String param : newPropValues) {
+                        if (param.startsWith("name:")) {
+                            newName = param.substring(5);
+                        }
+                    }
+                    if(newName !=  null && !newName.isEmpty()){
+                    	sendNotification = true;
+                    	return sendNotification;
+                    }
+                }
+            }
+    	}
+    	return sendNotification;
+	}
 }
 

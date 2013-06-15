@@ -44,11 +44,11 @@ public class Utils {
 
     private static String remoteSubscriptionStoreContext;
 
-    public static synchronized void setRegistryService(RegistryService service) {
+    public static void setRegistryService(RegistryService service) {
         registryService = service;
     }
 
-    public static synchronized RegistryService getRegistryService() {
+    public static RegistryService getRegistryService() {
         return registryService;
     }
 
@@ -84,11 +84,11 @@ public class Utils {
         Utils.remoteSubscriptionStoreContext = remoteSubscriptionStoreContext;
     }
 
-    public static synchronized NotificationService getRegistryNotificationService() {
+    public static NotificationService getRegistryNotificationService() {
         return registryNotificationService;
     }
 
-    public static synchronized void setRegistryNotificationService(NotificationService registryNotificationService) {
+    public static void setRegistryNotificationService(NotificationService registryNotificationService) {
         Utils.registryNotificationService = registryNotificationService;
     }
 }
