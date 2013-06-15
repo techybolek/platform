@@ -35,7 +35,11 @@
             for (int i = 0; i < count; i++) {
                 String paramName = request.getParameter("param" + i);
                 if (paramName != null && !"".equals(paramName.trim())) {
-                    paramList.add(paramName);
+                    if (!(paramList.contains(paramName.toString())))
+                    {
+                        paramList.add(paramName);
+                    }
+
                 }
                 //System.out.println("param name ....." + paramName);
             }

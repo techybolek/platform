@@ -109,7 +109,9 @@ function handleParamAdd(templateName, count) {
                     error: function(msg) {
 //                        CARBON.showErrorDialog('<fmt:message key="template.trace.enable.link"/>' +
 //                                               ' ' + templateName);
-                    }
+                    },
+                    async: false
+
                 });
 }
 
