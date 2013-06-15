@@ -23,21 +23,16 @@ import org.wso2.carbon.registry.core.Registry;
 public class FilterFactory {
 
     public enum FilterTypes {
-        SERVICE, WSDL, SCHEMA, POLICY
+        GENERIC
     }
 
-    public static FilterStrategy createFilter(String type, String criteria,
-                                              Registry governanceRegistry) throws Exception {
+    public static FilterStrategy createFilter(String type, String criteria, Registry governanceRegistry, String artifactKey)
+            throws Exception {
         FilterTypes types = FilterTypes.valueOf(type.toUpperCase());
         switch (types) {
-            case SERVICE:
-                return new FilterService(criteria, governanceRegistry);
-            case SCHEMA:
-                return new FilterSchema(criteria, governanceRegistry);
-            case WSDL:
-                return new FilterWSDL(criteria, governanceRegistry);
-            case POLICY:
-                return new FilterPolicy(criteria, governanceRegistry);
+
+            case GENERIC:
+                return new FilterGenericArtifact(criteria, governanceRegistry,artifactKey);
             default:
                 throw new Exception("Unsupported filter strategy");
         }

@@ -110,9 +110,18 @@ public class GovernanceMgtUIListMetadataServiceComponent {
                                 org.wso2.carbon.registry.extensions.utils.CommonUtil
                                         .acquireUpdateLock();
                                 try {
-                                    if (!CommonUtil.validateXMLConfigOnSchema(
-                                            RegistryUtils.decodeBytes((byte[])
-                                                    requestContext.getResource().getContent()),
+                                    String rxtContent;
+                                    Object rxtObj = requestContext.getResource().getContent();
+
+                                    if (rxtObj instanceof byte[]) {
+                                        rxtContent = RegistryUtils.decodeBytes(
+                                                (byte[]) requestContext.getResource().getContent());
+                                    } else if (rxtObj instanceof String) {
+                                        rxtContent = rxtObj.toString();
+                                    } else {
+                                        throw new RegistryException("Invalid RXT");
+                                    }
+                                    if (!CommonUtil.validateXMLConfigOnSchema(rxtContent,
                                             "rxt-ui-config")) {
                                         throw new RegistryException("Violation of RXT definition in" +
                                                 " configuration file, follow the schema correctly..!!");
@@ -150,9 +159,9 @@ public class GovernanceMgtUIListMetadataServiceComponent {
                                 if (systemRegistry.resourceExists(GovernanceConstants.ARTIFACT_CONTENT_PATH + needToDelete)) {
                                     systemRegistry.delete(GovernanceConstants.ARTIFACT_CONTENT_PATH + needToDelete);
                                 }
-                                GovernanceUtils.loadGovernanceArtifacts((UserRegistry) systemRegistry);
                                 List<GovernanceArtifactConfiguration> configurations =
                                         GovernanceUtils.findGovernanceArtifactConfigurations(systemRegistry);
+                                GovernanceUtils.loadGovernanceArtifacts((UserRegistry) systemRegistry, configurations);
                                 for (GovernanceArtifactConfiguration configuration : configurations) {
                                     for (ManagementPermission uiPermission : configuration.getUIPermissions()) {
                                         String resourceId = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
@@ -232,7 +241,8 @@ public class GovernanceMgtUIListMetadataServiceComponent {
                             }
                         });
             }
-           CommonUtil.schedulePreFetchTasks();
+            //After pagination we don't need the artifact pre-fetch anymore.
+            //CommonUtil.schedulePreFetchTasks();
         } catch (RegistryException e) {
             log.error("Unable to load governance artifacts.", e);
         }

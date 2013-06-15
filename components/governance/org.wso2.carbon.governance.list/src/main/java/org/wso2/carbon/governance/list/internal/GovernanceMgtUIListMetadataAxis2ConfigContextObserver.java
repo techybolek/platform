@@ -60,7 +60,8 @@ public class GovernanceMgtUIListMetadataAxis2ConfigContextObserver implements
                 cache = ArtifactCacheFactory.createArtifactCache();
                 ArtifactCacheManager.getCacheManager().addTenantArtifactCache(cache,tenantId);
             }
-            CommonUtil.schedulePreFetchTasks();
+              //After pagination we don't need the artifact pre-fetch anymore.
+              //CommonUtil.schedulePreFetchTasks();
         } catch (RegistryException e) {
             log.error("Unable to load governance artifacts.", e);
         }

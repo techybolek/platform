@@ -21,6 +21,7 @@ package org.wso2.carbon.governance.list.util.task;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.list.util.CommonUtil;
@@ -31,6 +32,7 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
+import java.util.List;
 import java.util.Map;
 
 public class PreFetchTask implements Task {
@@ -50,10 +52,10 @@ public class PreFetchTask implements Task {
     public void init() {
         try {
             UserRegistry userRegistry =
-                        CommonUtil.getRegistryService().getRegistry(
-                                CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+                    CommonUtil.getRegistryService().getRegistry(
+                            CarbonConstants.REGISTRY_SYSTEM_USERNAME);
             this.governanceRegistry =
-                        GovernanceUtils.getGovernanceSystemRegistry(userRegistry);
+                    GovernanceUtils.getGovernanceSystemRegistry(userRegistry);
         } catch (RegistryException e) {
             log.error("Error occurred while retrieving user registry", e);
         }
@@ -62,12 +64,22 @@ public class PreFetchTask implements Task {
     @Override
     public void execute() {
         try {
-            FilterStrategy filterStrategy =
-                    FilterFactory.createFilter(artifactType, null, governanceRegistry);
             UserRegistry userRegistry =
                     CommonUtil.getRegistryService().getRegistry(
                             CarbonConstants.REGISTRY_SYSTEM_USERNAME);
-            ArtifactPopulator.getArtifactPopulator().populateTenantArtifactCache(filterStrategy,userRegistry);
+            if (artifactType.equals(FilterFactory.FilterTypes.GENERIC.toString())) {
+                List<GovernanceArtifactConfiguration> configurationList =
+                        GovernanceUtils.findGovernanceArtifactConfigurations(governanceRegistry);
+                GovernanceArtifactConfiguration[] configurations =
+                        configurationList.toArray(new GovernanceArtifactConfiguration[configurationList.size()]);
+                for (GovernanceArtifactConfiguration configuration : configurations) {
+
+                    FilterStrategy filterStrategy =
+                            FilterFactory.createFilter(artifactType, null, governanceRegistry, configuration.getKey());
+                    ArtifactPopulator.getArtifactPopulator().populateTenantArtifactCache(filterStrategy, userRegistry);
+                }
+
+            }
         } catch (Exception e) {
             log.error("Error occurred while populating the cache", e);
         }

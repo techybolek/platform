@@ -76,10 +76,8 @@ public class CommonUtil {
     private static TaskService taskService;
     private static TaskManager taskManager;
 
-    public static synchronized void setRegistryService(RegistryService service) {
-        if (registryService == null) {
-            registryService = service;
-        }
+    public static void setRegistryService(RegistryService service) {
+        registryService = service;
     }
 
     public static RegistryService getRegistryService() {
@@ -331,9 +329,9 @@ public class CommonUtil {
 
     public static void configureGovernanceArtifacts(Registry systemRegistry, AxisConfiguration axisConfig)
             throws RegistryException {
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) systemRegistry);
         List<GovernanceArtifactConfiguration> configurations =
                 GovernanceUtils.findGovernanceArtifactConfigurations(systemRegistry);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) systemRegistry, configurations);
         Registry governanceSystemRegistry = GovernanceUtils.getGovernanceSystemRegistry(systemRegistry);
 
         for (GovernanceArtifactConfiguration configuration : configurations) {
@@ -544,21 +542,10 @@ public class CommonUtil {
 
     public static void schedulePreFetchTasks() {
         try {
+            //Generic Task manage the service,policy,wsdl and schema too.
             if (!CommonUtil.getTaskManager().isTaskScheduled(
-                    GovernanceConstants.ArtifactTypes.SERVICE)) {
-                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.SERVICE);
-            }
-            if (!CommonUtil.getTaskManager().isTaskScheduled(
-                    GovernanceConstants.ArtifactTypes.WSDL)) {
-                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.WSDL);
-            }
-            if (!CommonUtil.getTaskManager().isTaskScheduled(
-                    GovernanceConstants.ArtifactTypes.SCHEMA)) {
-                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.SCHEMA);
-            }
-            if (!CommonUtil.getTaskManager().isTaskScheduled(
-                    GovernanceConstants.ArtifactTypes.POLICY)) {
-                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.POLICY);
+                    GovernanceConstants.ArtifactTypes.GENERIC)) {
+                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.GENERIC);
             }
         } catch (TaskException e) {
             e.printStackTrace();

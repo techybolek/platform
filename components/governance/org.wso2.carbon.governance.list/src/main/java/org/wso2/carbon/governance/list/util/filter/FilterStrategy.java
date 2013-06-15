@@ -27,9 +27,12 @@ public abstract class FilterStrategy {
     private String criteria;
     private Registry governanceRegistry;
 
-    public FilterStrategy(String criteria, Registry governanceRegistry) {
+    private String artifactKey;
+
+    protected FilterStrategy(String criteria, Registry governanceRegistry, String artifactKey) {
         this.criteria = criteria;
         this.governanceRegistry = governanceRegistry;
+        this.artifactKey = artifactKey;
     }
 
     public abstract GovernanceArtifact[] getArtifacts() throws RegistryException;
@@ -40,6 +43,14 @@ public abstract class FilterStrategy {
 
     public Registry getGovernanceRegistry() {
         return governanceRegistry;
+    }
+
+    public String getArtifactKey() {
+        return artifactKey;
+    }
+
+    public void setArtifactKey(String artifactKey) {
+        this.artifactKey = artifactKey;
     }
 
 }

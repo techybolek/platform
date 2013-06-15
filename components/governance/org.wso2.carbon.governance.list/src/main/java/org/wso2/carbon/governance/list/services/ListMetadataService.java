@@ -86,7 +86,7 @@ public class ListMetadataService extends AbstractAdmin implements
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
         GovernanceArtifact[] artifacts = new GovernanceArtifact[0];
         try {
-            artifacts = (new FilterWSDL(null, registry)).getArtifacts();
+            artifacts = (new FilterWSDL(null, registry,null)).getArtifacts();
         } catch (RegistryException e) {
             log.error("An error occurred while obtaining the list of WSDLs.", e);
         }
@@ -99,7 +99,7 @@ public class ListMetadataService extends AbstractAdmin implements
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
         GovernanceArtifact[] artifacts = new GovernanceArtifact[0];
         try {
-            artifacts = (new FilterWSDL(wsdlName, registry)).getArtifacts();
+            artifacts = (new FilterWSDL(wsdlName, registry,null)).getArtifacts();
         } catch (Exception e) {
             log.error("An error occurred while obtaining the list of WSDLs.", e);
         }
@@ -111,7 +111,7 @@ public class ListMetadataService extends AbstractAdmin implements
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
         GovernanceArtifact[] artifacts = new GovernanceArtifact[0];
         try {
-            artifacts = (new FilterPolicy(null, registry)).getArtifacts();
+            artifacts = (new FilterPolicy(null, registry,null)).getArtifacts();
         } catch (RegistryException e) {
             log.error("An error occurred while obtaining the list of policies.", e);
         }
@@ -123,7 +123,7 @@ public class ListMetadataService extends AbstractAdmin implements
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
         GovernanceArtifact[] artifacts = new GovernanceArtifact[0];
         try {
-            artifacts = (new FilterPolicy(policyName, registry)).getArtifacts();
+            artifacts = (new FilterPolicy(policyName, registry,null)).getArtifacts();
         } catch (RegistryException e) {
             log.error("An error occurred while obtaining the list of policies.", e);
         }
@@ -135,7 +135,7 @@ public class ListMetadataService extends AbstractAdmin implements
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
         GovernanceArtifact[] artifacts = new GovernanceArtifact[0];
         try {
-            artifacts = (new FilterSchema(null, registry)).getArtifacts();
+            artifacts = (new FilterSchema(null, registry,null)).getArtifacts();
         } catch (RegistryException e) {
             log.error("An error occurred while obtaining the list of schemas.", e);
         }
@@ -144,17 +144,12 @@ public class ListMetadataService extends AbstractAdmin implements
 
     }
 
-    public String[] getAllLifeCycleState(String s) {
-        // TODO Implement this properly. This is added to fix the the compilation error when creating 4.1.0-SNAPSHOT trunk
-        return new String[0];
-    }
-
     public SchemaBean listSchemaByName(String schemaName)throws Exception{
         RegistryUtils.recordStatistics();
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
         GovernanceArtifact[] artifacts = new GovernanceArtifact[0];
         try {
-            artifacts = (new FilterSchema(schemaName, registry)).getArtifacts();
+            artifacts = (new FilterSchema(schemaName, registry,null)).getArtifacts();
         } catch (RegistryException e) {
             log.error("An error occurred while obtaining the list of schemas.", e);
         }
@@ -320,6 +315,9 @@ public class ListMetadataService extends AbstractAdmin implements
     }
 
 
+    public String[] getAllLifeCycleState(String LCName) {
+        return new String[0];
+    }
 
 
 

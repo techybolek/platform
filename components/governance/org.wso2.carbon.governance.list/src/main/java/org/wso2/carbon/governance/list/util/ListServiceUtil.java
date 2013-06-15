@@ -21,7 +21,7 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.services.dataobjects.ServiceImpl;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.list.beans.ServiceBean;
-import org.wso2.carbon.governance.list.util.filter.FilterService;
+import org.wso2.carbon.governance.list.util.filter.FilterGenericArtifact;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -46,7 +46,7 @@ public class ListServiceUtil {
                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
 
         try {
-            artifacts = (new FilterService(criteria, registry)).getArtifacts();
+            artifacts = (new FilterGenericArtifact(criteria, registry,"service")).getArtifacts();
         } catch (RegistryException e) {
             log.error("An error occurred while obtaining the list of services.", e);
         }
