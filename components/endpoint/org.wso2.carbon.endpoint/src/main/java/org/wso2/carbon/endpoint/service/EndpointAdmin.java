@@ -618,6 +618,27 @@ public class EndpointAdmin extends AbstractServiceBusAdmin {
     }
 
     /**
+     * Check registry is available or not
+     * @return boolean
+     * @throws EndpointAdminException
+     */
+
+    public boolean isRegisterNull() throws EndpointAdminException{
+        final Lock lock = getLock();
+        try {
+            lock.lock();
+            SynapseConfiguration synConfig = getSynapseConfiguration();
+            Registry registry = synConfig.getRegistry();
+            if (registry == null) {
+                return true;
+            }
+        } finally {
+            lock.unlock();
+        }
+        return false;
+    }
+
+    /**
      * Get all endpoints stored in the registry
      *
      * @return endpoints in the registry
