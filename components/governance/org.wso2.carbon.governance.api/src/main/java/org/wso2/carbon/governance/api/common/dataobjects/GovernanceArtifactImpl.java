@@ -136,25 +136,32 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
     private void serializeToAttributes(OMElement contentElement, String parentAttributeName)
             throws GovernanceException {
         Iterator childIt = contentElement.getChildren();
-        while (childIt.hasNext()) {
-            Object childObj = childIt.next();
-            if (childObj instanceof OMElement) {
-                OMElement childElement = (OMElement) childObj;
-                String elementName = childElement.getLocalName();
-                String attributeName =
-                        (parentAttributeName == null ? "" : parentAttributeName + "_") +
-                                elementName;
-                serializeToAttributes(childElement, attributeName);
-            } else if (childObj instanceof OMText) {
-                OMText childText = (OMText) childObj;
-                if (childText.getNextOMSibling() == null &&
-                        childText.getPreviousOMSibling() == null) {
-                    // if it is only child, we consider it is a value.
-                    String textValue = childText.getText();
-                    addAttribute(parentAttributeName, textValue);
+        if (childIt.hasNext()) {
+        	while (childIt.hasNext()) {
+                Object childObj = childIt.next();
+                if (childObj instanceof OMElement) {
+                    OMElement childElement = (OMElement) childObj;
+                    String elementName = childElement.getLocalName();
+                    String attributeName =
+                            (parentAttributeName == null ? "" : parentAttributeName + "_") +
+                                    elementName;
+                    serializeToAttributes(childElement, attributeName);
+                } else if (childObj instanceof OMText) {
+                    OMText childText = (OMText) childObj;
+                    if (childText.getNextOMSibling() == null &&
+                            childText.getPreviousOMSibling() == null) {
+                        // if it is only child, we consider it is a value.
+                        String textValue = childText.getText();
+                        addAttribute(parentAttributeName, textValue);
+                    }
                 }
             }
+        } else {
+        	if(contentElement != null && !contentElement.getChildElements().hasNext()){
+        		addAttribute(parentAttributeName, null);
+        	}
         }
+        
     }
 
     public static GovernanceArtifactImpl create(final Registry registry, final String artifactId)

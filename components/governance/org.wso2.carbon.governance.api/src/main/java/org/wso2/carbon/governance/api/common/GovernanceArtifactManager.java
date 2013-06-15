@@ -523,43 +523,69 @@ public class GovernanceArtifactManager {
                     return;
                 }
             }
-            OMNamespace namespace = OMAbstractFactory.getOMFactory().
-                    createOMNamespace(artifactElementNamespace, "");
-            Map<String, OMElement> elementsMap = new HashMap<String, OMElement>();
-            String[] attributeKeys = artifact.getAttributeKeys();
-            if (attributeKeys != null) {
-                OMElement contentElement =
-                        OMAbstractFactory.getOMFactory().createOMElement(
-                                artifactElementRoot, namespace);
-                for (String aggregatedKey : attributeKeys) {
-                    String[] keys = aggregatedKey.split("_");
-                    String elementsMapKey = null;
-                    OMElement parentKeyElement = contentElement;
-                    for (int i = 0; i < keys.length - 1; i++) {
-                        String key = keys[i];
-                        elementsMapKey = (elementsMapKey == null ? "" : elementsMapKey + "_") + key;
-                        OMElement keyElement = elementsMap.get(elementsMapKey);
-                        if (keyElement == null) {
-                            keyElement = OMAbstractFactory.getOMFactory()
-                                    .createOMElement(key, namespace);
-                            parentKeyElement.addChild(keyElement);
-                            elementsMap.put(elementsMapKey, keyElement);
-                        }
-                        parentKeyElement = keyElement;
-                    }
-                    String[] attributeValues = artifact.getAttributes(aggregatedKey);
+            OMNamespace namespace = OMAbstractFactory.getOMFactory().createOMNamespace(artifactElementNamespace, "");
+            Map<String, HashMap> mainElementMap = new HashMap<String, HashMap>();
+            String[] attributeKeys2 = artifact.getAttributeKeys();
+            if (attributeKeys2 != null) {
+            	for (String aggregatedKey : attributeKeys2) {
+            		String[] keys = aggregatedKey.split("_");
+            		String key = null;
+            		for (int i = 0; i < keys.length - 1; i++) {
+            			key = keys[i];
+            			if (mainElementMap.get(key) == null){
+            				mainElementMap.put(key, new HashMap<String, String[]>());
+            			}
+            		}
+            		String[] attributeValues = artifact.getAttributes(aggregatedKey);
                     String elementName = keys[keys.length - 1];
-                    for (String value : attributeValues) {
-                        OMElement keyElement = OMAbstractFactory.getOMFactory()
-                                .createOMElement(elementName, namespace);
-                        OMText textElement = OMAbstractFactory.getOMFactory().createOMText(value);
-                        keyElement.addChild(textElement);
-                        parentKeyElement.addChild(keyElement);
-                    }
-                }
-                String updatedContent = GovernanceUtils.serializeOMElement(contentElement);
-                resource.setContent(updatedContent);
+                    mainElementMap.get(key).put(elementName,attributeValues);
+                    
+            	}
+            	
             }
+            
+            OMElement contentElement = OMAbstractFactory.getOMFactory().createOMElement(artifactElementRoot, namespace);
+            
+            Iterator it = mainElementMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, HashMap> pairs = (Map.Entry)it.next();
+                
+                Map<String, Map>  subElementMap = pairs.getValue();
+                Iterator subit = subElementMap.entrySet().iterator();
+                int size = 0;
+                while (subit.hasNext()) {
+                	Map.Entry<String, String[]> subpairs = (Map.Entry)subit.next();
+                	if (size < subpairs.getValue().length) {
+                		size = subpairs.getValue().length;
+                	}                	
+                }
+                for (int i = 0; i < size; i++) {
+                	OMElement keyElement =  OMAbstractFactory.getOMFactory().createOMElement(pairs.getKey(), namespace);
+                	Iterator subit2 = subElementMap.entrySet().iterator();
+                	int a = 0;
+                	while (subit2.hasNext()) {
+                		
+                		Map.Entry<String, String[]> subpairs = (Map.Entry)subit2.next();
+                		String value ;
+                		try {
+                			value = subpairs.getValue()[i];
+                		} catch (Exception ex) {
+                			value = null;
+                		}	
+                		
+                		OMElement subkeyElement = OMAbstractFactory.getOMFactory().createOMElement(subpairs.getKey(), namespace);
+                        OMText textElement = OMAbstractFactory.getOMFactory().createOMText(value);
+                        subkeyElement.addChild(textElement);
+                        keyElement.addChild(subkeyElement);
+                		
+                		a++;
+                	}
+                	contentElement.addChild(keyElement);
+                }
+            }
+            String updatedContent = GovernanceUtils.serializeOMElement(contentElement);
+            resource.setContent(updatedContent);   
+            
         } catch (RegistryException e) {
             String msg;
             if (artifact.getPath() != null) {
