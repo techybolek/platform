@@ -1,20 +1,20 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- ~
- ~ WSO2 Inc. licenses this file to you under the Apache License,
- ~ Version 2.0 (the "License"); you may not use this file except
- ~ in compliance with the License.
- ~ You may obtain a copy of the License at
- ~
- ~    http://www.apache.org/licenses/LICENSE-2.0
- ~
- ~ Unless required by applicable law or agreed to in writing,
- ~ software distributed under the License is distributed on an
- ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~ KIND, either express or implied.  See the License for the
- ~ specific language governing permissions and limitations
- ~ under the License.
- -->
+~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+~
+~ WSO2 Inc. licenses this file to you under the Apache License,
+~ Version 2.0 (the "License"); you may not use this file except
+~ in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~ http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing,
+~ software distributed under the License is distributed on an
+~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~ KIND, either express or implied. See the License for the
+~ specific language governing permissions and limitations
+~ under the License.
+-->
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
 <%@ page import="org.wso2.carbon.mediator.fault.FaultMediator" %>
 <%@ page import="org.wso2.carbon.mediator.fault.ui.util.FaultUtil" %>
@@ -57,6 +57,7 @@
 
 <script type="text/javascript" src="../makefault-mediator/js/mediator-util.js"></script>
 <div>
+
 <table class="normal" width="100%">
 <tr>
 <td>
@@ -201,13 +202,16 @@
             }
         %>
 
+    </td>
+    <td valign="top" align="left">
+        <br/>
+
         <a onclick="showNameSpaceEditor('name_space');"
            style="padding-left: 40px;<% if(!isNSEditorRequired) {%>display:none;<%} %>"
            class="nseditor-icon-link" href="#nsEditorLink" id="nmsp_button"><fmt:message
                 key="mediator.fault.nameSpaces"/></a>
-        <a name="nsEditorLink"/>
+        <a name="string_nsEditorLink"/>
 
-        <div id="nsEditor" style="display:none;"/>
     </td>
 </tr>
 <tr id ="fault_actor_table_row" <% if (faultMediator.getSoapVersion() == 3) { %> style="display:none;" <% } %> >
@@ -252,29 +256,91 @@
         <fmt:message key="mediator.fault.detail"/>
     </td>
     <td>
+
         <%
-            if (faultMediator.getFaultDetail() == null && faultMediator.getFaultDetailElements().size() == 0) {
+            if (faultMediator.getFaultDetail() != null) {
+        %>
+        <input type="radio" name="fault_detail" value="value" checked="true"
+               onclick="changeButton('detail_value');">value
+        <input type="radio" name="fault_detail" value="expression"
+               onclick="changeButton('detail_expression');">expression
+        <%
+        } else if (faultMediator.getFaultDetailExpr() != null) {
+        %>
+        <input type="radio" name="fault_detail" value="value"
+               onclick="changeButton('detail_value');">value
+        <input type="radio" name="fault_detail" value="expression" checked="true"
+               onclick="changeButton('detail_expression');">expression
+
+        <%
+        } else {
+        %>
+
+        <input type="radio" name="fault_detail" value="value" checked="true"
+               onclick="changeButton('detail_value');">value
+        <input type="radio" name="fault_detail" value="expression"
+               onclick="changeButton('detail_expression');">expression
+        <%
+            }
+        %>
+        <br/>
+
+        <%
+            boolean isNSEditorRequiredForDetail = false;
+
+            NameSpacesRegistrar nameSpacesRegistrarForDetail = NameSpacesRegistrar.getInstance();
+            nameSpacesRegistrarForDetail.registerNameSpaces(faultMediator.getFaultDetailExpr(), "detail", session);
+            if (faultMediator.getFaultDetailExpr() != null &&
+                    faultMediator.getFaultDetailExpr().getRootExpr() != null &&
+                    faultMediator.getFaultDetailExpr().getRootExpr().getText() != null) {
+                isNSEditorRequiredForDetail = true;
+                String detailXPathString = FaultUtil.repalceDoubleQuotation(faultMediator.getFaultDetailExpr().getRootExpr().getText());
+                //TODO: why do we need to set the expression as followings, the comment line
+                //FaultUtil.repalceDoubleQuotation(faultMediator.getFaultReasonExpr().getRootExpr().getText());
+                // setting the expression as below would be enough
+
+        %>
+        <textarea cols="30" rows="8" class="longInput" type="text" id="detail"
+                  name="detail"><%=detailXPathString%>
+        </textarea>
+
+        <%
+        } else if (faultMediator.getFaultDetail() == null && faultMediator.getFaultDetailElements().size() == 0) {
         %>
         <textarea cols="30" rows="8" class="longInput" type="text" id="detail" name="detail"/>
         <%
-        } else if (faultMediator.getFaultDetail() != null){
+        } else if (faultMediator.getFaultDetail() != null) {
         %>
         <textarea cols="30" rows="8" class="longInput" type="text" id="detail"
                   name="detail"><%=faultMediator.getFaultDetail()%>
         </textarea>
         <%
-        } else if (faultMediator.getFaultDetailElements().size() > 0){
+        } else if (faultMediator.getFaultDetailElements().size() > 0) {
             String detail = "";
             for (OMElement e : faultMediator.getFaultDetailElements()) {
                 detail += e.toString();
             }
-        %>
+        %>                                                                     '
+
         <textarea cols="30" rows="8" class="longInput" type="text" id="detail"
                   name="detail"><%=detail%>
         </textarea>
+
         <%
-        }
+            }
         %>
+
+    </td>
+    <td valign="top" align="left">
+        <br/>
+
+        <a onclick="showNameSpaceEditor('detail');"
+           style="padding-left: 40px;<% if(!isNSEditorRequiredForDetail) {%>display:none;<%} %>"
+           class="nseditor-icon-link" href="#nsEditorLink" id="detail_nmsp_button"><fmt:message
+                key="mediator.fault.nameSpaces"/></a>
+        <a name="detail_nsEditorLink"/>
+
+
     </td>
 </tr>
 </table>

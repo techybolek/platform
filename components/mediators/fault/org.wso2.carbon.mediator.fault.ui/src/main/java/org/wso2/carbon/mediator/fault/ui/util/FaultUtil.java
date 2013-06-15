@@ -41,16 +41,16 @@ public class FaultUtil {
             populateFaultCode(request, faultMediator);
             populateFaultString(request, session, faultMediator);
             populateFaultActor(request, faultMediator);
-            populateFaultDetail(request, faultMediator);
+            populateFaultDetail(request, session, faultMediator);
         } else if (FaultMediator.SOAP12 == faultMediator.getSoapVersion()) {
             populateFaultCode(request, faultMediator);
             populateFaultReason(request, session, faultMediator);
             populateRole(request, faultMediator);
             populateNode(request, faultMediator);
-            populateFaultDetail(request, faultMediator);
+            populateFaultDetail(request, session, faultMediator);
         }else if(FaultMediator.POX == faultMediator.getSoapVersion()){
         	populateFaultReason(request, session, faultMediator);
-        	populateFaultDetail(request, faultMediator);
+        	populateFaultDetail(request, session, faultMediator);
         }
     }
 
@@ -116,31 +116,36 @@ public class FaultUtil {
         }
     }
 
-    private static void populateFaultDetail(HttpServletRequest request, FaultMediator faultMediator) {
-        String faultDetail = request.getParameter("detail");
-        faultDetail = faultDetail.trim();
-        faultMediator.setFaultDetail(null);
-        faultMediator.getFaultDetailElements().clear();
-        faultMediator.setFaultDetailExpr(null);
-        if (!faultDetail.equals("")) {
-            //faultDetail = "<detail>" + faultDetail.trim() + "</detail>";
-        	  faultDetail = faultDetail.trim();
-            try {
-                // first try to create an OMElement
-                OMElement element = AXIOMUtil.stringToOM(faultDetail);
-                if (element.getChildElements().hasNext()){
-                    Iterator it = element.getChildElements();
-                    while (it.hasNext()) {
-                        faultMediator.addFaultDetailElement((OMElement) it.next());
+    private static void populateFaultDetail(HttpServletRequest request, HttpSession session, FaultMediator faultMediator) {
+        String faultDetailType = request.getParameter("fault_detail");
+        if ("value".equals(faultDetailType)) {
+            String faultDetail = request.getParameter("detail");
+            faultDetail = faultDetail.trim();
+            faultMediator.setFaultDetail(null);
+            faultMediator.getFaultDetailElements().clear();
+            faultMediator.setFaultDetailExpr(null);
+            if (!faultDetail.equals("")) {
+                faultDetail = "<detail>" + faultDetail.trim() + "</detail>";
+                try {
+                    // first try to create an OMElement
+                    OMElement element = AXIOMUtil.stringToOM(faultDetail);
+                    if (element.getChildElements().hasNext()){
+                        Iterator it = element.getChildElements();
+                        while (it.hasNext()) {
+                            faultMediator.addFaultDetailElement((OMElement) it.next());
+                        }
+                    } else if (element.getText() != null) {
+                        faultMediator.setFaultDetail(element.getText());
                     }
-                } else if (element.getText() != null) {
-                    faultMediator.setFaultDetail(element.getText());
-                } 
-            } catch (Exception e) {
-                /* if failed set it as an string */
-                faultMediator.setFaultDetail(faultDetail);
+                } catch (Exception e) {
+                    /* if failed set it as an string */
+                    faultMediator.setFaultDetail(faultDetail);
+                }
+            } else if ("expression".equals(faultDetailType)) {
+                XPathFactory xPathFactory = XPathFactory.getInstance();
+                faultMediator.setFaultDetailExpr(xPathFactory.createSynapseXPath("detail", request, session));
+                faultMediator.setFaultDetail(null);
             }
-
         }
     }
 

@@ -54,13 +54,19 @@ function loadFaultCode(soap){
     }
    }
 
-
+                                                                                            
 function changeButton(fault_string){
     if(fault_string == 'value'){
         document.getElementById('nmsp_button').style.display = 'none';
     }
     if(fault_string == 'expression'){
         document.getElementById('nmsp_button').style.display = '';
+    }
+    if(fault_string == 'detail_value'){
+        document.getElementById('detail_nmsp_button').style.display = 'none';
+    }
+    if(fault_string == 'detail_expression'){
+        document.getElementById('detail_nmsp_button').style.display = '';
     }
 }
 
