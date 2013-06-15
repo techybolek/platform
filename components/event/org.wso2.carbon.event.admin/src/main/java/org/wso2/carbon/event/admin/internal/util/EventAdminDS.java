@@ -20,7 +20,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.core.EventBroker;
 
 /**
- * @scr.component name="wsevent.component" immediate="true"
+ * @scr.component name="wsevent.component.admin" immediate="true"
  * @scr.reference name="eventbroker.service"
  * interface="org.wso2.carbon.event.core.EventBroker" cardinality="1..1"
  * policy="dynamic" bind="setEventBroker" unbind="unSetEventBroker"
