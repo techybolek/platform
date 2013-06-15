@@ -35,12 +35,16 @@
     SynapseXPath xpath = null;
     String name = null;
     String action = null;
+    String scope = null;
     if (!(mediator instanceof HeaderMediator)) {
         // todo : proper error handling
         throw new RuntimeException("Unable to edit the mediator");
     }
     HeaderMediator headerMediator = (HeaderMediator) mediator;
     name = request.getParameter("mediator.header.name");
+    
+    scope = request.getParameter("mediator.header.scope");
+    headerMediator.setScope(scope); 
 
     if (name != null && !name.equals("")){
         QName qname = QNameFactory.getInstance().createQName("mediator.header.name", request, session);

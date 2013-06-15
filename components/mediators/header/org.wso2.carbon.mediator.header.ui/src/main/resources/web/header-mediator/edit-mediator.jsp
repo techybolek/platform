@@ -31,6 +31,7 @@
     String prefix = "", uri = "";
     String val = "";
     String xml = "";
+    String scope = "";
     NameSpacesRegistrar nmspRegistrar = NameSpacesRegistrar.getInstance();
     if (!(mediator instanceof HeaderMediator)) {
         // todo : proper error handling
@@ -57,6 +58,8 @@
     } else if (headerMediator.getXml() != null) {
         type = 3;
         xml = headerMediator.getXml().toString();
+    } else if (headerMediator.getScope() != null) {
+    	scope = headerMediator.getScope();
     }
 %>
 
@@ -142,6 +145,20 @@
                     <textarea rows="8" cols="50" id="mediator.header.inlinexmltext" name="mediator.header.inlinexmltext"  style="<%=(type == 3) ? "": "display:none;"%> " ><%=xml%></textarea>
                 </td>
             </tr>
+            <tr>
+                <td><fmt:message key="mediator.header.scope"/></td>
+                <td>
+                    <select id="mediator.header.scope" name="mediator.header.scope"
+                            style="width:150px;">
+                        <option value="default" <%=headerMediator.getScope() != null && headerMediator.getScope().equals("default") ? "selected=\"selected\"" : ""%>>
+                            <fmt:message key="synapse"/>
+                        </option>
+                        <option value="transport" <%=headerMediator.getScope() != null && headerMediator.getScope().equals("transport") ? "selected=\"selected\"" : ""%>>
+                            <fmt:message key="transport"/>
+                        </option>
+                    </select>
+                </td>
+            </tr>               
         </tbody>
     </table>
     </td>
