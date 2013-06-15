@@ -211,30 +211,39 @@
     }
 
     function validateCombinations(currElem){
-                    var elm = document.getElementById('mediator.enrich.target.type');
-                    var selectedElmValueForType = elm.options[elm.selectedIndex].value;
+        var elm = document.getElementById('mediator.enrich.target.type');
+        var selectedElmValueForType = elm.options[elm.selectedIndex].value;
 
-                    var elemAction = document.getElementById('mediator.enrich.target.action');
-                    var selectedElmValueForAction = elemAction.options[elemAction.selectedIndex].value;
+        var elemAction = document.getElementById('mediator.enrich.target.action');
+        var selectedElmValueForAction = elemAction.options[elemAction.selectedIndex].value;
 
-                    var thisElemValue = currElem.options[currElem.selectedIndex].value;
-                    <%--alert("on validate : type :" + selectedElmValueForType + "  action : " + selectedElmValueForAction--%>
-                        <%--+ "  this : " + thisElemValue);--%>
+        var thisElemValue = currElem.options[currElem.selectedIndex].value;
+        <%--alert("on validate : type :" + selectedElmValueForType + "  action : " + selectedElmValueForAction--%>
+            <%--+ "  this : " + thisElemValue);--%>
 
 
-                    if(selectedElmValueForAction == "sibling" && selectedElmValueForType == "envelope" ){
-                        if(thisElemValue == "sibling"){
-                            //force option to 'replace'
-                            elm.value = 'body';
-                        } else if (thisElemValue == "envelope"){
-                            //force option to 'body'
-                            elemAction.value = 'replace';
-                        }
-                    }
+        if(selectedElmValueForAction == "sibling" && selectedElmValueForType == "envelope" ){
+            if(thisElemValue == "sibling"){
+                //force option to 'replace'
+                elm.value = 'body';
+            }
         }
 
+        if (selectedElmValueForType == "envelope") {
+            elemAction.value = 'replace';
+            elemAction.disabled = true;
+        }
+        else {
+            elemAction.disabled = false;
+        }
+    }
+
+    // here the past parameter is just not important.
+    window.onload = validateCombinations(document.getElementById('mediator.enrich.target.action'));
 
 </script>
+
+
 
 <table class="normal" width="100%">
 <tbody>
