@@ -153,15 +153,8 @@ public class IdentitySCIMManager implements CharonManager {
 
     public UserManager getUserManager(String userName) throws CharonException {
         SCIMUserManager scimUserManager = null;
-        String tenantLessUserName = null;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        //TODO: use util method to get tenantless username
-        String[] userNameArray = userName.split("@");
-        if (userNameArray.length > 1) {
-            tenantLessUserName = userNameArray[0];
-        } else {
-            tenantLessUserName = userName;
-        }
+        String tenantLessUserName = MultitenantUtils.getTenantAwareUsername(userName);
 
         try {
             //get super tenant context and get realm service which is an osgi service
