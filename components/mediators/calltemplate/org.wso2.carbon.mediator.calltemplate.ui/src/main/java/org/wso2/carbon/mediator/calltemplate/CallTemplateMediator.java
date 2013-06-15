@@ -29,6 +29,7 @@ import org.wso2.carbon.mediator.calltemplate.util.ValueSerializer;
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
@@ -50,7 +51,7 @@ public class CallTemplateMediator extends AbstractMediator {
     public static final String INVOKE_N = "call-template";
 
     public CallTemplateMediator() {
-        pName2ExpressionMap = new HashMap<String, Value>();
+        pName2ExpressionMap = new LinkedHashMap<String, Value>();
     }
 
     public String getTargetTemplate() {

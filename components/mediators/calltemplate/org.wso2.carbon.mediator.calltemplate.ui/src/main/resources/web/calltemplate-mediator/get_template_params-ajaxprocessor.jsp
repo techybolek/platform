@@ -43,7 +43,7 @@
 <%
     int i = 0;
     for (String  mp : callTemplateParamList) {
-        if (mp != null) {
+        if (!(mp.isEmpty())) {
             Value value = null;
             SynapseXPath synapseXPath = null;
             boolean isLiteral = true;
@@ -118,15 +118,27 @@
     <td><a href="#" class="delete-icon-link" onclick="deleteproperty('<%=i%>');return false;"><fmt:message
             key="delete"/></a></td>
 </tr>
-<% }
-    i++;
-} %>
+    <%
+            i++;
+        }
+
+    }
+    %>
 <input type="hidden" name="propertyCount" id="propertyCount" value="<%=i%>"/>
 <script type="text/javascript">
     if (isRemainPropertyExpressions()) {
         resetDisplayStyle("");
     }else{
         resetDisplayStyle("none");
+    }
+    var paramCount = 0;
+    paramCount = <%=i%>;
+    var propertytable = document.getElementById("propertytable");
+    if(paramCount>0){
+        propertytable.style.display = "";
+    }
+    else{
+        propertytable.style.display = "none";
     }
 </script>
 </fmt:bundle>
