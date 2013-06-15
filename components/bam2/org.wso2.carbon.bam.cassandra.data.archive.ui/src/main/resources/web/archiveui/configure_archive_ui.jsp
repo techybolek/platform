@@ -17,12 +17,16 @@
 <%! public static final String DATE_PATTERN = "dd/MM/yyyy";
 
 %><fmt:bundle basename="org.wso2.carbon.bam.cassandra.data.archive.ui.i18n.Resources">
+<script type="text/javascript" src="js_lib/jquery-ui/dialog.js"></script>
     <script type="text/javascript">
+
+        jQuery(document).ready(function(){
+               jQuery("#date_range_radio_btn").prop('checked', true);
+        });
         /*jQuery(document).init(function () {*/
         function handleOK() {
 
         }
-
         function showHideTr(showTrId, hideTrId) {
             var showTrElement = document.getElementById(showTrId);
             showTrElement.style.display = "";
@@ -30,16 +34,25 @@
             hideTrElement.style.display = "none";
         }
 
-        function showHideOneTr(showHideTrId) {
-            var theTr = document.getElementById(showHideTrId);
+        function showHideDiv(showHideDivId) {
+            var theTr = document.getElementById(showHideDivId);
             if (theTr.style.display == "none") {
                 theTr.style.display = "";
             } else {
                 theTr.style.display = "none";
             }
         }
+        function doValidate(){
+            var userName = document.getElementById("username").value;
+            var passWord = document.getElementById("password").value;
+            if((userName==null || userName=="") && (passWord==null || passWord=="")) {
+                CARBON.showErrorDialog("User credentials must be provided");
+                return false;
+            }
+        }
 
     </script>
+
 
 <carbon:breadcrumb
             label="cassandra.data.archive"
@@ -164,21 +177,51 @@
     <%
         }
     } catch (Exception e) {
-            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-            session.setAttribute(CarbonUIMessage.ID, uiMsg);
+        String errorMessage = e.getMessage();
+        /*CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+        session.setAttribute(CarbonUIMessage.ID, uiMsg);*/
     %>
-    <jsp:include page="../admin/error.jsp"/>
+    <script language="JavaScript" type="text/JavaScript">
+        CARBON.showErrorDialog("<%=errorMessage%>");
+    </script>
     <%
     }
     %>
-    <link rel="stylesheet" href="js_libs/css/ui-lightness/jquery-ui-1.10.0.custom.min.css" />
-    <link rel="stylesheet" href="js_libs/" />
-    <style type="text/css">
-        .ui-datepicker{
-            font: 62.5% "Trebuchet MS", sans-serif;
-            margin: 50px;
-        }
-    </style>
+    <link rel="stylesheet" href="js_lib/jquery-ui/css/smoothness/jquery-ui-1.10.0.custom.min.css" />
+   <style type="text/css">
+       .ui-datepicker-div, .ui-datepicker-inline, #ui-datepicker-div{
+               background: url("js_lib/jquery-ui/css/smoothness/images/ui-bg_flat_75_ffffff_40x100.png") repeat-x scroll 50% 50% #FFFFFF;
+               border: 1px solid #AAAAAA;
+               font-family: Verdana,Arial,sans-serif;
+               font-size: 1.1em;
+               line-height: 1.3;
+               list-style: none outside none;
+               margin: 0;
+               outline: 0 none;
+               padding: 0.2em 0.2em 0;
+               position: relative;
+               text-decoration: none;
+               width: 17em;
+       }
+       .ui-dialog-buttonpane button {
+           background: url("images/e6e6e6_40x100_textures_02_glass_75.png") repeat-x scroll 0 50% #E6E6E6;
+           border: 1px solid #D3D3D3;
+           color: #555555;
+           cursor: pointer;
+           font-size: 10px;
+           line-height: 1.4em;
+           margin: 0!important;
+           padding: 0!important;
+       }
+       .ui-dialog-buttonpane {
+           background: none repeat scroll 0 0 #FFFFFF;
+           border-top: 1px solid #DDDDDD;
+           bottom: 0;
+           position: absolute;
+           text-align: left;
+           width: 95%;
+       }
+   </style>
 <div id="middle">
 <h2>
     <fmt:message key="bam.cassandra.data.archive.config"/>
@@ -187,8 +230,7 @@
 <div id="workArea">
 <div id="result"></div>
 <p>&nbsp;</p>
-
-<form action="configure_archive_ui.jsp" method="post">
+<form action="configure_archive_ui.jsp" method="post" onsubmit="return doValidate()">
 <input type="hidden" name="setConfig" value="on"/>
 <table width="100%" class="styledLeft" style="margin-left: 0px;">
 <thead>
@@ -200,66 +242,86 @@
 </thead>
 
 <tr>
-    <td style="border-color:#FFFFFF;"><fmt:message key="stream.name"/></td>
-    <td style="border-color:#FFFFFF;"><input id="stream_name" class="serviceConfigurationInput" type="text" name="stream_name" value="<%=streamName%>"/></td>
-    <td style="border-color:#FFFFFF;"><fmt:message key="version"/></td>
-    <td style="border-color:#FFFFFF;"><input id="version" type="text" class="serviceConfigurationInput" name="version" value="<%=version%>"/></td>
+    <td id="formRow">
+        <table id="archiveConfig">
+            <tr>
+                <td style="border-color:#FFFFFF;"><fmt:message key="stream.name"/></td>
+                <td style="border-color:#FFFFFF;"><input id="stream_name" class="serviceConfigurationInput" type="text" name="stream_name" value="<%=streamName%>"/></td>
+                <td style="border-color:#FFFFFF;"><fmt:message key="version"/></td>
+                <td style="border-color:#FFFFFF;"><input id="version" type="text" class="serviceConfigurationInput" name="version" value="<%=version%>"/></td>
+            </tr>
+            <tr>
+                <td style="border-color:#FFFFFF;"><input id="date_range_radio_btn" type="radio" onchange="showHideTr('date_range_tr','specified_date_tr')" value="date_range" name="date" checked="true"/>Date range (DD/MM/YYYY)</td>
+                <td style="border-color:#FFFFFF;"></td>
+                <td style="border-color:#FFFFFF;"></td>
+                <td style="border-color:#FFFFFF;"></td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td style="border-color:#FFFFFF;"><input id="specified_date_radio_btn" type="radio" onchange="showHideTr('specified_date_tr','date_range_tr')" value="below_date" name="date"/>Below this no of days</td>
+                <td style="border-color:#FFFFFF;"></td>
+                <td style="border-color:#FFFFFF;"></td>
+                <td style="border-color:#FFFFFF;"></td>
+            </tr>
+            <tr id="date_range_tr">
+                <td style="border-color:#FFFFFF;"><fmt:message key="from"/></td>
+                <td style="border-color:#FFFFFF;"><input id="datePicker_from" type="text" class="serviceConfigurationInput" name="from" value="<%=from%>"/></td>
+                <td style="border-color:#FFFFFF;"><fmt:message key="to"/></td>
+                <td style="border-color:#FFFFFF;"><input id="datePicker_to" type="text" class="serviceConfigurationInput" name="to" value="<%=to%>"/></td>
+            </tr>
+            <tr id="specified_date_tr" style="display:none">
+                <td style="border-color:#FFFFFF;">No of days:</td>
+                <td style="border-color:#FFFFFF;"><input id="specified_date" type="text" name="specified_date" value="<%=noOfDays%>"/></td>
+                <td style="border-color:#FFFFFF;">Cron expression:</td>
+                <td style="border-color:#FFFFFF;"><input id="cron" type="text" name="cron" value="<%=cron%>"/></td>
+            </tr>
+        </table>
+    </td>
+
 </tr>
-    <tr>
-        <td style="border-color:#FFFFFF;"><input id="date_range_radio_btn" type="radio" onchange="showHideTr('date_range_tr','specified_date_tr')" value="date_range" name="date" checked/>Date range (DD/MM/YYYY)</td>
-        <td style="border-color:#FFFFFF;"></td>
-        <td style="border-color:#FFFFFF;"></td>
-        <td style="border-color:#FFFFFF;"></td>
-    </tr>
-    <tr>
-        <td style="border-color:#FFFFFF;"><input id="specified_date_radio_btn" type="radio" onchange="showHideTr('specified_date_tr','date_range_tr')" value="below_date" name="date"/>Below this no of days</td>
-        <td style="border-color:#FFFFFF;"></td>
-        <td style="border-color:#FFFFFF;"></td>
-        <td style="border-color:#FFFFFF;"></td>
-    </tr>
-    <tr id="date_range_tr">
-    <td style="border-color:#FFFFFF;"><fmt:message key="from"/></td>
-    <td style="border-color:#FFFFFF;"><input id="datePicker_from" type="text" class="serviceConfigurationInput" name="from" value="<%=from%>"/></td>
-    <td style="border-color:#FFFFFF;"><fmt:message key="to"/></td>
-    <td style="border-color:#FFFFFF;"><input id="datePicker_to" type="text" class="serviceConfigurationInput" name="to" value="<%=to%>"/></td>
+<tr>
+    <td id="connectivityDetails">
+        <table>
+            <tr>
+                <td style="border-color:#FFFFFF;"><input type="checkbox" name="cassandra_cluster" onchange="showHideDiv('external_cassandra_cluster')"/>External cassandra cluster</td>
+                <td style="border-color:#FFFFFF;"></td>
+                <td style="border-color:#FFFFFF;" colspan="2">
+                    <div id="external_cassandra_cluster" style="display: none;">
+                        Connection URL:
+                                    <input id="connection_url" type="text" name="connection_url" value="<%=connectionURL%>"/>
+                                    <span style="color: #B0B0B0; font-size: 11px; font-style: italic;">ex:- 10.100.60.150:9160,10.100.60.151:9160</span>
+                    </div>
+                </td>
+            </tr>
+
+        </table>
+    </td>
 </tr>
-<tr id="specified_date_tr" style="display:none">
-    <td style="border-color:#FFFFFF;">No of days:</td>
-    <td style="border-color:#FFFFFF;"><input id="specified_date" type="text" name="specified_date" value="<%=noOfDays%>"/></td>
-    <td style="border-color:#FFFFFF;">Cron expression:</td>
-    <td style="border-color:#FFFFFF;"><input id="cron" type="text" name="cron" value="<%=cron%>"/></td>
+<tr>
+    <td id="authenticationDetails">
+        <table>
+            <tr>
+                <td style="border-color:#FFFFFF;">Username:</td>
+                <td style="border-color:#FFFFFF;"><input id="username" type="text" name="username" value="<%=username%>"/></td>
+                <td style="border-color:#FFFFFF;">Password:</td>
+                <td style="border-color:#FFFFFF;"><input id="password" type="password" name="password" value="<%=password%>"/></td>
+            </tr>
+        </table>
+    </td>
 </tr>
 
-    <tr>
-        <td style="border-color:#FFFFFF;"><input type="checkbox" name="cassandra_cluster" onchange="showHideOneTr('external_cassandra_cluster')"/>External cassandra cluster</td>
-        <td style="border-color:#FFFFFF;"></td>
-        <td style="border-color:#FFFFFF;"></td>
-        <td style="border-color:#FFFFFF;"></td>
-    </tr>
-    <tr id="external_cassandra_cluster" style="display:none">
-        <td style="border-color:#FFFFFF;">Connection URL:</td>
-        <td style="border-color:#FFFFFF;"><input id="connection_url" type="text" name="connection_url" value="<%=connectionURL%>"/><font color="#C0C0C0">ex:- 10.100.60.150:9160,10.100.60.151:9160</font></td>
-        <td style="border-color:#FFFFFF;"></td>
-        <td style="border-color:#FFFFFF;"></td>
-    </tr>
-    <tr id="authentication">
-        <td style="border-color:#FFFFFF;">Username:</td>
-        <td style="border-color:#FFFFFF;"><input id="username" type="text" name="username" value="<%=username%>"/></td>
-        <td style="border-color:#FFFFFF;">Password:</td>
-        <td style="border-color:#FFFFFF;"><input id="password" type="password" name="password" value="<%=password%>"/>
-        </td>
-    </tr>
- <tr>
-     <td colspan="4" class="buttonRow" style="border-color:#FFFFFF;">
+<tr>
+    <td class="buttonRow">
             <input type="submit" class="button" value="<fmt:message key="submit"/>"
                    id="updateStats"/>
-      </td>
+    </td>
  </tr>
 </table>
 </form>
 
-    <script src="js_libs/js/jquery-1.9.0.js"></script>
-    <script src="js_libs/js/jquery-ui-1.10.0.custom.min.js"></script>
+    <script src="js_lib/jquery-ui/js/jquery-1.9.0.js"></script>
+    <script src="js_lib/jquery-ui/js/jquery-ui-1.10.0.custom.min.js"></script>
 
     <script>
         $(function() {

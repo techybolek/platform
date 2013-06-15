@@ -473,12 +473,11 @@ public class GadgetGenService extends RegistryAbstractAdmin {
                     return stringUrl;
                 }
             } else {
-            String portOffset = CarbonUtils.getServerConfiguration().
-                        getFirstProperty("Ports.Offset");
+//            String portOffset = CarbonUtils.getServerConfiguration().
+//                        getFirstProperty("Ports.Offset");
               int  port =  CarbonUtils.
                       getTransportPort(GGWUtils.getConfigurationContextService().
-                              getServerConfigContext(), "http")+
-                        Integer.parseInt(portOffset);
+                              getServerConfigContext(), "http");
             return "http://"+url.getHost()+":"+port+url.getPath();
              }
         } catch (MalformedURLException e) {

@@ -17,7 +17,6 @@ package org.wso2.carbon.bam.cassandra.data.archive.service;
  * limitations under the License.
  */
 
-import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.hector.api.Cluster;
@@ -28,8 +27,11 @@ import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.quartz.CronExpression;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
+import org.wso2.carbon.bam.cassandra.data.archive.exception.CassandraArchiveException;
+import org.wso2.carbon.bam.cassandra.data.archive.exception.InvalidCronExpressionException;
 import org.wso2.carbon.bam.cassandra.data.archive.util.ArchiveConfiguration;
 import org.wso2.carbon.bam.cassandra.data.archive.util.CassandraArchiveUtil;
 import org.wso2.carbon.bam.cassandra.data.archive.util.GenerateHiveScript;
@@ -39,6 +41,7 @@ import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionExc
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,60 +50,75 @@ public class CassandraArchivalService {
 
     private static final Log log = LogFactory.getLog(CassandraArchivalService.class);
 
-    private static StringSerializer stringSerializer = StringSerializer.get();
     public static final String BAM_META_KEYSPACE = "META_KS";
     public static final String BAM_META_STREAM_DEF_CF = "STREAM_DEFINITION";
     private static final String STREAM_DEF = "STREAM_DEFINITION";
-
-    private StreamDefinition streamDefinition;
 
     Cluster cluster;
 
     public void archiveCassandraData(ArchiveConfiguration archiveConfiguration) throws Exception {
 
+        if ((archiveConfiguration != null)) {
+            if ( !archiveConfiguration.isSchedulingOn() || CronExpression.isValidExpression(
+                    archiveConfiguration.getCronExpression())) {
 
-        if (archiveConfiguration.getConnectionURL() == null) {
-            ClusterInformation clusterInformation = new ClusterInformation(archiveConfiguration.getUserName(),
-                    archiveConfiguration.getPassword());
-            cluster = CassandraArchiveUtil.getDataAccessService().getCluster(clusterInformation);
-        } else {
-            String connectionUrl = archiveConfiguration.getConnectionURL();
-            CassandraHostConfigurator hostConfigurator = new CassandraHostConfigurator(connectionUrl);
-            Map<String, String> credentials = new HashMap<String, String>();
-            credentials.put("username", archiveConfiguration.getUserName());
-            credentials.put("password", archiveConfiguration.getPassword());
-            cluster = new ThriftCluster(CassandraArchiveUtil.DEFAULT_CASSANDRA_CLUSTER, hostConfigurator, credentials);
-        }
-        CassandraArchiveUtil.setCluster(cluster);
-
-        try {
-
-            streamDefinition = getStreamDefinition(cluster, archiveConfiguration);
-            GenerateHiveScript generateHiveScript = new GenerateHiveScript(cluster, archiveConfiguration);
-            String hiveQuery = generateHiveScript.generateMappingForReadingCassandraOriginalCF(streamDefinition);
-            hiveQuery = hiveQuery + generateHiveScript.createUDF();
-            hiveQuery = hiveQuery + generateHiveScript.generateMappingForWritingToArchivalCF(streamDefinition) + "\n";
-            hiveQuery = hiveQuery + generateHiveScript.hiveQueryForWritingDataToArchivalCF(streamDefinition, archiveConfiguration) + "\n";
-            hiveQuery = hiveQuery + generateHiveScript.generateMappingForWritingToTmpCF(streamDefinition) + "\n";
-            hiveQuery = hiveQuery + generateHiveScript.hiveQueryForWritingDataToTmpCF(streamDefinition, archiveConfiguration) + "\n";
-            hiveQuery = hiveQuery + generateHiveScript.mapReduceJobAsHiveQuery();
-            if (archiveConfiguration.isSchedulingOn()) {
-                HiveScriptStoreService hiveScriptStoreService = CassandraArchiveUtil.getHiveScriptStoreService();
-                String scriptName = streamDefinition.getName() + streamDefinition.getVersion() + "_archiveScript";
-                hiveScriptStoreService.saveHiveScript(scriptName, hiveQuery, archiveConfiguration.getCronExpression());
-            } else {
-                HiveExecutorService hiveExecutorService = CassandraArchiveUtil.getHiveExecutorService();
-                if (log.isDebugEnabled()) {
-                    log.debug(hiveQuery);
+                if (archiveConfiguration.getConnectionURL() == null) {
+                    ClusterInformation clusterInformation = new ClusterInformation(archiveConfiguration.getUserName(),
+                                                                                   archiveConfiguration.getPassword());
+                    cluster = CassandraArchiveUtil.getDataAccessService().getCluster(clusterInformation);
+                } else {
+                    String connectionUrl = archiveConfiguration.getConnectionURL();
+                    CassandraHostConfigurator hostConfigurator = new CassandraHostConfigurator(connectionUrl);
+                    Map<String, String> credentials = new HashMap<String, String>();
+                    credentials.put("username", archiveConfiguration.getUserName());
+                    credentials.put("password", archiveConfiguration.getPassword());
+                    cluster = new ThriftCluster(CassandraArchiveUtil.DEFAULT_CASSANDRA_CLUSTER, hostConfigurator, credentials);
                 }
-                hiveExecutorService.execute(hiveQuery);
+                CassandraArchiveUtil.setCluster(cluster);
+
+                try {
+
+                    StreamDefinition streamDefinition = getStreamDefinition(cluster, archiveConfiguration);
+
+                    if (streamDefinition != null) {
+                        GenerateHiveScript generateHiveScript = new GenerateHiveScript(cluster, archiveConfiguration);
+                        String hiveQuery = generateHiveScript.generateMappingForReadingCassandraOriginalCF(streamDefinition);
+                        hiveQuery = hiveQuery + generateHiveScript.createUDF();
+                        hiveQuery = hiveQuery + generateHiveScript.generateMappingForWritingToArchivalCF(streamDefinition) + "\n";
+                        hiveQuery = hiveQuery + generateHiveScript.hiveQueryForWritingDataToArchivalCF(streamDefinition, archiveConfiguration) + "\n";
+                        hiveQuery = hiveQuery + generateHiveScript.generateMappingForWritingToTmpCF(streamDefinition) + "\n";
+                        hiveQuery = hiveQuery + generateHiveScript.hiveQueryForWritingDataToTmpCF(streamDefinition, archiveConfiguration) + "\n";
+                        hiveQuery = hiveQuery + generateHiveScript.mapReduceJobAsHiveQuery();
+                        if (archiveConfiguration.isSchedulingOn()) {
+                            HiveScriptStoreService hiveScriptStoreService = CassandraArchiveUtil.getHiveScriptStoreService();
+                            String scriptName = streamDefinition.getName() + streamDefinition.getVersion() + "_archiveScript";
+                            hiveScriptStoreService.saveHiveScript(scriptName, hiveQuery, archiveConfiguration.getCronExpression());
+                        } else {
+                            HiveExecutorService hiveExecutorService = CassandraArchiveUtil.getHiveExecutorService();
+                            if (log.isDebugEnabled()) {
+                                log.debug(hiveQuery);
+                            }
+                            hiveExecutorService.execute(hiveQuery);
+                        }
+                    }else {
+                        String message = "Unable to find stream definition " + archiveConfiguration.getStreamName() +
+                                " with version " + archiveConfiguration.getVersion();
+                        log.error(message);
+                        throw new CassandraArchiveException(message);
+                    }
+
+                } catch (StreamDefinitionStoreException e) {
+                    log.error("Failed to get stream definition from Cassandra", e);
+                    throw new CassandraArchiveException("Failed to get stream definition");
+                }
+            } else {
+                log.error("Invalid cron expression: " + archiveConfiguration.getCronExpression());
+                throw new InvalidCronExpressionException("Invalid cron expression: " + archiveConfiguration.getCronExpression());
             }
-
-        } catch (StreamDefinitionStoreException e) {
-            log.error("Failed to get stream definition from Cassandra", e);
+        }else {
+            log.error("UI doesn't pass the configuration to backend");
+            throw new CassandraArchiveException("UI doesn't pass the configuration to backend");
         }
-
-
     }
 
 

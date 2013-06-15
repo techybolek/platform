@@ -27,6 +27,7 @@ import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.persistence.cassandra.Utils.CassandraSDSUtils;
+import org.wso2.carbon.databridge.persistence.cassandra.Utils.KeySpaceUtils;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.DataType;
 
@@ -157,7 +158,7 @@ public class GenerateHiveScript {
         hiveQuery = hiveQuery + ")" + storedBy + "(" + "\n";
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraHost, cassandraHostIp);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraPort, Integer.toString(cassandraPortValue));
-        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKs, CassandraConnector.BAM_EVENT_DATA_KEYSPACE);
+        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKs, KeySpaceUtils.getKeySpaceName());
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsUsername, username);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsPassword, password);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraCFName, cfName);
@@ -211,7 +212,7 @@ public class GenerateHiveScript {
 
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraHost, cassandraHostIp);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraPort, Integer.toString(cassandraPortValue));
-        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKs, CassandraConnector.BAM_EVENT_DATA_KEYSPACE);
+        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKs, KeySpaceUtils.getKeySpaceName());
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsUsername, username);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsPassword, password);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraCFName, cfName);

@@ -28,18 +28,33 @@
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);*/
     String mgtConsoleUrl = CarbonUIUtil.getAdminConsoleURL(request);
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+    String appName = (String) CarbonContext.getCurrentContext().getApplicationName();
+    String tenantDomain = (String) CarbonContext.getCurrentContext().getTenantDomain();
     int tenantId = CarbonContext.getCurrentContext().getTenantId();
 %>
 <script type="text/javascript">
     jQuery(document).ready(function(){
             var SUPER_TENENT_ID = -1234;
             var tenentId = <%=tenantId%>;
+	    var tenantDomain = "<%=tenantDomain%>";
             var dashboardUrl;
+	    var contextRoot = "<%=appName%>";	
             if(tenentId == SUPER_TENENT_ID){
-                dashboardUrl = "../../bamdashboards/index.jag";
+		if((contextRoot === null) || (contextRoot == "") || (contextRoot == 'null')){
+        		dashboardUrl = "../../bamdashboards/index.jag";
+		}
+		else{
+			dashboardUrl = "../../../bamdashboards/index.jag?appName="+contextRoot;
+		}
             }
             else{
-                dashboardUrl = "../../jaggeryapps/bamdashboards/index.jag";
+		if((contextRoot === null) || (contextRoot == "") || (contextRoot == 'null')){
+        		dashboardUrl = "../../jaggeryapps/bamdashboards/index.jag";
+		}
+		else{
+			var url = "t/"+tenantDomain+"/jaggeryapps/bamdashboards/index.jag?appName="+contextRoot;
+			dashboardUrl = "../../../../../"+url;
+		}                
             }
             location.href = dashboardUrl;
     });
