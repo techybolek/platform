@@ -45,22 +45,7 @@ public class ProxyServiceDeployer extends org.apache.synapse.deployers.ProxyServ
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
         super.init(configCtx);
-        int retry =0;
-        while(mpm == null || retry < 10){
-            mpm = ServiceBusUtils.getMediationPersistenceManager(configCtx.getAxisConfiguration());
-            if(mpm != null){
-            	break;
-            }
-            try {
-	            Thread.sleep(1000);
-	            retry++;
-            } catch (InterruptedException e) {
-	            // TODO Auto-generated catch block
-	           log.error("Error while initializing persistance engine");
-            }
-        }
-     
-    
+        /*removed deprecated persistence logic*/
     }
 
     @Override
@@ -71,7 +56,6 @@ public class ProxyServiceDeployer extends org.apache.synapse.deployers.ProxyServ
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
         String proxyName = super.deploySynapseArtifact(artifactConfig, fileName, properties);
-        mpm.saveItemToRegistry(proxyName, ServiceBusConstants.ITEM_TYPE_PROXY_SERVICE);
         return proxyName;
     }
 
@@ -84,7 +68,6 @@ public class ProxyServiceDeployer extends org.apache.synapse.deployers.ProxyServ
 
         String proxyName = super.updateSynapseArtifact(
                 artifactConfig, fileName, existingArtifactName, properties);
-        mpm.saveItemToRegistry(proxyName, ServiceBusConstants.ITEM_TYPE_PROXY_SERVICE);
         return proxyName;
     }
 
@@ -95,7 +78,6 @@ public class ProxyServiceDeployer extends org.apache.synapse.deployers.ProxyServ
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
         super.undeploySynapseArtifact(artifactName);
-        mpm.deleteItemFromRegistry(artifactName, ServiceBusConstants.ITEM_TYPE_PROXY_SERVICE);
     }
 
     @Override
@@ -105,6 +87,5 @@ public class ProxyServiceDeployer extends org.apache.synapse.deployers.ProxyServ
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
         super.restoreSynapseArtifact(artifactName);
-        mpm.saveItemToRegistry(artifactName, ServiceBusConstants.ITEM_TYPE_PROXY_SERVICE);
     }
 }
