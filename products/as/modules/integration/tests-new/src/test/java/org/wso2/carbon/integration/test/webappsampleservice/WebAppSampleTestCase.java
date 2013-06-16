@@ -45,7 +45,7 @@ import static org.testng.Assert.*;
 
 /*
    This class adds user to web application, checks authentication,  adds resources
- */
+*/
 public class WebAppSampleTestCase extends ASIntegrationTest {
 
     private static final Log log = LogFactory.getLog(WebAppSampleTestCase.class);

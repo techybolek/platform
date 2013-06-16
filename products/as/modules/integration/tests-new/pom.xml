@@ -7,12 +7,12 @@
         <groupId>org.wso2.appserver</groupId>
         <artifactId>wso2appserver-parent</artifactId>
         <version>5.2.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <name>WSO2 AppServer - Test New Module</name>
-    <artifactId>org.wso2.appserver.test</artifactId>
+    <name>WSO2 AppServer - Integration Test UI Module</name>
+    <artifactId>org.wso2.appserver.test.ui</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -157,6 +157,27 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>copy-stratos-jks</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/src/test/resources/keystores/stratos
+                            </outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>
+                                        ${basedir}/target/tobeCopied/wso2as-${project.version}/repository/resources/security/
+                                    </directory>
+                                    <includes>
+                                        <include>**/*.jks</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>copy-axis2files</id>
                         <phase>compile</phase>
                         <goals>
@@ -218,22 +239,17 @@
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.api</artifactId>
-            <version>${test.framework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.automation</groupId>
-            <artifactId>org.wso2.carbon.automation.tools.jmeter</artifactId>
-            <version>${test.framework.version}</version>
+            <version>${test-automation-framework-version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.core</artifactId>
-            <version>${test.framework.version}</version>
+            <version>${test-automation-framework-version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.utils</artifactId>
-            <version>${test.framework.version}</version>
+            <version>${test-automation-framework-version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.xfer</groupId>
@@ -246,6 +262,11 @@
             <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.automation</groupId>
+            <artifactId>org.wso2.carbon.automation.tools.jmeter</artifactId>
+            <version>${test-automation-framework-version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.1.1</version>
@@ -253,6 +274,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <test.framework.version>${carbon.platform.version}</test.framework.version>
+        <test-automation-framework-version>${carbon.platform.version}</test-automation-framework-version>
     </properties>
 </project>
