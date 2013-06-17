@@ -773,6 +773,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
     public boolean deleteFaultyServiceGroup(String archiveName) throws AxisFault {
 
         String repository = getAxisConfig().getRepository().getPath();
+        String originalName = archiveName;
         if (repository.endsWith("/")) {
             repository = repository.substring(0, repository.length() - 1);
         }
@@ -785,7 +786,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         }
 
         if (archiveName.indexOf(repository) != 0) {
-            archiveName = repository + archiveName;
+            archiveName = repository +"/synapse-configs/default/proxy-services/"+archiveName+".xml";
         }
 
         if (log.isDebugEnabled()) {
@@ -803,7 +804,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                                         + "Please stop the server and manually delete this file.");
                 } else {
                     isDeleted = true;
-                    getAxisConfig().getFaultyServices().remove(archiveName);
+                    getAxisConfig().getFaultyServices().remove(originalName);
                 }
             }
         }
