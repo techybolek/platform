@@ -120,14 +120,38 @@
                     return;
                 }
                 if (allServiceGroupsSelected) {
-                    CARBON.showConfirmationDialog("<fmt:message key="delete.selected.faulty.service.groups.prompt"><fmt:param value="<%= faultyServicesWrapper.getNumberOfFaultyServiceGroups() %>"/></fmt:message>", 
+                    CARBON.showConfirmationDialog("<fmt:message key="delete.selected.faulty.service.groups.prompt"><fmt:param value="<%= faultyServicesWrapper.getNumberOfFaultyServiceGroups() %>"/></fmt:message>",
                             function() {
                                 location.href = 'delete_faulty_service_groups.jsp?deleteAllServiceGroups=true';
                     });
                 } else {
-                    CARBON.showConfirmationDialog("<fmt:message key="delete.all.faulty.service.groups.prompt"/>", function() {
-                        document.faultyServiceForm.submit();
+                    var serviceGroupsString = '';
+                    jQuery('.chkBox').each(function(index) {
+                        if(this.checked) {
+                            serviceGroupsString += this.value + ':';
+                        }
                     });
+
+                    jQuery.ajax(
+                            {
+                                url : "checkForGroupedServices_ajaxprocessor.jsp?serviceGroupsString=" + serviceGroupsString,
+                                success : function (data) {
+                                    if(data.search('foundgroupedservice') > 0){
+                                        CARBON.showConfirmationDialog("<fmt:message key="delete.service.groups.with.multiples.services.prompt"/>",
+                                                function(){
+                                                    document.faultyServiceForm.submit();
+                                                },
+                                                function(){
+                                                    location.href='';
+                                                });
+                                    } else {
+                                        CARBON.showConfirmationDialog("<fmt:message key="delete.services.on.page.prompt"/>", function() {
+                                            document.faultyServiceForm.submit();
+                                        });
+                                    }
+                                }
+                            }
+                    );
                 }
             }
 
@@ -181,6 +205,7 @@
         <p>&nbsp;</p>
 
         <form action="delete_faulty_service_groups.jsp" name="faultyServiceForm">
+            <input type="hidden" name="pageNumber" value="<%= pageNumber%>"/>
             <table class="styledLeft">
                 <thead>
                 <tr>
@@ -201,8 +226,8 @@
                 <tr>
                     <td rowspan="2">
                         <input type="checkbox" name="serviceGroups"
-                               value="<%=service.getArtifact()%>"
-                               onclick="resetVars()"/>
+                               value="<%=service.getServiceName()%>"
+                               onclick="resetVars()" class="chkBox"/>
                     </td>
                     <td width="300px">
                         <%=faultyServiceName%>
