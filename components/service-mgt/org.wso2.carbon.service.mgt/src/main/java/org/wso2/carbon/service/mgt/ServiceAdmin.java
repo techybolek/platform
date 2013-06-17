@@ -55,6 +55,7 @@ import org.apache.neethi.PolicyReference;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.Resources;
 import org.wso2.carbon.core.persistence.PersistenceFactory;
 import org.wso2.carbon.core.persistence.PersistenceUtils;
@@ -65,6 +66,7 @@ import org.wso2.carbon.core.transports.TransportPersistenceManager;
 import org.wso2.carbon.core.util.ParameterUtil;
 import org.wso2.carbon.core.util.SystemFilter;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.utils.Transaction;
@@ -903,6 +905,19 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                axisConfig.removeService(axisService.getName());
                //adding log per service in order to notify user about the service's state when viewing logs.
                log.info("Undeploying Axis2 Service: " + axisService.getName());
+
+               Registry registry = getConfigSystemRegistry();
+               String servicePath = RegistryResources.ROOT + "axis2" +
+                       RegistryConstants.PATH_SEPARATOR + "service-groups" +
+                       RegistryConstants.PATH_SEPARATOR +
+                       axisService.getAxisServiceGroup().getServiceGroupName() +
+                       RegistryConstants.PATH_SEPARATOR + "services" +
+                       RegistryConstants.PATH_SEPARATOR + axisService.getName();
+               try {
+                   registry.delete(servicePath);
+               } catch (RegistryException e) {
+                   log.warn("Unable to delete registry collection conf:" + servicePath,e);
+               }
 
            }
 
