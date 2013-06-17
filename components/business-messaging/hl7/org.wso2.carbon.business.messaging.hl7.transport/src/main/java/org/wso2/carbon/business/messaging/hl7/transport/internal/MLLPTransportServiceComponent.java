@@ -25,8 +25,6 @@ import org.wso2.carbon.core.transports.TransportService;
 import org.wso2.carbon.core.transports.TransportPersistenceManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import java.util.Properties;
-
 /**
  * @scr.component name="mllp.transport.services" immediate="true"
  * @scr.reference name="config.context.service" interface="org.wso2.carbon.utils.ConfigurationContextService"

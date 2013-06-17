@@ -23,24 +23,34 @@ import ca.uhn.hl7v2.app.SimpleServer;
 import ca.uhn.hl7v2.llp.LowerLayerProtocol;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.transport.base.AbstractTransportListenerEx;
+import org.wso2.carbon.business.messaging.hl7.common.HL7Constants;
 import org.wso2.carbon.business.messaging.hl7.transport.utils.HL7MessageProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class HL7TransportListener extends AbstractTransportListenerEx<HL7Endpoint> {
-
+	
+	//default timeout value to wait for backend response
+	private  int timeOutVal = 1000;
+	
     private Map<HL7Endpoint, SimpleServer> serverTable = new HashMap<HL7Endpoint, SimpleServer>();
 
     @Override
-    protected void doInit() throws AxisFault {
+	protected void doInit() throws AxisFault {
+		Parameter transTimeOutParam = getTransportInDescription().getParameter(HL7Constants.HL7_TRANSPORT_TIMEOUT);
+		if (transTimeOutParam != null) {
+			timeOutVal = Integer.parseInt(transTimeOutParam.getValue().toString());
+		}
 
-    }
+		log.info("HL7 Transport Receiver initialized.");
+	}
 
     @Override
     protected HL7Endpoint createEndpoint() {
-        return new HL7Endpoint();
+        return new HL7Endpoint(timeOutVal);
     }
 
     @Override

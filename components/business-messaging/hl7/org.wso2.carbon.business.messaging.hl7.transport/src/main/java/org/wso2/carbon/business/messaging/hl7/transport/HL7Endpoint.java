@@ -33,8 +33,19 @@ public class HL7Endpoint extends ProtocolEndpoint {
 
     private int port = HL7Constants.DEFAULT_SYNAPSE_HL7_PORT;
     
-    private HL7ProcessingContext processingContext;
+    private HL7ProcessingContext  processingContext;
     
+    //default timeout value to wait for backend response
+    private int timeOutVal;
+    
+	public HL7Endpoint() {
+
+	}
+
+	public HL7Endpoint(int timeout) {
+		this.timeOutVal = timeout;
+	}
+	
     @Override
     public boolean loadConfiguration(ParameterInclude params) throws AxisFault {
     	if (params instanceof AxisService) {
@@ -43,6 +54,7 @@ public class HL7Endpoint extends ProtocolEndpoint {
             	return false;
             }
             this.processingContext = this.createProcessingContext(params);
+            setTransportLevelParams(processingContext);
             return true;
         } else {
         	return false;
@@ -82,4 +94,17 @@ public class HL7Endpoint extends ProtocolEndpoint {
     public int getPort() {
         return port;
     }
+    
+    public int getTimeOutVal(){
+    	return timeOutVal;
+    }
+    
+    /**
+     * When creating the MessageProcessing context,consider the transport level parameters.
+     * @param processingContext
+     */
+    private void setTransportLevelParams(HL7ProcessingContext  processingContext) {
+    	  processingContext.setTimeOutVal(timeOutVal);
+    }
+    
 }

@@ -24,12 +24,14 @@ import ca.uhn.hl7v2.app.ApplicationException;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.parser.DefaultXMLParser;
 import ca.uhn.hl7v2.parser.Parser;
+import ca.uhn.hl7v2.util.Terser;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.commons.logging.Log;
@@ -38,6 +40,7 @@ import org.wso2.carbon.business.messaging.hl7.common.HL7ProcessingContext;
 import org.wso2.carbon.business.messaging.hl7.common.HL7Constants;
 import org.wso2.carbon.business.messaging.hl7.common.HL7Utils;
 import org.wso2.carbon.business.messaging.hl7.transport.HL7Endpoint;
+import org.wso2.carbon.business.messaging.hl7.transport.HL7TransportOutInfo;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -55,9 +58,21 @@ public class HL7MessageProcessor implements Application {
         if (log.isDebugEnabled()) {
             log.debug("Received HL7 message: " + message.toString());
         }
+     	Terser terser = new Terser(message);
+    	String messageControlerID = terser.get("/MSH-10");
+    	if (messageControlerID  == null || messageControlerID .length() == 0) {
+    		throw new HL7Exception("MSH segment missing required field: Control ID (MSH-10)",
+    			                       HL7Exception.REQUIRED_FIELD_MISSING);    		
+    	}
+    		
         HL7ProcessingContext procCtx = this.endpoint.getProcessingContext();
         try {
-            MessageContext messageContext = endpoint.createMessageContext();
+			MessageContext messageContext = endpoint.createMessageContext();
+			HL7TransportOutInfo outinfo = new HL7TransportOutInfo();
+			outinfo.setMessageControllerID(messageControlerID);
+			outinfo.setProcessingContext(procCtx);
+			messageContext.setProperty(Constants.OUT_TRANSPORT_INFO, outinfo);
+			
             messageContext.setIncomingTransportName(HL7Constants.TRANSPORT_NAME);
             procCtx.initMessageContext(message, messageContext);
             procCtx.checkConformanceProfile(message);
