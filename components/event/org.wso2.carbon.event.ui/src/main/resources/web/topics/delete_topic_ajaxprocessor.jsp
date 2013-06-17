@@ -13,7 +13,7 @@
             .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 //Server URL which is defined in the server.xml
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(),
-                                                 session) + "TopicManagerAdminService.TopicManagerAdminServiceHttpsSoap12Endpoint";
+            session) + "TopicManagerAdminService.TopicManagerAdminServiceHttpsSoap12Endpoint";
     TopicManagerAdminServiceStub stub = new TopicManagerAdminServiceStub(configContext, serverURL);
 
     String cookie = (String) session.getAttribute(org.wso2.carbon.utils.ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -28,13 +28,15 @@
     session.removeAttribute("topicWsSubscriptions");
 
     try {
-            Subscription[] subscriptions = stub.getWsSubscriptionsForTopic(topic);
-            if(subscriptions != null && subscriptions.length>0){
-                message = "Error, Subscriptions exists for this topic, Please remove all subscriptions before deleting the topic";
-            }else{
-                stub.removeTopic(topic);
-                message = " Topic removed successfully";
-            }
+        Subscription[] wsSubscriptionsForTopic = stub.getWsSubscriptionsForTopic(topic);
+        Subscription[] jmsSubscriptionsForTopic = stub.getJMSSubscriptionsForTopic(topic);
+        if ((wsSubscriptionsForTopic != null && wsSubscriptionsForTopic.length > 0) ||
+                (jmsSubscriptionsForTopic != null && jmsSubscriptionsForTopic.length > 0)) {
+            message = "Error, Subscriptions exists for this topic, Please remove all subscriptions before deleting the topic";
+        } else {
+            stub.removeTopic(topic);
+            message = " Topic removed successfully";
+        }
     } catch (RemoteException e) {
         message = "Error in deleting topic  " + e;
 %> <%=message%>
