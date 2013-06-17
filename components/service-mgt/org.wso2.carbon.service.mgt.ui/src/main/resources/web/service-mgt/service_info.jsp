@@ -143,6 +143,14 @@
 
 %>
 
+<%  String endPointStr = "";
+    String[] eps = service.getEndPoints();
+    for (String ep : eps) {
+        endPointStr += ep + ",";
+    }
+    endPointStr = endPointStr.substring(0, endPointStr.length()-1);
+%>
+
 <div id="middle">
 <h2><fmt:message key="service.dashboard"/> (<%= serviceName%>)</h2>
 
