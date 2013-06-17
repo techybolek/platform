@@ -78,6 +78,7 @@ public class ConnectionManager {
             hostConfigurator.setRetryDownedHosts(false);
             // this.cluster = HFactory.getOrCreateCluster(clusterName, hostConfigurator, credentials);
             Cluster cluster = new ThriftCluster(clusterName, hostConfigurator, credentials);
+            cluster.describeKeyspaces();
             ExplorerSessionManager.setSessionObject(EXPLORER_CLUSTER_CONNECTION, cluster);
         } catch (Exception exception) {
             throw new CassandraExplorerException(exception.getMessage(), exception.getCause());
@@ -137,3 +138,4 @@ public class ConnectionManager {
           ExplorerSessionManager.setSessionObject(EXPLORER_MAX_RESULT_COUNT,maxResultCount);
     }
 }
+

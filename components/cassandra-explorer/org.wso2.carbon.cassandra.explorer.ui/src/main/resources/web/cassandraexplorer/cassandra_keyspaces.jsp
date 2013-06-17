@@ -41,15 +41,7 @@
             keyspaces = adminClient.getKeyspaces();
         } catch (CassandraExplorerAdminCassandraExplorerException e) { %>
     <script type="text/javascript">
-        jQuery(document).ready(function () {
-            CARBON.showErrorDialog('Connection Error.<br>Please retry with correct connection details.', function () {
-                CARBON.closeWindow();
-                location.href = "cassandra_connect.jsp";
-            }, function () {
-                CARBON.closeWindow();
-                location.href = "cassandra_connect.jsp";
-            });
-        });
+         location.href = "cassandra_connect.jsp?region=region1&item=cassandra_explorer_connect_menu";
     </script>
     <% }
     %>
@@ -76,7 +68,8 @@
         <div id="workArea">
             <!-- Section 1 -->
             <%
-                for (String keyspace : keyspaces) {%>
+                if(keyspaces != null) {
+                    for (String keyspace : keyspaces) {%>
             <div class="sectionSeperator togglebleTitle"><%=keyspace%>
             </div>
             <div class="sectionSub">
@@ -113,7 +106,25 @@
                     </tbody>
                 </table>
             </div>
-            <%}%>
+            <%}
+            }
+                else {
+                %>
+            <script type="text/javascript">
+                jQuery(function () {
+                    CARBON.showErrorDialog('Data is not existing to show', function () {
+                        CARBON.closeWindow();
+                        location.href = "cassandra_connect.jsp?region=region1&item=cassandra_explorer_connect_menu";
+                    }, function () {
+                        CARBON.closeWindow();
+                        location.href = "cassandra_connect.jsp?region=region1&item=cassandra_explorer_connect_menu";
+                    });
+                });
+            </script>
+
+            <%
+            }
+            %>
         </div>
     </div>
 </fmt:bundle>

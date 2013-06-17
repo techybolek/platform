@@ -34,9 +34,10 @@
         isConnectionSuccess = adminClient.connectToCassandraCluster(connectionUrl, connectionUrl, userName, password);
         adminClient.setMaxRowCount(maxRowCount);
 
-    } catch (Exception exception) { %>
+    } catch (Exception exception) {
+%>
 <script type="text/javascript">
-    location.href = "cassandra_connect.jsp";
+    location.href = "cassandra_connect.jsp?region=region1&item=cassandra_explorer_connect_menu&conFailure=true";
 </script>
 <% }
 
@@ -46,5 +47,13 @@
     location.href = "cassandra_keyspaces.jsp";
 </script>
 <%
+    }else {
+%>
+<script type="text/javascript">
+    location.href = "cassandra_connect.jsp?region=region1&item=cassandra_explorer_connect_menu&conFailure=true";
+</script>
+
+<%
     }
+
 %>

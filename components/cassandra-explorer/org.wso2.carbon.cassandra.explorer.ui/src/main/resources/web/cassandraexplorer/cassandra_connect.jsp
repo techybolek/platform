@@ -32,6 +32,22 @@
             topPage="false"
             request="<%=request%>"/>
 
+<%
+  String connectionFailure;
+    connectionFailure = request.getParameter("conFailure");
+  if(null != connectionFailure && !connectionFailure.trim().isEmpty() && connectionFailure.trim().equalsIgnoreCase("true")){
+      %>
+       <script type="text/javascript">
+        jQuery(document).ready(function () {
+            CARBON.showErrorDialog('Connection Error.<br>Please retry with correct connection details.', function () {
+                CARBON.closeWindow();
+            }, function () {
+                CARBON.closeWindow();
+            });
+        });
+    </script>
+  <%  }
+%>
     <div id="middle">
         <h2>Connect</h2>
 

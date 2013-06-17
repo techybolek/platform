@@ -15,16 +15,11 @@
  */
 package org.wso2.carbon.cassandra.explorer.utils;
 
-import me.prettyprint.cassandra.serializers.AsciiSerializer;
-import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.serializers.TimeUUIDSerializer;
-import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.serializers.*;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 
 import java.nio.ByteBuffer;
@@ -46,12 +41,21 @@ public class CassandraUtils {
         serializerMap.put(ComparatorType.LONGTYPE.getClassName(), new LongSerializer());
         serializerMap.put(ComparatorType.BYTESTYPE.getClassName(), new ByteBufferSerializer());
         serializerMap.put(ComparatorType.INTEGERTYPE.getClassName(), new IntegerSerializer());
+        serializerMap.put("org.apache.cassandra.db.marshal.Int32Type", new IntegerSerializer());        
         serializerMap.put(ComparatorType.UUIDTYPE.getClassName(), new UUIDSerializer());
         serializerMap.put(ComparatorType.TIMEUUIDTYPE.getClassName(), new TimeUUIDSerializer());
+        serializerMap.put(ComparatorType.COMPOSITETYPE.getClassName(), new CompositeSerializer());
+        serializerMap.put("org.apache.cassandra.db.marshal.DoubleType", new DoubleSerializer());
+        serializerMap.put("org.apache.cassandra.db.marshal.BooleanType", new BooleanSerializer());
+        serializerMap.put("org.apache.cassandra.db.marshal.FloatType", new FloatSerializer());
     }
 
     public static Serializer getSerializer(String comparatorClass) {
-        return serializerMap.get(comparatorClass);
+        if(!comparatorClass.startsWith(ComparatorType.COMPOSITETYPE.getClassName())) {
+            return serializerMap.get(comparatorClass);
+        } else {
+            return new CompositeSerializer();
+        }
     }
 
     public static CFInfo getColumnFamilyInfo(Cluster cluster, Keyspace keyspace,
@@ -74,4 +78,29 @@ public class CassandraUtils {
         return columnName.toString();
     }
 
+    public static String getStringDeserialization(CassandraSerializer cassandraSerializer, ByteBuffer data) {
+        Serializer serializer = cassandraSerializer.getSerializer();
+        if(serializer instanceof ByteBufferSerializer){
+            serializer = new StringSerializer();
+        }
+        Object columnName = serializer.fromByteBuffer(data);
+
+        if(columnName instanceof Composite && cassandraSerializer.getCompositeSerializerList() != null) {
+            boolean isAdded = false;
+            StringBuilder stringBuilder = new StringBuilder();
+            Composite composite = (Composite) columnName;
+            for(int i = 0; i < cassandraSerializer.getCompositeSerializerList().size(); i++) {
+                if(isAdded) {
+                    stringBuilder.append(":");
+                }
+                Object compositeColName = composite.get(i, cassandraSerializer.getCompositeSerializerList().get(i));
+                isAdded = true;
+                stringBuilder.append(compositeColName.toString());
+            }
+            return stringBuilder.toString();
+        }
+
+        return columnName.toString();
+    }
 }
+

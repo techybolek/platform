@@ -23,6 +23,7 @@
 <%@ page import="org.wso2.carbon.cassandra.explorer.stub.data.xsd.Row" %>
 <%@ page import="org.json.simple.JSONObject" %>
 <%@ page import="org.json.simple.JSONArray" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
@@ -65,7 +66,7 @@
         session.setAttribute(CarbonUIMessage.ID, uiMsg);
 %>
 <script type="text/javascript">
-    location.href = "cassandra_connect.jsp";
+    location.href = "cassandra_connect.jsp?region=region1&item=cassandra_explorer_connect_menu";
 </script>
 <%
     }
@@ -91,7 +92,7 @@
                     columns = new Column[0];
                 }
                 for (int j = 0; j < columns.length; j++) {
-                    valueArray.add(columns[j].getValue());
+                    valueArray.add(StringEscapeUtils.escapeXml(columns[j].getValue()));
                 }
                 if (columns.length < 3) {
                     for (int k = 0; k < 3 - columns.length; k++) {

@@ -144,7 +144,7 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
             org.wso2.carbon.cassandra.explorer.data.Row row =
                     new org.wso2.carbon.cassandra.explorer.data.Row();
             row.setRowId(CassandraUtils.getStringDeserialization(
-                    columnFamilyInfo.getKeySerializer(), cassandraRow.getKey()));
+                    columnFamilyInfo.getKeyCassandraSerializer(), cassandraRow.getKey()));
             List<HColumn<ByteBuffer, ByteBuffer>> hColumnsList = cassandraRow.
                     getColumnSlice().getColumns();
             Column[] columns = new Column[hColumnsList.size()];
@@ -155,13 +155,11 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                 }
                 HColumn hColumn = hColumnsList.get(i);
                 Column column = new Column();
-                column.setName(CassandraUtils.getStringDeserialization(
-                        columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes()));
-
+                column.setName(cleanNonXmlChars(CassandraUtils.getStringDeserialization(
+                        columnFamilyInfo.getColumnCassandraSerializer(), hColumn.getNameBytes())));
                 String value = CassandraUtils.getStringDeserialization(columnFamilyInfo.
-                        getColumnValueSerializer(hColumn.getNameBytes()),
-                                                                       hColumn.getValueBytes());
-                column.setValue(value);
+                        getColumnValueCassandraSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
+                column.setValue(cleanNonXmlChars(value));
                 column.setTimeStamp(hColumn.getClock());
                 columns[i] = column;
             }
@@ -208,7 +206,7 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                     new org.wso2.carbon.cassandra.explorer.data.Row();
 
             String rowKey = CassandraUtils.getStringDeserialization(
-                    columnFamilyInfo.getKeySerializer(), cassandraRow.getKey());
+                    columnFamilyInfo.getKeyCassandraSerializer(), cassandraRow.getKey());
             //check if search key present in the row keys.
             if (rowKey.contains(searchKey)) {
                 row.setRowId(cleanNonXmlChars(rowKey));
@@ -224,10 +222,10 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                     HColumn hColumn = hColumnsList.get(i);
                     Column column = new Column();
                     column.setName(CassandraUtils.getStringDeserialization(
-                            columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes()));
+                            columnFamilyInfo.getColumnCassandraSerializer(), hColumn.getNameBytes()));
 
                     String value = CassandraUtils.getStringDeserialization(columnFamilyInfo.
-                            getColumnValueSerializer(hColumn.getNameBytes()),
+                            getColumnValueCassandraSerializer(hColumn.getNameBytes()),
                                                                            hColumn.getValueBytes());
                     column.setValue(value);
                     column.setTimeStamp(hColumn.getClock());
@@ -287,7 +285,7 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                     new org.wso2.carbon.cassandra.explorer.data.Row();
 
             String rowKey = CassandraUtils.getStringDeserialization(
-                    columnFamilyInfo.getKeySerializer(), cassandraRow.getKey());
+                    columnFamilyInfo.getKeyCassandraSerializer(), cassandraRow.getKey());
             //check if search key present in the row keys.
             if (rowKey.contains(searchKey)) {
                 rowlist.add(row);
@@ -331,9 +329,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
 
         for (HColumn hColumn : hColumnsList) {
             String columnKey = CassandraUtils.getStringDeserialization(
-                    columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes());
+                    columnFamilyInfo.getColumnCassandraSerializer(), hColumn.getNameBytes());
             String columnValue = CassandraUtils.getStringDeserialization(columnFamilyInfo.
-                    getColumnValueSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
+                    getColumnValueCassandraSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
 
             if ((columnKey.contains(searchKey) || columnValue.contains(searchKey))) {
                 Column column = new Column();
@@ -395,9 +393,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
         for (HColumn hColumn : hColumnsList) {
 
             String columnKey = CassandraUtils.getStringDeserialization(
-                    columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes());
+                    columnFamilyInfo.getColumnCassandraSerializer(), hColumn.getNameBytes());
             String columnValue = CassandraUtils.getStringDeserialization(columnFamilyInfo.
-                    getColumnValueSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
+                    getColumnValueCassandraSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
 
             if ((columnKey.contains(searchKey) || columnValue.contains(searchKey))) {
                 columnCount++;
@@ -461,9 +459,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
             Column column = new Column();
 
             String key = CassandraUtils.getStringDeserialization(
-                    columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes());
+                    columnFamilyInfo.getColumnCassandraSerializer(), hColumn.getNameBytes());
             String value = CassandraUtils.getStringDeserialization(columnFamilyInfo.
-                    getColumnValueSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
+                    getColumnValueCassandraSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
 
             key = cleanNonXmlChars(key);
             value = cleanNonXmlChars(value);
@@ -585,3 +583,4 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
     }
 
 }
+

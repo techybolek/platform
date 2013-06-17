@@ -16,6 +16,7 @@
 package org.wso2.carbon.cassandra.explorer.utils;
 
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
+import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -37,11 +38,13 @@ public class CFInfo {
 
     private String columnFamilyName;
 
-    private Serializer keySerializer = new ByteBufferSerializer();
+    private CassandraSerializer keySerializer = new CassandraSerializer(new ByteBufferSerializer());
 
-    private Serializer columnSerializer = new ByteBufferSerializer();
+    private CassandraSerializer columnSerializer = new CassandraSerializer(new ByteBufferSerializer());
 
-    private Map<ByteBuffer, Serializer> valueSerializerMap = new HashMap<ByteBuffer, Serializer>();
+    private CassandraSerializer defaultValidationSerializer = new CassandraSerializer(new ByteBufferSerializer());
+
+    private Map<ByteBuffer, CassandraSerializer> valueSerializerMap = new HashMap<ByteBuffer, CassandraSerializer>();
 
     public CFInfo(Cluster cluster, Keyspace keyspace, String name) {
         this.setKeyspace(keyspace.getKeyspaceName());
@@ -50,20 +53,42 @@ public class CFInfo {
         ColumnFamilyDefinition cfDef = ConnectionManager.getColumnFamilyDefinition(
                 cluster, keyspace, getColumnFamilyName());
 
-        this.keySerializer = CassandraUtils.getSerializer(cfDef.getKeyValidationClass());
+        this.keySerializer.setSerializer(CassandraUtils.getSerializer(cfDef.getKeyValidationClass()));
+
+        if(this.keySerializer.getSerializer() instanceof CompositeSerializer) {
+            this.keySerializer.setCompositeSerializerList(cfDef.getKeyValidationClass());
+        }
+
         ComparatorType comparatorType;
         List<ColumnDefinition> columnMetaData = new ArrayList<ColumnDefinition>();
         if (cfDef != null) {
             comparatorType = cfDef.getComparatorType();
             columnMetaData = cfDef.getColumnMetadata();
 
-            this.columnSerializer = ConnectionManager.getSerializer(comparatorType.getClassName());
+            this.columnSerializer.setSerializer(CassandraUtils.getSerializer(comparatorType.getClassName()) != null ?
+                    CassandraUtils.getSerializer(comparatorType.getClassName()) : new StringSerializer());
+
+            if(this.columnSerializer.getSerializer() instanceof CompositeSerializer) {
+                this.columnSerializer.setCompositeSerializerList(comparatorType.getClassName());
+            }
         }
 
         for (ColumnDefinition columnDefinition : columnMetaData) {
-            valueSerializerMap.put(columnDefinition.getName(),
-                                   CassandraUtils.getSerializer(
-                                           columnDefinition.getValidationClass()));
+            CassandraSerializer valueSerializer =  new CassandraSerializer(
+                    CassandraUtils.getSerializer(columnDefinition.getValidationClass()) != null ?
+                            CassandraUtils.getSerializer(columnDefinition.getValidationClass()) : new StringSerializer());
+            if(valueSerializer.getSerializer() instanceof CompositeSerializer) {
+                valueSerializer.setCompositeSerializerList(columnDefinition.getValidationClass());
+            }
+
+            valueSerializerMap.put(columnDefinition.getName(), valueSerializer);
+        }
+
+        this.defaultValidationSerializer.setSerializer(CassandraUtils.getSerializer(cfDef.getDefaultValidationClass()) != null ?
+                CassandraUtils.getSerializer(cfDef.getDefaultValidationClass()) : new StringSerializer());
+
+        if(this.defaultValidationSerializer.getSerializer() instanceof CompositeSerializer) {
+            this.defaultValidationSerializer.setCompositeSerializerList(cfDef.getDefaultValidationClass());
         }
 
     }
@@ -85,29 +110,47 @@ public class CFInfo {
     }
 
     public Serializer getKeySerializer() {
-        return keySerializer;
+        return keySerializer.getSerializer();
     }
 
     public void setKeySerializer(Serializer keySerializer) {
-        this.keySerializer = keySerializer;
+        this.keySerializer.setSerializer(keySerializer);
     }
 
     public Serializer getColumnSerializer() {
-        return columnSerializer;
+        return columnSerializer.getSerializer();
     }
 
     public void setColumnSerializer(Serializer columnSerializer) {
-        this.columnSerializer = columnSerializer;
+        this.columnSerializer.setSerializer(columnSerializer);
     }
 
     public Serializer getColumnValueSerializer(ByteBuffer columnName) {
-        Serializer serializer = valueSerializerMap.get(columnName);
+        CassandraSerializer cassandraSerializer = valueSerializerMap.get(columnName);
 
-        if (serializer == null) {
-            serializer = new StringSerializer(); // Defaults to UTF8 based String serializer
+        if (cassandraSerializer == null) {
+            cassandraSerializer = this.defaultValidationSerializer;
         }
 
-        return serializer;
+        return cassandraSerializer.getSerializer();
     }
 
+    public CassandraSerializer getKeyCassandraSerializer() {
+        return keySerializer;
+    }
+
+    public CassandraSerializer getColumnCassandraSerializer() {
+        return columnSerializer;
+    }
+
+    public CassandraSerializer getColumnValueCassandraSerializer(ByteBuffer columnName) {
+        CassandraSerializer cassandraSerializer = valueSerializerMap.get(columnName);
+
+        if (cassandraSerializer == null) {
+            cassandraSerializer = this.defaultValidationSerializer;
+        }
+
+        return cassandraSerializer;
+    }
 }
+
