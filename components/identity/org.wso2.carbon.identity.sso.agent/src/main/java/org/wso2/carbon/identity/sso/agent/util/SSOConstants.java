@@ -23,4 +23,9 @@ public class SSOConstants {
 	public static final String HTTP_POST_PARAM_SAML2_AUTH_REQ = "SAMLRequest";
 	public static final String HTTP_POST_PARAM_SAML2_RESP = "SAMLResponse";
 	public static final String IDP_SESSION = "IdPSession";
+
+    public class StatusCodes {
+        public static final String IDENTITY_PROVIDER_ERROR = "urn:oasis:names:tc:SAML:2.0:status:Responder";
+        public static final String NO_PASSIVE = "urn:oasis:names:tc:SAML:2.0:status:NoPassive";
+    }
 }

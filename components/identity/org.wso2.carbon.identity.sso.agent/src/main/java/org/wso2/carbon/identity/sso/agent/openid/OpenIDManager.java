@@ -46,8 +46,7 @@ public class OpenIDManager {
             // Keeping necessary parameters to verify the AuthResponse
             request.getSession().setAttribute(SSOConfigs.getDiscoverySessionAttributeName(), discovered);
 
-            // To identify OP's HTTP POST from other POSTs
-
+            consumerManager.setImmediateAuth(true);
             AuthRequest authReq = consumerManager.authenticate(discovered, SSOConfigs.getReturnTo());
 
             // Request subject attributes using Attribute Exchange extension specification

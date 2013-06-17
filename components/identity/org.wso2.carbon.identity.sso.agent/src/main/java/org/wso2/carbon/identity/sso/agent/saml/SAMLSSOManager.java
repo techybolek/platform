@@ -32,6 +32,7 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -127,11 +128,11 @@ public class SAMLSSOManager {
 	 * 
 	 * @return redirectionUrl
 	 */
-	public String buildRequest(HttpServletRequest request, boolean isLogout) throws SSOAgentException {
+	public String buildRequest(HttpServletRequest request, boolean isLogout, boolean isPassive) throws SSOAgentException {
 
 		RequestAbstractType requestMessage;
 		if (!isLogout) {
-			requestMessage = buildAuthnRequest();
+			requestMessage = buildAuthnRequest(isPassive);
 		} else { 
 			requestMessage = buildLogoutRequest((String) request.getSession().
                     getAttribute(SSOConfigs.getSubjectIdSessionAttributeName()));
@@ -150,7 +151,7 @@ public class SAMLSSOManager {
         }
         
         if(SSOConfigs.isRequestSigned()){
-            Util.addDeflateSignatureToHTTPQueryString(httpQueryString, credential.getPrivateKey());
+            Util.addDeflateSignatureToHTTPQueryString(httpQueryString, credential);
         }
         
         if(SSOConfigs.getIdPUrl().indexOf("?") > -1){
@@ -199,7 +200,7 @@ public class SAMLSSOManager {
         }
     }
 
-    private void processSSOResponse(HttpServletRequest request) throws SSOAgentException{
+    private void processSSOResponse(HttpServletRequest request) throws SSOAgentException {
 
         Response samlResponse = (Response) unmarshall(new String(Base64.decode(request.getParameter(SSOConstants.HTTP_POST_PARAM_SAML2_RESP))));
         List<Assertion> assertions = samlResponse.getAssertions();
@@ -209,8 +210,11 @@ public class SAMLSSOManager {
         }
         if (assertion == null) {
             if (samlResponse.getStatus() != null &&
-                    samlResponse.getStatus().getStatusMessage() != null) {
-                throw new SSOAgentException(samlResponse.getStatus().getStatusMessage().getMessage());
+                    samlResponse.getStatus().getStatusCode() != null &&
+                    samlResponse.getStatus().getStatusCode().getValue().equals(SSOConstants.StatusCodes.IDENTITY_PROVIDER_ERROR) &&
+                    samlResponse.getStatus().getStatusCode().getStatusCode() != null &&
+                    samlResponse.getStatus().getStatusCode().getStatusCode().getValue().equals(SSOConstants.StatusCodes.NO_PASSIVE)) {
+                return;
             }
             throw new SSOAgentException("SAML Assertion not found in the Response");
         }
@@ -277,7 +281,7 @@ public class SAMLSSOManager {
 		return logoutReq;
 	}
 
-	private AuthnRequest buildAuthnRequest() throws SSOAgentException{
+	private AuthnRequest buildAuthnRequest(boolean isPassive) throws SSOAgentException{
 
 		
 		IssuerBuilder issuerBuilder = new IssuerBuilder();
@@ -316,7 +320,7 @@ public class SAMLSSOManager {
 		                           authRequestBuilder.buildObject("urn:oasis:names:tc:SAML:2.0:protocol",
 		                                                          "AuthnRequest", "samlp");
 		authRequest.setForceAuthn(false);
-		authRequest.setIsPassive(false);
+		authRequest.setIsPassive(isPassive);
 		authRequest.setIssueInstant(issueInstant);
 		authRequest.setProtocolBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
 		authRequest.setAssertionConsumerServiceURL(SSOConfigs.getConsumerUrl());

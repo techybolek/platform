@@ -84,26 +84,29 @@ public class SSOAgentFilter implements Filter {
                 samlSSOManager.doSLO(request);
             } else if(SSOConfigs.isSAMLSSOLoginEnabled() && samlResponse != null){
                 samlSSOManager.processResponse(request);
+                if(request.getSession(false).getAttribute(SSOConfigs.getSubjectIdSessionAttributeName()) == null){
+                    request.getRequestDispatcher(SSOConfigs.getLoginUrl()).forward(request,response);
+                    return;
+                }
             } else if(SSOConfigs.isOpenIDLoginEnabled() && openid_mode != null &&
                     !openid_mode.equals("") && !openid_mode.equals("null")){
                 openIdManager.processOpenIDLoginResponse(request, response);
             } else if (SSOConfigs.isSAMLSSOLoginEnabled() && request.getRequestURI().endsWith(SSOConfigs.getLogoutUrl())){
                 if(request.getSession(false) != null){
-                    response.sendRedirect(samlSSOManager.buildRequest(request, true));
+                    response.sendRedirect(samlSSOManager.buildRequest(request, true, false));
                     return;
                 }
             } else if(SSOConfigs.isSAMLSSOLoginEnabled() && request.getRequestURI().endsWith(SSOConfigs.getSAMLSSOUrl())){
-                response.sendRedirect(samlSSOManager.buildRequest(request, false));
+                response.sendRedirect(samlSSOManager.buildRequest(request, false, false));
                 return;
             } else if(SSOConfigs.isOpenIDLoginEnabled() && request.getRequestURI().endsWith(SSOConfigs.getOpenIdUrl()) &&
                     claimed_id != null && !claimed_id.equals("") && !claimed_id.equals("null")){
                 response.sendRedirect(openIdManager.doOpenIDLogin(request, response));
                 return;
-            } else if (SSOConfigs.isOpenIDLoginEnabled() && !request.getRequestURI().endsWith(SSOConfigs.getLoginUrl()) &&
-                    !request.getRequestURI().endsWith(request.getContextPath()) &&
-                    !request.getRequestURI().endsWith(request.getContextPath() + "/") &&
+            } else if ((SSOConfigs.isSAMLSSOLoginEnabled() || SSOConfigs.isOpenIDLoginEnabled()) &&
+                    !request.getRequestURI().endsWith(SSOConfigs.getLoginUrl()) &&
                     request.getSession().getAttribute(SSOConfigs.getSubjectIdSessionAttributeName()) == null) {
-                response.sendRedirect(samlSSOManager.buildRequest(request,false));
+                response.sendRedirect(samlSSOManager.buildRequest(request, false, true));
                 return;
              }
             // pass the request along the filter chain

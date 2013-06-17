@@ -178,13 +178,13 @@ public class Util {
     }
     
     public static void addDeflateSignatureToHTTPQueryString(StringBuilder httpQueryString,
-                                            PrivateKey privateKey) throws SSOAgentException {
+                                                            X509Credential cred) throws SSOAgentException {
         try {
             httpQueryString.append("&SigAlg="
                     + URLEncoder.encode(XMLSignature.ALGO_ID_SIGNATURE_RSA, "UTF-8").trim());
 
             java.security.Signature signature = java.security.Signature.getInstance("SHA1withRSA");
-            signature.initSign(privateKey);
+            signature.initSign(cred.getPrivateKey());
             signature.update(httpQueryString.toString().getBytes());
             byte[] signatureByteArray = signature.sign();
 
