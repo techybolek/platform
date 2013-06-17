@@ -83,10 +83,14 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.mex.feature:${wso2carbon.version}</featureArtifactDef>
 
 								<!-- registry related features -->
-								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature:4.2.0-SNAPSHOT</featureArtifactDef>
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature:${wso2carbon.version}</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties.feature:${wso2carbon.version}</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.profiles.feature:${wso2carbon.version}</featureArtifactDef>
-								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch.feature:4.2.0-SNAPSHOT</featureArtifactDef>
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch.feature:${wso2carbon.version}</featureArtifactDef>
+
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.common.feature:${wso2carbon.version}</featureArtifactDef>
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.ui.feature:${wso2carbon.version}</featureArtifactDef>
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu.feature:${wso2carbon.version}</featureArtifactDef>
 
 								<!-- Directory server related features -->
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.feature:4.2.0-SNAPSHOT</featureArtifactDef>
@@ -197,18 +201,22 @@
 									<version>4.2.0-SNAPSHOT</version>
 								</feature-->
 								<feature>
-									<id>org.wso2.carbon.registry.core.feature.group</id>
-									<version>4.2.0-SNAPSHOT</version>
+									<id>org.wso2.carbon.registry.core.common.feature.group</id>
+									<version>${wso2carbon.version}</version>
 								</feature>
-								<!--feature>
+								<feature>
+									<id>org.wso2.carbon.registry.core.feature.group</id>
+									<version>${wso2carbon.version}</version>
+								</feature>
+								<feature>
 									<id>org.wso2.carbon.registry.core.ui.feature.group</id>
-									<version>4.2.0-SNAPSHOT</version>
-								</feature-->
+									<version>${wso2carbon.version}</version>
+								</feature>
 
-								<!--feature>
+								<feature>
 									<id>org.wso2.carbon.registry.ui.menu.feature.group</id>
 									<version>${wso2carbon.version}</version>
-								</feature-->
+								</feature>
 								<feature>
 									<id>org.wso2.carbon.registry.resource.properties.feature.group</id>
 									<version>${wso2carbon.version}</version>
@@ -330,7 +338,7 @@
 								</feature>
        								<feature>
                                    					 <id>org.wso2.carbon.registry.contentsearch.feature.group</id>
-				                                         <version>4.2.0-SNAPSHOT</version>
+				                                         <version>${wso2carbon.version}</version>
 				                                </feature>
 								<feature>
                                    					 <id>org.wso2.carbon.stratos.deployment.feature.group</id>
