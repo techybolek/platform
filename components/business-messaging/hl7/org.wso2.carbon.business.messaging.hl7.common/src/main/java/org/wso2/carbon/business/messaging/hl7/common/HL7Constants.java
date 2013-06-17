@@ -79,6 +79,8 @@ public class HL7Constants {
 	
 	public static final String HL7_GENERATE_ACK = "HL7_GENERATE_ACK";
 	
+	public static final String HL7_APPLICATION_ACK  = "HL7_APPLICATION_ACK";
+			
 	public static final class MessageType {
 		
 		public static final String V2X = "V2X";
@@ -94,5 +96,9 @@ public class HL7Constants {
 		public static final String XML = "XML";
 		
 	}
+
+	//HL7 Transport parameters
+
+	public static final String HL7_TRANSPORT_TIMEOUT = "transport.hl7.TimeOut";
 
 }
