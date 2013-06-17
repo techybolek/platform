@@ -134,7 +134,7 @@ public class HL7MessageFormatter implements MessageFormatter {
     }
     
     private Message createGeneratedMessageAck(HL7ProcessingContext processingCtx, 
-    		Message message, MessageContext msgCtx) throws HL7Exception {
+    		Message message, MessageContext msgCtx) throws HL7Exception, AxisFault {
     	try {
     		return processingCtx.handleHL7Result(msgCtx, message);
     	} catch (HL7Exception e) {
