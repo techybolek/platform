@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.identity.oauth.ui.client;
 
-import java.rmi.RemoteException;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -35,6 +33,8 @@ import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDT
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationRequestDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationResponseDTO;
 import org.wso2.carbon.user.api.Claim;
+
+import java.rmi.RemoteException;
 
 public class OAuth2ServiceClient {
 
@@ -81,6 +81,7 @@ public class OAuth2ServiceClient {
         oauthDTO.setResponseType(authorizeReqDTO.getResponseType());
         oauthDTO.setScopes(authorizeReqDTO.getScopes());
         oauthDTO.setUsername(authorizeReqDTO.getUsername());
+        oauthDTO.setUserAuthenticated(authorizeReqDTO.getUserAuthenticated());
 
         org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO resp = oauth2Service.authorize(oauthDTO);
 

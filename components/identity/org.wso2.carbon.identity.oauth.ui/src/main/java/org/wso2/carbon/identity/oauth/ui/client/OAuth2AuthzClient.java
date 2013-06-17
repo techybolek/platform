@@ -26,6 +26,7 @@ import org.apache.amber.oauth2.common.message.types.ResponseType;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.core.common.AuthenticationException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
@@ -36,6 +37,8 @@ import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeRespDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
+import org.wso2.carbon.ui.CarbonUIAuthenticator;
+import org.wso2.carbon.ui.tracker.AuthenticatorRegistry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +72,7 @@ public class OAuth2AuthzClient {
             }
 			OAuthASResponse.OAuthAuthorizationResponseBuilder builder =
 			                                                            OAuthASResponse.authorizationResponse(request,
-			                                                                                                  HttpServletResponse.SC_FOUND);
+                                                                                                              HttpServletResponse.SC_FOUND);
             OAuthResponse oauthResponse;
             // user is authorized.
             if (authzRespDTO.getAuthorized()) {
@@ -140,17 +143,17 @@ public class OAuth2AuthzClient {
 		return redirectUrl;
 	}
 
-	private OAuth2AuthorizeRespDTO authorize(HttpServletRequest req, OAuth2Parameters oauth2Params)
+    private OAuth2AuthorizeRespDTO authorize(HttpServletRequest req, OAuth2Parameters oauth2Params)
             throws OAuthProblemException {
         try {
             // authenticate and issue the authorization code
-			String backendServerURL = CarbonUIUtil.getServerURL(ServerConfiguration.getInstance());
-			ConfigurationContext configContext =
-			                                     (ConfigurationContext) req.getSession()
-			                                                               .getServletContext()
-			                                                               .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-			OAuth2ServiceClient oauth2ServiceClient =
-			                                          new OAuth2ServiceClient(backendServerURL, configContext);
+            String backendServerURL = CarbonUIUtil.getServerURL(ServerConfiguration.getInstance());
+            ConfigurationContext configContext =
+                    (ConfigurationContext) req.getSession()
+                            .getServletContext()
+                            .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+            OAuth2ServiceClient oauth2ServiceClient =
+                    new OAuth2ServiceClient(backendServerURL, configContext);
 
             OAuth2AuthorizeReqDTO authzReqDTO = new OAuth2AuthorizeReqDTO();
             authzReqDTO.setCallbackUrl(oauth2Params.getRedirectURI());
@@ -159,17 +162,31 @@ public class OAuth2AuthzClient {
             authzReqDTO.setScopes(oauth2Params.getScopes().toArray(
                     new String[oauth2Params.getScopes().size()]));
             String username = req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_NAME);
-            if(username == null) {
-            	username = (String) req.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
+            if (username == null) {
+                username = (String) req.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
             }
             authzReqDTO.setUsername(username);
             authzReqDTO.setPassword(req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_PASSWORD));
+            CarbonUIAuthenticator authenticator = AuthenticatorRegistry.getCarbonAuthenticator(req);
+            try {
+                if (authenticator != null) {
+                    authenticator.authenticate(req);
+                    authzReqDTO.setUserAuthenticated(true);
+                    return oauth2ServiceClient.authorize(authzReqDTO);
+                }
+            } catch (AuthenticationException e) {
+                log.error(e.getMessage());
+            }
+            log.error("Error when Authenticating User.");
 
-            return oauth2ServiceClient.authorize(authzReqDTO);
+            OAuth2AuthorizeRespDTO authorizeRespDTO = new OAuth2AuthorizeRespDTO();
+            authorizeRespDTO.setCallbackURI(authzReqDTO.getCallbackUrl());
+            return authorizeRespDTO;
+
         } catch (RemoteException e) {
             log.error("Error when invoking the OAuth2Service to perform authorization.", e);
             throw OAuthProblemException.error(OAuth2ErrorCodes.SERVER_ERROR,
-                    "Error when invoking the OAuth2Service to perform authorization.");
+                                              "Error when invoking the OAuth2Service to perform authorization.");
         }
     }
 }

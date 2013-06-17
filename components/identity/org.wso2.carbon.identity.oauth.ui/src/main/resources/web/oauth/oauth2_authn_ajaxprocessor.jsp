@@ -121,21 +121,21 @@ if(!"true".equals(request.getSession().getAttribute(OAuthConstants.OIDCSessionCo
                 </div>
                 <!--Username-->
                 <div class="control-group">
-                    <label class="control-label" for="oauth_user_name">Username:</label>
+                    <label class="control-label" for="username">Username:</label>
 
                     <div class="controls">
-                        <input type="text" class="input-large" id='oauth_user_name'
-                               name="oauth_user_name">
+                        <input type="text" class="input-large" id='username'
+                               name="username">
                     </div>
                 </div>
 
                 <!--Password-->
                 <div class="control-group">
-                    <label class="control-label" for="oauth_user_password">Password:</label>
+                    <label class="control-label" for="password">Password:</label>
 
                     <div class="controls">
-                        <input type="password" class="input-large" id='oauth_user_password'
-                               name="oauth_user_password">
+                        <input type="password" class="input-large" id='password'
+                               name="password">
                     </div>
                 </div>
 
