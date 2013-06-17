@@ -252,6 +252,7 @@ public class SAMLSSOManager {
 		LogoutRequest logoutReq = new LogoutRequestBuilder().buildObject();
 
 		logoutReq.setID(Util.createID());
+		logoutReq.setDestination(SSOConfigs.getIdPUrl());
 
 		DateTime issueInstant = new DateTime();
 		logoutReq.setIssueInstant(issueInstant);
@@ -324,6 +325,7 @@ public class SAMLSSOManager {
 		authRequest.setRequestedAuthnContext(requestedAuthnContext);
 		authRequest.setID(authReqRandomId);
 		authRequest.setVersion(SAMLVersion.VERSION_20);
+		authRequest.setDestination(SSOConfigs.getIdPUrl());
 
 		/* Requesting Attributes. This Index value is registered in the IDP */
 		if (SSOConfigs.getAttributeConsumingServiceIndex() != null && SSOConfigs.getAttributeConsumingServiceIndex().trim().length() > 0) {

@@ -21,6 +21,11 @@ package org.wso2.carbon.identity.sso.agent.util;
 import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
 
 import javax.servlet.FilterConfig;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public class SSOConfigs {
@@ -59,36 +64,43 @@ public class SSOConfigs {
 
 
     public static void initConfigs(FilterConfig fConfigs) throws SSOAgentException {
+        
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream(fConfigs.getInitParameter("AgentPropertyFilePath")));
+        } catch (Exception e) {
+            throw new SSOAgentException("Error while reading the properties file");
+        }
+        
+        samlSSOLoginEnabled = Boolean.parseBoolean(properties.getProperty("EnableSAMLSSOLogin"));
+        openidLoginEnabled = Boolean.parseBoolean(properties.getProperty("EnableOpenIDLogin"));
+        loginUrl = properties.getProperty("LoginUrl");
+        samlSSOUrl = properties.getProperty("SAMLSSOUrl");
+        openIdUrl = properties.getProperty("OpenIDUrl");
 
-        samlSSOLoginEnabled = Boolean.parseBoolean(fConfigs.getInitParameter("EnableSAMLSSOLogin"));
-        openidLoginEnabled = Boolean.parseBoolean(fConfigs.getInitParameter("EnableOpenIDLogin"));
-        loginUrl = fConfigs.getInitParameter("LoginUrl");
-        samlSSOUrl = fConfigs.getInitParameter("SAMLSSOUrl");
-        openIdUrl = fConfigs.getInitParameter("OpenIDUrl");
+        issuerId = properties.getProperty("SAML.IssuerID");
+        consumerUrl = properties.getProperty("SAML.ConsumerUrl");
+		idPUrl = properties.getProperty("SAML.IdPUrl");
+        subjectIdSessionAttributeName = properties.getProperty("SAML.SubjectIDSessionAttributeName");
+        attributeConsumingServiceIndex = properties.getProperty("SAML.AttributeConsumingServiceIndex");
+        samlSSOAttributesMapName = properties.getProperty("SAML.AttributesMapName");
+        isSLOEnabled = Boolean.parseBoolean(properties.getProperty("SAML.EnableSLO"));
+        logoutUrl = properties.getProperty("SAML.LogoutUrl");
+        isResponseSigned = Boolean.parseBoolean(properties.getProperty("SAML.EnableResponseSigning"));
+        isAssertionSigned = Boolean.parseBoolean(properties.getProperty("SAML.EnableAssertionSigning"));
+        isRequestSigned = Boolean.parseBoolean(properties.getProperty("SAML.EnableRequestSigning"));
+        ssoAgentCredentialImplClass = properties.getProperty("SAML.SSOAgentCredentialImplClass");
+        keyStore = properties.getProperty("SAML.KeyStore");
+        keyStorePassword = properties.getProperty("SAML.KeyStorePassword");
+        idPCertAlias = properties.getProperty("SAML.IdPCertAlias");
+        privateKeyPassword = properties.getProperty("SAML.PrivateKeyPassword");
 
-        issuerId = fConfigs.getInitParameter("SAML.IssuerID");
-        consumerUrl = fConfigs.getInitParameter("SAML.ConsumerUrl");
-		idPUrl = fConfigs.getInitParameter("SAML.IdPUrl");
-        subjectIdSessionAttributeName = fConfigs.getInitParameter("SAML.SubjectIDSessionAttributeName");
-        attributeConsumingServiceIndex = fConfigs.getInitParameter("SAML.AttributeConsumingServiceIndex");
-        samlSSOAttributesMapName = fConfigs.getInitParameter("SAML.AttributesMapName");
-        isSLOEnabled = Boolean.parseBoolean(fConfigs.getInitParameter("SAML.EnableSLO"));
-        logoutUrl = fConfigs.getInitParameter("SAML.LogoutUrl");
-        isResponseSigned = Boolean.parseBoolean(fConfigs.getInitParameter("SAML.EnableResponseSigning"));
-        isAssertionSigned = Boolean.parseBoolean(fConfigs.getInitParameter("SAML.EnableAssertionSigning"));
-        isRequestSigned = Boolean.parseBoolean(fConfigs.getInitParameter("SAML.EnableRequestSigning"));
-        ssoAgentCredentialImplClass = fConfigs.getInitParameter("SAML.SSOAgentCredentialImplClass");
-        keyStore = fConfigs.getInitParameter("SAML.KeyStore");
-        keyStorePassword = fConfigs.getInitParameter("SAML.KeyStorePassword");
-        idPCertAlias = fConfigs.getInitParameter("SAML.IdPCertAlias");
-        privateKeyPassword = fConfigs.getInitParameter("SAML.PrivateKeyPassword");
-
-        returnTo = fConfigs.getInitParameter("OpenID.ReturnToUrl");
-        claimedIdParameterName = fConfigs.getInitParameter("OpenID.ClaimedIDParameterName");
-        claimedIdSessionAttributeName = fConfigs.getInitParameter("OpenID.ClaimedIDSessionAttributeName");
-        discoverySessionAttributeName = fConfigs.getInitParameter("OpenID.DiscoverySessionAttributeName");
-        attributesRequestorImplClass = fConfigs.getInitParameter("OpenID.AttributesRequestorImplClass");
-        openIdAttributesMapName = fConfigs.getInitParameter("OpenID.AttributesMapName");
+        returnTo = properties.getProperty("OpenID.ReturnToUrl");
+        claimedIdParameterName = properties.getProperty("OpenID.ClaimedIDParameterName");
+        claimedIdSessionAttributeName = properties.getProperty("OpenID.ClaimedIDSessionAttributeName");
+        discoverySessionAttributeName = properties.getProperty("OpenID.DiscoverySessionAttributeName");
+        attributesRequestorImplClass = properties.getProperty("OpenID.AttributesRequestorImplClass");
+        openIdAttributesMapName = properties.getProperty("OpenID.AttributesMapName");
 
 
         if(samlSSOLoginEnabled == null){
