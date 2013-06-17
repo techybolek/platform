@@ -86,7 +86,12 @@ public class CassandraClusterAdmin extends AbstractAdmin {
             String load = loadMap.containsKey(primaryEndpoint)
                     ? loadMap.get(primaryEndpoint)
                     : "?";
-            String owns = new DecimalFormat("##0.00%").format(ownerships.get(token));
+
+            Float ownership = ownerships.get(token);
+            String owns = "N/A";
+            if(ownership!=null){
+                owns = new DecimalFormat("##0.00%").format(ownership);
+            }
 
             NodeInformation nodeInformation = new NodeInformation();
             nodeInformation.setAddress(primaryEndpoint);

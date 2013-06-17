@@ -172,7 +172,7 @@ public class CassandraServerDSComponent {
      * @return offset number
      */
     private int readPortOffset() {
-      return CarbonUtils.getPortFromServerConfig(CARBON_CONFIG_PORT_OFFSET)+1;
+     return CarbonUtils.getPortFromServerConfig(CARBON_CONFIG_PORT_OFFSET)+1;
     }
 
     /**
