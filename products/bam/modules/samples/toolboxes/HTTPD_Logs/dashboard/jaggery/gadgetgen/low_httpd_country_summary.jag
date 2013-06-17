@@ -1,8 +1,7 @@
 <%
         var config = {};
 
-        var db = new Database("jdbc:h2:repository/database/samples/WSO2CARBON_DB;AUTO_SERVER=TRUE",
-        "wso2carbon", "wso2carbon", config);
+        var db = new Database("WSO2BAM_DATASOURCE");
     	var result = db.query("select * from CountrySummary where requestCount < 10");
 
         var respJson = null;

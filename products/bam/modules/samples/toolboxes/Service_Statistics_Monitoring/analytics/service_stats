@@ -1,9 +1,8 @@
 CREATE EXTERNAL TABLE IF NOT EXISTS AppServerStats (key STRING, service_name STRING,operation_name STRING,
 request_count INT,response_count INT,fault_count INT, response_time BIGINT,remote_address STRING,
 payload_timestamp BIGINT,host STRING) STORED BY 
-'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES ( "cassandra.host" = "127.0.0.1",
-"cassandra.port" = "9160","cassandra.ks.name" = "EVENT_KS",
-"cassandra.ks.username" = "admin","cassandra.ks.password" = "admin",
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
 "cassandra.cf.name" = "bam_service_data_publisher",
 "cassandra.columns.mapping" = ":key,payload_service_name,payload_operation_name,payload_request_count,payload_response_count,payload_fault_count, payload_response_time,meta_remote_address, payload_timestamp,meta_host" );                                    
 

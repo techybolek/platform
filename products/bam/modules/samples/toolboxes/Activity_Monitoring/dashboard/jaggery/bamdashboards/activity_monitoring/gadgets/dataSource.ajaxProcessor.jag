@@ -1,7 +1,17 @@
 <%
+    var tableName = request.getParameter('tableName');
 
-    var query = request.getParameter('query');
-    var dbType = request.getParameter('dbType');
+    var query;
+    var dbType = "RDBMS";
+
+    if( tableName == "Entry" )
+    {
+        query = "SELECT messageRowID, sentTimestamp, soapHeader, soapBody, host FROM ActivitySummary LIMIT 1,1";
+    }
+    else
+    {
+        query =  "SELECT DISTINCT bamActivityID, COUNT(messageRowID) AS MESSAGECOUNT FROM ActivitySummary GROUP BY bamActivityID LIMIT 1,1";
+    }
 
     function createTableJSON(result) {
         var len = result.length;
@@ -52,5 +62,7 @@
 
     var result = queryResults(query);
     var respJson = createTableJSON(result);
+    //var log =  new Log();
+    //log.info(result);
     print(respJson);
 %>

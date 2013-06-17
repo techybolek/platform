@@ -78,6 +78,17 @@ $(document).ready(function(){
   	    }
 		
 	});
+
+    //If no user action, reload page to prevent session timeout.
+    var wintimeout;
+    function setWinTimeout() {
+        wintimeout = window.setTimeout("location.reload(true)",1740000); //setting timeout for 29 minutes. Actual timeout is 30 minutes.
+    }
+    $('body').click(function() {
+        window.clearTimeout(wintimeout);
+        setWinTimeout();
+    });
+    setWinTimeout();
     /*$.getJSON("populate_combos_ajaxprocessor.jag?server=10.150.3.174:9443",
         function(data){
           alert(data);

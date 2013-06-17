@@ -107,7 +107,22 @@
             </div>
             <div class="row-fluid">
                 <div class="hero-unit">
-                    <iframe id="dashboardWidget-5" src="gadgets/cpuUsage.jag?t=Now" class="single-column-gadget"></iframe>
+                    <iframe id="dashboardWidget-5" src="gadgets/psOldGen.jag?t=Now" class="single-column-gadget"></iframe>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="hero-unit">
+                    <iframe id="dashboardWidget-6" src="gadgets/codeCache.jag?t=Now" class="single-column-gadget"></iframe>
+                </div><!--/span-->
+            </div>
+            <div class="row-fluid">
+                <div class="hero-unit">
+                    <iframe id="dashboardWidget-7" src="gadgets/psSurvivorSpace.jag?t=Now" class="single-column-gadget"></iframe>
+                </div><!--/span-->
+            </div>
+            <div class="row-fluid">
+                <div class="hero-unit">
+                    <iframe id="dashboardWidget-8" src="gadgets/cpuUsage.jag?t=Now" class="single-column-gadget"></iframe>
                 </div><!--/span-->
             </div><!--/row-->
         </div><!--/span-->

@@ -135,7 +135,7 @@ public class KPISampleTestCase {
     @Test(groups = {"wso2.bam"}, dependsOnMethods = "runKPIAgent")
     public void validateData() throws SQLException {
         dataSource = (BasicDataSource) initDataSource("org.h2.Driver",
-                "jdbc:h2:repository/database/samples/WSO2CARBON_DB;AUTO_SERVER=TRUE",
+                "jdbc:h2:repository/database/samples/BAM_STATS_DB;AUTO_SERVER=TRUE",
                 "wso2carbon",
                 "wso2carbon");
         connection = dataSource.getConnection();

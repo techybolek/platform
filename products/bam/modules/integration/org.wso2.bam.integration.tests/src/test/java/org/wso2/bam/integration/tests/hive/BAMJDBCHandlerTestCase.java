@@ -54,6 +54,7 @@ import static org.testng.Assert.assertTrue;
 
 public class BAMJDBCHandlerTestCase {
 
+    public static final int NUMBER_OF_EVENTS = 100;
     private HiveExecutionServiceStub hiveStub;
     private final Log log = LogFactory.getLog(BAMJDBCHandlerTestCase.class);
     private LoginLogoutUtil util = new LoginLogoutUtil();
@@ -85,12 +86,6 @@ public class BAMJDBCHandlerTestCase {
     @Test(groups = {"wso2.bam"})
     public void publishData(){
 
-        AgentConfiguration agentConfiguration = new AgentConfiguration();
-        String carbonHome = System.getProperty("carbon.home");
-        System.setProperty("javax.net.ssl.trustStore", carbonHome + "/repository/resources/security/client-truststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-        Agent agent = new Agent(agentConfiguration);
-
         String host = null;
         try {
             host = getLocalHostAddress().getHostAddress();
@@ -98,7 +93,7 @@ public class BAMJDBCHandlerTestCase {
             host = "127.0.0.1";
         }
         try {
-            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin");
             defineEventStream();
             publishEvent();
             runHiveDataTypeTest();
@@ -125,7 +120,11 @@ public class BAMJDBCHandlerTestCase {
             assertTrue(null != vals && vals.length != 0, "No results are returned from jdbc handler test");
 
             boolean resultsAreCorrect = false;
-            if(vals[2].equals("3000") && vals[3].equals("100") && vals[4].equals("3.0") && vals[5].equals("3.5") && vals[6].equals("0.7")){
+            if(Integer.parseInt(vals[2])==((event2RequestCount + event4RequestCount)*NUMBER_OF_EVENTS) &&
+                    Integer.parseInt(vals[3])== ((faultCount2+faultCount4)*NUMBER_OF_EVENTS)  &&
+                    Double.parseDouble(vals[4]) == ((avg_response_time2*NUMBER_OF_EVENTS + avg_response_time4* NUMBER_OF_EVENTS)/(2*NUMBER_OF_EVENTS)) &&
+                    Float.parseFloat(vals[5]) == responseTime4 &&
+                    Float.parseFloat(vals[6])==minResponseTime4){
                  resultsAreCorrect = true;
             }
 
@@ -144,7 +143,11 @@ public class BAMJDBCHandlerTestCase {
             assertTrue(null != newValue && newValue.length != 0, "No results are returned from jdbc handler test");
 
             boolean newResultsAreCorrect = false;
-            if(newValue[2].equals("2000") && newValue[3].equals("0") && newValue[4].equals("4.5") && newValue[5].equals("3.5") && newValue[6].equals("0.7")){
+            if(Integer.parseInt(newValue[2]) == event4RequestCount * NUMBER_OF_EVENTS  &&
+                    Integer.parseInt(newValue[3]) == faultCount4 * NUMBER_OF_EVENTS &&
+                    Double.parseDouble(newValue[4]) == (avg_response_time4 * NUMBER_OF_EVENTS)/NUMBER_OF_EVENTS &&
+                    Float.parseFloat(newValue[5]) == responseTime4 &&
+                    Float.parseFloat(newValue[6]) == minResponseTime4){
                 newResultsAreCorrect = true;
             }
             assertTrue(newResultsAreCorrect,"Results are different from expected one: " + newValue[2]+ ":" + newValue[3]+ ":"
@@ -208,6 +211,7 @@ public class BAMJDBCHandlerTestCase {
     private String defineEventStream(){
             try {
                 streamId = dataPublisher.defineStream(getStreamDef("jdbc_handler_test_stream","1.0.1"));
+                log.info("JDBC HANDLER SREAM DEFINED stream id is:" + streamId);
             } catch (Exception e) {
                 fail("Failed when defining stream: " + e.getMessage() );
             }
@@ -244,7 +248,7 @@ public class BAMJDBCHandlerTestCase {
     }
 
         private void publishEvent() throws AgentException {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < NUMBER_OF_EVENTS; i++) {
                 Event event1 =getEvent1();
                 dataPublisher.publish(event1);
                 Event  event2=getEvent2();
@@ -253,6 +257,11 @@ public class BAMJDBCHandlerTestCase {
                 dataPublisher.publish(event3);
                 Event event4=getEvent4();
                 dataPublisher.publish(event4);
+            }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+
             }
         }
 
@@ -266,6 +275,16 @@ public class BAMJDBCHandlerTestCase {
     private double avg_response_time3 = 2.25;
     private double avg_response_time4 = 4.5;
 
+    private int faultCount2 = 1;
+    private int faultCount4 = 0;
+
+    private float responseTime2 = 3.3f;
+    private float responseTime4 =  3.5f;
+
+    private float minResponseTime2 = 0.9f;
+    private float minResponseTime4 = 0.7f;
+
+
     private Event getEvent1() {
        Event event = new Event(streamId, System.currentTimeMillis(), new Object[]{"10.100.3.175"}, null,
                   new Object[]{"twitter","1.0.0","Kasun","WQEEWWSJDSDIKHDSSDBSDGJHGGDSDSHJ",
@@ -276,7 +295,8 @@ public class BAMJDBCHandlerTestCase {
     private Event getEvent2(){
         Event event = new Event(streamId, System.currentTimeMillis(),new Object[]{"10.100.3.176"},null,
                                 new Object[]{"facebook","1.0.5","Kushan","GJSKDSKJDHSFHSIURSJSBDJSBDSDS",
-                                             event2RequestCount,1,avg_response_time2,3.3f,0.9f,false});
+                                             event2RequestCount,faultCount2,avg_response_time2,responseTime2,
+                                        minResponseTime2,false});
         return event;
     }
 
@@ -290,7 +310,8 @@ public class BAMJDBCHandlerTestCase {
     private Event getEvent4(){
         Event event = new Event(streamId, System.currentTimeMillis(),new Object[]{"10.100.3.178"},null,
                                 new Object[]{"facebook","1.0.5","Nuwan","ZXXZXVCVCVCBVBBMNMNCVBVBNBNMN",
-                                             event4RequestCount,0,avg_response_time4,3.5f,0.7f,false});
+                                             event4RequestCount,faultCount4,avg_response_time4,responseTime4,
+                                        minResponseTime4,false});
         return event;
     }
 

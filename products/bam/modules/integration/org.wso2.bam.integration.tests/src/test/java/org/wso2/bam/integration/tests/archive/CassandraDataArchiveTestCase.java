@@ -112,12 +112,6 @@ public class CassandraDataArchiveTestCase {
     @Test(groups = {"wso2.bam"})
     public void publishData(){
 
-        AgentConfiguration agentConfiguration = new AgentConfiguration();
-        String carbonHome = System.getProperty("carbon.home");
-        System.setProperty("javax.net.ssl.trustStore", carbonHome + "/repository/resources/security/client-truststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-        Agent agent = new Agent(agentConfiguration);
-
         String host = null;
         try {
             host = getLocalHostAddress().getHostAddress();
@@ -125,11 +119,12 @@ public class CassandraDataArchiveTestCase {
             host = "127.0.0.1";
         }
         try {
-            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin");
             defineEventStream();
             //Publish yesterday's data
             publishEvent(-1);
             publishEvent(0);
+            Thread.sleep(5000);
             runArchivalJob();
             runJDBCHandlerTest();
         } catch (Exception e) {

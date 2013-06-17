@@ -61,7 +61,7 @@ public class HiveMapDataTypeTestCase {
         KPIAgent.publish();
     }
 
-    //@Test(groups = {"wso2.bam"}, dependsOnMethods = "runKPIAgent")
+    @Test(groups = {"wso2.bam"}, dependsOnMethods = "runKPIAgent")
     public void executeScript() {
 
         String[] queries = getHiveQueries("HiveMapSampleScript");
@@ -92,34 +92,12 @@ public class HiveMapDataTypeTestCase {
                         result.getColumnNames().length + " columns returned.");
                 }
 
-                if (!"value".equals(result.getColumnNames()[3])) {
+                if (!"value".equals(result.getColumnNames()[2])) {
                     fail("Unexpected column returned. Expected map column 'value'.");
                 }
 
                 break;
             }
-
-            hiveStub.executeHiveScript(queries[3]); // Create second table with two maps in schema
-
-            results = hiveStub.executeHiveScript(queries[2]);
-
-            for (HiveExecutionServiceStub.QueryResult result : results) {
-                if (result.getColumnNames().length != 6) {
-                    fail("Unexpected result returned. Expected 6 columns in the results. Only " +
-                        result.getColumnNames().length + " columns returned.");
-                }
-
-                if (!"value".equals(result.getColumnNames()[3])) {
-                    fail("Unexpected column returned. Expected map column 'value'.");
-                }
-
-                if (!"test".equals(result.getColumnNames()[5])) {
-                    fail("Unexpected column returned. Expected map column 'test'.");
-                }
-
-                break;
-            }
-
 
         } catch (HiveExecutionServiceHiveExecutionException e) {
             fail("Failed while excecuting hive script " + e.getMessage());

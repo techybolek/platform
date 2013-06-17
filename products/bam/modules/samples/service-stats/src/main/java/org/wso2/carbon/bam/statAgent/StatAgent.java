@@ -10,6 +10,7 @@ import org.wso2.carbon.databridge.commons.exception.*;
 import javax.security.sasl.AuthenticationException;
 import java.net.*;
 import java.util.*;
+import java.lang.String;
 
 public class StatAgent {
     public static final String STREAM_NAME1 = "bam_service_data_publisher";
@@ -134,8 +135,13 @@ public class StatAgent {
         } else {
            host = "localhost"; // Defaults to localhost
         }
+
+        String url = getProperty("url", "tcp://" + host + ":" + "7611");
+        String username = getProperty("username", "admin");
+        String password = getProperty("password", "admin");
+
         //create data publisher
-        DataPublisher dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+        DataPublisher dataPublisher = new DataPublisher(url, username, password, agent);
 
         String streamId1 = null;
 
@@ -274,6 +280,14 @@ public class StatAgent {
         }
 
         return null;
+    }
+
+    private static String getProperty(String name, String def) {
+        String result = System.getProperty(name);
+        if (result == null || result.length() == 0 || result == "") {
+            result = def;
+        }
+        return result;
     }
 }
 

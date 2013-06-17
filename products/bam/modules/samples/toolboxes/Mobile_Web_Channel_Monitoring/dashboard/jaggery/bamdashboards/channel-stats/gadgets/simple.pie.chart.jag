@@ -222,7 +222,7 @@
 			result = db.query(q);
 		}
 		catch(e){
-			print("<span style='color:#fff;font-weight:100;font-size:16px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM200/Service+Statistics+Toolbox' target='_blank' style='color:#FFFE89'>docs</a> to see how to configure AS monitoring</span><br /><span style='color:#eee;font-size:11px;'> <b>Reason : </b>" + e +"</span>");
+			print("<span style='color:#fff;font-weight:100;font-size:16px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM230/Service+Statistics+Toolbox' target='_blank' style='color:#FFFE89'>docs</a> to see how to configure AS monitoring</span><br /><span style='color:#eee;font-size:11px;'> <b>Reason : </b>" + e +"</span>");
 		}
 		finally{
 			db.close();
@@ -321,7 +321,7 @@ if(typeof _mobileChannel[0] !== 'undefined' && _mobileChannel[0] !== null){
 		for(var i = 100; i < 1000000000 ; i){
 			if(maxValue<i){
 				var y = i/10;
-				maxValue = Math.ceil(maxValue/y)*y;
+				maxValue = (Math.ceil(maxValue/y)*y)+y;
 				break;
 			}
 			i = i*10;
@@ -367,7 +367,7 @@ if(typeof _mobileChannel[0] !== 'undefined' && _mobileChannel[0] !== null){
             	}
           );
 	}else{
-		$("#errorInfo").html("<span style='position:absolute;top:10px;color:#0E0E0E;font-weight:100;font-size:14px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM200/Service+Statistics+Toolbox' target='_blank' style='color:#1285FF;text-decoration:underline;'>docs</a> to see how to configure AS monitoring</span>")	
+		$("#errorInfo").html("<span style='position:absolute;top:10px;color:#0E0E0E;font-weight:100;font-size:14px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM230/Service+Statistics+Toolbox' target='_blank' style='color:#1285FF;text-decoration:underline;'>docs</a> to see how to configure AS monitoring</span>")
 	}
     });
 </script>

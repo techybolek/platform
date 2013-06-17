@@ -1,9 +1,9 @@
-WSO2 Business Activity Monitor, v2.3.0-SNAPSHOT
+WSO2 Business Activity Monitor, v2.4.0-SNAPSHOT
 ================================
 
-11th February 2012
+22nd May 2012
 
-Welcome to the WSO2 Business Activity Monitor, v2.3.0-SNAPSHOT release
+Welcome to the WSO2 Business Activity Monitor, v2.4.0-SNAPSHOT release
 
 WSO2 Business Activity Monitor (WSO2 BAM) is a comprehensive framework designed to solve the problems in the wide area of business activity monitoring. WSO2 BAM comprises of many modules to give the best of performance, scalability and customizability. This allows to achieve requirements of business users, dev ops, CEOs without spending countless months on customizing the solution without sacrificing performance or the ability to scale. 
 
@@ -13,17 +13,28 @@ platform.
 
 New Features
 ============
-* Data archival support
-	This functionality can be used to archive your Cassandra data, and archiving process use map-reduce jobs to achive the task, therefore it supports for archiving 		large amount of data  using cluster of hadoop nodes. You can run your archive process manually or you can schedule it using a cron expression.
-* Multi tenancy support for all BAM features
-	You can add a tenant in BAM server and you can obtain the Multi Tenant functionality by following some easy steps as mentioned in the documentation. Multi tenancy   		in BAM has tenant seperation in the sense of Data storage in cassandra, Hive space, seperate tenant data recieving, etc, with high performance.
-* Undefined data support for BAM in data publisher and hive
-	You can send additionally a <String, String> Map, which holds key/value pairs with your payload. This enables to send some more data other than what you have 		defined in your stream definition. And Hive support for analyze the data received in map is also added.
-* Load balancing and High availability for all data-agents
-	You can load balance and achive high availability with BAM in all data agents. This enables to load balance within a set of servers, and send multiple servers same 		event at a time, so that high availability is possible in this feature. 
-* JMX Agent and JMX toolbox
-	The JMX agent for BAM is used to monitor JMX attributes of a required JMX enabled server (Ex- Carbon based servers) and store the monitored data in BAM. The user 		can install the JMX agent either on a BAM server or any Carbon based server. The monitored data is sent to the BAM server using the Thrift API of BAM. 
 
+Parametrize Hive scripts through registry keys
+	BAM provides an easy way to configure Hive scripts to get values from the registry at runtime using registry keys
+
+Improvements
+============
+
+BAM receiver REST API improvement.
+
+Server side pagination support for Activity Monitoring toolbox.
+
+Using Cassandra data-source in hive scripts.
+
+Cassandra explorer improvement to support composite types.
+
+Improve Hive Cassandra handler to persist data into Cassandra with proper data types.
+
+Ability to configure BAM persistence Keyspace.
+
+Migration script for migrating Cassandra data persisted via WSO2 BAM 2.0.x to higher.
+
+Toolbox support for ORACLE and MSSQL. 
 
 Features
 ========
@@ -81,7 +92,7 @@ System Requirements
 3. The Management Console requires full Javascript enablement of the Web browser
 
 For more details see the Installation guide or,
-http://docs.wso2.org/wiki/display/BAM200/Installation+Prerequisites
+http://docs.wso2.org/wiki/display/BAM230/Installation+Prerequisites
 
 Including External Dependencies
 ===============================

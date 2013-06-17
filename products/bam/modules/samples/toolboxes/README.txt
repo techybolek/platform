@@ -45,5 +45,5 @@ Uninstalling Toolbox
     - There you can notice that the selected toolbox(s) will be in the status of 'uninstalling'
     - Wait for approximately 1mintue and refresh the page, then you can notice the toolbox(s) have been removed from list of toolboxes.
 
-For more information on Toolboxes visit to our documentation on http://docs.wso2.org/wiki/display/BAM200/Toolboxes
+For more information on Toolboxes visit to our documentation on http://docs.wso2.org/wiki/display/BAM230/Toolboxes
 

@@ -1,8 +1,7 @@
 CREATE EXTERNAL TABLE IF NOT EXISTS AllTicketingStats (key STRING, clientType STRING,operation STRING,
 payload_timestamp BIGINT) STORED BY 
-'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES ( "cassandra.host" = "127.0.0.1",
-"cassandra.port" = "9160","cassandra.ks.name" = "EVENT_KS",
-"cassandra.ks.username" = "admin","cassandra.ks.password" = "admin",
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
 "cassandra.cf.name" = "org_wso2_ticket_service",
 "cassandra.columns.mapping" = ":key,meta_clientType,payload_operation,payload_timestamp");                                    
 
@@ -10,9 +9,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS TicketStatsPerMinute(clientType STRING, oper
 total_count INT, year SMALLINT,month SMALLINT,day SMALLINT,
 hour SMALLINT,minute SMALLINT, time STRING) 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( 
-'mapred.jdbc.driver.class' = 'org.h2.Driver',
-'mapred.jdbc.url' = 'jdbc:h2:repository/database/samples/BAM_STATS_DB;AUTO_SERVER=TRUE',
-'mapred.jdbc.username' = 'wso2carbon','mapred.jdbc.password' = 'wso2carbon',
+'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
 'hive.jdbc.update.on.duplicate' = 'true',
 'hive.jdbc.primary.key.fields' = 'clientType,operation,year,month,day,hour,minute',
 'hive.jdbc.table.create.query' = 'CREATE TABLE Ticket_Stats_Per_Minute 
@@ -42,18 +39,14 @@ CREATE EXTERNAL TABLE IF NOT EXISTS TicketStatsPerMinuteDataFetcher (clientType 
 total_count INT, year SMALLINT,month SMALLINT,day SMALLINT,
 hour SMALLINT,minute SMALLINT, time STRING) 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( 
-'mapred.jdbc.driver.class' = 'org.h2.Driver',
-'mapred.jdbc.url' = 'jdbc:h2:repository/database/samples/BAM_STATS_DB;AUTO_SERVER=TRUE',
-'mapred.jdbc.username' = 'wso2carbon','mapred.jdbc.password' = 'wso2carbon',
+'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
 'mapred.jdbc.input.table.name' = 'Ticket_Stats_Per_Minute' );
 
 CREATE EXTERNAL TABLE IF NOT EXISTS TicketStatsPerHour (clientType STRING, operation STRING, 
 total_count INT, year SMALLINT,month SMALLINT,day SMALLINT,
 hour SMALLINT, time STRING) 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( 
-'mapred.jdbc.driver.class' = 'org.h2.Driver',
-'mapred.jdbc.url' = 'jdbc:h2:repository/database/samples/BAM_STATS_DB;AUTO_SERVER=TRUE',
-'mapred.jdbc.username' = 'wso2carbon','mapred.jdbc.password' = 'wso2carbon',
+'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
 'hive.jdbc.update.on.duplicate' = 'true',
 'hive.jdbc.primary.key.fields' = 'clientType,operation,year,month,day,hour',
 'hive.jdbc.table.create.query' = 'CREATE TABLE Ticket_Stats_Per_Hour 
@@ -72,9 +65,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS TicketStatsPerHourDataFetcher
 total_count INT, year SMALLINT,month SMALLINT,day SMALLINT,
 hour SMALLINT, time STRING) 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( 
-'mapred.jdbc.driver.class' = 'org.h2.Driver',
-'mapred.jdbc.url' = 'jdbc:h2:repository/database/samples/BAM_STATS_DB;AUTO_SERVER=TRUE',
-'mapred.jdbc.username' = 'wso2carbon','mapred.jdbc.password' = 'wso2carbon',
+'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
 'mapred.jdbc.input.table.name' = 'Ticket_Stats_Per_Hour'  );
 
 
@@ -82,9 +73,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS TicketStatsPerDay
 (clientType STRING, operation STRING, 
 total_count INT, year SMALLINT,month SMALLINT,day SMALLINT, time STRING) 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( 
-'mapred.jdbc.driver.class' = 'org.h2.Driver',
-'mapred.jdbc.url' = 'jdbc:h2:repository/database/samples/BAM_STATS_DB;AUTO_SERVER=TRUE',
-'mapred.jdbc.username' = 'wso2carbon','mapred.jdbc.password' = 'wso2carbon',
+'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
 'hive.jdbc.update.on.duplicate' = 'true',
 'hive.jdbc.primary.key.fields' = 'clientType,operation,year,month,day',
 'hive.jdbc.table.create.query' = 'CREATE TABLE Ticket_Stats_Per_Day 
@@ -102,9 +91,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS TicketStatsPerMonth
 (clientType STRING, operation STRING, 
 total_count INT, year SMALLINT,month SMALLINT, time STRING) 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( 
-'mapred.jdbc.driver.class' = 'org.h2.Driver',
-'mapred.jdbc.url' = 'jdbc:h2:repository/database/samples/BAM_STATS_DB;AUTO_SERVER=TRUE',
-'mapred.jdbc.username' = 'wso2carbon','mapred.jdbc.password' = 'wso2carbon',
+'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
 'hive.jdbc.update.on.duplicate' = 'true',
 'hive.jdbc.primary.key.fields' = 'clientType,operation,year,month',
 'hive.jdbc.table.create.query' = 'CREATE TABLE Ticket_Stats_Per_Month 

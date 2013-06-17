@@ -8,7 +8,11 @@ var redirectToDashboard = function(){
 					deployedToolboxes = deployedToolboxes.replace(/\n/g, '');
 					deployedToolboxes = deployedToolboxes.split(',');
 					for (var i=0; i<deployedToolboxes.length; i++){
-						if(deployedToolboxes[i].toLowerCase() == "mediation_statistics_monitoring"){
+						if(deployedToolboxes[i].toLowerCase() == ""){
+							location.href = "index.html";
+							break;
+						}
+						else if(deployedToolboxes[i].toLowerCase() == "mediation_statistics_monitoring"){
 							location.href = "mediation_stats/esb_proxy.jsp";
 							break;
 						}

@@ -116,7 +116,7 @@
 			timeBetweenQuery = "time between '" + fromDate + "' and '" + toDate + "'";
 
 		}
-		if(time.toLowerCase() == "hour"){
+        else if(time.toLowerCase() == "hour"){
 			dataTable = "JMX_SUMMARY_PER_MINUTE";
 			timeGroup = "minute";
 			orderByQuery = "group by minute,hour,year,month,day,time order by year DESC ,month DESC,day DESC,hour DESC,minute DESC";
@@ -174,7 +174,7 @@
 			result = db.query(q);
 		}
 		catch(e){
-			print("<span style='color:#fff;font-weight:100;font-size:16px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM200/Service+Statistics+Toolbox' target='_blank' style='color:#FFFE89'>docs</a> to see how to configure JMX monitoring</span><br /><span style='color:#eee;font-size:11px;'> <b>Reason : </b>" + e +"</span>");
+			print("<span style='color:#fff;font-weight:100;font-size:16px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM230/Service+Statistics+Toolbox' target='_blank' style='color:#FFFE89'>docs</a> to see how to configure JMX monitoring</span><br /><span style='color:#eee;font-size:11px;'> <b>Reason : </b>" + e +"</span>");
 		}
 		finally{
 			db.close();
@@ -242,9 +242,23 @@
             __used  = "AVG_PROCESSCPUTIME";
             timeInterval=200000000 * 30 * 60 * 24;
 	    }
-        for(i=0;i<results.length-1;i++){
-    	    var usage=(results[i][__used]-results[i+1][__used])/timeInterval;
-    	    used.push([results[i].TIME,usage]);
+        var resultsTemp = [];
+        //new Log().info(results);
+        for(i=0;i<results.length;i++){
+            var obj = results[i];
+            var objTemp = {};
+            for( var key in obj )
+            {
+                var keyTemp = key;
+                key = key.toUpperCase();
+                objTemp[key] = obj[keyTemp];
+            }
+            resultsTemp.push(objTemp);
+        }
+        //new Log().info(resultsTemp);
+        for(i=0;i<resultsTemp.length-1;i++){
+    	    var usage=(resultsTemp[i][__used]-resultsTemp[i+1][__used])/timeInterval;
+    	    used.push([resultsTemp[i].TIME,usage]);
         }
     }
 
@@ -455,7 +469,7 @@ if(used){
 
 	}
 	else{
-	$("#errorInfo").html("<span style='color:#fff;font-weight:100;font-size:16px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM200/Service+Statistics+Toolbox' target='_blank' style='color:#FFFE89'>docs</a> to see how to configure JMX monitoring</span>")
+	$("#errorInfo").html("<span style='color:#fff;font-weight:100;font-size:16px;'>No data available. Please visit our <a href='http://docs.wso2.org/wiki/display/BAM230/Service+Statistics+Toolbox' target='_blank' style='color:#FFFE89'>docs</a> to see how to configure JMX monitoring</span>")
 	}
 
 

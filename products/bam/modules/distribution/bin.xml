@@ -28,6 +28,7 @@
                 <exclude>**/INSTALL.txt</exclude>
                 <exclude>**/LICENSE.txt</exclude>
                 <exclude>**/datasources/master-datasources.xml</exclude>
+                <exclude>**/etc/cache.xml</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -42,6 +43,13 @@
                 <include>**/*.sh</include>
             </includes>
             <fileMode>755</fileMode>
+        </fileSet>
+        <fileSet>
+             <directory>../p2-profile-gen/target/WSO2-CARBON-PATCH-4.2.0-SNAPSHOT-0001</directory>
+             <outputDirectory>wso2bam-${pom.version}/repository/components/patches/</outputDirectory>
+             <includes>
+                  <include>**/patch0001/*.*</include>
+             </includes>
         </fileSet>
         <!--fileSet>
             <directory>../samples</directory>
@@ -196,6 +204,11 @@
             </excludes>
         </fileSet>
 
+	<fileSet>
+            <directory>bam-resources/migration-resources</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/migration</outputDirectory>
+        </fileSet>
+
         <fileSet>
             <directory>../samples/toolboxes/target</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/samples/toolboxes</outputDirectory>
@@ -256,14 +269,23 @@
             </includes>
             <fileMode>755</fileMode>
         </fileSet>
-        <fileSet>
+
+	<fileSet>
+ 	    <directory>bam-resources/bamdashboards</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/resources/jaggery/bamdashboards</outputDirectory>
+            <includes>
+                <include>**/**</include>
+            </includes>
+            <fileMode>755</fileMode>
+        </fileSet>
+        <!--fileSet>
             <directory>bam-resources/reports</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/resources/reports</outputDirectory>
             <includes>
                 <include>**/*.jrxml</include>
             </includes>
             <fileMode>755</fileMode>
-        </fileSet>
+        </fileSet-->
 	<!-- jaggery modules -->
 
 	<fileSet>
@@ -441,7 +463,7 @@
 
         <!-- data bridge config file -->
         <file>
-            <source>bam-resources/databridge/data-bridge-config.xml</source>
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/data-bridge/data-bridge-config.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/data-bridge</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
@@ -517,11 +539,9 @@
 
         <!-- Copy BAM JAXRS RESt API war -->
 
-	    <file>
+	<file>
             <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/deployment/server/jaxwebapps/datareceiver.war</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps/</outputDirectory>
-            <filtered>true</filtered>
-            <fileMode>644</fileMode>
         </file>
 
         <file>
@@ -549,5 +569,13 @@
 	    <filtered>true</filtered>
 	    <fileMode>644</fileMode>
         </file>
+
+        <file>
+            <source>bam-resources/cache/cache.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+
     </files>
 </assembly>

@@ -1,9 +1,8 @@
 CREATE EXTERNAL TABLE IF NOT EXISTS EsbMediationStats (key STRING, resource_name STRING,resource_type STRING,
 payload_count INT,direction STRING,fault_count INT, avg_processing_time DOUBLE,max_processing_time BIGINT, min_processing_time BIGINT,
 payload_timestamp BIGINT,host STRING) STORED BY 
-'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES ( "cassandra.host" = "127.0.0.1",
-"cassandra.port" = "9160","cassandra.ks.name" = "EVENT_KS",
-"cassandra.ks.username" = "admin","cassandra.ks.password" = "admin",
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE" ,
 "cassandra.cf.name" = "bam_mediation_stats_data_publisher",
 "cassandra.columns.mapping" = ":key,payload_resource_id,payload_stats_type,payload_count,payload_direction,payload_fault_count, payload_avg_processing_time,payload_max_processing_time, payload_min_processing_time,payload_timestamp,meta_host" ); 
 

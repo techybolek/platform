@@ -10,6 +10,7 @@ import org.wso2.carbon.databridge.commons.exception.*;
 import javax.security.sasl.AuthenticationException;
 import java.net.*;
 import java.util.*;
+import java.lang.String;
 
 public class ChannelAnalysisAgent {
     public static final String STREAM_NAME1 = "org.wso2.ticket.service";
@@ -71,7 +72,12 @@ public class ChannelAnalysisAgent {
         } else {
             host = "localhost"; // Defaults to localhost
         }
-        DataPublisher dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+
+        String url = getProperty("url", "tcp://" + host + ":" + "7611");
+        String username = getProperty("username", "admin");
+        String password = getProperty("password", "admin");
+
+        DataPublisher dataPublisher = new DataPublisher(url, username, password, agent);
 
         String streamId1 = null;
 
@@ -166,6 +172,14 @@ public class ChannelAnalysisAgent {
         }
 
         return null;
+    }
+
+    private static String getProperty(String name, String def) {
+        String result = System.getProperty(name);
+        if (result == null || result.length() == 0 || result == "") {
+            result = def;
+        }
+        return result;
     }
 }
 

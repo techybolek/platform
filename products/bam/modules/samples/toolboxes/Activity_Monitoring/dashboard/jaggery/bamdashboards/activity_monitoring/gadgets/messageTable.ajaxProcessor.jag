@@ -1,0 +1,207 @@
+<%
+    var sEcho = request.getParameter('sEcho');
+    var sSearch = request.getParameter('sSearch');
+    var iDisplayStart = request.getParameter('iDisplayStart');
+    var iDisplayLength = request.getParameter('iDisplayLength');
+    var iColumns = request.getParameter('iColumns');
+    var iSortingCols = request.getParameter('iSortingCols');
+    var sBamActivityId = request.getParameter('bamActivityId');
+    var sTimeStampFrom = request.getParameter('timeStampForm');
+    var sTimeStampTo = request.getParameter('timeStampTo');
+    var sServer = request.getParameter('server');
+    var sService = request.getParameter('service');
+    var sOperation = request.getParameter('operation');
+    var iSort = request.getParameter('iSortCol_0');
+    var sSort = request.getParameter('sSortDir_0');
+    var iIndexOfSoapBody = request.getParameter('indexOfSoapBody');
+    var iIndexOfSoapHeader = request.getParameter('indexOfSoapHeader');
+    var iIndexOfHostAddress = request.getParameter('indexOfHostAddress');
+
+    queryGen = {};
+
+    queryGen.entry = {};
+
+    queryGen.entries = {};
+
+    queryGen.commons = {}
+
+    queryGen.commons.getFromTime = function() {
+        var fromTime = '' + sTimeStampFrom + '';
+        if(fromTime != -1) {
+            return 'sentTimestamp > ' + fromTime;
+        } else {
+            return '';
+        }
+    };
+
+    queryGen.commons.getToTime = function() {
+        var toTime = '' + sTimeStampTo + '';
+        if(toTime != -1) {
+            return 'sentTimestamp < ' + toTime;
+        } else {
+            return '';
+        }
+    };
+
+    queryGen.commons.getServer = function() {
+        var server = '' + sServer + '';
+        if(server != '') {
+            return 'host = \'' + server + '\'';
+        } else {
+            return '';
+        }
+    };
+
+    queryGen.commons.getService = function() {
+        var service = '' + sService + '';
+        if(service != '') {
+            return 'service_name = \'' + service + '\'';
+        } else {
+            return '';
+        }
+    };
+
+    queryGen.commons.getOperation = function() {
+        var operation = '' + sOperation + '';
+        if(operation != '') {
+            return 'operation_name = \'' + operation + '\'';
+        } else {
+            return '';
+        }
+    };
+
+    queryGen.commons.getConstraintString = function() {
+        var constraintString = '';
+        var conditions = [this.getFromTime(), this.getToTime(), this.getServer(),
+                          this.getService(), this.getOperation()];
+        for(var i=0; i<5; i++) {
+            if(conditions[i] != '') {
+                if(constraintString != '') {
+                    constraintString = constraintString + ' AND ' + conditions[i];
+                } else {
+                    constraintString = ' ' + conditions[i];
+                }
+            }
+        }
+        return constraintString;
+    };
+
+    queryGen.entry.genQuery = function( queryType ) {
+        var whereString = queryGen.commons.getConstraintString();
+        if(whereString != '') {
+            whereString = ' AND ' + whereString ;
+        }
+        if( sSearch != "" )
+            whereString += " AND ( soapHeader LIKE '%" + sSearch + "%' OR soapBody LIKE '%" + sSearch + "%' OR host LIKE '%" + sSearch + "%' )";
+        if( queryType == "sQuery")
+            return "SELECT messageRowID, sentTimestamp, soapHeader, soapBody, host FROM ActivitySummary WHERE bamActivityID='" + sBamActivityId + "' " + whereString + " ORDER BY "+ queryGen.entry.getOrderByString() + " " + sSort +" LIMIT "+ iDisplayStart + "," + iDisplayLength;
+        else
+            return "SELECT COUNT(*) AS COUNT FROM ActivitySummary WHERE bamActivityID='" + sBamActivityId + "'" + whereString;
+    }
+
+    queryGen.entry.getOrderByString = function()
+    {
+        switch(iSort)
+        {
+            case iIndexOfSoapBody:
+                return "soapBody";
+                break;
+            case iIndexOfSoapHeader:
+                return "soapHeader";
+                break;
+            case iIndexOfHostAddress:
+                return "host";
+                break;
+            default:
+                return "sentTimestamp";
+        }
+    }
+
+    var log = new Log();
+
+    //log.info( "sEcho " + sEcho + " :)" );
+    //log.info( "sKeyword " + sSearch + " :)" );
+    //log.info( "iDisplayStart " + iDisplayStart + " :)" );
+    //log.info( "iDisplayLength " + iDisplayLength + " :)" );
+    //log.info( "iColumns " + iColumns + " :)" );
+    //log.info( "iSortingCols " + iSortingCols + " :)" );
+    //log.info( sBamActivityId );
+    //log.info( sTimeStampFrom );
+    //log.info( sTimeStampTo );
+    //log.info( "---------------------------------" );
+    //log.info( mColumnIndex );
+
+
+
+    var iTotalRecords;
+    var iTotalDisplayedRecords;
+    var aaData;
+
+    var result;
+    var rowCount;
+    var db;
+    try
+    {
+        db = new Database("WSO2BAM_DATASOURCE");
+        //log.info("SELECT messageRowID, sentTimestamp, soapHeader, soapBody FROM ActivitySummary  LIMIT "+ iDisplayStart + "," + iDisplayLength);
+        //
+
+        var whereString = '';
+
+        var sQuery;
+        var sCountQuery;
+        sCountQuery = queryGen.entry.genQuery("sCountQuery");
+        sQuery = queryGen.entry.genQuery("sQuery");
+        //log.info("squery---------------------------------------------");
+        //log.info(sQuery);
+        //log.info(sCountQuery);
+
+        result = db.query(sQuery);
+        rowCount = db.query(sCountQuery);
+        //log.info('--------------------------------------------------------------------');
+        //log.info(rowCount[0].COUNT);
+        //log.info();
+    }
+    catch(e)
+    {
+        result = "";
+    }
+    finally
+    {
+        db.close();
+    }
+    //log.info('--------------------------------------------------------------------');
+    //log.info( result );
+
+    var len = result.length;
+    var rows = [];
+    var columnNames = [];
+    var rowEntryStr = "";
+    for (var i = 0; i < len; i++) {
+        var obj = result[i];
+        var objTemp = {};
+        //log.info(stringify(obj));
+        var row = [];
+        for( var key in obj )
+        {
+            var keyTemp = key;
+            key = key.toUpperCase();
+            objTemp[key] = obj[keyTemp];
+            row.push( objTemp[key].toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace( /\t/g, '&nbsp;') );
+        }
+        row.push( "<span><img src=\"../images/details_open.png\" title=\"Explore\"></span>" );
+        //log.info( objTemp );
+        rows.push(row);
+    }
+
+    var numberOfRows = parseInt( rowCount[0].COUNT )/iDisplayLength;
+
+    var obj = {
+            "sEcho":sEcho,
+            "iTotalRecords":numberOfRows + 1,
+            "iTotalDisplayRecords":rowCount[0].COUNT,
+            "aaData": rows
+    };
+    //log.info(obj);
+    print(obj);
+%>

@@ -41,6 +41,8 @@ import java.io.FileReader;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static junit.framework.Assert.fail;
 
@@ -61,7 +63,7 @@ public class HiveTempFileCleanupTestCase {
         KPIAgent.publish();
     }
 
-    //@Test(groups = {"wso2.bam"}, dependsOnMethods = "runKPIAgent")
+    @Test(groups = {"wso2.bam"}, dependsOnMethods = "runKPIAgent")
     public void executeScript() {
 
         String[] queries = getHiveQueries("KPISampleScript");
@@ -78,7 +80,7 @@ public class HiveTempFileCleanupTestCase {
 
     }
 
-    //@Test(groups = {"wso2.bam"}, dependsOnMethods = "executeScript")
+    @Test(groups = {"wso2.bam"}, dependsOnMethods = "executeScript")
     public void validateTmpFileCleanup() {
 
         String[] tmpDirectories = {
@@ -133,11 +135,54 @@ public class HiveTempFileCleanupTestCase {
             while ((line = bufferedReader.readLine()) != null) {
                 script += line;
             }
-            queries = script.split(";");
+            //queries = script.split(";");
+            queries = this.extractHiveQueries(script);
         } catch (Exception e) {
             fail("Error while reading resource : " + resourceName);
         }
         return queries;
+    }
+    
+    private String[] extractHiveQueries(String hiveString) {
+        String[] outputQueries;
+        if (hiveString != null && !hiveString.equals("")) {
+            Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
+            Matcher regexMatcher = regex.matcher(hiveString);
+            String formattedScript = "";
+            while (regexMatcher.find()) {
+                String temp = "";
+                if (regexMatcher.group(1) != null) {
+                    // Add double-quoted string without the quotes
+                    temp = regexMatcher.group(1).trim().replaceAll(";", "%%");
+                    temp = "\"" + temp + "\"";
+                } else if (regexMatcher.group(2) != null) {
+                    // Add single-quoted string without the quotes
+                    temp = regexMatcher.group(2).trim().replaceAll(";", "%%");
+                    temp = "\'" + temp + "\'";
+                } else {
+                    temp = regexMatcher.group().trim();
+                }
+                formattedScript += temp + " ";
+            }
+            String[] queries = formattedScript.split(";");
+            outputQueries = new String[queries.length];
+            int a = 0;
+            hiveString = "";
+            for (String aquery : queries) {
+                aquery = aquery.trim();
+                if (!aquery.equals("")) {
+                    aquery = aquery.replaceAll("%%\n", ";");
+                    aquery = aquery.replaceAll("%% ", ";");
+                    aquery = aquery.replaceAll(" %% ", ";");
+                    aquery = aquery.replaceAll("%%", ";");
+                    //hiveString = hiveString + aquery + ";" + "\n";
+                    outputQueries[a] = aquery;
+                    a++;
+                }
+            }
+            return outputQueries;
+        }
+        return new String[0];
     }
 
 }

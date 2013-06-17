@@ -27,7 +27,7 @@
             </definition>
         </datasource>
 
-	<datasource>
+	    <datasource>
            <name>WSO2BAM_DATASOURCE</name>
            <description>The datasource used for analyzer data</description>
            <definition type="RDBMS">
@@ -43,7 +43,19 @@
                    <validationInterval>30000</validationInterval>
                </configuration>
            </definition>
-       </datasource>
+        </datasource>
+
+        <datasource>
+            <name>WSO2BAM_CASSANDRA_DATASOURCE</name>
+            <description>The datasource used for Cassandra data</description>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:cassandra://localhost:9160/EVENT_KS</url>
+                    <username>admin</username>
+                    <password>admin</password>
+                </configuration>
+            </definition>
+        </datasource>
 
         <!-- For an explanation of the properties, see: http://people.apache.org/~fhanik/jdbc-pool/jdbc-pool.html -->
         <!--datasource>

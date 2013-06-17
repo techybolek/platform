@@ -15,10 +15,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS PhonebrandTable(brand STRING,
 	totalOrders INT, totalQuantity INT) STORED BY
 	'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
 	TBLPROPERTIES (
-	'mapred.jdbc.driver.class' = 'org.h2.Driver' ,
-	'mapred.jdbc.url' = 'jdbc:h2:repository/database/samples/WSO2CARBON_DB;AUTO_SERVER=TRUE' ,
-	'mapred.jdbc.username' = 'wso2carbon' ,
-	'mapred.jdbc.password' = 'wso2carbon' ,
+    'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
 	'hive.jdbc.update.on.duplicate' = 'true' ,
 	'hive.jdbc.primary.key.fields' = 'brand' ,
 	'hive.jdbc.table.create.query' =

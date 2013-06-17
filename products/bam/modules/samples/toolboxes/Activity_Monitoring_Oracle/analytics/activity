@@ -1,0 +1,36 @@
+CREATE EXTERNAL TABLE IF NOT EXISTS ActivityDataTable
+	(messageID STRING, sentTimestamp BIGINT, activityID STRING, version STRING, soapHeader STRING, soapBody STRING, host STRING, serviceName STRING, operationName STRING)
+	STORED BY 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler'
+	WITH SERDEPROPERTIES (
+ 	"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE" ,
+	"cassandra.cf.name" = "org_wso2_bam_activity_monitoring" ,
+	"cassandra.columns.mapping" =
+	":key, payload_timestamp, correlation_bam_activity_id, Version, payload_soap_header, payload_soap_body, meta_host, payload_service_name, payload_operation_name" );
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ActivitySummaryTable(
+	messageRowID STRING, sentTimestamp BIGINT, bamActivityID STRING, soapHeader STRING, soapBody STRING, host STRING, service_name STRING, operation_name STRING)
+	STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+	TBLPROPERTIES (
+	'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
+	'hive.jdbc.update.on.duplicate' = 'true' ,
+	'hive.jdbc.primary.key.fields' = 'messageRowID' ,
+	'hive.jdbc.table.create.query' =
+	'CREATE TABLE ActivitySummaryTable (messageRowID VARCHAR2(100) NOT NULL PRIMARY KEY,
+	 sentTimestamp NUMBER, bamActivityID VARCHAR2(40), soapHeader CLOB, soapBody CLOB, host VARCHAR2(100), service_name VARCHAR2(150), operation_name VARCHAR2(150))' );
+
+CREATE EXTERNAL TABLE IF NOT EXISTS CategoryTable(host STRING, service_name STRING, operation_name STRING,  version STRING)
+    STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+    TBLPROPERTIES (
+    'wso2.carbon.datasource.name'='WSO2BAM_DATASOURCE',
+    'hive.jdbc.update.on.duplicate' = 'true',
+    'hive.jdbc.primary.key.fields' = 'host,service_name,operation_name',
+    'hive.jdbc.table.create.query' =
+    'CREATE TABLE CategoryTable ( host VARCHAR2(100) NOT NULL, service_name VARCHAR2(150), operation_name VARCHAR2(150), version VARCHAR2(30) )' );
+
+insert overwrite table CategoryTable select host, serviceName, operationName,version
+	from ActivityDataTable group by host,serviceName,operationName,version;
+
+insert overwrite table ActivitySummaryTable
+	select messageID, sentTimestamp, activityID, soapHeader, soapBody, host, serviceName, operationName
+	from ActivityDataTable
+	where version= "1.0.0";

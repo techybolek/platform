@@ -6,6 +6,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.testng.annotations.Test;
 import org.wso2.carbon.analytics.hive.stub.HiveExecutionServiceStub;
 import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
@@ -65,14 +66,9 @@ public class BAMReceiverTestCase {
     public void publishConcurrentEvents() throws
             Exception {
         init();
-        AgentConfiguration agentConfiguration = new AgentConfiguration();
-        String carbonHome = System.getProperty("carbon.home");
-        System.setProperty("javax.net.ssl.trustStore", carbonHome + "/repository/resources/security/client-truststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-        Agent agent = new Agent(agentConfiguration);
 
         for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-            BAMDataPublisher publisher = new BAMDataPublisher(i + 1, STREAM_NAME, VERSION, agent);
+            BAMDataPublisher publisher = new BAMDataPublisher(i + 1, STREAM_NAME, VERSION);
             threadPoolExecutor.execute(publisher);
         }
         threadPoolExecutor.shutdown();
@@ -144,12 +140,12 @@ public class BAMReceiverTestCase {
 
         private static final int NUMBER_EVENTS = 2000;
 
-        private BAMDataPublisher(int id, String streamName, String version, Agent agent) throws AgentException, MalformedURLException, AuthenticationException, SocketException, TransportException {
+        private BAMDataPublisher(int id, String streamName, String version) throws AgentException, MalformedURLException, AuthenticationException, SocketException, TransportException {
             this.publisherId = id;
             this.streamName = streamName;
             this.version = version;
             String host = getLocalHostAddress().getHostAddress();
-            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin");
         }
 
         @Override

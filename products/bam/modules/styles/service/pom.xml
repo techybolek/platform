@@ -20,13 +20,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-	<groupId>org.wso2.bam</groupId>
+        <groupId>org.wso2.bam</groupId>
     	<artifactId>wso2bam-styles-parent</artifactId>
-    	<version>2.0.0-SNAPSHOT</version>
+        <version>2.4.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>${stratos.version}</version>
     <artifactId>org.wso2.stratos.bam.styles</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 BAM UI styles</name>
@@ -89,7 +90,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
-	    <version>${carbon.version}</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
 
         <dependency>
@@ -133,4 +134,8 @@
             <artifactId>javax.servlet.jsp</artifactId>
         </dependency>
     </dependencies>
+
+    <properties>
+        <carbon.platform.version>4.2.0-SNAPSHOT</carbon.platform.version>
+    </properties>
 </project>

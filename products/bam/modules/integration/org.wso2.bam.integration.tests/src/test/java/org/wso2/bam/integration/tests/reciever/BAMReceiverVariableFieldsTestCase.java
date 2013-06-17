@@ -55,7 +55,7 @@ public class BAMReceiverVariableFieldsTestCase {
     private static final Log log = LogFactory.getLog(BAMReceiverVariableFieldsTestCase.class);
     private ThreadPoolExecutor threadPoolExecutor;
 
-    private static final int NUMBER_OF_THREADS = 800;
+    private static final int NUMBER_OF_THREADS = 10;
     private static final long KEEP_ALIVE_TIME = 10;
 
     private static final String STREAM_NAME = "org.wso2.carbon.bam.variable.fields.test";
@@ -76,21 +76,16 @@ public class BAMReceiverVariableFieldsTestCase {
     public void publishConcurrentEvents() throws
             Exception {
         init();
-        AgentConfiguration agentConfiguration = new AgentConfiguration();
-        String carbonHome = System.getProperty("carbon.home");
-        System.setProperty("javax.net.ssl.trustStore", carbonHome + "/repository/resources/security/client-truststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-        Agent agent = new Agent(agentConfiguration);
 
         for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-            BAMDataPublisher publisher = new BAMDataPublisher(i + 1, STREAM_NAME, VERSION, agent);
+            BAMDataPublisher publisher = new BAMDataPublisher(i + 1, STREAM_NAME, VERSION);
             threadPoolExecutor.execute(publisher);
         }
         threadPoolExecutor.shutdown();
 
         //waiting till hive receiver saves all published data.
         try {
-            Thread.sleep(4 * 60000);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
 
@@ -153,14 +148,14 @@ public class BAMReceiverVariableFieldsTestCase {
         private String streamName;
         private String version;
 
-        private static final int NUMBER_EVENTS = 2000;
+        private static final int NUMBER_EVENTS = 20;
 
-        private BAMDataPublisher(int id, String streamName, String version, Agent agent) throws AgentException, MalformedURLException, AuthenticationException, SocketException, TransportException {
+        private BAMDataPublisher(int id, String streamName, String version) throws AgentException, MalformedURLException, AuthenticationException, SocketException, TransportException {
             this.publisherId = id;
             this.streamName = streamName;
             this.version = version;
             String host = getLocalHostAddress().getHostAddress();
-            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+            dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin");
         }
 
         @Override

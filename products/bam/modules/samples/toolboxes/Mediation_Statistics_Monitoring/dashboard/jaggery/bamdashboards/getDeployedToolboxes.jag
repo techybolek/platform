@@ -5,16 +5,13 @@ function invokeBasicToolBoxes() {
  	var bam = new ws.WSRequest();
  	var options = new Array();
  	options.useSOAP = 1.2;
- 	options.action = "urn:getDeployedToolBoxes";
+ 	options.action = "urn:getJaggeryDashboards";
 	var cookie = session.get("carboncookie");
 	var host = session.get("host");
 	options["HTTPHeaders"] = [
             { name : "Cookie", value : cookie }
         ];
- 	var payload ='<ser:getDeployedToolBoxes xmlns:ser="http://service.deployer.toolbox.bam.carbon.wso2.org">'+
-         					'<ser:type></ser:type>'+
-         					'<ser:searchKey></ser:searchKey>'+
-      					'</ser:getDeployedToolBoxes>';
+ 	var payload ='<ser:getJaggeryDashboards xmlns:ser="http://service.deployer.toolbox.bam.carbon.wso2.org"/>';
  	var result;
 
  	try {
@@ -25,19 +22,24 @@ function invokeBasicToolBoxes() {
  	log.error(e.toString());
  	return e.toString();
 }
- 	var response =result.responseText;
+ 	var response =result.responseXML;
 	var xml = new XML(response);
 	var ns = 'http://util.deployer.toolbox.bam.carbon.wso2.org/xsd';
-	var tools = xml..ns::deployedTools;
+	var children = xml.children();
 	var toolboxArray = [];
-	for each(var tool in tools) {
-		toolboxArray.push(tool.text());
+	for each(var child in children){
+		var dashboardName = child..ns::dashboardName;
+		var tboxDisplayName = child..ns::displayName;
+		var tboxUrl = child..ns::url;
+		var dashboardChilds = []
+		for(var i = 0; i < tboxDisplayName.length(); i++) {
+			dashboardChilds.push([tboxDisplayName[i].text(),tboxUrl[i].text()]);
+		}
+		toolboxArray.push({"dashboard":dashboardName,"childDashboards":dashboardChilds})
 	}
-	return toolboxArray;
+	return {"toolboxes":toolboxArray};
  }
-var deployedToolboxes = invokeBasicToolBoxes();
-for(var i=0;i<deployedToolboxes.length;i++){
-	print(deployedToolboxes[i]+",");
-}
+
+print(invokeBasicToolBoxes());
 %>
 

@@ -5,7 +5,7 @@ var channel_monitoring = ['Mobile/Web Channel Monitoring',[['Channel Monitoring'
 var jmx_stats = ['JMX Statistics',[['JMX Stats','index.jsp']]];
 
 $(document).ready(function(){
-			var dashboardurl = 'https://'+window.location.host+'/bamdashboards/';
+			var dashboardurl = '../';
 			$.ajax({
 				type: "GET",
 				url: "../getDeployedToolboxes.jag",

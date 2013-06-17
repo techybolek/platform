@@ -12,7 +12,7 @@ Standalone Mode
 
 2. All the shell scripts and .bat files are available in CARBON_HOME/bin directory.
 
-3. To start @product.name@ you can use either wso2server.sh or daemon.sh in all *nix
+3. To start @product.name@ you can run wso2server.sh in all *nix
    systems & wso2server.bat file on Windows operating systems.
 
 4. Some of the commands that can be used to start @product.name@:
@@ -92,6 +92,6 @@ System Requirements
 5. Cygwin (Windows) - BAM analytics framework depends on Apache Hadoop and Hadoop requires Cygwin in order to run in Windows. So first make sure that you have at least installed basic, net (OpenSSH,tcp_wrapper packages) and security related Cygwin packages if you are working on Windows before using BAM.
 
 For more details see
-    http://docs.wso2.org/wiki/display/BAM200/Installation+Guide
+    http://docs.wso2.org/wiki/display/BAM230/Installation+Guide
 
 

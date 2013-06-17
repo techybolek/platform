@@ -61,17 +61,10 @@ public class KPIAgent {
 
         String host;
 
-        AgentConfiguration agentConfiguration = new AgentConfiguration();
-        String carbonHome = System.getProperty("carbon.home");
-        System.setProperty("javax.net.ssl.trustStore", carbonHome + "/repository/resources/security/client-truststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-
-        Agent agent = new Agent(agentConfiguration);
-
         host = getLocalHostAddress().getHostAddress();
         //create data publisher
 
-        DataPublisher dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+        DataPublisher dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin");
         String streamId = null;
 
         try {

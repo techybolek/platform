@@ -17,6 +17,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Scanner;
+import java.lang.String;
 
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -53,9 +54,14 @@ public class HttpdLogAgent {
         } else {
            host = "localhost"; // Defaults to localhost
         }
+
+        String url = getProperty("url", "tcp://" + host + ":" + "7611");
+        String username = getProperty("username", "admin");
+        String password = getProperty("password", "admin");
+
         //create data publisher
 
-        DataPublisher dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+        DataPublisher dataPublisher = new DataPublisher(url, username, password, agent);
         String streamId = null;
 
         try {
@@ -123,6 +129,14 @@ public class HttpdLogAgent {
             }
         }
         return InetAddress.getLocalHost();
+    }
+
+    private static String getProperty(String name, String def) {
+        String result = System.getProperty(name);
+        if (result == null || result.length() == 0 || result == "") {
+            result = def;
+        }
+        return result;
     }
 
 }

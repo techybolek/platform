@@ -1,4 +1,4 @@
-
+<% var app =  request.getParameter('appName');%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,11 +111,11 @@
 			<div id="dashboardDeatils">
 				<div class="featureItem">
 					<span class="imgIconHolder">
-						<a class="imgIcon" href="http://docs.wso2.org/wiki/display/BAM200/WSO2+Business+Activity+Monitor+Documentation" target="_blank">
+						<a class="imgIcon" href="http://docs.wso2.org/wiki/display/BAM230/WSO2+Business+Activity+Monitor+Documentation" target="_blank">
 							<img src="resources/images/user-guide.gif"></a>
 					</span>	
 					<div class="descFeature">
-						<h5><a href="http://docs.wso2.org/wiki/display/BAM200/WSO2+Business+Activity+Monitor+Documentation" target="_blank">User Guide</a></h5>
+						<h5><a href="http://docs.wso2.org/wiki/display/BAM230/WSO2+Business+Activity+Monitor+Documentation" target="_blank">User Guide</a></h5>
 						<p>WSO2 Carbon user guide.</p>
 					</div>
 				</div>
@@ -182,10 +182,27 @@
 		$("#btnSignIn").click(function(){
 			var usrName = $("#userName").val();
 			var pass = $("#password").val();
-			var usr = {name:""+usrName+"",pass:""+pass+"",host:""+location.host+""}
-			$.post("createSession.jag",usr);
-			redirectToDashboard();
+			var app = '<%=app%>';
+			if((app === null) || (app == "") || (app == 'null')){
+				var host = location.host;
+			}else{
+				var host = location.host+"/"+app;
+			}			
+			var usr = {name:""+usrName+"",pass:""+pass+"",host:""+host+""}
+			$.post("createSession.jag",usr,function(json) {
+				if(json == "true"){
+					redirectToDashboard();
+				}else{
+					alert("Login failed! Please recheck the username and password and try again.");
+				}
+			});
 		});
+
+		$("#password").keyup(function(event){
+		    	if(event.keyCode == 13){
+		        	$("#btnSignIn").click();
+		    	}
+        	});
 	});
 </script>
 </body>

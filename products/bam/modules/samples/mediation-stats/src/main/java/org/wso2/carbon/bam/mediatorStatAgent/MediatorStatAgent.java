@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
+import java.lang.String;
 
 public class MediatorStatAgent {
 
@@ -73,9 +74,14 @@ public class MediatorStatAgent {
         } else {
             host = "localhost"; // Defaults to localhost
         }
+
+        String url = getProperty("url", "tcp://" + host + ":" + "7611");
+        String username = getProperty("username", "admin");
+        String password = getProperty("password", "admin");
+
         //create data publisher
 
-        DataPublisher dataPublisher = new DataPublisher("tcp://" + host + ":7611", "admin", "admin", agent);
+        DataPublisher dataPublisher = new DataPublisher(url, username, password, agent);
         String streamId = null;
 
         try {
@@ -204,5 +210,13 @@ public class MediatorStatAgent {
         }
 
         return null;
+    }
+
+    private static String getProperty(String name, String def) {
+        String result = System.getProperty(name);
+        if (result == null || result.length() == 0 || result == "") {
+            result = def;
+        }
+        return result;
     }
 }
