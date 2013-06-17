@@ -21,8 +21,6 @@ package org.wso2.carbon.identity.oauth2.authz.handlers;
 import org.apache.amber.oauth2.as.issuer.MD5Generator;
 import org.apache.amber.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
-import org.apache.oltu.openidconnect.as.util.OIDCAuthzServerUtil;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.callback.OAuthCallback;
 import org.wso2.carbon.identity.oauth.callback.OAuthCallbackManager;
@@ -33,9 +31,6 @@ import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
 import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO;
-import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
-import org.wso2.carbon.identity.openidconnect.RememberMeStore;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 public abstract class AbstractAuthorizationHandler implements AuthorizationHandler {
     private OAuthCallbackManager callbackManager;
@@ -58,35 +53,35 @@ public abstract class AbstractAuthorizationHandler implements AuthorizationHandl
         }
     }
 
-    public boolean authenticateResourceOwner(OAuthAuthzReqMessageContext oauthAuthzMsgCtx)
-            throws IdentityOAuth2Exception {
-		OAuth2AuthorizeReqDTO authorizationReqDTO = oauthAuthzMsgCtx.getAuthorizationReqDTO();
-		boolean authStatus = false;
-		// openid connect prompt= none support by remembering users
-		if (OIDCAuthzServerUtil.isOIDCAuthzRequest(authorizationReqDTO.getScopes()) &&
-		    authorizationReqDTO.getPassword() == null) {
-			authStatus = RememberMeStore.getInstance().isUserInStore(authorizationReqDTO.getUsername());
-		} else {
-			authStatus =
-			             OAuth2Util.authenticateUser(authorizationReqDTO.getUsername(),
-			                                         authorizationReqDTO.getPassword());
-		}
-        if(authStatus){
-        	// store the authenticated user for the openid-connect rememberMe usecase
-			if (OIDCAuthzServerUtil.isOIDCAuthzRequest(authorizationReqDTO.getScopes())) {
-				RememberMeStore.getInstance().addUserToStore(authorizationReqDTO.getUsername());
-			}
-            if(authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0){
-                authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR +
-                        authorizationReqDTO.getUsername());
-            }else if(authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0){
-                authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR +
-                        authorizationReqDTO.getUsername().substring(authorizationReqDTO.getUsername().
-                                indexOf(CarbonConstants.DOMAIN_SEPARATOR)+1));
-            }
-        }
-        return authStatus;
-    }
+//    public boolean authenticateResourceOwner(OAuthAuthzReqMessageContext oauthAuthzMsgCtx)
+//            throws IdentityOAuth2Exception {
+//		OAuth2AuthorizeReqDTO authorizationReqDTO = oauthAuthzMsgCtx.getAuthorizationReqDTO();
+//		boolean authStatus = false;
+//		// openid connect prompt= none support by remembering users
+//		if (OIDCAuthzServerUtil.isOIDCAuthzRequest(authorizationReqDTO.getScopes()) &&
+//		    authorizationReqDTO.getPassword() == null) {
+//			authStatus = RememberMeStore.getInstance().isUserInStore(authorizationReqDTO.getUsername());
+//		} else {
+//			authStatus =
+//			             OAuth2Util.authenticateUser(authorizationReqDTO.getUsername(),
+//			                                         authorizationReqDTO.getPassword());
+//		}
+//        if(authStatus){
+//        	// store the authenticated user for the openid-connect rememberMe usecase
+//			if (OIDCAuthzServerUtil.isOIDCAuthzRequest(authorizationReqDTO.getScopes())) {
+//				RememberMeStore.getInstance().addUserToStore(authorizationReqDTO.getUsername());
+//			}
+//            if(authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0){
+//                authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR +
+//                        authorizationReqDTO.getUsername());
+//            }else if(authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0){
+//                authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR +
+//                        authorizationReqDTO.getUsername().substring(authorizationReqDTO.getUsername().
+//                                indexOf(CarbonConstants.DOMAIN_SEPARATOR)+1));
+//            }
+//        }
+//        return authStatus;
+//    }
 
     public boolean validateAccessDelegation(OAuthAuthzReqMessageContext oauthAuthzMsgCtx)
             throws IdentityOAuth2Exception {

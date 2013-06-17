@@ -84,7 +84,8 @@ public class AuthorizationHandlerManager {
         AuthorizationHandler authzHandler = authzHandlers.get(responseType);
         OAuthAuthzReqMessageContext authzReqMsgCtx = new OAuthAuthzReqMessageContext(authzReqDTO);
 
-        boolean authStatus = authzHandler.authenticateResourceOwner(authzReqMsgCtx);
+        boolean authStatus = authzReqDTO.isUserAuthenticated();
+
         if (!authStatus) {
             log.warn("User Authentication failed for user : " + authzReqDTO.getUsername());
             handleErrorRequest(authorizeRespDTO, OAuth2ErrorCodes.UNAUTHORIZED_CLIENT,

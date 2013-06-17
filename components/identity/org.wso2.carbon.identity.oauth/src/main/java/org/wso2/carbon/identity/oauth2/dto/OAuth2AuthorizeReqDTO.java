@@ -25,6 +25,7 @@ public class OAuth2AuthorizeReqDTO {
     private String callbackUrl;
     private String username;
     private String password;
+    private boolean isAuthenticated;
 
     public String getUsername() {
         return username;
@@ -73,6 +74,14 @@ public class OAuth2AuthorizeReqDTO {
 
     public void setCallbackUrl(String callbackUrl) {
         this.callbackUrl = callbackUrl;
+    }
+
+    public boolean isUserAuthenticated(){
+        return isAuthenticated;
+    }
+
+    public void setUserAuthenticated(boolean isAuthenticated){
+        this.isAuthenticated = isAuthenticated;
     }
 
 }
