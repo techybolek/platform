@@ -4,10 +4,9 @@
     <parameter name="useDefaultListeners" value="false"/>
     <test name="Test - APPServer" preserve-order="true" parallel="false">
         <packages>
-            <!--<package name="org.wso2.carbon.integration.test.*"/>
+            <package name="org.wso2.carbon.integration.test.*"/>
             <package name="jaggery.integration.tests.*"/>
-            <package name="ms.integration.tests.*"/>-->
-            <package name="org.wso2.carbon.integration.test.webapp.*"/>
+            <package name="ms.integration.tests.*"/>
         </packages>
 
         <classes>
