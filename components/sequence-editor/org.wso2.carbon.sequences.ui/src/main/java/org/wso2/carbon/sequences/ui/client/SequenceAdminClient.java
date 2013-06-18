@@ -173,7 +173,7 @@ public class SequenceAdminClient implements EditorUIClient {
                     " sure to click the update button after configuring a mediator.", e);
         } catch (Exception e) {
             handleException("Error in adding the sequence with the configuration '"
-                    + sequenceElem + "'", e);
+                    + sequenceElem + "'. " + e.getMessage(), e);
         }
     }
 

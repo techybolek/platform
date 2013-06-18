@@ -18,6 +18,7 @@
 <%@ page import="org.apache.axiom.om.OMAttribute" %>
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.apache.axiom.om.OMFactory" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="org.wso2.carbon.mediator.service.MediatorStore" %>
 <%@ page import="org.wso2.carbon.mediator.service.builtin.SequenceMediator" %>
 <%@ page import="org.wso2.carbon.mediator.service.ui.Mediator" %>
@@ -888,8 +889,11 @@
             if (session.getAttribute("sequence.error.message") != null) {
         %>
         <script type="text/javascript">
+            <%
+                String seqErrorMsg = (String) session.getAttribute("sequence.error.message");
+            %>
             jQuery(document).ready(function() {
-                CARBON.showErrorDialog("<%= session.getAttribute("sequence.error.message") %>");
+                CARBON.showErrorDialog("<%= StringEscapeUtils.escapeXml(seqErrorMsg) %>");
             });
         </script>
         <%
@@ -899,8 +903,11 @@
             if (session.getAttribute("sequence.error2.message") != null) {
         %>
         <script type="text/javascript">
+            <%
+                String seqErrorMsg2 = (String) session.getAttribute("sequence.error2.message");
+            %>
             jQuery(document).ready(function() {
-                CARBON.showErrorDialog("<%= session.getAttribute("sequence.error2.message") %>");
+                CARBON.showErrorDialog("<%= StringEscapeUtils.escapeXml(seqErrorMsg2) %>");
             });
         </script>
         <%
@@ -910,8 +917,11 @@
             if (session.getAttribute("sequence.warn.message") != null) {
         %>
         <script type="text/javascript">
+            <%
+                String seqWarnMsg = (String) session.getAttribute("sequence.warn.message");
+            %>
             jQuery(document).ready(function() {
-                CARBON.showWarningDialog("<%= session.getAttribute("sequence.warn.message") %>");
+                CARBON.showWarningDialog("<%= StringEscapeUtils.escapeXml(seqWarnMsg) %>");
             });
         </script>
         <%
