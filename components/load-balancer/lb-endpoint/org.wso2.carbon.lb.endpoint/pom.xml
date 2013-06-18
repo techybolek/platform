@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
-            <version>1.6.1-wso2v8</version>
+            <version>1.6.1-wso2v10</version>
         </dependency>
         <dependency>
            <groupId>org.wso2.carbon</groupId>
