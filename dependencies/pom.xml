@@ -47,6 +47,7 @@
                 <module>hive/0.8.1-wso2v6</module>
                 <module>hadoop/0.20.203.1-wso2v4</module>
 		<module>amber/0.22.1358727-wso2v3</module>
+		<module>cassandra/1.1.3-wso2v4</module>
                 <!--module>jclouds/vcloud/1.6.0-wso2v1</module-->
                 <module>ode/1.3.5-wso2v9</module>
                 <module>orbit/andes</module>
@@ -60,6 +61,7 @@
 	        <module>juddi/3.1.5-wso2v1</module>
                 <module>orbit/juddi/3.1.5-wso2v1</module>
                 <module>orbit/ode</module>
+		<module>orbit/cassandra</module>
 	     </modules>
    <dependencyManagement>
 	<dependencies>
