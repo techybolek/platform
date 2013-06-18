@@ -32,7 +32,7 @@
     <artifactId>hive</artifactId>
     <packaging>bundle</packaging>
     <name>hive.wso2</name>
-    <version>0.8.1.wso2v6</version>
+    <version>0.8.1.wso2v8</version>
     <description>
         This bundle will represent hive jars
     </description>
@@ -128,7 +128,7 @@
     <properties>
         <hive.thrift.osgi.version>0.7.5.wso2v1</hive.thrift.osgi.version>
         <antlr.osgi.version>3.2.0.wso2v1</antlr.osgi.version>
-	<hive.wso2.version>0.8.1-wso2v6</hive.wso2.version>
+	<hive.wso2.version>0.8.1-wso2v8</hive.wso2.version>
     </properties>
 
 </project>
