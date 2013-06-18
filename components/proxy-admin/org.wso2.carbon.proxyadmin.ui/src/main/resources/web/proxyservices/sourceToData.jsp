@@ -24,6 +24,7 @@
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="java.util.regex.Pattern" %>
 <%@ page import="java.util.regex.Matcher" %>
+<%@ page import="java.lang.IllegalStateException" %>
 <%@ page import="org.wso2.carbon.proxyadmin.stub.types.carbon.ProxyData" %>
 <%
     ResourceBundle bundle = ResourceBundle.getBundle("org.wso2.carbon.proxyadmin.ui.i18n.Resources",
@@ -47,24 +48,28 @@
     boolean invalidCharInName = false;
     String str;
 
-    Pattern pattern = Pattern.compile("name=\"(.+?)\"");
-    Matcher matcher = pattern.matcher(source);
-    matcher.find();
-    str = matcher.group(1);
+    try {
+        Pattern pattern = Pattern.compile("name=\"(.+?)\"");
+        Matcher matcher = pattern.matcher(source);
+        matcher.find();
+        str = matcher.group(1);
 
-    // regular expression to match any string containing the following special characters
-    // Note: _ (underscore) character is allowed to be present in the text
-    // ~ ! @ # $ % ^ & * ( ) \ / + = - : ; < > ' " ? [ ] { } | \s ,
-    if (Pattern.matches("\\p{Alnum}*[~!@#$%^&*()\\+=\\-:;<>\\s?\\[\\]{},/\\\\\"]+\\p{Alnum}*", str)) {
-        session.setAttribute("proxyXML", source);
-        forwardTo = "source.jsp?header=" + header;
-        CarbonUIMessage.sendCarbonUIMessage(bundle.getString("invalid.char.in.name"),
-                CarbonUIMessage.ERROR, request);
-        invalidCharInName = true;
-    } else {
-        // the name does not match with given regular expression means that it does not contain any
-        // special characters. Therefore, it is a valid name
-        validName = true;
+        // regular expression to match any string containing the following special characters
+        // Note: _ (underscore) character is allowed to be present in the text
+        // ~ ! @ # $ % ^ & * ( ) \ / + = - : ; < > ' " ? [ ] { } | \s ,
+        if (Pattern.matches("\\p{Alnum}*[~!@#$%^&*()\\+=\\-:;<>\\s?\\[\\]{},/\\\\\"]+\\p{Alnum}*", str)) {
+            session.setAttribute("proxyXML", source);
+            forwardTo = "source.jsp?header=" + header;
+            CarbonUIMessage.sendCarbonUIMessage(bundle.getString("invalid.char.in.name"),
+                    CarbonUIMessage.ERROR, request);
+            invalidCharInName = true;
+        } else {
+            // the name does not match with given regular expression means that it does not contain any
+            // special characters. Therefore, it is a valid name
+            validName = true;
+        }
+    } catch(IllegalStateException e) {
+        validName=false;
     }
 
     if (validName && !invalidCharInName) {
