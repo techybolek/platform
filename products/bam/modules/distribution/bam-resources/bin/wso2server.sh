@@ -288,7 +288,6 @@ do
     -Dcom.sun.jndi.ldap.connect.pool.timeout=3000  \
     -Dorg.terracotta.quartz.skipUpdateCheck=true \
     -Djava.security.egd=file:/dev/./urandom \
-    -DapplyPatches \
     -Dfile.encoding=UTF8 \
     org.wso2.carbon.bootstrap.Bootstrap $*
     status=$?
