@@ -406,4 +406,39 @@ public class EndpointTemplateEditorAdmin extends AbstractServiceBusAdmin {
         log.error(message);
         throw new AxisFault(message);
     }
+
+    public boolean hasDuplicateTempleteEndpoint(String  templateElementConfig) throws AxisFault {
+        OMElement templateElement = null;
+        try {
+            templateElement = AXIOMUtil.stringToOM(templateElementConfig);
+        }
+         catch (XMLStreamException e) {
+            handleException("unable to Checking template Endpoint...invalid configuration element", e);
+        }
+        if (templateElement!=null) {
+            final Lock lock = getLock();
+            try {
+                lock.lock();
+                if (templateElement.getLocalName().equals(
+                        XMLConfigConstants.TEMPLATE_ELT.getLocalPart())) {
+                    String templateName = templateElement.getAttributeValue(new QName("name"));
+                    SynapseConfiguration config = getSynapseConfiguration();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Checking template : " + templateName + " with existing configuration");
+                    }
+                    if (config.getLocalRegistry().get(templateName) != null) {
+                        return true;
+                    }
+                }
+            } catch (Exception fault) {
+                handleException("Error Checking template : " + fault.getMessage(), fault);
+            } catch (Error error) {
+                throw new AxisFault("Unexpected error occured while " +
+                        "Checking the template : " + error.getMessage(), error);
+            } finally {
+                lock.unlock();
+            }
+        }
+     return false;
+    }
 }
