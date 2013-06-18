@@ -264,7 +264,7 @@ public class SequenceAdmin extends AbstractServiceBusAdmin {
                 }
                 if (config.getLocalRegistry().get(sequenceName) != null) {
                     handleException("The name '" + sequenceName +
-                        "' is already used within the configuration");
+                        "' is already used within the configuration - a sequence or local entry with this name already exists");
                 } else {
                     SynapseXMLConfigurationFactory.defineSequence(config, sequenceElement,
                             getSynapseConfiguration().getProperties());
