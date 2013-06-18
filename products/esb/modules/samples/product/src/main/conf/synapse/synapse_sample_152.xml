@@ -27,6 +27,7 @@
                 <address uri="http://localhost:9000/services/SimpleStockQuoteService" format="pox"/>
             </endpoint>
             <outSequence>
+                <log level="full"/>
                 <send/>
             </outSequence>
         </target>
