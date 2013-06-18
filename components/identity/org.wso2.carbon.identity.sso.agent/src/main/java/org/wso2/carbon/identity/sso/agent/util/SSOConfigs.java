@@ -25,12 +25,15 @@ import javax.servlet.FilterConfig;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 public class SSOConfigs {
 
     private static Logger LOGGER = Logger.getLogger("InfoLogging");
+
+    private static boolean propertiesFileDefined;
 
     private static Boolean samlSSOLoginEnabled;
     private static Boolean openidLoginEnabled;
@@ -67,11 +70,23 @@ public class SSOConfigs {
         
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(fConfigs.getInitParameter("AgentPropertyFilePath")));
-        } catch (Exception e) {
-            throw new SSOAgentException("Error while reading the properties file");
+            if(fConfigs.getInitParameter("AgentPropertyFilePath") != null &&
+                    !fConfigs.getInitParameter("AgentPropertyFilePath").equals("")){
+                propertiesFileDefined = true;
+                properties.load(new FileInputStream(fConfigs.getInitParameter("AgentPropertyFilePath")));
+            } else {
+                propertiesFileDefined = false;
+                LOGGER.info("\'AgentPropertyFilePath\' not defined. Using default configurations");
+                InputStream is = fConfigs.getServletContext().getClassLoader().getResourceAsStream("agent.properties");
+                properties.load(is);
+            }
+
+        } catch (FileNotFoundException e) {
+            throw new SSOAgentException("Agent properties file not found");
+        } catch (IOException e) {
+            throw new SSOAgentException("Error occurred while reading Agent properties file");
         }
-        
+
         samlSSOLoginEnabled = Boolean.parseBoolean(properties.getProperty("EnableSAMLSSOLogin"));
         openidLoginEnabled = Boolean.parseBoolean(properties.getProperty("EnableOpenIDLogin"));
         loginUrl = properties.getProperty("LoginUrl");
@@ -231,6 +246,10 @@ public class SSOConfigs {
             openIdAttributesMapName = "OpenIDAttributes";
         }
 	}
+
+    public static boolean isPropertiesFleDefined() {
+        return propertiesFileDefined;
+    }
 
     public static boolean isSAMLSSOLoginEnabled() {
         return samlSSOLoginEnabled;

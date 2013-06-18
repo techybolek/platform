@@ -84,14 +84,11 @@ public class SSOAgentFilter implements Filter {
                 samlSSOManager.doSLO(request);
             } else if(SSOConfigs.isSAMLSSOLoginEnabled() && samlResponse != null){
                 samlSSOManager.processResponse(request);
-                if(request.getSession(false).getAttribute(SSOConfigs.getSubjectIdSessionAttributeName()) == null){
-                    request.getRequestDispatcher(SSOConfigs.getLoginUrl()).forward(request,response);
-                    return;
-                }
             } else if(SSOConfigs.isOpenIDLoginEnabled() && openid_mode != null &&
                     !openid_mode.equals("") && !openid_mode.equals("null")){
                 openIdManager.processOpenIDLoginResponse(request, response);
-            } else if (SSOConfigs.isSAMLSSOLoginEnabled() && request.getRequestURI().endsWith(SSOConfigs.getLogoutUrl())){
+            } else if (SSOConfigs.isSAMLSSOLoginEnabled() && SSOConfigs.isSLOEnabled() &&
+                    request.getRequestURI().endsWith(SSOConfigs.getLogoutUrl())){
                 if(request.getSession(false) != null){
                     response.sendRedirect(samlSSOManager.buildRequest(request, true, false));
                     return;

@@ -21,14 +21,14 @@ package org.wso2.carbon.identity.sso.agent.saml;
 import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
 import org.wso2.carbon.identity.sso.agent.util.SSOConfigs;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.util.logging.Logger;
 
 public class SSOAgentKeyStoreCredential implements SSOAgentCredential {
+
+    private static Logger LOGGER = Logger.getLogger("InfoLogging");
 
     private static PublicKey publicKey = null;
     private static PrivateKey privateKey = null;
@@ -101,27 +101,33 @@ public class SSOAgentKeyStoreCredential implements SSOAgentCredential {
                                         String storeType) throws SSOAgentException {
 
         File keyStoreFile = new File(location);
-        if (!keyStoreFile.exists()) {
-            throw new SSOAgentException("KeyStore can not be found at ' " + keyStoreFile + " '");
+        if (SSOConfigs.isPropertiesFleDefined() && !keyStoreFile.exists()) {
+            throw new SSOAgentException("KeyStore can not be found at \'" + keyStoreFile + "\'" );
         }
+
         if (storePassword == null) {
             throw new SSOAgentException("KeyStore password can not be null");
         }
         if (storeType == null) {
             throw new SSOAgentException ("KeyStore Type can not be null");
         }
-        BufferedInputStream bufferedInputStream = null;
+
+        InputStream is = null;
         try {
-            bufferedInputStream = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            if(keyStoreFile.exists()){
+                is = new FileInputStream(keyStoreFile);
+            } else {
+                is = Thread.currentThread().getContextClassLoader().getResourceAsStream("wso2carbon.jks");
+            }
             KeyStore keyStore = KeyStore.getInstance(storeType);
-            keyStore.load(bufferedInputStream, storePassword.toCharArray());
+            keyStore.load(is, storePassword.toCharArray());
             return keyStore;
         } catch (Exception e) {
             throw new SSOAgentException("Error while loading key store file" , e);
         } finally {
-            if (bufferedInputStream != null) {
+            if (is != null) {
                 try {
-                    bufferedInputStream.close();
+                    is.close();
                 } catch (IOException ignored) {
                     throw new SSOAgentException("Error while closing input stream of key store");
                 }
