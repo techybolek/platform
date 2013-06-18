@@ -582,7 +582,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		                                                           .getIdentityDataStore();
 		UserIdentityClaimsDO identityDTO = identityDataStore.load(userName, storeManager);
 		// check if its a security question or identity claim 
-		if (identityDTO.getUserDataMap().containsKey(claim)) {
+		if (identityDTO != null && identityDTO.getUserDataMap().containsKey(claim)) {
 			claimValue.add(identityDTO.getUserDataMap().get(claim));
 			return false;
 		} 
