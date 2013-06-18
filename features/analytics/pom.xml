@@ -33,9 +33,9 @@
 
     <modules>
         <module>org.wso2.carbon.analytics.hive.server.feature</module>
-	<module>org.wso2.carbon.analytics.hive.ui.feature</module>
+        <module>org.wso2.carbon.analytics.hive.ui.feature</module>
         <module>org.wso2.carbon.analytics.server.feature</module>
-	<module>org.wso2.carbon.analytics.ui.feature</module>
+        <module>org.wso2.carbon.analytics.ui.feature</module>
         <module>org.wso2.carbon.analytics.feature</module>
     </modules>
 
