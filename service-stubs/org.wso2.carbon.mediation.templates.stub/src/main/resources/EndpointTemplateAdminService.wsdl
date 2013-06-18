@@ -1,7 +1,15 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://org.apache.synapse/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://services.templates.mediation.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ax2275="http://common.templates.mediation.carbon.wso2.org/xsd" targetNamespace="http://services.templates.mediation.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd"
+                  xmlns:ns="http://org.apache.synapse/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:tns="http://services.templates.mediation.carbon.wso2.org"
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:ax2275="http://common.templates.mediation.carbon.wso2.org/xsd"
+                  targetNamespace="http://services.templates.mediation.carbon.wso2.org">
     <wsdl:documentation>EndpointTemplateAdminService</wsdl:documentation>
     <wsdl:types>
-        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://common.templates.mediation.carbon.wso2.org/xsd">
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
+                   targetNamespace="http://common.templates.mediation.carbon.wso2.org/xsd">
             <xs:complexType name="EndpointTemplateInfo">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
@@ -11,7 +19,8 @@
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax2276="http://common.templates.mediation.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.synapse/xsd">
+        <xs:schema xmlns:ax2276="http://common.templates.mediation.carbon.wso2.org/xsd" attributeFormDefault="qualified"
+                   elementFormDefault="qualified" targetNamespace="http://org.apache.synapse/xsd">
             <xs:import namespace="http://common.templates.mediation.carbon.wso2.org/xsd"/>
             <xs:element name="saveEndpointTemplate">
                 <xs:complexType>
@@ -25,6 +34,20 @@
                     <xs:sequence>
                         <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="sequenceConfig" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="hasDuplicateTempleteEndpoint">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="templateElementConfig" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="hasDuplicateTempleteEndpointResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -66,7 +89,8 @@
             <xs:element name="getEndpointTemplatesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2276:EndpointTemplateInfo"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
+                                    type="ax2276:EndpointTemplateInfo"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -93,7 +117,8 @@
             <xs:element name="getDynamicEndpointTemplatesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2276:EndpointTemplateInfo"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
+                                    type="ax2276:EndpointTemplateInfo"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -167,6 +192,12 @@
     <wsdl:message name="getTemplateResponse">
         <wsdl:part name="parameters" element="ns:getTemplateResponse"/>
     </wsdl:message>
+    <wsdl:message name="hasDuplicateTempleteEndpointRequest">
+        <wsdl:part name="parameters" element="ns:hasDuplicateTempleteEndpoint"/>
+    </wsdl:message>
+    <wsdl:message name="hasDuplicateTempleteEndpointResponse">
+        <wsdl:part name="parameters" element="ns:hasDuplicateTempleteEndpointResponse"/>
+    </wsdl:message>
     <wsdl:message name="saveDynamicEndpointTemplateRequest">
         <wsdl:part name="parameters" element="ns:saveDynamicEndpointTemplate"/>
     </wsdl:message>
@@ -179,13 +210,15 @@
     <wsdl:portType name="EndpointTemplateAdminServicePortType">
         <wsdl:operation name="getDynamicEndpointTemplates">
             <wsdl:input message="tns:getDynamicEndpointTemplatesRequest" wsaw:Action="urn:getDynamicEndpointTemplates"/>
-            <wsdl:output message="tns:getDynamicEndpointTemplatesResponse" wsaw:Action="urn:getDynamicEndpointTemplatesResponse"/>
+            <wsdl:output message="tns:getDynamicEndpointTemplatesResponse"
+                         wsaw:Action="urn:getDynamicEndpointTemplatesResponse"/>
         </wsdl:operation>
         <wsdl:operation name="saveEndpointTemplate">
             <wsdl:input message="tns:saveEndpointTemplateRequest" wsaw:Action="urn:saveEndpointTemplate"/>
         </wsdl:operation>
         <wsdl:operation name="deleteDynamicEndpointTemplate">
-            <wsdl:input message="tns:deleteDynamicEndpointTemplateRequest" wsaw:Action="urn:deleteDynamicEndpointTemplate"/>
+            <wsdl:input message="tns:deleteDynamicEndpointTemplateRequest"
+                        wsaw:Action="urn:deleteDynamicEndpointTemplate"/>
         </wsdl:operation>
         <wsdl:operation name="addDynamicEndpointTemplate">
             <wsdl:input message="tns:addDynamicEndpointTemplateRequest" wsaw:Action="urn:addDynamicEndpointTemplate"/>
@@ -201,19 +234,28 @@
             <wsdl:output message="tns:getEndpointTemplatesResponse" wsaw:Action="urn:getEndpointTemplatesResponse"/>
         </wsdl:operation>
         <wsdl:operation name="getDynamicEndpointTemplatesCount">
-            <wsdl:input message="tns:getDynamicEndpointTemplatesCountRequest" wsaw:Action="urn:getDynamicEndpointTemplatesCount"/>
-            <wsdl:output message="tns:getDynamicEndpointTemplatesCountResponse" wsaw:Action="urn:getDynamicEndpointTemplatesCountResponse"/>
+            <wsdl:input message="tns:getDynamicEndpointTemplatesCountRequest"
+                        wsaw:Action="urn:getDynamicEndpointTemplatesCount"/>
+            <wsdl:output message="tns:getDynamicEndpointTemplatesCountResponse"
+                         wsaw:Action="urn:getDynamicEndpointTemplatesCountResponse"/>
         </wsdl:operation>
         <wsdl:operation name="getTemplate">
             <wsdl:input message="tns:getTemplateRequest" wsaw:Action="urn:getTemplate"/>
             <wsdl:output message="tns:getTemplateResponse" wsaw:Action="urn:getTemplateResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="hasDuplicateTempleteEndpoint">
+            <wsdl:input message="tns:hasDuplicateTempleteEndpointRequest"
+                        wsaw:Action="urn:hasDuplicateTempleteEndpoint"/>
+            <wsdl:output message="tns:hasDuplicateTempleteEndpointResponse"
+                         wsaw:Action="urn:hasDuplicateTempleteEndpointResponse"/>
         </wsdl:operation>
         <wsdl:operation name="saveDynamicEndpointTemplate">
             <wsdl:input message="tns:saveDynamicEndpointTemplateRequest" wsaw:Action="urn:saveDynamicEndpointTemplate"/>
         </wsdl:operation>
         <wsdl:operation name="getEndpointTemplatesCount">
             <wsdl:input message="tns:getEndpointTemplatesCountRequest" wsaw:Action="urn:getEndpointTemplatesCount"/>
-            <wsdl:output message="tns:getEndpointTemplatesCountResponse" wsaw:Action="urn:getEndpointTemplatesCountResponse"/>
+            <wsdl:output message="tns:getEndpointTemplatesCountResponse"
+                         wsaw:Action="urn:getEndpointTemplatesCountResponse"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="EndpointTemplateAdminServiceSoap11Binding" type="tns:EndpointTemplateAdminServicePortType">
@@ -289,6 +331,15 @@
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="hasDuplicateTempleteEndpoint">
+            <soap:operation soapAction="urn:hasDuplicateTempleteEndpoint" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getEndpointTemplatesCount">
             <soap:operation soapAction="urn:getEndpointTemplatesCount" style="document"/>
@@ -374,6 +425,15 @@
                 <soap12:body use="literal"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="hasDuplicateTempleteEndpoint">
+            <soap12:operation soapAction="urn:hasDuplicateTempleteEndpoint" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="getEndpointTemplatesCount">
             <soap12:operation soapAction="urn:getEndpointTemplatesCount" style="document"/>
             <wsdl:input>
@@ -457,6 +517,15 @@
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="hasDuplicateTempleteEndpoint">
+            <http:operation location="hasDuplicateTempleteEndpoint"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getEndpointTemplatesCount">
             <http:operation location="getEndpointTemplatesCount"/>
