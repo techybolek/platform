@@ -89,7 +89,7 @@ public class SynapseApplicationAdmin extends AbstractAdmin {
             Artifact artifact = dependency.getArtifact();
 
             String type = artifact.getType();
-            String instanceName = artifact.getRuntimeObjectName();
+            String instanceName = artifact.getName();
 
             // if the instance name is null, artifact deployment has failed..
             if (instanceName == null) {
