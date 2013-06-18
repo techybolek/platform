@@ -102,6 +102,7 @@
                     <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="responseType" nillable="true" type="xs:string"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="scopes" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="userAuthenticated" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
