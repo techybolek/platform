@@ -466,7 +466,7 @@
 
     function afterMediatorUpdate(src) {
         var error  = src.trim();
-        if(error != '' && error.startsWith("error:")){
+        if(error != '' && (error.indexOf("error:") != -1)){
             CARBON.showErrorDialog(error.substring(6,error.length));
             if (document.getElementById('whileUpload') != null && document.getElementById('whileUpload') != undefined) {
                 document.getElementById('whileUpload').style.display = "none";
