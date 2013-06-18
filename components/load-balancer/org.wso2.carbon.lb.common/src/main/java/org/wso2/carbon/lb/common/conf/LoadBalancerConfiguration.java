@@ -144,6 +144,13 @@ public class LoadBalancerConfiguration implements Serializable {
      */
     public void init(String configURL) {
 
+        if(configURL == null){
+            String msg = "Cannot locate the location of the loadbalancer.conf file." +
+                   " You need to set the 'loadbalancer.conf' system property.";
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
+        
         if (configURL.startsWith("$system:")) {
             configURL = System.getProperty(configURL.substring("$system:".length()));
         }
@@ -171,17 +178,6 @@ public class LoadBalancerConfiguration implements Serializable {
         // load 'loadbalancer' node
         Node lbConfigNode = rootNode.findChildNodeByName(Constants.LOAD_BALANCER_ELEMENT);
 
-//        if (lbConfigNode == null) {
-//            String msg =
-//                         Constants.LOAD_BALANCER_ELEMENT + " element can not be" +
-//                                 " found in the configuration file.";
-//            log.warn(msg);
-//            // throw new RuntimeException(msg);
-//        } else {
-//            // Set load balancer configuration
-//            createConfiguration(lbConfig = new LBConfiguration(), lbConfigNode);
-//        }
-        
         if(lbConfigNode != null){
         	createConfiguration(lbConfig = new LBConfiguration(), lbConfigNode);
         }
@@ -233,8 +229,11 @@ public class LoadBalancerConfiguration implements Serializable {
      *
      * @param servicesConfigNode services element's Node
      */
-    public void createServicesConfig(Node servicesConfigNode) {
+    public List<ServiceConfiguration> createServicesConfig(Node servicesConfigNode) {
 
+        // current list of service configs
+        List<ServiceConfiguration> currentServiceConfigs = new ArrayList<ServiceConfiguration>();
+        
         // Building default configuration
         Node defaultNode = servicesConfigNode.findChildNodeByName(Constants.DEFAULTS_ELEMENT);
 
@@ -301,12 +300,21 @@ public class LoadBalancerConfiguration implements Serializable {
                         log.error(msg);
                         throw new RuntimeException(msg);
                     }
+                    
+                    currentServiceConfigs.add(serviceConfig);
 
-                    // add the built ServiceConfiguration, to the map
-                    addServiceConfiguration(serviceConfig);
                 }
             }
         }
+
+        for (ServiceConfiguration serviceConfiguration : currentServiceConfigs) {
+            
+            // add the built ServiceConfiguration, to the map
+            addServiceConfiguration(serviceConfiguration);
+            
+        }
+        
+        return currentServiceConfigs;
 
     }
 
@@ -387,6 +395,8 @@ public class LoadBalancerConfiguration implements Serializable {
             	List<ServiceConfiguration> list = serviceNameToServiceConfigurations.get(serviceName);
             	
             	list.remove(serviceConfig);
+            	
+            	serviceNameToServiceConfigurations.put(serviceName, list);
             }
         } 
         
@@ -408,18 +418,6 @@ public class LoadBalancerConfiguration implements Serializable {
         
         return serviceConfig;
     }
-    
-//    private ServiceConfiguration getServiceConfIfExists(ServiceConfiguration serviceConfig){
-//        String domain, subDomain;
-//        if(serviceConfig != null){
-//        if(serviceConfigurations.get(serviceConfig.getDomain()) != null){
-//            if(serviceConfigurations.get(serviceConfig.getDomain()).get(serviceConfig.getSubDomain()) != null){
-//                return serviceConfigurations.get(serviceConfig.getDomain()).get(serviceConfig.getSubDomain());
-//            }
-//        }
-//        }
-//        return serviceConfig;
-//    }
     
     public void resetData(){
     	serviceConfigurations =
@@ -474,15 +472,6 @@ public class LoadBalancerConfiguration implements Serializable {
         hostNamesTracker.put(name, allHosts);
     }
     
-//    public void removeFromHostNameTracker(String serviceName, String hostName){
-//    	Set<String> allHosts;
-//
-//        if (hostNamesTracker.containsKey(serviceName)) {
-//            allHosts = hostNamesTracker.get(serviceName);
-//            allHosts.remove(hostName);
-//        }
-//    }
-    
     public void addToHostContextMap(String hostName, HostContext ctxt) {
 
         if (hostName != null && ctxt != null) {
@@ -490,14 +479,6 @@ public class LoadBalancerConfiguration implements Serializable {
         }
     }
     
-//    public void removeHostContext(String hostName) {
-//
-//        if (hostName != null) {
-//            hostCtxt.remove(hostName);
-//        }
-//    }
-
-
     /**
      * Return a map of {@link HostContext}.
      * @return
@@ -771,8 +752,9 @@ public class LoadBalancerConfiguration implements Serializable {
         private int sessionTimeOut = -1;
         private String groupManagementAgentClass;
         private String autoscalerTaskClass;
-        private String mbServerUrl = "localhost:5672";
+        private String mbServerUrl;
         private boolean useEmbeddedAutoscaler = true;
+        private String algorithm = "org.apache.synapse.endpoints.algorithms.RoundRobin";
 
         public String getElasticIP() {
             return elasticIP;
@@ -852,6 +834,16 @@ public class LoadBalancerConfiguration implements Serializable {
         
         public void setSession_timeout(String timeout) {
             this.sessionTimeOut = Integer.parseInt(timeout);
+        }
+
+        public String getAlgorithm() {
+            return algorithm;
+        }
+
+        public void setAlgorithm(String algorithm) {
+            if (algorithm != null) {
+                this.algorithm = algorithm;
+            }
         }
 
         public int getSizeOfCache() {

@@ -141,7 +141,10 @@ public class Node implements Serializable{
         
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : properties.entrySet()) {
-            sb.append(indent +entry.getKey() + "\t" + entry.getValue() + ";\n");
+            // hack to get a quick fix in.
+            if (!"tenant_id".equals(entry.getKey()) && !"alias".equals(entry.getKey())) {
+                sb.append(indent + entry.getKey() + "\t" + entry.getValue() + ";\n");
+            }
         }
         return sb.toString();
     }
