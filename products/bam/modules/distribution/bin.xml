@@ -496,7 +496,7 @@
 	<!-- log4j properties -->
 	 <file>
             <source>conf/log4j.properties</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
