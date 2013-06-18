@@ -128,6 +128,17 @@
         session.removeAttribute("seq.d.mgt.error.name");
     }
 
+    try {
+        if (((String) session.getAttribute("hasDuplicateTemplateEndpoint")).equals("true")) {
+%>
+    <script type="text/javascript">
+        CARBON.showErrorDialog('<fmt:message key="endpoint.already.exists"/>');
+    </script>
+    <%
+                session.removeAttribute("hasDuplicateTemplateEndpoint");
+            }
+        } catch (Exception e) {
+        }
 %>
 
 

@@ -233,6 +233,15 @@ public class EndpointTemplateAdminClient {
         }
     }
 
+   public boolean hasDuplicateTemplateEndpoint(String  templateElementConfig)throws TemplateEditorException {
+       try {
+           return endpointTemplateAdminStub.hasDuplicateTempleteEndpoint(templateElementConfig);
+       } catch (Exception e) {
+           handleException("Couldn't Check the endpoint template : ", e);
+       }
+       return false;
+   }
+
 
 
 }
