@@ -77,8 +77,15 @@
                     client.addEndpoint(configuration);
                 } else {
                     //add new endpoint template
+                    session.removeAttribute("hasDuplicateTemplateEndpoint");
                     EndpointTemplateAdminClient templateClient = new EndpointTemplateAdminClient(config, session);
-                    templateClient.addTemplate(configuration);
+
+                    if (templateClient.hasDuplicateTemplateEndpoint(configuration)) {
+                            session.setAttribute("hasDuplicateTemplateEndpoint","true");
+                    } else {
+                        templateClient.addTemplate(configuration);
+                        session.setAttribute("hasDuplicateTemplateEndpoint","false");
+                    }
                 }
             }
         } catch (Exception e) {
