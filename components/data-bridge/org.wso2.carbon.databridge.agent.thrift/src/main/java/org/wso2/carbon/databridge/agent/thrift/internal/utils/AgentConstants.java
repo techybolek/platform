@@ -41,6 +41,7 @@ public final class AgentConstants {
 
     public static final String BUFFERED_EVENTS_SIZE = "bufferedEventsSize";
     public static final String POOL_SIZE = "poolSize";
+    public static final String MAX_POOL_SIZE = "maxPoolSize";
 
     public static final String MAX_TRANSPORT_POOL_SIZE = "maxTransportPoolSize";
     public static final String MAX_IDLE_CONNECTIONS = "maxIdleConnections";
@@ -71,6 +72,7 @@ public final class AgentConstants {
     public static final long DEFAULT_RECONNECTION_INTERVAL = 30;
 
     public static final int DEFAULT_POOL_SIZE = 30;
+    public static final int MAX_DEFAULT_POOL_SIZE = 50;
 
     public static final int DEFAULT_MAX_TRANSPORT_POOL_SIZE = 250;
     public static final int DEFAULT_MAX_IDLE_CONNECTIONS = 250;

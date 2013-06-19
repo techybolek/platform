@@ -167,6 +167,13 @@ public final class AgentBuilder {
         if (poolSize != null) {
             agentConfiguration.setPoolSize(Integer.parseInt(poolSize.getText()));
         }
+
+        OMElement maxPoolSize = agentServerConfig.getFirstChildWithName(
+                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
+                        AgentConstants.MAX_POOL_SIZE));
+        if (maxPoolSize != null) {
+            agentConfiguration.setMaxPoolSize(Integer.parseInt(maxPoolSize.getText()));
+        }
         OMElement evictionTimePeriod = agentServerConfig.getFirstChildWithName(
                 new QName(AgentConstants.AGENT_CONF_NAMESPACE,
                         AgentConstants.EVICTION_TIME_PERIOD));

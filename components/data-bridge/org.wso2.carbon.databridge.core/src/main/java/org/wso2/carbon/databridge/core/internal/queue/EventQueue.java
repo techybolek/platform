@@ -19,10 +19,11 @@ package org.wso2.carbon.databridge.core.internal.queue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.databridge.commons.utils.DataBridgeThreadFactory;
 import org.wso2.carbon.databridge.core.AgentCallback;
 import org.wso2.carbon.databridge.core.RawDataAgentCallback;
-import org.wso2.carbon.databridge.core.conf.DataBridgeConfiguration;
 import org.wso2.carbon.databridge.core.Utils.EventComposite;
+import org.wso2.carbon.databridge.core.conf.DataBridgeConfiguration;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -49,7 +50,7 @@ public class EventQueue {
         this.subscribers = subscribers;
         this.rawDataSubscribers = rawDataSubscribers;
         // Note : Using a fixed worker thread pool and a bounded queue to prevent the server dying if load is too high
-        executorService = Executors.newFixedThreadPool(dataBridgeConfiguration.getWorkerThreads());
+        executorService = Executors.newFixedThreadPool(dataBridgeConfiguration.getWorkerThreads(),new DataBridgeThreadFactory("Core"));
         eventQueue = new ArrayBlockingQueue<EventComposite>(dataBridgeConfiguration.getEventBufferCapacity());
     }
 

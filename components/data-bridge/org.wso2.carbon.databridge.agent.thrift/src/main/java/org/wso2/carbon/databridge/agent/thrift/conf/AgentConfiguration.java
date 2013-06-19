@@ -30,6 +30,7 @@ public class AgentConfiguration {
 
     private int bufferedEventsSize = AgentConstants.DEFAULT_BUFFERED_EVENTS_SIZE;
     private int poolSize = AgentConstants.DEFAULT_POOL_SIZE;
+    private int maxPoolSize = AgentConstants.MAX_DEFAULT_POOL_SIZE;
     private int asyncDataPublisherBufferedEventSize = AgentConstants.DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE;
     private int loadBalancingDataPublisherBufferedEventSize = AgentConstants.DEFAULT_LB_CLIENT_BUFFERED_EVENTS_SIZE;
 
@@ -175,5 +176,13 @@ public class AgentConfiguration {
 
     public void setLoadBalancingDataPublisherBufferedEventSize(int loadBalancingDataPublisherBufferedEventSize) {
         this.loadBalancingDataPublisherBufferedEventSize = loadBalancingDataPublisherBufferedEventSize;
+    }
+
+    public int getMaxPoolSize() {
+        return maxPoolSize;
+    }
+
+    public void setMaxPoolSize(int maxPoolSize) {
+        this.maxPoolSize = maxPoolSize;
     }
 }

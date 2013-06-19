@@ -17,7 +17,8 @@
 
     <bufferedEventsSize>200</bufferedEventsSize>
 
-    <poolSize>50</poolSize>
+    <poolSize>30</poolSize>
+    <maxPoolSize>50</maxPoolSize>
 
     <maxTransportPoolSize>250</maxTransportPoolSize>
     <maxIdleConnections>250</maxIdleConnections>

@@ -5,6 +5,7 @@
         <xs:all>
             <xs:element type="xs:string" name="bufferedEventsSize"/>
             <xs:element type="xs:string" name="poolSize"/>
+            <xs:element type="xs:string" name="maxPoolSize"/>
             <xs:element type="xs:string" name="maxTransportPoolSize"/>
             <xs:element type="xs:string" name="maxIdleConnections"/>
             <xs:element type="xs:string" name="evictionTimePeriod"/>

@@ -31,6 +31,7 @@ import org.wso2.carbon.databridge.agent.thrift.internal.pool.client.secure.Secur
 import org.wso2.carbon.databridge.agent.thrift.internal.publisher.authenticator.AgentAuthenticator;
 import org.wso2.carbon.databridge.agent.thrift.internal.publisher.authenticator.AgentAuthenticatorFactory;
 import org.wso2.carbon.databridge.agent.thrift.internal.utils.AgentConstants;
+import org.wso2.carbon.databridge.commons.utils.DataBridgeThreadFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -75,9 +76,10 @@ public class Agent {
         //for the unbounded queue implementation the maximum pool size irrelevant and
         // only the CorePoolSize number of threads will be created
         this.threadPool = new ThreadPoolExecutor(agentConfiguration.getPoolSize(),
-                                                 Integer.MAX_VALUE,
+                                                 agentConfiguration.getMaxPoolSize(),
                                                  AgentConstants.DEFAULT_KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                                                 new LinkedBlockingQueue<Runnable>()
+                                                 new LinkedBlockingQueue<Runnable>(),
+                                                 new DataBridgeThreadFactory("Agent")
         );
     }
 
