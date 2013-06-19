@@ -34,8 +34,6 @@ public class SCIMCommonComponent {
     private static Log logger = LogFactory.getLog(SCIMCommonComponent.class);
 
     private static IdentityUtil identityUtil;
-    /*private static RealmService realmService;
-    private static RegistryService registryService;*/
 
     ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -62,6 +60,7 @@ public class SCIMCommonComponent {
             SCIMUserOperationListener scimUserOperationListener = new SCIMUserOperationListener();
             ctx.getBundleContext().registerService(UserOperationEventListener.class.getName(),
                                                    scimUserOperationListener, null);
+
             SCIMCommonUtils.init();
 
             if (logger.isDebugEnabled()) {
@@ -73,31 +72,7 @@ public class SCIMCommonComponent {
             logger.error("Error in reading information from identity tables at SCIMCommonComponentStartup.");
         }
     }
-
-    /*protected void setCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = invalidator;
-    }
-
-    protected void unsetCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = null;
-    }*/
-
-    /*protected void setRealmService(RealmService realm) {
-        realmService = realm;
-    }
-
-    protected void unsetRealmService(RealmService realmService) {
-        realmService = null;
-    }
-
-    protected void setRegistryService(RegistryService regService) {
-        registryService = regService;
-    }
-
-    protected void unsetRegistryService(RegistryService regService) {
-        registryService = null;
-    }*/
-
+    
     protected void setIdentityUtil(IdentityUtil idnUtil) {
         identityUtil = idnUtil;
     }
@@ -105,10 +80,6 @@ public class SCIMCommonComponent {
     protected void unsetIdentityUtil(IdentityUtil idnUtil) {
         identityUtil = null;
     }
-
-    /*public static CacheInvalidator getCacheInvalidator() {
-        return cacheInvalidator;
-    }*/
 
     protected class SCIMConfigPersister implements Runnable {
         private SCIMConfig scimConfig;

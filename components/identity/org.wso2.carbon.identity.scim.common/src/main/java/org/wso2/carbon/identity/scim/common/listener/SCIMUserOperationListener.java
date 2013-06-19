@@ -155,7 +155,11 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
                  info in createUser request.*/
 
                 //TODO if groups are set (through) carbon APIs, then need to send a update group provisioning request as well.
-                //but for the moment, do group mgt operations through group resource.
+                //but for the moment, do group-mgt operations through group resource.
+                
+                //create a map with provisioning data
+                Map<String, Object> provisioningData = new HashMap<String, Object>();
+                
                 provisioningThreadPool.submit(new DefaultSCIMProvisioningHandler(
                         consumerUserId, user, SCIMConstants.POST, null));
             }
