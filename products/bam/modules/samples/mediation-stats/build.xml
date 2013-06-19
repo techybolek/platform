@@ -15,45 +15,11 @@
     <property name="password" value=""/>
 
     <path id="classpath">
-    <fileset dir="${dependency.jars.path}">
-     <include name="org.wso2.carbon.logging_4.2.0-SNAPSHOT.jar"/>
-     <include name="commons-pool_1.5.6.wso2v1.jar"/>
-     <include name="google-collect_1.0.0.wso2v2.jar"/>
-     <include name="com.google.gson_2.1.0.jar"/>
-     <include name="geronimo-jms_1.1_spec-1.1.1.jar"/>
-     <include name="guava_12.0.0.wso2v1.jar"/>
-     <include name="httpclient_4.2.3.wso2v1.jar"/>
-     <include name="libthrift_0.7.0.wso2v2.jar"/>
-     <include name="slf4j.log4j12_1.6.1.jar"/>
-     <include name="slf4j.api_1.6.1.jar"/>
-     <include name="org.wso2.carbon.authenticator.stub_4.2.0-SNAPSHOT.jar"/>
-     <include name="org.wso2.carbon.databridge.agent.thrift_4.1.2.jar"/>
-     <include name="org.wso2.carbon.databridge.commons.thrift_4.2.0-SNAPSHOT.jar"/>
-     <include name="org.wso2.carbon.databridge.commons_4.1.2.jar"/>
-     <include name="org.wso2.carbon.identity.authentication_4.2.0-SNAPSHOT.jar"/>
-     <include name="org.wso2.carbon.queuing_4.2.0-SNAPSHOT.jar"/>
-    </fileset>       
+      <fileset dir="${dependency.jars.path}" includes="**/*.jar"/>    
     </path>
     
     <path id="runtimeclasspath">
-    <fileset dir="${dependency.jars.path}">
-     <include name="org.wso2.carbon.logging_4.2.0-SNAPSHOT.jar"/>
-     <include name="commons-pool_1.5.6.wso2v1.jar"/>
-     <include name="google-collect_1.0.0.wso2v2.jar"/>
-     <include name="com.google.gson_2.1.0.jar"/>
-     <include name="geronimo-jms_1.1_spec-1.1.1.jar"/>
-     <include name="guava_12.0.0.wso2v1.jar"/>
-     <include name="httpclient_4.2.3.wso2v1.jar"/>
-     <include name="libthrift_0.7.0.wso2v2.jar"/>
-     <include name="slf4j.log4j12_1.6.1.jar"/>
-     <include name="slf4j.api_1.6.1.jar"/>
-     <include name="org.wso2.carbon.authenticator.stub_4.2.0-SNAPSHOT.jar"/>
-     <include name="org.wso2.carbon.databridge.agent.thrift_4.1.2.jar"/>
-     <include name="org.wso2.carbon.databridge.commons.thrift_4.2.0-SNAPSHOT.jar"/>
-     <include name="org.wso2.carbon.databridge.commons_4.1.2.jar"/>
-     <include name="org.wso2.carbon.identity.authentication_4.2.0-SNAPSHOT.jar"/>
-     <include name="org.wso2.carbon.queuing_4.2.0-SNAPSHOT.jar"/>
-    </fileset>
+      <fileset dir="${dependency.jars.path}" includes="**/*.jar"/>
     <pathelement location="${classes.dir}"/>
     </path>
 
