@@ -89,7 +89,7 @@
         <dependency>
             <groupId>org.apache.hive.wso2</groupId>
             <artifactId>hive</artifactId>
-            <version>0.8.1.wso2v6</version>
+            <version>0.8.1.wso2v8</version>
         </dependency>
     </dependencies>
 
