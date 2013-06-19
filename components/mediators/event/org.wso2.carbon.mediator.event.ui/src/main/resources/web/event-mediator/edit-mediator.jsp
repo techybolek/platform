@@ -96,7 +96,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td>Topic</td>
+                    <td>Topic<span class="required">*</span></td>
                     <td><input class="longInput" type="text" id="topicVal"
                                name="topicVal"
                                value="<%=topicValue%>"/></td>

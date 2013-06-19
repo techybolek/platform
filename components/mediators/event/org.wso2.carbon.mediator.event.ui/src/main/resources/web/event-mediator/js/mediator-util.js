@@ -10,5 +10,12 @@ function displayElement(elementId, isDisplay) {
 }
 
 function eventMediatorValidate(){
+
+    var topic = document.getElementById("topicVal");
+    if (topic && topic.value == "") {
+            CARBON.showErrorDialog(eventi18n["specify.topic"]);
+            return false;
+    }
+
     return true;
 }
