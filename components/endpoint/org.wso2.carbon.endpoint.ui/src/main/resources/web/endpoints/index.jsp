@@ -631,7 +631,7 @@ function editDynamicEndpoint(key) {
             <th style="width:20%">
                 <fmt:message key="type"/>
             </th>
-            <th colspan="2">
+            <th class="registryWriteOperation" colspan="2">
                 <fmt:message key="action"/>
             </th>
         </tr>
@@ -649,14 +649,14 @@ function editDynamicEndpoint(key) {
                 %>
                 <%=epService.getDisplayName()%>
             </td>
-            <td style="border-right:none;width:100px">
+            <td class="registryWriteOperation" style="border-right:none;width:100px">
                 <div class="inlineDiv">
                     <a href="#" onclick="editDynamicEndpoint('<%=endpoint%>')" class="icon-link"
                        style="background-image:url(../admin/images/edit.gif);"><fmt:message
                             key="edit"/></a>
                 </div>
             </td>
-            <td style="border-left:none;width:100px">
+            <td class="registryWriteOperation" style="border-left:none;width:100px">
                 <div class="inlineDiv">
                     <a href="#" onclick="deleteDynamicEndpoint('<%= endpoint %>')"
                        class="icon-link"
