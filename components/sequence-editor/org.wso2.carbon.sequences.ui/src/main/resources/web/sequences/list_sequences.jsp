@@ -579,7 +579,7 @@
             <th>
                 <fmt:message key="sequence.name"/>
             </th>
-            <th style="width:200px" colspan="2">
+            <th class="registryWriteOperation" style="width:200px" colspan="2">
                 <fmt:message key="sequence.actions"/>
             </th>
         </tr>
@@ -590,7 +590,7 @@
             <td style="width:200px">
                 <%= sequence.getName() %>
             </td>
-            <td style="border-right:none;width:100px">
+            <td class="registryWriteOperation" style="border-right:none;width:100px">
                 <div class="inlineDiv">
                     <a href="#"
                        onclick="editRegistrySequence('<%= sequence.getName() %>')"
@@ -599,7 +599,7 @@
                             key="sequence.edit.action"/></a>
                 </div>
             </td>
-            <td style="border-left:none;width:100px">
+            <td class="registryWriteOperation" style="border-left:none;width:100px">
                 <div class="inlineDiv">
                     <a href="#"
                        onclick="deleteRegistrySequence('<%= sequence.getName() %>')"
