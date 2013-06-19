@@ -17,27 +17,19 @@
 */
 package org.wso2.carbon.identity.scim.provider.filter;
 
-import org.apache.axiom.om.util.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.RequestHandler;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.scim.provider.auth.SCIMAuthenticationHandler;
+import org.wso2.carbon.identity.scim.provider.auth.SCIMAuthenticatorRegistry;
 import org.wso2.carbon.identity.scim.provider.util.JAXRSResponseBuilder;
-import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.charon.core.encoder.json.JSONEncoder;
-import org.wso2.charon.core.exceptions.InternalServerException;
 import org.wso2.charon.core.exceptions.UnauthorizedException;
 import org.wso2.charon.core.protocol.endpoints.AbstractResourceEndpoint;
-import org.wso2.charon.core.schema.SCIMConstants;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.TreeMap;
 
 public class AuthenticationFilter implements RequestHandler {
 
@@ -47,68 +39,23 @@ public class AuthenticationFilter implements RequestHandler {
         if (log.isDebugEnabled()) {
             log.debug("Authenticating SCIM request..");
         }
-        //get the map of protocol headers
-        TreeMap protocolHeaders = (TreeMap) message.get(Message.PROTOCOL_HEADERS);
-        //get the value for Authorization Header
-        ArrayList authzHeaders = (ArrayList) protocolHeaders.get(SCIMConstants.AUTHORIZATION_HEADER);
-        if (authzHeaders != null) {
-            //get the authorization header value, if provided
-            String authzHeader = (String) authzHeaders.get(0);
-            //currently, handle, basic auth in the filter itself.
-            //Plan is to add pluggable authenticators here, with default ones being basic auth and oauth
-
-            byte[] decodedAuthHeader = Base64.decode(authzHeader.split(" ")[1]);
-            String authHeader = new String(decodedAuthHeader);
-            String userName = authHeader.split(":")[0];
-            String password = authHeader.split(":")[1];
-            if (userName != null && password != null) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-                String tenantLessUserName = MultitenantUtils.getTenantAwareUsername(userName);
-
-                try {
-                    //get super tenant context and get realm service which is an osgi service
-                    RealmService realmService = (RealmService)
-                            PrivilegedCarbonContext.getCurrentContext().getOSGiService(RealmService.class);
-                    if (realmService != null) {
-                        int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-                        //get tenant's user realm
-                        UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
-                        boolean authenticated = userRealm.getUserStoreManager().authenticate(tenantLessUserName, password);
-                        if (authenticated) {
-                            //authentication success. set the username for authorization header and proceed the REST call
-                            authzHeaders.set(0, userName);
-                            return null;
-                        } else {
-                            UnauthorizedException unauthorizedException = new UnauthorizedException(
-                                    "Authentication required for this resource.");
-                            return new JAXRSResponseBuilder().buildResponse(
-                                    AbstractResourceEndpoint.encodeSCIMException(new JSONEncoder(), unauthorizedException));
-                        }
-                    } else {
-                        log.error("Error in getting Realm Service for user: " + userName);
-                        InternalServerException internalServerException = new InternalServerException(
-                                "Internal server error while authenticating the user.");
-                        return new JAXRSResponseBuilder().buildResponse(
-                                AbstractResourceEndpoint.encodeSCIMException(new JSONEncoder(), internalServerException));
-                    }
-
-                } catch (UserStoreException e) {
-                    InternalServerException internalServerException = new InternalServerException(
-                            "Internal server error while authenticating the user.");
-                    return new JAXRSResponseBuilder().buildResponse(
-                            AbstractResourceEndpoint.encodeSCIMException(new JSONEncoder(), internalServerException));
+        //TODO: get the authenticator from authentication registry. If no authenticators' returned, error.
+        SCIMAuthenticatorRegistry SCIMAuthRegistry = SCIMAuthenticatorRegistry.getInstance();
+        if (SCIMAuthRegistry != null) {
+            SCIMAuthenticationHandler SCIMAuthHandler = SCIMAuthRegistry.getAuthenticator(
+                    message, classResourceInfo);
+            boolean isAuthenticated = false;
+            if (SCIMAuthHandler != null) {
+                isAuthenticated = SCIMAuthHandler.isAuthenticated(message, classResourceInfo);
+                if (isAuthenticated) {
+                    return null;
                 }
-            } else {
-                UnauthorizedException unauthorizedException = new UnauthorizedException(
-                        "Authentication required for this resource.");
-                return new JAXRSResponseBuilder().buildResponse(
-                        AbstractResourceEndpoint.encodeSCIMException(new JSONEncoder(), unauthorizedException));
             }
-        } else {
-            UnauthorizedException unauthorizedException = new UnauthorizedException(
-                    "Authentication required for this resource.");
-            return new JAXRSResponseBuilder().buildResponse(
-                    AbstractResourceEndpoint.encodeSCIMException(new JSONEncoder(), unauthorizedException));
         }
+        //if null response is not returned(i.e:message continues its way to the resource), return error & terminate.
+        UnauthorizedException unauthorizedException = new UnauthorizedException(
+                "Authentication failed for this resource.");
+        return new JAXRSResponseBuilder().buildResponse(
+                AbstractResourceEndpoint.encodeSCIMException(new JSONEncoder(), unauthorizedException));
     }
 }
