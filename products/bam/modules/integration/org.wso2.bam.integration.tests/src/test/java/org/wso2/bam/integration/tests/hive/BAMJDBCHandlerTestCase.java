@@ -10,9 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.analytics.hive.stub.HiveExecutionServiceHiveExecutionException;
 import org.wso2.carbon.analytics.hive.stub.HiveExecutionServiceStub;
-import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.Event;
@@ -24,11 +22,7 @@ import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.URL;
+import java.net.*;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 
@@ -210,7 +204,7 @@ public class BAMJDBCHandlerTestCase {
 
     private String defineEventStream(){
             try {
-                streamId = dataPublisher.defineStream(getStreamDef("jdbc_handler_test_stream","1.0.1"));
+                streamId = dataPublisher.defineStream(getStreamDef("jdbc.handler.integration.test.stream","1.0.0"));
                 log.info("JDBC HANDLER SREAM DEFINED stream id is:" + streamId);
             } catch (Exception e) {
                 fail("Failed when defining stream: " + e.getMessage() );
