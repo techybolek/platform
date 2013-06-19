@@ -133,12 +133,16 @@ public class CommonUtil {
 		
     }
 
-    public static WSCollection transformCollectiontoWSCollection(Collection collection, DataHandler dataHandler) {
+    public static WSCollection transformCollectiontoWSCollection(Collection collection, DataHandler dataHandler) throws RegistryException {
+        int childCount = 0;
         WSCollection wsCollection = (WSCollection) transformResourceToWSResource(collection, dataHandler);
         wsCollection.setCollection(true);
-        //         wsCollection.setChildCount(collection.getChildCount());
+        childCount = collection.getChildCount();
+        wsCollection.setChildCount(childCount);
+        if (childCount > 0) {
+            wsCollection.setChildren(collection.getChildren());
+        }
         return wsCollection;
-
     }
 
     public static WSResource transformResourceToWSResource(Resource resource, DataHandler dataHandler) {
