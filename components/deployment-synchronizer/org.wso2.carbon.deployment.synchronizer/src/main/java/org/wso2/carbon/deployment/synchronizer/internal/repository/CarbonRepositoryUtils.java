@@ -21,21 +21,20 @@ package org.wso2.carbon.deployment.synchronizer.internal.repository;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.util.JavaUtils;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.deployment.synchronizer.*;
+import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
+import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizationManager;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizer;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
+import org.wso2.carbon.deployment.synchronizer.internal.util.DeploymentSynchronizerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.internal.util.RepositoryConfigParameter;
 import org.wso2.carbon.deployment.synchronizer.internal.util.RepositoryReferenceHolder;
-import org.wso2.carbon.deployment.synchronizer.internal.util.DeploymentSynchronizerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.internal.util.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -68,7 +67,7 @@ public class CarbonRepositoryUtils {
                     config.getRepositoryType());
             artifactRepository.init(tenantId);
             DeploymentSynchronizer synchronizer = DeploymentSynchronizationManager.getInstance().
-                    createSynchronizer(artifactRepository, filePath);
+                    createSynchronizer(tenantId, artifactRepository, filePath);
             synchronizer.setAutoCommit(config.isAutoCommit());
             synchronizer.setAutoCheckout(config.isAutoCheckout());
             synchronizer.setPeriod(config.getPeriod());

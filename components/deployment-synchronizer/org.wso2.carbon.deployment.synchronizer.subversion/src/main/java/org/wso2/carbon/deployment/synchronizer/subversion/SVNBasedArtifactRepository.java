@@ -28,6 +28,7 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
+import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.internal.repository.CarbonRepositoryUtils;
 import org.wso2.carbon.deployment.synchronizer.internal.util.DeploymentSynchronizerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.internal.util.RepositoryConfigParameter;
@@ -38,7 +39,9 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Subversion based artifact repository can be used in conjunction with the
@@ -58,16 +61,13 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     private static final boolean RECURSIVE = true;
     private static final boolean NO_SET_DEPTH = false;
 
-    private SVNUrl svnUrl;
-    private ISVNClientAdapter svnClient;
-
-    private boolean ignoreExternals = true;
-    private boolean forceUpdate = true;
+    private Map<Integer, TenantSVNRepositoryContext> tenantSVNRepositories;
 
     private  List<RepositoryConfigParameter> parameters;
     private DeploymentSynchronizerConfiguration conf;
 
     public SVNBasedArtifactRepository(){
+        tenantSVNRepositories = new HashMap<Integer, TenantSVNRepositoryContext>();
         populateParameters();
     }
 
@@ -77,7 +77,9 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         conf = CarbonRepositoryUtils.getActiveSynchronizerConfiguration(tenantId);
 
         String url = null;
-        boolean appendTenantId = false;
+        boolean appendTenantId = true;
+        boolean ignoreExternals = false;
+        boolean forceUpdate = true;
         String user = null;
         String password = null;
 
@@ -115,6 +117,11 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
             url += tenantId;
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("Registering SVN URL: " + url + " for tenant: " + tenantId);
+        }
+
+        SVNUrl svnUrl = null;
         try {
             svnUrl = new SVNUrl(url);
         } catch (MalformedURLException e) {
@@ -130,7 +137,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
             }
         }
 
-        svnClient = SVNClientAdapterFactory.createSVNClient(clientType);
+        ISVNClientAdapter svnClient = SVNClientAdapterFactory.createSVNClient(clientType);
         if (user != null) {
             svnClient.setUsername(user);
             svnClient.setPassword(password);
@@ -141,7 +148,16 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         svnClient.setProgressListener(notifyListener);
         svnClient.addConflictResolutionCallback(new DefaultSVNConflictResolver());
 
-        checkRemoteDirectory();
+        TenantSVNRepositoryContext tenantRepositoryContext = new TenantSVNRepositoryContext();
+        tenantRepositoryContext.setSvnUrl(svnUrl);
+        tenantRepositoryContext.setSvnClient(svnClient);
+        tenantRepositoryContext.setConf(conf);
+        tenantRepositoryContext.setIgnoreExternals(ignoreExternals);
+        tenantRepositoryContext.setForceUpdate(forceUpdate);
+
+        tenantSVNRepositories.put(tenantId, tenantRepositoryContext);
+
+        checkRemoteDirectory(tenantId);
     }
 
     private void populateParameters(){
@@ -191,8 +207,18 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
      *
      * @throws DeploymentSynchronizerException If an error occurs while creating the directory
      */
-    private void checkRemoteDirectory() throws DeploymentSynchronizerException {
+    private void checkRemoteDirectory(int tenantId) throws DeploymentSynchronizerException {
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return;
+        }
+
+        SVNUrl svnUrl = repoContext.getSvnUrl();
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+
         try {
+
             ISVNInfo info = svnClient.getInfo(svnUrl);
             if (info != null && log.isDebugEnabled()) {
                 log.debug("Remote directory: " + svnUrl + " exists");
@@ -211,10 +237,18 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         }
     }
 
-    private void svnAddFiles(File root) throws SVNClientException {
+    private void svnAddFiles(int tenantId, File root) throws SVNClientException {
         if (log.isDebugEnabled()) {
             log.debug("SVN adding files in " + root);
         }
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return;
+        }
+
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+
         ISVNStatus[] status = svnClient.getStatus(root, true, false);
         for (ISVNStatus s : status) {
             if (s.getTextStatus().toInt() == UNVERSIONED) {
@@ -242,22 +276,30 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                     });
 
                     for (File child : children) {
-                        svnAddFiles(child);
+                        svnAddFiles(tenantId, child);
                     }
                 }
             }
         }
     }
 
-    public boolean commit(String filePath) throws DeploymentSynchronizerException {
+    public boolean commit(int tenantId, String filePath) throws DeploymentSynchronizerException {
         if (log.isDebugEnabled()) {
             log.debug("SVN committing " + filePath);
         }
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return false;
+        }
+
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+
         File root = new File(filePath);
         try {
             svnClient.cleanup(root);
-            svnAddFiles(root);
-            cleanupDeletedFiles(root);
+            svnAddFiles(tenantId, root);
+            cleanupDeletedFiles(tenantId, root);
             ISVNStatus[] status = svnClient.getStatus(root, true, false);
             if (status != null && status.length > 0 && !isAllUnversioned(status)) {
                 File[] files = new File[] { root };
@@ -281,14 +323,26 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         return true;
     }
 
-    public boolean checkout(String filePath) throws DeploymentSynchronizerException {
+    public boolean checkout(int tenantId, String filePath) throws DeploymentSynchronizerException {
         if (log.isDebugEnabled()) {
             log.debug("SVN checking out " + filePath);
         }
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return false;
+        }
+
+        SVNUrl svnUrl = repoContext.getSvnUrl();
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+        DeploymentSynchronizerConfiguration conf = repoContext.getConf();
+        boolean ignoreExternals = repoContext.isIgnoreExternals();
+        boolean forceUpdate = repoContext.isForceUpdate();
+
         File root = new File(filePath);
         try {
             if (conf.isAutoCommit()) {
-                cleanupDeletedFiles(root);
+                cleanupDeletedFiles(tenantId, root);
             }
             ISVNStatus status = svnClient.getSingleStatus(root);
             if (CarbonUtils.isWorkerNode()) {
@@ -300,7 +354,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                 }
             }
             if (status != null && status.getTextStatus().toInt() == UNVERSIONED) {
-                cleanupUnversionedFiles(this.svnUrl,root);
+                cleanupUnversionedFiles(tenantId, svnUrl, root);
                 if (svnClient instanceof CmdLineClientAdapter) {
                     // CmdLineClientAdapter does not support all the options
                     svnClient.checkout(svnUrl, root, SVNRevision.HEAD, RECURSIVE);
@@ -346,7 +400,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                                 Thread.sleep(5000);
                             } catch (InterruptedException ignored) {
                             }
-                            cleanupUnversionedFiles(this.svnUrl,root);
+                            cleanupUnversionedFiles(tenantId, svnUrl,root);
                         } else {
                             throw e;
                         }
@@ -361,7 +415,16 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         return false;
     }
 
-    private void cleanupUnversionedFiles(SVNUrl svnURL,  File root) throws SVNClientException {
+    private void cleanupUnversionedFiles(int tenantId, SVNUrl svnURL,  File root) throws SVNClientException {
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return;
+        }
+
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+        DeploymentSynchronizerConfiguration conf = repoContext.getConf();
+
         ISVNDirEntry[] entries = svnClient.getList(svnURL, SVNRevision.HEAD, false);
         for (ISVNDirEntry entry : entries) {
             String fileName = entry.getPath();
@@ -372,7 +435,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                 if (status != null && status.getTextStatus().toInt() != UNVERSIONED) {
                     if (localFile.isDirectory()) { // see whether there are unversioned files under this dir. Recursive
                         String appendPath = "/" + localFile.getName();
-                        cleanupUnversionedFiles(svnURL.appendPath(appendPath), localFile);
+                        cleanupUnversionedFiles(tenantId, svnURL.appendPath(appendPath), localFile);
                         continue; // this is not an unversioned directory, continue
                     } else if (localFile.isFile()) {
                         continue;
@@ -404,7 +467,15 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
      * @param root Root directory of the local working copy
      * @throws SVNClientException If an error occurs in the SVN client
      */
-    private void cleanupDeletedFiles(File root) throws SVNClientException {
+    private void cleanupDeletedFiles(int tenantId, File root) throws SVNClientException {
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return;
+        }
+
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+
         ISVNStatus[] status = svnClient.getStatus(root, true, false);
         if (status != null) {
             List<File> deletableFiles = new ArrayList<File>();
@@ -440,17 +511,29 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         return parameters;
     }
 
-    public boolean checkout(String filePath, int depth)
+    public boolean checkout(int tenantId, String filePath, int depth)
             throws DeploymentSynchronizerException {
         log.info("SVN checking out " + filePath);
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return false;
+        }
+
+        SVNUrl svnUrl = repoContext.getSvnUrl();
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+        DeploymentSynchronizerConfiguration conf = repoContext.getConf();
+        boolean ignoreExternals = repoContext.isIgnoreExternals();
+        boolean forceUpdate = repoContext.isForceUpdate();
+
         File root = new File(filePath);
         try {
             if (conf.isAutoCommit()) {
-                cleanupDeletedFiles(root);
+                cleanupDeletedFiles(tenantId, root);
             }
             ISVNStatus status = svnClient.getSingleStatus(root);
             if (status != null && status.getTextStatus().toInt() == UNVERSIONED) {
-                cleanupUnversionedFiles(this.svnUrl, root);
+                cleanupUnversionedFiles(tenantId, svnUrl, root);
                 if (svnClient instanceof CmdLineClientAdapter) {
                     // CmdLineClientAdapter does not support all the options
                     svnClient.checkout(svnUrl, root, SVNRevision.HEAD, RECURSIVE);
@@ -488,7 +571,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                                 Thread.sleep(5000);
                             } catch (InterruptedException ignored) {
                             }
-                            cleanupUnversionedFiles(this.svnUrl, root);
+                            cleanupUnversionedFiles(tenantId, svnUrl, root);
                         } else {
                             throw e;
                         }
@@ -503,8 +586,19 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         return false;
     }
 
-    public boolean update(String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
+    public boolean update(int tenantId, String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
         log.info("SVN updating " + filePath);
+
+        TenantSVNRepositoryContext repoContext= tenantSVNRepositories.get(tenantId);
+        if (repoContext == null ) {
+            log.warn("TenantSVNRepositoryContext not initialized for " + tenantId);
+            return false;
+        }
+        SVNUrl svnUrl = repoContext.getSvnUrl();
+        ISVNClientAdapter svnClient = repoContext.getSvnClient();
+        boolean ignoreExternals = repoContext.isIgnoreExternals();
+        boolean forceUpdate = repoContext.isForceUpdate();
+
         File root = new File(rootPath);
         boolean setDepth = false;
         if (depth == Depth.infinity) {
@@ -545,7 +639,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                             Thread.sleep(5000);
                         } catch (InterruptedException ignored) {
                         }
-                        cleanupUnversionedFiles(this.svnUrl, root);
+                        cleanupUnversionedFiles(tenantId, svnUrl, root);
                     } else {
                         throw e;
                     }
@@ -559,6 +653,10 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         return false;
     }
 
+    @Override
+    public void cleanupTenantContext(int tenantId) {
+        tenantSVNRepositories.remove(tenantId);
+    }
 
     @Override
     public boolean equals(Object o) {

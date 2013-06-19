@@ -102,7 +102,7 @@ public class RegistryBasedArtifactRepository implements ArtifactRepository {
             return DeploymentSynchronizerConstants.TENANT_REGISTRY_PATH;
         }
     }
-    public boolean commit(String filePath) throws DeploymentSynchronizerException {
+    public boolean commit(int tenantId, String filePath) throws DeploymentSynchronizerException {
         if (log.isDebugEnabled()) {
             log.debug("Committing artifacts at " + filePath + " to the collection at " +
                     registryPath);
@@ -117,7 +117,7 @@ public class RegistryBasedArtifactRepository implements ArtifactRepository {
         return false;
     }
 
-    public boolean checkout(String filePath) throws DeploymentSynchronizerException {
+    public boolean checkout(int tenantId, String filePath) throws DeploymentSynchronizerException {
         if (log.isDebugEnabled()) {
             log.debug("Checking out artifacts from " + registryPath + " to the file system " +
                     "at " + filePath);
@@ -176,14 +176,19 @@ public class RegistryBasedArtifactRepository implements ArtifactRepository {
     }
 
     @Override
-    public boolean checkout(String filePath, int depth)
+    public boolean checkout(int tenantId, String filePath, int depth)
             throws DeploymentSynchronizerException {
         throw new DeploymentSynchronizerException("Not implemented yet.");
     }
 
     @Override
-    public boolean update(String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
+    public boolean update(int tenantId, String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
         throw new DeploymentSynchronizerException("Not implemented yet.");
+    }
+
+    @Override
+    public void cleanupTenantContext(int tenantId) {
+        //nothing to do yet. TODO implement reg based tenant contexts
     }
 
     @Override

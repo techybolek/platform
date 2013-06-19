@@ -40,20 +40,22 @@ public interface ArtifactRepository {
     /**
      * Commit the artifacts in the local repository to the remote repository
      *
+     * @param tenantId tenant Id
      * @param filePath File path of the local repository
      * @throws DeploymentSynchronizerException on error
      * @return true if file changes were committed, false otherwise
      */
-    public boolean commit(String filePath) throws DeploymentSynchronizerException;
+    public boolean commit(int tenantId, String filePath) throws DeploymentSynchronizerException;
 
     /**
      * Checkout all or updated artifacts from the remote repository to the local file system
      *
+     * @param tenantId tenant Id
      * @param filePath File path of the local repository
      * @throws DeploymentSynchronizerException on error
      * @return true if files were checked out or updated, false otherwise
      */
-    public boolean checkout(String filePath) throws DeploymentSynchronizerException;
+    public boolean checkout(int tenantId, String filePath) throws DeploymentSynchronizerException;
 
     /**
      * Setup the remote repository for auto checkouts
@@ -83,22 +85,31 @@ public interface ArtifactRepository {
     /**
      * Checkout artifacts from the remote repository with given depth to the local file system
      *
+     * @param tenantId tenant Id
      * @param filePath File path of the local repository
      * @param depth - given depth to get the update
      * @return true if files were checked out or updated, false otherwise
      * @throws DeploymentSynchronizerException on error
      */
 
-    public boolean checkout(String filePath, int depth) throws DeploymentSynchronizerException;
+    public boolean checkout(int tenantId, String filePath, int depth) throws DeploymentSynchronizerException;
 
     /**
      * Invoke the update operation on the specified file in the repository, with given depth
      *
+     * @param tenantId tenant Id
      * @param rootPath - root path of the repository of which the dep-sychronizer is registered
      * @param filePathToUpdate - location of the file in the repository
      * @param depth Depth given to update, (eg 0 - empty, 3 - infinite)
      * @return true if files were updated, false otherwise
      * @throws DeploymentSynchronizerException on error
      */
-    public boolean update(String rootPath, String filePathToUpdate, int depth) throws DeploymentSynchronizerException;
+    public boolean update(int tenantId, String rootPath, String filePathToUpdate, int depth) throws DeploymentSynchronizerException;
+
+    /**
+     * Cleanup the cached tenant context for the tenant specified by tenantId
+     *
+     * @param tenantId tenant Id
+     */
+    public void cleanupTenantContext(int tenantId);
 }

@@ -40,4 +40,23 @@ public class GitDeploymentSynchronizerConstants {
     public static final String USERNAME_REGEX = "username:(.*?),";
     public static final String PASSWORD_REGEX = "password:(.*?)}";
 
+    //Configuration parameter names read from carbon.xml
+    public static final String DEPLOYMENT_METHOD = DEPLOYMENT_SYNCHRONIZER + ".StandardDeployment";
+    public static final String GIT_REPO_BASE_URL = DEPLOYMENT_SYNCHRONIZER + ".GitBaseUrl";
+    public static final String GIT_USERNAME = DEPLOYMENT_SYNCHRONIZER + ".GitUserName";
+    public static final String GIT_PASSWORD = DEPLOYMENT_SYNCHRONIZER + ".GitPassword";
+
+    //Git based constants
+    public static final String GIT_REFS_HEADS_MASTER = "refs/heads/master";
+    public static final String GIT_REFS_HEADS = "refs/heads/";
+    public static final String GIT_MASTER = "master";
+    public static final String GIT_ORIGIN = "origin";
+    public static final String GIT_REMOTE = "remote";
+    public static final String GIT_BRANCH = "branch";
+    public static final String GIT_MERGE = "merge";
+
+    //Gitblit based constants
+    public static final String GITBLIT_ADMIN_USERNAME = "admin";
+    public static final String GITBLIT_ADMIN_PASAWORD = "admin";
+
 }

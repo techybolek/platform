@@ -112,7 +112,7 @@ public final class DeploymentSynchronizationManager {
      * @param filePath File path in the local file system
      * @return a DeploymentSynchronizer instance
      */
-    public DeploymentSynchronizer createSynchronizer(ArtifactRepository artifactRepository,
+    public DeploymentSynchronizer createSynchronizer(int tenantId, ArtifactRepository artifactRepository,
                                                     String filePath) {
 
         // We synchronize based on filePath.intern() to make sure that two threads don't
@@ -128,7 +128,7 @@ public final class DeploymentSynchronizationManager {
                 }
             }
 
-            DeploymentSynchronizer synchronizer = new DeploymentSynchronizer(artifactRepository,
+            DeploymentSynchronizer synchronizer = new DeploymentSynchronizer(tenantId, artifactRepository,
                     filePath);
             synchronizers.put(filePath, synchronizer);
             return synchronizer;

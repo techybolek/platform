@@ -44,6 +44,12 @@ public class DeploymentSynchronizer {
     private static final Log log = LogFactory.getLog(DeploymentSynchronizer.class);
 
     /**
+     * DeploymentSynchronizer objects are created per-tenant
+     *
+     */
+    private int tenantId;
+
+    /**
      * Location in the file system where the repository is located
      */
     private String filePath;
@@ -83,7 +89,8 @@ public class DeploymentSynchronizer {
 
     private long period = DeploymentSynchronizerConstants.DEFAULT_AUTO_SYNC_PERIOD;
 
-    DeploymentSynchronizer(ArtifactRepository artifactRepository, String filePath) {
+    DeploymentSynchronizer(int tenantId, ArtifactRepository artifactRepository, String filePath) {
+        this.tenantId = tenantId;
         this.artifactRepository = artifactRepository;
         this.filePath = filePath;
     }
@@ -135,7 +142,7 @@ public class DeploymentSynchronizer {
         if (log.isDebugEnabled()) {
             log.debug("Started commit from " + filePath);
         }
-        boolean result = artifactRepository.commit(filePath);
+        boolean result = artifactRepository.commit(tenantId, filePath);
         lastCommitTime = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
             log.debug("Commit completed at " + new Date(lastCommitTime) + ". Status: " + result);
@@ -152,7 +159,7 @@ public class DeploymentSynchronizer {
         if (log.isDebugEnabled()) {
             log.debug("Started commit from " + filePath);
         }
-        boolean result = artifactRepository.commit(filePath);
+        boolean result = artifactRepository.commit(tenantId, filePath);
         lastCommitTime = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
             log.debug("Commit completed at " + new Date(lastCommitTime) + ". Status: " + result);
@@ -171,7 +178,7 @@ public class DeploymentSynchronizer {
         if (log.isDebugEnabled()) {
             log.debug("Started checkout to " + filePath);
         }
-        boolean result = artifactRepository.checkout(filePath);
+        boolean result = artifactRepository.checkout(tenantId, filePath);
         lastCheckoutTime = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
             log.debug("Checkout completed at " + new Date(lastCheckoutTime) + ". Status: " + result);
@@ -189,7 +196,7 @@ public class DeploymentSynchronizer {
         if (log.isDebugEnabled()) {
             log.debug("Started checkout to " + filePath + " with depth: " + depth);
         }
-        boolean result = artifactRepository.checkout(filePath, depth);
+        boolean result = artifactRepository.checkout(tenantId, filePath, depth);
         lastCheckoutTime = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
             log.debug("Checkout completed at " + new Date(lastCheckoutTime) + ". Status: " + result);
@@ -207,7 +214,7 @@ public class DeploymentSynchronizer {
         if (log.isDebugEnabled()) {
             log.debug("Started to update " + filePath);
         }
-        boolean result = artifactRepository.update(rootPath, filePath, depth);
+        boolean result = artifactRepository.update(tenantId, rootPath, filePath, depth);
         lastCheckoutTime = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
             log.debug("Update completed at " + new Date(lastCheckoutTime) + ". Status: " + result);
