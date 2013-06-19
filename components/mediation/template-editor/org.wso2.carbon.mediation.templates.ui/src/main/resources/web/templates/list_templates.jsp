@@ -562,7 +562,7 @@
                     <th>
                         <fmt:message key="sequence.name"/>
                     </th>
-                    <th style="width:200px" colspan="2">
+                    <th class="registryWriteOperation" style="width:200px" colspan="2">
                         <fmt:message key="sequence.actions"/>
                     </th>
                 </tr>
@@ -573,14 +573,14 @@
                 <td style="width:200px">
                     <%= sequence.getName() %>
                 </td>
-                <td style="border-right:none;width:100px">
+                <td class="registryWriteOperation" style="border-right:none;width:100px">
                     <div class="inlineDiv">
                         <a href="#" onclick="editRegistrySequence('<%= sequence.getName() %>')" class="icon-link"
                            style="background-image:url(../admin/images/edit.gif);"><fmt:message
                                 key="sequence.edit.action"/></a>
                     </div>
                 </td>
-                <td style="border-left:none;width:100px">
+                <td class="registryWriteOperation" style="border-left:none;width:100px">
                     <div class="inlineDiv">
                         <a href="#" onclick="deleteRegistrySequence('<%= sequence.getName() %>')" class="icon-link"
                            style="background-image:url(../admin/images/delete.gif);"><fmt:message
@@ -738,7 +738,7 @@
                 <th>
                     <fmt:message key="endpoint.description"/>
                 </th>
-                <th colspan="4">
+                <th class="registryWriteOperation" colspan="4">
                     <fmt:message key="endpoint.actions"/>
                 </th>
             </tr>
@@ -753,7 +753,7 @@
                     <%= endpoint.getDescription() != null ? endpoint.getDescription() : "" %>
                 </td>
 
-                <td style="border-left:none;border-right:none;width:100px">
+                <td class="registryWriteOperation" style="border-left:none;border-right:none;width:100px">
                     <div class="inlineDiv">
                         <a href="#" onclick="editRegistryEndpoint('<%= endpoint.getTemplateName() %>','<%= endpoint.getEndpointType() %>','<%= endpoint.getParamColelctionString() %>')"
                            class="icon-link"
@@ -761,7 +761,7 @@
                                 key="endpoint.edit.action"/></a>
                     </div>
                 </td>
-                <td style="border-left:none;width:100px">
+                <td class="registryWriteOperation" style="border-left:none;width:100px">
                     <div class="inlineDiv">
                         <a href="#" onclick="deleteRegistryEndpoint('<%= endpoint.getTemplateName() %>','<%= endpoint.getEndpointType() %>')"
                            class="icon-link"
