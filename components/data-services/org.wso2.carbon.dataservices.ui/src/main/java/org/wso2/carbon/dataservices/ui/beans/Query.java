@@ -462,7 +462,7 @@ public class Query extends DataServiceConfigurationElement {
 		if (this.getResult() != null
 				&& (this.getResult().getAttributes().size() > 0
 						|| this.getResult().getElements().size() > 0 || this.getResult()
-						.getCallQueryGroups().size() > 0)) {
+						.getCallQueryGroups().size() > 0) || this.getResult().getComplexElements().size() > 0) {
 			queryEl.addChild(this.getResult().buildXML());
 		}
 		if (this.getParams() != null) {
