@@ -68,8 +68,9 @@
             // special characters. Therefore, it is a valid name
             validName = true;
         }
-    } catch(IllegalStateException e) {
+    } catch(Exception e) {
         validName=false;
+        invalidCharInName = true;
     }
 
     if (validName && !invalidCharInName) {
@@ -131,6 +132,9 @@
         forwardTo = "source.jsp?header=" + header;
         CarbonUIMessage.sendCarbonUIMessage(bundle.getString("invalid.name"),
                 CarbonUIMessage.ERROR, request);
+    } else if(!validName && ((param = request.getParameter("return")) != null)) {
+        // forward to design page and this does not require validation
+        forwardTo = param + "?header=" + header + "&ordinal=1";
     }
 %>
 
