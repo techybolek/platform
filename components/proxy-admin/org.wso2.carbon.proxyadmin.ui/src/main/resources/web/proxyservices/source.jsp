@@ -68,7 +68,10 @@
             }
         } else if ((source = (String)session.getAttribute("proxyXML")) != null && !"".equals(source)){
             // this means that we came here from sourceToData causing an exception
-            source = prettyPrint(source);
+            String ppSource = prettyPrint(source);
+            if(ppSource.length() > 0) {
+                source = ppSource;
+            }
             // removes the session attribute of proxyXML
             session.removeAttribute("proxyXML");
         }
