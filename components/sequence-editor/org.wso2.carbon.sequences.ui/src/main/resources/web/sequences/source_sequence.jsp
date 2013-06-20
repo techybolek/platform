@@ -21,6 +21,7 @@
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <script src="../editarea/edit_area_full.js" type="text/javascript"></script>
@@ -65,6 +66,8 @@
             sequenceXML = SequenceEditorHelper.parseSequenceToPrettyfiedString(
                     SequenceEditorHelper.getEditingSequence(session));
         }
+
+        sequenceXML =  StringEscapeUtils.escapeXml(sequenceXML);
     } catch (Exception e) {
         session.setAttribute("sequence.error2.message", "" + e.getMessage());
 %>
