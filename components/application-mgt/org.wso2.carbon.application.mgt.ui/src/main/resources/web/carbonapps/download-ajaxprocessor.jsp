@@ -28,7 +28,10 @@
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-
+    if (cookie == null) {
+        response.sendRedirect("/carbon/admin/login.jsp");
+        return;
+    }
     ApplicationAdminClient client =
             new ApplicationAdminClient(cookie, backendServerURL, configContext, request.getLocale());
 

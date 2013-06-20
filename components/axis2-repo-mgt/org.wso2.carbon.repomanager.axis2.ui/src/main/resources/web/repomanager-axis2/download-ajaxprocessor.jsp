@@ -20,6 +20,10 @@
 
 <%
     String cookie = (String) session.getAttribute(org.wso2.carbon.utils.ServerConstants.ADMIN_SERVICE_COOKIE);
+    if (cookie == null) {
+        response.sendRedirect("/carbon/admin/login.jsp");
+        return;
+    }
     Axis2RepoManagerClient axis2repoManagerClient = new Axis2RepoManagerClient(cookie, config, session);
 
     String filePath = request.getParameter("filepath");

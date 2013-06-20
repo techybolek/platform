@@ -29,10 +29,14 @@
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-    if (cookie == null && !CarbonUtils.isRunningOnLocalTransportMode())
-       {
-             %><jsp:forward page="index.jsp" /><%
-       }
+    if (cookie == null) {
+        response.sendRedirect("/carbon/admin/login.jsp");
+        return;
+    }
+    if (!CarbonUtils.isRunningOnLocalTransportMode())
+    {
+       %><jsp:forward page="index.jsp" /><%
+    }
 
     ServiceAdminClient client;
     String serviceGroupName = request.getParameter("serviceName");
