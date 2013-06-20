@@ -101,7 +101,6 @@
 				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.social.feature:${carbon.version}</featureArtifactDef>
 				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.gadget.editor.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.gadget.editor.ui.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.platform.extensions.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.lifecycle.management.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.metadata.feature:${carbon.version}</featureArtifactDef>
@@ -131,6 +130,7 @@
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.humantask.server.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature:${carbon.version}</featureArtifactDef>
 				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.attachment.mgt.feature:${carbon.version}</featureArtifactDef>
+                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.platform.extensions.feature:${carbon.version}</featureArtifactDef>
 
                                 <!-- Features related to Cloud governance -->
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.server.feature:${carbon.version}</featureArtifactDef>
@@ -259,11 +259,6 @@
                                     <version>${carbon.version}</version>
                                 </feature>
 
-                                <feature>
-                                    <id>org.wso2.carbon.governance.platform.extensions.feature.group</id>
-                                    <version>${carbon.version}</version>
-                                </feature>
-
          	                <feature>
                                     <id>org.wso2.carbon.gadget.editor.feature.group</id>
                                     <version>${carbon.version}</version>
@@ -319,6 +314,11 @@
 
                                 <feature>
                                     <id>org.wso2.carbon.registry.resource.properties.feature.group</id>
+                                    <version>${carbon.version}</version>
+                                </feature>
+ 
+                                <feature>
+                                    <id>org.wso2.carbon.governance.platform.extensions.feature.group</id>
                                     <version>${carbon.version}</version>
                                 </feature>
 
