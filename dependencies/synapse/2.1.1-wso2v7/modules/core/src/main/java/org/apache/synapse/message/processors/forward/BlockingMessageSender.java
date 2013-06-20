@@ -17,6 +17,8 @@
 */
 package org.apache.synapse.message.processors.forward;
 
+import java.util.Iterator;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAP12Constants;
@@ -47,23 +49,18 @@ import java.util.Map;
 
 
 public class BlockingMessageSender {
-
-    private MessageStoreServiceClient sc = null;
-
-
     public final static String DEFAULT_CLIENT_REPO = "./samples/axis2Client/client_repo";
     public final static String DEFAULT_AXIS2_XML = "./samples/axis2Client/client_repo/conf/axis2.xml";
-
-
-    private String clientRepository = null;
-    private String axis2xml = null;
+    public final static String TARGET_MESSAGE_TYPE = "target.messageType";
 
     private static Log log = LogFactory.getLog(BlockingMessageSender.class);
-
+    private String clientRepository = null;
+    private String axis2xml = null;
     private ConfigurationContext configurationContext = null;
+    private MessageStoreServiceClient sc = null;
 
     public void init() {
-         try {
+        try {
             configurationContext
                     = ConfigurationContextFactory.createConfigurationContextFromFileSystem(
                     clientRepository != null ? clientRepository : DEFAULT_CLIENT_REPO,
@@ -78,24 +75,17 @@ public class BlockingMessageSender {
 
     public MessageContext send(EndpointDefinition endpoint, MessageContext messageIn)
             throws Exception {
-
         String serviceUrl = endpoint.getAddress();
-
         if(log.isDebugEnabled()) {
             log.debug("Start Sending the Message ");
         }
-
         try {
-
             MessageContext messageOut = MessageHelper.cloneMessageContext(messageIn);
             Options options = new Options();
             options.setTo(new EndpointReference(serviceUrl));
-            if(messageIn.getSoapAction() != null) {
-
+            if (messageIn.getSoapAction() != null) {
                 options.setAction(messageIn.getSoapAction());
-
             } else {
-
                 if (messageIn.isSOAP11()) {
                     options.setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, true);
                 } else {
@@ -105,29 +95,24 @@ public class BlockingMessageSender {
                     axis2MessageCtx.getTransportOut().addParameter(
                             new Parameter(HTTPConstants.OMIT_SOAP_12_ACTION, true));
                 }
-
             }
-
             //After setting all the options we need to find the MEP of the Message
             org.apache.axis2.context.MessageContext axis2Ctx =
                     ((Axis2MessageContext) messageOut).getAxis2MessageContext();
 
             boolean outOnlyMessage = isOutOnly(messageIn, axis2Ctx);
-
             // Here We consider all other Messages that evaluates to outOnlyMessage == false
             // follows out in mep.
             if (log.isDebugEnabled()) {
                 log.debug("Invoking service Url " + serviceUrl + " with Message" +
                         messageIn.getMessageID());
             }
-
             options.setProperty(
                     AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, Boolean.TRUE);
 
             //clean existing headers
             // otherwise when retrying same header element will add multiple times
             sc.removeHeaders();
-
             Iterator itr = axis2Ctx.getEnvelope().getHeader().getChildren();
             while (itr.hasNext()) {
                 Object o =itr.next();
@@ -135,14 +120,11 @@ public class BlockingMessageSender {
                     sc.addHeader((OMElement)o);
                 }
             }
-
             if (endpoint.isUseMTOM()) {
                 options.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
             } else if (endpoint.isUseSwa()) {
                 options.setProperty(Constants.Configuration.ENABLE_SWA, Constants.VALUE_TRUE);
             }
-
-
             if(endpoint.isForcePOX()){
             	axis2Ctx.setDoingREST(true);
             }
@@ -150,34 +132,50 @@ public class BlockingMessageSender {
             //Set whether to retry on SOAPFault
             options.setExceptionToBeThrownOnSOAPFault("true".equals(messageIn.getProperty(SynapseConstants.RETRY_ON_SOAPFAULT)));
 
+            // Disable throwing a AxisFault on SOAPFault
+            // options.setExceptionToBeThrownOnSOAPFault(false);  TODO: implement this properly
             sc.setOptions(options);
             OMElement result = null;
+            boolean isDoingJSON = false;
             try {
-                OMElement payload = axis2Ctx.getEnvelope().getBody().getFirstElement();
-                if(outOnlyMessage) {
-                	 sc.sendRobust(payload,axis2Ctx);
+                OMElement payload = axis2Ctx.getEnvelope().getBody();
+                if (outOnlyMessage) {
+                    sc.sendRobust(payload, axis2Ctx, endpoint, messageIn);
                 } else {
-                    result = sc.sendReceive(payload);
+                    org.apache.axis2.context.MessageContext resultMc
+                            = sc.sendReceive(payload, axis2Ctx, endpoint, messageIn);
+                    result = resultMc.getEnvelope().getBody();
+                    isDoingJSON = sc.isDoingJSON(resultMc);
                 }
-
             } catch (Exception axisFault) {
-
                 // Here if Message is not a Out only Message
                 // To indicate that it is a Error we set a new Message Context property
                 // and return the message context
                 // If its not we throw an Exception
                 if (!outOnlyMessage) {
-                    messageOut.setProperty(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR,
-                            "true");
-
+                    messageOut.setProperty(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR, "true");
+                    if (axisFault instanceof AxisFault) {
+                        AxisFault fault = (AxisFault) axisFault;
+                        messageOut.setProperty(SynapseConstants.ERROR_CODE,
+                                               fault.getFaultCode() != null ?
+                                               fault.getFaultCode().getLocalPart() : "");
+                        messageOut.setProperty(SynapseConstants.ERROR_MESSAGE, fault.getMessage());
+                        messageOut.setProperty(SynapseConstants.ERROR_DETAIL,
+                                               fault.getDetail() != null ?
+                                               fault.getDetail().getText() : "");
+                        messageOut.setProperty(SynapseConstants.ERROR_EXCEPTION, axisFault);
+                        org.apache.axis2.context.MessageContext faultMC = fault.getFaultMessageContext();
+                        if (faultMC != null) {
+                            messageOut.setProperty(NhttpConstants.HTTP_SC,
+                                                   faultMC.getProperty("transport.http.statusCode"));
+                            messageOut.setEnvelope(faultMC.getEnvelope());
+                        }
+                    }
                     return messageOut;
                 }
-
-                log.error("Error sending Message to url : " + serviceUrl ,axisFault);
-                throw new Exception("Error while Sending Message" , axisFault);
-
+                log.error("Error sending Message to url : " + serviceUrl, axisFault);
+                throw new Exception("Error while Sending Message", axisFault);
             }
-
             if(!outOnlyMessage) {
                     if(result != null) {
 					Map<String, org.apache.axis2.context.MessageContext> outMessageContexts = sc.getServiceContext()
@@ -189,7 +187,7 @@ public class BlockingMessageSender {
 							messageOut.setProperty(NhttpConstants.HTTP_SC,
 							                       outmc.getProperty("transport.http.statusCode"));
 							String soapNamespaceURI = axis2Ctx.getEnvelope().getNamespace().getNamespaceURI();
-							SOAPEnvelope envelope = createSOAPEnvelope(result, soapNamespaceURI);
+							SOAPEnvelope envelope = createSOAPEnvelope(result, soapNamespaceURI, isDoingJSON);
 							axis2Ctx.setEnvelope(envelope);
 							return messageOut;
 						}
@@ -204,21 +202,16 @@ public class BlockingMessageSender {
         return null;
     }
 
-    private boolean isOutOnly(MessageContext messageIn, 
+    private boolean isOutOnly(MessageContext messageIn,
                               org.apache.axis2.context.MessageContext axis2Ctx) {
-        
-        
-        if ( "true".equals(messageIn.getProperty(
-                                            SynapseConstants.OUT_ONLY))){
+        if ("true".equals(messageIn.getProperty(SynapseConstants.OUT_ONLY))) {
             return true;
         }
-        
-        if ( axis2Ctx.getOperationContext() != null ){
-            return  WSDL2Constants.MEP_URI_IN_ONLY.equals(
-                                      axis2Ctx.getOperationContext()
-                                             .getAxisOperation().getMessageExchangePattern());
+        if (axis2Ctx.getOperationContext() != null) {
+            return WSDL2Constants.MEP_URI_IN_ONLY.equals(
+                    axis2Ctx.getOperationContext()
+                            .getAxisOperation().getMessageExchangePattern());
         }
-        
         return false;
     }
 
@@ -238,15 +231,23 @@ public class BlockingMessageSender {
         this.axis2xml = axis2xml;
     }
 
-    private SOAPEnvelope createSOAPEnvelope(OMElement payload , String soapNamespaceUri) {
-         SOAPFactory soapFactory = null;
-                if (soapNamespaceUri.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
-                    soapFactory = OMAbstractFactory.getSOAP12Factory();
-                } else {
-                    soapFactory = OMAbstractFactory.getSOAP11Factory();
-                }
+    private SOAPEnvelope createSOAPEnvelope(OMElement payload , String soapNamespaceUri, boolean isDoingJSON) {
+        SOAPFactory soapFactory;
+        if (soapNamespaceUri.equals(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
+            soapFactory = OMAbstractFactory.getSOAP12Factory();
+        } else {
+            soapFactory = OMAbstractFactory.getSOAP11Factory();
+        }
         SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-        envelope.getBody().addChild(payload);
+        if (isDoingJSON) {
+            Iterator<OMElement> elems = payload.getChildElements();
+            while (elems.hasNext()) {
+                OMElement elem = elems.next();
+                envelope.getBody().addChild(elem);
+            }
+        } else if (payload.getFirstElement() != null) {
+            envelope.getBody().addChild(payload.getFirstElement());
+        }
         return envelope;
     }
 }

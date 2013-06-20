@@ -78,12 +78,13 @@ public class ForwardingJob implements StatefulJob {
 
         // WE do not try to process if the processor is inactive or
         // there is no message store attached.
+        if(!processor.isActive() || messageStore == null) {
+            return;
+        }
 
         boolean errorStop = false;
         while (!errorStop) {
-            if(!processor.isActive() || messageStore == null) {
-                return;
-            }
+
             MessageContext messageContext = messageStore.peek();
             if (messageContext != null) {
 
