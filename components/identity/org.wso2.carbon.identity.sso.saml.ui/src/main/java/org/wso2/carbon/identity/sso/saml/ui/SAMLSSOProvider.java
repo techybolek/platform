@@ -281,6 +281,8 @@ public class SAMLSSOProvider extends HttpServlet {
         boolean isCustomLoginPage = false;
 		req.getSession().setAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING,
 				req.getQueryString());
+		req.getSession().setAttribute(SAMLSSOProviderConstants.DESTINATION,
+		        signInRespDTO.getDestination());
 		req.setAttribute(SAMLSSOProviderConstants.RELAY_STATE, relayState);
 		req.setAttribute(SAMLSSOProviderConstants.REQ_MSG_STR,
 				signInRespDTO.getRequestMessageString());
@@ -387,7 +389,7 @@ public class SAMLSSOProvider extends HttpServlet {
                 sendToReAuthenticate(req, resp, e.getMessage(), authnReqDTO.getLoginPageURL());
 
             }
-            authRespDTO = ssoServiceClient.processAuthentication(authnReqDTO, ssoTokenID);
+            authRespDTO = ssoServiceClient.processAuthentication(authnReqDTO, req.getSession().getId());
         }
 
         if (authRespDTO.isSessionEstablished()) { // authenticated
@@ -427,6 +429,9 @@ public class SAMLSSOProvider extends HttpServlet {
 		authnReqDTO.setQueryString((String) req
 				.getSession().getAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING));
 		req.getSession().removeAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING);
+		authnReqDTO.setDestination((String) req
+                .getSession().getAttribute(SAMLSSOProviderConstants.DESTINATION));
+		req.getSession().removeAttribute(SAMLSSOProviderConstants.DESTINATION);
 	}
 
 	/**
@@ -515,7 +520,7 @@ public class SAMLSSOProvider extends HttpServlet {
     private void handleRequestWithOpenIDLogin(HttpServletRequest req, HttpServletResponse resp,
                                               SAMLSSOReqValidationResponseDTO signInRespDTO, String relayState, String ssoTokenId)
             throws ServletException, IOException, IdentityException {
-        req.setAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING, req.getQueryString());
+        req.getSession().setAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING, req.getQueryString());
         req.setAttribute(SAMLSSOProviderConstants.RELAY_STATE, relayState);
         req.setAttribute(SAMLSSOProviderConstants.REQ_MSG_STR, signInRespDTO.getRequestMessageString());
         req.setAttribute(SAMLSSOProviderConstants.ISSUER, signInRespDTO.getIssuer());

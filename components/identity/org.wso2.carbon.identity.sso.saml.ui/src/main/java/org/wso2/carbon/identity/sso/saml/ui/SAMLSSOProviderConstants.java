@@ -34,6 +34,7 @@ public class SAMLSSOProviderConstants {
 	public static final String SUBJECT = "subject";
 	public static final String RP_SESSION_ID = "relyingPartySessionId";
 	public static final String REQ_MSG_STR = "requestMessageString";
+	public static final String DESTINATION = "destination";
 
 	public static final String RELAY_STATE = "RelayState";
 	public static final String AUTH_REQ_SAML_ASSRTN = "SAMLRequest";
