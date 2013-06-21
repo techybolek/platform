@@ -211,7 +211,7 @@
                 <inherited>false</inherited>
                 <executions>
                     <execution>
-                        <id>unpack-wso2carbon</id>
+                        <id>2-unpack-wso2carbon</id>
                         <phase>package</phase>
                         <goals>
                             <goal>unpack</goal>
@@ -251,13 +251,80 @@
 		</dependencies>
                 <executions>
                     <execution>
-                        <id>sign jars</id>
+                        <id>3-extract-docs-from-components</id>
                         <phase>package</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <target>
+                                <property name="tempdir" value="target/docs-temp"/>
+                                <mkdir dir="${tempdir}"/>
+                                <unzip dest="${tempdir}">
+                                    <fileset dir="target">
+                                        <include name="${project.artifactId}-${project.version}.zip"/>
+                                    </fileset>
+                                </unzip>
+                                <copy todir="target/wso2carbon-core-${carbon.kernel.version}/repository/components"
+                                      overwrite="true">
+                                    <fileset
+                                            dir="${tempdir}/${project.artifactId}-${project.version}/repository/components">
+                                    </fileset>
+                                </copy>
+                                <delete file="target/${project.artifactId}-${project.version}.zip"/>
+                                <delete dir="${tempdir}"/>
+                                <mkdir dir="${tempdir}"/>
+                                <unzip dest="${tempdir}">
+                                    <fileset
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components/plugins/">
+                                        <include name="*.ui*.jar"/>
+                                    </fileset>
+                                </unzip>
+                                <move todir="${tempdir}/web/" includeemptydirs="false">
+                                    <fileset dir="${tempdir}/web/">
+                                        <exclude name="**/yui/**"/>
+                                        <exclude name="**/ajax/**"/>
+                                        <exclude name="**/editarea/**"/>
+                                        <exclude name="**/codepress/**"/>
+                                        <exclude name="**/WEB-INF/**"/>
+                                        <include name="**/*.html"/>
+                                    </fileset>
+                                    <mapper type="glob" from="*.html" to="*.xml"/>
+                                </move>
+                                <mkdir dir="src/site/xdoc"/>
+                                <copy todir="src/site/xdoc" overwrite="false"
+                                      includeemptydirs="false">
+                                    <fileset dir="${tempdir}/web">
+                                        <exclude name="**/yui/**"/>
+                                        <exclude name="**/ajax/**"/>
+                                        <exclude name="**/WEB-INF/**"/>
+                                        <exclude name="**/*.html"/>
+                                        <exclude name="**/*.js"/>
+                                        <exclude name="**/*.jsp"/>
+                                        <exclude name="**/*.xsl"/>
+                                        <exclude name="*.*"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="src/site" overwrite="false" includeemptydirs="false">
+                                    <fileset dir="../../docs">
+                                        <exclude name="**/images/**/*.*"/>
+                                    </fileset>
+                                    <filterset>
+                                        <filter token="buildNumber" value="${buildNumber}"/>
+                                    </filterset>
+                                </copy>
+                                <copy todir="src/site" overwrite="false" includeemptydirs="false">
+                                    <fileset dir="../../docs">
+                                        <include name="**/images/**/*.*"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="target/site/" overwrite="false"
+                                      includeemptydirs="false">
+                                    <fileset dir="src/site/xdoc/">
+                                        <include name="**/images/**/*.*"/>
+                                    </fileset>
+                                </copy>
+
                                 <!-- Sign all the jars in the distribution -->
 				<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
 				<if>
