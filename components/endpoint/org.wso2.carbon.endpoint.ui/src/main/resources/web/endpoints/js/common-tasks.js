@@ -76,11 +76,12 @@ function directToSubmitDynamicEndpointPage() {
                     url: 'ajaxprocessors/submitDynamicEndpoint-ajaxprocessor.jsp',
                     data: 'registry=' + registry + '&regKey=' + key,
                     success: function(msg) {
-                        var index = msg.toString().trim().indexOf('<div>');
-                        if (msg.toString().trim().indexOf('<div>Error:') == index) {
-                            CARBON.showErrorDialog(msg.toString().trim().substring(index + 17));
+                        var msgString = trimStr(msg.toString())
+                        var index = msgString.indexOf('<div>');
+                        if (msgString.indexOf('<div>Error:') == index) {
+                            CARBON.showErrorDialog(msgString.substring(index + 17));
                         } else {
-                            location.href = msg.toString().trim().substring(index + 17);
+                            location.href = msgString.substring(index + 17);
                         }
                     }
                 });
@@ -116,11 +117,13 @@ function directToSubmitPage() {
                     url: 'ajaxprocessors/submitEndpoint-ajaxprocessor.jsp',
                     data: 'data=null',
                     success: function(msg) {
-                        var index = msg.toString().trim().indexOf('<div>');
-                        if (msg.toString().trim().indexOf('<div>Error:') == index) {
-                            CARBON.showErrorDialog(msg.toString().trim().substring(index + 17));
+                        var msgString = trimStr(msg.toString())
+                        var index = msgString.indexOf('<div>');
+
+                        if (msgString.indexOf('<div>Error:') == index) {
+                            CARBON.showErrorDialog(msgString.substring(index + 17));
                         } else {
-                            location.href = msg.toString().trim().substring(index + 17);
+                            location.href = msgString.substring(index + 17);
                         }
                     }
                 });
@@ -141,4 +144,7 @@ function showSaveAsForm(show, isFromTemplateEditor) {
     } else {
         formElem.style.display = "none"
     }
+}
+function trimStr(str) {
+    return str.replace(/^\s+|\s+$/g, '');
 }
