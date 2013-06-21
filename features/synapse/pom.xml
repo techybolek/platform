@@ -86,7 +86,7 @@
     </dependencyManagement>
 
     <properties>
-        <saxon.wso2.version>8.9.0.wso2v1</saxon.wso2.version>
+        <saxon.wso2.version>8.9.0.wso2v2</saxon.wso2.version>
         <quartz.wso2.version>2.1.1.wso2v1</quartz.wso2.version>
     </properties>
 

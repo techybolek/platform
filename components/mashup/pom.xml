@@ -349,7 +349,7 @@
         <jdom.version.mashup>1.0.0.wso2v1</jdom.version.mashup>
         <json.version.mashup>1.6.1.wso2v1</json.version.mashup>
         <webharvest.version.mashup>2.0.0.wso2v1</webharvest.version.mashup>
-        <saxon.version.mashup>8.9.0.wso2v1</saxon.version.mashup>
+        <saxon.version.mashup>8.9.0.wso2v2</saxon.version.mashup>
         <htmlcleaner.version.mashup>2.1.0.wso2v1</htmlcleaner.version.mashup>
         <jena.wso2.version>1.0.0.wso2v1</jena.wso2.version>
         <jdom.version>1.0.0.wso2v1</jdom.version>
