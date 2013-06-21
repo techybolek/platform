@@ -96,10 +96,10 @@
                    <td>
                            <%
                                String checked = "";
-                               if((format!= null) && (format!=""))
-                               {
-
-                                    checked = "checked";
+                               if((format!= null) && (format!="")) {
+                                   if (!(payloadFactoryMediator.isDynamic())) {
+                                       checked = "checked";
+                                   }
 
                                }
 
@@ -129,11 +129,12 @@
             <tr>
                             <td>
                                    <%
-                                  if((formatKey!= null) && (formatKey!=""))
-                                         {
+                                  if((formatKey!= null) && (formatKey!="")) {
+                                      if (payloadFactoryMediator.isDynamic()) {
+                                          checked = "checked";
+                                      }
 
-                                        checked = "checked";
-                                    }
+                                  }
 
                                     %>
 

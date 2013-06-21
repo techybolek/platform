@@ -23,6 +23,7 @@
     // payloadFactoryMediator.setFormat(request.getParameter("payloadFactory.format"));
     String option = request.getParameter("pfFormat");
     if ("inline".equals(option)) {
+        payloadFactoryMediator.setDynamic(false);
         payloadFactoryMediator.setFormat(request.getParameter("payloadFactory.format"));
 
     } else if ("registry".equals(option)) {
