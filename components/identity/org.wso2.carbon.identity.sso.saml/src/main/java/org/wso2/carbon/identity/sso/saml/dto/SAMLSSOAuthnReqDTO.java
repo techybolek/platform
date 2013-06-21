@@ -33,6 +33,7 @@ public class SAMLSSOAuthnReqDTO {
     private String rpSessionId;
     private String requestMessageString;
     private String queryString;
+    private String destination;
     private String[] requestedClaims;
     private String[] requestedAudiences;
     private boolean doSingleLogout;
@@ -239,4 +240,18 @@ public class SAMLSSOAuthnReqDTO {
 		this.doSignResponse = doSignResponse;
 	}
 
+	/**
+	 * @return the 'destination' attribute of the SAML request
+	 */
+	public String getDestination() {
+		return destination;
+	}
+
+	/**
+	 * @param destination
+	 *            Set the SAML request's 'destination' attribute
+	 */
+	public void setDestination(String destination) {
+		this.destination = destination;
+	}
  }

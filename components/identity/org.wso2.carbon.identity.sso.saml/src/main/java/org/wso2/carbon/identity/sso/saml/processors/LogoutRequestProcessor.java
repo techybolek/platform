@@ -26,8 +26,10 @@ import org.apache.commons.logging.LogFactory;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.core.NameID;
+import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.SAMLSSOServiceProviderDO;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
 import org.wso2.carbon.identity.sso.saml.builders.SingleLogoutMessageBuilder;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOReqValidationResponseDTO;
@@ -106,15 +108,33 @@ public class LogoutRequestProcessor {
 						.getServiceProviderList();
 				SAMLSSOServiceProviderDO logoutReqIssuer = sessionsList.get(issuer);
 
-				// validate the signature, if it is set.
 				if (logoutReqIssuer.getCertAlias() != null) {
-					boolean isSignatureValid = SAMLSSOUtil.validateLogoutRequestSignature(
-							logoutRequest, logoutReqIssuer.getCertAlias(), subject, queryString);
-					if (!isSignatureValid) {
-						String message = "The signature contained in the Assertion is not valid.";
+
+					// Validate 'Destination'
+					String idpUrl = IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_IDP_URL);
+
+					if (logoutRequest.getDestination() == null ||
+					    !idpUrl.equals(logoutRequest.getDestination())) {
+						String message = "Destination validation for Logout Request failed. " +
+						                         "Received: [" + logoutRequest.getDestination() +
+						                         "]." + " Expected: [" + idpUrl + "]";
 						log.error(message);
 						return buildErrorResponse(logoutRequest.getID(),
-								SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
+						                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR,
+						                          message);
+					}
+
+					// Validate Signature
+					boolean isSignatureValid = SAMLSSOUtil.validateLogoutRequestSignature(logoutRequest,
+					                                                                      logoutReqIssuer.getCertAlias(),
+					                                                                      subject,
+					                                                                      queryString);
+					if (!isSignatureValid) {
+						String message = "Signature validation for Logout Request failed";
+						log.error(message);
+						return buildErrorResponse(logoutRequest.getID(),
+						                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR,
+						                          message);
 					}
 				}
 

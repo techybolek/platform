@@ -32,6 +32,7 @@ public class SAMLSSOReqValidationResponseDTO {
     private String rpSessionId;
     private String requestMessageString;
     private String queryString;
+    private String destination;
 	private SingleLogoutRequestDTO[] logoutRespDTO;
     
     public boolean isValid() {
@@ -158,5 +159,19 @@ public class SAMLSSOReqValidationResponseDTO {
      */
     public void setQueryString(String queryString) {
 	    this.queryString = queryString;
+    }
+
+    /**
+     * @return the 'destination' attribute of the SAML request
+     */
+    public String getDestination() {
+        return destination;
+    }
+
+    /**
+     * @param destination Set the SAML request's 'destination' attribute
+     */
+    public void setDestination(String destination) {
+        this.destination = destination;
     }
 }

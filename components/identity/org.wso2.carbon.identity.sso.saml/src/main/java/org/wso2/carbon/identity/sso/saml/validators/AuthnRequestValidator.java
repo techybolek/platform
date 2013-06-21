@@ -159,6 +159,7 @@ public class AuthnRequestValidator {
             }
             validationResponse.setId(authnReq.getID());
             validationResponse.setAssertionConsumerURL(authnReq.getAssertionConsumerServiceURL());
+            validationResponse.setDestination(authnReq.getDestination());
             validationResponse.setValid(true);
 
             if (log.isDebugEnabled()) {

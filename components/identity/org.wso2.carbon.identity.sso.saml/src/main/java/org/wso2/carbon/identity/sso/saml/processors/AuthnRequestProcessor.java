@@ -22,9 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.opensaml.saml2.core.Response;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
+import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.SAMLSSOServiceProviderDO;
 import org.wso2.carbon.identity.core.persistence.IdentityPersistenceManager;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
 import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
 import org.wso2.carbon.identity.sso.saml.builders.ErrorResponseBuilder;
@@ -61,12 +63,26 @@ public class AuthnRequestProcessor {
             // reading the service provider configs
             populateServiceProviderConfigs(serviceProviderConfigs, authnReqDTO);
 
-            // validate the signature
             if (authnReqDTO.getCertAlias() != null) {
+                
+                // Validate 'Destination'
+                String idpUrl = IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_IDP_URL);
+    
+                if (authnReqDTO.getDestination() == null
+                        || !idpUrl.equals(authnReqDTO.getDestination())) {
+                    String msg = "Destination validation for Authentication Request failed. " +
+                    		        "Received: [" + authnReqDTO.getDestination() + "]." +
+                    				" Expected: [" + idpUrl + "]";
+                    log.warn(msg);
+                    return buildErrorResponse(authnReqDTO.getId(),
+                            SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, msg);
+                }
+                
+                // validate the signature
                 boolean isSignatureValid = SAMLSSOUtil.validateAuthnRequestSignature(authnReqDTO);
 
                 if (!isSignatureValid) {
-                    String msg = "Signature Validation Failed for the SAML Assertion.";
+                    String msg = "Signature validation for Authentication Request failed.";
                     log.warn(msg);
                     return buildErrorResponse(authnReqDTO.getId(),
                                               SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, msg);
@@ -211,6 +227,7 @@ public class AuthnRequestProcessor {
         authReqDTO.setRpSessionId(rpSessionId);
         authReqDTO.setRequestMessageString(valiationDTO.getRequestMessageString());
         authReqDTO.setQueryString(valiationDTO.getQueryString());
+        authReqDTO.setDestination(valiationDTO.getDestination());
 
         if (authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
             SSOSessionPersistenceManager sessionPersistenceManager =
