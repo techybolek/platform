@@ -383,19 +383,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>site</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -428,8 +416,6 @@
                             </filters>
                             <descriptors>
                                 <descriptor>${basedir}/src/assembly/bin.xml</descriptor>
-                                <descriptor>${basedir}/src/assembly/docs.xml</descriptor>
-                                <!--<descriptor>${basedir}/src/assembly/src.xml</descriptor>-->
                             </descriptors>
                         </configuration>
                     </execution>
