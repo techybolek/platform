@@ -99,6 +99,12 @@
                         <artifactId>uddi-ws</artifactId>
                         <version>${project.parent.version}</version>
                 </dependency>
+               <dependency>
+                        <groupId>org.apache.juddi</groupId>
+                        <artifactId>uddi-tck-base</artifactId>
+                        <version>${project.parent.version}</version>
+                </dependency>
+
                 <dependency>
                         <groupId>commons-configuration</groupId>
                         <artifactId>commons-configuration</artifactId>
