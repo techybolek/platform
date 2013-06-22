@@ -31,7 +31,7 @@ import java.util.*;
 public class POMGenerator {
 
 
-    public void generateAxis2Client(Map optionsMap, String codegenOutputDirectory) throws Exception {
+    public void generateAxis2Client(Map optionsMap, String codegenOutputDirectory, HashMap<String, String> projOptionsList) throws Exception {
         Map<String, String> configurationMap = new HashMap<String, String>();
         Map<String, String> predifinedValues = new HashMap<String, String>();
 
@@ -58,6 +58,11 @@ public class POMGenerator {
 
         String s = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("org/wso2/carbon/wsdl2code/axis-pom.xml"), "UTF-8");
+        
+        s = s.replace("gid", projOptionsList.get("-gid").toString()).
+                replace("aid", projOptionsList.get("-aid").toString()).
+                replace("vn", projOptionsList.get("-vn").toString());
+
         Iterator iterator = optionsMap.keySet().iterator();
         String configurations = "";
         while (iterator.hasNext()) {
@@ -96,9 +101,11 @@ public class POMGenerator {
 //
 //        artifactVersions.add(version);
 
-        for (int i = 0; i < artifactVersions.size(); i++) {
-            s = s.replace("{dependancy-v-" + (i + 1) + "}", artifactVersions.get(i).replace(".wso2", "-wso2"));
-        }
+//        for (int i = 0; i < artifactVersions.size(); i++) {
+//            s = s.replace("{dependancy-v-" + (i + 1) + "}", artifactVersions.get(i).replace(".wso2", "-wso2"));
+//           
+//        }
+        s = s.replaceAll("axs_ver", artifactVersions.get(0).replace(".wso2", "-wso2"));
 
         String toWrite = String.format(s, configurations);
         createFile(codegenOutputDirectory, toWrite);
@@ -117,9 +124,12 @@ public class POMGenerator {
     }
 
 
-    public void generateJaxWSClient(List optionsList, String codegenOutputDirectory) throws Exception {
+    public void generateJaxWSClient(List optionsList, String codegenOutputDirectory, HashMap<String, String> projOptionsList) throws Exception {
         String s = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("org/wso2/carbon/wsdl2code/jaxws-pom.xml"), "UTF-8");
+        s = s.replace("gid", projOptionsList.get("-gid").toString()).
+                replace("aid", projOptionsList.get("-aid").toString()).
+                replace("vn", projOptionsList.get("-vn").toString());
         String wsdlURL = getArgumentValue("-Service", optionsList);
         String wsdlOptions = getExtraArgsJaxWS(optionsList);
         wsdlOptions += getBindingFiles(optionsList);
@@ -283,9 +293,12 @@ public class POMGenerator {
         return null;
     }
 
-    public static void generateJaxRSClient(List optionsList, String codegenOutputDirectory) throws Exception {
+    public static void generateJaxRSClient(List optionsList, String codegenOutputDirectory, HashMap<String, String> projOptionsList) throws Exception {
         String s = IOUtils.toString(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("org/wso2/carbon/wsdl2code/jaxrs-pom.xml"), "UTF-8");
+        s = s.replace("gid", projOptionsList.get("-gid").toString()).
+                replace("aid", projOptionsList.get("-aid").toString()).
+                replace("vn", projOptionsList.get("-vn").toString());
 
 //        URL url = getContainingArtifact(javax.ws.rs.core.Application.class);
 //        String version = getVersion(url.getFile());

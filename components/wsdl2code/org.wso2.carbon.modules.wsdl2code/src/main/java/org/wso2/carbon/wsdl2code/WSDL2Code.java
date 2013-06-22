@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.wso2.carbon.wsdl2code;
 
 import org.apache.axis2.AxisFault;
@@ -39,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,19 +52,16 @@ public class WSDL2Code extends AbstractAdmin {
     private static final String CODEGEN_POM_XSL = "org/wso2/carbon/wsdl2code/codegen-pom.xsl";
 
     /**
-     * This method will generate the code based on the options array. Options arrya should be as
-     * follows,
-     * new String[] {"-uri", "location of wsdl", "-g" ...}. Thus, the incoming XML should be as
-     * follows,
+     * This method will generate the code based on the options array. Options
+     * arrya should be as follows, new String[] {"-uri", "location of wsdl",
+     * "-g" ...}. Thus, the incoming XML should be as follows,
      * <p/>
      * <ns:codegenRequest xmlns:ns="http://org.wso2.wsf/tools">
-     * <options>-uri</options>
-     * <options>file://foo</options>
-     * ...
+     * <options>-uri</options> <options>file://foo</options> ...
      * </ns:codegenRequest>
      * <p/>
-     * Once codegenerated, location of genereated code will be send as an ID, thus, one could easily
-     * download artifact as a zip file or jar file.
+     * Once codegenerated, location of genereated code will be send as an ID,
+     * thus, one could easily download artifact as a zip file or jar file.
      *
      * @param options
      * @return String
@@ -74,18 +71,31 @@ public class WSDL2Code extends AbstractAdmin {
 
         String uuid = String.valueOf(System.currentTimeMillis() + Math.random());
         ConfigurationContext configContext = getConfigContext();
-        String codegenOutputDir = configContext.getProperty(ServerConstants.WORK_DIR) + File.separator +
-                "tools_codegen" + File.separator + uuid + File.separator;
+        String codegenOutputDir = configContext.getProperty(ServerConstants.WORK_DIR) + File.separator
+                + "tools_codegen" + File.separator + uuid + File.separator;
         System.getProperties().remove("project.base.dir");
         System.getProperties().remove("name");
         System.setProperty("project.base.dir", codegenOutputDir);
 
+        String projectName = "";
+
         ArrayList<String> optionsList = new ArrayList<String>();
+        HashMap<String, String> projOptionsList = new HashMap<String, String>();
+        // adding default configurations
+        
+        projOptionsList.put("-gid", "WSO2");
+        projOptionsList.put("-vn", "0.0.1-SNAPSHOT");
+        projOptionsList.put("-aid", "WSO2-Axis2-Client");
         for (int j = 0; j < options.length; j++) {
             String option = options[j];
-            optionsList.add(option);
+            if (option.equalsIgnoreCase("-gid") || option.equalsIgnoreCase("-vn") || option.equalsIgnoreCase("-aid")) {
+                projOptionsList.put(option, options[j + 1]);
+                j++;
+            } else {
+                optionsList.add(option);
+            }
         }
-
+        optionsList.add("--noBuildXML");
 
         String[] args = optionsList.toArray(new String[optionsList.size()]);
         Map allOptions;
@@ -96,12 +106,13 @@ public class WSDL2Code extends AbstractAdmin {
             List list = commandLineOptionParser.getInvalidOptions(new WSDL2JavaOptionsValidator());
             if (list.size() > 0) {
                 String faultOptions = "";
-                for (Iterator iterator = list.iterator(); iterator.hasNext(); ) {
+                for (Iterator iterator = list.iterator(); iterator.hasNext();) {
                     CommandLineOption commandLineOption = (CommandLineOption) iterator.next();
                     String optionValue = commandLineOption.getOptionValue();
-                    faultOptions += "Invalid input for [ " + commandLineOption.getOptionType() +
-                            (optionValue != null ? " : " + optionValue + " ]" : " ]") +
-                            "\n";
+                    faultOptions += "Invalid input for [ " + commandLineOption.getOptionType()
+                            + (optionValue != null ? " : " + optionValue + " ]" : " ]")
+                            + "\n";
+
                 }
 
                 log.error(faultOptions);
@@ -112,6 +123,7 @@ public class WSDL2Code extends AbstractAdmin {
                 throw new AxisFault("WSDL URI or Path Cannot be empty");
             }
             String uriValue = commandLineOption.getOptionValue().trim();
+            projectName = getProjectName(uriValue);
             if ("".equals(uriValue)) {
                 throw new AxisFault("WSDL URI or Path Cannot be empty");
             } else if (!(uriValue.startsWith("https://") || uriValue.startsWith("http://"))) {
@@ -121,7 +133,7 @@ public class WSDL2Code extends AbstractAdmin {
                 }
             }
 //            new CodeGenerationEngine(commandLineOptionParser).generate();
-            (new POMGenerator()).generateAxis2Client(allOptions, codegenOutputDir);
+            (new POMGenerator()).generateAxis2Client(allOptions, codegenOutputDir, projOptionsList);
         } catch (Exception e) {
             String rootMsg = "Code generation failed";
             Throwable throwable = e.getCause();
@@ -138,19 +150,19 @@ public class WSDL2Code extends AbstractAdmin {
         //set the output name
         CommandLineOption option =
                 (CommandLineOption) allOptions.
-                        get(CommandLineOptionConstants.WSDL2JavaConstants.SERVICE_NAME_OPTION);
+                get(CommandLineOptionConstants.WSDL2JavaConstants.SERVICE_NAME_OPTION);
 
         try {
             //achive destination
             uuid = String.valueOf(System.currentTimeMillis() + Math.random());
-            File destDir = new File(configContext.getProperty(ServerConstants.WORK_DIR) + File.separator +
-                    "tools_codegen" +
-                    File.separator +
-                    uuid);
+            File destDir = new File(configContext.getProperty(ServerConstants.WORK_DIR) + File.separator
+                    + "tools_codegen"
+                    + File.separator
+                    + uuid);
             if (!destDir.exists()) {
                 destDir.mkdirs();
             }
-            String destFileName = uuid.substring(2) + ".zip";
+            String destFileName = projectName + "-client.zip";
             String destArchive = destDir.getAbsolutePath() + File.separator + destFileName;
 
 
@@ -189,42 +201,56 @@ public class WSDL2Code extends AbstractAdmin {
         boolean isJaxWs = true; //Otherwise JaxRS
         String uuid = String.valueOf(System.currentTimeMillis() + Math.random());
         ConfigurationContext configContext = getConfigContext();
-        String codegenOutputDir = configContext.getProperty(ServerConstants.WORK_DIR) + File.separator +
-                "tools_codegen" + File.separator + uuid + File.separator;
+        String codegenOutputDir = configContext.getProperty(ServerConstants.WORK_DIR) + File.separator
+                + "tools_codegen" + File.separator + uuid + File.separator;
         System.getProperties().remove("project.base.dir");
         System.getProperties().remove("name");
         System.setProperty("project.base.dir", codegenOutputDir);
 
         ArrayList<String> optionsList = new ArrayList<String>();
+        HashMap<String, String> projOptionsList = new HashMap<String, String>();
+        // adding default configurations
+
+        projOptionsList.put("-gid", "WSO2");
+        projOptionsList.put("-vn", "0.0.1-SNAPSHOT");
+        projOptionsList.put("-aid", "WSO2-Axis2-Client");
+
+                    int i = 0;
         for (String s : options) {
-            if (s.equalsIgnoreCase("-jaxws") || s.equalsIgnoreCase("-jaxrs")) {
+
+               if (s.equalsIgnoreCase("-jaxws") || s.equalsIgnoreCase("-jaxrs")) {
                 if (s.equals("-jaxrs")) {
                     isJaxWs = false;
                     //This is only to distinguish jaxws and jaxrs. Therefore no need of adding this to options list
+                    i++;
                     continue;
                 }
             }
-            optionsList.add(s);
+            if (s.equalsIgnoreCase("-gid") || s.equalsIgnoreCase("-vn") || s.equalsIgnoreCase("-aid")) {
+                projOptionsList.put(s, options[i + 1]);
+            } else {
+                optionsList.add(s);
+            }
+            i++;
         }
 
         if (isJaxWs) {
-            return getJaxWSCodegenDownloadData(configContext, codegenOutputDir, optionsList);
+            return getJaxWSCodegenDownloadData(configContext, codegenOutputDir, optionsList, projOptionsList);
         } else {
-            return getJaxRSCodegenDownloadData(configContext, codegenOutputDir, optionsList);
+            return getJaxRSCodegenDownloadData(configContext, codegenOutputDir, optionsList, projOptionsList);
         }
     }
 
-    private CodegenDownloadData getJaxWSCodegenDownloadData(ConfigurationContext configContext, String codegenOutputDir, ArrayList<String> optionsList) throws AxisFault {
+    private CodegenDownloadData getJaxWSCodegenDownloadData(ConfigurationContext configContext, String codegenOutputDir, ArrayList<String> optionsList, HashMap<String, String> projOptionsList) throws AxisFault {
         String uuid;
         optionsList.add("-frontend");
         optionsList.add("jaxws21");
         optionsList.add("-client");
 
-
         String[] args = optionsList.toArray(new String[optionsList.size()]);
 
         try {
-            (new POMGenerator()).generateJaxWSClient(optionsList, codegenOutputDir);
+            (new POMGenerator()).generateJaxWSClient(optionsList, codegenOutputDir, projOptionsList);
         } catch (Exception e) {
             String rootMsg = "Code generation failed";
             Throwable throwable = e.getCause();
@@ -242,14 +268,15 @@ public class WSDL2Code extends AbstractAdmin {
         try {
             //achive destination
             uuid = String.valueOf(System.currentTimeMillis() + Math.random());
-            File destDir = new File(configContext.getProperty(ServerConstants.WORK_DIR) + File.separator +
-                    "tools_codegen" +
-                    File.separator +
-                    uuid);
+            File destDir = new File(configContext.getProperty(ServerConstants.WORK_DIR) + File.separator
+                    + "tools_codegen"
+                    + File.separator
+                    + uuid);
             if (!destDir.exists()) {
                 destDir.mkdirs();
             }
-            String destFileName = uuid.substring(2) + ".zip";
+            //String destFileName = uuid.substring(2) + ".zip";
+            String destFileName = getJAXWSRSProjectname(optionsList) + "-Client.zip";
             String destArchive = destDir.getAbsolutePath() + File.separator + destFileName;
 
             new ArchiveManipulator().archiveDir(destArchive, new File(codegenOutputDir).getPath());
@@ -276,13 +303,13 @@ public class WSDL2Code extends AbstractAdmin {
         }
     }
 
-    private CodegenDownloadData getJaxRSCodegenDownloadData(ConfigurationContext configContext, String codegenOutputDir, ArrayList<String> optionsList) throws AxisFault {
+    private CodegenDownloadData getJaxRSCodegenDownloadData(ConfigurationContext configContext, String codegenOutputDir, ArrayList<String> optionsList, HashMap<String, String> projOptionsList) throws AxisFault {
         String uuid;
 
         String[] args = optionsList.toArray(new String[optionsList.size()]);
 
         try {
-            POMGenerator.generateJaxRSClient(optionsList, codegenOutputDir);
+            POMGenerator.generateJaxRSClient(optionsList, codegenOutputDir, projOptionsList);
         } catch (Exception e) {
             String rootMsg = "Code generation failed";
             Throwable throwable = e.getCause();
@@ -300,14 +327,15 @@ public class WSDL2Code extends AbstractAdmin {
         try {
             //achive destination
             uuid = String.valueOf(System.currentTimeMillis() + Math.random());
-            File destDir = new File(configContext.getProperty(ServerConstants.WORK_DIR) + File.separator +
-                    "tools_codegen" +
-                    File.separator +
-                    uuid);
+            File destDir = new File(configContext.getProperty(ServerConstants.WORK_DIR) + File.separator
+                    + "tools_codegen"
+                    + File.separator
+                    + uuid);
             if (!destDir.exists()) {
                 destDir.mkdirs();
             }
-            String destFileName = uuid.substring(2) + ".zip";
+           // String destFileName = uuid.substring(2) + ".zip";
+            String destFileName = getJAXWSRSProjectname(optionsList) + "-Client.zip";
             String destArchive = destDir.getAbsolutePath() + File.separator + destFileName;
 
             new ArchiveManipulator().archiveDir(destArchive, new File(codegenOutputDir).getPath());
@@ -346,7 +374,7 @@ public class WSDL2Code extends AbstractAdmin {
         if (http != null) {
             EndpointReference epr =
                     ((HttpTransportListener) http.getReceiver()).
-                            getEPRForService(serviceName, ip);
+                    getEPRForService(serviceName, ip);
             String wsdlUrlPrefix = epr.getAddress();
             if (wsdlUrlPrefix.endsWith("/")) {
                 wsdlUrlPrefix = wsdlUrlPrefix.substring(0, wsdlUrlPrefix.length() - 1);
@@ -357,9 +385,10 @@ public class WSDL2Code extends AbstractAdmin {
     }
 
     /**
-     * When the service is a hierarchical service, the service name contains '/' charactors. But
-     * if the artifact id of the generated pom.xml file contains '/' charactors, it will fail to
-     * build. Therefore, we have to replace '/' with '-'.
+     * When the service is a hierarchical service, the service name contains '/'
+     * charactors. But if the artifact id of the generated pom.xml file contains
+     * '/' charactors, it will fail to build. Therefore, we have to replace '/'
+     * with '-'.
      *
      * @param name - original service name
      * @return - formatted name
@@ -372,4 +401,30 @@ public class WSDL2Code extends AbstractAdmin {
         return newName;
     }
 
+    private String generateUUDI() {
+        return String.valueOf(System.currentTimeMillis() + Math.random());
+    }
+
+    private String getProjectName(String url) {
+        String fileName = url.substring(url.lastIndexOf('/') + 1, url.length());
+        String fileNameWithoutExtn = fileName.substring(0, fileName.lastIndexOf('?'));
+        return fileNameWithoutExtn;
+    }
+
+    private String getJAXWSRSProjectname(ArrayList<String> optionsList){
+
+        String [] arr = new String[optionsList.size()];
+        int p =0;
+        for(Object b : optionsList.toArray()){
+            arr[p]=optionsList.get(p);
+            p++;
+        }
+        String retVal = "";
+        for (int x=0; x<arr.length-1 ; x++){
+            if (arr[x].toString().equalsIgnoreCase("-service")){
+                retVal = getProjectName(arr[x+1].toString());
+                break;
+            }                                }
+        return retVal;
+    }
 }
