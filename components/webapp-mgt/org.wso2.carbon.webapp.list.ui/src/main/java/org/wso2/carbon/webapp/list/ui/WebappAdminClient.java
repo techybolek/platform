@@ -295,6 +295,13 @@ public class WebappAdminClient {
             ServletOutputStream out = response.getOutputStream();
             DataHandler handler = stub.downloadWarFileHandler(fileName, webappType);
             if (handler != null) {
+                if ("jaggeryWebapp".equals(webappType)) {
+                    if (!fileName.endsWith(".zip")) {
+                        fileName = fileName.concat(".zip");
+                    }
+                } else if (!fileName.endsWith(".war")) {
+                    fileName = fileName.concat(".war");
+                }
                 response.setHeader("Content-Disposition", "fileName=" + fileName);
                 response.setContentType(handler.getContentType());
                 InputStream in = handler.getDataSource().getInputStream();

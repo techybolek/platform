@@ -482,7 +482,8 @@
                 <nobr><fmt:message key="webapp.last.modified"/></nobr>
             </th>
             <% if (webappState.equalsIgnoreCase("started") ||
-                   webappState.equalsIgnoreCase("all")) { %>
+                   webappState.equalsIgnoreCase("all")||
+                   webappState.equalsIgnoreCase("stopped")) { %>
             <th colspan="2"><fmt:message key="webapp.action"/></th>
             <% } else { %>
             <th><fmt:message key="webapp.action"/></th>
@@ -540,7 +541,7 @@
                         webappDisplayType = "WebApp";
                     } else if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
                         iconPath = "../jax-webapp-mgt/images/jax_type.gif";
-                        webappDisplayType = "JaxWebApp";
+                        webappDisplayType = "JAX-WS/RS Webapp";
                     } else if(currentWebappType.equalsIgnoreCase("JaggeryWebapp")) {
                         iconPath = "../jaggeryapp-mgt/images/webapps.gif";
                         webappDisplayType = "JaggeryWebApp";
@@ -601,7 +602,7 @@
                     %>
                 </a>
             </td>
-            <% } else { %>
+            <% } else if (!webappState.equalsIgnoreCase("stopped")){ %>
             <td>
             </td>
             <%}%>

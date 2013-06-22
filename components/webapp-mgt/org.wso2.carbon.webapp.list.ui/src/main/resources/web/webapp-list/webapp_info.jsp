@@ -309,65 +309,174 @@
                 <td width="10px">&nbsp;</td>
 
                 <td>
-                    <div id="sessionStatsDiv">
-                        <%
-                            if(!"JaxWebapp".equalsIgnoreCase(webappType)) {
-                        %>
-                        <table class="styledLeft" id="sessionStatsTable"
-                               style="margin-left: 0px;" width="100%">
-                            <%
-                                WebappStatistics stats = webapp.getStatistics();
-                            %>
-                            <thead>
-                            <tr>
-                                <th colspan="2" align="left">
-                                    <fmt:message key="session.statistics"/>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tr>
-                                <td><fmt:message key="active.sessions"/></td>
-                                <td>
-                                    <% if (stats.getActiveSessions() > 0) { %>
-                                    <a href="sessions.jsp?webappFileName=<%= webapp.getWebappFile() %>">
-                                        <%= stats.getActiveSessions()%>
-                                    </a>
-                                    <% } else { %>
-                                    <%= stats.getActiveSessions()%>
-                                    <% } %>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="expired.sessions"/></td>
-                                <td><%= stats.getExpiredSessions()%>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="maximum.active.sessions"/></td>
-                                <td><%= stats.getMaxActiveSessions()%>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="rejected.sessions"/></td>
-                                <td><%= stats.getRejectedSessions()%>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="average.session.lifetime"/></td>
-                                <td><%= stats.getAvgSessionLifetime()%>&nbsp;s</td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="maximum.session.lifetime"/></td>
-                                <td><%= stats.getMaxSessionLifetime()%>&nbsp;s</td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="maximum.session.inactivity.interval"/></td>
-                                <td><%= stats.getMaxSessionInactivityInterval()%>&nbsp;s</td>
-                            </tr>
-                        </table>
-                        <%}%>
-                    </div>
+                            <% if (webappType.equalsIgnoreCase("JaxWebapp") && wsdlURLS != null) { %>
+                <td width="10px">&nbsp;</td>
+
+                <td width="50%">
+                    <table class="styledLeft" id="wsClientTable"
+                           style="margin-left: 0px;" width="100%">
+                        <thead>
+                        <tr>
+                            <th colspan="3"><fmt:message key="availableWS"/></th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <td>
+                                <a href="#" onclick="validateAndSubmitTryit('<%=wsdlURLS.get(0)%>')" class="icon-link"
+                                   style='background-image:url(images/tryit.gif)'>
+                                    <fmt:message key="tryit"/>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="../wsdl2code/index.jsp?generateClient=<%=wsdlURLS.get(0)%>&toppage=false&resultType=cxf&api=jaxws" class="icon-link"
+                                   style='background-image:url(images/genclient.gif)'>
+                                    <fmt:message key="generate.jaxws.client"/>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%">
+                                <a href="<%=wsdlURLS.get(0)%>" class="icon-link"
+                                   style="background-image:url(images/wsdl.gif);" target="_blank">
+                                    WSDL1.1
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="left">
+                                <strong><fmt:message key="endpoints"/></strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <%
+                                    String wsdlURL = wsdlURLS.get(0).toString();
+                                    String jaxWSEpr = wsdlURL.substring( 0, wsdlURL.indexOf("?wsdl") );
+                                %>
+                                <%=jaxWSEpr%>
+                            </td>
+                        </tr>
+                    </table>
                 </td>
+                        <% } %>
+                        <% if (webappType.equalsIgnoreCase("JaxWebapp") && wadlURLS != null) { %>
+                <td width="10px">&nbsp;</td>
+
+                <td width="50%">
+                    <table class="styledLeft" id="rsClientTable"
+                           style="margin-left: 0px;" width="100%">
+                        <thead>
+                        <tr>
+                            <th colspan="3"><fmt:message key="availableRS"/></th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <td>
+                                <a href="../wsdl2code/index.jsp?generateClient=<%=wadlURLS.get(0)%>&toppage=false&resultType=cxf&api=jaxrs" class="icon-link"
+                                   style='background-image:url(images/genclient.gif)'>
+                                    <fmt:message key="generate.jaxrs.client"/>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%">
+                                <a href="<%=wadlURLS.get(0)%>" class="icon-link"
+                                   style="background-image:url(images/wsdl.gif);" target="_blank">
+                                    WADL
+                                </a>
+                            </td>
+                                <%--<td>--%>
+                                <%--<a href="../tryit/rest.jsp?wadlURL=<%=value%>" class="icon-link"--%>
+                                <%--style='background-image:url(images/tryit.gif)'>--%>
+                                <%--<fmt:message key="tryit"/>--%>
+                                <%--</a>--%>
+                                <%--</td>--%>
+                        </tr>
+                        <tr>
+                            <td colspan="2">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="left">
+                                <strong><fmt:message key="endpoints"/></strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <%
+                                    String wadlURL = wadlURLS.get(0).toString();
+                                    String jaxRSEpr = wadlURL.substring( 0, wadlURL.indexOf("?_wadl") );
+                                %>
+                                <%=jaxRSEpr%>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            <%}%>
+
+            <div id="sessionStatsDiv">
+                <%
+                    if(!"JaxWebapp".equalsIgnoreCase(webappType)) {
+                %>
+                <table class="styledLeft" id="sessionStatsTable"
+                       style="margin-left: 0px;" width="100%">
+                    <%
+                        WebappStatistics stats = webapp.getStatistics();
+                    %>
+                    <thead>
+                    <tr>
+                        <th colspan="2" align="left">
+                            <fmt:message key="session.statistics"/>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tr>
+                        <td><fmt:message key="active.sessions"/></td>
+                        <td>
+                            <% if (stats.getActiveSessions() > 0) { %>
+                            <a href="sessions.jsp?webappFileName=<%= webapp.getWebappFile() %>">
+                                <%= stats.getActiveSessions()%>
+                            </a>
+                            <% } else { %>
+                            <%= stats.getActiveSessions()%>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="expired.sessions"/></td>
+                        <td><%= stats.getExpiredSessions()%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="maximum.active.sessions"/></td>
+                        <td><%= stats.getMaxActiveSessions()%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="rejected.sessions"/></td>
+                        <td><%= stats.getRejectedSessions()%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="average.session.lifetime"/></td>
+                        <td><%= stats.getAvgSessionLifetime()%>&nbsp;s</td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="maximum.session.lifetime"/></td>
+                        <td><%= stats.getMaxSessionLifetime()%>&nbsp;s</td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="maximum.session.inactivity.interval"/></td>
+                        <td><%= stats.getMaxSessionInactivityInterval()%>&nbsp;s</td>
+                    </tr>
+                </table>
+                <%}%>
+            </div>
+            </td>
             </tr>
             <tr>
                 <td colspan="3">&nbsp;</td>
@@ -461,86 +570,6 @@
                 <td width="10px">&nbsp;</td>
                 <td>&nbsp;</td>
             </tr>
-            <% if (webappType.equalsIgnoreCase("JaxWebapp") && wsdlURLS != null) { %>
-            <tr>
-                <td colspan="3">&nbsp;</td>
-            </tr>
-            <tr>
-                <td width="50%">
-                    <table class="styledLeft" id="wsTable"
-                           style="margin-left: 0px;" width="100%">
-                        <thead>
-                        <tr>
-                            <th colspan="3"><fmt:message key="availalebleWS"/></th>
-                        </tr>
-                        </thead>
-                        <%
-                            Iterator iterator = wsdlURLS.iterator();
-                            while (iterator.hasNext()) {
-                                String value = (String) iterator.next();
-                        %>
-                        <tr>
-                            <td>
-                                <%=value%>
-                            </td>
-                            <td>
-                                <a href="../wsdl2code/index.jsp?generateClient=<%=value%>&toppage=false&resultType=cxf&api=jaxws" class="icon-link"
-                                   style='background-image:url(images/genclient.gif)'>
-                                    <fmt:message key="generate.jaxws.client"/>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#" onclick="validateAndSubmitTryit('<%=value%>')" class="icon-link"
-                                   style='background-image:url(images/tryit.gif)'>
-                                    <fmt:message key="tryit"/>
-                                </a>
-                            </td>
-                        </tr>
-                        <%} %>
-                    </table>
-                </td>
-            </tr>
-            <%}%>
-            <% if (webappType.equalsIgnoreCase("JaxWebapp") && wadlURLS != null) { %>
-            <tr>
-                <td colspan="3">&nbsp;</td>
-            </tr>
-            <tr>
-                <td width="50%">
-                    <table class="styledLeft" id="rsTable"
-                           style="margin-left: 0px;" width="100%">
-                        <thead>
-                        <tr>
-                            <th colspan="3"><fmt:message key="availalebleRS"/></th>
-                        </tr>
-                        </thead>
-                        <%
-                            Iterator iterator = wadlURLS.iterator();
-                            while (iterator.hasNext()) {
-                                String value = (String)iterator.next();
-                        %>
-                        <tr>
-                            <td>
-                                <%=value%>
-                            </td>
-                            <td>
-                                <a href="../wsdl2code/index.jsp?generateClient=<%=value%>&toppage=false&resultType=cxf&api=jaxrs" class="icon-link"
-                                   style='background-image:url(images/genclient.gif)'>
-                                    <fmt:message key="generate.jaxrs.client"/>
-                                </a>
-                            </td>
-                            <%--<td>--%>
-                                <%--<a href="../tryit/rest.jsp?wadlURL=<%=value%>" class="icon-link"--%>
-                                   <%--style='background-image:url(images/tryit.gif)'>--%>
-                                    <%--<fmt:message key="tryit"/>--%>
-                                <%--</a>--%>
-                            <%--</td>--%>
-                        </tr>
-                        <%} %>
-                    </table>
-                </td>
-            </tr>
-            <%}%>
         </table>
 
 
@@ -548,6 +577,8 @@
             alternateTableRows('webappTable', 'tableEvenRow', 'tableOddRow');
             alternateTableRows('sessionStatsTable', 'tableEvenRow', 'tableOddRow');
             alternateTableRows('operationsTable', 'tableEvenRow', 'tableOddRow');
+            alternateTableRows('wsClientTable', 'tableEvenRow', 'tableOddRow');
+            alternateTableRows('rsClientTable', 'tableEvenRow', 'tableOddRow');
         </script>
         <%
             }
