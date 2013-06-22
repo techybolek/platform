@@ -25,6 +25,7 @@
 <%@ page import="org.wso2.carbon.wsdl2code.ui.client.Util" %>
 <%@ page import="javax.xml.namespace.QName" %>
 <%@ page import="java.util.Iterator" %>
+<%@ page import="org.wso2.carbon.wsdl2code.ui.endpoints.EndPointsSetter" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
@@ -34,6 +35,7 @@
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 
     String generateClient = request.getParameter("generateClient");
+    String endPointsStr = "";
 
     //For CXF web applicationsc
     String generateType= request.getParameter("resultType");
@@ -47,6 +49,9 @@
         }else if(generateMethod.equalsIgnoreCase("jaxrs")){
             wadl =generateClient;
         }
+    }
+    if(generateType ==null){
+       endPointsStr = request.getParameter("endpoints"); 
     }
 
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -359,6 +364,70 @@ function codeGenFileUploadeHelper(codegenParentTextId, executor) {
 
 
     <div id="workArea">
+    <table width="100%">
+        <thead>
+        <tr>
+            <th colspan="2"><fmt:message key="maven"/></th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <table class="styledLeft" width="100%">
+                        <thead>
+                        <tr>
+                            <th width="10%"><fmt:message key="option"/></th>
+                            <th width="60%"><fmt:message key="description"/></th>
+                            <th><fmt:message key="selectValue"/></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!--- Maven Configurations starts here -->
+
+                        <tr>
+                            <td>groupId</td>
+                            <td>Group Id for maven configuration</td>
+                            <td><input type="text" class="toolsClass" value="WSO2" name="gid" id="id_gid"></td>
+                        </tr>
+
+                        <% dynamicJS = dynamicJS + "var obj_id_gid = document.getElementById('id_gid');\n" +
+                                "if (obj_id_gid.value != '') {\n" +
+                                "    options['id_gid'] = obj_id_gid.value;\n" +
+                                "}" ;
+                        %>
+
+                        <tr>
+                            <td>artifactId</td>
+                            <td>Artifact Id for maven configuration</td>
+                            <td><input type="text" class="toolsClass" value="WSO2-Axis2-Client" name="aid" id="id_aid"></td>
+                        </tr>
+
+                        <% dynamicJS = dynamicJS + "var obj_id_aid = document.getElementById('id_aid');\n" +
+                                "if (obj_id_aid.value != '') {\n" +
+                                "    options['id_aid'] = obj_id_aid.value;\n" +
+                                "}" ;
+                        %>
+
+                        <tr>
+                            <td>version</td>
+                            <td>Version for maven configuration</td>
+                            <td><input type="text" class="toolsClass" value="0.0.1-SNAPSHOT" name="vn" id="id_vn"></td>
+                        </tr>
+
+                        <% dynamicJS = dynamicJS + "var obj_id_vn = document.getElementById('id_vn');\n" +
+                                "if (obj_id_vn.value != '') {\n" +
+                                "    options['id_vn'] = obj_id_vn.value;\n" +
+                                "}" ;
+                        %>
+
+
+                        <!-- finished maven configurations-->
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
         <table width="100%">
             <thead>
             <tr>
@@ -374,8 +443,8 @@ function codeGenFileUploadeHelper(codegenParentTextId, executor) {
                     <table class="styledLeft" width="100%">
                         <thead>
                         <tr>
-                            <th><fmt:message key="option"/></th>
-                            <th><fmt:message key="description"/></th>
+                            <th width="10%"><fmt:message key="option"/></th>
+                            <th width="60%"><fmt:message key="description"/></th>
                             <th><fmt:message key="selectValue"/></th>
                         </tr>
                         </thead>
@@ -496,6 +565,23 @@ function codeGenFileUploadeHelper(codegenParentTextId, executor) {
                                 }
                             }
                         %>
+                        
+                        <% if(generateType ==null){ %>
+                            <tr>
+                            <td>-pn</td>
+                            <td>Port name. Choose a specific port when there are multiple ports in the wsdl </td>
+                            <td>
+                                
+                                <% EndPointsSetter parcer = new EndPointsSetter();%>
+                                <%= parcer.getEndPoints(endPointsStr) %>
+
+                                <% dynamicJS = dynamicJS + "var obj_id_pn = document.getElementById('id_pn'); " +
+                                        "options['id_pn'] = obj_id_pn[obj_id_pn.selectedIndex].value;" ; %>
+
+                            </td>            
+                            </tr>
+                            <%  } %>
+
 
                         </tbody>
                     </table>

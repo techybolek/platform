@@ -59,7 +59,7 @@
     <!--<name>g</name>-->
     <!--<description>Generates all the classes. Valid only with -ss</description>-->
     <!--</argument>-->
-    <argument uiType="text">
+    <argument uiType="skip">
         <name>pn</name>
         <description>Port name. Choose a specific port when there are multiple ports in the wsdl</description>
     </argument>
