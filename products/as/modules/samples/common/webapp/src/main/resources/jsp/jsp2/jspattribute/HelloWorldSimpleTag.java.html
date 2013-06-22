@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">/*
+<html><body><pre>
+/*
 * Licensed to the Apache Software Foundation (ASF) under one or more
 * contributor license agreements.  See the NOTICE file distributed with
 * this work for additional information regarding copyright ownership.
@@ -16,17 +17,20 @@
 */
 
 
-</span><span style="color:#000080;background-color:#ffffff;">package</span><span style="background-color:#ffffff;"> jsp2.examples.simpletag;
+package jsp2.examples.simpletag;
 
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> javax.servlet.jsp.JspException;
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> javax.servlet.jsp.tagext.SimpleTagSupport;
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> java.io.IOException;
+import java.io.IOException;
 
-</span><span style="color:#008000;background-color:#ffffff;">/**
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+
+/**
  * SimpleTag handler that prints "Hello, world!"
  */
-</span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">class</span><span style="background-color:#ffffff;"> HelloWorldSimpleTag </span><span style="color:#000080;background-color:#ffffff;">extends</span><span style="background-color:#ffffff;"> SimpleTagSupport {
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">void</span><span style="background-color:#ffffff;"> doTag() </span><span style="color:#000080;background-color:#ffffff;">throws</span><span style="background-color:#ffffff;"> JspException, IOException {
-    getJspContext().getOut().write( </span><span style="color:#008000;background-color:#ffffff;">"Hello, world!"</span><span style="background-color:#ffffff;"> );
+public class HelloWorldSimpleTag extends SimpleTagSupport {
+    @Override
+    public void doTag() throws JspException, IOException {
+        getJspContext().getOut().write( "Hello, world!" );
     }
-}</span></pre>
+}
+</pre></body></html>

@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,27 +14,28 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-&lt;%@ taglib prefix="mytag" uri="/WEB-INF/jsp2/jsp2-example-taglib.tld" %&gt;
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;JSP 2.0 Examples - Repeat SimpleTag Handler&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;h1&gt;JSP 2.0 Examples - Repeat SimpleTag Handler&lt;/h1&gt;
-    &lt;hr&gt;
-    &lt;p&gt;This tag handler accepts a "num" parameter and repeats the body of the
+--%>
+&lt;%@ taglib prefix="mytag" uri="/WEB-INF/jsp2/jsp2-example-taglib.tld" %>
+&lt;html>
+  &lt;head>
+    &lt;title>JSP 2.0 Examples - Repeat SimpleTag Handler&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;h1>JSP 2.0 Examples - Repeat SimpleTag Handler&lt;/h1>
+    &lt;hr>
+    &lt;p>This tag handler accepts a "num" parameter and repeats the body of the
     tag "num" times.  It's a simple example, but the implementation of
     such a tag in JSP 2.0 is substantially simpler than the equivalent
-    JSP 1.2-style classic tag handler.&lt;/p&gt;
-    &lt;p&gt;The body of the tag is encapsulated in a "JSP Fragment" and passed
+    JSP 1.2-style classic tag handler.&lt;/p>
+    &lt;p>The body of the tag is encapsulated in a "JSP Fragment" and passed
     to the tag handler, which then executes it five times, inside a
     for loop.  The tag handler passes in the current invocation in a
-    scoped variable called count, which can be accessed using the EL.&lt;/p&gt;
-    &lt;br&gt;
-    &lt;b&gt;&lt;u&gt;Result:&lt;/u&gt;&lt;/b&gt;&lt;br&gt;
-    &lt;mytag:repeat num="5"&gt;
-      Invocation ${count} of 5&lt;br&gt;
-    &lt;/mytag:repeat&gt;
-  &lt;/body&gt;
-&lt;/html&gt;</span></pre>
+    scoped variable called count, which can be accessed using the EL.&lt;/p>
+    &lt;br>
+    &lt;b>&lt;u>Result:&lt;/u>&lt;/b>&lt;br>
+    &lt;mytag:repeat num="5">
+      Invocation ${count} of 5&lt;br>
+    &lt;/mytag:repeat>
+  &lt;/body>
+&lt;/html>
+</pre></body></html>

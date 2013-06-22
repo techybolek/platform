@@ -1,5 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,43 +14,45 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">bgcolor=</span><span style="color:#008000;background-color:#efefef;">"white"</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> Request Information </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">size=</span><span style="color:#008000;background-color:#efefef;">"4"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">JSP Request Method: &lt;% out.print(util.HTMLFilter.filter(request.getMethod())); %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Request URI: &lt;%= request.getRequestURI() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Request Protocol: &lt;%= request.getProtocol() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Servlet path: &lt;%= request.getServletPath() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Path info: &lt;% out.print(util.HTMLFilter.filter(request.getPathInfo())); %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Query string: &lt;% out.print(util.HTMLFilter.filter(request.getQueryString())); %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Content length: &lt;%= request.getContentLength() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Content type: &lt;% out.print(util.HTMLFilter.filter(request.getContentType())); %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Server name: &lt;%= request.getServerName() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Server port: &lt;%= request.getServerPort() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Remote user: &lt;%= request.getRemoteUser() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Remote address: &lt;%= request.getRemoteAddr() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Remote host: &lt;%= request.getRemoteHost() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Authorization scheme: &lt;%= request.getAuthType() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">Locale: &lt;%= request.getLocale() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">The browser you are using is &lt;% out.print(util.HTMLFilter.filter(request.getHeader("User-Agent"))); %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+--%>
+&lt;html>
+&lt;body bgcolor="white">
+&lt;h1> Request Information &lt;/h1>
+&lt;font size="4">
+JSP Request Method: &lt;%= util.HTMLFilter.filter(request.getMethod()) %>
+&lt;br>
+Request URI: &lt;%= util.HTMLFilter.filter(request.getRequestURI()) %>
+&lt;br>
+Request Protocol: &lt;%= util.HTMLFilter.filter(request.getProtocol()) %>
+&lt;br>
+Servlet path: &lt;%= util.HTMLFilter.filter(request.getServletPath()) %>
+&lt;br>
+Path info: &lt;%= util.HTMLFilter.filter(request.getPathInfo()) %>
+&lt;br>
+Query string: &lt;%= util.HTMLFilter.filter(request.getQueryString()) %>
+&lt;br>
+Content length: &lt;%= request.getContentLength() %>
+&lt;br>
+Content type: &lt;%= util.HTMLFilter.filter(request.getContentType()) %>
+&lt;br>
+Server name: &lt;%= util.HTMLFilter.filter(request.getServerName()) %>
+&lt;br>
+Server port: &lt;%= request.getServerPort() %>
+&lt;br>
+Remote user: &lt;%= util.HTMLFilter.filter(request.getRemoteUser()) %>
+&lt;br>
+Remote address: &lt;%= util.HTMLFilter.filter(request.getRemoteAddr()) %>
+&lt;br>
+Remote host: &lt;%= util.HTMLFilter.filter(request.getRemoteHost()) %>
+&lt;br>
+Authorization scheme: &lt;%= util.HTMLFilter.filter(request.getAuthType()) %>
+&lt;br>
+Locale: &lt;%= request.getLocale() %>
+&lt;hr>
+The browser you are using is
+&lt;%= util.HTMLFilter.filter(request.getHeader("User-Agent")) %>
+&lt;hr>
+&lt;/font>
+&lt;/body>
+&lt;/html>
+</pre></body></html>

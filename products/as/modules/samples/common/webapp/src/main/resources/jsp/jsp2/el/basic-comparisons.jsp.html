@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,104 +14,105 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Expression Language - Basic Comparisons</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Expression Language - Basic Comparisons</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    This example illustrates basic Expression Language comparisons.
+--%>
+&lt;html>
+  &lt;head>
+    &lt;title>JSP 2.0 Expression Language - Basic Comparisons&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;h1>JSP 2.0 Expression Language - Basic Comparisons&lt;/h1>
+    &lt;hr>
+    This example illustrates basic Expression Language comparisons.
     The following comparison operators are supported:
-    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Less-than (</span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;"> or lt)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Greater-than (</span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> or gt)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Less-than-or-equal (</span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;">= or le)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Greater-than-or-equal (</span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;">= or ge)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Equal (== or eq)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Not Equal (!= or ne)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">blockquote</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">u</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Numeric</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">u</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">code</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">border=</span><span style="color:#008000;background-color:#efefef;">"1"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">thead</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">EL Expression</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Result</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">thead</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${1 </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;"> 2}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${1 &lt; 2}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${1 lt 2}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${1 lt 2}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${1 </span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> (4/2)}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${1 &gt; (4/2)}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${1 </span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> (4/2)}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${1 &gt; (4/2)}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${4.0 </span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;">= 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${4.0 &gt;= 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${4.0 ge 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${4.0 ge 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${4 </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;">= 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${4 &lt;= 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${4 le 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${4 le 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${100.0 == 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${100.0 == 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${100.0 eq 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${100.0 eq 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${(10*10) != 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${(10*10) != 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${(10*10) ne 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${(10*10) ne 100}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">code</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">u</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Alphabetic</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">u</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">code</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">border=</span><span style="color:#008000;background-color:#efefef;">"1"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">thead</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">EL Expression</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Result</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">thead</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${'a' </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;"> 'b'}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${'a' &lt; 'b'}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${'hip' </span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> 'hit'}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${'hip' &gt; 'hit'}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${'4' </span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${'4' &gt; 3}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">code</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">blockquote</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+    &lt;ul>
+      &lt;li>Less-than (&amp;lt; or lt)&lt;/li>
+      &lt;li>Greater-than (&amp;gt; or gt)&lt;/li>
+      &lt;li>Less-than-or-equal (&amp;lt;= or le)&lt;/li>
+      &lt;li>Greater-than-or-equal (&amp;gt;= or ge)&lt;/li>
+      &lt;li>Equal (== or eq)&lt;/li>
+      &lt;li>Not Equal (!= or ne)&lt;/li>
+    &lt;/ul>
+    &lt;blockquote>
+      &lt;u>&lt;b>Numeric&lt;/b>&lt;/u>
+      &lt;code>
+        &lt;table border="1">
+          &lt;thead>
+        &lt;td>&lt;b>EL Expression&lt;/b>&lt;/td>
+        &lt;td>&lt;b>Result&lt;/b>&lt;/td>
+      &lt;/thead>
+      &lt;tr>
+        &lt;td>\${1 &amp;lt; 2}&lt;/td>
+        &lt;td>${1 &lt; 2}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${1 lt 2}&lt;/td>
+        &lt;td>${1 lt 2}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${1 &amp;gt; (4/2)}&lt;/td>
+        &lt;td>${1 > (4/2)}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${1 gt (4/2)}&lt;/td>
+        &lt;td>${1 gt (4/2)}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${4.0 &amp;gt;= 3}&lt;/td>
+        &lt;td>${4.0 >= 3}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${4.0 ge 3}&lt;/td>
+        &lt;td>${4.0 ge 3}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${4 &amp;lt;= 3}&lt;/td>
+        &lt;td>${4 &lt;= 3}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${4 le 3}&lt;/td>
+        &lt;td>${4 le 3}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${100.0 == 100}&lt;/td>
+        &lt;td>${100.0 == 100}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${100.0 eq 100}&lt;/td>
+        &lt;td>${100.0 eq 100}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${(10*10) != 100}&lt;/td>
+        &lt;td>${(10*10) != 100}&lt;/td>
+      &lt;/tr>
+      &lt;tr>
+        &lt;td>\${(10*10) ne 100}&lt;/td>
+        &lt;td>${(10*10) ne 100}&lt;/td>
+      &lt;/tr>
+    &lt;/table>
+      &lt;/code>
+      &lt;br>
+      &lt;u>&lt;b>Alphabetic&lt;/b>&lt;/u>
+      &lt;code>
+        &lt;table border="1">
+          &lt;thead>
+            &lt;td>&lt;b>EL Expression&lt;/b>&lt;/td>
+            &lt;td>&lt;b>Result&lt;/b>&lt;/td>
+          &lt;/thead>
+          &lt;tr>
+            &lt;td>\${'a' &amp;lt; 'b'}&lt;/td>
+            &lt;td>${'a' &lt; 'b'}&lt;/td>
+          &lt;/tr>
+          &lt;tr>
+            &lt;td>\${'hip' &amp;gt; 'hit'}&lt;/td>
+            &lt;td>${'hip' > 'hit'}&lt;/td>
+          &lt;/tr>
+          &lt;tr>
+            &lt;td>\${'4' &amp;gt; 3}&lt;/td>
+            &lt;td>${'4' > 3}&lt;/td>
+          &lt;/tr>
+        &lt;/table>
+      &lt;/code>
+    &lt;/blockquote>
+  &lt;/body>
+&lt;/html>
+</pre></body></html>

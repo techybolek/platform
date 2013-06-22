@@ -16,16 +16,16 @@
 <html>
 <head>
     <meta http-equiv="content-type" content=""/>
-    <title>WSO2 Application Server 5.0.2 Release Notes</title>
+    <title>WSO2 Application Server 5.1.1 Release Notes</title>
     <link href="./tools/cmd/css/wsas-dist-doc.css" rel="stylesheet"
           type="text/css" media="all"/>
 </head>
 
 <body>
-<h1>WSO2 Application Server(WSO2 AS) 5.0.2
+<h1>WSO2 Application Server(WSO2 AS) 5.1.1
     Release Notes</h1>
 
-<h3>December 2012</h3>
+<h3>March 2013</h3>
 
 <p>The WSO2 Application Server is an enterprise-ready cloud-enabled application server, powered
     by Apache Tomcat and also integrates Apache Axis2 and Apache CXF frameworks. It provides
@@ -49,7 +49,7 @@
 
 <p>WSO2 Application Server is a part of WSO2 Stratos cloud platform (PaaS) and hosted offering
     of WSO2 Application Server as a service can be accessed from here
-    https://appserver.stratoslive.wso2.com.
+    <a href="https://management.appserver.stratoslive.wso2.com" target="new">https://management.appserver.stratoslive.wso2.com.</a>
 </p>
 
 <p>An open source product, WSO2 AppServer is available under the
@@ -62,8 +62,38 @@
 
 <h2>New Features In This Release</h2>
 <ul>
-    This is a patch release of WSO2 AS on top of new WSO2 Carbon platform version 4.0.5.
+<li>
+ New classloader environment customization architecture which can configure classloader per server or per web application.   
+</li>
+<li>
+   User defined classloaders environments.
+</li>
+<li>
+   Upgraded Tomcat runtime into Tomcat 7.0.34.
+</li>
+<li>
+   In built support for Servlet -3, JSP 2.2, EL 2.2, JSTL 1.2 specifications. 
+</li>
+<li>
+   Full JNDI based data source support. 
+</li>
+<li>
+   Enhanced service dashboard page for JAX-WS and JAX-RS services. 
+</li>
+<li>
+   Try-It feature for JAX-WS services.
+</li>
+<li>
+   Maven based client side code generation support for JAX-WS, JAX-RS services. 
+</li>
+<li>
+   Maven based new code generation feature for Axis2 services.
+</li>
+<li>
+   Upgraded CXF runtime into 2.7.3.   
+</li>
 </ul>
+
 
 
 <h2>Key Features</h2>
@@ -98,8 +128,8 @@
 <h2>Issues Fixed for this release</h2>
 <ul>
     <li>AppServer related components of the WSO2 Carbon Platform -
-        <a href="https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10895">
-            https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10895
+        <a href="https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10910">
+            https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10910
         </a>
     </li>
 </ul>
@@ -123,8 +153,22 @@
     <li>WS-Eventing</li>
 </ul>
 
+</br>
+<h2>J2EE Web application Standards Support</h2>
+<ul>
+    <li>Servlet 3.0</li>
+    <li>JavaServer Pages (JSP) 2.2</li>
+    <li>Expression Language (EL) 2.2</li>
+    <li>Standard Tag Library for JavaServer Pages (JSTL) 1.2</li>
+    <li>Java Naming and Directory Interface (JNDI)</li>
+    <li>JAXB 2.2</li>
+    <li>JMS</li>
+    <li>Java Mail</li>
+</ul>
+
 <h2>Open Source components included in WSO2 Application Server</h2>
 <ul>
+    <li>Embedded Apache Tomcat</li>
     <li>Apache CXF Support: Supporting JAX-WS and JAX-RS</li>
     <li>Apache Axis2 (SOAP)</li>
     <li>Apache Axiom (High performance XML Object Model)</li>
@@ -134,29 +178,15 @@
     <li>WS-Addressing implementation in Axis2</li>
     <li>Apache Neethi (WS-Policy)</li>
     <li>WS-SecurityPolicy implementation in Axis2</li>
-    <li>Apache XML Schema</li>
-    <li>Embedded Apache Tomcat</li>
+    <li>Apache XML Schema</li>    
     <li>Apache Tribes (Group Communications Framework)</li>
-</ul>
-
-<h2>Apache Axis2 modules included with WSO2 Application Server</h2>
-<ul>
-    <li>Apache Rampart: Supporting WS-Security &amp; WS-Trust</li>
-    <li>Apache Rahas: Supporting WS-SecureConversation</li>
-    <li>Apache Sandesha2: Supporting WS-Reliable Messaging</li>
-    <li>Mex: Supporting WS-MetaDataExchange</li>
-    <li>Throttle: For throttling requests</li>
-    <li>Statistics: For gathering &amp; monitoring statistics</li>
-    <li>Tracer: For tracing SOAP requests &amp; responses</li>
-    <li>WSO2 Application Server Administration: For administering Web services</li>
-    <li>XFer: Supporting WS-Transfer</li>
 </ul>
 
 <h2>Known Issues</h2>
 <ul>
     <li>Application Server related components of the WSO2 Carbon Platform -
-        <a href="https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10896">
-            https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10896
+        <a href="https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10951">
+            https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&amp;requestId=10951
         </a>
     </li>
 </ul>
@@ -170,13 +200,13 @@
 <h2>Contact us</h2>
 WSO2 Application Server developers can be contacted via the mailing list:
 <br/>
-<a href="mailto:carbon-dev@wso2.org">Carbon developer mailing list</a>
+<a href="mailto:dev@wso2.org">Carbon developer mailing list</a>
 <br/>
 
-Alternatively, questions can also be raised in the Application Server forum:
+Alternatively, questions can also be raised in the stackoverflow: 
 <br/>
 <strong>Forum</strong>
-<a href="http://www.wso2.org/forum/184" target="_blank">http://www.wso2.org/forum/184</a>
+<a href="http://stackoverflow.com/questions/tagged/wso2" target="_blank">http://stackoverflow.com/questions/tagged/wso2</a>
 <br/>
 
 <h2>Support</h2>
@@ -203,6 +233,5 @@ For additional support information please refer to
     <em>-The WSO2 Application Server Development Team</em>
 </strong>
 <hr/>
-
 </body>
 </html>

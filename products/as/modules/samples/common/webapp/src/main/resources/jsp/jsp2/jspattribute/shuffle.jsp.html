@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,78 +14,79 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-</span><span style="background-color:#ffffff;">&lt;%@ taglib prefix="my" uri="http://jakarta.apache.org/tomcat/jsp2-example-taglib"%&gt;
+--%>
+&lt;%@ taglib prefix="my" uri="http://tomcat.apache.org/jsp2-example-taglib"%>
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Examples - Shuffle Example</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Examples - Shuffle Example</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Try reloading the page a few times.  Both the rows and the columns
-    are shuffled and appear different each time.</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Here's how the code works.  The SimpleTag handler called
-    </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;">my:shuffle</span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> accepts three attributes.  Each attribute is a
+&lt;html>
+  &lt;head>
+    &lt;title>JSP 2.0 Examples - Shuffle Example&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;h1>JSP 2.0 Examples - Shuffle Example&lt;/h1>
+    &lt;hr>
+    &lt;p>Try reloading the page a few times.  Both the rows and the columns
+    are shuffled and appear different each time.&lt;/p>
+    &lt;p>Here's how the code works.  The SimpleTag handler called
+    &amp;lt;my:shuffle&amp;gt; accepts three attributes.  Each attribute is a
     JSP Fragment, meaning it is a fragment of JSP code that can be
     dynamically executed by the shuffle tag handler on demand.  The
     shuffle tag handler executes the three fragments in a random order.
     To shuffle both the rows and the columns, the shuffle tag is used
-    with itself as a parameter.</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">blockquote</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">     </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#ffffff"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment1"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">            </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">              </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment1"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#ff0000"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"A"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment2"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#00ff00"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"B"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment3"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#0000ff"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"C"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">              </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">            </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment2"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">            </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">              </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment1"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#ff0000"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"1"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment2"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#00ff00"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"2"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment3"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#0000ff"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"3"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">              </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">            </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment3"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">            </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">              </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment1"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#ff0000"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"!"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment2"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#00ff00"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"@"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"fragment3"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">                  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:tile</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"#0000ff"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">label=</span><span style="color:#008000;background-color:#efefef;">"#"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">                </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">              </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">            </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">my:shuffle</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">     </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">blockquote</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+    with itself as a parameter.&lt;/p>
+    &lt;hr>
+    &lt;blockquote>
+     &lt;font color="#ffffff">
+      &lt;table>
+        &lt;my:shuffle>
+          &lt;jsp:attribute name="fragment1">
+            &lt;tr>
+              &lt;my:shuffle>
+                &lt;jsp:attribute name="fragment1">
+                  &lt;my:tile color="#ff0000" label="A"/>
+                &lt;/jsp:attribute>
+                &lt;jsp:attribute name="fragment2">
+                  &lt;my:tile color="#00ff00" label="B"/>
+                &lt;/jsp:attribute>
+                &lt;jsp:attribute name="fragment3">
+                  &lt;my:tile color="#0000ff" label="C"/>
+                &lt;/jsp:attribute>
+              &lt;/my:shuffle>
+            &lt;/tr>
+          &lt;/jsp:attribute>
+          &lt;jsp:attribute name="fragment2">
+            &lt;tr>
+              &lt;my:shuffle>
+                &lt;jsp:attribute name="fragment1">
+                  &lt;my:tile color="#ff0000" label="1"/>
+                &lt;/jsp:attribute>
+                &lt;jsp:attribute name="fragment2">
+                  &lt;my:tile color="#00ff00" label="2"/>
+                &lt;/jsp:attribute>
+                &lt;jsp:attribute name="fragment3">
+                  &lt;my:tile color="#0000ff" label="3"/>
+                &lt;/jsp:attribute>
+              &lt;/my:shuffle>
+            &lt;/tr>
+          &lt;/jsp:attribute>
+          &lt;jsp:attribute name="fragment3">
+            &lt;tr>
+              &lt;my:shuffle>
+                &lt;jsp:attribute name="fragment1">
+                  &lt;my:tile color="#ff0000" label="!"/>
+                &lt;/jsp:attribute>
+                &lt;jsp:attribute name="fragment2">
+                  &lt;my:tile color="#00ff00" label="@"/>
+                &lt;/jsp:attribute>
+                &lt;jsp:attribute name="fragment3">
+                  &lt;my:tile color="#0000ff" label="#"/>
+                &lt;/jsp:attribute>
+              &lt;/my:shuffle>
+            &lt;/tr>
+          &lt;/jsp:attribute>
+        &lt;/my:shuffle>
+      &lt;/table>
+     &lt;/font>
+    &lt;/blockquote>
+  &lt;/body>
+&lt;/html>
+</pre></body></html>

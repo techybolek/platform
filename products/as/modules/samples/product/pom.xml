@@ -26,10 +26,29 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <groupId>org.wso2.appserver</groupId>
     <artifactId>wso2appserver-samples</artifactId>
+    <version>5.1.1</version>
     <packaging>pom</packaging>
     <name>Samples</name>
     <description>All the samples contained in WSO2 AppServer</description>
+
+    <repositories>
+        <repository>
+            <id>wso2-Nexus</id>
+            <name>WSO2 Repository</name>
+            <url>http://dist.wso2.org/maven2</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>wso2-Nexus</id>
+            <name>WSO2 Repository</name>
+            <url>http://dist.wso2.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
+
 
     <reporting>
         <plugins>
@@ -66,7 +85,6 @@
         <module>MEX</module>
         <module>MTOM</module>
         <module>Xfer</module>
-        <module>STS</module>
         <module>Jaxws-Jaxrs</module>
         <module>JSON</module>
         <module>Jibx</module>
@@ -80,7 +98,7 @@
         <module>TomcatWebApps/JDBCDataSource</module>
         <module>TomcatWebApps/CarbonDataSourceAccessExample</module>
         <module>Axis2Module</module>
-	<module>EntitlementFilter</module>
+        <module>EntitlementFilter</module>
     </modules>
 
     <dependencyManagement>
@@ -185,6 +203,12 @@
         <orbit.version.xmlschema>1.4.7.wso2v1</orbit.version.xmlschema>
         <orbit.version.woden>1.0.0.M8-wso2v1</orbit.version.woden>
         <orbit.version.opensaml>2.0.0.alpha1-wso2v1</orbit.version.opensaml>
+        <orbit.version.neethi>2.0.4.wso2v4</orbit.version.neethi>
+        <version.commons.logging>1.1.1</version.commons.logging>
+        <rampart.osgi.version>1.6.1.wso2v4</rampart.osgi.version>
+        <neethi.version>2.0.4-wso2v2</neethi.version>
+        <version.tomcat>7.0.34</version.tomcat>
+        <javax.servlet.jsp.version>2.2.0.v201112011158</javax.servlet.jsp.version>
     </properties>
 
 </project>

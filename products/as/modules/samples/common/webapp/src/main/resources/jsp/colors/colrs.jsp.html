@@ -1,5 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,57 +14,59 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
+--%>
+&lt;html>
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:useBean</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">id=</span><span style="color:#008000;background-color:#efefef;">"cb"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">scope=</span><span style="color:#008000;background-color:#efefef;">"session"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">class=</span><span style="color:#008000;background-color:#efefef;">"colors.ColorGameBean"</span><span style="background-color:#efefef;"> /&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:setProperty</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"cb"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">property=</span><span style="color:#008000;background-color:#efefef;">"*"</span><span style="background-color:#efefef;"> /&gt;
+&lt;jsp:useBean id="cb" scope="session" class="colors.ColorGameBean" />
+&lt;jsp:setProperty name="cb" property="*" />
 
-</span><span style="background-color:#ffffff;">&lt;%
-    cb.processRequest(request);
-%&gt;
+&lt;%
+    cb.processRequest();
+%>
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">bgcolor=</span><span style="color:#008000;background-color:#efefef;">&lt;%=</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">cb.getColor1</span><span style="background-color:#ffffff;">() %&gt;&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">size=</span><span style="color:#008000;background-color:#efefef;">6</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">&lt;%=</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">cb.getColor2</span><span style="background-color:#ffffff;">() %&gt;&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
+&lt;body bgcolor=&lt;%= cb.getColor1() %>>
+&lt;font size=6 color=&lt;%= cb.getColor2() %>>
+&lt;p>
 
-</span><span style="background-color:#ffffff;">&lt;% if (cb.getHint()==true) { %&gt;
+&lt;% if (cb.getHint()==true) { %>
 
-    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> Hint #1: Vampires prey at night!
-    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> Hint #2: Nancy without the n.
+    &lt;p> Hint #1: Vampires prey at night!
+    &lt;p>  &lt;p> Hint #2: Nancy without the n.
 
-&lt;% } %&gt;
+&lt;% } %>
 
-&lt;% if  (cb.getSuccess()==true) { %&gt;
+&lt;% if  (cb.getSuccess()==true) { %>
 
-    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> CONGRATULATIONS!!
-    &lt;% if  (cb.getHintTaken()==true) { %&gt;
+    &lt;p> CONGRATULATIONS!!
+    &lt;% if  (cb.getHintTaken()==true) { %>
 
-        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> ( although I know you cheated and peeked into the hints)
+        &lt;p> ( although I know you cheated and peeked into the hints)
 
-    &lt;% } %&gt;
+    &lt;% } %>
 
-&lt;% } %&gt;
+&lt;% } %>
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> Total attempts so far: &lt;%= cb.getAttempts() %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
+&lt;p> Total attempts so far: &lt;%= cb.getAttempts() %>
+&lt;p>
 
-&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
+&lt;p>
 
-&lt;</span><span style="color:#000080;background-color:#efefef;">form</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">method=</span><span style="color:#008000;background-color:#efefef;">POST</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">action=</span><span style="color:#008000;background-color:#efefef;">colrs.jsp</span><span style="background-color:#efefef;">&gt;
+&lt;form method=POST action=colrs.jsp>
 
-</span><span style="background-color:#ffffff;">Color #1: </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">input</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">type=</span><span style="color:#008000;background-color:#efefef;">text</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="background-color:#efefef;"> </span><span style="color:#008000;background-color:#efefef;">color1</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">size=</span><span style="color:#008000;background-color:#efefef;">16</span><span style="background-color:#efefef;">&gt;
+Color #1: &lt;input type=text name= color1 size=16>
 
-&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
+&lt;br>
 
-</span><span style="background-color:#ffffff;">Color #2: </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">input</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">type=</span><span style="color:#008000;background-color:#efefef;">text</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="background-color:#efefef;"> </span><span style="color:#008000;background-color:#efefef;">color2</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">size=</span><span style="color:#008000;background-color:#efefef;">16</span><span style="background-color:#efefef;">&gt;
+Color #2: &lt;input type=text name= color2 size=16>
 
-&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
+&lt;p>
 
-&lt;</span><span style="color:#000080;background-color:#efefef;">input</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">type=</span><span style="color:#008000;background-color:#efefef;">submit</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">action</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">value=</span><span style="color:#008000;background-color:#efefef;">"Submit"</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">input</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">type=</span><span style="color:#008000;background-color:#efefef;">submit</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">action</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">value=</span><span style="color:#008000;background-color:#efefef;">"Hint"</span><span style="background-color:#efefef;">&gt;
+&lt;input type=submit name=action value="Submit">
+&lt;input type=submit name=action value="Hint">
 
-&lt;/</span><span style="color:#000080;background-color:#efefef;">form</span><span style="background-color:#efefef;">&gt;
+&lt;/form>
 
-&lt;/</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+&lt;/font>
+&lt;/body>
+&lt;/html>
+</pre></body></html>

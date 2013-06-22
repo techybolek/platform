@@ -14,19 +14,26 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-import javax.servlet.http.*;
+package async;
 
-public class servletToJsp extends HttpServlet {
+import java.io.IOException;
 
-    public void doGet (HttpServletRequest request,
-		       HttpServletResponse response) {
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-	try {
-	    // Set the attribute and Forward to hello.jsp
-	    request.setAttribute ("servletName", "servletToJsp");
-	    getServletConfig().getServletContext().getRequestDispatcher("/jsp/jsptoserv/hello.jsp").forward(request, response);
-	} catch (Exception ex) {
-	    ex.printStackTrace ();
-	}
+public class Async3 extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final AsyncContext actx = req.startAsync();
+        actx.setTimeout(30*1000);
+        actx.dispatch("/jsp/async/async3.jsp");
     }
+
+
 }

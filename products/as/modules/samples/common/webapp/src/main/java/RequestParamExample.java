@@ -14,14 +14,18 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-/* $Id: RequestParamExample.java 500674 2007-01-27 23:15:00Z markt $
+/* $Id: RequestParamExample.java 1337730 2012-05-12 23:17:21Z kkolinko $
  *
  */
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ResourceBundle;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import util.HTMLFilter;
 
@@ -33,9 +37,11 @@ import util.HTMLFilter;
 
 public class RequestParamExample extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
 
-    ResourceBundle rb = ResourceBundle.getBundle("LocalStrings");
-    
+    private static final ResourceBundle RB = ResourceBundle.getBundle("LocalStrings");
+
+    @Override
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response)
         throws IOException, ServletException
@@ -44,22 +50,21 @@ public class RequestParamExample extends HttpServlet {
 
         PrintWriter out = response.getWriter();
         out.println("<html>");
-        out.println("<body>");
         out.println("<head>");
 
-        String title = rb.getString("requestparams.title");
+        String title = RB.getString("requestparams.title");
         out.println("<title>" + title + "</title>");
         out.println("</head>");
         out.println("<body bgcolor=\"white\">");
 
         // img stuff not req'd for source code html showing
 
-	// all links relative
+       // all links relative
 
         // XXX
         // making these absolute till we work out the
-        // addition of a PathInfo issue 
-	
+        // addition of a PathInfo issue
+
         out.println("<a href=\"../reqparams.html\">");
         out.println("<img src=\"../images/code.gif\" height=24 " +
                     "width=24 align=right border=0 alt=\"view code\"></a>");
@@ -70,23 +75,23 @@ public class RequestParamExample extends HttpServlet {
         out.println("<h3>" + title + "</h3>");
         String firstName = request.getParameter("firstname");
         String lastName = request.getParameter("lastname");
-        out.println(rb.getString("requestparams.params-in-req") + "<br>");
+        out.println(RB.getString("requestparams.params-in-req") + "<br>");
         if (firstName != null || lastName != null) {
-            out.println(rb.getString("requestparams.firstname"));
+            out.println(RB.getString("requestparams.firstname"));
             out.println(" = " + HTMLFilter.filter(firstName) + "<br>");
-            out.println(rb.getString("requestparams.lastname"));
+            out.println(RB.getString("requestparams.lastname"));
             out.println(" = " + HTMLFilter.filter(lastName));
         } else {
-            out.println(rb.getString("requestparams.no-params"));
+            out.println(RB.getString("requestparams.no-params"));
         }
         out.println("<P>");
         out.print("<form action=\"");
         out.print("RequestParamExample\" ");
         out.println("method=POST>");
-        out.println(rb.getString("requestparams.firstname"));
+        out.println(RB.getString("requestparams.firstname"));
         out.println("<input type=text size=20 name=firstname>");
         out.println("<br>");
-        out.println(rb.getString("requestparams.lastname"));
+        out.println(RB.getString("requestparams.lastname"));
         out.println("<input type=text size=20 name=lastname>");
         out.println("<br>");
         out.println("<input type=submit>");
@@ -96,6 +101,7 @@ public class RequestParamExample extends HttpServlet {
         out.println("</html>");
     }
 
+    @Override
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response)
         throws IOException, ServletException

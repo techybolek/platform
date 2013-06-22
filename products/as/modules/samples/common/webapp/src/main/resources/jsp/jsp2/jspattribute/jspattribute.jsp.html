@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,34 +14,35 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-</span><span style="background-color:#ffffff;">&lt;%@ taglib prefix="my" uri="http://jakarta.apache.org/tomcat/jsp2-example-taglib"%&gt;
+--%>
+&lt;%@ taglib prefix="my" uri="http://tomcat.apache.org/jsp2-example-taglib"%>
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Examples - jsp:attribute and jsp:body</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Examples - jsp:attribute and jsp:body</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">The new </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;">jsp:attribute</span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> and </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;">jsp:body</span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;">
+&lt;html>
+  &lt;head>
+    &lt;title>JSP 2.0 Examples - jsp:attribute and jsp:body&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;h1>JSP 2.0 Examples - jsp:attribute and jsp:body&lt;/h1>
+    &lt;hr>
+    &lt;p>The new &amp;lt;jsp:attribute&amp;gt; and &amp;lt;jsp:body&amp;gt;
     standard actions can be used to specify the value of any standard
-    action or custom action attribute.</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">This example uses the </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;">jsp:attribute</span><span style="color:#0000ff;background-color:#ffffff;">&gt;
-</span><span style="background-color:#ffffff;">    standard action to use the output of a custom action invocation
+    action or custom action attribute.&lt;/p>
+    &lt;p>This example uses the &amp;lt;jsp:attribute&amp;gt;
+    standard action to use the output of a custom action invocation
     (one that simply outputs "Hello, World!") to set the value of a
     bean property.  This would normally require an intermediary
-    step, such as using JSTL's </span><span style="color:#0000ff;background-color:#ffffff;">&lt;</span><span style="background-color:#ffffff;">c:set</span><span style="color:#0000ff;background-color:#ffffff;">&gt;</span><span style="background-color:#ffffff;"> action.</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:useBean</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">id=</span><span style="color:#008000;background-color:#efefef;">"foo"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">class=</span><span style="color:#008000;background-color:#efefef;">"jsp2.examples.FooBean"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      Bean created!  Setting foo.bar...</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:setProperty</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"foo"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">property=</span><span style="color:#008000;background-color:#efefef;">"bar"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"value"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:helloWorld</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:attribute</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:setProperty</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">jsp:useBean</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    Result: ${foo.bar}
-  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+    step, such as using JSTL's &amp;lt;c:set&amp;gt; action.&lt;/p>
+    &lt;br>
+    &lt;jsp:useBean id="foo" class="jsp2.examples.FooBean">
+      Bean created!  Setting foo.bar...&lt;br>
+      &lt;jsp:setProperty name="foo" property="bar">
+        &lt;jsp:attribute name="value">
+          &lt;my:helloWorld/>
+        &lt;/jsp:attribute>
+      &lt;/jsp:setProperty>
+    &lt;/jsp:useBean>
+    &lt;br>
+    Result: ${foo.bar}
+  &lt;/body>
+&lt;/html>
+</pre></body></html>

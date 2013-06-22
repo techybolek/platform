@@ -1,4 +1,4 @@
-<!--
+<%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,13 +13,13 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
+--%>
 <html>
 <head>
 <title>Error Page For Examples</title>
 </head>
 <body bgcolor="white">
 Invalid username and/or password, please try
-<a href='<%= response.encodeURL("login.jsp") %>'>again</a>.
+<a href='<%= response.encodeURL("index.jsp") %>'>again</a>.
 </body>
 </html>

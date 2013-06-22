@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,77 +14,78 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-</span><span style="background-color:#ffffff;">&lt;%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %&gt;
+--%>
+&lt;%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Expression Language - Implicit Objects</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Expression Language - Implicit Objects</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    This example illustrates some of the implicit objects available
-    in the Expression Lanaguage.  The following implicit objects are
+&lt;html>
+  &lt;head>
+    &lt;title>JSP 2.0 Expression Language - Implicit Objects&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;h1>JSP 2.0 Expression Language - Implicit Objects&lt;/h1>
+    &lt;hr>
+    This example illustrates some of the implicit objects available
+    in the Expression Language.  The following implicit objects are
     available (not all illustrated here):
-    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">pageContext - the PageContext object</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">pageScope - a Map that maps page-scoped attribute names to
-          their values</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">requestScope - a Map that maps request-scoped attribute names
-          to their values</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">sessionScope - a Map that maps session-scoped attribute names
-          to their values</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">applicationScope - a Map that maps application-scoped attribute
-          names to their values</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">param - a Map that maps parameter names to a single String
-          parameter value</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">paramValues - a Map that maps parameter names to a String[] of
-          all values for that parameter</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">header - a Map that maps header names to a single String
-          header value</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">headerValues - a Map that maps header names to a String[] of
-          all values for that header</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">initParam - a Map that maps context initialization parameter
-          names to their String parameter value</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">cookie - a Map that maps cookie names to a single Cookie object.</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
+    &lt;ul>
+      &lt;li>pageContext - the PageContext object&lt;/li>
+      &lt;li>pageScope - a Map that maps page-scoped attribute names to
+          their values&lt;/li>
+      &lt;li>requestScope - a Map that maps request-scoped attribute names
+          to their values&lt;/li>
+      &lt;li>sessionScope - a Map that maps session-scoped attribute names
+          to their values&lt;/li>
+      &lt;li>applicationScope - a Map that maps application-scoped attribute
+          names to their values&lt;/li>
+      &lt;li>param - a Map that maps parameter names to a single String
+          parameter value&lt;/li>
+      &lt;li>paramValues - a Map that maps parameter names to a String[] of
+          all values for that parameter&lt;/li>
+      &lt;li>header - a Map that maps header names to a single String
+          header value&lt;/li>
+      &lt;li>headerValues - a Map that maps header names to a String[] of
+          all values for that header&lt;/li>
+      &lt;li>initParam - a Map that maps context initialization parameter
+          names to their String parameter value&lt;/li>
+      &lt;li>cookie - a Map that maps cookie names to a single Cookie object.&lt;/li>
+    &lt;/ul>
 
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">blockquote</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">u</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Change Parameter</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">u</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">form</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">action=</span><span style="color:#008000;background-color:#efefef;">"implicit-objects.jsp"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">method=</span><span style="color:#008000;background-color:#efefef;">"GET"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      foo = </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">input</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">type=</span><span style="color:#008000;background-color:#efefef;">"text"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"foo"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">value=</span><span style="color:#008000;background-color:#efefef;">"${fn:escapeXml(param["</span><span style="color:#0000ff;background-color:#efefef;">foo</span><span style="background-color:#ffffff;">"])}"&gt;
-          </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">input</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">type=</span><span style="color:#008000;background-color:#efefef;">"submit"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">form</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">code</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">border=</span><span style="color:#008000;background-color:#efefef;">"1"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">          </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">thead</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">EL Expression</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Result</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">b</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">thead</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${param.foo}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${fn:escapeXml(param["foo"])}</span><span style="color:#0000ff;background-color:#ffffff;">&nbsp;</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${param["foo"]}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${fn:escapeXml(param["foo"])}</span><span style="color:#0000ff;background-color:#ffffff;">&nbsp;</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${header["host"]}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${fn:escapeXml(header["host"])}</span><span style="color:#0000ff;background-color:#ffffff;">&nbsp;</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${header["accept"]}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${fn:escapeXml(header["accept"])}</span><span style="color:#0000ff;background-color:#ffffff;">&nbsp;</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">\${header["user-agent"]}</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">        </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">${fn:escapeXml(header["user-agent"])}</span><span style="color:#0000ff;background-color:#ffffff;">&nbsp;</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">td</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">tr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">table</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">code</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">blockquote</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+    &lt;blockquote>
+      &lt;u>&lt;b>Change Parameter&lt;/b>&lt;/u>
+      &lt;form action="implicit-objects.jsp" method="GET">
+          foo = &lt;input type="text" name="foo" value="${fn:escapeXml(param["foo"])}">
+          &lt;input type="submit">
+      &lt;/form>
+      &lt;br>
+      &lt;code>
+        &lt;table border="1">
+          &lt;thead>
+            &lt;td>&lt;b>EL Expression&lt;/b>&lt;/td>
+            &lt;td>&lt;b>Result&lt;/b>&lt;/td>
+          &lt;/thead>
+          &lt;tr>
+            &lt;td>\${param.foo}&lt;/td>
+            &lt;td>${fn:escapeXml(param["foo"])}&amp;nbsp;&lt;/td>
+          &lt;/tr>
+          &lt;tr>
+            &lt;td>\${param["foo"]}&lt;/td>
+            &lt;td>${fn:escapeXml(param["foo"])}&amp;nbsp;&lt;/td>
+          &lt;/tr>
+          &lt;tr>
+            &lt;td>\${header["host"]}&lt;/td>
+            &lt;td>${fn:escapeXml(header["host"])}&amp;nbsp;&lt;/td>
+          &lt;/tr>
+          &lt;tr>
+            &lt;td>\${header["accept"]}&lt;/td>
+            &lt;td>${fn:escapeXml(header["accept"])}&amp;nbsp;&lt;/td>
+          &lt;/tr>
+          &lt;tr>
+            &lt;td>\${header["user-agent"]}&lt;/td>
+            &lt;td>${fn:escapeXml(header["user-agent"])}&amp;nbsp;&lt;/td>
+          &lt;/tr>
+        &lt;/table>
+      &lt;/code>
+    &lt;/blockquote>
+  &lt;/body>
+&lt;/html>
+</pre></body></html>

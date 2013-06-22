@@ -56,7 +56,7 @@ System Requirements
 4. The Management Console requires full Javascript enablement of the Web browser
 
 For more details see
-http://docs.wso2.org/wiki/display/AS501/Installation+Prerequisites
+http://docs.wso2.org/wiki/display/AS510/Installation+Prerequisites
 
 (2) Running Samples
 -------------------

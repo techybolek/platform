@@ -44,24 +44,12 @@
         <mkdir dir="${classes}"/>
 	<mkdir dir="${webapps}"/>
 
-	<unzip src="${wso2appserver.home}/repository/components/plugins/cxf-bundle_2.6.1.wso2v2.jar" dest="${dependencies}">
-        <patternset>
-        	<include name="xmlsec-1.5.2.jar"/>
-		<include name="xmlschema-core-2.0.2.jar"/>
-		<include name="xml-resolver-1.2.jar"/>
-		<include name="neethi-3.0.2.jar"/>
-		<include name="jaxb-impl-2.2.5.jar"/>
-		<include name="ehcache-core-2.5.1.jar"/>
-        </patternset>
-        </unzip>
 	<copy toDir="${dependencies}">
-            <fileset dir="${wso2appserver.home}/repository/components/plugins/">
-                <include name="cxf-bundle_2.6.1.wso2v2.jar"/>
-		<include name="wsdl4j_1.6.2.wso2v4.jar"/>
-		<include name="jaxb_2.2.5.wso2v1"/>
-            </fileset>
              <fileset dir="../junit">
                <include name="**"/>
+            </fileset>
+	    <fileset dir="${wso2appserver.home}/lib/runtimes/cxf/">
+                <include name="*.jar"/>
             </fileset>
         </copy>
     </target>
@@ -80,6 +68,9 @@
 		<include name="servicelist.css"/>
              </fileset>
              <classes dir="${classes}"/>
+	    <metainf  dir="src/main/webapp/META-INF"  
+		    includes="webapp-classloading.xml" >
+	    </metainf>
 	     <webinf dir="${src}/main/webapp/WEB-INF"/>
         </war>
     </target>

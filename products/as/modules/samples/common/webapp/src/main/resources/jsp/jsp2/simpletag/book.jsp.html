@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,43 +14,44 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-&lt;%@ taglib prefix="my" uri="/WEB-INF/jsp2/jsp2-example-taglib.tld" %&gt;
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;JSP 2.0 Examples - Book SimpleTag Handler&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;h1&gt;JSP 2.0 Examples - Book SimpleTag Handler&lt;/h1&gt;
-    &lt;hr&gt;
-    &lt;p&gt;Illustrates a semi-realistic use of SimpleTag and the Expression
-    Language.  First, a &lt;my:findBook&gt; tag is invoked to populate
+--%>
+&lt;%@ taglib prefix="my" uri="/WEB-INF/jsp2/jsp2-example-taglib.tld" %>
+&lt;html>
+  &lt;head>
+    &lt;title>JSP 2.0 Examples - Book SimpleTag Handler&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;h1>JSP 2.0 Examples - Book SimpleTag Handler&lt;/h1>
+    &lt;hr>
+    &lt;p>Illustrates a semi-realistic use of SimpleTag and the Expression
+    Language.  First, a &amp;lt;my:findBook&amp;gt; tag is invoked to populate
     the page context with a BookBean.  Then, the books fields are printed
-    in all caps.&lt;/p&gt;
-    &lt;br&gt;
-    &lt;b&gt;&lt;u&gt;Result:&lt;/u&gt;&lt;/b&gt;&lt;br&gt;
-    &lt;my:findBook var="book"/&gt;
-    &lt;table border="1"&gt;
-        &lt;thead&gt;
-        &lt;td&gt;&lt;b&gt;Field&lt;/b&gt;&lt;/td&gt;
-        &lt;td&gt;&lt;b&gt;Value&lt;/b&gt;&lt;/td&gt;
-        &lt;td&gt;&lt;b&gt;Capitalized&lt;/b&gt;&lt;/td&gt;
-    &lt;/thead&gt;
-    &lt;tr&gt;
-        &lt;td&gt;Title&lt;/td&gt;
-        &lt;td&gt;${book.title}&lt;/td&gt;
-        &lt;td&gt;${my:caps(book.title)}&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;td&gt;Author&lt;/td&gt;
-        &lt;td&gt;${book.author}&lt;/td&gt;
-        &lt;td&gt;${my:caps(book.author)}&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;td&gt;ISBN&lt;/td&gt;
-        &lt;td&gt;${book.isbn}&lt;/td&gt;
-        &lt;td&gt;${my:caps(book.isbn)}&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;/table&gt;
-  &lt;/body&gt;
-&lt;/html&gt;</span></pre>
+    in all caps.&lt;/p>
+    &lt;br>
+    &lt;b>&lt;u>Result:&lt;/u>&lt;/b>&lt;br>
+    &lt;my:findBook var="book"/>
+    &lt;table border="1">
+        &lt;thead>
+        &lt;td>&lt;b>Field&lt;/b>&lt;/td>
+        &lt;td>&lt;b>Value&lt;/b>&lt;/td>
+        &lt;td>&lt;b>Capitalized&lt;/b>&lt;/td>
+    &lt;/thead>
+    &lt;tr>
+        &lt;td>Title&lt;/td>
+        &lt;td>${book.title}&lt;/td>
+        &lt;td>${my:caps(book.title)}&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>Author&lt;/td>
+        &lt;td>${book.author}&lt;/td>
+        &lt;td>${my:caps(book.author)}&lt;/td>
+    &lt;/tr>
+    &lt;tr>
+        &lt;td>ISBN&lt;/td>
+        &lt;td>${book.isbn}&lt;/td>
+        &lt;td>${my:caps(book.isbn)}&lt;/td>
+    &lt;/tr>
+    &lt;/table>
+  &lt;/body>
+&lt;/html>
+</pre></body></html>

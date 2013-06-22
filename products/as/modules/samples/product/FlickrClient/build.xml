@@ -33,6 +33,9 @@
         <fileset dir="${wso2appserver.home}">
             <include name="repository/lib/*.jar"/>
 	</fileset>
+        <fileset dir="${wso2appserver.home}">
+            <include name="lib/endorsed/xercesImpl-2.8.1.wso2v2.jar"/>
+	</fileset>
     </path>
 
     <target name="init" depends="clean">

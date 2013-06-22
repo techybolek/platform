@@ -14,31 +14,35 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-
 package compressionFilters;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import javax.servlet.*;
-import javax.servlet.http.*;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Very Simple test servlet to test compression filter
  * @author Amy Roh
- * @version $Revision: 500668 $, $Date: 2007-01-28 00:07:51 +0100 (dim., 28 janv. 2007) $
  */
-
 public class CompressionFilterTestServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
+
+    @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
 
         ServletOutputStream out = response.getOutputStream();
         response.setContentType("text/plain");
 
-        Enumeration e = ((HttpServletRequest)request).getHeaders("Accept-Encoding");
+        Enumeration<String> e = request.getHeaders("Accept-Encoding");
         while (e.hasMoreElements()) {
-            String name = (String)e.nextElement();
+            String name = e.nextElement();
             out.println(name);
             if (name.indexOf("gzip") != -1) {
                 out.println("gzip supported -- able to compress");
@@ -50,6 +54,11 @@ public class CompressionFilterTestServlet extends HttpServlet {
 
 
         out.println("Compression Filter Test Servlet");
+        out.println("Minimum content length for compression is 128 bytes");
+        out.println("**********  32 bytes  **********");
+        out.println("**********  32 bytes  **********");
+        out.println("**********  32 bytes  **********");
+        out.println("**********  32 bytes  **********");
         out.close();
     }
 

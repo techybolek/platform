@@ -15,7 +15,17 @@ WSO2 Application Server is a part of WSO2 Stratos cloud platform (PaaS) and host
 New Features In This Release
 ----------------------------
 
-* This is a patch release of WSO2 AS on top of new WSO2 Carbon platform version 4.0.5.
+* New classloader environment customization architecture which can configure classloader per server or per web application.
+* User defined classloaders environments.
+* Upgraded Tomcat runtime into Tomcat 7.0.34.
+* In built support for Servlet -3, JSP 2.2, EL 2.2, JSTL 1.2 specifications.
+* Full JNDI based data source support.
+* Enhanced service dashboard page for JAX-WS and JAX-RS services.
+* Try-It feature for JAX-WS services.
+* Maven based client side code generation support for JAX-WS, JAX-RS services.
+* Maven based new code generation feature for Axis2 services.
+* Upgraded CXF runtime into 2.7.3.
+
 
 Key Features
 ------------
@@ -41,7 +51,7 @@ Issues Fixed in This Release
 ----------------------------
 
 * Application Server related components of the WSO2 Carbon Platform -
-       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10811
+       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10910
 
 Installation & Running
 ----------------------
@@ -60,13 +70,13 @@ System Requirements
 3. The Management Console requires full Javascript enablement of the Web browser
 
 For more details see the Installation guide or,
-http://docs.wso2.org/wiki/display/AS501/Installation+Prerequisites
+http://docs.wso2.org/wiki/display/AS510/Installation+Prerequisites
 
 Known Issues in This Release
 ----------------------------
 
 * Application Server related components of the WSO2 Carbon Platform -
-       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10812
+       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10951
 
 Including External Dependencies
 --------------------------------
@@ -80,6 +90,9 @@ Application Server Binary Distribution Directory Structure
         |-- bin <directory>
         |-- dbscripts <directory>
         |-- lib <directory>
+             `-- runtimes <directory>
+		   |-- cxf <directory>
+		   `-- ext <directory>
         |-- repository <directory>
         |   |-- carbonapps <directory>
         |   |-- components <directory>
@@ -87,6 +100,7 @@ Application Server Binary Distribution Directory Structure
         |   |-- data <directory>
         |   |-- database <directory>
         |   |-- deployment <directory>
+        |   |-- lib <directory>
         |   |-- logs <directory>
         |   |-- resources <directory>
         |   |   `-- security <directory>
@@ -198,7 +212,7 @@ By default mode, it would ask you to enter the master password
 > ciphertool -Dchange  (in UNIX)
 
 For more details see
-http://docs.wso2.org/wiki/display/Carbon402/WSO2+Carbon+Secure+Vault
+http://docs.wso2.org/wiki/display/Carbon410/WSO2+Carbon+Secure+Vault
 
 Training
 --------

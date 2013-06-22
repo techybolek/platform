@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;!--
+<html><body><pre>
+&lt;!--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,17 +14,18 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-&lt;%@ attribute name="color" %&gt;
-&lt;%@ attribute name="bgcolor" %&gt;
-&lt;%@ attribute name="title" %&gt;
-&lt;table border="1" bgcolor="${color}"&gt;
-  &lt;tr&gt;
-    &lt;td&gt;&lt;b&gt;${title}&lt;/b&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;td bgcolor="${bgcolor}"&gt;
-      &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:doBody</span><span style="background-color:#edffed;">/&gt;
-    &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;</span></pre>
+-->
+&lt;%@ attribute name="color" %>
+&lt;%@ attribute name="bgcolor" %>
+&lt;%@ attribute name="title" %>
+&lt;table border="1" bgcolor="${color}">
+  &lt;tr>
+    &lt;td>&lt;b>${title}&lt;/b>&lt;/td>
+  &lt;/tr>
+  &lt;tr>
+    &lt;td bgcolor="${bgcolor}">
+      &lt;jsp:doBody/>
+    &lt;/td>
+  &lt;/tr>
+&lt;/table>
+</pre></body></html>

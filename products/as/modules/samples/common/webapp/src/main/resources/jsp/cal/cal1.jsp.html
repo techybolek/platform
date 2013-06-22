@@ -1,5 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">HTML</span><span style="background-color:#efefef;">&gt;
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,82 +14,82 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">HEAD</span><span style="background-color:#efefef;">&gt;&lt;</span><span style="color:#000080;background-color:#efefef;">TITLE</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">
+--%>
+&lt;HTML>
+&lt;HEAD>&lt;TITLE>
     Calendar: A JSP APPLICATION
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TITLE</span><span style="background-color:#efefef;">&gt;&lt;/</span><span style="color:#000080;background-color:#efefef;">HEAD</span><span style="background-color:#efefef;">&gt;
+&lt;/TITLE>&lt;/HEAD>
 
 
-&lt;</span><span style="color:#000080;background-color:#efefef;">BODY</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">BGCOLOR=</span><span style="color:#008000;background-color:#efefef;">"white"</span><span style="background-color:#efefef;">&gt;
+&lt;BODY BGCOLOR="white">
 
-</span><span style="background-color:#ffffff;">&lt;%@ page language="java" import="cal.*" %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:useBean</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">id=</span><span style="color:#008000;background-color:#efefef;">"table"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">scope=</span><span style="color:#008000;background-color:#efefef;">"session"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">class=</span><span style="color:#008000;background-color:#efefef;">"cal.TableBean"</span><span style="background-color:#efefef;"> /&gt;
+&lt;%@ page language="java" import="cal.*" %>
+&lt;jsp:useBean id="table" scope="session" class="cal.TableBean" />
 
-</span><span style="background-color:#ffffff;">&lt;%
+&lt;%
     table.processRequest(request);
     if (table.getProcessError() == false) {
-%&gt;
+%>
 
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!-- html table goes here --&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">CENTER</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TABLE</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">WIDTH=</span><span style="color:#008000;background-color:#efefef;">60%</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">BGCOLOR=</span><span style="color:#008000;background-color:#efefef;">yellow</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">CELLPADDING=</span><span style="color:#008000;background-color:#efefef;">15</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">ALIGN=</span><span style="color:#008000;background-color:#efefef;">CENTER</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">A</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">HREF=</span><span style="color:#008000;background-color:#efefef;">cal1.jsp?date=prev</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> prev </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">A</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">ALIGN=</span><span style="color:#008000;background-color:#efefef;">CENTER</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> Calendar:&lt;%= table.getDate() %&gt;</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">ALIGN=</span><span style="color:#008000;background-color:#efefef;">CENTER</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">A</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">HREF=</span><span style="color:#008000;background-color:#efefef;">cal1.jsp?date=next</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> next </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">A</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">TABLE</span><span style="background-color:#efefef;">&gt;
+&lt;!-- html table goes here -->
+&lt;CENTER>
+&lt;TABLE WIDTH=60% BGCOLOR=yellow CELLPADDING=15>
+&lt;TR>
+&lt;TD ALIGN=CENTER> &lt;A HREF=cal1.jsp?date=prev> prev &lt;/A>
+&lt;TD ALIGN=CENTER> Calendar:&lt;%= table.getDate() %>&lt;/TD>
+&lt;TD ALIGN=CENTER> &lt;A HREF=cal1.jsp?date=next> next &lt;/A>
+&lt;/TR>
+&lt;/TABLE>
 
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!-- the main table --&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">TABLE</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">WIDTH=</span><span style="color:#008000;background-color:#efefef;">60%</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">BGCOLOR=</span><span style="color:#008000;background-color:#efefef;">lightblue</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">BORDER=</span><span style="color:#008000;background-color:#efefef;">1</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">CELLPADDING=</span><span style="color:#008000;background-color:#efefef;">10</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TH</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> Time </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TH</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TH</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> Appointment </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TH</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">FORM</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">METHOD=</span><span style="color:#008000;background-color:#efefef;">POST</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">ACTION=</span><span style="color:#008000;background-color:#efefef;">cal1.jsp</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
-    for(int i=0; i</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">table.getEntries</span><span style="background-color:#ffffff;">().getRows(); i++) {
+&lt;!-- the main table -->
+&lt;TABLE WIDTH=60% BGCOLOR=lightblue BORDER=1 CELLPADDING=10>
+&lt;TR>
+&lt;TH> Time &lt;/TH>
+&lt;TH> Appointment &lt;/TH>
+&lt;/TR>
+&lt;FORM METHOD=POST ACTION=cal1.jsp>
+&lt;%
+    for(int i=0; i&lt;table.getEntries().getRows(); i++) {
        cal.Entry entr = table.getEntries().getEntry(i);
-%&gt;
-    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">
-    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">A</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">HREF=</span><span style="color:#008000;background-color:#efefef;">cal2.jsp?time=&lt;%=</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">entr.getHour</span><span style="background-color:#ffffff;">() %&gt;&gt;
-        &lt;%= entr.getHour() %&gt; </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">A</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">BGCOLOR=</span><span style="color:#008000;background-color:#efefef;">&lt;%=</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">entr.getColor</span><span style="background-color:#ffffff;">() %&gt;&gt;
-    &lt;% out.print(util.HTMLFilter.filter(entr.getDescription())); %&gt;
-    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">
-    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+%>
+    &lt;TR>
+    &lt;TD>
+    &lt;A HREF=cal2.jsp?time=&lt;%= entr.getHour() %>>
+        &lt;%= entr.getHour() %> &lt;/A>
+    &lt;/TD>
+    &lt;TD BGCOLOR=&lt;%= entr.getColor() %>>
+    &lt;% out.print(util.HTMLFilter.filter(entr.getDescription())); %>
+    &lt;/TD>
+    &lt;/TR>
+&lt;%
     }
-%&gt;
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">FORM</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">TABLE</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">BR</span><span style="background-color:#efefef;">&gt;
+%>
+&lt;/FORM>
+&lt;/TABLE>
+&lt;BR>
 
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!-- footer --&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">TABLE</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">WIDTH=</span><span style="color:#008000;background-color:#efefef;">60%</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">BGCOLOR=</span><span style="color:#008000;background-color:#efefef;">yellow</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">CELLPADDING=</span><span style="color:#008000;background-color:#efefef;">15</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">ALIGN=</span><span style="color:#008000;background-color:#efefef;">CENTER</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">  &lt;% out.print(util.HTMLFilter.filter(table.getName())); %&gt; :
-             &lt;% out.print(util.HTMLFilter.filter(table.getEmail())); %&gt; </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">TD</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">TR</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">TABLE</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">CENTER</span><span style="background-color:#efefef;">&gt;
+&lt;!-- footer -->
+&lt;TABLE WIDTH=60% BGCOLOR=yellow CELLPADDING=15>
+&lt;TR>
+&lt;TD ALIGN=CENTER>  &lt;% out.print(util.HTMLFilter.filter(table.getName())); %> :
+             &lt;% out.print(util.HTMLFilter.filter(table.getEmail())); %> &lt;/TD>
+&lt;/TR>
+&lt;/TABLE>
+&lt;/CENTER>
 
-</span><span style="background-color:#ffffff;">&lt;%
+&lt;%
     } else {
-%&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">size=</span><span style="color:#008000;background-color:#efefef;">5</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    You must enter your name and email address correctly.
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+%>
+&lt;font size=5>
+    You must enter your name and email address correctly.
+&lt;/font>
+&lt;%
     }
-%&gt;
+%>
 
 
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">BODY</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">HTML</span><span style="background-color:#efefef;">&gt;
+&lt;/BODY>
+&lt;/HTML>
 
 
-
-</span></pre>
+</pre></body></html>

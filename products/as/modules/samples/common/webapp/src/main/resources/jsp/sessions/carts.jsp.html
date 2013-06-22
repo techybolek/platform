@@ -1,5 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,31 +14,32 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
+--%>
+&lt;html>
+&lt;jsp:useBean id="cart" scope="session" class="sessions.DummyCart" />
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:useBean</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">id=</span><span style="color:#008000;background-color:#efefef;">"cart"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">scope=</span><span style="color:#008000;background-color:#efefef;">"session"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">class=</span><span style="color:#008000;background-color:#efefef;">"sessions.DummyCart"</span><span style="background-color:#efefef;"> /&gt;
-
-&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:setProperty</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"cart"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">property=</span><span style="color:#008000;background-color:#efefef;">"*"</span><span style="background-color:#efefef;"> /&gt;
-</span><span style="background-color:#ffffff;">&lt;%
-    cart.processRequest(request);
-%&gt;
+&lt;jsp:setProperty name="cart" property="*" />
+&lt;%
+    cart.processRequest();
+%>
 
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">FONT</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">size</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">=</span><span style="background-color:#efefef;"> </span><span style="color:#008000;background-color:#efefef;">5</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">COLOR=</span><span style="color:#008000;background-color:#efefef;">"#CC0000"</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> You have the following items in your cart:
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ol</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+&lt;FONT size = 5 COLOR="#CC0000">
+&lt;br> You have the following items in your cart:
+&lt;ol>
+&lt;%
     String[] items = cart.getItems();
-    for (int i=0; i</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">items.length</span><span style="background-color:#ffffff;">; i++) {
-%&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;"> &lt;% out.print(util.HTMLFilter.filter(items[i])); %&gt;
+    for (int i=0; i&lt;items.length; i++) {
+%>
+&lt;li> &lt;% out.print(util.HTMLFilter.filter(items[i])); %>
 &lt;%
     }
-%&gt;
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ol</span><span style="background-color:#efefef;">&gt;
+%>
+&lt;/ol>
 
-&lt;/</span><span style="color:#000080;background-color:#efefef;">FONT</span><span style="background-color:#efefef;">&gt;
+&lt;/FONT>
 
-&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%@ include file ="carts.html" %&gt;
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+&lt;hr>
+&lt;%@ include file ="carts.html" %>
+&lt;/html>
+</pre></body></html>

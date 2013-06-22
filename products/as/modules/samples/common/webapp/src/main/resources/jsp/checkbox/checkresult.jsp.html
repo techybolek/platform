@@ -1,5 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,51 +14,52 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
+--%>
+&lt;html>
+&lt;body bgcolor="white">
+&lt;font size=5 color="red">
+&lt;%! String[] fruits; %>
+&lt;jsp:useBean id="foo" scope="page" class="checkbox.CheckTest" />
 
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">bgcolor=</span><span style="color:#008000;background-color:#efefef;">"white"</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">size=</span><span style="color:#008000;background-color:#efefef;">5</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">color=</span><span style="color:#008000;background-color:#efefef;">"red"</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%! String[] fruits; %&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:useBean</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">id=</span><span style="color:#008000;background-color:#efefef;">"foo"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">scope=</span><span style="color:#008000;background-color:#efefef;">"page"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">class=</span><span style="color:#008000;background-color:#efefef;">"checkbox.CheckTest"</span><span style="background-color:#efefef;"> /&gt;
-
-&lt;</span><span style="color:#000080;background-color:#efefef;">jsp:setProperty</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">name=</span><span style="color:#008000;background-color:#efefef;">"foo"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">property=</span><span style="color:#008000;background-color:#efefef;">"fruit"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">param=</span><span style="color:#008000;background-color:#efefef;">"fruit"</span><span style="background-color:#efefef;"> /&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">The checked fruits (got using request) are: </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+&lt;jsp:setProperty name="foo" property="fruit" param="fruit" />
+&lt;hr>
+The checked fruits (got using request) are: &lt;br>
+&lt;%
     fruits = request.getParameterValues("fruit");
-%&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+%>
+&lt;ul>
+&lt;%
     if (fruits != null) {
       for (int i = 0; i &lt; fruits.length; i++) {
-%&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+%>
+&lt;li>
+&lt;%
           out.println (util.HTMLFilter.filter(fruits[i]));
       }
     } else out.println ("none selected");
-%&gt;
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
-&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
+%>
+&lt;/ul>
+&lt;br>
+&lt;hr>
 
-</span><span style="background-color:#ffffff;">The checked fruits (got using beans) are </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">br</span><span style="background-color:#efefef;">&gt;
+The checked fruits (got using beans) are &lt;br>
 
-</span><span style="background-color:#ffffff;">&lt;%
+&lt;%
         fruits = foo.getFruit();
-%&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+%>
+&lt;ul>
+&lt;%
     if (!fruits[0].equals("1")) {
       for (int i = 0; i &lt; fruits.length; i++) {
-%&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">li</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">&lt;%
+%>
+&lt;li>
+&lt;%
           out.println (util.HTMLFilter.filter(fruits[i]));
       }
     } else out.println ("none selected");
-%&gt;
-</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">font</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+%>
+&lt;/ul>
+&lt;/font>
+&lt;/body>
+&lt;/html>
+</pre></body></html>

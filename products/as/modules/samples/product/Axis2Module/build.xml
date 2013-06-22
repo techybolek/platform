@@ -39,10 +39,10 @@
 
         <copy toDir="${lib}">
             <fileset dir="${wso2appserver.home}/repository/components/plugins/">
-		<include name="axis2_1.6.1.wso2v6.jar" /> 
-		<include name="org.wso2.carbon.logging_4.0.0.jar"/>   
+		<include name="axis2_1.6.1.wso2v9.jar" /> 
+		<include name="org.wso2.carbon.logging_4.1.0.jar"/>   
 		<include name="neethi_2.0.4.wso2v4.jar"/>
-		<include name="axiom_1.2.11.wso2v3.jar" />
+		<include name="axiom_1.2.11.wso2v4.jar" />
             </fileset>  
         </copy> 
     </target>

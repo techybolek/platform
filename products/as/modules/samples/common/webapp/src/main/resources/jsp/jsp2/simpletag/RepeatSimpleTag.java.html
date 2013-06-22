@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">/*
+<html><body><pre>
+/*
 * Licensed to the Apache Software Foundation (ASF) under one or more
 * contributor license agreements.  See the NOTICE file distributed with
 * this work for additional information regarding copyright ownership.
@@ -16,27 +17,30 @@
 */
 
 
-</span><span style="color:#000080;background-color:#ffffff;">package</span><span style="background-color:#ffffff;"> jsp2.examples.simpletag;
+package jsp2.examples.simpletag;
 
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> javax.servlet.jsp.JspException;
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> javax.servlet.jsp.tagext.SimpleTagSupport;
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> java.io.IOException;
+import java.io.IOException;
 
-</span><span style="color:#008000;background-color:#ffffff;">/**
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+
+/**
  * SimpleTag handler that accepts a num attribute and
  * invokes its body 'num' times.
  */
-</span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">class</span><span style="background-color:#ffffff;"> RepeatSimpleTag </span><span style="color:#000080;background-color:#ffffff;">extends</span><span style="background-color:#ffffff;"> SimpleTagSupport {
-    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">int</span><span style="background-color:#ffffff;"> </span><span style="color:#660e7a;background-color:#ffffff;">num;
+public class RepeatSimpleTag extends SimpleTagSupport {
+    private int num;
 
-</span><span style="background-color:#ffffff;">    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">void</span><span style="background-color:#ffffff;"> doTag() </span><span style="color:#000080;background-color:#ffffff;">throws</span><span style="background-color:#ffffff;"> JspException, IOException {
-        </span><span style="color:#000080;background-color:#ffffff;">for</span><span style="background-color:#ffffff;"> (</span><span style="color:#000080;background-color:#ffffff;">int</span><span style="background-color:#ffffff;"> i=</span><span style="color:#0000ff;background-color:#ffffff;">0</span><span style="background-color:#ffffff;">; i&lt;</span><span style="color:#660e7a;background-color:#ffffff;">num;</span><span style="background-color:#ffffff;"> i++) {
-            getJspContext().setAttribute(</span><span style="color:#008000;background-color:#ffffff;">"count"</span><span style="background-color:#ffffff;">, String.</span><span style="color:#800000;background-color:#ffffff;">valueOf(</span><span style="background-color:#ffffff;"> i + </span><span style="color:#0000ff;background-color:#ffffff;">1</span><span style="background-color:#ffffff;"> ) );
-        getJspBody().invoke(</span><span style="color:#000080;background-color:#ffffff;">null</span><span style="background-color:#ffffff;">);
+    @Override
+    public void doTag() throws JspException, IOException {
+        for (int i=0; i&lt;num; i++) {
+            getJspContext().setAttribute("count", String.valueOf( i + 1 ) );
+            getJspBody().invoke(null);
         }
     }
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">void</span><span style="background-color:#ffffff;"> setNum(</span><span style="color:#000080;background-color:#ffffff;">int</span><span style="background-color:#ffffff;"> num) {
-    </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">num </span><span style="background-color:#ffffff;">= num;
+    public void setNum(int num) {
+        this.num = num;
     }
-}</span></pre>
+}
+</pre></body></html>

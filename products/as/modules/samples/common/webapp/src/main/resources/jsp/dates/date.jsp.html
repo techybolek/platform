@@ -1,5 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;html&gt;
-&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,28 +14,30 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
+--%>
+&lt;html>
 
-&lt;%@ page session="false"%&gt;
+&lt;%@ page session="false"%>
 
-&lt;body bgcolor="white"&gt;
-&lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:useBean</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">id=</span><span style="color:#008000;background-color:#edffed;">'clock'</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">scope=</span><span style="color:#008000;background-color:#edffed;">'page'</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">class=</span><span style="color:#008000;background-color:#edffed;">'dates.JspCalendar'</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">type=</span><span style="color:#008000;background-color:#edffed;">"dates.JspCalendar"</span><span style="background-color:#edffed;"> /&gt;
+&lt;body bgcolor="white">
+&lt;jsp:useBean id='clock' scope='page' class='dates.JspCalendar' type="dates.JspCalendar" />
 
-&lt;font size=4&gt;
-&lt;ul&gt;
-&lt;li&gt;    Day of month: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"dayOfMonth"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Year: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"year"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Month: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"month"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Time: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"time"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Date: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"date"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Day: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"day"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Day Of Year: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"dayOfYear"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Week Of Year: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"weekOfYear"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    era: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"era"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    DST Offset: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"DSTOffset"</span><span style="background-color:#edffed;">/&gt;
-&lt;li&gt;    Zone Offset: is  &lt;</span><span style="color:#0000ff;background-color:#edffed;font-weight:bold;">jsp:getProperty</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">name=</span><span style="color:#008000;background-color:#edffed;">"clock"</span><span style="background-color:#edffed;"> </span><span style="color:#0000ff;background-color:#edffed;">property=</span><span style="color:#008000;background-color:#edffed;">"zoneOffset"</span><span style="background-color:#edffed;">/&gt;
-&lt;/ul&gt;
-&lt;/font&gt;
+&lt;font size=4>
+&lt;ul>
+&lt;li>    Day of month: is  &lt;jsp:getProperty name="clock" property="dayOfMonth"/>
+&lt;li>    Year: is  &lt;jsp:getProperty name="clock" property="year"/>
+&lt;li>    Month: is  &lt;jsp:getProperty name="clock" property="month"/>
+&lt;li>    Time: is  &lt;jsp:getProperty name="clock" property="time"/>
+&lt;li>    Date: is  &lt;jsp:getProperty name="clock" property="date"/>
+&lt;li>    Day: is  &lt;jsp:getProperty name="clock" property="day"/>
+&lt;li>    Day Of Year: is  &lt;jsp:getProperty name="clock" property="dayOfYear"/>
+&lt;li>    Week Of Year: is  &lt;jsp:getProperty name="clock" property="weekOfYear"/>
+&lt;li>    era: is  &lt;jsp:getProperty name="clock" property="era"/>
+&lt;li>    DST Offset: is  &lt;jsp:getProperty name="clock" property="DSTOffset"/>
+&lt;li>    Zone Offset: is  &lt;jsp:getProperty name="clock" property="zoneOffset"/>
+&lt;/ul>
+&lt;/font>
 
-&lt;/body&gt;
-&lt;/html&gt;</span></pre>
+&lt;/body>
+&lt;/html>
+</pre></body></html>

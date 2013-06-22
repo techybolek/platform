@@ -104,8 +104,8 @@
                 <configuration>
                     <warName>example</warName>
                     <packagingIncludes>
-                        WEB-INF/classes/**,
-                        WEB-INF/*,
+                        WEB-INF/classes/**/*.class,
+			WEB-INF/classes/*.properties,
                         WEB-INF/lib/jstl.jar,
                         WEB-INF/lib/standard.jar,
                         **/axis2-client*.jar,
@@ -120,7 +120,12 @@
                         **/*.class,
                         **/*.html
                     </packagingIncludes>
-                    <!--<packagingExcludes>WEB-INF/classes/WEB-INF/*</packagingExcludes>-->
+                    <packagingExcludes>
+			WEB-INF/classes/**/*.j*,
+                        WEB-INF/classes/**/*.html,
+                        WEB-INF/classes/**/*.t*,
+                        WEB-INF/classes/**/*.gif,
+		    </packagingExcludes>
                     <webResources>
                         <resource>
                             <!-- this is relative to the pom.xml directory -->

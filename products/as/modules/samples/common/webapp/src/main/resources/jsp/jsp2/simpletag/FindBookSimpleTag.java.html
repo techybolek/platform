@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">/*
+<html><body><pre>
+/*
 * Licensed to the Apache Software Foundation (ASF) under one or more
 * contributor license agreements.  See the NOTICE file distributed with
 * this work for additional information regarding copyright ownership.
@@ -16,29 +17,32 @@
 */
 
 
-</span><span style="color:#000080;background-color:#ffffff;">package</span><span style="background-color:#ffffff;"> jsp2.examples.simpletag;
+package jsp2.examples.simpletag;
 
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> javax.servlet.jsp.JspException;
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> javax.servlet.jsp.tagext.SimpleTagSupport;
-</span><span style="color:#000080;background-color:#ffffff;">import</span><span style="background-color:#ffffff;"> jsp2.examples.BookBean;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
 
-</span><span style="color:#008000;background-color:#ffffff;">/**
+import jsp2.examples.BookBean;
+
+/**
  * SimpleTag handler that pretends to search for a book, and stores
  * the result in a scoped variable.
  */
-</span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">class</span><span style="background-color:#ffffff;"> FindBookSimpleTag </span><span style="color:#000080;background-color:#ffffff;">extends</span><span style="background-color:#ffffff;"> SimpleTagSupport {
-    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> String </span><span style="color:#660e7a;background-color:#ffffff;">var;
-</span><span style="background-color:#ffffff;">
-    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">static</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">final</span><span style="background-color:#ffffff;"> String </span><span style="color:#800000;background-color:#ffffff;">BOOK_TITLE </span><span style="background-color:#ffffff;">= </span><span style="color:#008000;background-color:#ffffff;">"The Lord of the Rings"</span><span style="background-color:#ffffff;">;
-    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">static</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">final</span><span style="background-color:#ffffff;"> String </span><span style="color:#800000;background-color:#ffffff;">BOOK_AUTHOR </span><span style="background-color:#ffffff;">= </span><span style="color:#008000;background-color:#ffffff;">"J. R. R. Tolkein"</span><span style="background-color:#ffffff;">;
-    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">static</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">final</span><span style="background-color:#ffffff;"> String </span><span style="color:#800000;background-color:#ffffff;">BOOK_ISBN </span><span style="background-color:#ffffff;">= </span><span style="color:#008000;background-color:#ffffff;">"0618002251"</span><span style="background-color:#ffffff;">;
+public class FindBookSimpleTag extends SimpleTagSupport {
+    private String var;
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">void</span><span style="background-color:#ffffff;"> doTag() </span><span style="color:#000080;background-color:#ffffff;">throws</span><span style="background-color:#ffffff;"> JspException {
-        BookBean book = </span><span style="color:#000080;background-color:#ffffff;">new</span><span style="background-color:#ffffff;"> BookBean( </span><span style="color:#800000;background-color:#ffffff;">BOOK_TITLE,</span><span style="background-color:#ffffff;"> </span><span style="color:#800000;background-color:#ffffff;">BOOK_AUTHOR,</span><span style="background-color:#ffffff;"> </span><span style="color:#800000;background-color:#ffffff;">BOOK_ISBN </span><span style="background-color:#ffffff;">);
-        getJspContext().setAttribute( </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">var,</span><span style="background-color:#ffffff;"> book );
+    private static final String BOOK_TITLE = "The Lord of the Rings";
+    private static final String BOOK_AUTHOR = "J. R. R. Tolkein";
+    private static final String BOOK_ISBN = "0618002251";
+
+    @Override
+    public void doTag() throws JspException {
+        BookBean book = new BookBean( BOOK_TITLE, BOOK_AUTHOR, BOOK_ISBN );
+        getJspContext().setAttribute( this.var, book );
     }
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">void</span><span style="background-color:#ffffff;"> setVar( String var ) {
-    </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">var </span><span style="background-color:#ffffff;">= var;
+    public void setVar( String var ) {
+        this.var = var;
     }
-}</span></pre>
+}
+</pre></body></html>

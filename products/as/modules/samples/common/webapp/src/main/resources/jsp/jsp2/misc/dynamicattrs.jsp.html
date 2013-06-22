@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">&lt;!--
+<html><body><pre>
+&lt;%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,32 +14,33 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---&gt;
-</span><span style="background-color:#ffffff;">&lt;%@ taglib prefix="my" uri="http://jakarta.apache.org/tomcat/jsp2-example-taglib"%&gt;
-</span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Examples - Dynamic Attributes</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">title</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">head</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">JSP 2.0 Examples - Dynamic Attributes</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h1</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">This JSP page invokes a custom tag that accepts a dynamic set
+--%>
+&lt;%@ taglib prefix="my" uri="http://tomcat.apache.org/jsp2-example-taglib"%>
+&lt;html>
+  &lt;head>
+    &lt;title>JSP 2.0 Examples - Dynamic Attributes&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;h1>JSP 2.0 Examples - Dynamic Attributes&lt;/h1>
+    &lt;hr>
+    &lt;p>This JSP page invokes a custom tag that accepts a dynamic set
     of attributes.  The tag echoes the name and value of all attributes
-    passed to it.</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">p</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">hr</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h2</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Invocation 1 (six attributes)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h2</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:echoAttributes</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">x=</span><span style="color:#008000;background-color:#efefef;">"1"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">y=</span><span style="color:#008000;background-color:#efefef;">"2"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">z=</span><span style="color:#008000;background-color:#efefef;">"3"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">r=</span><span style="color:#008000;background-color:#efefef;">"red"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">g=</span><span style="color:#008000;background-color:#efefef;">"green"</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">b=</span><span style="color:#008000;background-color:#efefef;">"blue"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h2</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Invocation 2 (zero attributes)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h2</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:echoAttributes</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">h2</span><span style="background-color:#efefef;">&gt;</span><span style="background-color:#ffffff;">Invocation 3 (three attributes)</span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">h2</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">      </span><span style="background-color:#efefef;">&lt;</span><span style="color:#000080;background-color:#efefef;">my:echoAttributes</span><span style="background-color:#efefef;"> </span><span style="color:#0000ff;background-color:#efefef;">dogName=</span><span style="color:#008000;background-color:#efefef;">"Scruffy"</span><span style="background-color:#efefef;">
-                </span><span style="color:#0000ff;background-color:#efefef;">catName=</span><span style="color:#008000;background-color:#efefef;">"Fluffy"</span><span style="background-color:#efefef;">
-             </span><span style="color:#0000ff;background-color:#efefef;">blowfishName=</span><span style="color:#008000;background-color:#efefef;">"Puffy"</span><span style="background-color:#efefef;">/&gt;
-</span><span style="background-color:#ffffff;">    </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">ul</span><span style="background-color:#efefef;">&gt;
-</span><span style="background-color:#ffffff;">  </span><span style="background-color:#efefef;">&lt;/</span><span style="color:#000080;background-color:#efefef;">body</span><span style="background-color:#efefef;">&gt;
-&lt;/</span><span style="color:#000080;background-color:#efefef;">html</span><span style="background-color:#efefef;">&gt;</span></pre>
+    passed to it.&lt;/p>
+    &lt;hr>
+    &lt;h2>Invocation 1 (six attributes)&lt;/h2>
+    &lt;ul>
+      &lt;my:echoAttributes x="1" y="2" z="3" r="red" g="green" b="blue"/>
+    &lt;/ul>
+    &lt;h2>Invocation 2 (zero attributes)&lt;/h2>
+    &lt;ul>
+      &lt;my:echoAttributes/>
+    &lt;/ul>
+    &lt;h2>Invocation 3 (three attributes)&lt;/h2>
+    &lt;ul>
+      &lt;my:echoAttributes dogName="Scruffy"
+                         catName="Fluffy"
+                         blowfishName="Puffy"/>
+    &lt;/ul>
+  &lt;/body>
+&lt;/html>
+</pre></body></html>

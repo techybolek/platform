@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">/*
+<html><body><pre>
+/*
 * Licensed to the Apache Software Foundation (ASF) under one or more
 * contributor license agreements.  See the NOTICE file distributed with
 * this work for additional information regarding copyright ownership.
@@ -14,30 +15,33 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-</span><span style="color:#000080;background-color:#ffffff;">package</span><span style="background-color:#ffffff;"> jsp2.examples.el;
+package jsp2.examples.el;
 
-</span><span style="color:#008000;background-color:#ffffff;">/**
+import java.util.Locale;
+
+/**
  * Defines the functions for the jsp2 example tag library.
  *
- * </span><span style="color:#008000;background-color:#e2ffe2;">&lt;p&gt;</span><span style="color:#008000;background-color:#ffffff;">Each function is defined as a static method.</span><span style="color:#008000;background-color:#e2ffe2;">&lt;/p&gt;
-</span><span style="color:#008000;background-color:#ffffff;"> */
-</span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">class</span><span style="background-color:#ffffff;"> Functions {
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">static</span><span style="background-color:#ffffff;"> String reverse( String text ) {
-        </span><span style="color:#000080;background-color:#ffffff;">return</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">new</span><span style="background-color:#ffffff;"> StringBuffer( text ).reverse().toString();
+ * &lt;p>Each function is defined as a static method.&lt;/p>
+ */
+public class Functions {
+    public static String reverse( String text ) {
+        return new StringBuilder( text ).reverse().toString();
     }
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">static</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">int</span><span style="background-color:#ffffff;"> numVowels( String text ) {
-        String vowels = </span><span style="color:#008000;background-color:#ffffff;">"aeiouAEIOU"</span><span style="background-color:#ffffff;">;
-    </span><span style="color:#000080;background-color:#ffffff;">int</span><span style="background-color:#ffffff;"> result = </span><span style="color:#0000ff;background-color:#ffffff;">0</span><span style="background-color:#ffffff;">;
-        </span><span style="color:#000080;background-color:#ffffff;">for</span><span style="background-color:#ffffff;">( </span><span style="color:#000080;background-color:#ffffff;">int</span><span style="background-color:#ffffff;"> i = </span><span style="color:#0000ff;background-color:#ffffff;">0</span><span style="background-color:#ffffff;">; i &lt; text.length(); i++ ) {
-        </span><span style="color:#000080;background-color:#ffffff;">if</span><span style="background-color:#ffffff;">( vowels.indexOf( text.charAt( i ) ) != -</span><span style="color:#0000ff;background-color:#ffffff;">1</span><span style="background-color:#ffffff;"> ) {
-            result++;
+    public static int numVowels( String text ) {
+        String vowels = "aeiouAEIOU";
+        int result = 0;
+        for( int i = 0; i &lt; text.length(); i++ ) {
+            if( vowels.indexOf( text.charAt( i ) ) != -1 ) {
+                result++;
+            }
         }
-    }
-    </span><span style="color:#000080;background-color:#ffffff;">return</span><span style="background-color:#ffffff;"> result;
+        return result;
     }
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">static</span><span style="background-color:#ffffff;"> String caps( String text ) {
-        </span><span style="color:#000080;background-color:#ffffff;">return</span><span style="background-color:#ffffff;"> text.toUpperCase();
+    public static String caps( String text ) {
+        return text.toUpperCase(Locale.ENGLISH);
     }
-}</span></pre>
+}
+</pre></body></html>

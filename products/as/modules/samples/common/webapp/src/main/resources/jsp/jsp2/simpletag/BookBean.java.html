@@ -1,4 +1,5 @@
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="color:#808080;background-color:#ffffff;">/*
+<html><body><pre>
+/*
 * Licensed to the Apache Software Foundation (ASF) under one or more
 * contributor license agreements.  See the NOTICE file distributed with
 * this work for additional information regarding copyright ownership.
@@ -16,29 +17,30 @@
 */
 
 
-</span><span style="color:#000080;background-color:#ffffff;">package</span><span style="background-color:#ffffff;"> jsp2.examples;
+package jsp2.examples;
 
-</span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">class</span><span style="background-color:#ffffff;"> BookBean {
-    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> String </span><span style="color:#660e7a;background-color:#ffffff;">title;
-</span><span style="background-color:#ffffff;">    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> String </span><span style="color:#660e7a;background-color:#ffffff;">author;
-</span><span style="background-color:#ffffff;">    </span><span style="color:#000080;background-color:#ffffff;">private</span><span style="background-color:#ffffff;"> String </span><span style="color:#660e7a;background-color:#ffffff;">isbn;
-</span><span style="background-color:#ffffff;">
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> BookBean( String title, String author, String isbn ) {
-        </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">title </span><span style="background-color:#ffffff;">= title;
-        </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">author </span><span style="background-color:#ffffff;">= author;
-        </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">isbn </span><span style="background-color:#ffffff;">= isbn;
+public class BookBean {
+    private String title;
+    private String author;
+    private String isbn;
+
+    public BookBean( String title, String author, String isbn ) {
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
     }
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> String getTitle() {
-        </span><span style="color:#000080;background-color:#ffffff;">return</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">title;
-</span><span style="background-color:#ffffff;">    }
+    public String getTitle() {
+        return this.title;
+    }
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> String getAuthor() {
-        </span><span style="color:#000080;background-color:#ffffff;">return</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">author;
-</span><span style="background-color:#ffffff;">    }
+    public String getAuthor() {
+        return this.author;
+    }
 
-    </span><span style="color:#000080;background-color:#ffffff;">public</span><span style="background-color:#ffffff;"> String getIsbn() {
-        </span><span style="color:#000080;background-color:#ffffff;">return</span><span style="background-color:#ffffff;"> </span><span style="color:#000080;background-color:#ffffff;">this</span><span style="background-color:#ffffff;">.</span><span style="color:#660e7a;background-color:#ffffff;">isbn;
-</span><span style="background-color:#ffffff;">    }
+    public String getIsbn() {
+        return this.isbn;
+    }
 
-}</span></pre>
+}
+</pre></body></html>
