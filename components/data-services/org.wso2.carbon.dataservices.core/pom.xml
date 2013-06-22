@@ -139,11 +139,11 @@
             <artifactId>webharvest-core</artifactId>
             <version>${web-harvest.wso2.version.data-services}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>net.sf.saxon.wso2</groupId>
             <artifactId>saxon</artifactId>
             <version>${saxon.wso2.version.data-services}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>commons-httpclient.wso2</groupId>
             <artifactId>commons-httpclient</artifactId>
