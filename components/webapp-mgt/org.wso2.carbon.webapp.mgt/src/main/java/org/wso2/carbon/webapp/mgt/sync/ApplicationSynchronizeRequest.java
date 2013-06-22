@@ -56,7 +56,7 @@ public class ApplicationSynchronizeRequest extends ClusteringMessage {
         if (tenantId == MultitenantConstants.SUPER_TENANT_ID ||
                 TenantAxisUtils.getTenantConfigurationContexts(configContext).get(tenantDomain) != null) {
             if (log.isDebugEnabled()) {
-                log.debug("Going to synchronize Application status.");
+                log.debug("Going to synchronize Application status for tenant: TID - " + tenantId + " TD - " + tenantDomain);
             }
             try {
                 PrivilegedCarbonContext.startTenantFlow();
@@ -65,16 +65,20 @@ public class ApplicationSynchronizeRequest extends ClusteringMessage {
                 privilegedCarbonContext.setTenantId(tenantId);
                 privilegedCarbonContext.setTenantDomain(tenantDomain);
 
-                ConfigurationContext tenantConfigConfigurationContext =
-                        TenantAxisUtils.getTenantConfigurationContexts(configContext).get(tenantDomain);
+                ConfigurationContext tenantConfigurationContext;
+                if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                    tenantConfigurationContext = configContext;
+                } else {
+                    tenantConfigurationContext = TenantAxisUtils.getTenantConfigurationContexts(configContext).get(tenantDomain);
+                }
                 WebApplicationsHolder webappsHolder = (WebApplicationsHolder)
-                        tenantConfigConfigurationContext.getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
+                        tenantConfigurationContext.getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
                 switch (operation) {
                     case STOP:
                         stopApplications(webappsHolder);
                         break;
                     case START:
-                        startApplications(tenantConfigConfigurationContext, webappsHolder);
+                        startApplications(tenantConfigurationContext, webappsHolder);
                         break;
                     case RELOAD:
                         reloadApplications(webappsHolder);
@@ -85,7 +89,7 @@ public class ApplicationSynchronizeRequest extends ClusteringMessage {
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Tenant is not loaded. ");
+                log.debug("Tenant is not loaded. TID - " + tenantId + " TD - " + tenantDomain);
             }
         }
     }

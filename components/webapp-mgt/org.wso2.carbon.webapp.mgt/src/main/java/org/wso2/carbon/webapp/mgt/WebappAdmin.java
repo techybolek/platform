@@ -135,13 +135,16 @@ public class WebappAdmin extends AbstractAdmin {
 
         String appContext = "/";
         for (Container container : webApplication.getContext().findChildren()) {
-            if(((StandardWrapper) container).getServletName().equals("JAXServlet")) {
+            if(((StandardWrapper) container).getServletClass().equals(
+                    "org.apache.cxf.transport.servlet.CXFServlet")) {
                 appContext = (((StandardWrapper) container).findMappings())[0];
+                if(appContext.endsWith("/*")) {
+                    appContext = appContext.substring(0, appContext.indexOf("/*"));
+                }
+                break;
             }
         }
-        if(appContext.endsWith("/*")) {
-            appContext = appContext.substring(0, appContext.indexOf("/*"));
-        }
+
         webappMetadata.setDisplayName(webApplication.getDisplayName());
         webappMetadata.setContext(webApplication.getContextName());
         webappMetadata.setServletContext(appContext);
