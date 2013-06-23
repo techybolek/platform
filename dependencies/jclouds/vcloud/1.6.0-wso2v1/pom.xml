@@ -37,9 +37,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.jamesmurty.utils</groupId>
+      <groupId>com.jamesmurty.utils.wso2</groupId>
       <artifactId>java-xmlbuilder</artifactId>
-      <version>0.4</version>
+      <version>0.4.wso2v1</version>
     </dependency>
     <dependency>
       <groupId>org.jclouds</groupId>
@@ -72,11 +72,22 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
-      <artifactId>jclouds-log4j</artifactId>
-      <version>${jclouds.version}</version>
-      <scope>test</scope>
+	<groupId>xmlunit</groupId>
+	<artifactId>xmlunit</artifactId>
+	<version>1.3</version>
     </dependency>
+    <dependency>
+	<groupId>org.easymock</groupId>
+	<artifactId>easymockclassextension</artifactId>
+	<version>3.1</version>
+    </dependency>
+    <dependency>
+	<groupId>org.testng</groupId>
+	<artifactId>testng</artifactId>
+	<version>6.1.1</version>
+	<scope>test</scope>
+    </dependency>
+
   </dependencies>
   <build>
         <plugins>
@@ -89,30 +100,23 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Export-Package>org.jclouds.vcloud*</Export-Package>
-                        <!--Import-Package>${jclouds.osgi.import}</Import-Package-->
+                        <Export-Package>org.jclouds.vcloud.*</Export-Package>
+                        <Import-Package>!com.jamesmurty.utils.*</Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>2.3.2</version>
-            <executions>
-                <execution>
-                    <id>default-testCompile</id>
-                    <phase>test-compile</phase>
-                    <goals>
-                        <goal>testCompile</goal>
-                    </goals>
-                    <configuration>
-                        <!-- skipping compiling tests because required dependant source files are not available in openstack-keystone -->
-                        <skip>true</skip>
-                    </configuration>
-                </execution>
-            </executions>
-            </plugin>
+	     <plugin>
+	       <groupId>org.apache.maven.plugins</groupId>
+	       <artifactId>maven-surefire-plugin</artifactId>
+	       <configuration>
+		  <!--skipping test, since we have to re-write the test along with the newly added vlcoud changes-->
+     		  <skipTests>true</skipTests>
+   		</configuration>
+      	    </plugin>	
         </plugins>
     </build>
+    <properties>
+        <jclouds.version>1.5.0-beta.5</jclouds.version>
+    </properties>
 </project>
