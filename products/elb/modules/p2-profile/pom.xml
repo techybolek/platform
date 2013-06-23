@@ -64,7 +64,7 @@
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
-                <version>${carbon.p2.plugin.version}</version>
+                <version>1.5.2-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <id>2-p2-repo-generation</id>
@@ -146,7 +146,7 @@
                                 </featureArtifactDef>
 
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.stratos.cloud.controller.feature:1.0.0-SNAPSHOT
+                                    org.wso2.carbon:org.wso2.carbon.stratos.cloud.controller.feature:2.2.0-SNAPSHOT
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.mediator.autoscale.feature:${carbon.version}
@@ -186,6 +186,7 @@
                         </goals>
                         <configuration>
                             <profile>default</profile>
+                            <p2AgentLocation>${basedir}/target/p2-agent</p2AgentLocation>
                             <metadataRepository>file:${basedir}/target/p2-repo</metadataRepository>
                             <artifactRepository>file:${basedir}/target/p2-repo</artifactRepository>
                             <destination>
@@ -227,7 +228,7 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.stratos.cloud.controller.feature.group</id>
-                                    <version>1.0.0-SNAPSHOT</version>
+                                    <version>2.2.0-SNAPSHOT</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.endpoint.server.feature.group</id>
@@ -306,7 +307,7 @@
                 <configuration>
                     <tasks>
                         <replace token="false" value="true"
-                                 dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components/configuration/org.eclipse.equinox.simpleconfigurator">
+                                 dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components">
                             <include name="**/bundles.info"/>
                         </replace>
                     </tasks>
@@ -319,7 +320,7 @@
     </plugin>
         </plugins>
     </build>
-    <properties>
+    <!--properties>
         <carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
-    </properties>
+    </properties-->
 </project>
