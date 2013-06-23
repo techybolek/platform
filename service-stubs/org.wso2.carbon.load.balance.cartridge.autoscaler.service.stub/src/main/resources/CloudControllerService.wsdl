@@ -1,4 +1,4 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://impl.controller.cloud.stratos.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2171="http://util.controller.cloud.stratos.carbon.wso2.org/xsd" xmlns:ax2169="http://exception.controller.cloud.stratos.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://impl.controller.cloud.stratos.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2179="http://util.controller.cloud.stratos.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://impl.controller.cloud.stratos.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax2177="http://exception.controller.cloud.stratos.carbon.wso2.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://impl.controller.cloud.stratos.carbon.wso2.org">
     <wsdl:documentation>CloudControllerService</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://exception.controller.cloud.stratos.carbon.wso2.org/xsd">
@@ -9,13 +9,13 @@
                 <xs:sequence/>
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax2172="http://util.controller.cloud.stratos.carbon.wso2.org/xsd" xmlns:ax2170="http://exception.controller.cloud.stratos.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://impl.controller.cloud.stratos.carbon.wso2.org">
+        <xs:schema xmlns:ax2180="http://util.controller.cloud.stratos.carbon.wso2.org/xsd" xmlns:ax2178="http://exception.controller.cloud.stratos.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://impl.controller.cloud.stratos.carbon.wso2.org">
             <xs:import namespace="http://exception.controller.cloud.stratos.carbon.wso2.org/xsd"/>
             <xs:import namespace="http://util.controller.cloud.stratos.carbon.wso2.org/xsd"/>
             <xs:element name="CloudControllerServiceUnregisteredServiceException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="UnregisteredServiceException" nillable="true" type="ax2170:UnregisteredServiceException"/>
+                        <xs:element minOccurs="0" name="UnregisteredServiceException" nillable="true" type="ax2178:UnregisteredServiceException"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -97,7 +97,7 @@
             <xs:element name="CloudControllerServiceUnregisteredCartridgeException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="UnregisteredCartridgeException" nillable="true" type="ax2170:UnregisteredCartridgeException"/>
+                        <xs:element minOccurs="0" name="UnregisteredCartridgeException" nillable="true" type="ax2178:UnregisteredCartridgeException"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -109,7 +109,7 @@
                         <xs:element minOccurs="0" name="tenantRange" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="cartridgeType" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="hostName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="properties" nillable="true" type="ax2172:Properties"/>
+                        <xs:element minOccurs="0" name="properties" nillable="true" type="ax2179:Properties"/>
                         <xs:element minOccurs="0" name="payload" nillable="true" type="xs:base64Binary"/>
                     </xs:sequence>
                 </xs:complexType>
@@ -158,21 +158,7 @@
             <xs:element name="getCartridgeInfoResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2172:CartridgeInfo"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getCartridgeDescription">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="cartridgeType" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getCartridgeDescriptionResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2179:CartridgeInfo"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -196,7 +182,7 @@
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://util.controller.cloud.stratos.carbon.wso2.org/xsd">
             <xs:complexType name="Properties">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax2171:Property"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax2179:Property"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="Property">
@@ -207,15 +193,18 @@
             </xs:complexType>
             <xs:complexType name="CartridgeInfo">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="appTypes" nillable="true" type="ax2171:AppType"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="appTypes" nillable="true" type="ax2179:AppType"/>
                     <xs:element minOccurs="0" name="baseDir" nillable="true" type="xs:string"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="deploymentDirs" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="displayName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="hostName" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="portMappings" nillable="true" type="ax2171:PortMapping"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax2171:Property"/>
+                    <xs:element minOccurs="0" name="multiTenant" type="xs:boolean"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="portMappings" nillable="true" type="ax2179:PortMapping"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax2179:Property"/>
                     <xs:element minOccurs="0" name="provider" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="type" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="AppType">
@@ -293,12 +282,6 @@
     <wsdl:message name="startInstanceResponse">
         <wsdl:part name="parameters" element="ns:startInstanceResponse"/>
     </wsdl:message>
-    <wsdl:message name="getCartridgeDescriptionRequest">
-        <wsdl:part name="parameters" element="ns:getCartridgeDescription"/>
-    </wsdl:message>
-    <wsdl:message name="getCartridgeDescriptionResponse">
-        <wsdl:part name="parameters" element="ns:getCartridgeDescriptionResponse"/>
-    </wsdl:message>
     <wsdl:message name="terminateLastlySpawnedInstanceRequest">
         <wsdl:part name="parameters" element="ns:terminateLastlySpawnedInstance"/>
     </wsdl:message>
@@ -344,11 +327,6 @@
         <wsdl:operation name="startInstance">
             <wsdl:input message="ns:startInstanceRequest" wsaw:Action="urn:startInstance"/>
             <wsdl:output message="ns:startInstanceResponse" wsaw:Action="urn:startInstanceResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="getCartridgeDescription">
-            <wsdl:input message="ns:getCartridgeDescriptionRequest" wsaw:Action="urn:getCartridgeDescription"/>
-            <wsdl:output message="ns:getCartridgeDescriptionResponse" wsaw:Action="urn:getCartridgeDescriptionResponse"/>
-            <wsdl:fault message="ns:CloudControllerServiceUnregisteredCartridgeException" name="CloudControllerServiceUnregisteredCartridgeException" wsaw:Action="urn:getCartridgeDescriptionCloudControllerServiceUnregisteredCartridgeException"/>
         </wsdl:operation>
         <wsdl:operation name="terminateLastlySpawnedInstance">
             <wsdl:input message="ns:terminateLastlySpawnedInstanceRequest" wsaw:Action="urn:terminateLastlySpawnedInstance"/>
@@ -446,18 +424,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getCartridgeDescription">
-            <soap:operation soapAction="urn:getCartridgeDescription" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-            <wsdl:fault name="CloudControllerServiceUnregisteredCartridgeException">
-                <soap:fault use="literal" name="CloudControllerServiceUnregisteredCartridgeException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="terminateLastlySpawnedInstance">
             <soap:operation soapAction="urn:terminateLastlySpawnedInstance" style="document"/>
@@ -561,18 +527,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getCartridgeDescription">
-            <soap12:operation soapAction="urn:getCartridgeDescription" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-            <wsdl:fault name="CloudControllerServiceUnregisteredCartridgeException">
-                <soap12:fault use="literal" name="CloudControllerServiceUnregisteredCartridgeException"/>
-            </wsdl:fault>
-        </wsdl:operation>
         <wsdl:operation name="terminateLastlySpawnedInstance">
             <soap12:operation soapAction="urn:terminateLastlySpawnedInstance" style="document"/>
             <wsdl:input>
@@ -666,15 +620,6 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getCartridgeDescription">
-            <http:operation location="getCartridgeDescription"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="terminateLastlySpawnedInstance">
             <http:operation location="terminateLastlySpawnedInstance"/>
             <wsdl:input>
@@ -687,22 +632,28 @@
     </wsdl:binding>
     <wsdl:service name="CloudControllerService">
         <wsdl:port name="CloudControllerServiceHttpSoap11Endpoint" binding="ns:CloudControllerServiceSoap11Binding">
-            <soap:address location="http://nirmal:8280/services/CloudControllerService.CloudControllerServiceHttpSoap11Endpoint"/>
+            <soap:address location="http://192.168.93.68:9767/services/CloudControllerService.CloudControllerServiceHttpSoap11Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="CloudControllerServiceHttpsSoap11Endpoint" binding="ns:CloudControllerServiceSoap11Binding">
-            <soap:address location="https://nirmal:8243/services/CloudControllerService.CloudControllerServiceHttpsSoap11Endpoint"/>
+            <soap:address location="https://192.168.93.68:9447/services/CloudControllerService.CloudControllerServiceHttpsSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="CloudControllerServiceLocalSoap11Endpoint" binding="ns:CloudControllerServiceSoap11Binding">
+            <soap:address location="local:///services/CloudControllerService.CloudControllerServiceLocalSoap11Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="CloudControllerServiceHttpSoap12Endpoint" binding="ns:CloudControllerServiceSoap12Binding">
-            <soap12:address location="http://nirmal:8280/services/CloudControllerService.CloudControllerServiceHttpSoap12Endpoint"/>
+            <soap12:address location="http://192.168.93.68:9767/services/CloudControllerService.CloudControllerServiceHttpSoap12Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="CloudControllerServiceHttpsSoap12Endpoint" binding="ns:CloudControllerServiceSoap12Binding">
-            <soap12:address location="https://nirmal:8243/services/CloudControllerService.CloudControllerServiceHttpsSoap12Endpoint"/>
+            <soap12:address location="https://192.168.93.68:9447/services/CloudControllerService.CloudControllerServiceHttpsSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="CloudControllerServiceLocalSoap12Endpoint" binding="ns:CloudControllerServiceSoap12Binding">
+            <soap12:address location="local:///services/CloudControllerService.CloudControllerServiceLocalSoap12Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="CloudControllerServiceHttpEndpoint" binding="ns:CloudControllerServiceHttpBinding">
-            <http:address location="http://nirmal:8280/services/CloudControllerService.CloudControllerServiceHttpEndpoint"/>
+            <http:address location="http://192.168.93.68:9767/services/CloudControllerService.CloudControllerServiceHttpEndpoint/"/>
         </wsdl:port>
         <wsdl:port name="CloudControllerServiceHttpsEndpoint" binding="ns:CloudControllerServiceHttpBinding">
-            <http:address location="https://nirmal:8243/services/CloudControllerService.CloudControllerServiceHttpsEndpoint"/>
+            <http:address location="https://192.168.93.68:9447/services/CloudControllerService.CloudControllerServiceHttpsEndpoint/"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

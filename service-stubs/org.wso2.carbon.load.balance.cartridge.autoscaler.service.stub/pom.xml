@@ -89,10 +89,10 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.stratos.cloud.controller.stub.impl.*; version=0.0.0,
-                            org.wso2.carbon.stratos.cloud.controller.stub.exception.xsd.*; version=0.0.0,
+                            org.wso2.carbon.stratos.cloud.controller.impl.*; version=0.0.0,
+                            org.wso2.carbon.stratos.cloud.controller.exception.xsd.*; version=0.0.0,
                             org.wso2.carbon.stratos.cloud.controller.stub.*; version=0.0.0,
-                            org.wso2.carbon.stratos.cloud.controller.util.xsd.stub.*; version=0.0.0
+                            org.wso2.carbon.stratos.cloud.controller.util.xsd.*; version=0.0.0
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
