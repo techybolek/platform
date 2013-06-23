@@ -106,6 +106,7 @@
                     <xs:element minOccurs="0" name="loginPageURL" nillable="true" type="xs:string"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="logoutRespDTO" nillable="true" type="ax2307:SingleLogoutRequestDTO"/>
                     <xs:element minOccurs="0" name="logoutResponse" nillable="true" type="xs:string"/>
+		    <xs:element minOccurs="0" name="passive" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="queryString" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="requestMessageString" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="response" nillable="true" type="xs:string"/>
