@@ -29,7 +29,10 @@ import org.opensaml.saml2.core.impl.ResponseBuilder;
 import org.opensaml.saml2.core.impl.StatusBuilder;
 import org.opensaml.saml2.core.impl.StatusCodeBuilder;
 import org.opensaml.saml2.core.impl.StatusMessageBuilder;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
+
+import java.util.List;
 
 public class ErrorResponseBuilder {
 
@@ -51,13 +54,23 @@ public class ErrorResponseBuilder {
      * Build the error response
      *
      * @param inResponseToID
-     * @param status
-     * @param statMsg
+     * @param statusCodes
+     * @param statusMsg
      * @return
      */
-    public Response buildResponse(String inResponseToID, String status, String statMsg) {
+    public Response buildResponse(String inResponseToID, List<String> statusCodes, String statusMsg) throws IdentityException {
+        if(statusCodes == null || statusCodes.size() == 0){
+            throw new IdentityException("No Status Values");
+        }
         response.setIssuer(SAMLSSOUtil.getIssuer());
-        response.setStatus(buildStatus(status, statMsg));
+        Status status = new StatusBuilder().buildObject();
+        StatusCode statusCode = null;
+        for(String statCode:statusCodes){
+            statusCode = buildStatusCode(statCode, statusCode);
+        }
+        status.setStatusCode(statusCode);
+        buildStatusMsg(status, statusMsg);
+        response.setStatus(status);
         response.setVersion(SAMLVersion.VERSION_20);
         response.setID(SAMLSSOUtil.createID());
         response.setInResponseTo(inResponseToID);
@@ -66,29 +79,43 @@ public class ErrorResponseBuilder {
     }
 
     /**
-     * Build the status for Response
+     * Build the StatusCode for Status of Response
      *
-     * @param status
-     * @param statMsg
+     * @param parentStatusCode
+     * @param childStatusCode
      * @return
      */
-    private Status buildStatus(String status, String statMsg) {
+    private StatusCode buildStatusCode(String parentStatusCode, StatusCode childStatusCode) throws IdentityException{
 
-        Status stat = new StatusBuilder().buildObject();
-
-        //Set the status code
-        StatusCode statCode = new StatusCodeBuilder().buildObject();
-        statCode.setValue(status);
-        stat.setStatusCode(statCode);
-
-        //Set the status Message
-        if (statMsg != null) {
-            StatusMessage statMesssage = new StatusMessageBuilder().buildObject();
-            statMesssage.setMessage(statMsg);
-            stat.setStatusMessage(statMesssage);
+        if(parentStatusCode == null){
+            throw new IdentityException("Invalid SAML Response Status Code");
         }
 
-        return stat;
+        StatusCode statusCode = new StatusCodeBuilder().buildObject();
+        statusCode.setValue(parentStatusCode);
+
+        //Set the status Message
+        if(childStatusCode != null){
+            statusCode.setStatusCode(childStatusCode);
+            return statusCode;
+        } else {
+            return statusCode;
+        }
     }
+
+    /**
+     * Set the StatusMessage for Status of Response
+     *
+     * @param statusMsg
+     * @return
+     */
+     private Status buildStatusMsg(Status status, String statusMsg) {
+        if (statusMsg != null) {
+            StatusMessage statusMesssage = new StatusMessageBuilder().buildObject();
+            statusMesssage.setMessage(statusMsg);
+            status.setStatusMessage(statusMesssage);
+        }
+        return status;
+     }
 
 }

@@ -37,6 +37,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.c14n.Canonicalizer;
+import org.apache.xml.security.signature.XMLSignature;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Assertion;
@@ -80,6 +81,7 @@ import org.wso2.carbon.identity.core.persistence.IdentityPersistenceManager;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
 import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
+import org.wso2.carbon.identity.sso.saml.builders.ErrorResponseBuilder;
 import org.wso2.carbon.identity.sso.saml.attributes.SAMLAttributeStatementBuilder;
 import org.wso2.carbon.identity.sso.saml.builders.X509CredentialImpl;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
@@ -205,7 +207,7 @@ public class SAMLSSOUtil {
 	 *            String to be encoded
 	 * @return encoded String
 	 */
-	public static String encode(String xmlString) throws Exception {
+    public static String encode(String xmlString) {
 		// Encoding the message
 		String encodedRequestMessage =
 		                               Base64.encodeBytes(xmlString.getBytes(),
@@ -714,5 +716,19 @@ public class SAMLSSOUtil {
 			                            e);
 		}
 	}
+
+    /**
+     * build the error response
+     * @param id
+     * @param statusCodes
+     * @param statusMsg
+     * @return decoded response
+     * @throws IdentityException
+     */
+    public static String buildErrorResponse(String id, List<String> statusCodes, String statusMsg) throws IdentityException {
+       ErrorResponseBuilder respBuilder = new ErrorResponseBuilder();
+       Response response = respBuilder.buildResponse(id, statusCodes, statusMsg);
+       return SAMLSSOUtil.encode(SAMLSSOUtil.marshall(response));
+    }
 
 }

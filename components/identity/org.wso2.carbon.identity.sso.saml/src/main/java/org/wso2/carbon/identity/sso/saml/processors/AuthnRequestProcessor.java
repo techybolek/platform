@@ -43,6 +43,9 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AuthnRequestProcessor {
 
     private static Log log = LogFactory.getLog(AuthnRequestProcessor.class);
@@ -263,7 +266,9 @@ public class AuthnRequestProcessor {
                                               String statMsg) throws Exception {
         SAMLSSORespDTO samlSSORespDTO = new SAMLSSORespDTO();
         ErrorResponseBuilder errRespBuilder = new ErrorResponseBuilder();
-        Response resp = errRespBuilder.buildResponse(id, status, statMsg);
+        List<String> statusCodeList = new ArrayList<String>();
+        statusCodeList.add(status);
+        Response resp = errRespBuilder.buildResponse(id, statusCodeList, statMsg);
         samlSSORespDTO.setRespString(SAMLSSOUtil.encode(SAMLSSOUtil.marshall(resp)));
         samlSSORespDTO.setSessionEstablished(false);
         return samlSSORespDTO;

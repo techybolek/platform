@@ -32,6 +32,7 @@ public class SAMLSSOReqValidationResponseDTO {
     private String rpSessionId;
     private String requestMessageString;
     private String queryString;
+    private boolean isPassive;
     private String destination;
 	private SingleLogoutRequestDTO[] logoutRespDTO;
     
@@ -159,6 +160,20 @@ public class SAMLSSOReqValidationResponseDTO {
      */
     public void setQueryString(String queryString) {
 	    this.queryString = queryString;
+    }
+
+    /**
+     * @return the isPassive attrbute of the AuthnRequest
+     */
+    public boolean isPassive() {
+        return isPassive;
+    }
+
+    /**
+     * @param isPassive set the AuthnRequest isPassive attribute
+     */
+    public void setPassive(boolean isPassive) {
+       this.isPassive = isPassive;
     }
 
     /**

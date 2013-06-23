@@ -32,6 +32,9 @@ import org.wso2.carbon.identity.sso.saml.session.SSOSessionPersistenceManager;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
 import org.wso2.carbon.identity.sso.saml.validators.AuthnRequestValidator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SAMLSSOService {
 
 	/**
@@ -75,8 +78,13 @@ public class SAMLSSOService {
 						throw new IdentityException("Error processing the Authentication Request",
 						                            e);
 					}
-				}
-				if (isExistingSession) { // now should send the Response
+                } else if (!isExistingSession && validationResp.isPassive()){
+                    List<String> statusCodes = new ArrayList<String>();
+                    statusCodes.add(SAMLSSOConstants.StatusCodes.NO_PASSIVE);
+                    statusCodes.add(SAMLSSOConstants.StatusCodes.IDENTITY_PROVIDER_ERROR);
+                    validationResp.setResponse(SAMLSSOUtil.buildErrorResponse(
+                    validationResp.getId(), statusCodes,"Cannot authenticate Subject in Passive Mode"));
+                } else if (isExistingSession) { // now should send the Response
 					AuthnRequestProcessor authnRequestProcessor = new AuthnRequestProcessor();
 					try {
 						return authnRequestProcessor.process(validationResp, sessionId,

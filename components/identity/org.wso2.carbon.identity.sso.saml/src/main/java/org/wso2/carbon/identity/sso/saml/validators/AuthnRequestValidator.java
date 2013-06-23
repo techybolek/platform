@@ -35,6 +35,9 @@ import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOServiceProviderDTO;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOServiceProviderInfoDTO;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class AuthnRequestValidator {
 
@@ -161,9 +164,10 @@ public class AuthnRequestValidator {
             validationResponse.setAssertionConsumerURL(authnReq.getAssertionConsumerServiceURL());
             validationResponse.setDestination(authnReq.getDestination());
             validationResponse.setValid(true);
+            validationResponse.setPassive(authnReq.isPassive());
 
             if (log.isDebugEnabled()) {
-                log.debug("Authentication Request Validation is successfull..");
+                log.debug("Authentication Request Validation is successful..");
             }
             return validationResponse;
         } catch (Exception e) {
@@ -180,7 +184,9 @@ public class AuthnRequestValidator {
      */
     private String buildErrorResponse(String status, String message) throws Exception {
         ErrorResponseBuilder respBuilder = new ErrorResponseBuilder();
-        Response response = respBuilder.buildResponse(authnReq.getID(), status, message);
+        List<String> statusCodeList = new ArrayList<String>();
+        statusCodeList.add(status);
+        Response response = respBuilder.buildResponse(authnReq.getID(), statusCodeList, message);
         return SAMLSSOUtil.encode(SAMLSSOUtil.marshall(response));
     }
 }
