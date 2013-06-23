@@ -40,7 +40,7 @@
 		</cassandraInfo-->
 	</dataPublisher>
 
-    <topologySync enable="true">
+    <topologySync enable="false">
 		<!-- MB server info -->
 		<mbServerUrl>localhost:5674</mbServerUrl>
 		<cron>1 * * * * ? *</cron>
