@@ -3,6 +3,7 @@ package org.wso2.carbon.stratos.cloud.controller.consumers;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.io.FileUtils;
@@ -23,9 +24,9 @@ import org.wso2.carbon.stratos.cloud.controller.util.ServiceContext;
 public class TopologyBuilder implements Runnable {
 
     private BlockingQueue<List<ServiceContext>> sharedQueue;
-	private File topologyFile, backup;
+	private static File topologyFile, backup;
 	private static final Log log = LogFactory.getLog(TopologyBuilder.class);
-	private DeclarativeServiceReferenceHolder data = DeclarativeServiceReferenceHolder.getInstance();
+	private static DeclarativeServiceReferenceHolder data = DeclarativeServiceReferenceHolder.getInstance();
 	
 	public TopologyBuilder(BlockingQueue<List<ServiceContext>> queue){
 		
@@ -114,6 +115,73 @@ public class TopologyBuilder implements Runnable {
             	log.error(e.getMessage(), e);
             	throw new CloudControllerException(e.getMessage(), e);
             }
+        }
+
+	}
+	
+	public static void removeTopologyAndPublish(ServiceContext serviceContext){
+	    
+	    Node currentNodeToBeRemoved = null;
+	    Node nodeToBeRemoved = serviceContext.toNode();
+        
+        if(!topologyFile.exists()){
+            return;
+        }
+        try{
+        String currentContent = FileUtils.readFileToString(topologyFile);
+        Node currentNode = NodeBuilder.buildNode(currentContent);
+            
+        for (Node aNode : currentNode.getChildNodes()) {
+            // similar service element is present
+            if(aNode.getName().equals(nodeToBeRemoved.getName())){
+                // let's check whether the domain node exists
+                
+                Node domainsNode = aNode.findChildNodeByName(Constants.DOMAIN_ELEMENT);
+                
+                if(domainsNode == null){
+                    continue;
+                }
+                
+                for (Node serNode : nodeToBeRemoved.findChildNodeByName(Constants.DOMAIN_ELEMENT).getChildNodes()) {
+                    
+                    for (Node currentSerNode : domainsNode.getChildNodes()) {
+                        String prop = Constants.SUB_DOMAIN_ELEMENT;
+                        if(serNode.getName().equals(currentSerNode.getName()) &&
+                                serNode.getProperty(prop).equals(currentSerNode.getProperty(prop))){
+                            // if domain and sub domain, are matching, we should remove the node.
+                            domainsNode.removeChildNode(currentSerNode.getName());
+                            if(domainsNode.getChildNodes().size() == 0){
+                                // if no cluster definitions remain, we shouldn't keep the node
+                                currentNodeToBeRemoved = aNode;
+                            }
+                            break;
+                        }
+                    }
+                    
+                }
+                
+            }
+        }
+        
+        if(currentNodeToBeRemoved != null){
+            // remove the node with empty clusters
+            currentNode.removeChildNode(currentNodeToBeRemoved);
+        }
+        
+        if (topologyFile.exists()) {
+            backup.delete();
+            topologyFile.renameTo(backup);
+        }
+        
+        // overwrite the topology file
+        FileUtils.writeStringToFile(topologyFile, currentNode.toString());
+        
+        // publish to the topic - to sync immediately
+        data.getConfigPub().publish(CloudControllerConstants.TOPIC_NAME, currentNode.toString());
+        
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new CloudControllerException(e.getMessage(), e);
         }
 
 	}

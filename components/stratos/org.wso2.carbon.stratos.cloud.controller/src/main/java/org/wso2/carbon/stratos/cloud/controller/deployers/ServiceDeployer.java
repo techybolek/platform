@@ -30,6 +30,7 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.stratos.cloud.controller.axiom.AxiomXpathParser;
+import org.wso2.carbon.stratos.cloud.controller.consumers.TopologyBuilder;
 import org.wso2.carbon.stratos.cloud.controller.runtime.FasterLookUpDataHolder;
 import org.wso2.carbon.stratos.cloud.controller.util.Cartridge;
 import org.wso2.carbon.stratos.cloud.controller.util.ServiceContext;
@@ -140,6 +141,8 @@ public class ServiceDeployer extends AbstractDeployer{
             // remove 'em all
             for (ServiceContext ctxt : fileToServiceContextListMap.get(file)) {
                 serviceContextLookUpStructure.removeServiceContext(ctxt);
+                // remove from the topology
+                TopologyBuilder.removeTopologyAndPublish(ctxt);
             }
             
             log.info("Successfully undeployed the Service definition specified at "+file);

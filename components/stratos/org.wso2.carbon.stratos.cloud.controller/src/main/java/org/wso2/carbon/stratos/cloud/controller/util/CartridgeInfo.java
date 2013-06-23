@@ -29,6 +29,8 @@ public class CartridgeInfo {
     
     private String hostName;
     
+    private String displayName;
+    
     private String description;
     
     private String[] deploymentDirs;
@@ -38,6 +40,10 @@ public class CartridgeInfo {
     private AppType[] appTypes;
     
     private String provider;
+    
+    private String version;
+    
+    private boolean multiTenant;
     
     private String baseDir;
     
@@ -60,7 +66,15 @@ public class CartridgeInfo {
         this.type = type;
     }
 
-    public String getDescription() {
+    public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getDescription() {
         return description;
     }
 
@@ -97,6 +111,22 @@ public class CartridgeInfo {
 	public void setProvider(String provider) {
 	    this.provider = provider;
     }
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public boolean isMultiTenant() {
+		return multiTenant;
+	}
+
+	public void setMultiTenant(boolean multiTenant) {
+		this.multiTenant = multiTenant;
+	}
 
 	public String getBaseDir() {
 	    return baseDir;

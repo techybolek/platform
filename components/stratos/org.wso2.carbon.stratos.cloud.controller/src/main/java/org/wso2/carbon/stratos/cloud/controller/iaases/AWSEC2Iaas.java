@@ -207,6 +207,7 @@ public class AWSEC2Iaas extends Iaas{
 		if (ip == null || ip.isEmpty()) {
 			try {
 				ip = ec2Client.getElasticIPAddressServices().allocateAddressInRegion(region);
+				log.info("Assigned ip [" + ip +"]");
 
 			} catch (Exception e) {
 				String msg = "Failed to allocate an IP address. All IP addresses are in use.";
@@ -225,7 +226,7 @@ public class AWSEC2Iaas extends Iaas{
 		}
 
 		int retries = 0;
-		while (retries < 5 && !associatePublicIp(ec2Client, region, ip, id)) {
+		while (retries < 12 && !associatePublicIp(ec2Client, region, ip, id)) {
 
 			// wait for 5s
 			CloudControllerUtil.sleep(5000);
@@ -249,8 +250,10 @@ public class AWSEC2Iaas extends Iaas{
 	private boolean associatePublicIp(AWSEC2Client ec2Client, String region, String ip, String id) {
 		try {
 			ec2Client.getElasticIPAddressServices().associateAddressInRegion(region, ip, id);
+			log.info("Successfully associated public IP ");
 			return true;
 		} catch (Exception e) {
+			log.error("Exception in associating public IP " + e.getMessage());
 			return false;
 		}
 	}

@@ -240,7 +240,7 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 	                        		
 	                        		if(ctxt.getCartridge() == null){
 	                        			// load Cartridge
-	                        			ctxt.setCartridge(loadCartridge(ctxt.getCartridgeType(), ctxt.getPayload()));
+	                        			ctxt.setCartridge(loadCartridge(ctxt.getCartridgeType(), ctxt.getPayload(), serializedObj.getCartridges()));
 	                        		}
 	                        		
 	                        		IaasProvider serializedIaas = serializedCtxt.getCartridge().getLastlyUsedIaas();
@@ -295,7 +295,8 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 
 		// load Cartridge
 		serviceCtxt.setCartridge(loadCartridge(serviceCtxt.getCartridgeType(),
-		                                       serviceCtxt.getPayload()));
+		                                       serviceCtxt.getPayload(),
+		                                       FasterLookUpDataHolder.getInstance().getCartridges()));
 
 		if (serviceCtxt.getCartridge() == null) {
 			String msg =
@@ -424,6 +425,9 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 						list.add(serviceCtxt);
 						try {
 							dataHolder.getSharedTopologyDiffQueue().put(list);
+							
+							// publish data
+							CartridgeInstanceDataPublisherTask.publish();
 						} catch (InterruptedException ignore) {
 						}
 
@@ -448,7 +452,7 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 					continue;
 				}
 			} else {
-				log.debug("Max instance limit is reached in the IaaS " + iaas.getType() +
+				log.warn("Max instance limit is reached in the IaaS " + iaas.getType() +
 				          " : Max instance limit: " + iaas.getMaxInstanceLimit());
 			}
 
@@ -491,9 +495,9 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 	    }
     }
 
-	private Cartridge loadCartridge(String cartridgeType, byte[] payload) {
+	private Cartridge loadCartridge(String cartridgeType, byte[] payload, List<Cartridge> cartridges) {
 
-		for (Cartridge cartridge : FasterLookUpDataHolder.getInstance().getCartridges()) {
+		for (Cartridge cartridge : cartridges) {
 			if (cartridge.getType().equals(cartridgeType)) {
 				for (IaasProvider iaas : cartridge.getIaases()) {
 					iaas.setPayload(payload);
@@ -529,7 +533,9 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		// load Cartridge, if null
 		if (serviceCtxt.getCartridge() == null) {
 			serviceCtxt.setCartridge(loadCartridge(serviceCtxt.getCartridgeType(),
-			                                       serviceCtxt.getPayload()));
+			                                       serviceCtxt.getPayload(),
+			                                       FasterLookUpDataHolder.getInstance()
+			                                                             .getCartridges()));
 		}
 		
 		// if still, Cartridge is null
@@ -614,7 +620,9 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		// load Cartridge, if null
 		if (serviceCtxt.getCartridge() == null) {
 			serviceCtxt.setCartridge(loadCartridge(serviceCtxt.getCartridgeType(),
-			                                       serviceCtxt.getPayload()));
+			                                       serviceCtxt.getPayload(),
+			                                       FasterLookUpDataHolder.getInstance()
+			                                                             .getCartridges()));
 		}
 		
 		if (serviceCtxt.getCartridge() == null) {
@@ -691,7 +699,9 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		// load Cartridge, if null
 		if (serviceCtxt.getCartridge() == null) {
 			serviceCtxt.setCartridge(loadCartridge(serviceCtxt.getCartridgeType(),
-			                                       serviceCtxt.getPayload()));
+			                                       serviceCtxt.getPayload(),
+			                                       FasterLookUpDataHolder.getInstance()
+			                                                             .getCartridges()));
 		}
 		
 		if (serviceCtxt.getCartridge() == null) {
@@ -710,6 +720,11 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		for (IaasProvider iaas : serviceCtxt.getCartridge().getIaases()) {
 
 			IaasContext ctxt = serviceCtxt.getIaasContext(iaas.getType());
+			
+			if (ctxt == null) {
+				log.error("Iaas Context for " + iaas.getType() + " not found. Cannot terminate instances");
+				continue;
+			}
 
 			ArrayList<String> temp = new ArrayList<String>(ctxt.getNodeIds());
 			for (String id : temp) {
@@ -751,7 +766,10 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		if (subjectedSerCtxt != null && subjectedSerCtxt.getCartridgeType() != null) {
 			
 			// load cartridge
-			subjectedSerCtxt.setCartridge(loadCartridge(subjectedSerCtxt.getCartridgeType(), subjectedSerCtxt.getPayload()));
+			subjectedSerCtxt.setCartridge(loadCartridge(subjectedSerCtxt.getCartridgeType(),
+			                                            subjectedSerCtxt.getPayload(),
+			                                            FasterLookUpDataHolder.getInstance()
+			                                                                  .getCartridges()));
 			
 			if(subjectedSerCtxt.getCartridge() == null){
 				return pendingInstanceCount;
@@ -826,13 +844,24 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		// destroy the node
 		iaasTemp.getComputeService().destroyNode(nodeId);
 		
+		
+		String autoAssignIpProp =
+			iaasTemp.getProperty(CloudControllerConstants.AUTO_ASSIGN_IP_PROPERTY);
+		
 		// release allocated IP address
-		iaasTemp.getIaas().releaseAddress(iaasTemp, ctxt.getPublicIp(nodeId));
+		if (autoAssignIpProp == null ||
+			    (autoAssignIpProp != null && autoAssignIpProp.equals("false"))) {
+				// allocate an IP address - manual IP assigning mode
+			iaasTemp.getIaas().releaseAddress(iaasTemp, ctxt.getPublicIp(nodeId));
+		}		
 
 		// remove the node id
 		ctxt.removeNodeId(nodeId);
 		
 		ctxt.decrementCurrentInstanceCountByOne();
+		
+		// publish data to BAM
+		CartridgeInstanceDataPublisherTask.publish();
 
 		log.info("Node with Id: '" + nodeId + "' is terminated!");
 		return iaasTemp;
@@ -1038,23 +1067,6 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		}
 
 		return false;
-	}
-
-	@Override
-	public String getCartridgeDescription(String cartridgeType)
-	                                                           throws UnregisteredCartridgeException {
-
-		Cartridge cartridge = FasterLookUpDataHolder.getInstance().getCartridge(cartridgeType);
-
-		if (cartridge != null) {
-			return cartridge.getDescription();
-		}
-
-		String msg =
-		             "Cannot find a Cartridge having a type of " + cartridgeType +
-		                     ". Hence unable to fetch a description.";
-		log.error(msg);
-		throw new UnregisteredCartridgeException(msg);
 	}
 
 	private String checkSubDomain(String subDomainName) {

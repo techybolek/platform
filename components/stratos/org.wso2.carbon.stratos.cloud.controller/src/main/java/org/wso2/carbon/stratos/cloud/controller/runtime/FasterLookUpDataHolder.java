@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
@@ -137,7 +138,7 @@ public class FasterLookUpDataHolder implements Serializable{
 	private FasterLookUpDataHolder() {
 
 		serviceCtxtList = new ArrayList<ServiceContext>();
-		serviceCtxts = new HashMap<String, Map<String, ServiceContext>>();
+		serviceCtxts = new ConcurrentHashMap<String, Map<String, ServiceContext>>();
 		nodeIdToServiceCtxt = new LinkedHashMap<String, ServiceContext>();
 		cartridges = new ArrayList<Cartridge>();
 

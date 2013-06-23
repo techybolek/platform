@@ -22,7 +22,7 @@ public class IaasContext implements Serializable{
 	
 	private Map<String, String> nodeToPublicIp;
 	
-	private Map<String, NodeMetadata> nodes;
+	private transient Map<String, NodeMetadata> nodes;
 	
 	private List<String> toBeRemovedNodeIds;
 	
@@ -100,18 +100,26 @@ public class IaasContext implements Serializable{
 	}
 	
 	public void addNodeMetadata(NodeMetadata node) {
+	    if(nodes == null){
+	        nodes = new HashMap<String, NodeMetadata>();
+	    }
 		nodes.put(node.getId(), node);
 	}
 	
-	public void removeNodeMetadata(NodeMetadata node) {
-		nodes.remove(node.getId());
-	}
+    public void removeNodeMetadata(NodeMetadata node) {
+        if (nodes != null) {
+            nodes.remove(node.getId());
+        }
+    }
 	
 	public void removeNodeIdToPublicIp(String nodeId){
 		nodeToPublicIp.remove(nodeId);
 	}
 	
 	public NodeMetadata getNode(String nodeId) {
+	    if(nodes == null) {
+	        return null;
+	    }
 		return nodes.get(nodeId);
 	}
 	

@@ -34,6 +34,8 @@
             			</xs:simpleContent>
             		</xs:complexType>
             	</xs:element>
+            	<xs:element name="displayName" maxOccurs="1"
+            		minOccurs="0" />
             	<xs:element name="description" maxOccurs="1"
             		minOccurs="0" />
             	<xs:element name="iaasProvider" maxOccurs="unbounded"
@@ -50,6 +52,12 @@
             		</xs:annotation>
             		<xs:complexType>
             			<xs:choice maxOccurs="unbounded">
+                            <xs:element type="xs:string" name="scaleUpOrder"
+    						    minOccurs="0" maxOccurs="1" />
+                            <xs:element type="xs:string" name="scaleDownOrder"
+    						    minOccurs="0" maxOccurs="1" />
+                            <xs:element type="xs:string" name="maxInstanceLimit"
+    						    minOccurs="0" maxOccurs="1" />
             				<xs:element type="xs:string" name="imageId"
             					minOccurs="0" maxOccurs="1" />
             				<xs:element name="property"
@@ -125,6 +133,8 @@
             <xs:attribute type="xs:string" name="type"/>
             <xs:attribute type="xs:string" name="host" />
             <xs:attribute type="xs:string" name="provider" />
+            <xs:attribute type="xs:string" name="version" />
+            <xs:attribute type="xs:boolean" name="multiTenant" />
           </xs:complexType>
         </xs:element>
       </xs:choice>

@@ -53,10 +53,10 @@ import com.google.common.collect.Maps;
 public class CartridgeInstanceDataPublisherTask implements Task{
     
     private static final Log log = LogFactory.getLog(CartridgeInstanceDataPublisherTask.class);
-    private DataPublisher dataPublisher;
-    private String streamId;
+    private static DataPublisher dataPublisher;
+    private static String streamId;
     private static final String cloudControllerEventStreamVersion = "1.0.0";
-    private List<CartridgeInstanceData> dataToBePublished ;
+    private static List<CartridgeInstanceData> dataToBePublished ;
 
     protected enum NodeStatus {
         PENDING, RUNNING, SUSPENDED, TERMINATED, ERROR, UNRECOGNIZED
@@ -65,9 +65,13 @@ public class CartridgeInstanceDataPublisherTask implements Task{
     @Override
     public void execute() {
         
+        publish();
+    }
+    
+    public static void publish(){
         if(FasterLookUpDataHolder.getInstance().isPublisherRunning() ||
-        		// this is a temporary fix to avoid task execution - limitation with ntask
-        		!FasterLookUpDataHolder.getInstance().getEnableBAMDataPublisher()){
+                // this is a temporary fix to avoid task execution - limitation with ntask
+                !FasterLookUpDataHolder.getInstance().getEnableBAMDataPublisher()){
             return;
         }
         
@@ -158,6 +162,9 @@ public class CartridgeInstanceDataPublisherTask implements Task{
                                                          dataObj.getType(),
                                                          dataObj.getDomain(),
                                                          dataObj.getSubDomain(),
+                                                         dataObj.getAlias(),
+                                                         dataObj.getTenantRange(),
+                                                         String.valueOf(dataObj.isMultiTenant()),
                                                          dataObj.getIaas(),
                                                          dataObj.getStatus(),
                                                          dataObj.getMetaData().getHostname(),
@@ -199,14 +206,14 @@ public class CartridgeInstanceDataPublisherTask implements Task{
 //            System.out.println(str);
 //        }
 //        System.out.println("***********");
-//        release();
+        release();
     }
     
-    private void release(){
+    private static void release(){
         FasterLookUpDataHolder.getInstance().setPublisherRunning(false);
     }
     
-    private void defineStream() throws Exception {
+    private static void defineStream() throws Exception {
         streamId = dataPublisher.
                 defineStream("{" +
                         "  'name':'" + CloudControllerConstants.CLOUD_CONTROLLER_EVENT_STREAM +"'," +
@@ -219,6 +226,9 @@ public class CartridgeInstanceDataPublisherTask implements Task{
                         "          {'name':'"+CloudControllerConstants.CARTRIDGE_TYPE_COL+"','type':'STRING'}," +
                         "          {'name':'"+CloudControllerConstants.DOMAIN_COL+"','type':'STRING'}," +
                         "          {'name':'"+CloudControllerConstants.SUB_DOMAIN_COL+"','type':'STRING'}," +
+                        "          {'name':'"+CloudControllerConstants.ALIAS_COL+"','type':'STRING'}," +
+                        "          {'name':'"+CloudControllerConstants.TENANT_RANGE_COL+"','type':'STRING'}," +
+                        "          {'name':'"+CloudControllerConstants.IS_MULTI_TENANT_COL+"','type':'STRING'}," +
                         "          {'name':'"+CloudControllerConstants.IAAS_COL+"','type':'STRING'}," +
                         "          {'name':'"+CloudControllerConstants.STATUS_COL+"','type':'STRING'}," +
                         "          {'name':'"+CloudControllerConstants.HOST_NAME_COL+"','type':'STRING'}," +
@@ -256,7 +266,7 @@ public class CartridgeInstanceDataPublisherTask implements Task{
     @Override
     public void setProperties(Map<String, String> arg0) {}
     
-    private void createDataPublisher(){
+    private static void createDataPublisher(){
         //creating the agent
         AgentConfiguration agentConfiguration = new AgentConfiguration();
 
@@ -285,48 +295,64 @@ public class CartridgeInstanceDataPublisherTask implements Task{
         
     }
     
-    private void bundleData(String key, String val, ServiceContext serviceCtxt) {
+    private static void bundleData(String key, String val, ServiceContext serviceCtxt) {
         
         CartridgeInstanceData instanceData = new CartridgeInstanceData();
         instanceData.setNodeId(key);
         instanceData.setStatus(val);
         instanceData.setDomain(serviceCtxt.getDomainName());
         instanceData.setSubDomain(serviceCtxt.getSubDomainName());
+        instanceData.setAlias("".equals(serviceCtxt.getProperty(CloudControllerConstants.ALIAS_PROPERTY))
+            ? "NULL"
+                : serviceCtxt.getProperty(CloudControllerConstants.ALIAS_PROPERTY));
+        instanceData.setTenantRange("".equals(serviceCtxt.getProperty(CloudControllerConstants.TENANT_ID_PROPERTY))
+            ? serviceCtxt.getTenantRange()
+                : serviceCtxt.getProperty(CloudControllerConstants.TENANT_ID_PROPERTY));
         
-        for (IaasProvider iaas : serviceCtxt.getCartridge().getIaases()) {
-        	
-        	IaasContext ctxt = null;
-            if((ctxt = serviceCtxt.getIaasContext(iaas.getType())) == null){
-            	ctxt = serviceCtxt.addIaasContext(iaas.getType());
-            }
-            
-            if(ctxt.didISpawn(key)){
-                instanceData.setIaas(iaas.getType());
-                instanceData.setMetaData(ctxt.getNode(key));
-                
-                // clear to be removed data 
-                ctxt.removeToBeRemovedNodeId(key);
-                
-                // if the node is terminated
-                if(val.equals(NodeStatus.TERMINATED.toString())){
-                    // since this node is terminated
-                    FasterLookUpDataHolder.getInstance().removeNodeId(key);
+        if (serviceCtxt.getCartridge() != null) {
+            instanceData.setMultiTenant(serviceCtxt.getCartridge().isMultiTenant());
 
-                    // remove node meta data
-                    ctxt.removeNodeMetadata(ctxt.getNode(key));
+            for (IaasProvider iaas : serviceCtxt.getCartridge().getIaases()) {
+
+                IaasContext ctxt = null;
+                if ((ctxt = serviceCtxt.getIaasContext(iaas.getType())) == null) {
+                    ctxt = serviceCtxt.addIaasContext(iaas.getType());
                 }
-                
-                break;
+
+                if (ctxt.didISpawn(key)) {
+                    instanceData.setIaas(iaas.getType());
+                    instanceData.setMetaData(ctxt.getNode(key));
+
+                    // clear to be removed data
+                    ctxt.removeToBeRemovedNodeId(key);
+
+                    // if the node is terminated
+                    if (val.equals(NodeStatus.TERMINATED.toString())) {
+                        // since this node is terminated
+                        FasterLookUpDataHolder.getInstance().removeNodeId(key);
+
+                        // remove node meta data
+                        ctxt.removeNodeMetadata(ctxt.getNode(key));
+                    }
+
+                    break;
+                }
             }
+
+            instanceData.setType(serviceCtxt.getCartridge().getType());
+        } else {
+            log.warn("Cartridge is null for Service Context : (domain: " +
+                serviceCtxt.getDomainName() +
+                    ", sub domain: " +
+                    serviceCtxt.getSubDomainName() +
+                    ")");
         }
-        
-        instanceData.setType(serviceCtxt.getCartridge().getType());
         
         dataToBePublished.add(instanceData);
         
     }
     
-    private Map<String, String> getNodeIdToStatusMap() throws Exception {
+    private static Map<String, String> getNodeIdToStatusMap() throws Exception {
         
         Map<String, String> statusMap = new HashMap<String, String>();
         
@@ -346,6 +372,10 @@ public class CartridgeInstanceDataPublisherTask implements Task{
                     for (IaasProvider iaas : iaases) {
 
                         ComputeService computeService = iaas.getComputeService();
+                        
+                        if(computeService == null){
+                            continue;
+                        }
                         
                         IaasContext ctxt = null;
                         if((ctxt = subjectedSerCtxt.getIaasContext(iaas.getType())) == null){
@@ -397,7 +427,7 @@ public class CartridgeInstanceDataPublisherTask implements Task{
 
     }
     
-    private void populateNewlyAddedOrStateChangedNodes(Map<String, String> newMap){
+    private static void populateNewlyAddedOrStateChangedNodes(Map<String, String> newMap){
         
         MapDifference<String, String> diff = Maps.difference(newMap, 
                                                              FasterLookUpDataHolder.getInstance().getNodeIdToStatusMap());
@@ -411,6 +441,8 @@ public class CartridgeInstanceDataPublisherTask implements Task{
             String key = entry.getKey();
             String val = entry.getValue();
             ServiceContext ctxt = FasterLookUpDataHolder.getInstance().getServiceContext(key);
+            
+            log.debug("------ Node id: "+key+" --- node status: "+val+" -------- ctxt: "+ctxt);
             
             if (ctxt != null && key != null && val != null) {
                 // bundle the data to be published
@@ -429,6 +461,8 @@ public class CartridgeInstanceDataPublisherTask implements Task{
             String key = entry.getKey();
             String newState = entry.getValue().leftValue();
             ServiceContext ctxt = FasterLookUpDataHolder.getInstance().getServiceContext(key);
+            
+            log.debug("------- Node id: "+key+" --- node status: "+newState+" -------- ctxt: "+ctxt);
             
             if (ctxt != null && key != null && newState != null) {
                 // bundle the data to be published

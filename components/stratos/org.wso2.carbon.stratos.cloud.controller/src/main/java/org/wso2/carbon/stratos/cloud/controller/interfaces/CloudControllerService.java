@@ -59,18 +59,6 @@ public interface CloudControllerService {
 	@Deprecated
     public boolean createKeyPairFromPublicKey(String cartridgeType, String keyPairName,
         String publicKey);
-    
-    /**
-     * This method will return the description of the given cartridge, if present.
-     * Else this will return <code>null</code>.
-     * 
-     * @param cartridgeType
-     *            type of the cartridge.
-     * @return description of the given cartridge type or <code>null</code>.
-     * @throws UnregisteredCartridgeException if there is no registered cartridge with this type.
-     */
-    @Deprecated
-    public String getCartridgeDescription(String cartridgeType) throws UnregisteredCartridgeException;
 
     /**
      * This method will return the information regarding the given cartridge, if present.
@@ -139,20 +127,19 @@ public interface CloudControllerService {
 
     /**
      * Calling this method will result in an instance startup, which is belong
-     * to the provided service domain. This method is non-blocking, means we do not
-     * wait till the instance is started up. Also note that the instance that is starting up
+     * to the provided service domain. Also note that the instance that is starting up
      * belongs to the group whose name is derived from its service domain, replacing <i>.</i>
      * by a hyphen (<i>-</i>).
      * 
      * @param domainName
      *            service clustering domain of the instance to be started up.
-     * @param sudDomainName
+     * @param subDomainName
      *            service clustering sub domain of the instance to be started up.
      *            If this is null, the default value will be used. Default value is
      *            {@link Constants}.DEFAULT_SUB_DOMAIN.
      * @return public IP which is associated with the newly started instance.
      */
-    public String startInstance(String domainName, String sudDomainName);
+    public String startInstance(String domainName, String subDomainName);
 
     /**
      * Calling this method will result in termination of all instances belong
@@ -161,7 +148,7 @@ public interface CloudControllerService {
      * @param domainName
      *            service domain of the instance to be terminated.
      * @param sudDomainName
-     *            service clustering sub domain of the instance to be started up.
+     *            service clustering sub domain of the instances to be terminated.
      *            If this is null, the default value will be used. Default value is
      *            {@link Constants}.DEFAULT_SUB_DOMAIN.
      * @return whether an instance terminated successfully or not.
@@ -175,7 +162,7 @@ public interface CloudControllerService {
      * @param domainName
      *            service domain of the instance to be terminated.
      * @param sudDomainName
-     *            service clustering sub domain of the instance to be started up.
+     *            service clustering sub domain of the instance to be terminated.
      *            If this is null, the default value will be used. Default value is
      *            {@link Constants}.DEFAULT_SUB_DOMAIN.
      * @return whether an instance terminated successfully or not.
@@ -189,7 +176,7 @@ public interface CloudControllerService {
      * @param domainName
      *            service domain of the instance to be terminated.
      * @param sudDomainName
-     *            service clustering sub domain of the instance to be started up.
+     *            service clustering sub domain of the instance to be terminated.
      *            If this is null, the default value will be used. Default value is
      *            {@link Constants}.DEFAULT_SUB_DOMAIN.
      * @return whether the termination is successful or not.

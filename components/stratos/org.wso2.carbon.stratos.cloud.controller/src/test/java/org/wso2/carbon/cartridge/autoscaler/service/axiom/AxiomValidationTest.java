@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 
 public class AxiomValidationTest extends TestCase {
     
-    AxiomXpathParser util1, util2, util3, util4, util5, util6 ;
+    AxiomXpathParser util1, util2, util3, util4, util5, util6, util7, util8, util9;
     File xmlSchemaCartridges = new File("src/main/resources/cartridges.xsd");
     File xmlSchemaCartridge = new File("src/main/resources/cartridge.xsd");
     String dir = "src/test/resources/";
@@ -43,12 +43,18 @@ public class AxiomValidationTest extends TestCase {
         util4 = new AxiomXpathParser(new File(dir+"cartridges-4.xml"));
         util5 = new AxiomXpathParser(new File(dir+"cartridges-5.xml"));
         util6 = new AxiomXpathParser(new File(dir+"cartridges-6.xml"));
+        util7 = new AxiomXpathParser(new File(dir+"cartridges-7.xml"));
+        util8 = new AxiomXpathParser(new File(dir+"cartridges-8.xml"));
+        util9 = new AxiomXpathParser(new File(dir+"cartridges-9.xml"));
         util1.parse();
         util2.parse();
         util3.parse();
         util4.parse();
         util5.parse();
         util6.parse();
+        util7.parse();
+        util8.parse();
+        util9.parse();
     }
 
     public final void testCartridgeValidation() throws Exception {
@@ -60,9 +66,14 @@ public class AxiomValidationTest extends TestCase {
         
         assertEquals(true, util6.validate(xmlSchemaCartridges));
         
+        assertEquals(true, util7.validate(xmlSchemaCartridges));
+        
+        assertEquals(true, util9.validate(xmlSchemaCartridges));
+        
         // schema 2 - cartridge
         assertEquals(true, util2.validate(xmlSchemaCartridge));
         
+        assertEquals(true, util8.validate(xmlSchemaCartridge));
     }
     
     public final void testCartridgeInvalidation() {

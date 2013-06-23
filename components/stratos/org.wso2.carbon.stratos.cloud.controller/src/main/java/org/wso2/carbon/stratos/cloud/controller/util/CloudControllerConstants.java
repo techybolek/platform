@@ -37,6 +37,8 @@ public final class CloudControllerConstants {
     public static final String HOST_ATTR = "host";
     public static final String BASE_DIR_ATTR = "baseDir";
     public static final String PROVIDER_ATTR = "provider";
+    public static final String VERSION_ATTR = "version";
+    public static final String MULTI_TENANT_ATTR = "multiTenant";
     public static final String PORT_ATTR = "port";
     public static final String PROXY_PORT_ATTR = "proxyPort";
     public static final String NAME_ATTR = "name";
@@ -45,6 +47,7 @@ public final class CloudControllerConstants {
     public static final String CARTRIDGES_ELEMENT = "cartridges";
     public static final String CARTRIDGE_ELEMENT = "cartridge";
     
+    public static final String DISPLAY_NAME_ELEMENT = "displayName";
     public static final String DESCRIPTION_ELEMENT = "description";
     public static final String PROPERTY_ELEMENT = "property";
     public static final String PROPERTY_NAME_ATTR= "name";
@@ -93,6 +96,9 @@ public final class CloudControllerConstants {
     public static final String CARTRIDGE_TYPE_COL = "cartridgeType";
     public static final String DOMAIN_COL = "domain";
     public static final String SUB_DOMAIN_COL = "subDomain";
+    public static final String ALIAS_COL = "alias";
+    public static final String TENANT_RANGE_COL = "tenantRange";
+    public static final String IS_MULTI_TENANT_COL = "isMultiTenant";
     public static final String IAAS_COL = "iaas";
     public static final String STATUS_COL = "status";
     public static final String HOST_NAME_COL = "hostName";
@@ -113,6 +119,8 @@ public final class CloudControllerConstants {
      */
     public static final String REGION_PROPERTY = "region";
     public static final String PUBLIC_IP_PROPERTY = "public_ip";
+    public static final String TENANT_ID_PROPERTY = "tenant_id";
+    public static final String ALIAS_PROPERTY = "alias";
     public static final String AUTO_ASSIGN_IP_PROPERTY = "autoAssignIp";
     
     /**

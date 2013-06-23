@@ -42,10 +42,13 @@ public class CloudControllerUtil {
 
 		CartridgeInfo carInfo = new CartridgeInfo();
 		carInfo.setType(cartridge.getType());
+		carInfo.setDisplayName(cartridge.getDisplayName());
 		carInfo.setDescription(cartridge.getDescription());
 		carInfo.setHostName(cartridge.getHostName());
 		carInfo.setDeploymentDirs(cartridge.getDeploymentDirs());
 		carInfo.setProvider(cartridge.getProvider());
+		carInfo.setVersion(cartridge.getVersion());
+		carInfo.setMultiTenant(cartridge.isMultiTenant());
 		carInfo.setBaseDir(cartridge.getBaseDir());
 		carInfo.setPortMappings(cartridge.getPortMappings()
 		                                 .toArray(new PortMapping[cartridge.getPortMappings()

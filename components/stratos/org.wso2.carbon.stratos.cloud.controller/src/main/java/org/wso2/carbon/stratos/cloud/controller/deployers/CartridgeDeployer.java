@@ -49,7 +49,6 @@ public class CartridgeDeployer extends AbstractDeployer{
     private Map<String, List<Cartridge>> fileToCartridgeListMap;
     private File cartridgesSchema, cartridgeSchema;
 
-    @Override
     public void init(ConfigurationContext arg0) {
         fileToCartridgeListMap = new ConcurrentHashMap<String, List<Cartridge>>();
         String etcDir = CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc" + File.separator;
@@ -57,12 +56,10 @@ public class CartridgeDeployer extends AbstractDeployer{
         cartridgeSchema = new File(etcDir+"cartridge.xsd");
     }
 
-    @Override
     public void setDirectory(String arg0) {
         // component xml handles this
     }
 
-    @Override
     public void setExtension(String arg0) {
         // component xml handles this
     }

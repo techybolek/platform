@@ -37,6 +37,12 @@ public class CartridgeInstanceData {
     
     private String status;
     
+    private String tenantRange;
+    
+    private String alias;
+    
+    private boolean isMultiTenant;
+    
     private NodeMetadata metaData;
 
     public String getType() {
@@ -93,6 +99,30 @@ public class CartridgeInstanceData {
 
     public void setMetaData(NodeMetadata metaData) {
         this.metaData = metaData;
+    }
+
+    public String getTenantRange() {
+        return tenantRange;
+    }
+
+    public void setTenantRange(String tenantRange) {
+        this.tenantRange = tenantRange;
+    }
+
+    public boolean isMultiTenant() {
+        return isMultiTenant;
+    }
+
+    public void setMultiTenant(boolean isMultiTenant) {
+        this.isMultiTenant = isMultiTenant;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
     
     

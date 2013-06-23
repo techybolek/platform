@@ -38,9 +38,15 @@ public class Cartridge implements Serializable{
     
     private String provider;
     
+    private String displayName;
+    
     private String description;
     
     private String baseDir;
+    
+    private String version;
+    
+    private boolean multiTenant;
     
     private List<PortMapping> portMappings = new ArrayList<PortMapping>();
     
@@ -62,10 +68,12 @@ public class Cartridge implements Serializable{
     
     public Cartridge(){}
     
-    public Cartridge(String type, String host, String provider) {
+    public Cartridge(String type, String host, String provider, String version, boolean multiTenant) {
         this.type = type;
         this.hostName = host;
-        this.setProvider(provider);
+        this.provider = provider;
+        this.version = version;
+        this.multiTenant = multiTenant;
     }
 
     public String getType() {
@@ -147,6 +155,14 @@ public class Cartridge implements Serializable{
 //        this.isJcloudsObjectsBuilt = isJcloudsObjectsBuilt;
 //    }
 
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
     public String getDescription() {
         return description;
     }
@@ -194,6 +210,22 @@ public class Cartridge implements Serializable{
 	public void setProvider(String provider) {
 	    this.provider = provider;
     }
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public boolean isMultiTenant() {
+		return multiTenant;
+	}
+
+	public void setMultiTenant(boolean multiTenant) {
+		this.multiTenant = multiTenant;
+	}
 
 	public String getBaseDir() {
 	    return baseDir;

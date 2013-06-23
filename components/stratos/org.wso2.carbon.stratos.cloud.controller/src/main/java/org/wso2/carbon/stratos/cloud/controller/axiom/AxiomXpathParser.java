@@ -171,14 +171,32 @@ public class AxiomXpathParser {
 					                                                           CloudControllerConstants.HOST_ATTR));
 					String provider = cartridgeElement.getAttributeValue(new QName(
 					                                                               CloudControllerConstants.PROVIDER_ATTR));
+					
+					String version =
+			                  cartridgeElement.getAttributeValue(new QName(
+			                                                               CloudControllerConstants.VERSION_ATTR));
+
+					boolean multiTenant = Boolean.valueOf(cartridgeElement.getAttributeValue(new QName(
+							CloudControllerConstants.MULTI_TENANT_ATTR)));
 
 					Cartridge aCartridge;
 
 					if ((aCartridge = dataHolder.getCartridge(type)) == null) {
 
-						aCartridge = new Cartridge(type, host, provider);
+						aCartridge = new Cartridge(type, host, provider, version, multiTenant);
 					}
+					
+					// read displayName
+					Iterator<?> itName =
+					                 cartridgeElement.getChildrenWithName(new QName(
+					                                                                CloudControllerConstants.DISPLAY_NAME_ELEMENT));
 
+					if (itName.hasNext()) {
+						OMElement name = (OMElement) itName.next();
+
+						aCartridge.setDisplayName(name.getText());
+					}
+					
 					// read description
 					Iterator<?> it =
 					                 cartridgeElement.getChildrenWithName(new QName(
