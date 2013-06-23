@@ -237,7 +237,7 @@ public class AutoscalerTaskServiceComponent {
 
             int interval = AutoscalerTaskDSHolder.getInstance().getLoadBalancerConfig().getAutoscalerTaskInterval();
             taskDescription.setInterval(interval);
-            taskDescription.setStartTime(new Date(System.currentTimeMillis() + interval));
+            taskDescription.setStartTime(new Date(System.currentTimeMillis() + (interval*2)));
 
             TaskSchedulingManager scheduler = new TaskSchedulingManager();
             scheduler.scheduleTask(taskDescription, dataMap, configurationContext);

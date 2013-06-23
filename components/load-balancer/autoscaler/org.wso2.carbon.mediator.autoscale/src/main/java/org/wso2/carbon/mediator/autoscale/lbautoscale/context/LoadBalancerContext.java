@@ -27,6 +27,11 @@ public class LoadBalancerContext implements Serializable{
     private static final long serialVersionUID = -2022110665957598060L;
     private int runningInstances;
     private int pendingInstances;
+    private int terminatingInstances;
+    
+    public synchronized int getTerminatingInstanceCount() {
+        return terminatingInstances;
+    }
     
     public synchronized int getRunningInstanceCount() {
         return runningInstances;
@@ -62,16 +67,35 @@ public class LoadBalancerContext implements Serializable{
         
         this.pendingInstances = count;
     }
+    
+    public synchronized void setTerminatingInstanceCount(int count) {
+        
+        this.terminatingInstances = count;
+    }
 
     public synchronized void incrementPendingInstances(int diff) {
 
         this.pendingInstances += diff;
     }
     
+    public synchronized void incrementTerminatingInstances(int diff) {
+
+        this.terminatingInstances += diff;
+    }
+    
     public synchronized void decrementPendingInstancesIfNotZero(int diff) {
 
         while (diff > 0 && this.pendingInstances > 0) {
             this.pendingInstances--;
+            diff--;
+        }
+
+    }
+    
+    public synchronized void decrementTerminatingInstancesIfNotZero(int diff) {
+
+        while (diff > 0 && this.terminatingInstances > 0) {
+            this.terminatingInstances--;
             diff--;
         }
 

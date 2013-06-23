@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration.ServiceConfiguration;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.clients.CloudControllerClient;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.AppDomainContext;
+import org.wso2.carbon.mediator.autoscale.lbautoscale.state.check.TerminatingInstancesStateChecker;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleConstants;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleUtil;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscalerTaskDSHolder;
@@ -64,6 +65,7 @@ public class AutoscaleDeciderCallable implements Callable<Boolean> {
 
             long average = appDomainContext.getAverageRequestsInFlight();
             int runningAppInstances = appDomainContext.getRunningInstanceCount();
+            int terminatingAppInstances = appDomainContext.getTerminatingInstanceCount();
 
             int maxRPS = serviceConfig.getMaxRequestsPerSecond();
             double taskInterval =
@@ -85,10 +87,16 @@ public class AutoscaleDeciderCallable implements Callable<Boolean> {
                 log.debug(clusterStr +": Average requests in flight: " + average + " **** Handleable requests: " +
                     (runningAppInstances * maxhandleableReqs));
             }
-            if (average > (runningAppInstances * maxhandleableReqs)) {
-                // current average is high than that can be handled by current nodes.
-                scaleUp();
-            } else if (average < ((runningAppInstances - 1) * minhandleableReqs)) {
+            if (average > (runningAppInstances * maxhandleableReqs) && maxhandleableReqs > 0) {
+                
+                // estimate number of instances we might want to spawn
+                int requiredInstances = (int) Math.ceil(average/maxhandleableReqs);
+                
+                log.debug(clusterStr+" : Required instance count: "+requiredInstances);
+                
+                // current average is higher than that can be handled by current nodes.
+                scaleUp(requiredInstances - runningAppInstances);
+            } else if (terminatingAppInstances == 0 && average < ((runningAppInstances - 1) * minhandleableReqs)) {
                 // current average is less than that can be handled by (current nodes - 1).
                 scaleDown();
             }
@@ -100,23 +108,24 @@ public class AutoscaleDeciderCallable implements Callable<Boolean> {
     private void scaleDown() {
 
         int runningInstances = appDomainContext.getRunningInstanceCount();
-        int pendingInstances = appDomainContext.getPendingInstanceCount();
+//        int pendingInstances = appDomainContext.getPendingInstanceCount();
+        int terminatingInstances = appDomainContext.getTerminatingInstanceCount();
         int minAppInstances = serviceConfig.getMinAppInstances();
-        int serverStartupDelay = AutoscalerTaskDSHolder
-                                            .getInstance()
-                                            .getWholeLoadBalancerConfig()
-                                            .getLoadBalancerConfig()
-                                            .getServerStartupDelay();
+//        int serverStartupDelay = AutoscalerTaskDSHolder
+//                                            .getInstance()
+//                                            .getWholeLoadBalancerConfig()
+//                                            .getLoadBalancerConfig()
+//                                            .getServerStartupDelay();
 
-        if (runningInstances > minAppInstances) {
+        if ( (runningInstances - terminatingInstances) > minAppInstances) {
 
             if (log.isDebugEnabled()) {
                 log.debug("Scale Down - " +
                     clusterStr +
                         ". Running instances:" +
                         runningInstances +
-                        ". Pending instances: " +
-                        pendingInstances +
+                        ". Terminating instances: " +
+                        terminatingInstances +
                         ". Min instances:" +
                         minAppInstances);
             }
@@ -124,89 +133,110 @@ public class AutoscaleDeciderCallable implements Callable<Boolean> {
             try {
                 if (client.terminateInstance(domain, subDomain)) {
                     
-                        log.debug(clusterStr +": There's an instance who's in shutting down state " +
-                            "(but still not left ELB), hence we should wait till " +
-                            "it leaves the cluster.");
-
-                        int totalWaitedTime = 0;
-
-                        log.debug(clusterStr +": Task will wait maximum of (milliseconds) : " +
-                            serverStartupDelay +
-                                ", to let the member leave the cluster.");
-                        
-                        // for each sub domain, get the clustering group management agent
-                        GroupManagementAgent agent =
-                            AutoscalerTaskDSHolder.getInstance().getAgent()
-                                .getGroupManagementAgent(domain,
-                                    subDomain);
-
-                        // we give some time for the server to be terminated, we'll check time to time
-                        // whether the instance has actually left the cluster.
-                        while (agent.getMembers().size() == runningInstances &&
-                            totalWaitedTime < serverStartupDelay) {
-
-                            try {
-                                Thread.sleep(AutoscaleConstants.INSTANCE_REMOVAL_CHECK_TIME);
-                            } catch (InterruptedException ignore) {
-                            }
-
-                            totalWaitedTime += AutoscaleConstants.INSTANCE_REMOVAL_CHECK_TIME;
-                        }
-
-                        log.debug(clusterStr+ " : task waited for (milliseconds) : " + totalWaitedTime);
-
-                        // we recalculate number of alive instances
-                        runningInstances = agent.getMembers().size();
-                        
-                        appDomainContext.setRunningInstanceCount(runningInstances);
-
-                        log.debug(clusterStr+" : New running instance count: " + runningInstances);
+                    Thread th = new Thread(new TerminatingInstancesStateChecker(appDomainContext, domain, subDomain));
+                    th.start();
+                    
+//                        log.debug(clusterStr +": There's an instance who's in shutting down state " +
+//                            "(but still not left ELB), hence we should wait till " +
+//                            "it leaves the cluster.");
+//
+//                        int totalWaitedTime = 0;
+//
+//                        log.debug(clusterStr +": Task will wait maximum of (milliseconds) : " +
+//                            serverStartupDelay +
+//                                ", to let the member leave the cluster.");
+//                        
+//                        // for each sub domain, get the clustering group management agent
+//                        GroupManagementAgent agent =
+//                            AutoscalerTaskDSHolder.getInstance().getAgent()
+//                                .getGroupManagementAgent(domain,
+//                                    subDomain);
+//
+//                        // we give some time for the server to be terminated, we'll check time to time
+//                        // whether the instance has actually left the cluster.
+//                        while (agent.getMembers().size() == runningInstances &&
+//                            totalWaitedTime < serverStartupDelay) {
+//
+//                            try {
+//                                Thread.sleep(AutoscaleConstants.INSTANCE_REMOVAL_CHECK_TIME);
+//                            } catch (InterruptedException ignore) {
+//                            }
+//
+//                            totalWaitedTime += AutoscaleConstants.INSTANCE_REMOVAL_CHECK_TIME;
+//                        }
+//
+//                        log.debug(clusterStr+ " : task waited for (milliseconds) : " + totalWaitedTime);
+//
+//                        // we recalculate number of alive instances
+//                        runningInstances = agent.getMembers().size();
+//                        
+//                        appDomainContext.setRunningInstanceCount(runningInstances);
+//
+//                        log.debug(clusterStr+" : New running instance count: " + runningInstances);
                 }
 
             } catch (Exception e) {
-                log.error("Instance termination failed for " + clusterStr);
+                log.error("Instance termination failed for " + clusterStr, e);
             }
         }
 
     }
 
-    private void scaleUp() {
+    private void scaleUp(int requiredInstanceCount) {
 
         int maxAppInstances = serviceConfig.getMaxAppInstances();
-        int instancesPerScaleUp = serviceConfig.getInstancesPerScaleUp();
-        int runningInstances = appDomainContext.getRunningInstanceCount();
-        int pendingInstances = appDomainContext.getPendingInstanceCount();
-
-        int failedInstances = 0;
-        if (runningInstances < maxAppInstances && pendingInstances == 0) {
-
+//        int instancesPerScaleUp = serviceConfig.getInstancesPerScaleUp();
+//        int runningInstances = appDomainContext.getRunningInstanceCount();
+//        int pendingInstances = appDomainContext.getPendingInstanceCount();
+        int totalInstanceCount = appDomainContext.getInstances();
+        
+        log.debug(AutoscaleUtil.domainSubDomainString(domain, subDomain)+ " - Total Running/Pending instance count: "+totalInstanceCount);
+        
+        if(maxAppInstances > totalInstanceCount){
+            
+            int availableQuotaOfInstances = maxAppInstances - totalInstanceCount;
+            
+            log.debug(AutoscaleUtil.domainSubDomainString(domain, subDomain)+ " - Available Quota of Instances: "+availableQuotaOfInstances);
+            
+            requiredInstanceCount = requiredInstanceCount <= availableQuotaOfInstances ? requiredInstanceCount : availableQuotaOfInstances;
+            
             log.debug(clusterStr + " - Going to start " +
-                instancesPerScaleUp + " instance/s. Running instances:" + runningInstances);
+                    requiredInstanceCount + " instance/s.");
 
-            int successfullyStarted =
                 AutoscaleUtil.runInstances(client, appDomainContext, domain, subDomain,
-                    instancesPerScaleUp);
-
-            if (successfullyStarted != instancesPerScaleUp) {
-                failedInstances = instancesPerScaleUp - successfullyStarted;
-                if (log.isDebugEnabled()) {
-                    log.debug(successfullyStarted +
-                        " instances successfully started and\n" + failedInstances +
-                        " instances failed to start for " + clusterStr);
-                }
-            }
-
-            // we increment the pending instance count
-            // appDomainContext.incrementPendingInstances(instancesPerScaleUp);
-            else {
-                log.debug("Successfully started " + successfullyStarted +
-                    " instances of " + clusterStr);
-            }
-
-        } else if (runningInstances > maxAppInstances) {
+                    requiredInstanceCount);
+                
+        } else if (totalInstanceCount > maxAppInstances) {
             log.fatal("Number of running instances has over reached the maximum limit of " +
                 maxAppInstances + " of " + clusterStr);
         }
+
+//        int failedInstances = 0;
+//        if (runningInstances < maxAppInstances && pendingInstances == 0) {
+//
+//            log.debug(clusterStr + " - Going to start " +
+//                    requiredInstanceCount + " instance/s. Running instances:" + runningInstances);
+//
+//                AutoscaleUtil.runInstances(client, appDomainContext, domain, subDomain,
+//                    requiredInstanceCount);
+
+//            if (successfullyStarted != instancesPerScaleUp) {
+//                failedInstances = instancesPerScaleUp - successfullyStarted;
+//                if (log.isDebugEnabled()) {
+//                    log.debug(successfullyStarted +
+//                        " instances successfully started and\n" + failedInstances +
+//                        " instances failed to start for " + clusterStr);
+//                }
+//            }
+//
+//            // we increment the pending instance count
+//            // appDomainContext.incrementPendingInstances(instancesPerScaleUp);
+//            else {
+//                log.debug("Successfully started " + successfullyStarted +
+//                    " instances of " + clusterStr);
+//            }
+
+       
     }
 
 }

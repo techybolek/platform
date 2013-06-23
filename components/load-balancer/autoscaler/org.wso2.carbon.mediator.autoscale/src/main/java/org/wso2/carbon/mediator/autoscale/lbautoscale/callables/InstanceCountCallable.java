@@ -52,8 +52,8 @@ public class InstanceCountCallable implements Callable<Boolean> {
         Callable<Integer> worker = new RunningInstanceCountCallable(this.domain, this.subDomain);
         Future<Integer> runningInstanceCount = executor.submit(worker);
 
-        worker = new PendingInstanceCountCallable(this.domain, this.subDomain, client);
-        Future<Integer> pendingInstanceCount = executor.submit(worker);
+//        worker = new PendingInstanceCountCallable(this.domain, this.subDomain, client);
+//        Future<Integer> pendingInstanceCount = executor.submit(worker);
 
         int runningInstances = 0, pendingInstances = 0;
         if (appCtxt != null) {
@@ -61,7 +61,7 @@ public class InstanceCountCallable implements Callable<Boolean> {
             try {
                 // get the values of Callables
                 runningInstances = runningInstanceCount.get();
-                pendingInstances = pendingInstanceCount.get();
+                pendingInstances = appCtxt.getPendingInstanceCount();
             } catch (Exception e) {
                 // no need to throw
                 log.error(e.getMessage(), e);

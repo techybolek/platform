@@ -80,7 +80,7 @@ public class CloudControllerStubClient extends CloudControllerClient {
         try {
 
             stub = new CloudControllerServiceStub(CLOUD_CONTROLLER_EPR);
-            stub._getServiceClient().getOptions().setTimeOutInMilliSeconds(90000);
+            stub._getServiceClient().getOptions().setTimeOutInMilliSeconds(300000);
 
         } catch (AxisFault axisFault) {
             String msg = "Failed to initiate AutoscalerService client. " + axisFault.getMessage();

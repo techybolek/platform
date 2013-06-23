@@ -59,19 +59,19 @@ public class AppNodeSanityCheckCallable implements Callable<Boolean> {
 
             // we try to maintain the minimum number of instances required
             if (currentInstances < requiredInstances) {
-                log.debug("App domain Sanity check failed for [domain: " + this.domain + " - sub domain: " +
-                    this.subDomain + "] . Current instances: " + currentInstances +
-                    ". Required instances: " + requiredInstances);
+                log.debug("App domain Sanity check failed for " +
+                    AutoscaleUtil.domainSubDomainString(domain, subDomain) +
+                        " . Current instances: " +
+                        currentInstances +
+                        ". Required instances: " +
+                        requiredInstances);
 
                 int diff = requiredInstances - currentInstances;
 
                 // Launch diff number of App instances
                 log.debug("Launching " +
                     diff +
-                    " App instances for sub domain " +
-                    this.subDomain +
-                    " of domain " +
-                    this.domain);
+                    " App instances for " +AutoscaleUtil.domainSubDomainString(domain, subDomain));
 
                 // FIXME: should we need to consider serviceConfig.getInstancesPerScaleUp()?
                 AutoscaleUtil.runInstances(client, appDomainContext, this.domain, this.subDomain, diff);

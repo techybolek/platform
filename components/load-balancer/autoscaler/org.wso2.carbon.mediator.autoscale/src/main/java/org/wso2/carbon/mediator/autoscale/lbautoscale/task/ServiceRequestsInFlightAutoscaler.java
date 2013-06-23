@@ -45,7 +45,7 @@ import org.wso2.carbon.mediator.autoscale.lbautoscale.clients.CloudControllerOsg
 import org.wso2.carbon.mediator.autoscale.lbautoscale.clients.CloudControllerStubClient;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.AppDomainContext;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.LoadBalancerContext;
-import org.wso2.carbon.mediator.autoscale.lbautoscale.replication.RequestTokenReplicationCommand;
+import org.wso2.carbon.lb.common.replication.RequestTokenReplicationCommand;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleConstants;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleUtil;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscalerTaskDSHolder;
@@ -73,8 +73,8 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
      * Value - Map of key - sub domain
      * value - {@link AppDomainContext}
      */
-    private Map<String, Map<String, AppDomainContext>> appDomainContexts =
-        new HashMap<String, Map<String, AppDomainContext>>();
+    private Map<String, Map<String, ?>> appDomainContexts =
+        new HashMap<String, Map<String, ?>>();
 
     /**
      * LB Context for LB cluster
@@ -113,10 +113,10 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
             String[] serviceSubDomains = loadBalancerConfig.getServiceSubDomains(serviceDomain);
 
             for (String serviceSubDomain : serviceSubDomains) {
-                log.debug("Sanity check has started for "+AutoscaleUtil.domainSubDomainString(serviceDomain, serviceSubDomain));
+                log.debug("Sanity check has started for: "+AutoscaleUtil.domainSubDomainString(serviceDomain, serviceSubDomain));
                 AppDomainContext appCtxt;
                 if (appDomainContexts.get(serviceDomain) != null) {
-                    appCtxt = appDomainContexts.get(serviceDomain).get(serviceSubDomain);
+                    appCtxt = (AppDomainContext) appDomainContexts.get(serviceDomain).get(serviceSubDomain);
                     
                     if (appCtxt != null) {
                         // Concurrently perform the application node sanity check.
@@ -168,7 +168,7 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
 
                 AppDomainContext appCtxt;
                 if (appDomainContexts.get(serviceDomain) != null) {
-                    appCtxt = appDomainContexts.get(serviceDomain).get(serviceSubDomain);
+                    appCtxt = (AppDomainContext) appDomainContexts.get(serviceDomain).get(serviceSubDomain);
 
                     if (appCtxt != null) {
 
@@ -216,7 +216,14 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
 
                 AppDomainContext appCtxt;
                 if (appDomainContexts.get(serviceDomain) != null) {
-                    appCtxt = appDomainContexts.get(serviceDomain).get(serviceSubDomain);
+                    appCtxt = (AppDomainContext) appDomainContexts.get(serviceDomain).get(serviceSubDomain);
+                    
+                    log.debug("Values in App domain context: " +
+                        appCtxt.getPendingInstanceCount() +
+                            " - " +
+                            appCtxt.getRunningInstanceCount() +
+                            " - Ctxt: " +
+                            appCtxt.hashCode());
 
                     if (appCtxt != null) {
                         Callable<Boolean> worker =
@@ -262,13 +269,10 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
                 AutoscalerTaskDSHolder.getInstance().getAgent().getParameter("subDomain").getValue().toString();
         }
 
-        Callable<Integer> worker = new PendingInstanceCountCallable(lbDomain, lbSubDomain, autoscalerService);
-        Future<Integer> pendingInstanceCount = executor.submit(worker);
-
         // reset
         pendingInstances = 0;
         try {
-            pendingInstances = pendingInstanceCount.get();
+            pendingInstances = lbContext.getPendingInstanceCount();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             // no need to throw
@@ -313,10 +317,13 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
         }
         try {
             isTaskRunning = true;
-            sanityCheck();
+            setIsPrimaryLB();
             if (!isPrimaryLoadBalancer) {
+                log.debug("This is not the primary load balancer, hence will not " +
+                        "perform any sanity check.");
                 return;
             }
+            sanityCheck();
             autoscale();
         } finally {
             // if there are any changes in the request length
@@ -389,7 +396,7 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
         int requiredInstances = lbConfig.getInstances();
 
         if (currentLBInstances < requiredInstances) {
-            log.debug("LB Sanity check failed. Current LB instances: " + currentLBInstances +
+            log.debug("LB Sanity check failed. Running/Pending LB instances: " + currentLBInstances +
                 ". Required LB instances: " + requiredInstances);
             int diff = requiredInstances - currentLBInstances;
 
@@ -462,8 +469,6 @@ public class ServiceRequestsInFlightAutoscaler implements Task, ManagedLifecycle
      * maintained
      */
     private void sanityCheck() {
-
-        setIsPrimaryLB();
 
         if (!isPrimaryLoadBalancer) {
             log.debug("This is not the primary load balancer, hence will not " +

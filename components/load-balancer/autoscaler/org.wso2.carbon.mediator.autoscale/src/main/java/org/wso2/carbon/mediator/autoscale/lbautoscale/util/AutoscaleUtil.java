@@ -28,6 +28,7 @@ import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.clients.CloudControllerClient;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.AppDomainContext;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.LoadBalancerContext;
+import org.wso2.carbon.mediator.autoscale.lbautoscale.state.check.PendingInstancesStateChecker;
 import org.apache.axiom.om.util.Base64;
 import java.io.File;
 import java.io.FileInputStream;
@@ -237,13 +238,11 @@ public final class AutoscaleUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Map<String, AppDomainContext>> getAppDomainContexts(ConfigurationContext configCtx,
+    public static Map<String, Map<String, ?>> getAppDomainContexts(ConfigurationContext configCtx,
  LoadBalancerConfiguration lbConfig) {
-        Map<String, Map<String, AppDomainContext>> appDomainContexts = 
-        	(Map<String, Map<String, AppDomainContext>>) configCtx.getPropertyNonReplicable(AutoscaleConstants.APP_DOMAIN_CONTEXTS);
-        if (appDomainContexts == null) {
-            appDomainContexts = new HashMap<String, Map<String, AppDomainContext>>();
-        }
+        Map<String, Map<String, ?>> oldAppDomainContexts =
+        	(Map<String, Map<String, ?>>) configCtx.getPropertyNonReplicable(AutoscaleConstants.APP_DOMAIN_CONTEXTS);
+        Map<String, Map<String, ?>> newAppDomainContexts = new HashMap<String, Map<String, ?>>();
         
             ClusteringAgent clusteringAgent = configCtx.getAxisConfiguration().getClusteringAgent();
 
@@ -256,14 +255,16 @@ public final class AutoscaleUtil {
                                                    " has not been defined");
                     }
 
-                    if(appDomainContexts.get(domain) == null || 
-                    		(appDomainContexts.get(domain) != null && appDomainContexts.get(domain).get(subDomain) == null)){
+                    if(oldAppDomainContexts == null || oldAppDomainContexts.get(domain) == null || 
+                    		(oldAppDomainContexts.get(domain) != null && oldAppDomainContexts.get(domain).get(subDomain) == null)){
                     	
                     	AppDomainContext appCtxt = new AppDomainContext(lbConfig.getServiceConfig(domain,
                                 subDomain));
 
-                    	addAppDomainContext(appDomainContexts, domain, subDomain, appCtxt);
+                    	addAppDomainContext(newAppDomainContexts, domain, subDomain, appCtxt);
                     	
+                    } else {
+                        addAppDomainContext(newAppDomainContexts, domain, subDomain, (AppDomainContext) oldAppDomainContexts.get(domain).get(subDomain));
                     }
                     
                 }
@@ -271,19 +272,19 @@ public final class AutoscaleUtil {
             }
 //        }
         configCtx.setNonReplicableProperty(AutoscaleConstants.APP_DOMAIN_CONTEXTS,
-                                           appDomainContexts);
+                                           newAppDomainContexts);
 
-        return appDomainContexts;
+        return newAppDomainContexts;
     }
     
     
-    private static void addAppDomainContext(Map<String, Map<String, AppDomainContext>> appDomainContexts, 
+    private static void addAppDomainContext(Map<String, Map<String, ?>> appDomainContexts,
                                      String domain, String subDomain, AppDomainContext appCtxt) {
 
         Map<String, AppDomainContext> map ;
         
         if(appDomainContexts.containsKey(domain)){
-            map = appDomainContexts.get(domain);
+            map = (Map<String, AppDomainContext>) appDomainContexts.get(domain);
         }
         else{
             map = new HashMap<String, AppDomainContext>();
@@ -337,61 +338,16 @@ public final class AutoscaleUtil {
         }
 
         if (successfullyStartedInstanceCount > 0) {
-            // waiting till the spawned instances get joined.
-            log.debug("There's an instance of " +
-                domainSubDomainString(domain, subDomain) +
-                    ", who's in pending state " +
-                    "(but still not joined ELB), hence we should wait till " +
-                    "it joins ELB.");
-
-            int totalWaitedTime = 0;
-            int serverStartupDelay =
-                AutoscalerTaskDSHolder
-                    .getInstance()
-                    .getWholeLoadBalancerConfig()
-                    .getLoadBalancerConfig()
-                    .getServerStartupDelay();
-
-            log.debug("Thread will wait maximum of (milliseconds) : " +
-                serverStartupDelay +
-                " time, to let the member (" + domainSubDomainString(domain, subDomain) + ") join the ELB.");
-
-            // for each sub domain, get the clustering group management agent
-            GroupManagementAgent agent =
-                AutoscalerTaskDSHolder.getInstance().getAgent()
-                    .getGroupManagementAgent(domain,
-                        subDomain);
-
-            int runningInstances = context.getRunningInstanceCount();
-
-            // we give some time for the server to get joined, we'll check time to time
-            // whether the instance has actually joined the ELB.
-            while ((agent.getMembers().size() <= (runningInstances + successfullyStartedInstanceCount)) &&
-                totalWaitedTime < serverStartupDelay) {
-
-                try {
-                    Thread.sleep(AutoscaleConstants.INSTANCE_REMOVAL_CHECK_TIME);
-                } catch (InterruptedException ignore) {
-                }
-
-                totalWaitedTime += AutoscaleConstants.INSTANCE_REMOVAL_CHECK_TIME;
-            }
-
-            log.debug("Thread waited for (milliseconds) : " +
-                totalWaitedTime +
-                " till member/s belong to " +
-                domainSubDomainString(domain, subDomain) +
-                " get joined.");
-
-            // we recalculate number of alive instances
-            runningInstances = agent.getMembers().size();
-
-            context.setRunningInstanceCount(runningInstances);
-
-            log.debug("New running instance count of the cluster " +
-                domainSubDomainString(domain, subDomain) +
-                " is " +
-                runningInstances);
+            
+            Thread stateChecker =
+                new Thread(new PendingInstancesStateChecker(
+                    context,
+                    domain,
+                    subDomain,
+                    successfullyStartedInstanceCount,
+                    context.getRunningInstanceCount(),
+                    client));
+            stateChecker.start();
         }
 
         return successfullyStartedInstanceCount;

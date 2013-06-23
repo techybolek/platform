@@ -60,7 +60,7 @@ public class AutoscaleOutMediator extends AbstractMediator implements ManagedLif
             appDomainContext.removeRequestToken(tokenId);
             System.setProperty(AutoscaleConstants.IS_TOUCHED, "true");
         } else {
-            log.error("AppDomainContext not found for domain " + domain+" and sub domain : "+subDomain);
+            log.debug("AppDomainContext not found for domain " + domain+" and sub domain : "+subDomain);
         }
         return true;
     }
