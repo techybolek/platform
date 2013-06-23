@@ -215,7 +215,7 @@ public class SAMLSSOProvider extends HttpServlet {
 		SAMLSSOReqValidationResponseDTO signInRespDTO = client.validateRequest(samlRequest,
 				queryString, ssoTokenID, rpSessionId, authMode);
 		if (!signInRespDTO.isLogOutReq()) { // an <AuthnRequest> received
-            if (signInRespDTO.isValid() && signInRespDTO.getResponse() != null) {
+            if (signInRespDTO.isValid() && signInRespDTO.getResponse() != null && !signInRespDTO.isPassive()) {
                 // user already has an existing SSO session, redirect
                 if (SAMLSSOProviderConstants.AuthnModes.OPENID.equals(authMode)) {
 
@@ -230,7 +230,10 @@ public class SAMLSSOProvider extends HttpServlet {
             } else if (signInRespDTO.isValid() && samlSsoService.isOpenIDLoginAccepted() &&
                     req.getSession().getAttribute("authenticatedOpenID") != null){
                 handleRequestWithOpenIDLogin(req,resp,signInRespDTO,relayState,ssoTokenID);
-            } else if (signInRespDTO.isValid() && signInRespDTO.getResponse() == null) {
+            } else if(signInRespDTO.isValid() && signInRespDTO.getResponse() != null && signInRespDTO.isPassive()){
+                sendResponse(req, resp, relayState, signInRespDTO.getResponse(),
+                signInRespDTO.getAssertionConsumerURL(), signInRespDTO.getSubject());
+            } else if (signInRespDTO.isValid() && signInRespDTO.getResponse() == null && !signInRespDTO.isPassive()) {
 				// user doesn't have an existing SSO session, so authenticate
 				sendToAuthenticate(req, resp, signInRespDTO, relayState);
             } else {

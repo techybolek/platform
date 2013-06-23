@@ -44,7 +44,8 @@
     	   domain = MultitenantUtils.getTenantDomain(subject);
 	}
 	// handling tenant partitioning
-    if("true".equals(IdentityUtil.getProperty((IdentityConstants.ServerConfig.SSO_TENANT_PARTITIONING_ENABLED)))){
+    if(domain != null &&
+            "true".equals(IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_TENANT_PARTITIONING_ENABLED))){
         assertionConsumerURL = assertionConsumerURL+"?"+MultitenantConstants.TENANT_DOMAIN+"="+domain;
     }
 	if(relayState != null){
