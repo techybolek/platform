@@ -17,6 +17,7 @@
 <UserManager>
     <Realm>
         <Configuration>
+		<AddAdmin>true</AddAdmin>
                 <AdminRole>admin</AdminRole>
                 <AdminUser>
                      <UserName>admin</UserName>
@@ -59,20 +60,26 @@
 	<!-- Following is the configuration for internal JDBC user store. This user store manager is based on JDBC. In case if application needs to manage 		     passwords externally set property <Property name="PasswordsExternallyManaged">true</Property>. In case if user core cache domain is needed to 			identify uniquely set property <Property name="UserCoreCacheIdentifier">domain</Property>. Furthermore properties, IsEmailUserName and 	     			DomainCalculation are readonly properties. 
 	     Note: Do not comment within UserStoreManager tags. Cause, specific tag names are used as tokens when building configurations for products. -->	
         <UserStoreManager class="org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager">
-	    <Property name="ReadOnly">false</Property>
+            <Property name="TenantManager">org.wso2.carbon.user.core.tenant.JDBCTenantManager</Property>
+	    	<Property name="ReadOnly">false</Property>
             <Property name="MaxUserNameListLength">100</Property>
+            <Property name="Disabled">false</Property>                       
             <Property name="IsEmailUserName">false</Property>
             <Property name="DomainCalculation">default</Property>
             <Property name="PasswordDigest">SHA-256</Property>
             <Property name="StoreSaltedPassword">true</Property>
+            <Property name="ReadGroups">true</Property>
+	    	<Property name="WriteGroups">true</Property>
             <Property name="UserNameUniqueAcrossTenants">false</Property>
             <Property name="PasswordJavaRegEx">^[\S]{5,30}$</Property>
             <Property name="PasswordJavaScriptRegEx">^[\\S]{5,30}$</Property>
-	    <Property name="UsernameJavaRegEx">^[^~!#$;%^*+={}\\|\\\\&lt;&gt;,\'\"]{3,30}$</Property>
-	    <Property name="UsernameJavaScriptRegEx">^[\\S]{3,30}$</Property>
-	    <Property name="RolenameJavaRegEx">^[^~!@#$;%^*+={}\\|\\\\&lt;&gt;,\'\"]{3,30}$</Property>
-	    <Property name="RolenameJavaScriptRegEx">^[\\S]{3,30}$</Property>
+	    	<Property name="UsernameJavaRegEx">^[^~!#$;%^*+={}\\|\\\\&lt;&gt;,\'\"]{3,30}$</Property>
+	    	<Property name="UsernameJavaScriptRegEx">^[\\S]{3,30}$</Property>
+	    	<Property name="RolenameJavaRegEx">^[^~!@#$;%^*+={}\\|\\\\&lt;&gt;,\'\"]{3,30}$</Property>
+	    	<Property name="RolenameJavaScriptRegEx">^[\\S]{3,30}$</Property>
             <Property name="UserRolesCacheEnabled">true</Property>
+            <Property name="MaxRoleNameListLength">100</Property>
+            <Property name="MaxUserNameListLength">100</Property>
         </UserStoreManager>
 	
 	<!-- If product is using an external LDAP as the user store in READ ONLY mode, use following user manager.
