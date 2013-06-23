@@ -34,13 +34,13 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
 import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
-import org.wso2.carbon.lb.endpoint.SubDomainAwareGroupManagementAgent;
+import org.wso2.carbon.lb.common.util.DomainMapping;
+import org.wso2.carbon.lb.common.group.mgt.*;
+import org.wso2.carbon.lb.common.cache.URLMappingCache;
 import org.wso2.carbon.lb.endpoint.TenantAwareLoadBalanceEndpointException;
 import org.wso2.carbon.lb.endpoint.TenantLoadBalanceMembershipHandler;
-import org.wso2.carbon.lb.endpoint.cache.URLMappingCache;
 import org.wso2.carbon.lb.endpoint.internal.RegistryManager;
 import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
-import org.wso2.carbon.lb.endpoint.util.DomainMapping;
 
 public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints.DynamicLoadbalanceEndpoint implements Serializable {
 
@@ -50,13 +50,13 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
      * Axis2 based membership handler which handles members in multiple clustering domains
      */
     private TenantLoadBalanceMembershipHandler tlbMembershipHandler;
-  
+
     /**
-     * Key - host name 
+     * Key - host name
      * Value - {@link HostContext}
      */
     private Map<String, HostContext> hostContexts = new HashMap<String, HostContext>();
-    
+
     private LoadBalancerConfiguration lbConfig;
 
     /**
@@ -65,13 +65,13 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
     private URLMappingCache mappingCache;
     private RegistryManager registryManager;
     private int sizeOfCache;
-    
+
     private boolean initialized;
-    
+
     private String algorithm;
         private String configuration;
         private String failOver;
-    
+
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
@@ -79,7 +79,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             lbConfig = ConfigHolder.getInstance().getLbConfig();
             hostContexts = lbConfig.getHostContextMap();
             sizeOfCache = lbConfig.getLoadBalancerConfig().getSizeOfCache();
-            mappingCache = new URLMappingCache(sizeOfCache);
+            mappingCache = URLMappingCache.getInstance(sizeOfCache);
             setSessionTimeout(lbConfig.getLoadBalancerConfig().getSessionTimeOut());
             setFailover(lbConfig.getLoadBalancerConfig().getFailOver());
 
@@ -96,7 +96,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             algorithm =
                     LoadbalanceAlgorithmFactory.
                             createLoadbalanceAlgorithm(payload, null);
-            
+
         } catch (Exception e) {
             String msg = "Error While creating Load balance algorithm";
             log.error(msg, e);
@@ -151,7 +151,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                                                                               algorithm, cfgCtx,
                                                                               isClusteringEnabled,
                                                                               getName());
-                
+
                 // set TenantLoadBalanceMembershipHandler for future reference
                 ConfigHolder.getInstance().setTenantLoadBalanceMembershipHandler(tlbMembershipHandler);
             }
@@ -166,22 +166,22 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             initialized = true;
             log.info("Tenant Aware Load Balance Endpoint is initialized.");
         }
-        
+
     }
-    
+
     	public void setConfiguration(String paramEle) {
     	        configuration = paramEle;
     	}
-    	
+
     	    public void setAlgorithm(String paramEle) {
     	        this.algorithm = paramEle;
     	    }
-    	
+
     	    public void setFailOver(String paramEle) {
     	        this.failOver = paramEle;
     	    }
-    
-    
+
+
     public String getName() {
 		return "tlbEndpoint";
 	}
@@ -203,6 +203,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         /*   setCookieHeader(synCtx);     */
         Member currentMember = null;
         SessionInformation sessionInformation = null;
+        String actualHost = null;
 
         //Gathering required information for domain mapping
         org.apache.axis2.context.MessageContext axis2MessageContext =
@@ -210,13 +211,42 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         Map<String, String> transportHeaders = (Map<String, String>) axis2MessageContext.
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String targetHost = transportHeaders.get(HTTP.TARGET_HOST);
-        String toAddress = synCtx.getTo().getAddress();
+
         String port = "";
+        boolean containsPort = false;
         if (targetHost.contains(":")) {
+            containsPort = true;
             port = targetHost.substring(targetHost.indexOf(':') + 1, targetHost.length());
             targetHost = targetHost.substring(0, targetHost.indexOf(':'));
         }
         //Gathering required information for domain mapping done
+
+        boolean isValidHost = tlbMembershipHandler.isAValidHostName(targetHost);
+        DomainMapping domainMapping = null;
+        if(!isValidHost){
+            //check if the host is valid, if not valid, execute following code to check whether it is a mapped domain
+            domainMapping = mappingCache.getMapping(targetHost);
+            if(domainMapping == null){
+                registryManager = new RegistryManager();
+                domainMapping = registryManager.getMapping(targetHost);
+                mappingCache.addValidMapping(targetHost, domainMapping);
+            }
+            if (domainMapping != null) {
+                actualHost = domainMapping.getActualHost();
+
+                if(containsPort){
+                    transportHeaders.put(HTTP.TARGET_HOST, actualHost + ":" + port);
+                } else {
+                    transportHeaders.put(HTTP.TARGET_HOST, actualHost);
+                }
+                ((Axis2MessageContext) synCtx).getAxis2MessageContext().setProperty("TRANSPORT_HEADERS" , transportHeaders);
+
+            } else {
+                String msg = "Invalid host name : " + targetHost;
+                log.error(msg);
+                throw new SynapseException(msg);
+            }
+        }
 
         if (isSessionAffinityBasedLB()) {
             // first check if this session is associated with a session. if so, get the endpoint
@@ -263,7 +293,8 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         }
 
         TenantDynamicLoadBalanceFaultHandlerImpl faultHandler = new TenantDynamicLoadBalanceFaultHandlerImpl();
-        faultHandler.setHost(targetHost);
+        log.debug("************* Actual Host: "+actualHost +" ****** Target Host: "+targetHost);
+        faultHandler.setHost(actualHost != null ? actualHost : targetHost);
 
         if (sessionInformation != null && currentMember != null) {
             //send message on current session
@@ -281,12 +312,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                     throw new SynapseException(msg);
                 }
                 sendToApplicationMember(synCtx, currentMember, faultHandler, true);
-            }
-            //If it is not a valid host name we will see whether it is a domain mapping, only if
-            //autoscaling is disabled. Since if autoscaling is enabled, we do this resolution at
-            // AutoscaleInMediator.
-            else if(!lbConfig.getLoadBalancerConfig().isAutoscaleEnabled()) {
-                DomainMapping domainMapping = mappingCache.getMapping(targetHost);
+            } else {
                 if(domainMapping == null){
                     registryManager = new RegistryManager();
                     domainMapping = registryManager.getMapping(targetHost);
@@ -294,24 +320,25 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                 }
                 if(domainMapping != null) {
 
-                    String tenantContext = domainMapping.getTenantContext();
-                    String actualHost = domainMapping.getActualHost();
-                    String appType = domainMapping.getAppType();
-                    String app = domainMapping.getApp();
+                    actualHost = domainMapping.getActualHost();
+                    
+                    log.debug("************* Actual Host: "+actualHost +" ****** Target Host: "+targetHost);
+                    faultHandler.setHost(actualHost != null ? actualHost : targetHost);
 
-                    if(toAddress.indexOf("/t/") == -1 && !toAddress.startsWith("/carbon")){
-                        synCtx.setTo(new EndpointReference(tenantContext + appType + app + toAddress));
+                    if(containsPort){
+                        transportHeaders.put(HTTP.TARGET_HOST, actualHost + ":" + port);
+                    } else {
+                        transportHeaders.put(HTTP.TARGET_HOST, actualHost);
                     }
-                    transportHeaders.put(HTTP.TARGET_HOST, actualHost + ":" + port);
                     ((Axis2MessageContext) synCtx).getAxis2MessageContext().setProperty("TRANSPORT_HEADERS" , transportHeaders);
-                    tenantId = getTenantId(tenantContext);
+
                     currentMember = tlbMembershipHandler.getNextApplicationMember(actualHost,tenantId);
                     sendToApplicationMember(synCtx,currentMember,faultHandler,true);
+                }else {
+                    String msg = "Invalid host name : " + targetHost;
+                    log.error(msg);
+                    throw new SynapseException(msg);
                 }
-            } else {
-                String msg = "Invalid host name : " + targetHost;
-                log.error(msg);
-                throw new SynapseException(msg);
             }
         }
     }
@@ -395,6 +422,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         };
 
         public void setHost(String host) {
+            log.debug("Setting host name: "+host);
             this.host = host;
         }
 
@@ -410,13 +438,14 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         }
 
         public void onFault(MessageContext synCtx) {
-            if (currentMember == null) {
+            if (currentMember == null || to == null) {
                 return;
             }
 
             // Prevent infinite retrying to failed members
             callCount.set(callCount.get() + 1);
             if (callCount.get() >= MAX_RETRY_COUNT) {
+                log.debug("Retrying to a failed member has stopped.");
                 return;
             }
 
@@ -434,7 +463,9 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                         errorCode.equals(NhttpConstants.CONNECT_CANCEL) ||
                         errorCode.equals(NhttpConstants.CONNECT_TIMEOUT)) {
                     
-                    synCtx.getFaultStack().pop();
+                    if (!synCtx.getFaultStack().isEmpty()) {
+                        synCtx.getFaultStack().pop();
+                    }
                     // Try to resend to another member
                     Member newMember = tlbMembershipHandler.getNextApplicationMember(host, getTenantId(synCtx.toString()));
                     if (newMember == null || newMember.isSuspended()) {
@@ -443,7 +474,6 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                         log.error(msg);
                         throw new SynapseException(msg);
                     }
-                    log.info("Failed over to " + newMember);
                     synCtx.setTo(to);
                     if (isSessionAffinityBasedLB()) {
                         // We are sending this message on a new session,
@@ -457,6 +487,11 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                         Thread.sleep(1000);  // Sleep for sometime before retrying
                     } catch (InterruptedException ignored) {
                     }
+                    
+                    if(synCtx == null || to == null) {
+                        return;
+                    }
+                    log.info("Failed over to " + newMember);
                     sendToApplicationMember(synCtx, newMember, this, true);
                 } else if (errorCode.equals(NhttpConstants.SND_IO_ERROR_SENDING) ||
                         errorCode.equals(NhttpConstants.CONNECTION_CLOSED)) {

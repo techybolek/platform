@@ -171,14 +171,18 @@ public class LoadBalanceEndpointServiceComponent {
                 log.debug("Endpoint Admin bundle is activated ");
             }
             
-            // start consumer
-    		// initialize TopologyBuilder Consumer
-    		Thread topologyConsumer = new Thread(new TopologySyncher(ConfigHolder.getInstance().getSharedTopologyDiffQueue()));
-    		// start consumer
-    		topologyConsumer.start();
-    		
-    		TopologySubscriber.subscribe(TopologyConstants.TOPIC_NAME);
-            
+            if (ConfigHolder.getInstance().getLbConfig().getLoadBalancerConfig().getMbServerUrl() != null) {
+
+                // start consumer
+                // initialize TopologyBuilder Consumer
+                Thread topologyConsumer =
+                    new Thread(new TopologySyncher(ConfigHolder.getInstance().getSharedTopologyDiffQueue()));
+                // start consumer
+                topologyConsumer.start();
+
+                TopologySubscriber.subscribe(TopologyConstants.TOPIC_NAME);
+
+            }
             activated = true;
         } catch (Throwable e) {
             log.error("Failed to activate Endpoint Admin bundle ", e);

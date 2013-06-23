@@ -18,7 +18,7 @@ package org.wso2.carbon.lb.endpoint.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
-import org.wso2.carbon.lb.endpoint.util.DomainMapping;
+import org.wso2.carbon.lb.common.util.DomainMapping;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -31,9 +31,6 @@ public class RegistryManager {
      */
     private Resource resource = null;
     public static final String HOST_INFO = "hostinfo/";
-    private static final String TENANT_CONTEXT = "tenant.context";
-    private static final String APP = "app";
-    private static final String APP_TYPE = "app.type";
     public static final String ACTUAL_HOST = "actual.host";
 
     public DomainMapping getMapping(String hostName) {
@@ -43,9 +40,6 @@ public class RegistryManager {
                 resource = governanceRegistry.get(HOST_INFO + hostName);
                 domainMapping = new DomainMapping(hostName);
                 domainMapping.setActualHost(resource.getProperty(ACTUAL_HOST));
-                domainMapping.setApp(resource.getProperty(APP));
-                domainMapping.setAppType(resource.getProperty(APP_TYPE));
-                domainMapping.setTenantContext(resource.getProperty(TENANT_CONTEXT));
                 return domainMapping;
             }
         } catch (RegistryException e) {

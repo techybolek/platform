@@ -30,7 +30,7 @@ import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration.ServiceConfigura
 import org.wso2.carbon.lb.common.conf.util.Constants;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
 import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
-import org.wso2.carbon.lb.endpoint.SubDomainAwareGroupManagementAgent;
+import org.wso2.carbon.lb.common.group.mgt.SubDomainAwareGroupManagementAgent;
 import org.wso2.carbon.lb.endpoint.TenantLoadBalanceMembershipHandler;
 import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
 
@@ -107,7 +107,7 @@ public class ClusterDomainManagerImpl implements ClusterDomainManager {
         // we simply override the attributes with new values
         serviceConfig.setDomain(domain);
         serviceConfig.setSub_domain(subDomain);
-        serviceConfig.setTenant_range(/*String.valueOf(tenantId)*/tenantRange);
+        serviceConfig.setTenant_range(tenantRange);
         serviceConfig.setHosts(hostName);
         serviceConfig.setMin_app_instances(minInstances);
         serviceConfig.setMax_app_instances(maxInstances);
@@ -135,10 +135,10 @@ public class ClusterDomainManagerImpl implements ClusterDomainManager {
         String tenantRange = cluster.getTenantRange();
 
         // sub domain can be null, but others can't
-        if (domain == null || hostName == null /*|| tenantId < 0*/) {
+        if (domain == null || hostName == null || tenantRange == null) {
             String msg =
                          "Invalid value/s detected - domain: " + domain + "\n host name: " +
-                                 hostName + "\n tenant id: " + tenantRange;
+                                 hostName + "\n tenant range: " + tenantRange;
             log.error(msg);
             throw new SynapseException(msg);
         }

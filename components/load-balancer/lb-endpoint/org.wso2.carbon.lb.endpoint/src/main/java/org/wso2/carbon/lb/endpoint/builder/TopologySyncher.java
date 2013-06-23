@@ -1,5 +1,8 @@
 package org.wso2.carbon.lb.endpoint.builder;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -7,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
+import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration.ServiceConfiguration;
 import org.wso2.carbon.lb.common.conf.structure.Node;
 import org.wso2.carbon.lb.common.conf.structure.NodeBuilder;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
@@ -65,9 +69,11 @@ public class TopologySyncher implements Runnable {
                     // reset service configurations
 //                    lbconfig.resetData();
                     // create new service configurations
-                    lbconfig.createServicesConfig(topologyNode);
-
+                    List<ServiceConfiguration> currentServiceConfigs = lbconfig.createServicesConfig(topologyNode);
+                    
                     generateGroupMgtAgents(lbconfig);
+                    
+                    removeGroupMgtAgents(lbconfig, currentServiceConfigs);
 
 //                }
 
@@ -75,6 +81,23 @@ public class TopologySyncher implements Runnable {
             }
         }
 
+    }
+
+    private void removeGroupMgtAgents(LoadBalancerConfiguration lbConfig, List<ServiceConfiguration> currentServiceConfigs) {
+
+        for (Iterator iterator = lbConfig.getServiceConfigurations().values().iterator(); iterator.hasNext();) {
+            Map<String, ServiceConfiguration> valuesMap = (Map<String, ServiceConfiguration>) iterator.next();
+            
+            for (Iterator iterator2 = valuesMap.values().iterator(); iterator2.hasNext();) {
+                ServiceConfiguration oldServiceConfig = (ServiceConfiguration) iterator2.next();
+                
+                if(!currentServiceConfigs.contains(oldServiceConfig)){
+                    // if the ServiceConfiguration is not there any more in the latest topology
+                    lbConfig.removeServiceConfiguration(oldServiceConfig.getDomain(), oldServiceConfig.getSubDomain());
+                    GroupMgtAgentBuilder.resetGroupMgtAgent(oldServiceConfig.getDomain(), oldServiceConfig.getSubDomain());
+                }
+            }
+        }
     }
 
     /**

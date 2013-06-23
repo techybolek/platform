@@ -4,8 +4,6 @@ import java.util.Properties;
 
 import javax.jms.*;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
@@ -15,41 +13,64 @@ public class TopologySubscriber {
 
 	private static final Log log = LogFactory.getLog(TopologySubscriber.class);
 	
-	public static void subscribe(String topicName) {
+    public static void subscribe(String topicName) {
         Properties initialContextProperties = new Properties();
+        TopicSubscriber topicSubscriber = null;
+        TopicSession topicSession = null;
+        TopicConnection topicConnection = null;
+        InitialContext initialContext = null;
+
         initialContextProperties.put("java.naming.factory.initial",
-                "org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
-        
+            "org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
+
         String mbServerUrl = null;
-        if(ConfigHolder.getInstance().getLbConfig() != null){
-        	mbServerUrl = ConfigHolder.getInstance().getLbConfig().getLoadBalancerConfig().getMbServerUrl();
+        if (ConfigHolder.getInstance().getLbConfig() != null) {
+            mbServerUrl = ConfigHolder.getInstance().getLbConfig().getLoadBalancerConfig().getMbServerUrl();
         }
-		String connectionString =
-		                          "amqp://admin:admin@clientID/carbon?brokerlist='tcp://" + 
-		                        		  (mbServerUrl==null ? TopologyConstants.DEFAULT_MB_SERVER_URL:mbServerUrl) + "?reconnect='true''";
+        String connectionString =
+            "amqp://admin:admin@clientID/carbon?brokerlist='tcp://" +
+                (mbServerUrl == null ? TopologyConstants.DEFAULT_MB_SERVER_URL : mbServerUrl) + "'&reconnect='true'";
         initialContextProperties.put("connectionfactory.qpidConnectionfactory", connectionString);
 
         try {
-        	InitialContext initialContext = new InitialContext(initialContextProperties);
+            initialContext = new InitialContext(initialContextProperties);
             TopicConnectionFactory topicConnectionFactory =
-                    (TopicConnectionFactory) initialContext.lookup("qpidConnectionfactory");
-            TopicConnection topicConnection = topicConnectionFactory.createTopicConnection();
+                (TopicConnectionFactory) initialContext.lookup("qpidConnectionfactory");
+            topicConnection = topicConnectionFactory.createTopicConnection();
             topicConnection.start();
-            TopicSession topicSession =
-                    topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            topicSession =
+                topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 
             Topic topic = topicSession.createTopic(topicName);
-            TopicSubscriber topicSubscriber =
-                    topicSession.createSubscriber(topic);
+            topicSubscriber =
+                topicSession.createSubscriber(topic);
 
-            topicSubscriber.setMessageListener(new TopologyListener(
-                    topicConnection, topicSession, topicSubscriber));
+            topicSubscriber.setMessageListener(new TopologyListener());
 
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
 
-        } catch (NamingException e) {
-        	log.error(e.getMessage(), e);
-        } catch (JMSException e) {
-        	log.error(e.getMessage(), e);
+            try {
+                if (topicSubscriber != null) {
+                    topicSubscriber.close();
+                }
+
+                if (topicSession != null) {
+                    topicSession.close();
+                }
+
+                if (topicConnection != null) {
+                    topicConnection.close();
+                }
+            } catch (JMSException e1) {
+                // ignore
+            }
+
+        } 
+        finally {
+            // start the health checker
+            Thread healthChecker = new Thread(new TopicHealthChecker(topicName, topicSubscriber));
+            healthChecker.start();
         }
     }
 
