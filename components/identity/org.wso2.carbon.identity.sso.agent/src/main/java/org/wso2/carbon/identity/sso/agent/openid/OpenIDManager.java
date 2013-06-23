@@ -16,7 +16,7 @@ import org.openid4java.message.ax.AxMessage;
 import org.openid4java.message.ax.FetchRequest;
 import org.openid4java.message.ax.FetchResponse;
 import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
-import org.wso2.carbon.identity.sso.agent.util.SSOConfigs;
+import org.wso2.carbon.identity.sso.agent.util.SSOAgentConfigs;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,7 +32,7 @@ public class OpenIDManager {
 
     public String doOpenIDLogin(HttpServletRequest request, HttpServletResponse response) throws SSOAgentException {
 
-        String claimed_id = request.getParameter(SSOConfigs.getClaimedIdParameterName());
+        String claimed_id = request.getParameter(SSOAgentConfigs.getClaimedIdParameterName());
 
 
         try {
@@ -44,18 +44,18 @@ public class OpenIDManager {
             DiscoveryInformation discovered = consumerManager.associate(discoveries);
 
             // Keeping necessary parameters to verify the AuthResponse
-            request.getSession().setAttribute(SSOConfigs.getDiscoverySessionAttributeName(), discovered);
+            request.getSession().setAttribute(SSOAgentConfigs.getDiscoverySessionAttributeName(), discovered);
 
             consumerManager.setImmediateAuth(true);
-            AuthRequest authReq = consumerManager.authenticate(discovered, SSOConfigs.getReturnTo());
+            AuthRequest authReq = consumerManager.authenticate(discovered, SSOAgentConfigs.getReturnTo());
 
             // Request subject attributes using Attribute Exchange extension specification
-            if(SSOConfigs.getAttributesRequestorImplClass() != null){
+            if(SSOAgentConfigs.getAttributesRequestorImplClass() != null){
 
                 if(attributesRequestor == null){
                     synchronized (this){
                         if(attributesRequestor == null){
-                            attributesRequestor = (AttributesRequestor)Class.forName(SSOConfigs.
+                            attributesRequestor = (AttributesRequestor)Class.forName(SSOAgentConfigs.
                                     getAttributesRequestorImplClass()).newInstance();
                             attributesRequestor.init();
                         }
@@ -94,13 +94,13 @@ public class OpenIDManager {
             throw new SSOAgentException("Error while doing OpenID Authentication", e);
         } catch (ClassNotFoundException e) {
             throw new SSOAgentException("Error while instantiating AttributeRequestorImplClass: " +
-                    SSOConfigs.getAttributesRequestorImplClass(), e);
+                    SSOAgentConfigs.getAttributesRequestorImplClass(), e);
         } catch (InstantiationException e) {
             throw new SSOAgentException("Error while instantiating AttributeRequestorImplClass: " +
-                    SSOConfigs.getAttributesRequestorImplClass(), e);
+                    SSOAgentConfigs.getAttributesRequestorImplClass(), e);
         } catch (IllegalAccessException e) {
             throw new SSOAgentException("Error while instantiating AttributeRequestorImplClass: " +
-                    SSOConfigs.getAttributesRequestorImplClass(), e);
+                    SSOAgentConfigs.getAttributesRequestorImplClass(), e);
         }
     }
 
@@ -111,11 +111,11 @@ public class OpenIDManager {
             ParameterList authResponseParams = new ParameterList(request.getParameterMap());
 
             // Previously discovered information
-            DiscoveryInformation discovered = (DiscoveryInformation) request.getSession().getAttribute(SSOConfigs.getDiscoverySessionAttributeName());
+            DiscoveryInformation discovered = (DiscoveryInformation) request.getSession().getAttribute(SSOAgentConfigs.getDiscoverySessionAttributeName());
 
             // Verify return-to, discoveries, nonce & signature
             // Signature will be verified using the shared secret
-            VerificationResult verificationResult = consumerManager.verify(SSOConfigs.getReturnTo(), authResponseParams, discovered);
+            VerificationResult verificationResult = consumerManager.verify(SSOAgentConfigs.getReturnTo(), authResponseParams, discovered);
 
             Identifier verified = verificationResult.getVerifiedId();
 
@@ -124,7 +124,7 @@ public class OpenIDManager {
 
                 AuthSuccess authSuccess = (AuthSuccess) verificationResult.getAuthResponse();
 
-                request.getSession().setAttribute(SSOConfigs.getClaimedIdSessionAttributeName(), authSuccess.getIdentity());
+                request.getSession().setAttribute(SSOAgentConfigs.getClaimedIdSessionAttributeName(), authSuccess.getIdentity());
 
                 // Get requested attributes using AX extension
                 if (authSuccess.hasExtension(AxMessage.OPENID_NS_AX)) {
@@ -143,7 +143,7 @@ public class OpenIDManager {
                             attributesMap.put(attr,attributeValues);
                         }
                     }
-                    request.getSession().setAttribute(SSOConfigs.getOpenIdAttributesMapName(), attributesMap);
+                    request.getSession().setAttribute(SSOAgentConfigs.getOpenIdAttributesMapName(), attributesMap);
                 }
 
             } else {

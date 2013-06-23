@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.sso.agent.saml;
 
-import org.wso2.carbon.identity.sso.agent.util.SSOConstants;
+import org.wso2.carbon.identity.sso.agent.util.SSOAgentConstants;
 
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -32,6 +32,6 @@ public class SSOAgentHttpSessionListener implements HttpSessionListener{
 
     @Override
     public void sessionDestroyed(HttpSessionEvent httpSessionEvent) {
-        SSOSessionManager.getSsoSessions().remove(httpSessionEvent.getSession().getAttribute(SSOConstants.IDP_SESSION));
+        SSOAgentSessionManager.getSsoSessions().remove(httpSessionEvent.getSession().getAttribute(SSOAgentConstants.IDP_SESSION));
     }
 }

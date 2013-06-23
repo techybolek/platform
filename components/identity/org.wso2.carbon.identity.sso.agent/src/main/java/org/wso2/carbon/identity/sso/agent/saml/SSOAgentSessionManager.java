@@ -18,12 +18,11 @@
 
 package org.wso2.carbon.identity.sso.agent.saml;
 
+import javax.servlet.http.HttpSession;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
-
-public class SSOSessionManager {
+public class SSOAgentSessionManager {
 	
 	/*
 	 * Session ID of the IdP is mapped to the session at the SP so that a single logout request can be handled

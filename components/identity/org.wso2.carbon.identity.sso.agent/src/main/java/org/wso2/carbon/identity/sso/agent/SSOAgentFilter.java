@@ -20,17 +20,16 @@ package org.wso2.carbon.identity.sso.agent;
 
 import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
 import org.wso2.carbon.identity.sso.agent.openid.OpenIDManager;
-import org.wso2.carbon.identity.sso.agent.saml.SAMLSSOManager;
-import org.wso2.carbon.identity.sso.agent.util.SSOConfigs;
-import org.wso2.carbon.identity.sso.agent.util.SSOConstants;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.wso2.carbon.identity.sso.agent.saml.SAML2SSOManager;
+import org.wso2.carbon.identity.sso.agent.util.SSOAgentConfigs;
+import org.wso2.carbon.identity.sso.agent.util.SSOAgentConstants;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet Filter implementation class SSOAgentFilter
@@ -39,7 +38,7 @@ public class SSOAgentFilter implements Filter {
 
     private static Logger LOGGER = Logger.getLogger("InfoLogging");
 
-    private SAMLSSOManager samlSSOManager;
+    private SAML2SSOManager samlSSOManager;
     private OpenIDManager openIdManager;
 
     /**
@@ -48,15 +47,15 @@ public class SSOAgentFilter implements Filter {
     public void init(FilterConfig fConfig) throws ServletException {
         try {
             //Initialize the configurations as 1st step.
-            SSOConfigs.initConfigs(fConfig);
-
-            // Initialize
-            samlSSOManager = new SAMLSSOManager();
+            SSOAgentConfigs.initConfig(fConfig);
+            SSOAgentConfigs.initCheck();
+            // initialize ssomanager and openidmanager
+            samlSSOManager = new SAML2SSOManager();
             openIdManager = new OpenIDManager();
             fConfig.getServletContext().addListener("org.wso2.carbon.identity.sso.agent.saml.SSOAgentHttpSessionListener");
-
         }  catch (SSOAgentException e) {
-            throw new ServletException(e);
+            LOGGER.log(Level.SEVERE, "An error has occurred", e);
+            throw e;
         }
     }
 
@@ -66,43 +65,44 @@ public class SSOAgentFilter implements Filter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
         try {
+
             HttpServletRequest request = (HttpServletRequest) req;
             HttpServletResponse response = (HttpServletResponse) res;
 
             // This should be SLO SAML Request from IdP
-            String samlRequest = request.getParameter(SSOConstants.HTTP_POST_PARAM_SAML2_AUTH_REQ);
+            String samlRequest = request.getParameter(SSOAgentConstants.HTTP_POST_PARAM_SAML2_AUTH_REQ);
 
             // This could be either SAML Response for a SSO SAML Request by the client application or
             // a SAML Response for a SLO SAML Request from a SP
-            String samlResponse = request.getParameter(SSOConstants.HTTP_POST_PARAM_SAML2_RESP);
+            String samlResponse = request.getParameter(SSOAgentConstants.HTTP_POST_PARAM_SAML2_RESP);
 
             String openid_mode = request.getParameter("openid.mode");
 
-            String claimed_id = request.getParameter(SSOConfigs.getClaimedIdParameterName());
+            String claimed_id = request.getParameter(SSOAgentConfigs.getClaimedIdParameterName());
 
-            if(SSOConfigs.isSAMLSSOLoginEnabled() && samlRequest != null){
+            if(SSOAgentConfigs.isSAMLSSOLoginEnabled() && samlRequest != null){
                 samlSSOManager.doSLO(request);
-            } else if(SSOConfigs.isSAMLSSOLoginEnabled() && samlResponse != null){
+            } else if(SSOAgentConfigs.isSAMLSSOLoginEnabled() && samlResponse != null){
                 samlSSOManager.processResponse(request);
-            } else if(SSOConfigs.isOpenIDLoginEnabled() && openid_mode != null &&
+            } else if(SSOAgentConfigs.isOpenIDLoginEnabled() && openid_mode != null &&
                     !openid_mode.equals("") && !openid_mode.equals("null")){
                 openIdManager.processOpenIDLoginResponse(request, response);
-            } else if (SSOConfigs.isSAMLSSOLoginEnabled() && SSOConfigs.isSLOEnabled() &&
-                    request.getRequestURI().endsWith(SSOConfigs.getLogoutUrl())){
+            } else if (SSOAgentConfigs.isSAMLSSOLoginEnabled() && SSOAgentConfigs.isSLOEnabled() &&
+                    request.getRequestURI().endsWith(SSOAgentConfigs.getLogoutUrl())){
                 if(request.getSession(false) != null){
                     response.sendRedirect(samlSSOManager.buildRequest(request, true, false));
                     return;
                 }
-            } else if(SSOConfigs.isSAMLSSOLoginEnabled() && request.getRequestURI().endsWith(SSOConfigs.getSAMLSSOUrl())){
+            } else if(SSOAgentConfigs.isSAMLSSOLoginEnabled() && request.getRequestURI().endsWith(SSOAgentConfigs.getSAMLSSOUrl())){
                 response.sendRedirect(samlSSOManager.buildRequest(request, false, false));
                 return;
-            } else if(SSOConfigs.isOpenIDLoginEnabled() && request.getRequestURI().endsWith(SSOConfigs.getOpenIdUrl()) &&
+            } else if(SSOAgentConfigs.isOpenIDLoginEnabled() && request.getRequestURI().endsWith(SSOAgentConfigs.getOpenIdUrl()) &&
                     claimed_id != null && !claimed_id.equals("") && !claimed_id.equals("null")){
                 response.sendRedirect(openIdManager.doOpenIDLogin(request, response));
                 return;
-            } else if ((SSOConfigs.isSAMLSSOLoginEnabled() || SSOConfigs.isOpenIDLoginEnabled()) &&
-                    !request.getRequestURI().endsWith(SSOConfigs.getLoginUrl()) &&
-                    request.getSession().getAttribute(SSOConfigs.getSubjectIdSessionAttributeName()) == null) {
+            } else if ((SSOAgentConfigs.isSAMLSSOLoginEnabled() || SSOAgentConfigs.isOpenIDLoginEnabled()) &&
+                    !request.getRequestURI().endsWith(SSOAgentConfigs.getLoginUrl()) &&
+                    request.getSession().getAttribute(SSOAgentConfigs.getSubjectIdSessionAttributeName()) == null) {
                 response.sendRedirect(samlSSOManager.buildRequest(request, false, true));
                 return;
              }

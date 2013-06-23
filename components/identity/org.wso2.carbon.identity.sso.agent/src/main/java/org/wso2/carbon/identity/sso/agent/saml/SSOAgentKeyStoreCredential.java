@@ -19,9 +19,10 @@
 package org.wso2.carbon.identity.sso.agent.saml;
 
 import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
-import org.wso2.carbon.identity.sso.agent.util.SSOConfigs;
+import org.wso2.carbon.identity.sso.agent.util.SSOAgentConfigs;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
@@ -56,22 +57,22 @@ public class SSOAgentKeyStoreCredential implements SSOAgentCredential {
 
     private static void readX509Credentials() throws SSOAgentException {
 
-        String keyStoreFile = SSOConfigs.getKeyStore();
-        String keyStorePassword = SSOConfigs.getKeyStorePassword();
-        String alias = SSOConfigs.getIdPCertAlias();
+        InputStream keyStoreFile = SSOAgentConfigs.getKeyStore();
+        String keyStorePassword = SSOAgentConfigs.getKeyStorePassword();
+        String alias = SSOAgentConfigs.getIdPCertAlias();
         KeyStore keyStore = readKeyStore(keyStoreFile, keyStorePassword, "JKS");
         X509Certificate cert = null;
         PrivateKey privateKey = null;
         try{
             if (alias != null) {
                 cert = (X509Certificate) keyStore.getCertificate(alias);
-                if(SSOConfigs.isRequestSigned()){
-                    privateKey = (PrivateKey) keyStore.getKey(alias,SSOConfigs.getPrivateKeyPassword().toCharArray());
+                if(SSOAgentConfigs.isRequestSigned()){
+                    privateKey = (PrivateKey) keyStore.getKey(alias, SSOAgentConfigs.getPrivateKeyPassword().toCharArray());
                 }
                 if(cert == null){
                     throw new SSOAgentException("Cannot find a certificate with the alias " + alias + " in the trust store");
                 }
-                if(SSOConfigs.isRequestSigned() && privateKey == null){
+                if(SSOAgentConfigs.isRequestSigned() && privateKey == null){
                     throw new SSOAgentException("RequestSigning is enabled, but cannot find private key with the alias " +
                             alias + " in the key store");
                 }
@@ -91,19 +92,14 @@ public class SSOAgentKeyStoreCredential implements SSOAgentCredential {
     /**
      * get the key store instance
      *
-     * @param location      location of key store
+     * @param is KeyStore InputStream
      * @param storePassword password of key store
      * @param storeType     key store type
      * @return KeyStore instant
      * @throws SSOAgentException if fails to load key store
      */
-    private static KeyStore readKeyStore(String location, String storePassword,
+    private static KeyStore readKeyStore(InputStream is, String storePassword,
                                         String storeType) throws SSOAgentException {
-
-        File keyStoreFile = new File(location);
-        if (SSOConfigs.isPropertiesFleDefined() && !keyStoreFile.exists()) {
-            throw new SSOAgentException("KeyStore can not be found at \'" + keyStoreFile + "\'" );
-        }
 
         if (storePassword == null) {
             throw new SSOAgentException("KeyStore password can not be null");
@@ -112,13 +108,7 @@ public class SSOAgentKeyStoreCredential implements SSOAgentCredential {
             throw new SSOAgentException ("KeyStore Type can not be null");
         }
 
-        InputStream is = null;
         try {
-            if(keyStoreFile.exists()){
-                is = new FileInputStream(keyStoreFile);
-            } else {
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream("wso2carbon.jks");
-            }
             KeyStore keyStore = KeyStore.getInstance(storeType);
             keyStore.load(is, storePassword.toCharArray());
             return keyStore;

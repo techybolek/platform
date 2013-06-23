@@ -35,15 +35,16 @@ import org.opensaml.xml.util.Base64;
 import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
 
 import javax.xml.namespace.QName;
-
 import java.net.URLEncoder;
-import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
-public class Util {
+public class SSOAgentUtils {
+
+    private static Logger LOGGER = Logger.getLogger("InfoLogging");
 
 	/**
      * Generates a unique Id for Authentication Requests
