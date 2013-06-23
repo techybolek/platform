@@ -139,9 +139,9 @@
 	    <module>bam2</module>
 	    <module>analytics</module>
 	    <!-- module>gadget-ide</module -->
-        <!--module>autoscaler</module-->
-        <!--module>autoscaler-service</module-->
-        <!--module>tenantaware-load-balancer</module-->
+        <module>autoscaler</module>
+        <module>loadbalancer</module>
+        <module>tenantaware-load-balancer</module>
         <module>gadgetgen-wizard</module>
         <module>cassandra-explorer</module>
         <module>data-bridge</module>
