@@ -37,6 +37,7 @@
 		<arg expression="get-property('uri.var.symbol')"/>
 	    </args>
 	 </payloadFactory>
+         <header name="Action" value="urn:getQuote"/>
 	 <send>
 	    <endpoint>
 		<address uri="http://localhost:9000/services/SimpleStockQuoteService" format="soap11"/>
