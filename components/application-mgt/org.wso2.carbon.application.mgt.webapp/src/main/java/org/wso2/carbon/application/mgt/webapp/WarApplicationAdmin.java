@@ -62,7 +62,7 @@ public class WarApplicationAdmin extends AbstractAdmin {
                 = WarAppServiceComponent.getAppManager().getCarbonApps(tenantId);
         CarbonApplication currentApplication = null;
         for (CarbonApplication application : appList) {
-            if (appName.equals(application.getAppName())) {
+            if (appName.equals(application.getAppNameWithVersion())) {
                 currentApplication = application;
                 break;
             }
@@ -169,7 +169,7 @@ public class WarApplicationAdmin extends AbstractAdmin {
                 = WarAppServiceComponent.getAppManager().getCarbonApps(tenantId);
         CarbonApplication currentApplication = null;
         for (CarbonApplication application : appList) {
-            if (appName.equals(application.getAppName())) {
+            if (appName.equals(application.getAppNameWithVersion())) {
                 currentApplication = application;
                 break;
             }

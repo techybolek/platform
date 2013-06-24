@@ -21,6 +21,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.application.mgt.ui.ApplicationAdminClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.application.mgt.stub.types.carbon.ApplicationMetadata" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -144,11 +145,13 @@
                     </thead>
                     <tbody>
                     <%
-                        for (String appName : appList) {
-                            appVersion = client.getAppData(appName).getAppVersion();
+                        for (String appNameWithVersion : appList) {
+                            ApplicationMetadata appMetadata = client.getAppData(appNameWithVersion);
+                            appVersion = appMetadata.getAppVersion();
+                            String appName = appMetadata.getAppName();
                     %>
                     <tr>
-                        <td><a href="./application_info.jsp?appName=<%= appName%>"><%= appName%></a></td>
+                        <td><a href="./application_info.jsp?appName=<%= appNameWithVersion%>"><%= appName%></a></td>
                         <%
                             if (appVersion != null) {
                         %>
@@ -158,8 +161,8 @@
                         <%
                             }
                         %>
-                        <td><a href="#" class="icon-link-nofloat" style="background-image:url(images/delete.gif);" onclick="deleteApplication('<%= appName%>');" title="<%= bundle.getString("carbonapps.delete.this.row")%>"><%= bundle.getString("carbonapps.delete")%></a></td>
-                        <td><a href="download-ajaxprocessor.jsp?cappName=<%= appName%>" class="icon-link-nofloat" style="background-image:url(images/download.gif);" title="<%= bundle.getString("download.capp")%>"><%= bundle.getString("download")%></a></td>
+                        <td><a href="#" class="icon-link-nofloat" style="background-image:url(images/delete.gif);" onclick="deleteApplication('<%= appNameWithVersion%>');" title="<%= bundle.getString("carbonapps.delete.this.row")%>"><%= bundle.getString("carbonapps.delete")%></a></td>
+                        <td><a href="download-ajaxprocessor.jsp?cappName=<%= appNameWithVersion%>" class="icon-link-nofloat" style="background-image:url(images/download.gif);" title="<%= bundle.getString("download.capp")%>"><%= bundle.getString("download")%></a></td>
                     </tr>
                     <%
                         }

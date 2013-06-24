@@ -52,7 +52,7 @@ public class HumanTaskApplicationAdmin extends AbstractAdmin {
                 = HumanTaskAppMgtServiceComponent.getAppManager().getCarbonApps(tenantId);
         CarbonApplication currentApplication = null;
         for (CarbonApplication application : appList) {
-            if (appName.equals(application.getAppName())) {
+            if (appName.equals(application.getAppNameWithVersion())) {
                 currentApplication = application;
                 break;
             }

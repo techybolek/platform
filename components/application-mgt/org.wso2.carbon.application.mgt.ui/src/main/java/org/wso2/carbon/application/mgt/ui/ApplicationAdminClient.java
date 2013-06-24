@@ -65,18 +65,18 @@ public class ApplicationAdminClient {
         return null;
     }
 
-    public ApplicationMetadata getAppData(String appName) throws AxisFault {
+    public ApplicationMetadata getAppData(String appNameWithVersion) throws AxisFault {
         try {
-            return stub.getAppData(appName);
+            return stub.getAppData(appNameWithVersion);
         } catch (java.lang.Exception e) {
             handleException(bundle.getString("cannot.get.service.data"), e);
         }
         return null;
     }
 
-    public void deleteApp(String appName) throws AxisFault {
+    public void deleteApp(String appNameWithVersion) throws AxisFault {
         try {
-            stub.deleteApplication(appName);
+            stub.deleteApplication(appNameWithVersion);
         } catch (java.lang.Exception e) {
             handleException(bundle.getString("cannot.delete.artifact"), e);
         }

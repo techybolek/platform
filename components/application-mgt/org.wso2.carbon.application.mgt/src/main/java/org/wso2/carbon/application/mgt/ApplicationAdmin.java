@@ -64,7 +64,7 @@ public class ApplicationAdmin extends AbstractAdmin {
         for (CarbonApplication anAppList : appList) {
             tempApp = anAppList;
             if (tempApp.isDeploymentCompleted()) {
-                existingApps.add(tempApp.getAppName());
+                existingApps.add(tempApp.getAppNameWithVersion());
             }
         }
         return existingApps.toArray(new String[existingApps.size()]);
@@ -142,7 +142,7 @@ public class ApplicationAdmin extends AbstractAdmin {
         ArrayList<CarbonApplication> appList =
                 AppManagementServiceComponent.getAppManager().getCarbonApps(tenantId);
         for (CarbonApplication carbonApp : appList) {
-            if (appName.equals(carbonApp.getAppName())) {
+            if (appName.equals(carbonApp.getAppNameWithVersion())) {
                 currentApp = carbonApp;
             }
         }
@@ -158,7 +158,7 @@ public class ApplicationAdmin extends AbstractAdmin {
         File file = new File(appFilePath);
         if (file.exists() && !file.delete()) {
             log.error("Artifact file couldn't be deleted for Application : "
-                    + currentApp.getAppName());
+                    + currentApp.getAppNameWithVersion());
         }
     }
     /**
@@ -253,8 +253,8 @@ public class ApplicationAdmin extends AbstractAdmin {
         ArrayList<CarbonApplication> appList
                 = AppManagementServiceComponent.getAppManager().getCarbonApps(tenantId);
         for (CarbonApplication application : appList) {
-            if (appName.equals(application.getAppName())) {
-                appData.setAppName(appName);
+            if (appName.equals(application.getAppNameWithVersion())) {
+                appData.setAppName(application.getAppName());
                 currentApplication = application;
                 break;
             }
@@ -508,7 +508,7 @@ public class ApplicationAdmin extends AbstractAdmin {
         ArrayList<CarbonApplication> appList =
                 AppManagementServiceComponent.getAppManager().getCarbonApps(tenantId);
         for (CarbonApplication carbonApp : appList) {
-            if (fileName.equals(carbonApp.getAppName())) {
+            if (fileName.equals(carbonApp.getAppNameWithVersion())) {
                 currentApp = carbonApp;
             }
         }

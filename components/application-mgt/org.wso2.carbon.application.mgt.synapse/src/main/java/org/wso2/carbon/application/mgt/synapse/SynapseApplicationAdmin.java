@@ -59,8 +59,8 @@ public class SynapseApplicationAdmin extends AbstractAdmin {
                 = SynapseAppServiceComponent.getAppManager().getCarbonApps(tenantId);
         CarbonApplication currentApplication = null;
         for (CarbonApplication application : appList) {
-            if (appName.equals(application.getAppName())) {
-                data.setAppName(appName);
+            if (appName.equals(application.getAppNameWithVersion())) {
+                data.setAppName(application.getAppName());
                 currentApplication = application;
                 break;
             }
