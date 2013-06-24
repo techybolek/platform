@@ -43,18 +43,6 @@ function calloutMediatorValidate() {
     var target;
     var source;
     var isEnvelope = false;
-    var serviceURL;
-    var serviceUrlGroup = document.getElementById("serviceURL");
-    if (serviceUrlGroup && serviceUrlGroup.checked) {
-        serviceURL = document.getElementById("mediator.callout.serviceurl.url.value");
-    } else {
-        serviceURL = document.getElementById("mediator.callout.serviceurl.key.value");
-    }
-
-    if (serviceURL && serviceURL.value == "") {
-        CARBON.showErrorDialog(calloutMediatorJsi18n["callout.service.required"]);
-        return false;
-    }
 
     var sourceGroup = document.getElementById("sourceGroupXPath");
     var sourceGroupEnvelope = document.getElementById("sourceGroupEnvelope");

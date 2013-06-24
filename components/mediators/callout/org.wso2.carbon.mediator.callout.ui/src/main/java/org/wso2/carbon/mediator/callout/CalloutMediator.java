@@ -302,8 +302,6 @@ public class CalloutMediator extends AbstractMediator {
            serviceURL = attServiceURL.getAttributeValue();
         } else if (attEndpoint != null) {
             endpointKey = attEndpoint.getAttributeValue();
-        } else {
-            throw new MediatorException("The 'serviceURL' attribute or 'endpointKey' attribute is required for the Callout mediator");
         }
 
         if (attAction != null) {
