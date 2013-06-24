@@ -35,12 +35,12 @@
         <dependency>
             <groupId>org.wso2.am</groupId>
             <artifactId>org.wso2.stratos.apimgt.dashboard.ui</artifactId>
-             <version>${project.version}</version>
+             <version>${stratos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui.menu.stratos</artifactId>
-             <version>${project.version}</version>
+             <version>${stratos.version}</version>
         </dependency>
     </dependencies>
 
