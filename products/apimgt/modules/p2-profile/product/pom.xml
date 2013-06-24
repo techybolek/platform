@@ -183,8 +183,8 @@
 
                                 <!--API Management related feature-->
                                 <featureArtifactDef>org.jaggeryjs:org.jaggeryjs.feature:0.9.0.ALPHA2-wso2v4</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.server.feature:1.1.2</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.ui.feature:1.1.2</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.server.feature:${apimserver.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.ui.feature:${apimserver.version}</featureArtifactDef>
 							<featureArtifactDef>org.wso2.am:org.wso2.stratos.apimgt.dashboard.ui.feature:${stratos.version}</featureArtifactDef>
 
                                 <!-- Registry Features -->
@@ -472,11 +472,11 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.apimgt.server.feature.group</id>
-                                    <version>1.1.2</version>
+                                    <version>${apimserver.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.apimgt.ui.feature.group</id>
-                                    <version>1.1.2</version>
+                                    <version>${apimserver.version}</version>
                                 </feature>
                                 <!---->
                                 <!--Registry Feature-->
