@@ -35,7 +35,7 @@
                             <value>false</value>
                         </property>
                         <property>
-                            <name>am.carbon.zip</name>
+                            <name>carbon.zip</name>
                             <value>
                                 ${basedir}/../../distribution/product/target/wso2am-${project.version}.zip
                             </value>
@@ -266,6 +266,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <test-automation-framework-version>4.1.2</test-automation-framework-version>
+        <test-automation-framework-version>4.1.3</test-automation-framework-version>
     </properties>
 </project>
