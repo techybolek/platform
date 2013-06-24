@@ -127,7 +127,7 @@ public class HTTPEndpoint extends AbstractEndpoint {
         try {
             evaluatedUri = uriTemplate.expand();
         } catch(ExpressionParseException e) {
-            log.warn("No URI Template variables found in HTTP Endpoint: " + this.getName());
+            log.debug("No URI Template variables defined in HTTP Endpoint: " + this.getName());
             evaluatedUri = uriTemplate.getTemplate();
         }
         if (evaluatedUri != null) {
