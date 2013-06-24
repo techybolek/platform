@@ -87,7 +87,6 @@
 
                 // ok we are going to submit
                 if (pd.getName() == null || "".equals(pd.getName())) {
-
                     // missing proxy name
                     // now the XML is wrong so set the wrong XML to the session for user to see that
                     // and remove the proxy data object from session since it is wrong
@@ -109,17 +108,14 @@
                     CarbonUIMessage.sendCarbonUIMessage(bundle.getString("proxy.target.missing"),
                             CarbonUIMessage.ERROR, request);
                 } else {
-
                     // validation went smooth and fine for the submission
                     forwardTo = "submit.jsp?forwardTo=" + request.getParameter("forwardTo") + "&submit=" + param + "&originator=sourceToData.jsp&header=" + header;
                 }
             } else if ((param = request.getParameter("return")) != null) {
-
                 // forward to design page and this does not require validation
                 forwardTo = param + "?header=" + header + "&ordinal=1";
             }
         } catch (Exception e) {
-
             // could not create proxy data object from the given source
             session.setAttribute("proxyXML", source);
             forwardTo = "source.jsp?header=" + header;
@@ -135,6 +131,8 @@
     } else if(!validName && ((param = request.getParameter("return")) != null)) {
         // forward to design page and this does not require validation
         forwardTo = param + "?header=" + header + "&ordinal=1";
+    } else {
+        forwardTo = "source.jsp?header=" + header;
     }
 %>
 
