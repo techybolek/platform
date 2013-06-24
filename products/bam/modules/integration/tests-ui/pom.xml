@@ -48,9 +48,9 @@
                         </property>
                         <sec.verifier.dir>${basedir}/target/security-verifier/</sec.verifier.dir>
                         <maven.test.haltafterfailure>false</maven.test.haltafterfailure>
-                        <bam.carbon.zip>
+                        <carbon.zip>
                             ${basedir}/../../distribution/target/wso2bam-${project.version}.zip
-                        </bam.carbon.zip>
+                        </carbon.zip>
                         <emma.home>${basedir}/target/emma</emma.home>
                         <instr.file>${basedir}/src/test/resources/instrumentation.txt</instr.file>
                         <filters.file>${basedir}/src/test/resources/filters.txt</filters.file>
@@ -273,6 +273,6 @@
     </dependencies>
 
     <properties>
-        <test.framework.version>4.1.2</test.framework.version>
+        <test.framework.version>${carbon.platform.version}</test.framework.version>
     </properties>
 </project>
