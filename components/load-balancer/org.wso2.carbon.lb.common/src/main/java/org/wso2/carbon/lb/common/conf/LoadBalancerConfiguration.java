@@ -506,7 +506,8 @@ public class LoadBalancerConfiguration implements Serializable {
                     for (Map.Entry<String, ServiceConfiguration> childMap : parentMap.getValue()
                             .entrySet()) {
                         // iterate through hosts of this
-                        for (String host : childMap.getValue().getHosts()) {
+                        ServiceConfiguration serviceConfiguration = childMap.getValue();
+                        for (String host : serviceConfiguration.getHosts()) {
                             // if a matching Service configuration is found.
                             if (host.equals(hostName)) {
                                 
@@ -514,7 +515,10 @@ public class LoadBalancerConfiguration implements Serializable {
                                 String domain = parentMap.getKey();
                                 String subDomain = childMap.getKey();
                                           
-                                ctxt.addTenantDomainContexts(LoadBalancerConfigUtil.getTenantDomainContexts(tenantRange, domain, subDomain));
+                                ctxt.addTenantDomainContexts(LoadBalancerConfigUtil.getTenantDomainContexts(tenantRange,
+                                                                                                            domain,
+                                                                                                            subDomain,
+                                                                                                            serviceConfiguration.getGroupMgtPort()));
 
                                 break;
                             }
@@ -932,6 +936,7 @@ public class LoadBalancerConfiguration implements Serializable {
 
         private String subDomain = Constants.DEFAULT_SUB_DOMAIN;
         private boolean subDomainSet;
+        private int groupMgtPort = -1;
 
         public String getTenantRange() {
             if (tenantRangeSet) {
@@ -1016,6 +1021,10 @@ public class LoadBalancerConfiguration implements Serializable {
                 return defaultServiceConfig.subDomain;
             }
             return subDomain;
+        }
+
+        public int getGroupMgtPort() {
+            return groupMgtPort;
         }
 
         public void setMin_app_instances(int minAppInstances) {
@@ -1129,6 +1138,10 @@ public class LoadBalancerConfiguration implements Serializable {
         public void setSub_domain(String subDomain) {
             this.subDomain = subDomain;
             this.subDomainSet = true;
+        }
+
+        public void setGroup_mgt_port(int groupMgtPort){
+            this.groupMgtPort = groupMgtPort;
         }
 
         public void setDomain(String domain) {

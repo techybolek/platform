@@ -211,7 +211,10 @@ public final class LoadBalancerConfigUtil {
     // return new EC2InstanceManager(ec2Client);
     // }
 
-    public static List<TenantDomainContext> getTenantDomainContexts(String tenantRange, String domain, String subDomain) {
+    public static List<TenantDomainContext> getTenantDomainContexts(String tenantRange,
+                                                                    String domain,
+                                                                    String subDomain,
+                                                                    int groupMgtPort) {
         
         List<TenantDomainContext> ctxts = new ArrayList<TenantDomainContext>();
         List<Integer> tenantIds = getTenantIds(tenantRange);
@@ -220,11 +223,8 @@ public final class LoadBalancerConfigUtil {
         for (Integer tId : tenantIds) {
 
             // create a new TenantDomainContext
-            TenantDomainContext tenantCtxt =
-                                             new TenantDomainContext(
-                                                                     tId,
-                                                                     domain,
-                                                                     subDomain);
+            TenantDomainContext tenantCtxt = new TenantDomainContext(tId, domain, subDomain);
+            tenantCtxt.setGroupMgtPort(groupMgtPort);
             // add it to the list
             ctxts.add(tenantCtxt);
         }

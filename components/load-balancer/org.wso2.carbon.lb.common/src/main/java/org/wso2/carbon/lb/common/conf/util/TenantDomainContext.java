@@ -36,14 +36,15 @@ public class TenantDomainContext {
      * Sub domain, which this tenant belongs to.
      */
     private String subDomain;
+
+    private int groupMgtPort;
     
     public TenantDomainContext(int tenantId, String domain, String subDomain) {
         this.tenantId = tenantId;
         this.domain = domain;
         this.subDomain = subDomain;
     }
-    
-    
+
     /** Getters and Setters **/
 
     public int getTenantId() {
@@ -69,8 +70,15 @@ public class TenantDomainContext {
     public void setSubDomain(String subDomain) {
         this.subDomain = subDomain;
     }
-    
-    
+
+    public int getGroupMgtPort() {
+        return groupMgtPort;
+    }
+
+    public void setGroupMgtPort(int groupMgtPort) {
+        this.groupMgtPort = groupMgtPort;
+    }
+
     /** End of Getters and Setters **/
     
     
