@@ -259,7 +259,6 @@ public class OpenIDHandler {
 	private String checkSetupOrImmediate(HttpServletRequest request, ParameterList params, OpenIDAdminClient client)
 	                                                                                      throws Exception {
 		boolean authenticated = false;
-		String userSelectedClaimedId = null;
 		String profileName = null;
 		HttpSession session = request.getSession();
 		String openId =
@@ -315,7 +314,6 @@ public class OpenIDHandler {
 		}
 
 		//session.removeAttribute(IdentityConstants.OpenId.PARAM_LIST);
-		String opLocalId = null;
 		OpenIDAuthRequestDTO openIDAuthRequest = new OpenIDAuthRequestDTO();
 
 		if (IdentityConstants.TRUE.equals(session.getAttribute(IdentityConstants.PHISHING_RESISTANCE))) {
@@ -329,8 +327,8 @@ public class OpenIDHandler {
 			session.removeAttribute(IdentityConstants.MULTI_FACTOR_AUTH);
 		}
 		openIDAuthRequest.setParams(OpenIDUtil.getOpenIDAuthRequest(params));
-		openIDAuthRequest.setOpLocalId(opLocalId);
-		openIDAuthRequest.setUserSelectedClaimedId(userSelectedClaimedId);
+        openIDAuthRequest.setOpLocalId(openId);
+        openIDAuthRequest.setUserSelectedClaimedId(openId);
 		openIDAuthRequest.setAuthenticated(authenticated);
 		openIDAuthRequest.setOpenID(openId);
 		openIDAuthRequest.setProfileName(profileName);

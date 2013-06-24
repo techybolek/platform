@@ -18,7 +18,6 @@
 <%@page import="org.wso2.carbon.identity.provider.openid.ui.OpenIDConstants"%>
 <%@page import="org.wso2.carbon.identity.provider.openid.ui.handlers.OpenIDUtil"%>
 <%@page import="org.wso2.carbon.identity.base.IdentityConstants"%>
-<%@page import="org.wso2.carbon.identity.base.IdentityConstants.OpenId"%>
 <%@page import="org.openid4java.message.ParameterList" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -82,7 +81,7 @@
         <h2><fmt:message key='signin.with.openid'/></h2>
 
         <div id="workArea">
-            <fmt:message key='signin.to.authenticate1'/><strong>"<%=openidrp%>" </strong><fmt:message key='signin.to.authenticate2'/><strong> "<%=openididentity%>"</strong>.
+            <fmt:message key='signin.to.authenticate1'/><strong>"<%=openidrp%>" </strong><fmt:message key='signin.to.authenticate2'/><%if(!openididentity.endsWith("/openid/")){%><strong> "<%=openididentity%>"</strong><% } else { %><strong> "<%=openididentity%>&lt;username&gt;"</strong><% } %>.
             <br/><br/>
 
             <table style="width:100%">
