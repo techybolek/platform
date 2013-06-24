@@ -77,13 +77,6 @@ public class IdentitySCIMManager implements CharonManager {
         encoderMap.put(SCIMConstants.JSON, new JSONEncoder());
         decoderMap.put(SCIMConstants.JSON, new JSONDecoder());
 
-        //create basic auth - authenticator property
-        Map<String, Object> basicAuthAuthenticator = new HashMap<String, Object>();
-        basicAuthAuthenticator.put(INSTANCE, new BasicAuthHandler());
-        basicAuthAuthenticator.put(SCIMConstants.AUTH_PROPERTY_PRIMARY, true);
-        //add basic auth authenticator properties to authenticators list.
-        authenticators.put(SCIMConstants.AUTH_TYPE_BASIC, basicAuthAuthenticator);
-
         //register encoder,decoders in AbstractResourceEndpoint, since they are called with in the API
         registerCoders();
 
@@ -139,6 +132,7 @@ public class IdentitySCIMManager implements CharonManager {
 
     }
 
+    /*This method is no longer used.*/
     public AuthenticationHandler getAuthenticationHandler(String authMechanism)
             throws CharonException {
         if (authenticators.size() != 0) {
@@ -221,7 +215,7 @@ public class IdentitySCIMManager implements CharonManager {
     public boolean isAuthenticationSupported(String s) {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
-
+    /*This method is no longer used..*/
     public AuthenticationInfo handleAuthentication(Map<String, String> authHeaderMap)
             throws UnauthorizedException {
         AuthenticationInfo authInfo = null;

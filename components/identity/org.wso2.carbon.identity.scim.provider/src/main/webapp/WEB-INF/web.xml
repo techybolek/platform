@@ -54,6 +54,10 @@
         </user-data-constraint>
     </security-constraint>
 
+    <listener>
+        <listener-class>org.wso2.carbon.identity.scim.provider.impl.ApplicationInitializer</listener-class>
+    </listener>
+
     <!--login-config>
         <auth-method>BASIC</auth-method>
     </login-config>

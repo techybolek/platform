@@ -303,15 +303,10 @@ public class GroupResource extends AbstractResource {
             outputFormat = identifyOutputFormat(outputFormat);
             //obtain the encoder at this layer in case exceptions needs to be encoded.
             encoder = identitySCIMManager.getEncoder(SCIMConstants.identifyFormat(outputFormat));
-            //perform authentication
-            Map<String, String> headerMap = new HashMap<String, String>();
-            headerMap.put(SCIMConstants.AUTHORIZATION_HEADER, authorization);
-            //authenticate the request
-            AuthenticationInfo authInfo = identitySCIMManager.handleAuthentication(headerMap);
 
             //obtain the user store manager
             UserManager userManager = IdentitySCIMManager.getInstance().getUserManager(
-                    authInfo.getUserName());
+                    authorization);
 
             //create charon-SCIM user endpoint and hand-over the request.
             GroupResourceEndpoint groupResourceEndpoint = new GroupResourceEndpoint();
@@ -327,10 +322,6 @@ public class GroupResource extends AbstractResource {
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
             }
-            return new JAXRSResponseBuilder().buildResponse(
-                    AbstractResourceEndpoint.encodeSCIMException(encoder, e));
-        } catch (UnauthorizedException e) {
-            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
