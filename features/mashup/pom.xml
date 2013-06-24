@@ -381,7 +381,7 @@
         <htmlcleaner.version.mashup>2.1.0.wso2v1</htmlcleaner.version.mashup>
         <abdera-extensions.version.mashup>0.4.0.wso2v2</abdera-extensions.version.mashup>
         <rampart.version.mashup>1.6.1.wso2v1</rampart.version.mashup>
-        <saxon.version.mashup>8.9.0.wso2v1</saxon.version.mashup>
+        <saxon.version.mashup>8.9.0.wso2v2</saxon.version.mashup>
         <geronimo.version.mashup>1.0.1.wso2v1</geronimo.version.mashup>
         <wss4j.version.mashup>1.5.11.wso2v1</wss4j.version.mashup>
         <cindy.version.mashup>2.4.4.wso2v1</cindy.version.mashup>
