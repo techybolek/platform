@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am</groupId>
         <artifactId>wso2stratos-am-features</artifactId>
-        <version>${apimserver.version}</version>
+        <version>${stratos.version}</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,12 +35,12 @@
         <dependency>
             <groupId>org.wso2.am</groupId>
             <artifactId>org.wso2.stratos.apimgt.dashboard.ui</artifactId>
-            <version>${apimserver.version}</version>
+             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui.menu.stratos</artifactId>
-            <version>${carbon.platform.version}</version>
+             <version>${project.version}</version>
         </dependency>
     </dependencies>
 
