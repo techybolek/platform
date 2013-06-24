@@ -124,6 +124,21 @@ public class EnvironmentVariables {
     }
 
     public void setEnvironment
+            (String _workerSessionCookie, String _backendUrl, String _serviceUrl,
+             String _secureServiceUrl,String webAppURL,
+             AuthenticatorClient authentication, ProductVariables productVariables,
+             WorkerVariables workerVariables) {
+        this.workerSessionCookie = _workerSessionCookie;
+        this.backEndUrl = _backendUrl;
+        this.serviceUrl = _serviceUrl;
+        this.secureServiceUrl = _secureServiceUrl;
+        this.webAppURL = webAppURL;
+        this.adminServiceAuthentication = authentication;
+        this.productVariables = productVariables;
+        this.workerVariables = workerVariables;
+    }
+
+    public void setEnvironment
             (String _backendUrl, String _serviceUrl,String _secureServiceUrl, UserInfo user,
              ProductVariables productVariables) {
         this.backEndUrl = _backendUrl;

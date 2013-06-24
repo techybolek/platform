@@ -1,33 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<clusters>
-    <as>
-        <node id="as001" name="asCluster">
-            <host>localhost</host>
-            <httpport>9763</httpport>
-            <httpsport>9443</httpsport>
-        </node>
-        <node id="as002" name="asCluster">
-            <host>localhost</host>
-            <httpport>9764</httpport>
-            <httpsport>9444</httpsport>
-        </node>
-    </as>
-
-    <esb>
-        <node id="as004" name="esbCluster">
-            <host>dsdsdsds2222222222222222222d</host>
-            <httpport>1222222222222222221</httpport>
-            <httpsport>s222222222222222</httpsport>
-            <nhttpport>s222222222222222</nhttpport>
-            <nhttpsport>s222222222222222</nhttpsport>
-        </node>
-    </esb>
-    <cep>
-        <node id="as003" name="cepCluster">
-            <host>dsdsdsds2333333333</host>
-            <httpport>122223221</httpport>
-            <httpsport>s2222232222</httpsport>
-            <qpidport>s22222322222</qpidport>
-        </node>
-    </cep>
-</clusters>
+<nodelist>
+    <platform name="">
+        <group name="is">
+            <nodes>
+                <instance name="isn001">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                </instance>
+            </nodes>
+            <workers>
+                <instance name="isw001" >
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                </instance>
+                <instance name="isw002" >
+                    <host>localhost</host>
+                    <httpport>9764</httpport>
+                    <httpsport>9444</httpsport>
+                </instance>
+                <instance name="isw003">
+                    <host>localhost</host>
+                    <httpport>9765</httpport>
+                    <httpsport>9445</httpsport>
+                </instance>
+            </workers>
+            <lb>
+                <instance name="worker" >
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                </instance>
+                <instance name="manager" >
+                    <host>localhost</host>
+                    <httpport>9765</httpport>
+                    <httpsport>9445</httpsport>
+                </instance>
+            </lb>
+            <managers>
+                <instance name="isw003">
+                    <host>localhost</host>
+                    <httpport>9763</httpport>
+                    <httpsport>9443</httpsport>
+                </instance>
+            </managers>
+        </group>
+        <group name="node2">
+            <node>
+                <instance id="isn002" name="isCluster">
+                    <host>localhost</host>
+                    <httpport>9765</httpport>
+                    <httpsport>9445</httpsport>
+                </instance>
+            </node>
+        </group>
+    </platform>
+    <platform group="as" environment="integration">
+        <group name="node2">
+            <node>
+                <instance id="as004" name="esbCluster">
+                    <host>dsdsdsds2222222222222222222d</host>
+                    <httpport>1222222222222222221</httpport>
+                    <httpsport>s222222222222222</httpsport>
+                    <nhttpport>s222222222222222</nhttpport>
+                    <nhttpsport>s222222222222222</nhttpsport>
+                </instance>
+            </node>
+        </group>
+        <group name="node2">
+            <node>
+                <instance id="as003" name="cepCluster">
+                    <host>dsdsdsds2333333333</host>
+                    <httpport>122223221</httpport>
+                    <httpsport>s2222232222</httpsport>
+                    <qpidport>s22222322222</qpidport>
+                </instance>
+            </node>
+        </group>
+    </platform>
+</nodelist>

@@ -277,4 +277,19 @@ public class ServiceAdminClient {
         log.info("Service Stopped");
 
     }
+
+    /**
+     *
+     * @param serviceName
+     * @return
+     * @throws ServiceAdminException
+     * @throws RemoteException
+     */
+    public String[] getExposedTransports(String serviceName)
+            throws ServiceAdminException, RemoteException {
+
+        return serviceAdminStub.getExposedTransports(serviceName);
+
+    }
+
 }

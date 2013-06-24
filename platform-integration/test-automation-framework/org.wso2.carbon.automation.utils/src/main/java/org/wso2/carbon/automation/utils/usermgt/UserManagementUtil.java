@@ -34,12 +34,11 @@ public class UserManagementUtil {
 
     /**
      * Add new user to given role
-     *
-     * @param backendUrl      - backend url of products
-     * @param newUserName     - user name of the new user to be added
-     * @param newUserPassword - password of the new user to be added.
-     * @param roleName        - role of the user
-     * @param adminUserInfo   - UserBean of admin user
+     * @param backendUrl - backend url of products
+     * @param newUserName - user name of the new user to be added
+     * @param newUserPassword  - password of the new user to be added.
+     * @param roleName - role of the user
+     * @param adminUserInfo - UserBean of admin user
      * @throws Exception - throws if user addition fails.
      */
     public static void createUser(String backendUrl, String newUserName,
@@ -60,8 +59,8 @@ public class UserManagementUtil {
     /**
      * The role will be created with all permissions and read, write, delete and authorize permission fro registry browser
      *
-     * @param roleName      - name of the role to be added
-     * @param backendUrl    - backendURL of the product
+     * @param roleName - name of the role to be added
+     * @param backendUrl - backendURL of the product
      * @param adminUserInfo - UserBean of admin user
      * @throws Exception - throws if role addition fails
      */

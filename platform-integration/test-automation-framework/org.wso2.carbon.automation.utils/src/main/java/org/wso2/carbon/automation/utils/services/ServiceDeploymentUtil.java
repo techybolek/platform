@@ -39,7 +39,6 @@ public class ServiceDeploymentUtil {
     private static int SERVICE_DEPLOYMENT_DELAY = 90 * 1000;
     private static Log log = LogFactory.getLog(ServiceDeploymentUtil.class);
 
-
     public static void deployArrService(String backEndUrl, String sessionCookie, String serviceName,
                                         String serviceFilePath, int deploymentDelay)
             throws RemoteException, MalformedURLException, LoginAuthenticationExceptionException,
@@ -91,9 +90,7 @@ public class ServiceDeploymentUtil {
 
             }
         }
-
         return isServiceDeployed;
-
     }
 
     public static boolean isServiceUnDeployed(String backEndUrl, String sessionCookie,
@@ -143,7 +140,6 @@ public class ServiceDeploymentUtil {
         }
 
         return isServiceDeployed;
-
     }
 
     public static boolean isServiceWSDlNotExist(String serviceUrl, long synchronizingDelay)
@@ -169,7 +165,6 @@ public class ServiceDeploymentUtil {
         }
 
         return isServiceUnDeployed;
-
     }
 
     public static boolean isWSDLAvailable(String serviceEndpoint) throws IOException {
@@ -210,7 +205,8 @@ public class ServiceDeploymentUtil {
         return isWsdlExist;
     }
 
-    public static boolean isServiceFaulty(String backEndUrl, String sessionCookie, String serviceName)
+    public static boolean isServiceFaulty(String backEndUrl, String sessionCookie,
+                                          String serviceName)
             throws RemoteException {
 
         boolean isServiceDeployed = false;
@@ -229,17 +225,17 @@ public class ServiceDeploymentUtil {
             }
         }
         return isServiceDeployed;
-
-
     }
 
-    public static boolean isServiceExist(String backEndUrl, String sessionCookie, String serviceName)
+    public static boolean isServiceExist(String backEndUrl, String sessionCookie,
+                                         String serviceName)
             throws RemoteException {
         ServiceAdminClient adminServiceService = new ServiceAdminClient(backEndUrl, sessionCookie);
         return adminServiceService.isServiceExists(serviceName);
     }
 
-    public static boolean isFaultyService(String backEndUrl, String sessionCookie, String serviceName)
+    public static boolean isFaultyService(String backEndUrl, String sessionCookie,
+                                          String serviceName)
             throws RemoteException {
         ServiceAdminClient adminServiceService = new ServiceAdminClient(backEndUrl, sessionCookie);
         return adminServiceService.isServiceFaulty(serviceName);
@@ -255,7 +251,8 @@ public class ServiceDeploymentUtil {
         }
     }
 
-    public static boolean isServiceDeleted(String backEndUrl, String sessionCookie, String serviceName)
+    public static boolean isServiceDeleted(String backEndUrl, String sessionCookie,
+                                           String serviceName)
             throws RemoteException {
         log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for service undeployment");
         ServiceAdminClient adminServiceService = new ServiceAdminClient(backEndUrl, sessionCookie);

@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.automation.api.clients.utils;
 
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.client.Stub;
@@ -45,6 +46,24 @@ public class AuthenticateStub {
         if (log.isDebugEnabled()) {
             log.debug("AuthenticateStub : Stub created with session " + sessionCookie);
         }
+    }
+
+    public static Stub authenticateStub(Stub stub, String sessionCookie, String backendURL) {
+        long soTimeout = 5 * 60 * 1000; // Three minutes
+
+        ServiceClient client = stub._getServiceClient();
+        Options option = client.getOptions();
+        option.setManageSession(true);
+        option.setTimeOutInMilliSeconds(soTimeout);
+        System.out.println("XXXXXXXXXXXXXXXXXXX" +
+                           backendURL +  client.getServiceContext().getAxisService().getName().replaceAll("[^a-zA-Z]", ""));
+        option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, sessionCookie);
+        option.setTo(new EndpointReference(backendURL +  client.getServiceContext().getAxisService().getName().replaceAll("[^a-zA-Z]", "")));
+        if (log.isDebugEnabled()) {
+            log.debug("AuthenticateStub : Stub created with session " + sessionCookie);
+        }
+
+        return stub;
     }
 
     /**

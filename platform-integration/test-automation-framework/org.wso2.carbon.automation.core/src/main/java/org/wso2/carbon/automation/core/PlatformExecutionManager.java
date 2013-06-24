@@ -123,6 +123,15 @@ public class PlatformExecutionManager implements IExecutionListener {
                                 , builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay())
                                 , "SimpleStockQuoteService deployment failed in Application Server");
 
+                        adminServiceAARServiceUploader.uploadAARFile(SampleAxis2Server.SIMPLE_AXIS2_SERVICE + ".aar"
+                                , ProductConstant.getResourceLocations(ProductConstant.AXIS2_SERVER_NAME)
+                                  + File.separator + "aar" + File.separator + "Axis2Service.aar"
+                                , "");
+                        Assert.assertTrue(isServiceDeployed(appServer.getBackEndUrl(), appServer.getSessionCookie()
+                                , SampleAxis2Server.SIMPLE_AXIS2_SERVICE
+                                , builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay())
+                                , "Axis2Service deployment failed in Application Server");
+
                         adminServiceAARServiceUploader.uploadAARFile(SampleAxis2Server.SECURE_STOCK_QUOTE_SERVICE + ".aar"
                                 , ProductConstant.getResourceLocations(ProductConstant.AXIS2_SERVER_NAME)
                                   + File.separator + "aar" + File.separator + "SecureStockQuoteService.aar"
@@ -221,6 +230,7 @@ public class PlatformExecutionManager implements IExecutionListener {
         sampleAxis2Server.deployService(SampleAxis2Server.LB_SERVICE_1);
         sampleAxis2Server.deployService(SampleAxis2Server.SIMPLE_STOCK_QUOTE_SERVICE);
         sampleAxis2Server.deployService(SampleAxis2Server.SECURE_STOCK_QUOTE_SERVICE);
+        sampleAxis2Server.deployService(SampleAxis2Server.SIMPLE_AXIS2_SERVICE);
     }
 
     private void stopSimpleAxis2Server() {

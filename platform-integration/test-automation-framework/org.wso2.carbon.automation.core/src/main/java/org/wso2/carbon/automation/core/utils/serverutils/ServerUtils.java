@@ -68,9 +68,14 @@ public class ServerUtils {
             }
             defaultHttpsPort = Integer.parseInt(frameworkProperties.getProductVariables().getHttpsPort());
             int defaultHttpPort = Integer.parseInt(frameworkProperties.getProductVariables().getHttpPort());
-            System.setProperty(ServerConstants.CARBON_HOME, carbonHome);
-            originalUserDir = System.getProperty("user.dir");
-            System.setProperty("user.dir", carbonHome);
+
+            //set carbon home only if port offset is default.
+            if (getPortOffsetFromCommandMap(commandMap) == 0) {
+                System.setProperty(ServerConstants.CARBON_HOME, carbonHome);
+                originalUserDir = System.getProperty("user.dir");
+                System.setProperty("user.dir", carbonHome);
+            }
+
             File commandDir = new File(carbonHome);
             log.info("Starting server............. ");
             String scriptName = ProductConstant.SEVER_STARTUP_SCRIPT_NAME;

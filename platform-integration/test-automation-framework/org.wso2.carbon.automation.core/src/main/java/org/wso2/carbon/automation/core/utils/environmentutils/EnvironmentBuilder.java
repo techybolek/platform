@@ -20,6 +20,7 @@ import java.util.Map;
 
 public class EnvironmentBuilder {
     protected EnvironmentVariables as;
+    protected EnvironmentVariables af;
     protected EnvironmentVariables esb;
     protected EnvironmentVariables is;
     protected EnvironmentVariables bps;
@@ -430,6 +431,30 @@ public class EnvironmentBuilder {
         return this;
     }
 
+    public EnvironmentBuilder af(int tenent)
+            throws RemoteException, LoginAuthenticationExceptionException {
+        envVariables = new EnvironmentVariables();
+        AuthenticatorClient managerServiceAuthentication;
+        AuthenticatorClient workerServiceAuthentication = null;
+        FrameworkProperties frameworkProperties =
+                FrameworkFactory.getFrameworkProperties(ProductConstant.APP_FACTORY_SERVER_NAME);
+        ProductVariables afSetter = frameworkProperties.getProductVariables();
+        WorkerVariables afWorker = frameworkProperties.getWorkerVariables();
+        managerBackEndUrl = afSetter.getBackendUrl();
+        workerBackEndUrl = afWorker.getBackendUrl();
+        managerHostName = afSetter.getHostName();
+        workerHostName = afWorker.getHostName();
+        httpPort = afSetter.getHttpPort();
+        managerServiceAuthentication = new AuthenticatorClient(managerBackEndUrl);
+        if (frameworkProperties.getEnvironmentSettings().isClusterEnable()) {
+            workerServiceAuthentication = new AuthenticatorClient(workerBackEndUrl);
+        }
+        envVariables = loginSetupAf(tenent, managerServiceAuthentication, workerServiceAuthentication,
+                                  frameworkProperties, afSetter, afWorker);
+        this.af = envVariables;
+        return this;
+    }
+
     public EnvironmentBuilder clusterNode(String node, int tenent)
             throws RemoteException, LoginAuthenticationExceptionException {
         ClusterReader reader = new ClusterReader();
@@ -511,6 +536,29 @@ public class EnvironmentBuilder {
                 getWebappURL(httpPort, managerHostName, frameworkProperties, userInfo);
         envVariables.setEnvironment(managerSessionCookie, workerSessionCookie, managerBackEndUrl, serviceUrl, secureServiceUrl, webAppURL,
                                     userInfo, managerServiceAuthentication, productSetter, workerSetter);
+        return envVariables;
+    }
+
+    private EnvironmentVariables loginSetupAf(int user,
+                                              AuthenticatorClient managerServiceAuthentication,
+                                              AuthenticatorClient workerServiceAuthentication,
+                                              FrameworkProperties frameworkProperties,
+                                              ProductVariables productSetter,
+                                              WorkerVariables workerSetter)
+            throws LoginAuthenticationExceptionException, RemoteException {
+        UserInfo userInfo = UserListCsvReader.getUserInfo(user);
+        managerSessionCookie = managerServiceAuthentication.login(userInfo.getUserName(),
+                userInfo.getPassword(), managerHostName);
+        if (frameworkProperties.getEnvironmentSettings().isClusterEnable()) {
+            workerSessionCookie = workerServiceAuthentication.login(userInfo.getUserName(),
+                    userInfo.getPassword(), workerHostName);
+        }
+        serviceUrl = getServiceURL(frameworkProperties, productSetter, workerSetter, userInfo);
+        secureServiceUrl = getSecureServiceURL(frameworkProperties, productSetter, workerSetter, userInfo);
+        webAppURL = new ProductUrlGeneratorUtil().
+                getWebappURL(httpPort, managerHostName, frameworkProperties, userInfo);
+        envVariables.setEnvironment(workerSessionCookie, managerBackEndUrl, serviceUrl, secureServiceUrl, webAppURL,
+                managerServiceAuthentication, productSetter, workerSetter);
         return envVariables;
     }
 

@@ -20,6 +20,8 @@ public class ManageEnvironment {
     private EnvironmentVariables manager;
     private EnvironmentVariables axis2;
     private EnvironmentVariables cluster;
+    private EnvironmentVariables af;
+
     private Map<String, EnvironmentVariables> clusterMap;
 
     public EnvironmentVariables getAs() {
@@ -78,6 +80,10 @@ public class ManageEnvironment {
         return axis2;
     }
 
+    public EnvironmentVariables getAppFactory() {
+        return af;
+    }
+
     public EnvironmentVariables getAm() {
         return this.am;
     }
@@ -106,6 +112,7 @@ public class ManageEnvironment {
         this.mb = builder.mb;
         this.ms = builder.ms;
         this.cep = builder.cep;
+        this.af = builder.af;
         this.am=builder.am;
         this.manager = builder.manager;
         this.clusterMap = builder.clusterMap;
