@@ -73,6 +73,7 @@
                     <property name="StockQuoteProxy"
                               value="Out sequence of StockQuote proxy invoked!"/>
                 </log>
+                <log level="full"/>
                 <send/>
             </outSequence>
         </target>
