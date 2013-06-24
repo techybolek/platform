@@ -28,7 +28,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>wso2stratos-am-features</artifactId>
-    <version>${stratos.version}</version>
+    <!--<version>${stratos.version}</version>-->
     <packaging>pom</packaging>
     <name>WSO2 Stratos  API Manager - Features Aggregator Module</name>
     <url>http://wso2.org</url>
@@ -94,11 +94,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <properties>
-        <wso2carbon.platform.version.caching>${carbon.patch.version.401}</wso2carbon.platform.version.caching>
-        <!--asm.version>3.1.wso2v1</asm.version-->
-    </properties>
 
 </project>
 

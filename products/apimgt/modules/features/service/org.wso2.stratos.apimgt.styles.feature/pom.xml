@@ -22,7 +22,7 @@
     <parent>
 	<groupId>org.wso2.am</groupId>
         <artifactId>wso2stratos-am-features</artifactId>
-        <version>${stratos.version}</version>
+        <version>${apimserver.version}</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
