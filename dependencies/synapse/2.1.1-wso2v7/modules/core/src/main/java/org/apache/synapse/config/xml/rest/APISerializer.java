@@ -60,22 +60,23 @@ public class APISerializer {
                 OMElement handlerElt = fac.createOMElement("handler", SynapseConstants.SYNAPSE_OMNAMESPACE);
                 handlerElt.addAttribute("class", handler.getClass().getName(), null);
                 handlersElt.addChild(handlerElt);
+                if (handler.getProperties()!=null) {
+                    Iterator itr = handler.getProperties().keySet().iterator();
+                    while (itr.hasNext()) {
+                        String propName = (String) itr.next();
+                        Object o = handler.getProperties().get(propName);
+                        OMElement prop = fac.createOMElement(APIFactory.PROP_Q, handlerElt);
+                        prop.addAttribute(fac.createOMAttribute(APIFactory.ATT_NAME.getLocalPart(),
+                                nullNS, propName));
 
-                Iterator itr = handler.getProperties().keySet().iterator();
-                while (itr.hasNext()) {
-                    String propName = (String) itr.next();
-                    Object o = handler.getProperties().get(propName);
-                    OMElement prop = fac.createOMElement(APIFactory.PROP_Q, handlerElt);
-                    prop.addAttribute(fac.createOMAttribute(APIFactory.ATT_NAME.getLocalPart(),
-                                                            nullNS, propName));
-
-                    if (o instanceof String) {
-                        prop.addAttribute(fac.createOMAttribute(APIFactory.ATT_VALUE.getLocalPart(),
-                                                                nullNS, (String) o));
-                    } else {
-                        prop.addChild((OMNode) o);
+                        if (o instanceof String) {
+                            prop.addAttribute(fac.createOMAttribute(APIFactory.ATT_VALUE.getLocalPart(),
+                                    nullNS, (String) o));
+                        } else {
+                            prop.addChild((OMNode) o);
+                        }
+                        handlerElt.addChild(prop);
                     }
-                    handlerElt.addChild(prop);
                 }
             }
             apiElt.addChild(handlersElt);
