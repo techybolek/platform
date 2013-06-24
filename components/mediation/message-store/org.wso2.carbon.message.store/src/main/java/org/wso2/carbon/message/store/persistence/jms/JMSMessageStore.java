@@ -786,7 +786,13 @@ public class JMSMessageStore extends AbstractMessageStore {
         QueueBrowser browser = null;
         boolean error = false;
 
-        ClassLoader originalCL = getContextClassLoader();
+        ClassLoader originalCl = null;
+
+        if (properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE) == null
+                || Boolean.parseBoolean((String)properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE))) {
+            originalCl = getContextClassLoader();
+            setContextClassLoader(this.getClass().getClassLoader());
+        }
 
         this.setContextClassLoader(this.getClass().getClassLoader());
 
@@ -816,8 +822,8 @@ public class JMSMessageStore extends AbstractMessageStore {
         this.size.set(count);
         log.debug("Updated JMS Message Store Size :" + size);
 
-        if(originalCL !=null){
-        	setContextClassLoader(originalCL);
+        if(originalCl !=null){
+        	setContextClassLoader(originalCl);
         }
 
     }
