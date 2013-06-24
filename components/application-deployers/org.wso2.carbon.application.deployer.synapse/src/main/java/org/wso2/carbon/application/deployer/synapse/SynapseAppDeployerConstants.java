@@ -39,7 +39,7 @@ public class SynapseAppDeployerConstants {
     public static final String LOCAL_ENTRIES_FOLDER = "local-entries";
     public static final String EVENTS_FOLDER = "event-sources";
     public static final String TASKS_FOLDER = "tasks";
-    public static final String MESSAGE_STORE_FOLDER="message-store";
+    public static final String MESSAGE_STORE_FOLDER="message-stores";
     public static final String MESSAGE_PROCESSOR_FOLDER="message-processors";
     public static final String APIS_FOLDER = "api";
     public static final String TEMPLATES_FOLDER = "templates";
