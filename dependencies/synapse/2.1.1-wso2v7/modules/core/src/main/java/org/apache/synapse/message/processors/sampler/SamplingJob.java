@@ -30,7 +30,7 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
+import org.apache.synapse.SynapseException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -79,7 +79,14 @@ public class SamplingJob implements Job {
                                 if (processingSequence != null) {
                                     processingSequence.mediate(messageContext);
                                 }
-                            } catch (Throwable t) {
+                            }
+                            catch (SynapseException syne){
+                                if (!messageContext.getFaultStack().isEmpty()) {
+                                    (messageContext.getFaultStack().pop()).handleFault(messageContext, syne);
+                                }
+                                log.error("Error occurred while executing the message", syne);
+                            }
+                            catch (Throwable t) {
                                 log.error("Error occurred while executing the message", t);
                             }
                         }
