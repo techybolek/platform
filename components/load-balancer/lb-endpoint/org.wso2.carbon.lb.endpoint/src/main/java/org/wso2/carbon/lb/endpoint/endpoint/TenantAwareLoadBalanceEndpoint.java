@@ -137,7 +137,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                                 groupManagementAgent = new SubDomainAwareGroupManagementAgent(subDomain);
                             }
                             clusteringAgent.addGroupManagementAgent(groupManagementAgent,
-                                                                    domain, subDomain,-1);
+                                                                    domain, subDomain,tenantCtxt.getGroupMgtPort());
                             if (log.isDebugEnabled()) {
                                 log.debug("Group management agent added to cluster domain: " +
                                           domain + " and sub domain: " + subDomain);
