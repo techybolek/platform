@@ -91,7 +91,7 @@ public class PayloadFactoryMediator extends AbstractMediator {
         format_raw=format;  //because the format will be altered when parsing to json.
                             // This is to preserve the original format.
         axis2MessageContext = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-        contentType = axis2MessageContext.getProperty(Constants.Configuration.CONTENT_TYPE).toString();
+        contentType = axis2MessageContext.getProperty(Constants.Configuration.MESSAGE_TYPE).toString();
         Builder messageBuilder=null;
         try {
             messageBuilder= MessageProcessorSelector.getMessageBuilder(JSON_CONTENT, axis2MessageContext);
