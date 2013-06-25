@@ -107,6 +107,8 @@
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.soaptracer.feature:${carbon.platform.version}</featureArtifactDef>
 
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.feature:${carbon.platform.version}</featureArtifactDef>
+								
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:${carbon.platform.version}</featureArtifactDef>
 
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature:${carbon.platform.version}</featureArtifactDef>
 
@@ -200,7 +202,7 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.lifecycle.management.feature:${carbon.platform.version}</featureArtifactDef>
 
 								<!-- Cloud API Manager related features -->
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:2.1.2</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature:${stratos.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:${stratos.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature:${stratos.version}</featureArtifactDef>
@@ -313,6 +315,10 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.security.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+								<feature>
+                                    <id>org.wso2.carbon.security.mgt.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
@@ -525,7 +531,7 @@
                                 </feature>                               
                                 <feature>
                                     <id>org.wso2.carbon.stratos.common.feature.group</id>
-                                    <version>2.1.2</version>
+                                    <version>${stratos.version}</version>
                                 </feature>                                                         
                                 <feature>
                                     <id>org.wso2.carbon.stratos.deployment.feature.group</id>
