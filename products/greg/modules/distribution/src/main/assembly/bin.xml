@@ -283,13 +283,6 @@
                 <include>**/master-datasources.xml</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory>../p2-profile-gen/target/WSO2-CARBON-PATCH-4.1.0-0001</directory>
-            <outputDirectory>${pom.artifactId}-${build.version}/repository/components/patches/</outputDirectory>
-            <includes>
-                <include>**/patch0001/*.*</include>
-            </includes>
-        </fileSet>
     </fileSets>
 
     <dependencySets>
@@ -541,12 +534,11 @@
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
         </file>
 	<!-- Including log4j.properties file -->
-        <file>
-            <source>
-                ../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/log4j.properties
-            </source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/
-            </outputDirectory>
+         <file>
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/bundle-config/org.wso2.carbon.logging/log4j.properties</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging</outputDirectory>
+            <destName>log4j.properties</destName>
+            <filtered>true</filtered>
         </file>      
         <file>
             <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/identity.xml</source>
