@@ -71,33 +71,41 @@
             <li class="selected"><a href="#tab1"><em><fmt:message key="source.view"/></em></a></li>
             <li><a href="#tab2" onclick="syncPolicyTreeView();"><em><fmt:message key="design.view"/></em></a></li>
         </ul>
-        <div class="yui-content" style="padding-bottom:20px">
+        <div class="yui-content" style="padding-bottom:20px;height:700px;">
             <div id="tab1">
-            	<table style="width:100%">
+            	<table style="width:100%" class="styledLeft" cellspacing="0" cellpadding="0">
+            	<tbody>
             	<tr>
             	
-                <td style="width:90%">
+                <td style="width:100%">
                     <textarea id="raw-policy" class="raw-policy-tree"></textarea>
                 </td>
-		<td>
-                <div class="button-panel-container">
-                            <span id="rawpolicy-button-panel" style="white-space:nowrap;">
-                                <input class="button" type="button" name="save-policy" value="<fmt:message key="save.policy"/>"
+                </tr>
+                <tr><td height="10px"></td></tr>
+                <tr>
+		        <td>
+                	<input class="button" type="button" name="save-policy" value="<fmt:message key="save.policy"/>"
                                            onclick="savePolicyXML();">
-                                <input class="button" type="button" name="go-back" value="<fmt:message key="go.back"/>"
+                    <input class="button" type="button" name="go-back" value="<fmt:message key="go.back"/>"
                                            onclick="goBack();">
-                            </span>
                 </div>
                 </td>
                 </tr>
+                </tbody>
                 </table>
             </div>
             <div id="tab2">
+            	<table style="width:100%" class="styledLeft" cellspacing="0" cellpadding="0">
+            	<tbody>
+            	<tr>
+            	<td>            
                 <div style="padding-bottom:0.5px;">
                   <em><i><fmt:message key="tip.for.more.operations.right.click.the.tree.nodes.in.the.panel.below"/></i></em>
                 </div>
-                <br>
-                <div>
+                </td>
+                </tr>
+                <tr>
+                <td>
                     <div id="divPolicyDocTree" class="policy-tree">
                         <!-- Will contain a tree representation of the policy xml -->
                     </div>
@@ -106,15 +114,19 @@
                             <!-- Will contain a tree representation of the policy xml -->
                         </div>
                     </div>
-                    <div class="button-panel-container">
-                            <span id="policytree-button-panel">
-                                <input class="button" type="button" name="save-policy" value="<fmt:message key="save.policy"/>"
+                    </td>
+                    </tr>
+                    <tr><td height="40px"></td></tr>
+                    <tr>
+                    <td>
+                        <input class="button" type="button" name="save-policy" value="<fmt:message key="save.policy"/>"
                                            onclick="savePolicyXML();">
-                                <input class="button" type="button" name="go-back" value="<fmt:message key="go.back"/>"
+                        <input class="button" type="button" name="go-back" value="<fmt:message key="go.back"/>"
                                            onclick="goBack();">
-                            </span>
-                    </div>
-                </div>
+                    </td>
+                    </tr>
+                    </tbody>
+                    </table>
             </div>
         </div>
     </div>
