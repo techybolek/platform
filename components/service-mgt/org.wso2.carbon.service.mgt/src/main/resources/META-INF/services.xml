@@ -50,8 +50,7 @@
             <parameter name="AuthorizationAction" locked="false">/permission/admin/login</parameter>
         </operation>
         <operation name="listServices">
-            <parameter name="DoAuthorization" locked="true">false</parameter>
-            <parameter name="DoAuthentication" locked="true">false</parameter>
+ 		<parameter name="AuthorizationAction" locked="false">/permission/admin/login</parameter>
         </operation>
         <excludeOperations>
             <operation>setConfigurationContext</operation>
@@ -71,8 +70,7 @@
             <parameter name="AuthorizationAction" locked="false">/permission/admin/login</parameter>        
         </operation>
         <operation name="listServiceGroups">
-            <parameter name="DoAuthorization" locked="true">false</parameter>
-            <parameter name="DoAuthentication" locked="true">false</parameter>
+  		<parameter name="AuthorizationAction" locked="false">/permission/admin/login</parameter>
         </operation>        
     </service>
 
