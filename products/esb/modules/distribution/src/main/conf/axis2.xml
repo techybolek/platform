@@ -837,7 +837,8 @@
             </handler-->
            <handler name="RelaySecuirtyMessageBuilderDispatchandler"
                      class="org.apache.synapse.transport.passthru.util.RelaySecuirtyMessageBuilderDispatchandler"/>
-
+           <handler name="CacheMessageBuilderDispatchandler"
+                     class="org.apache.synapse.transport.passthru.util.CacheMessageBuilderDispatchandler"/>
         </phase>
         <phase name="Addressing">
             <handler name="AddressingBasedDispatcher"
