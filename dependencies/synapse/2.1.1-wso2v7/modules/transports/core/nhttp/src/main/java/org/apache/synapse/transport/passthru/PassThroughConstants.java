@@ -104,7 +104,9 @@ public class PassThroughConstants {
     public final static String SECURITY_MODULE_NAME = "rampart";
     
     public final static String REST_GET_DELETE_INVOKE ="rest_get_delete_invoke";
-    
+
+    public final static String FORCE_POST_PUT_NOBODY ="FORCE_POST_PUT_NOBODY";
+
     public final static String PASSTROUGH_MESSAGE_LENGTH ="PASSTROUGH_MESSAGE_LENGTH";
     
 	public static final String CONF_LOCATION = "conf.location";

@@ -16,11 +16,6 @@
 
 package org.apache.synapse.transport.passthru;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Locale;
-
 import org.apache.axiom.om.OMOutputFormat;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -65,6 +60,11 @@ import org.apache.synapse.transport.passthru.jmx.PassThroughTransportMetricsColl
 import org.apache.synapse.transport.passthru.jmx.TransportView;
 import org.apache.synapse.transport.passthru.util.PassThroughTransportUtils;
 import org.apache.synapse.transport.passthru.util.SourceResponseFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Locale;
 
 /**
  * PassThroughHttpSender for Synapse based on HttpCore and NIO extensions
@@ -364,15 +364,18 @@ public class PassThroughHttpSender extends AbstractHandler implements TransportS
 						OMOutputFormat format = PassThroughTransportUtils.getOMOutputFormat(msgContext);
 						formatter.writeTo(msgContext, format, out, false);
 					}
-					
-					if ((msgContext.getProperty(PassThroughConstants.REST_GET_DELETE_INVOKE) != null &&
-						    (Boolean) msgContext.getProperty(PassThroughConstants.REST_GET_DELETE_INVOKE))) {
-							pipe.setSerializationCompleteWithoutData(true);
-					}else{
-						pipe.setSerializationComplete(true);
-					}
-			
-				}
+
+                    if ((msgContext.getProperty(PassThroughConstants.REST_GET_DELETE_INVOKE) != null &&
+                         (Boolean) msgContext.getProperty(PassThroughConstants.REST_GET_DELETE_INVOKE))) {
+                        pipe.setSerializationCompleteWithoutData(true);
+                    } else if ((msgContext.getProperty(PassThroughConstants.FORCE_POST_PUT_NOBODY) != null &&
+                                (Boolean) msgContext.getProperty(PassThroughConstants.FORCE_POST_PUT_NOBODY))) {
+                        pipe.setSerializationCompleteWithoutData(true);
+                    } else {
+                        pipe.setSerializationComplete(true);
+                    }
+
+                }
 			}
 		}
 	}
