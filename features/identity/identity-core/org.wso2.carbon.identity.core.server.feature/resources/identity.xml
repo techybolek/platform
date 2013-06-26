@@ -66,6 +66,7 @@
 		<SessionTimeout>36000</SessionTimeout>
 		<!-- skips authentication if valid SAML2 Web SSO browser session available -->
 		<AcceptSAMLSSOLogin>false</AcceptSAMLSSOLogin>
+		<ClaimsRetrieverImplClass>org.wso2.carbon.identity.provider.openid.claims.DefaultClaimsRetriever</ClaimsRetrieverImplClass>
 	</OpenID>
 
 	<OAuth>
@@ -163,6 +164,7 @@
 		<AttributeStatementBuilder>org.wso2.carbon.identity.sso.saml.attributes.UserAttributeStatementBuilder</AttributeStatementBuilder>
                 <AttributesClaimDialect>http://wso2.org/claims</AttributesClaimDialect>
 		<AcceptOpenIDLogin>false</AcceptOpenIDLogin>
+		<ClaimsRetrieverImplClass>org.wso2.carbon.identity.sso.saml.builders.claims.DefaultClaimsRetriever</ClaimsRetrieverImplClass>
 	</SSOService>
 
 	<EntitlementSettings>
