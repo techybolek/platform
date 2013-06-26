@@ -21,9 +21,10 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.IdentityClaimManager;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.provider.dto.OpenIDClaimDTO;
 import org.wso2.carbon.identity.provider.openid.OpenIDUtil;
-import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.identity.provider.openid.claims.ClaimsRetriever;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.utils.TenantUtils;
 
@@ -35,7 +36,10 @@ import java.util.Map;
  * Base class for all OpenID extensions. Any OpenID extension added should
  * extend this class.
  */
+
 public abstract class OpenIDExtension {
+
+    private static ClaimsRetriever claimsRetriever = null;
 
 	/**
 	 * Creates an instance of MessageExtension for the OpenID authentication
@@ -97,30 +101,29 @@ public abstract class OpenIDExtension {
 
 	private OpenIDClaimDTO[] getClaimValues(String openId, String profileId,
 	                                        List<String> requiredClaims) throws Exception {
-		UserStoreManager userStore = null;
 		Map<String, String> claimValues = null;
 		OpenIDClaimDTO[] claims = null;
 		OpenIDClaimDTO dto = null;
 		IdentityClaimManager claimManager = null;
 		Claim[] claimData = null;
 		String[] claimArray = new String[requiredClaims.size()];
-		String userName = null;
-		String domainName = null;
-		String tenatUser = null;
 
-		userName = OpenIDUtil.getUserName(openId);
-		domainName = TenantUtils.getDomainNameFromOpenId(openId);
+        synchronized (this){
+            if(claimsRetriever == null){
+                synchronized (this){
+                    claimsRetriever = (ClaimsRetriever)Class.forName(
+                            IdentityUtil.getProperty("OpenID.ClaimsRetrieverImplClass").trim()).newInstance();
+                    claimsRetriever.init();
+                }
+            }
+        }
 
-		tenatUser = userName;
-
-		if (userName.contains("@")) {
-			tenatUser = userName.substring(0, userName.indexOf("@"));
-		}
-
-		userStore = IdentityTenantUtil.getRealm(domainName, userName).getUserStoreManager();
+        String userName = null;
+        userName = OpenIDUtil.getUserName(openId);
+        String domainName = TenantUtils.getDomainNameFromOpenId(openId);
 
 		claimValues =
-		              userStore.getUserClaimValues(tenatUser, requiredClaims.toArray(claimArray),
+		              claimsRetriever.getUserClaimValues(openId, requiredClaims.toArray(claimArray),
 		                                           profileId);
 
 		claims = new OpenIDClaimDTO[claimValues.size()];
