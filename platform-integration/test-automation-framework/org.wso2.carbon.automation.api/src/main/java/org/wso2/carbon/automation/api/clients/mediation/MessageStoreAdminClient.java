@@ -24,8 +24,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
-import org.wso2.carbon.message.store.stub.MessageInfo;
-import org.wso2.carbon.message.store.stub.MessageStoreAdminServiceStub;
+import org.wso2.carbon.message.store.stub.*;
+import org.wso2.carbon.message.store.stub.Exception;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;
@@ -53,7 +53,7 @@ public class MessageStoreAdminClient {
         AuthenticateStub.authenticateStub(userName, password, messageStoreAdminServiceStub);
     }
 
-    public void addMessageStore(DataHandler dh) throws IOException, XMLStreamException {
+    public void addMessageStore(DataHandler dh) throws IOException, Exception, XMLStreamException {
         XMLStreamReader parser =
                 XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
         StAXOMBuilder builder = new StAXOMBuilder(parser);
@@ -61,14 +61,13 @@ public class MessageStoreAdminClient {
         messageStoreAdminServiceStub.addMessageStore(messageStore.toString());
     }
 
-    public void addMessageStore(OMElement messageStore) throws RemoteException {
+    public void addMessageStore(OMElement messageStore) throws Exception, RemoteException {
         messageStoreAdminServiceStub.addMessageStore(messageStore.toString());
     }
 
     public void updateMessageStore(OMElement messageStore) throws RemoteException {
         messageStoreAdminServiceStub.modifyMessageStore(messageStore.toString());
     }
-
 
     public void deleteMessageStore(String messageStoreName) throws RemoteException {
         messageStoreAdminServiceStub.deleteMessageStore(messageStoreName);

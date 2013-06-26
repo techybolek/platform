@@ -48,6 +48,7 @@ import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.bpel.stub.mgt.PackageManagementException;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
 import org.wso2.carbon.localentry.stub.types.LocalEntryAdminException;
+import org.wso2.carbon.message.store.stub.*;
 import org.wso2.carbon.proxyadmin.stub.ProxyServiceAdminProxyAdminException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.rule.service.stub.fileupload.ExceptionException;
@@ -63,6 +64,7 @@ import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariabl
 import org.wso2.carbon.automation.core.utils.fileutils.FolderTraversar;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkProperties;
 import org.xml.sax.SAXException;
+import java.lang.Exception;
 
 import javax.activation.DataHandler;
 import javax.servlet.ServletException;
@@ -364,7 +366,7 @@ public class ArtifactDeployerUtil {
                    ProxyServiceAdminProxyAdminException, SequenceEditorException,
                    EndpointAdminEndpointAdminException, LocalEntryAdminException,
                    TaskManagementException, TransformerException, SAXException, ServletException,
-                   ParserConfigurationException {
+                   ParserConfigurationException, org.wso2.carbon.message.store.stub.Exception {
 
 
         String scenarioConfigDir = artifactLocation + File.separator + "synapseconfig" + File.separator +
@@ -572,7 +574,7 @@ public class ArtifactDeployerUtil {
                                     String scenarioConfigDir, FolderTraversar dirTraversar,
                                     String aConfigDir)
             throws IOException, XMLStreamException, EndpointAdminEndpointAdminException,
-                   LocalEntryAdminException {
+                   LocalEntryAdminException, org.wso2.carbon.message.store.stub.Exception {
         if (aConfigDir.equalsIgnoreCase(MESSAGESTORE_DIR)) {
             String[] messageStoreFiles = dirTraversar.getConfigFiles
                     (new File(scenarioConfigDir + File.separator + MESSAGESTORE_DIR));
