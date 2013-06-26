@@ -22,8 +22,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -112,10 +117,13 @@ public class IdentityMgtConfig {
 	private String recoveryClaim;
 
     private PolicyRegistry policyRegistry = new PolicyRegistry();
-
-    private int passwordLengthMin;
-
-    private int passwordLengthMax;
+    
+	/*
+	 * Define the pattern of the configuration file. Assume following
+	 * pattern in config.
+	 * Eg. Password.policy.extensions.1.min.length=6
+	 */
+	private Pattern propertyPattern = Pattern.compile("(\\.\\d\\.)");
 
     private static final Log log = LogFactory.getLog(IdentityMgtConfig.class);
 
@@ -368,30 +376,9 @@ public class IdentityMgtConfig {
                 i++;
             }
 
-            String passwordPolicyExtensions = properties.getProperty(IdentityMgtConstants.PropertyConfig.PASSWORD_POLICY_EXTENSIONS);
-            if(passwordPolicyExtensions != null && passwordPolicyExtensions.trim().length() > 0) {
-
-                String[] classNames = passwordPolicyExtensions.split(",");
-                try{
-                    for (String className : classNames) {
-                        Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-                        this.policyRegistry.addPolicy((PolicyEnforcer) clazz.newInstance());
-                    }
-                }catch(Exception e) {
-                    log.error("Error while loading password policy classes ", e);
-                }
-            }
-
-            String passwordLengthMin = properties.getProperty(IdentityMgtConstants.PropertyConfig.PASSWORD_LENGTH_MIN);
-            if(passwordLengthMin != null && passwordLengthMin.trim().length() > 0) {
-                this.passwordLengthMin = Integer.valueOf(passwordLengthMin);
-            }
-
-            String passwordLengthMax = properties.getProperty(IdentityMgtConstants.PropertyConfig.PASSWORD_LENGTH_MAX);
-            if(passwordLengthMax != null && passwordLengthMax.trim().length() > 0) {
-                this.passwordLengthMax = Integer.valueOf(passwordLengthMax);
-            }
-
+            // Load the configuration for Password.policy.extensions.
+            loadPolicyExtensions(properties, IdentityMgtConstants.PropertyConfig.PASSWORD_POLICY_EXTENSIONS);
+            
             if(this.passwordGenerator == null){
                 this.passwordGenerator = new DefaultPasswordGenerator();
             }
@@ -562,12 +549,88 @@ public class IdentityMgtConfig {
     public PolicyRegistry getPolicyRegistry() {
         return policyRegistry;
     }
-
-    public int getPasswordLengthMax(){
-        return passwordLengthMax;
+    
+    /**
+     * This method is used to load the policies declared in the configuration.
+     * 
+     * @param properties Loaded properties
+     * @param extensionType Type of extension
+     */
+    private void loadPolicyExtensions(Properties properties, String extensionType){
+    	
+    	// First property must start with 1.
+    	int count = 1;
+    	String className = null;
+    	
+		while((className = properties.getProperty(extensionType + "." + count)) != null){
+            try {
+                Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                
+                PolicyEnforcer policy = (PolicyEnforcer) clazz.newInstance();
+                policy.init(getParameters(properties, extensionType, count));
+                
+                this.policyRegistry.addPolicy((PolicyEnforcer) policy);
+                count++;
+                
+            } catch (ClassNotFoundException e) {
+                log.error("Error while loading password policies "+ className + " " + e.getMessage());
+            } catch (SecurityException e) {
+            	log.error("Error while loading password policies "+ className + " " + e.getMessage());
+            } catch (InstantiationException e) {
+            	log.error("Error while loading password policies "+ className + " " + e.getMessage());
+            } catch (IllegalAccessException e) {
+            	log.error("Error while loading password policies "+ className + " " + e.getMessage());
+            }
+		}
+    	
     }
+    
+	/**
+	 * This utility method is used to get the parameters from the configuration
+	 * file for a given policy extension.
+	 * 
+	 * @param prop
+	 *            - properties
+	 * @param extensionKey
+	 *            - extension key which is defined in the
+	 *            IdentityMgtConstants
+	 * @param sequence
+	 *            - property sequence number in the file
+	 * @return Map of parameters with key and value from the configuration file.
+	 */
+	private Map<String, String> getParameters(Properties prop, String extensionKey, int sequence) {
 
-    public int getPasswordLengthMin(){
-        return passwordLengthMin;
-    }
+		Set<String> keys = prop.stringPropertyNames();
+
+		Map<String, String> keyValues = new HashMap<String, String>();
+
+		for (String key : keys) {
+			// Get only the provided extensions. 
+			// Eg.
+			// Password.policy.extensions.1
+			if (key.contains(extensionKey + "." + String.valueOf(sequence))) {
+
+				Matcher m = propertyPattern.matcher(key);
+
+				// Find the .1. pattern in the property key.
+				if (m.find()) {
+					int searchIndex = m.end();
+
+					/*
+					 * Key length is > matched pattern's end index if it has
+					 * parameters
+					 * in the config file.
+					 */
+					if (key.length() > searchIndex) {
+						String propKey = key.substring(searchIndex);
+						String propValue = prop.getProperty(key);
+						keyValues.put(propKey, propValue);
+					}
+				}
+
+			}
+		}
+
+		return keyValues;
+	}
 }

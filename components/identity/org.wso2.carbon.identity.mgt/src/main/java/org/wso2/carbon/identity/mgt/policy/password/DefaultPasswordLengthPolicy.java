@@ -15,9 +15,10 @@
  */
 package org.wso2.carbon.identity.mgt.policy.password;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.policy.AbstractPasswordPolicyEnforcer;
 
 /**
@@ -36,12 +37,19 @@ public class DefaultPasswordLengthPolicy extends AbstractPasswordPolicyEnforcer{
 	 * Required initializations to get the configuration values from file.
 	 */
 	@Override
-	public void init(){
-		
-		// Initialize the configuration from file.
-		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
-		MIN_LENGTH = config.getPasswordLengthMin();
-		MAX_LENGTH = config.getPasswordLengthMax();
+	public void init(Map<String, String> params) {
+
+		/*
+		 *  Initialize the configuration with the parameters defined in config file.
+		 *  Eg.
+		 *  In the config file if you specify as follows.
+		 *  Password.policy.extensions.1.min.length=6
+		 *  Get the value from the map as shown below using key "min.length".
+		 */
+		if (params != null && params.size() > 0) {
+			MIN_LENGTH = Integer.parseInt(params.get("min.length"));
+			MAX_LENGTH = Integer.parseInt(params.get("max.length"));
+		}
 	}
 	
 	/**
@@ -58,7 +66,7 @@ public class DefaultPasswordLengthPolicy extends AbstractPasswordPolicyEnforcer{
 			
 			String password = args[0].toString();
 			if (password.length() < MIN_LENGTH) {
-				errorMessage = "Password at least should be have " + MIN_LENGTH + " characters";
+				errorMessage = "Password at least should have " + MIN_LENGTH + " characters";
 				return false;
 			} else if (password.length() > MAX_LENGTH) {
 				errorMessage = "Password cannot have more than " + MAX_LENGTH + " characters";

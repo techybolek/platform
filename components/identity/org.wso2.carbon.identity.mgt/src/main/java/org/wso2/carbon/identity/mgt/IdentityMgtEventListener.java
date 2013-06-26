@@ -78,9 +78,10 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		                                                  .getAdminUserName();
 		try {
 			IdentityMgtConfig config = IdentityMgtConfig.getInstance();
-            // Initialize the policy attributes.
+
+			// Get the policy registry with the loaded policies.
             policyRegistry = config.getPolicyRegistry();
-            policyRegistry.initPolicies();
+
 			if (config.isListenerEnable()) {
 				IdentityMgtServiceComponent.getRealmService()
 				                           .getBootstrapRealm()
@@ -223,6 +224,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
         try{
             // Enforcing the password policies.
             policyRegistry.enforcePasswordPolicies(credential.toString(), userName);
+            
         }catch(PolicyViolationException pe) {
             log.error(pe.getMessage());
             throw new UserStoreException(pe.getMessage());

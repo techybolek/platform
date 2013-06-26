@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.identity.mgt.policy.password;
 
+import java.util.Map;
+
 import org.wso2.carbon.identity.mgt.policy.AbstractPasswordPolicyEnforcer;
 
 public class DefaultPasswordWhitespacePolicy extends AbstractPasswordPolicyEnforcer{
@@ -38,7 +40,7 @@ public class DefaultPasswordWhitespacePolicy extends AbstractPasswordPolicyEnfor
     }
 
 	@Override
-    public void init() {
+    public void init(Map<String,String> params) {
 	    // Nothing to init.
 	    
     }

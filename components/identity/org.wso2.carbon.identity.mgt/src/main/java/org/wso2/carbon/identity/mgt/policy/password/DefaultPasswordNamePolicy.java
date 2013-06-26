@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.identity.mgt.policy.password;
 
+import java.util.Map;
+
 import org.wso2.carbon.identity.mgt.policy.AbstractPasswordPolicyEnforcer;
 
 public class DefaultPasswordNamePolicy extends AbstractPasswordPolicyEnforcer{
@@ -39,7 +41,7 @@ public class DefaultPasswordNamePolicy extends AbstractPasswordPolicyEnforcer{
     }
 
 	@Override
-    public void init() {
+    public void init(Map<String,String> params) {
 	    // Nothing to init 
 	    
     }

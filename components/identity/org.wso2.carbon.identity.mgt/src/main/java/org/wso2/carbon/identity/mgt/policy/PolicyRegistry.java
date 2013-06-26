@@ -46,11 +46,4 @@ public class PolicyRegistry {
 		
 		policyCollection.add(policy);
 	}
-	
-	public void initPolicies(){
-		
-		for (PolicyEnforcer policy : policyCollection) {
-	        policy.init();
-        }
-	}
 }

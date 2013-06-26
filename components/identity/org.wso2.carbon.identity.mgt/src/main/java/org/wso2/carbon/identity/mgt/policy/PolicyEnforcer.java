@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.identity.mgt.policy;
 
+import java.util.Map;
+
 /**
  * This is the interface to be used by custom policy implementations such as password policy 
  * enforcement.
@@ -41,8 +43,14 @@ public interface PolicyEnforcer {
 	String getErrorMessage();
 	
 	/**
-	 * This method is used to initialize the policy implementation as needed.
+	 * This method is used to initialize the policy implementation using a Map. 
+	 * You can give parameters to the implementation class as shown below in the config file.
+	 * Eg. 
+	 * Password.policy.extensions.1.min.length=6
+	 * To initialize the implementation class, access the Map with the key after sequence 
+	 * as follows.
+	 * String minLength = params.get("min.length");
 	 * 
 	 */
-	void init();
+	void init(Map<String, String> params);
 }
