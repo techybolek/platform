@@ -39,7 +39,7 @@ import java.util.Properties;
  *   &lt;completeCondition [timeout="time-in-seconds"]&gt;
  *     &lt;messageCount min="int-min" max="int-max"/&gt;?
  *   &lt;/completeCondition&gt;?
- *   &lt;onComplete expression="xpath" [sequence="sequence-ref"]&gt;
+ *   &lt;onComplete expression="xpath" [sequence="sequence-ref"] [enclosingElementProperty="propertyName"] &gt;
  *     (mediator +)?
  *   &lt;/onComplete&gt;
  * &lt;/aggregate&gt;
@@ -72,7 +72,8 @@ public class AggregateMediatorFactory extends AbstractMediatorFactory {
             = new QName(XMLConfigConstants.NULL_NAMESPACE, "sequence");
     private static final QName ID_Q
             = new QName(XMLConfigConstants.NULL_NAMESPACE, "id");
-
+    private static final QName ENCLOSING_ELEMENT_PROPERTY
+                = new QName(XMLConfigConstants.NULL_NAMESPACE, "enclosingElementProperty");
 
     public Mediator createSpecificMediator(OMElement elem, Properties properties) {
 
@@ -130,6 +131,11 @@ public class AggregateMediatorFactory extends AbstractMediatorFactory {
                 } catch (JaxenException e) {
                     handleException("Unable to load the aggregating XPATH", e);
                 }
+            }
+
+            OMAttribute enclosingElementPropertyName = onComplete.getAttribute(ENCLOSING_ELEMENT_PROPERTY);
+            if (enclosingElementPropertyName != null) {
+                mediator.setEnclosingElementPropertyName(enclosingElementPropertyName.getAttributeValue());
             }
 
             OMAttribute onCompleteSequence = onComplete.getAttribute(SEQUENCE_Q);

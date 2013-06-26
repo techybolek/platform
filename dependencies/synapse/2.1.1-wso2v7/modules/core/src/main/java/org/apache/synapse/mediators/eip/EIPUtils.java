@@ -20,7 +20,6 @@
 package org.apache.synapse.mediators.eip;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
@@ -187,5 +186,26 @@ public class EIPUtils {
         String targetSynapsePropName = getTemplatePropertyMapping(templateName,paramName);
         synCtxt.setProperty(targetSynapsePropName,value);
     }
+
+    /**
+     * Enclose children of the soap body with a specific element
+     *
+     * @param envelope SOAPEnvelope which is to be enclosed
+     * @param encloseElement enclosing element
+     * @return modified SOAPEnvelope
+     */
+    public static SOAPEnvelope encloseWithElement (SOAPEnvelope envelope, OMElement encloseElement) {
+        Iterator itr = envelope.getBody().getChildElements();
+        Object o;
+        while (itr.hasNext()) {
+            o = itr.next();
+            if (o != null && o instanceof OMElement) {
+                encloseElement.addChild((OMElement) o);
+            }
+        }
+        envelope.getBody().addChild(encloseElement);
+        return envelope;
+    }
+
 
 }

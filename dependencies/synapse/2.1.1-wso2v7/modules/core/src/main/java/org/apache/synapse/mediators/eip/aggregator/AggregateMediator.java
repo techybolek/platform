@@ -19,8 +19,10 @@
 
 package org.apache.synapse.mediators.eip.aggregator;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAP11Constants;
 import org.apache.axiom.soap.SOAP12Constants;
+import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -85,6 +87,9 @@ public class AggregateMediator extends AbstractMediator implements ManagedLifecy
         Collections.synchronizedMap(new HashMap<String, Aggregate>());
 
     private String id = null;
+
+    /** Property which contains the Enclosing element of the aggregated message */
+    private String enclosingElementPropertyName = null;
 
     /** Lock object to provide the synchronized access to the activeAggregates on checking */
     private final Object lock = new Object();
@@ -405,6 +410,37 @@ public class AggregateMediator extends AbstractMediator implements ManagedLifecy
                 }
             }
         }
+
+        // Enclose with a parent element if EnclosingElement is defined
+        if (enclosingElementPropertyName != null) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Enclosing the aggregated message with enclosing element: " + enclosingElementPropertyName);
+            }
+
+            Object enclosingElementProperty = newCtx.getProperty(enclosingElementPropertyName);
+
+            if (enclosingElementProperty != null) {
+                if (enclosingElementProperty instanceof OMElement) {
+                    OMElement enclosingElement = ((OMElement) enclosingElementProperty).cloneOMElement();
+                    MessageContext newCtxWithEnclosingElement = aggregate.getMessages().get(0);
+
+                    try {
+                        newCtxWithEnclosingElement.setEnvelope(EIPUtils.encloseWithElement(newCtx.getEnvelope(), enclosingElement));
+                    } catch (AxisFault axisFault) {
+                        handleException("Error occurred while enclosing the result with enclosing element ", axisFault, newCtx);
+                    }
+
+                    return newCtxWithEnclosingElement;
+
+                } else {
+                    handleException("Enclosing Element defined in the property: " + enclosingElementPropertyName + " is not an OMElement ", newCtx);
+                }
+            } else {
+                handleException("Enclosing Element property: " + enclosingElementPropertyName + " not found ", newCtx);
+            }
+        }
+
         return newCtx;
     }
 
@@ -475,7 +511,12 @@ public class AggregateMediator extends AbstractMediator implements ManagedLifecy
 	public void setMaxMessagesToComplete(Value maxMessagesToComplete) {
     	this.maxMessagesToComplete = maxMessagesToComplete;
     }
-    
-    
-    
+
+    public String getEnclosingElementPropertyName() {
+        return enclosingElementPropertyName;
+    }
+
+    public void setEnclosingElementPropertyName(String enclosingElementPropertyName) {
+        this.enclosingElementPropertyName = enclosingElementPropertyName;
+    }
 }

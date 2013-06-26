@@ -82,6 +82,11 @@ public class AggregateMediatorSerializer extends AbstractMediatorSerializer {
             new SequenceMediatorSerializer().serializeChildren(
                     onCompleteElem, mediator.getOnCompleteSequence().getList());
         }
+
+        String enclosingElementPropertyName = mediator.getEnclosingElementPropertyName();
+        if (enclosingElementPropertyName != null) {
+            onCompleteElem.addAttribute("enclosingElementProperty", enclosingElementPropertyName,nullNS);
+        }
         aggregator.addChild(onCompleteElem);
 
         return aggregator;
