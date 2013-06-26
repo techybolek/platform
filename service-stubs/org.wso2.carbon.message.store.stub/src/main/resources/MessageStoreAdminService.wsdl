@@ -88,7 +88,7 @@
                         <xs:element minOccurs="0" name="return" nillable="true" type="xs:string" />
                     </xs:sequence>
                 </xs:complexType>
-            </xs:element>
+            </xs:element>                       
             <xs:element name="getClassName">
                 <xs:complexType>
                     <xs:sequence>
@@ -153,6 +153,18 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:complexType name="Exception">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="Exception" nillable="true" type="xs:anyType" />
+                </xs:sequence>
+            </xs:complexType>            
+            <xs:element name="Exception">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="Exception" nillable="true" type="ns:Exception" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>            
         </xs:schema>
     </wsdl:types>
     <wsdl:message name="getSizeRequest">
@@ -181,7 +193,10 @@
     </wsdl:message>
     <wsdl:message name="addMessageStoreRequest">
         <wsdl:part name="parameters" element="ns:addMessageStore" />
-    </wsdl:message>
+    </wsdl:message>   
+    <wsdl:message name="Exception">
+        <wsdl:part name="parameters" element="ns:Exception" />
+    </wsdl:message>    
     <wsdl:message name="modifyMessageStoreRequest">
         <wsdl:part name="parameters" element="ns:modifyMessageStore" />
     </wsdl:message>
@@ -236,6 +251,7 @@
         </wsdl:operation>
         <wsdl:operation name="addMessageStore">
             <wsdl:input message="tns:addMessageStoreRequest" wsaw:Action="urn:addMessageStore" />
+            <wsdl:fault message="tns:Exception" name="Exception" wsaw:Action="urn:addMessageStoreException" />            
         </wsdl:operation>
         <wsdl:operation name="modifyMessageStore">
             <wsdl:input message="tns:modifyMessageStoreRequest" wsaw:Action="urn:modifyMessageStore" />
@@ -314,7 +330,10 @@
             <soap:operation soapAction="urn:addMessageStore" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
-            </wsdl:input>
+            </wsdl:input>           
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception" />
+            </wsdl:fault>            
         </wsdl:operation>
         <wsdl:operation name="getClassName">
             <soap:operation soapAction="urn:getClassName" style="document" />
@@ -416,7 +435,10 @@
             <soap12:operation soapAction="urn:addMessageStore" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
-            </wsdl:input>
+            </wsdl:input>           
+            <wsdl:fault name="Exception">
+                <soap12:fault use="literal" name="Exception" />
+            </wsdl:fault>            
         </wsdl:operation>
         <wsdl:operation name="getClassName">
             <soap12:operation soapAction="urn:getClassName" style="document" />
