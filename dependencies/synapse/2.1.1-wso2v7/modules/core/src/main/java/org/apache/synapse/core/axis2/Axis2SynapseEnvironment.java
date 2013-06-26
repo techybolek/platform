@@ -273,8 +273,25 @@ public class Axis2SynapseEnvironment implements SynapseEnvironment {
                 removeProperty("rampart_engaged");
 
         if (synCtx.isResponse()) {
-
             if (endpoint != null) {
+                boolean buildMessage = false;
+                if (endpoint.getAddress() != null) {
+                    buildMessage = (!endpoint.getAddress().startsWith("http") && !endpoint.getAddress().startsWith("https"));
+                } else {
+                    String address = synCtx.getTo().getAddress();
+                    if (address == null) {
+                        log.error("Could not find an endpoint address, MessageID:" + synCtx.getMessageID());
+                        address = "";
+                    }
+                    buildMessage = (!address.startsWith("http") && !address.startsWith("https"));
+                }
+                if (buildMessage) {
+                    try {
+                        RelayUtils.buildMessage(((Axis2MessageContext) synCtx).getAxis2MessageContext(), false);
+                    } catch (Exception e) {
+                        handleException("Error while building message", e);
+                    }
+                }
                 Axis2Sender.sendOn(endpoint, synCtx);
             } else {
                 String proxyName = (String) synCtx.getProperty(SynapseConstants.PROXY_SERVICE);
