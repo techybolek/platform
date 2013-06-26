@@ -1,0 +1,361 @@
+<!--
+ ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~
+ ~ WSO2 Inc. licenses this file to you under the Apache License,
+ ~ Version 2.0 (the "License"); you may not use this file except
+ ~ in compliance with the License.
+ ~ You may obtain a copy of the License at
+ ~
+ ~    http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing,
+ ~ software distributed under the License is distributed on an
+ ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~ KIND, either express or implied.  See the License for the
+ ~ specific language governing permissions and limitations
+ ~ under the License.
+ -->
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://config.configuration.userstore.identity.carbon.wso2.org" xmlns:ax2341="http://utils.configuration.userstore.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2343="http://config.configuration.userstore.identity.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://config.configuration.userstore.identity.carbon.wso2.org">
+    <wsdl:documentation>UserstoreConfigAdminService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://utils.configuration.userstore.identity.carbon.wso2.org/xsd">
+            <xs:complexType name="IdentityUserstoreConfigurationException">
+                <xs:sequence/>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2342="http://utils.configuration.userstore.identity.carbon.wso2.org/xsd" xmlns:ax2344="http://config.configuration.userstore.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+            <xs:import namespace="http://utils.configuration.userstore.identity.carbon.wso2.org/xsd"/>
+            <xs:import namespace="http://config.configuration.userstore.identity.carbon.wso2.org/xsd"/>
+            <xs:element name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="IdentityUserstoreConfigurationException" nillable="true" type="ax2341:IdentityUserstoreConfigurationException"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="updateUserstoreProperties">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="userstoresDTO" nillable="true" type="ax2344:UserstoresDTO"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="updateAvailableDomains">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="userstoresDTO" nillable="true" type="ax2344:UserstoresDTO"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isExistingDomain">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="domainName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isExistingDomainResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDomainProperties">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="domainName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDomainPropertiesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAvailableDomains">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAvailableDomainsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2344:UserstoresDTO"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addUserStore">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="userstoresDTO" nillable="true" type="ax2344:UserstoresDTO"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://config.configuration.userstore.identity.carbon.wso2.org/xsd">
+            <xs:complexType name="UserstoresDTO">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="className" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="domainName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="enabled" nillable="true" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="tag" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="getDomainPropertiesRequest">
+        <wsdl:part name="parameters" element="ns1:getDomainProperties"/>
+    </wsdl:message>
+    <wsdl:message name="getDomainPropertiesResponse">
+        <wsdl:part name="parameters" element="ns1:getDomainPropertiesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+        <wsdl:part name="parameters" element="ns1:UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+    </wsdl:message>
+    <wsdl:message name="updateAvailableDomainsRequest">
+        <wsdl:part name="parameters" element="ns1:updateAvailableDomains"/>
+    </wsdl:message>
+    <wsdl:message name="addUserStoreRequest">
+        <wsdl:part name="parameters" element="ns1:addUserStore"/>
+    </wsdl:message>
+    <wsdl:message name="getAvailableDomainsRequest">
+        <wsdl:part name="parameters" element="ns1:getAvailableDomains"/>
+    </wsdl:message>
+    <wsdl:message name="getAvailableDomainsResponse">
+        <wsdl:part name="parameters" element="ns1:getAvailableDomainsResponse"/>
+    </wsdl:message>
+    <wsdl:message name="isExistingDomainRequest">
+        <wsdl:part name="parameters" element="ns1:isExistingDomain"/>
+    </wsdl:message>
+    <wsdl:message name="isExistingDomainResponse">
+        <wsdl:part name="parameters" element="ns1:isExistingDomainResponse"/>
+    </wsdl:message>
+    <wsdl:message name="updateUserstorePropertiesRequest">
+        <wsdl:part name="parameters" element="ns1:updateUserstoreProperties"/>
+    </wsdl:message>
+    <wsdl:portType name="UserstoreConfigAdminServicePortType">
+        <wsdl:operation name="getDomainProperties">
+            <wsdl:input message="tns:getDomainPropertiesRequest" wsaw:Action="urn:getDomainProperties"/>
+            <wsdl:output message="tns:getDomainPropertiesResponse" wsaw:Action="urn:getDomainPropertiesResponse"/>
+            <wsdl:fault message="tns:UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" wsaw:Action="urn:getDomainPropertiesUserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+        </wsdl:operation>
+        <wsdl:operation name="updateAvailableDomains">
+            <wsdl:input message="tns:updateAvailableDomainsRequest" wsaw:Action="urn:updateAvailableDomains"/>
+            <wsdl:fault message="tns:UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" wsaw:Action="urn:updateAvailableDomainsUserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+        </wsdl:operation>
+        <wsdl:operation name="addUserStore">
+            <wsdl:input message="tns:addUserStoreRequest" wsaw:Action="urn:addUserStore"/>
+            <wsdl:fault message="tns:UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" wsaw:Action="urn:addUserStoreUserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAvailableDomains">
+            <wsdl:input message="tns:getAvailableDomainsRequest" wsaw:Action="urn:getAvailableDomains"/>
+            <wsdl:output message="tns:getAvailableDomainsResponse" wsaw:Action="urn:getAvailableDomainsResponse"/>
+            <wsdl:fault message="tns:UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" wsaw:Action="urn:getAvailableDomainsUserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+        </wsdl:operation>
+        <wsdl:operation name="isExistingDomain">
+            <wsdl:input message="tns:isExistingDomainRequest" wsaw:Action="urn:isExistingDomain"/>
+            <wsdl:output message="tns:isExistingDomainResponse" wsaw:Action="urn:isExistingDomainResponse"/>
+            <wsdl:fault message="tns:UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" wsaw:Action="urn:isExistingDomainUserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+        </wsdl:operation>
+        <wsdl:operation name="updateUserstoreProperties">
+            <wsdl:input message="tns:updateUserstorePropertiesRequest" wsaw:Action="urn:updateUserstoreProperties"/>
+            <wsdl:fault message="tns:UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException" wsaw:Action="urn:updateUserstorePropertiesUserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="UserstoreConfigAdminServiceSoap11Binding" type="tns:UserstoreConfigAdminServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="getDomainProperties">
+            <soap:operation soapAction="urn:getDomainProperties" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addUserStore">
+            <soap:operation soapAction="urn:addUserStore" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="updateAvailableDomains">
+            <soap:operation soapAction="urn:updateAvailableDomains" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getAvailableDomains">
+            <soap:operation soapAction="urn:getAvailableDomains" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="isExistingDomain">
+            <soap:operation soapAction="urn:isExistingDomain" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="updateUserstoreProperties">
+            <soap:operation soapAction="urn:updateUserstoreProperties" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="UserstoreConfigAdminServiceSoap12Binding" type="tns:UserstoreConfigAdminServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="getDomainProperties">
+            <soap12:operation soapAction="urn:getDomainProperties" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap12:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addUserStore">
+            <soap12:operation soapAction="urn:addUserStore" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap12:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="updateAvailableDomains">
+            <soap12:operation soapAction="urn:updateAvailableDomains" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap12:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getAvailableDomains">
+            <soap12:operation soapAction="urn:getAvailableDomains" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap12:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="isExistingDomain">
+            <soap12:operation soapAction="urn:isExistingDomain" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap12:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="updateUserstoreProperties">
+            <soap12:operation soapAction="urn:updateUserstoreProperties" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException">
+                <soap12:fault use="literal" name="UserstoreConfigAdminServiceIdentityUserstoreConfigurationException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="UserstoreConfigAdminServiceHttpBinding" type="tns:UserstoreConfigAdminServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="getDomainProperties">
+            <http:operation location="getDomainProperties"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addUserStore">
+            <http:operation location="addUserStore"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="updateAvailableDomains">
+            <http:operation location="updateAvailableDomains"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getAvailableDomains">
+            <http:operation location="getAvailableDomains"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="isExistingDomain">
+            <http:operation location="isExistingDomain"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="updateUserstoreProperties">
+            <http:operation location="updateUserstoreProperties"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="UserstoreConfigAdminService">
+        <wsdl:port name="UserstoreConfigAdminServiceHttpsSoap11Endpoint" binding="tns:UserstoreConfigAdminServiceSoap11Binding">
+            <soap:address location="https://localhost:9443/services/UserstoreConfigAdminService.UserstoreConfigAdminServiceHttpsSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="UserstoreConfigAdminServiceHttpsSoap12Endpoint" binding="tns:UserstoreConfigAdminServiceSoap12Binding">
+            <soap12:address location="https://localhost:9443/services/UserstoreConfigAdminService.UserstoreConfigAdminServiceHttpsSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="UserstoreConfigAdminServiceHttpsEndpoint" binding="tns:UserstoreConfigAdminServiceHttpBinding">
+            <http:address location="https://localhost:9443/services/UserstoreConfigAdminService.UserstoreConfigAdminServiceHttpsEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

@@ -141,9 +141,10 @@ public class OAuthUIUtil {
 		String errorPageURL = null;
 		String errorPageInSession = (String) req.getSession().getAttribute("errorPageURL");
 		// if there is a configured custom page, then user it
-		if (clienDTO != null && clienDTO.getErrorPageURL() != null || errorPageInSession != null || !clienDTO.getErrorPageURL().equals("null")) {
+		if (clienDTO != null && clienDTO.getErrorPageURL() != null || errorPageInSession != null ||
+		    !clienDTO.getErrorPageURL().equals("")) {
 			errorPageURL = clienDTO.getErrorPageURL();
-			if(errorPageURL == null) {
+			if (errorPageURL == null) {
 				errorPageURL = errorPageInSession;
 				req.getSession().setAttribute("errorPageURL", errorPageURL);
 			}
@@ -178,8 +179,7 @@ public class OAuthUIUtil {
 	                                     OAuth2Parameters params) {
 		String loginPage = null;
 		// if there is a configured custom page, then use it
-		if (clientDTO != null && clientDTO.getLoginPageURL() != null &&
-		    !clientDTO.getLoginPageURL().equals("null")) {
+		if (clientDTO != null && clientDTO.getLoginPageURL() != null && !clientDTO.getLoginPageURL().equals("")) {
 			
 			loginPage = clientDTO.getLoginPageURL();
 			try {
@@ -213,7 +213,7 @@ public class OAuthUIUtil {
 	                                     OAuth2Parameters params, String loggedInUser, String redirectUrl) {
 		String consentPage = null;
 		// if there is a configured custom page, then use it 
-		if (clientDTO != null && clientDTO.getConsentPageUrl() != null && !clientDTO.getConsentPageUrl().equals("null")) {
+		if (clientDTO != null && clientDTO.getConsentPageUrl() != null && !clientDTO.getConsentPageUrl().equals("")) {
 			consentPage = clientDTO.getConsentPageUrl();
 		} else { // else use the default 
 			consentPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_consent_ajaxprocessor.jsp";
