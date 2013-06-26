@@ -23,7 +23,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.HashMap" %>
 <%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" %>
-<carbon:jsi18n resourceBundle="org.wso2.carbon.localentry.ui.i18n.Resources"
+<carbon:jsi18n resourceBundle="org.wso2.carbon.message.store.ui.i18n.JSResources"
                request="<%=request%>"/>
 
 <%!
