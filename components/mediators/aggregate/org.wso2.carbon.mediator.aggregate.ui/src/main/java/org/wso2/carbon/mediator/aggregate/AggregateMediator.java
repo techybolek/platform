@@ -52,7 +52,10 @@ public class AggregateMediator extends AbstractListMediator {
             = new QName(XMLConfigConstants.NULL_NAMESPACE, "max");
     private static final QName SEQUENCE_Q
             = new QName(XMLConfigConstants.NULL_NAMESPACE, "sequence");
-    private static final QName ID_Q = new QName("id");    
+    private static final QName ID_Q = new QName("id");
+
+    private static final QName ENCLOSING_ELEMENT_PROPERTY
+                    = new QName(XMLConfigConstants.NULL_NAMESPACE, "enclosingElementProperty");
 
     private long completionTimeoutSec = 0;
     private Value minMessagesToComplete;
@@ -63,6 +66,16 @@ public class AggregateMediator extends AbstractListMediator {
 
     private String onCompleteSequenceRef = null;
     private String id;
+
+    public String getEnclosingElementPropertyName() {
+        return enclosingElementPropertyName;
+    }
+
+    public void setEnclosingElementPropertyName(String enclosingElementPropertyName) {
+        this.enclosingElementPropertyName = enclosingElementPropertyName;
+    }
+
+    private String enclosingElementPropertyName = null;
     
 	public long getCompletionTimeoutSec() {
         return completionTimeoutSec;
@@ -163,6 +176,11 @@ public class AggregateMediator extends AbstractListMediator {
         } else if (getList().size() > 0) {
             serializeChildren(onCompleteElem, getList());
         }
+
+        if (enclosingElementPropertyName != null) {
+            onCompleteElem.addAttribute("enclosingElementProperty", enclosingElementPropertyName, nullNS);
+        }
+
         aggregator.addChild(onCompleteElem);
 
         if(id != null) {
@@ -242,6 +260,11 @@ public class AggregateMediator extends AbstractListMediator {
                 } catch (JaxenException e) {
                     throw new MediatorException("Unable to load the aggregating XPATH");
                 }
+            }
+
+            OMAttribute enclosingElementPropertyName = onComplete.getAttribute(ENCLOSING_ELEMENT_PROPERTY);
+            if (enclosingElementPropertyName != null) {
+                this.enclosingElementPropertyName = enclosingElementPropertyName.getAttributeValue();
             }
            
             OMAttribute onCompleteSequence = onComplete.getAttribute(SEQUENCE_Q);

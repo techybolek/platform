@@ -104,5 +104,14 @@
 						equals("")) {
     		aggregateMediator.setId(request.getParameter("mediator.aggregate.id"));
 	  }
+
+    if (request.getParameter("mediator.aggregate.enclose.element.property.name") != null &&
+        !request.getParameter("mediator.aggregate.enclose.element.property.name").trim().
+                equals("")) {
+        aggregateMediator.setEnclosingElementPropertyName(request.getParameter("mediator.aggregate.enclose.element.property.name"));
+    } else {
+        aggregateMediator.setEnclosingElementPropertyName(null);
+    }
+
 %>
 

@@ -255,6 +255,21 @@
                     </td>
                     <td></td>
                 </tr>
+
+
+                <tr>
+                   <td>
+                      <fmt:message key="mediator.aggregate.enclose.element.property"/>
+                   </td>
+                   <td><input type="text" id="mediator.aggregate.enclose.element.property.name" name="mediator.aggregate.enclose.element.property.name"
+                             value='<%= aggregateMediator.getEnclosingElementPropertyName() != null ?
+              								aggregateMediator.getEnclosingElementPropertyName(): ""%>'/>
+                   </td>
+                   <td></td>
+                   <td></td>
+                </tr>
+
+
                 <tr>
                     <td rowspan="3">
                         <b><fmt:message key="mediator.aggregate.complete"/></b>
