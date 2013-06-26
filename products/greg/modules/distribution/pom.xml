@@ -611,20 +611,7 @@
                                 def targetPath = project.build['directory']
                                 targetPath += sep + 'wso2carbon-core-' + project.properties['carbon.version']
 
-                                def launchIniPath = targetPath + sep + 'repository' + sep + 'conf' + sep + 'etc' + sep + 'launch.ini'
 
-                                println "Removing javax.xml.bind and javax.xml.bind.annotation form launch.ini"
-                                new File(targetPath + sep + 'launch.ini').withWriter { out ->
-                                 new File(launchIniPath).eachLine { line ->
-                                  if (!line.contains("javax.xml.bind")) {
-                                   out.writeLine(line)
-                                  }
-                                 }
-                                }
- 
-                                File tempFile = new File(targetPath + sep + 'launch.ini');  
-                                File file = new File(launchIniPath);  
-                                boolean fileMoved = tempFile.renameTo(file);  
 
                                def bundlesInfoPath = targetPath + sep + 'repository'  + sep + 'components' + sep + 'default' + sep + 'configuration' + sep + 'org.eclipse.equinox.simpleconfigurator' + sep + 'bundles.info' 
 
