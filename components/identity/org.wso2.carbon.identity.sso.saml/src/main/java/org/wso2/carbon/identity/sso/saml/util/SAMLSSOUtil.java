@@ -84,6 +84,7 @@ import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
 import org.wso2.carbon.identity.sso.saml.builders.ErrorResponseBuilder;
 import org.wso2.carbon.identity.sso.saml.attributes.SAMLAttributeStatementBuilder;
 import org.wso2.carbon.identity.sso.saml.builders.X509CredentialImpl;
+import org.wso2.carbon.identity.sso.saml.builders.claims.ClaimsRetriever;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
 import org.wso2.carbon.identity.sso.saml.exception.IdentitySAML2SSOException;
 import org.wso2.carbon.identity.sso.saml.validators.SAML2HTTPRedirectDeflateSignatureValidator;
@@ -104,6 +105,7 @@ public class SAMLSSOUtil {
 	private static ConfigurationContextService configCtxService;
 	private static boolean isBootStrapped = false;
 	private static Random random = new Random();
+    private static ClaimsRetriever claimsRetriever = null;
 	private static final char[] charMapping = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 	                                           'k', 'l', 'm', 'n', 'o', 'p' };
 
@@ -696,25 +698,34 @@ public class SAMLSSOUtil {
 	 */
 	private static Map<String, String> setClaimsAndValues(SAMLSSOAuthnReqDTO authnReqDTO)
 	                                                                         throws IdentityException {
-		try {
-			UserStoreManager userStroreManager =
-			                  AnonymousSessionUtil.getRealmByUserName(SAMLSSOUtil.getRegistryService(),
-			                                                          SAMLSSOUtil.getRealmService(),
-			                                                          authnReqDTO.getUsername()).getUserStoreManager();
-			String[] requestedClaims = (String[]) authnReqDTO.getRequestedClaims();
-			 return userStroreManager.getUserClaimValues(authnReqDTO.getUsername(), requestedClaims, null);
+        try {
+            String[] requestedClaims = (String[]) authnReqDTO.getRequestedClaims();
+            synchronized (Runtime.getRuntime().getClass()){
+                if(claimsRetriever == null){
+                    synchronized (Runtime.getRuntime().getClass()){
+                        claimsRetriever = (ClaimsRetriever)Class.forName(IdentityUtil.getProperty("SSOService.ClaimsRetrieverImplClass").trim()).newInstance();
+                        claimsRetriever.init();
+                    }
+                }
+            }
+            return claimsRetriever.getUserClaimValues(authnReqDTO.getUsername(), requestedClaims, null);
 
-		} catch (CarbonException e) {
-			log.error("Error while setting attributes. Unable to retrieve claims", e);
-			throw new IdentityException(
-			                            "Error while setting attributes. Unable to retrieve claims",
-			                            e);
-		} catch (UserStoreException e) {
-			log.error("Error while setting attributes. Unable to retrieve claims", e);
-			throw new IdentityException(
-			                            "Error while setting attributes. Unable to retrieve claims",
-			                            e);
-		}
+        } catch (ClassNotFoundException e) {
+            log.error("Class not found: " +  IdentityUtil.getProperty("SSOService.ClaimsRetrieverImplClass"));
+            throw new IdentityException(
+                    "Class not found: " +  IdentityUtil.getProperty("SSOService.ClaimsRetrieverImplClass"),
+                    e);
+        } catch (InstantiationException e) {
+            log.error("Error while instantiating class: " +  IdentityUtil.getProperty("SSOService.ClaimsRetrieverImplClass"));
+            throw new IdentityException(
+                    "Error while instantiating class: " +  IdentityUtil.getProperty("SSOService.ClaimsRetrieverImplClass"),
+                    e);
+        } catch (IllegalAccessException e) {
+            log.error("Illegal access to class: " +  IdentityUtil.getProperty("SSOService.ClaimsRetrieverImplClass"));
+            throw new IdentityException(
+                    "Illegal access to class: " +  IdentityUtil.getProperty("SSOService.ClaimsRetrieverImplClass"),
+                    e);
+        }
 	}
 
     /**
