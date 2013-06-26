@@ -67,7 +67,7 @@
                             <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cartridge.agent.server.feature</includedFeatureDef>
-				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cartridge.messages.feature</includedFeatureDef>
+				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cartridge.messages.feature:2.2.0-SNAPSHOT</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
