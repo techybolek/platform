@@ -37,7 +37,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.c14n.Canonicalizer;
-import org.apache.xml.security.signature.XMLSignature;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Assertion;
@@ -82,15 +81,12 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
 import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
 import org.wso2.carbon.identity.sso.saml.builders.ErrorResponseBuilder;
-import org.wso2.carbon.identity.sso.saml.attributes.SAMLAttributeStatementBuilder;
 import org.wso2.carbon.identity.sso.saml.builders.X509CredentialImpl;
 import org.wso2.carbon.identity.sso.saml.builders.claims.ClaimsRetriever;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
 import org.wso2.carbon.identity.sso.saml.exception.IdentitySAML2SSOException;
 import org.wso2.carbon.identity.sso.saml.validators.SAML2HTTPRedirectDeflateSignatureValidator;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -615,28 +611,6 @@ public class SAMLSSOUtil {
 			}
 		}
 		return isSignatureValid;
-	}
-	
-	/**
-	 * Returns an instance of the {@code SAMLAttributeStatementBuilder}
-	 * @return
-	 * @throws IdentityException
-	 */
-	public static SAMLAttributeStatementBuilder getAttributeStatementBuilder() throws IdentityException {
-		String attribBuilder = IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_ATTRIB_STATEMENT_BUILDER);
-		try {
-	        Class clazz = Thread.currentThread().getContextClassLoader().loadClass(attribBuilder);
-	        return (SAMLAttributeStatementBuilder) clazz.newInstance();
-        } catch (ClassNotFoundException e) {
-        	log.error("Error while loading the SAMLAttributeStatementBuilder", e);
-        	throw new IdentityException("Unable to build the AttributeStatement");
-        } catch (InstantiationException e) {
-        	log.error("Error while loading the SAMLAttributeStatementBuilder", e);
-        	throw new IdentityException("Unable to build the AttributeStatement");
-        } catch (IllegalAccessException e) {
-        	log.error("Error while loading the SAMLAttributeStatementBuilder", e);
-        	throw new IdentityException("Unable to build the AttributeStatement");
-        }
 	}
 
 	/**

@@ -21,43 +21,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.signature.XMLSignature;
 import org.joda.time.DateTime;
+import org.opensaml.Configuration;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml1.core.NameIdentifier;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Audience;
-import org.opensaml.saml2.core.AudienceRestriction;
-import org.opensaml.saml2.core.AuthnContext;
-import org.opensaml.saml2.core.AuthnContextClassRef;
-import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.saml2.core.Conditions;
-import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.Status;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.saml2.core.StatusMessage;
-import org.opensaml.saml2.core.Subject;
-import org.opensaml.saml2.core.SubjectConfirmation;
-import org.opensaml.saml2.core.SubjectConfirmationData;
-import org.opensaml.saml2.core.impl.AssertionBuilder;
-import org.opensaml.saml2.core.impl.AudienceBuilder;
-import org.opensaml.saml2.core.impl.AudienceRestrictionBuilder;
-import org.opensaml.saml2.core.impl.AuthnContextBuilder;
-import org.opensaml.saml2.core.impl.AuthnContextClassRefBuilder;
-import org.opensaml.saml2.core.impl.AuthnStatementBuilder;
-import org.opensaml.saml2.core.impl.ConditionsBuilder;
-import org.opensaml.saml2.core.impl.NameIDBuilder;
-import org.opensaml.saml2.core.impl.StatusBuilder;
-import org.opensaml.saml2.core.impl.StatusCodeBuilder;
-import org.opensaml.saml2.core.impl.StatusMessageBuilder;
-import org.opensaml.saml2.core.impl.SubjectBuilder;
-import org.opensaml.saml2.core.impl.SubjectConfirmationBuilder;
-import org.opensaml.saml2.core.impl.SubjectConfirmationDataBuilder;
+import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.impl.*;
+import org.opensaml.xml.schema.XSString;
+import org.opensaml.xml.schema.impl.XSStringBuilder;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
-import org.wso2.carbon.identity.sso.saml.attributes.SAMLAttributeStatementBuilder;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.Iterator;
+import java.util.Map;
 
 public class ResponseBuilder {
 
@@ -139,8 +117,15 @@ public class ResponseBuilder {
             }
             samlAssertion.getAuthnStatements().add(authStmt);
 
-            SAMLAttributeStatementBuilder attribBuilder = SAMLSSOUtil.getAttributeStatementBuilder();
-            samlAssertion.getAttributeStatements().add(attribBuilder.buildAttributeStatement(authReqDTO));
+            /*
+            * If <AttributeConsumingServiceIndex> element is in the
+            * <AuthnRequest> and
+            * according to the spec 2.0 the subject MUST be in the assertion
+            */
+            Map<String, String> claims = SAMLSSOUtil.getAttributes(authReqDTO);
+            if (claims != null) {
+                samlAssertion.getAttributeStatements().add(buildAttributeStatement(claims));
+            }
             
             AudienceRestriction audienceRestriction =
                     new AudienceRestrictionBuilder().buildObject();
@@ -191,6 +176,29 @@ public class ResponseBuilder {
         }
 
         return stat;
+    }
+
+    private AttributeStatement buildAttributeStatement(Map<String, String> claims) {
+        AttributeStatement attStmt = null;
+        if (claims != null) {
+            attStmt = new AttributeStatementBuilder().buildObject();
+            Iterator<String> ite = claims.keySet().iterator();
+
+            for (int i = 0; i < claims.size(); i++) {
+                Attribute attrib = new AttributeBuilder().buildObject();
+                String claimUri = ite.next();
+                attrib.setName(claimUri);
+                // look
+                // https://wiki.shibboleth.net/confluence/display/OpenSAML/OSTwoUsrManJavaAnyTypes
+                XSStringBuilder stringBuilder =
+                (XSStringBuilder) Configuration.getBuilderFactory().getBuilder(XSString.TYPE_NAME);
+                XSString stringValue = stringBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+                stringValue.setValue(claims.get(claimUri));
+                attrib.getAttributeValues().add(stringValue);
+                attStmt.getAttributes().add(attrib);
+            }
+        }
+        return attStmt;
     }
 
 }
