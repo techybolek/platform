@@ -153,7 +153,7 @@
 				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.throttle.server.feature:${carbon.version}</featureArtifactDef>
 				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature:${carbon.version}</featureArtifactDef>
 				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.rm.server.feature:${carbon.version}</featureArtifactDef>
-
+<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.version}</featureArtifactDef>
                             </featureArtifacts>
                         </configuration>
                     </execution>
@@ -442,6 +442,10 @@
                                     <id>org.wso2.carbon.apimgt.server.lite.feature.group</id>
                                     <version>${carbon.version}</version>
                                 </feature>
+				<feature>
+      				     <id>org.wso2.carbon.user.mgt.feature.group</id>
+      			             <version>${carbon.version}</version>
+				</feature>
                                 <!--feature>
                                     <id>org.wso2.carbon.apimgt.ui.feature.group</id>
                                     <version>1.0.6</version>
