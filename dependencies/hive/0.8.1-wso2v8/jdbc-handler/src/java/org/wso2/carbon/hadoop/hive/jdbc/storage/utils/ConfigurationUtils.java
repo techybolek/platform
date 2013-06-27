@@ -25,6 +25,10 @@ public class ConfigurationUtils {
     public static final String HIVE_JDBC_UPSERT_QUERY_VALUES_ORDER = "hive.jdbc.upsert.query.values.order";
     public static final String HIVE_PROP_CARBON_DS_NAME = "wso2.carbon.datasource.name";
 
+    public static final String JDBC_SPLIT_SIZE = "hive.jdbc.input.split.size";
+
+    public static final int DEFAULT_JDBC_SPLIT_SIZE = 1000;
+
 
     public static final String[] ALL_PROPERTIES = new String[]{
             DBConfiguration.DRIVER_CLASS_PROPERTY,
@@ -43,7 +47,8 @@ public class ConfigurationUtils {
             HIVE_JDBC_OUTPUT_UPSERT_QUERY,
             HIVE_JDBC_UPSERT_QUERY_VALUES_ORDER,
             HIVE_PROP_CARBON_DS_NAME,
-            HIVE_JDBC_OUTPUT_SQL_QUERY_BEFORE_DATA_INSERT};
+            HIVE_JDBC_OUTPUT_SQL_QUERY_BEFORE_DATA_INSERT,
+            JDBC_SPLIT_SIZE};
 
 
     public static void copyJDBCProperties(Properties from, Map<String, String> to) {
@@ -216,6 +221,27 @@ public class ConfigurationUtils {
 
     public static String getWso2CarbonDataSourceName(JobConf conf){
         return conf.get(ConfigurationUtils.HIVE_PROP_CARBON_DS_NAME);
+    }
+
+    /**
+     * Getting the number of rows in a table that should be given to a single mapper
+     * @param conf Job Configuration
+     * @return  Size of a single split
+     */
+    public final static int getJdbcSplitSize(JobConf conf){
+        int jdbcSplitSize = DEFAULT_JDBC_SPLIT_SIZE;
+        if(conf.get(JDBC_SPLIT_SIZE) == null){
+            return jdbcSplitSize;
+        }
+        try{
+            jdbcSplitSize = Integer.parseInt(conf.get(JDBC_SPLIT_SIZE));
+        }catch(NumberFormatException ex){
+            throw new RuntimeException("Invalid value for '" + JDBC_SPLIT_SIZE + "'. '" + conf.get(JDBC_SPLIT_SIZE) + "' is not a number.",ex);
+        }
+        if(jdbcSplitSize == 0){
+            throw new RuntimeException("Invalid value! '" + JDBC_SPLIT_SIZE + "' cannot be zero.");
+        }
+        return jdbcSplitSize;
     }
 
 }

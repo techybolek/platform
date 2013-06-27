@@ -100,30 +100,41 @@ public class JDBCSplit extends FileSplit implements InputSplit {
         QueryConstructor queryConstructor = new QueryConstructor();
         String sql = queryConstructor.constructCountQuery(dbProperties);
 
+        int numberOfSplits;
+
         DBManager dbManager = new DBManager();
         dbManager.createConnection(conf);
         JDBCSplit[] splits = null;
         try {
             Connection connection = dbManager.getConnection();
             DBOperation operation = new DBOperation();
-            long total = operation.getTotalCount(sql, connection);
-            final long splitSize = total / numSplits;
-            splits = new JDBCSplit[numSplits];
+
             final Path[] tablePaths = FileInputFormat.getInputPaths(conf);
-            for (int i = 0; i < numSplits; i++) {
-                if ((i + 1) == numSplits) {
-                    splits[i] = new JDBCSplit(i * splitSize, total, tablePaths[0]);
-                    splits[i].setLastSplit();
-                } else {
-                    splits[i] = new JDBCSplit(i * splitSize, (i + 1) * splitSize, tablePaths[0]);
+            long total = operation.getTotalCount(sql, connection);
+            final long splitSize = ConfigurationUtils.getJdbcSplitSize(conf);
+            if(total > splitSize){
+                numberOfSplits = (int)(total / splitSize);
+                if(splitSize > 1 && (total % splitSize) != 0){
+                    numberOfSplits++;
                 }
+                splits = new JDBCSplit[numberOfSplits];
+
+                for (int i = 0; i < numberOfSplits; i++) {
+                    if ((i + 1) == numberOfSplits) {
+                        splits[i] = new JDBCSplit(i * splitSize, total, tablePaths[0]);
+                        splits[i].setLastSplit();
+                    } else {
+                        splits[i] = new JDBCSplit(i * splitSize, (i + 1) * splitSize, tablePaths[0]);
+                    }
+                }
+            }else{
+                return new JDBCSplit[]{new JDBCSplit(0, total, tablePaths[0])};
             }
         } catch (ClassNotFoundException e) {
             log.error("Failed to get sql connection", e);
         } catch (SQLException e) {
             log.error("Failed to get total rows count", e);
         }
-
 
         return splits;
     }
