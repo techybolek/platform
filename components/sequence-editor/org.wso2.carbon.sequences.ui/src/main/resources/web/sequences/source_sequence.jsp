@@ -145,7 +145,16 @@
 	
 	}
     function cancelSequence() {
-        document.location.href = "<%=SequenceEditorHelper.getForwardToFrom(session)%>";
+        <%
+        String annonOriginator = (String) session.getAttribute("sequenceAnonOriginator");
+        if (annonOriginator != null && annonOriginator.equals("registry_sequence.jsp")) {
+        %>
+            window.location.href='<%=annonOriginator%>' + '?cancelled=true';
+        <%} else {
+        %>
+            window.location.href = "<%=SequenceEditorHelper.getForwardToFrom(session)%>";
+        <%}
+        %>
     }
 
     function saveSequence() {
