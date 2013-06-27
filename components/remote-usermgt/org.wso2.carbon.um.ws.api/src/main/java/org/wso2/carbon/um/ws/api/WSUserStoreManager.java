@@ -46,6 +46,7 @@ import org.wso2.carbon.um.ws.api.stub.ClaimValue;
 import org.wso2.carbon.um.ws.api.stub.PermissionDTO;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
 import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.Property;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -508,6 +509,11 @@ public class WSUserStoreManager implements UserStoreManager {
 
     public RealmConfiguration getRealmConfiguration() {
         return null;
+    }
+
+	@Override
+    public Property[] getDefaultUserStoreProperties() {
+	    return null;
     }
 
 
