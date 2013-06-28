@@ -66,6 +66,7 @@
 	        <module>juddi/3.1.5-wso2v1</module>
                 <module>orbit/juddi/3.1.5-wso2v1</module>
                 <module>orbit/ode</module>
+                <module>orbit/httpclient</module>
 		<module>orbit/cassandra</module>
 		<module>orbit/jgit/2.3.1-wso2v2</module>
 	     </modules>
