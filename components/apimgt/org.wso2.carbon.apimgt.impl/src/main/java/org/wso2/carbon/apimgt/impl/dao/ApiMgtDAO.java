@@ -81,7 +81,7 @@ public class ApiMgtDAO {
 	private static final String USERID_LOGIN = "UserIdLogin";
 	private static final String EMAIL_LOGIN = "EmailLogin";
 	private static final String PRIMARY_LOGIN = "primary";
-	private static final String CLAIM_URI = "ClaimUri";;
+	private static final String CLAIM_URI = "ClaimUri";
     
     public ApiMgtDAO() {
         String enableJWTGeneration = ServiceReferenceHolder.getInstance()
@@ -4203,6 +4203,32 @@ public class ApiMgtDAO {
 		  APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
 		}
     	return commentList.toArray(new Comment[commentList.size()]);
+    }
+
+    public static boolean isContextExist(String context) {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement prepStmt = null;
+
+        String sql = "SELECT CONTEXT FROM AM_API " +
+                " WHERE CONTEXT= ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, context);
+            resultSet = prepStmt.executeQuery();
+
+            while (resultSet.next()) {
+                if (resultSet.getString(1) != null) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed to retrieve the API Context ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
     }
 
     private static class SubscriptionInfo {

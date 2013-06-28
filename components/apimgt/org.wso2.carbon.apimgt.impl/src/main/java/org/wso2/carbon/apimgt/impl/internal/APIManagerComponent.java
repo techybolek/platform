@@ -111,15 +111,20 @@ public class APIManagerComponent {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
             addTierPolicies();
-            //Register Tenant service creator to deploy tenant specific common synapse configurations
-            TenantServiceCreator listener = new TenantServiceCreator();
-            bundleContext.registerService(
-                    Axis2ConfigurationContextObserver.class.getName(), listener, null);
 
             APIManagerConfiguration configuration = new APIManagerConfiguration();
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
+
+            String gatewayType = configuration.getFirstProperty("GatewayType");
+            if (gatewayType.equalsIgnoreCase("Synapse")) {
+                //Register Tenant service creator to deploy tenant specific common synapse configurations
+                TenantServiceCreator listener = new TenantServiceCreator();
+                bundleContext.registerService(
+                        Axis2ConfigurationContextObserver.class.getName(), listener, null);
+            }
+            
             APIManagerConfigurationServiceImpl configurationService =
                     new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
