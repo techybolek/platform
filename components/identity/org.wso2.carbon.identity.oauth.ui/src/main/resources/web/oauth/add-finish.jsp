@@ -38,11 +38,9 @@
 	String applicationName = CharacterEncoder.getSafeText(request.getParameter("application"));
     String callback = CharacterEncoder.getSafeText(request.getParameter("callback"));
     String oauthVersion = CharacterEncoder.getSafeText(request.getParameter("oauthVersion"));
-    String loginPage = CharacterEncoder.getSafeText(request.getParameter("loginPage"));
-    String errorPage = CharacterEncoder.getSafeText(request.getParameter("errorPage"));
-    String consentPage = CharacterEncoder.getSafeText(request.getParameter("consentPage"));
     //-- start setting grants
     String grantCode = CharacterEncoder.getSafeText(request.getParameter("grant_code"));
+    String grantImplicit = CharacterEncoder.getSafeText(request.getParameter("grant_implicit"));
     String grantPassword = CharacterEncoder.getSafeText(request.getParameter("grant_password"));
     String grantClient = CharacterEncoder.getSafeText(request.getParameter("grant_client"));
     String grantRefresh = CharacterEncoder.getSafeText(request.getParameter("grant_refresh"));
@@ -52,6 +50,9 @@
 	if (grantCode != null) {
 		buff.append(grantCode + " ");
 	}
+    if (grantImplicit != null) {
+        buff.append(grantImplicit + " ");
+    }
 	if (grantPassword != null) {
 		buff.append(grantPassword + " ");
 	}
@@ -62,7 +63,7 @@
 		buff.append(grantRefresh + " ");
 	}
 	if (grantSAML != null) {
-		buff.append(grantSAML + " ");
+		buff.append(grantSAML);
 	}
 	grants = buff.toString();
 	// -- end setting grants
@@ -82,9 +83,6 @@
 		app.setApplicationName(applicationName);
 		app.setCallbackUrl(callback);
 		app.setOAuthVersion(oauthVersion);
-		app.setLoginPageUrl(loginPage);
-		app.setErrorPageUrl(errorPage);
-		app.setConsentPageUrl(consentPage);
 		app.setGrantTypes(grants);
 		client.registerOAuthApplicationData(app);
 		String message = resourceBundle.getString("app.added.successfully");

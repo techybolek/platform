@@ -81,7 +81,6 @@ public class OAuth2ServiceClient {
         oauthDTO.setResponseType(authorizeReqDTO.getResponseType());
         oauthDTO.setScopes(authorizeReqDTO.getScopes());
         oauthDTO.setUsername(authorizeReqDTO.getUsername());
-        oauthDTO.setUserAuthenticated(authorizeReqDTO.getUserAuthenticated());
 
         org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO resp = oauth2Service.authorize(oauthDTO);
 
@@ -119,8 +118,6 @@ public class OAuth2ServiceClient {
         responseDTO.setErrorCode(validationRespDTO.getErrorCode());
         responseDTO.setErrorMsg(validationRespDTO.getErrorMsg());
         responseDTO.setValidClient(validationRespDTO.isValidClient());
-        responseDTO.setErrorPageURL(validationRespDTO.getErrorPageURL());
-        responseDTO.setLoginPageURL(validationRespDTO.getLoginPageURL());
         return responseDTO;
     }
 

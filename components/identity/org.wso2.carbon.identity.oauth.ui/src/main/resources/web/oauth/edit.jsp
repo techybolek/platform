@@ -46,11 +46,13 @@
 	String secret = null;
 	// grants
 	boolean codeGrant = false;
+    boolean implicitGrant = false;
 	boolean passowrdGrant = false;
 	boolean clientCredGrant = false;
 	boolean refreshGrant = false;
 	boolean samlGrant = false;
-	
+    List<String> allowedGrants = null;
+
     try {
 
        	String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -60,6 +62,7 @@
 		                                                                  .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 		OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
 		app = client.getOAuthApplicationData(consumerkey);
+        allowedGrants = new ArrayList<String>(Arrays.asList(client.getAllowedOAuthGrantTypes()));
 		if (OAuthConstants.OAuthVersions.VERSION_2.equals(app.getOAuthVersion())) {
 			id = resourceBundle.getString("consumerkey.oauth20");
 			secret = resourceBundle.getString("consumersecret.oauth20");
@@ -70,10 +73,11 @@
 		// setting geants
 		String grants = app.getGrantTypes();
 		codeGrant = grants.contains("authorization_code") ? true : false;
-		passowrdGrant = grants.contains("password");
-		clientCredGrant = grants.contains("client_credentials");
-		refreshGrant = grants.contains("refresh_token");
-		samlGrant = grants.contains("urn:ietf:params:oauth:grant-type:saml2-bearer");
+        implicitGrant = grants.contains("implicit") ? true : false;
+		passowrdGrant = grants.contains("password") ? true : false;
+		clientCredGrant = grants.contains("client_credentials") ? true : false;
+		refreshGrant = grants.contains("refresh_token") ? true : false;
+		samlGrant = grants.contains("urn:ietf:params:oauth:grant-type:saml2-bearer") ? true : false;
 	} catch (Exception e) {
 		String message = resourceBundle.getString("error.while.loading.app.data");
 		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
@@ -98,6 +102,9 @@
 
 
 <%@page import="java.util.ResourceBundle" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Arrays" %>
 <fmt:bundle basename="org.wso2.carbon.identity.oauth.ui.i18n.Resources">
     <carbon:breadcrumb label="app.settings"
                        resourceBundle="org.wso2.carbon.identity.oauth.ui.i18n.Resources"
@@ -149,30 +156,47 @@
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" value="<%=app.getCallbackUrl()%>" /></td>
 		                    </tr>
-		                    <tr>
-		                        <td class="leftCol-small"><fmt:message key='loginPage'/></td>
-		                        <td><input class="text-box-big" id="loginPage" name="loginPage"
-		                                   type="text" value="<%=app.getLoginPageUrl()%>" /></td>
-		                    </tr>
-		                    <tr>
-		                        <td class="leftCol-small"><fmt:message key='errorPage'/></td>
-		                        <td><input class="text-box-big" id="errorPage" name="errorPage"
-		                                   type="text" value="<%=app.getErrorPageUrl()%>" /></td>
-		                    </tr>
-		                    <tr>
-		                        <td class="leftCol-small"><fmt:message key='consentPage'/></td>
-		                        <td><input class="text-box-big" id="consentPage" name="consentPage"
-		                                   type="text" value="<%=app.getConsentPageUrl()%>" /></td>
-		                    </tr>
 		                     <tr>
 		                        <td class="leftCol-small"><fmt:message key='grantTypes'/></td>
 		                        <td>
 		                        <table>
-		                           <tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code"  <%=(codeGrant ? "checked=\"checked\"" : "")%>/>Code</label></tr>
-		                           <tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password"  <%=(passowrdGrant ? "checked=\"checked\"" : "")%>/>Password</lable></tr>
-		                           <tr><label><input type="checkbox" id="grant_client" name="grant_client" value="client_credentials"  <%=(clientCredGrant ? "checked=\"checked\"" : "")%>/>Client Credential</label></tr>
-		                           <tr><label><input type="checkbox" id="grant_refresh" name="grant_refresh" value="refresh_token"  <%=(refreshGrant ? "checked=\"checked\"" : "")%>/>Refresh Token</label></tr>
-		                           <tr><label><input type="checkbox" id="grant_saml" name="grant_saml" value="urn:ietf:params:oauth:grant-type:saml2-bearer"  <%=(samlGrant ? "checked=\"checked\"" : "")%>/>SAML</label></tr>
+                                <%
+                                    try{
+                                        if(allowedGrants.contains("authorization_code")){
+                                            %><tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code"  <%=(codeGrant ? "checked=\"checked\"" : "")%>/>Code</label></tr><%
+                                        }
+                                        if(allowedGrants.contains("implicit")){
+                                            %><tr><label><input type="checkbox" id="grant_implicit" name="grant_implicit" value="implicit"  <%=(implicitGrant ? "checked=\"checked\"" : "")%>/>Implicit</label></tr><%
+                                        }
+                                        if(allowedGrants.contains("password")){
+                                            %><tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password"  <%=(passowrdGrant ? "checked=\"checked\"" : "")%>/>Password</lable></tr><%
+                                        }
+                                        if(allowedGrants.contains("client_credentials")){
+                                            %><tr><label><input type="checkbox" id="grant_client" name="grant_client" value="client_credentials"  <%=(clientCredGrant ? "checked=\"checked\"" : "")%>/>Client Credential</label></tr><%
+                                        }
+                                        if(allowedGrants.contains("refresh_token")){
+                                            %><tr><label><input type="checkbox" id="grant_refresh" name="grant_refresh" value="refresh_token"  <%=(refreshGrant ? "checked=\"checked\"" : "")%>/>Refresh Token</label></tr><%
+                                        }
+                                        if(allowedGrants.contains("urn:ietf:params:oauth:grant-type:saml2-bearer")){
+                                            %><tr><tr><label><input type="checkbox" id="grant_saml" name="grant_saml" value="urn:ietf:params:oauth:grant-type:saml2-bearer"  <%=(samlGrant ? "checked=\"checked\"" : "")%>/>SAML</label></tr><%
+                                        }
+                                } catch (Exception e){
+                                    forwardTo = "../admin/error.jsp";
+                                    String message = resourceBundle.getString("error.while.getting.allowed.grants") + " : " + e.getMessage();
+                                    CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request, e);
+                                %>
+                                    <script type="text/javascript">
+                                        function forward() {
+                                            location.href = "<%=forwardTo%>";
+                                        }
+                                    </script>
+
+                                    <script type="text/javascript">
+                                        forward();
+                                    </script>
+                                <%
+                                }
+                                %>
 		                        </table>   
 		                        </td>
 		                    </tr>

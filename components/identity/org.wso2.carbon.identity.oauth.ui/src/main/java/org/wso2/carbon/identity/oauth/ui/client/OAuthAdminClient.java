@@ -31,6 +31,7 @@ public class OAuthAdminClient {
 
 	private OAuthAdminServiceStub stub;
 
+    private static String[] allowedGrantTypes = null;
 	/**
 	 * Instantiates OAuthAdminClient
 	 * 
@@ -75,5 +76,12 @@ public class OAuthAdminClient {
 
     public OAuthRevocationResponseDTO revokeAuthzForAppsByRessourceOwner(OAuthRevocationRequestDTO reqDTO) throws Exception {
         return stub.revokeAuthzForAppsByResoureOwner(reqDTO);
+    }
+
+    public String[] getAllowedOAuthGrantTypes() throws Exception {
+        if(allowedGrantTypes == null){
+            allowedGrantTypes = stub.getAllowedGrantTypes();
+        }
+        return allowedGrantTypes;
     }
 }

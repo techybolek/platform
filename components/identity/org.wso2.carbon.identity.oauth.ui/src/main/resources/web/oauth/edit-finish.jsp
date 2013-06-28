@@ -45,6 +45,7 @@
     String consentPage = CharacterEncoder.getSafeText(request.getParameter("consentPage"));
     //-- start setting grants
     String grantCode = CharacterEncoder.getSafeText(request.getParameter("grant_code"));
+    String grantImplicit = CharacterEncoder.getSafeText(request.getParameter("grant_implicit"));
     String grantPassword = CharacterEncoder.getSafeText(request.getParameter("grant_password"));
     String grantClient = CharacterEncoder.getSafeText(request.getParameter("grant_client"));
     String grantRefresh = CharacterEncoder.getSafeText(request.getParameter("grant_refresh"));
@@ -54,6 +55,9 @@
 	if (grantCode != null) {
 		buff.append(grantCode + " ");
 	}
+    if (grantImplicit != null) {
+        buff.append(grantImplicit + " ");
+    }
 	if (grantPassword != null) {
 		buff.append(grantPassword + " ");
 	}
@@ -64,7 +68,7 @@
 		buff.append(grantRefresh + " ");
 	}
 	if (grantSAML != null) {
-		buff.append(grantSAML + " ");
+		buff.append(grantSAML);
 	}
 	grants = buff.toString();
 	String forwardTo = "index.jsp";
@@ -84,9 +88,6 @@
         app.setCallbackUrl(callback);
         app.setApplicationName(applicationName);
         app.setOAuthVersion(oauthVersion);
-        app.setLoginPageUrl(loginPage);
-		app.setErrorPageUrl(errorPage);
-		app.setConsentPageUrl(consentPage);
 		app.setGrantTypes(grants);
         client.updateOAuthApplicationData(app);
         String message = resourceBundle.getString("app.updated.successfully");

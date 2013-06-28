@@ -66,11 +66,11 @@ public class OAuthUIServiceComponent {
             log.debug("Successfully registered an instance of OAuthServlet");
 
 			// Register OAuth 2.0 Authorization Endpoint
-			Servlet oauth2Servlet =
-			                        new ContextPathServletAdaptor(new OAuth2AuthzEndpoint(),
-			                                                      OAUTH2_AUTHORIZE_URL);
-			httpService.registerServlet(OAUTH2_AUTHORIZE_URL, oauth2Servlet, null, null);
-			log.debug("Successfully registered an instance of OAuth2 Authz Endpoint.");
+//			Servlet oauth2Servlet =
+//			                        new ContextPathServletAdaptor(new OAuth2AuthzEndpoint(),
+//			                                                      OAUTH2_AUTHORIZE_URL);
+//			httpService.registerServlet(OAUTH2_AUTHORIZE_URL, oauth2Servlet, null, null);
+//			log.debug("Successfully registered an instance of OAuth2 Authz Endpoint.");
 			
 			// Register OAuth 2.0 Authentication Servlet
 			Servlet oauth2AuthServlet =
@@ -107,7 +107,7 @@ public class OAuthUIServiceComponent {
 
     protected void unsetHttpService(HttpService httpService){
         httpService.unregister(OAUTH_URL);
-        httpService.unregister(OAUTH2_AUTHORIZE_URL);
+//        httpService.unregister(OAUTH2_AUTHORIZE_URL);
         httpService.unregister(OAUTH2_TOKEN_URL);
         OAuthUIServiceComponentHolder.getInstance().setHttpService(null);
     }

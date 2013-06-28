@@ -26,7 +26,6 @@ import org.apache.amber.oauth2.common.message.types.ResponseType;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.common.AuthenticationException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
@@ -37,8 +36,6 @@ import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeRespDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
-import org.wso2.carbon.ui.CarbonUIAuthenticator;
-import org.wso2.carbon.ui.tracker.AuthenticatorRegistry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -167,21 +164,7 @@ public class OAuth2AuthzClient {
             }
             authzReqDTO.setUsername(username);
             authzReqDTO.setPassword(req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_PASSWORD));
-            CarbonUIAuthenticator authenticator = AuthenticatorRegistry.getCarbonAuthenticator(req);
-            try {
-                if (authenticator != null) {
-                    authenticator.authenticate(req);
-                    authzReqDTO.setUserAuthenticated(true);
-                    return oauth2ServiceClient.authorize(authzReqDTO);
-                }
-            } catch (AuthenticationException e) {
-                log.error(e.getMessage());
-            }
-            log.error("Error when Authenticating User.");
-
-            OAuth2AuthorizeRespDTO authorizeRespDTO = new OAuth2AuthorizeRespDTO();
-            authorizeRespDTO.setCallbackURI(authzReqDTO.getCallbackUrl());
-            return authorizeRespDTO;
+            return oauth2ServiceClient.authorize(authzReqDTO);
 
         } catch (RemoteException e) {
             log.error("Error when invoking the OAuth2Service to perform authorization.", e);

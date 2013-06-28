@@ -18,7 +18,21 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"  prefix="carbon" %>
 <%@page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
+<%@ page import="org.wso2.carbon.identity.oauth.ui.client.OAuthAdminClient" %>
+<%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.apache.axis2.context.ConfigurationContext" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="java.util.ResourceBundle" %>
 
+<%
+    String BUNDLE = "org.wso2.carbon.identity.oauth.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+%>
 
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
@@ -84,30 +98,56 @@
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" /></td>
 		                    </tr>
-							 <tr>
-		                        <td class="leftCol-small"><fmt:message key='loginPage'/></td>
-		                        <td><input class="text-box-big" id="loginPage" name="loginPage"
-		                                   type="text" /></td>
-		                    </tr>
-		                     <tr>
-		                        <td class="leftCol-small"><fmt:message key='errorPage'/></td>
-		                        <td><input class="text-box-big" id="errorPage" name="errorPage"
-		                                   type="text" /></td>
-		                    </tr>
-		                     <tr>
-		                        <td class="leftCol-small"><fmt:message key='consentPage'/></td>
-		                        <td><input class="text-box-big" id="consentPage" name="consentPage"
-		                                   type="text" /></td>
-		                    </tr>
 		                     <tr>
 		                        <td class="leftCol-small"><fmt:message key='grantTypes'/></td>
 		                        <td>
 		                        <table>
-		                           <tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code" checked="checked"/>Code</label></tr>
-		                           <tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password" checked="checked"/>Password</lable></tr>
-		                           <tr><label><input type="checkbox" id="grant_client" name="grant_client" value="client_credentials" checked="checked"/>Client Credential</label></tr>
-		                           <tr><label><input type="checkbox" id="grant_refresh" name="grant_refresh" value="refresh_token" checked="checked"/>Refresh Token</label></tr>
-		                           <tr><label><input type="checkbox" id="grant_saml" name="grant_saml" value="urn:ietf:params:oauth:grant-type:saml2-bearer" checked="checked"/>SAML</label></tr>
+                                    <%
+                                        String forwardTo = "index.jsp";
+                                        try{
+                                            String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+                                            String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+                                            ConfigurationContext configContext =
+                                                    (ConfigurationContext) config.getServletContext()
+                                                            .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+                                            OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
+                                            List<String> allowedGrants = new ArrayList<String>(Arrays.asList(client.getAllowedOAuthGrantTypes()));
+                                            if(allowedGrants.contains("authorization_code")){
+                                                %><tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code" checked="checked"/>Code</label></tr><%
+                                            }
+                                            if(allowedGrants.contains("implicit")){
+                                                %><tr><label><input type="checkbox" id="grant_implicit" name="grant_implicit" value="implicit" checked="checked"/>Implicit</label></tr><%
+                                            }
+                                            if(allowedGrants.contains("password")){
+                                                %><tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password" checked="checked"/>Password</lable></tr><%
+                                            }
+                                            if(allowedGrants.contains("client_credentials")){
+                                                %><tr><label><input type="checkbox" id="grant_client" name="grant_client" value="client_credentials" checked="checked"/>Client Credential</label></tr><%
+                                            }
+                                            if(allowedGrants.contains("refresh_token")){
+                                                %><tr><label><input type="checkbox" id="grant_refresh" name="grant_refresh" value="refresh_token" checked="checked"/>Refresh Token</label></tr><%
+                                            }
+                                            if(allowedGrants.contains("urn:ietf:params:oauth:grant-type:saml2-bearer")){
+                                                %><tr><label><input type="checkbox" id="grant_saml" name="grant_saml" value="urn:ietf:params:oauth:grant-type:saml2-bearer" checked="checked"/>SAML</label></tr><%
+                                            }
+                                        } catch (Exception e){
+                                            String message = resourceBundle.getString("error.while.getting.allowed.grants") + " : " + e.getMessage();
+                                            CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request, e);
+                                    %>
+                                                <script type="text/javascript">
+                                                    function forward() {
+                                                        location.href = "<%=forwardTo%>";
+                                                    }
+                                                </script>
+
+                                                <script type="text/javascript">
+                                                        forward();
+                                                </script>
+                                    <%
+                                        }
+
+                                    %>
+
 		                        </table>   
 		                        </td>
 		                    </tr>

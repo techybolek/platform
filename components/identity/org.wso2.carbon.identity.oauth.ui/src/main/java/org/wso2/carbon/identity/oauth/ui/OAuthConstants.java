@@ -73,8 +73,8 @@ public final class OAuthConstants {
     public static final String OAUTH_ERROR_CODE = "oauthErrorCode";
     public static final String OAUTH_ERROR_MESSAGE = "oauthErrorMsg";
 
-    public static final String REQ_PARAM_OAUTH_USER_NAME = "username";
-    public static final String REQ_PARAM_OAUTH_USER_PASSWORD = "password";
+    public static final String REQ_PARAM_OAUTH_USER_NAME = "oauth_user_name";
+    public static final String REQ_PARAM_OAUTH_USER_PASSWORD = "oauth_user_password";
 
     public static final int DEFAULT_ITEMS_PER_PAGE = 10;
     public static final String OAUTH_ADMIN_CLIENT = "OAuthAdminClient";

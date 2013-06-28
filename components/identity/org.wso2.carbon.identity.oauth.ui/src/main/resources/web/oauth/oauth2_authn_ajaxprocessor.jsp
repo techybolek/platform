@@ -25,16 +25,8 @@
 
     OAuth2Parameters oauth2Params;
     String scopeString = "";
-    if (session.getAttribute(OAuthConstants.OAUTH2_PARAMS) != null) {
-        oauth2Params = (OAuth2Parameters) session.getAttribute(OAuthConstants.OAUTH2_PARAMS);
-        // build the scope string by joining all the scope parameters sent.
-        Set<String> scopes = oauth2Params.getScopes();
-        for (String scope : scopes) {
-            scopeString = scope + "; ";
-        }
-        if (scopeString.endsWith(": ")) {
-            scopeString = scopeString.substring(0, scopeString.lastIndexOf(": "));
-        }
+    if (request.getParameter(OAuthConstants.SCOPE) != null) {
+        scopeString = request.getParameter(OAuthConstants.SCOPE);
     } else {
         request.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_CODE, "invalid_request");
         request.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE,
@@ -87,7 +79,7 @@
 if(!"true".equals(request.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_REQUEST))) {
 %>
 <div class="header-text">
-    <strong><%=(String) oauth2Params.getApplicationName()%></strong> requests access to <strong><%=scopeString%></strong>
+    <strong><%=request.getParameter("application")%></strong> requests access to <strong><%=scopeString%></strong>
 </div>
 <%
 } else {
@@ -111,7 +103,7 @@ if(!"true".equals(request.getSession().getAttribute(OAuthConstants.OIDCSessionCo
 
             <form class="well form-horizontal" id="loginForm"
                   <% if(!("failed".equals(authStatus))) { %>style="display:none"<% } %>
-                  action="oauth2-authn-finish.jsp">
+                  action="../../oauth2endpoints/authorize">
 
                 <div class="alert alert-error"
                      id="errorMsg" <% if (!("failed".equals(authStatus))) { %>
@@ -121,21 +113,21 @@ if(!"true".equals(request.getSession().getAttribute(OAuthConstants.OIDCSessionCo
                 </div>
                 <!--Username-->
                 <div class="control-group">
-                    <label class="control-label" for="username">Username:</label>
+                    <label class="control-label" for="oauth_user_name">Username:</label>
 
                     <div class="controls">
-                        <input type="text" class="input-large" id='username'
-                               name="username">
+                        <input type="text" class="input-large" id='oauth_user_name'
+                               name="oauth_user_name">
                     </div>
                 </div>
 
                 <!--Password-->
                 <div class="control-group">
-                    <label class="control-label" for="password">Password:</label>
+                    <label class="control-label" for="oauth_user_password">Password:</label>
 
                     <div class="controls">
-                        <input type="password" class="input-large" id='password'
-                               name="password">
+                        <input type="password" class="input-large" id='oauth_user_password'
+                               name="oauth_user_password">
                     </div>
                 </div>
 

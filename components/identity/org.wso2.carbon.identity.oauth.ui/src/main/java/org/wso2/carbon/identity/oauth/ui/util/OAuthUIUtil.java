@@ -139,30 +139,29 @@ public class OAuthUIUtil {
 	public static String getErrorPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clienDTO,
 	                                     String errorCode, String errorMessage) {
 		String errorPageURL = null;
-		String errorPageInSession = (String) req.getSession().getAttribute("errorPageURL");
-		// if there is a configured custom page, then user it
-		if (clienDTO != null && clienDTO.getErrorPageURL() != null || errorPageInSession != null ||
-		    !clienDTO.getErrorPageURL().equals("")) {
-			errorPageURL = clienDTO.getErrorPageURL();
-			if (errorPageURL == null) {
-				errorPageURL = errorPageInSession;
-				req.getSession().setAttribute("errorPageURL", errorPageURL);
-			}
-			try {
-				errorPageURL =
-				               errorPageURL + "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" +
-				                       URLEncoder.encode(errorCode, "UTF-8") + "&" +
-				                       OAuthConstants.OAUTH_ERROR_MESSAGE + "=" +
-				                       URLEncoder.encode(errorMessage, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				// ignore, UTF-8 must be supported
-			}
-		} else { // else use the default 
-			errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
-			errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
-			req.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_CODE, errorCode);
-			req.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE, errorMessage);
-		}
+//		String errorPageInSession = (String) req.getSession().getAttribute("errorPageURL");
+//		// if there is a configured custom page, then user it
+//		if (clienDTO != null && clienDTO.getErrorPageURL() != null || errorPageInSession != null || !clienDTO.getErrorPageURL().equals("null")) {
+//			errorPageURL = clienDTO.getErrorPageURL();
+//			if(errorPageURL == null) {
+//				errorPageURL = errorPageInSession;
+//				req.getSession().setAttribute("errorPageURL", errorPageURL);
+//			}
+//			try {
+//				errorPageURL =
+//				               errorPageURL + "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" +
+//				                       URLEncoder.encode(errorCode, "UTF-8") + "&" +
+//				                       OAuthConstants.OAUTH_ERROR_MESSAGE + "=" +
+//				                       URLEncoder.encode(errorMessage, "UTF-8");
+//			} catch (UnsupportedEncodingException e) {
+//				// ignore, UTF-8 must be supported
+//			}
+//		} else { // else use the default
+//			errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
+//			errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
+//			req.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_CODE, errorCode);
+//			req.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE, errorMessage);
+//		}
 		return errorPageURL;
 	}
     
@@ -179,22 +178,23 @@ public class OAuthUIUtil {
 	                                     OAuth2Parameters params) {
 		String loginPage = null;
 		// if there is a configured custom page, then use it
-		if (clientDTO != null && clientDTO.getLoginPageURL() != null && !clientDTO.getLoginPageURL().equals("")) {
-			
-			loginPage = clientDTO.getLoginPageURL();
-			try {
-				loginPage =
-				            loginPage + "?" + OAuthConstants.SCOPE + "=" +
-				                    URLEncoder.encode(getScope(params), "UTF-8") + "&" + "application" + "=" +
-				                    URLEncoder.encode(params.getApplicationName(), "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				// ignore, this is not going to happen 
-			}
-		} else { // else use the default
-			loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_authn_ajaxprocessor.jsp";
-			loginPage = loginPage.replace("/oauth2/authorize", "");
-		}
-		req.getSession().setAttribute("loginPage", loginPage);
+//		if (clientDTO != null && clientDTO.getLoginPageURL() != null &&
+//		    !clientDTO.getLoginPageURL().equals("null")) {
+//
+//			loginPage = clientDTO.getLoginPageURL();
+//			try {
+//				loginPage =
+//				            loginPage + "?" + OAuthConstants.SCOPE + "=" +
+//				                    URLEncoder.encode(getScope(params), "UTF-8") + "&" + "application" + "=" +
+//				                    URLEncoder.encode(params.getApplicationName(), "UTF-8");
+//			} catch (UnsupportedEncodingException e) {
+//				// ignore, this is not going to happen
+//			}
+//		} else { // else use the default
+//			loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_authn_ajaxprocessor.jsp";
+//			loginPage = loginPage.replace("/oauth2/authorize", "");
+//		}
+//		req.getSession().setAttribute("loginPage", loginPage);
 		return loginPage;
 	}
 	
@@ -213,24 +213,24 @@ public class OAuthUIUtil {
 	                                     OAuth2Parameters params, String loggedInUser, String redirectUrl) {
 		String consentPage = null;
 		// if there is a configured custom page, then use it 
-		if (clientDTO != null && clientDTO.getConsentPageUrl() != null && !clientDTO.getConsentPageUrl().equals("")) {
-			consentPage = clientDTO.getConsentPageUrl();
-		} else { // else use the default 
-			consentPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_consent_ajaxprocessor.jsp";
-			consentPage = consentPage.replace("/oauth2/authenticate", "");
-		}
-		req.getSession().setAttribute("consentPage", consentPage);
-		try {
-			consentPage =
-			              consentPage + "?" + OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER + "=" +
-			                      URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
-			                      OAuthConstants.OIDCSessionConstant.OIDC_RP + "=" +
-			                      URLEncoder.encode(params.getApplicationName(), "UTF-8") + "&" +
-			                      OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE + "=" +
-			                      URLEncoder.encode(redirectUrl, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// ignore
-		}
+//		if (clientDTO != null && clientDTO.getConsentPageUrl() != null && !clientDTO.getConsentPageUrl().equals("null")) {
+//			consentPage = clientDTO.getConsentPageUrl();
+//		} else { // else use the default
+//			consentPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_consent_ajaxprocessor.jsp";
+//			consentPage = consentPage.replace("/oauth2/authenticate", "");
+//		}
+//		req.getSession().setAttribute("consentPage", consentPage);
+//		try {
+//			consentPage =
+//			              consentPage + "?" + OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER + "=" +
+//			                      URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
+//			                      OAuthConstants.OIDCSessionConstant.OIDC_RP + "=" +
+//			                      URLEncoder.encode(params.getApplicationName(), "UTF-8") + "&" +
+//			                      OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE + "=" +
+//			                      URLEncoder.encode(redirectUrl, "UTF-8");
+//		} catch (UnsupportedEncodingException e) {
+//			// ignore
+//		}
 		return consentPage;
 	}
 	
