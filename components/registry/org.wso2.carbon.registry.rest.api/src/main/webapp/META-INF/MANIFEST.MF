@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: jackson-core-asl-1.8.6.jar jackson-mapper-asl-1.8.6.jar ja
+ ckson-jaxrs-1.8.6.jar wstx-asl-3.2.9.jar stax-api-1.0.1.jar
+
