@@ -102,7 +102,6 @@
                     <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="responseType" nillable="true" type="xs:string"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="scopes" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="userAuthenticated" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
@@ -171,11 +170,8 @@
                 <xs:sequence>
                     <xs:element minOccurs="0" name="applicationName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="callbackURL" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="consentPageUrl" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="errorCode" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="errorMsg" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="errorPageURL" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="loginPageURL" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="validClient" type="xs:boolean"/>
                 </xs:sequence>
             </xs:complexType>
