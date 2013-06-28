@@ -18,11 +18,18 @@
 
 package org.wso2.carbon.identity.oauth2.authz;
 
+import net.sf.jsr107cache.Cache;
+import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.core.model.OAuthAppDO;
+import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.authz.handlers.AuthorizationHandler;
 import org.wso2.carbon.identity.oauth2.authz.handlers.CodeResponseTypeHandler;
@@ -45,6 +52,8 @@ public class AuthorizationHandlerManager {
     private Map<String, AuthorizationHandler> authzHandlers = new Hashtable<String, AuthorizationHandler>();
     private List<String> supportedRespTypes;
 
+    private Cache appInfoCache;
+
     public static AuthorizationHandlerManager getInstance() throws IdentityOAuth2Exception {
 
         CarbonUtils.checkSecurity();
@@ -64,10 +73,11 @@ public class AuthorizationHandlerManager {
         supportedRespTypes = OAuthServerConfiguration.getInstance().getSupportedResponseTypes();
         authzHandlers.put(ResponseType.CODE.toString(), new CodeResponseTypeHandler());
         authzHandlers.put(ResponseType.TOKEN.toString(), new TokenResponseTypeHandler());
+        appInfoCache = PrivilegedCarbonContext.getCurrentContext().getCache("AppInfoCache");
     }
 
     public OAuth2AuthorizeRespDTO handleAuthorization(OAuth2AuthorizeReqDTO authzReqDTO)
-            throws IdentityOAuth2Exception {
+            throws IdentityOAuth2Exception, IdentityOAuthAdminException, InvalidOAuthClientException {
 
         String responseType = authzReqDTO.getResponseType();
         OAuth2AuthorizeRespDTO authorizeRespDTO = new OAuth2AuthorizeRespDTO();
@@ -81,10 +91,35 @@ public class AuthorizationHandlerManager {
             return authorizeRespDTO;
         }
 
+        // loading the stored application data
+        OAuthAppDO oAuthAppDO = getAppInformation(authzReqDTO);
+        // If the application has defined a limited set of grant types, then check the grant
+        if(oAuthAppDO.getGrantTypes() != null) {
+            if(responseType.equals("code")){
+                //Do not change this log format as these logs use by external applications
+                if(!oAuthAppDO.getGrantTypes().contains("authorization_code")){
+                    log.debug("Unsupported Response Type : " + responseType +
+                            " for client id : " + authzReqDTO.getConsumerKey());
+                    handleErrorRequest(authorizeRespDTO, OAuthError.TokenResponse.UNSUPPORTED_GRANT_TYPE,
+                            "Unsupported Response Type!");
+                    return authorizeRespDTO;
+                }
+            } else if (responseType.equals("token")){
+                if(!oAuthAppDO.getGrantTypes().contains("implicit")){
+                    //Do not change this log format as these logs use by external applications
+                    log.debug("Unsupported Response Type : " + responseType +
+                            " for client id : " + authzReqDTO.getConsumerKey());
+                    handleErrorRequest(authorizeRespDTO, OAuthError.TokenResponse.UNSUPPORTED_GRANT_TYPE,
+                            "Unsupported Response Type!");
+                    return authorizeRespDTO;
+                }
+            }
+        }
+
         AuthorizationHandler authzHandler = authzHandlers.get(responseType);
         OAuthAuthzReqMessageContext authzReqMsgCtx = new OAuthAuthzReqMessageContext(authzReqDTO);
 
-        boolean authStatus = authzReqDTO.isUserAuthenticated();
+        boolean authStatus = authzHandler.authenticateResourceOwner(authzReqMsgCtx);
 
         if (!authStatus) {
             log.warn("User Authentication failed for user : " + authzReqDTO.getUsername());
@@ -136,5 +171,18 @@ public class AuthorizationHandlerManager {
         respDTO.setAuthorized(false);
         respDTO.setErrorCode(errorCode);
         respDTO.setErrorMsg(errorMsg);
+    }
+
+    private OAuthAppDO getAppInformation(OAuth2AuthorizeReqDTO authzReqDTO) throws IdentityOAuthAdminException, InvalidOAuthClientException {
+        OAuthAppDO oAuthAppDO;
+        Object obj = appInfoCache.get(authzReqDTO.getConsumerKey());
+        if(obj != null){
+            oAuthAppDO = (OAuthAppDO)obj;
+            return oAuthAppDO;
+        }else{
+            oAuthAppDO = new OAuthAppDAO().getAppInformation(authzReqDTO.getConsumerKey());
+            appInfoCache.put(authzReqDTO.getConsumerKey(),oAuthAppDO);
+            return oAuthAppDO;
+        }
     }
 }

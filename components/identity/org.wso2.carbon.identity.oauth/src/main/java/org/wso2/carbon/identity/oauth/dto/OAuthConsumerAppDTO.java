@@ -26,9 +26,6 @@ public class OAuthConsumerAppDTO {
     private String callbackUrl;
     private String oauthVersion;
     private String username;
-    private String loginPageUrl = "";
-    private String errorPageUrl = "";
-    private String consentPageUrl = "";
     private String grantTypes = "";
 
     public String getApplicationName() {
@@ -79,36 +76,4 @@ public class OAuthConsumerAppDTO {
 	    this.grantTypes = grantTypes;
     }
 
-	public String getConsentPageUrl() {
-		if (consentPageUrl == null || consentPageUrl.equals("null")) {
-			return "";
-		}
-		return consentPageUrl;
-	}
-
-	public void setConsentPageUrl(String consentPageUrl) {
-		this.consentPageUrl = consentPageUrl;
-	}
-
-	public String getErrorPageUrl() {
-		if (errorPageUrl == null || errorPageUrl.equals("null")) {
-			return "";
-		}
-		return errorPageUrl;
-	}
-
-	public void setErrorPageUrl(String errorPageUrl) {
-		this.errorPageUrl = errorPageUrl;
-	}
-
-	public String getLoginPageUrl() {
-		if (loginPageUrl == null || loginPageUrl.equals("null")) {
-			return "";
-		}
-		return loginPageUrl;
-	}
-
-	public void setLoginPageUrl(String loginPageUrl) {
-		this.loginPageUrl = loginPageUrl;
-	}
 }

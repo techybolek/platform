@@ -129,9 +129,6 @@ public class OAuth2Service extends AbstractAdmin {
                 validationResponseDTO.setValidClient(true);
                 validationResponseDTO.setCallbackURL(appDO.getCallbackUrl());
                 validationResponseDTO.setApplicationName(appDO.getApplicationName());
-                validationResponseDTO.setLoginPageURL(OAuth2Util.getLoginPage(appDO));
-                validationResponseDTO.setErrorPageURL(OAuth2Util.getErrorPage(appDO));
-                validationResponseDTO.setConsentPageUrl(OAuth2Util.getConsentPage(appDO));
                 return validationResponseDTO;
             }
 
@@ -146,18 +143,12 @@ public class OAuth2Service extends AbstractAdmin {
                 validationResponseDTO.setValidClient(true);
                 validationResponseDTO.setApplicationName(appDO.getApplicationName());
                 validationResponseDTO.setCallbackURL(callbackURI);
-                validationResponseDTO.setLoginPageURL(OAuth2Util.getLoginPage(appDO));
-                validationResponseDTO.setErrorPageURL(OAuth2Util.getErrorPage(appDO));
-                validationResponseDTO.setConsentPageUrl(OAuth2Util.getConsentPage(appDO));
                 return validationResponseDTO;
             } else {    // Provided callback URL does not match the registered callback url.
                 log.warn("Provided Callback URL does not match with the provided one.");
                 validationResponseDTO.setValidClient(false);
                 validationResponseDTO.setErrorCode(OAuth2ErrorCodes.INVALID_CALLBACK);
                 validationResponseDTO.setErrorMsg("Registered callback does not match with the provided url.");
-                validationResponseDTO.setLoginPageURL(OAuth2Util.getLoginPage(appDO));
-                validationResponseDTO.setErrorPageURL(OAuth2Util.getErrorPage(appDO));
-                validationResponseDTO.setConsentPageUrl(OAuth2Util.getConsentPage(appDO));
                 return validationResponseDTO;
             }
         } catch(InvalidOAuthClientException e){
@@ -166,18 +157,12 @@ public class OAuth2Service extends AbstractAdmin {
             validationResponseDTO.setValidClient(false);
             validationResponseDTO.setErrorCode(OAuth2ErrorCodes.INVALID_CLIENT);
             validationResponseDTO.setErrorMsg(e.getMessage());
-            validationResponseDTO.setLoginPageURL(OAuth2Util.getLoginPage(null));
-            validationResponseDTO.setErrorPageURL(OAuth2Util.getErrorPage(null));
-            validationResponseDTO.setConsentPageUrl(OAuth2Util.getConsentPage(null));
             return validationResponseDTO;
         }catch (IdentityOAuthAdminException e) {
             log.error("Error when reading the Application Information.", e);
             validationResponseDTO.setValidClient(false);
             validationResponseDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
             validationResponseDTO.setErrorMsg("Error when processing the authorization request.");
-            validationResponseDTO.setLoginPageURL(OAuth2Util.getLoginPage(null));
-            validationResponseDTO.setErrorPageURL(OAuth2Util.getErrorPage(null));
-            validationResponseDTO.setConsentPageUrl(OAuth2Util.getConsentPage(null));
             return validationResponseDTO;
         }
     }

@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.oauth;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
@@ -44,9 +45,13 @@ import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.*;
+
 public class OAuthAdminService extends AbstractAdmin {
 
     protected Log log = LogFactory.getLog(OAuthAdminService.class);
+
+    private static List<String> allowedGrants = null;
 
     /**
      * Registers an consumer secret against the logged in user. A given user can only have a single
@@ -105,9 +110,6 @@ public class OAuthAdminService extends AbstractAdmin {
                 dto.setOauthConsumerKey(app.getOauthConsumerKey());
                 dto.setOauthConsumerSecret(app.getOauthConsumerSecret());
                 dto.setOAuthVersion(app.getOauthVersion());
-                dto.setLoginPageUrl(app.getLoginPageUrl());
-                dto.setErrorPageUrl(app.getErrorPageUrl());
-                dto.setConsentPageUrl(app.getConsentPageUrl());
                 dto.setGrantTypes(app.getGrantTypes());
                 dtos[i] = dto;
             }
@@ -132,9 +134,6 @@ public class OAuthAdminService extends AbstractAdmin {
             dto.setOauthConsumerKey(app.getOauthConsumerKey());
             dto.setOauthConsumerSecret(app.getOauthConsumerSecret());
             dto.setOAuthVersion(app.getOauthVersion());
-            dto.setLoginPageUrl(app.getLoginPageUrl());
-            dto.setErrorPageUrl(app.getErrorPageUrl());
-            dto.setConsentPageUrl(app.getConsentPageUrl());
             dto.setGrantTypes(app.getGrantTypes());
         }
         return dto;
@@ -171,9 +170,13 @@ public class OAuthAdminService extends AbstractAdmin {
                 } else {   // by default, assume OAuth 2.0, if it is not set.
                     app.setOauthVersion(OAuthConstants.OAuthVersions.VERSION_2);
                 }
-                app.setLoginPageUrl(application.getLoginPageUrl());
-                app.setErrorPageUrl(application.getErrorPageUrl());
-                app.setConsentPageUrl(application.getConsentPageUrl());
+                List<String> allowedGrants = new ArrayList<String>(Arrays.asList(getAllowedGrantTypes()));
+                String[] requestGrants = application.getGrantTypes().split("\\s");
+                for(String requestedGrant:requestGrants){
+                    if(!allowedGrants.contains(requestedGrant)){
+                        throw new Exception(requestedGrant + " not allowed");
+                    }
+                }
                 app.setGrantTypes(application.getGrantTypes());
                 dao.addOAuthApplication(app);
             }
@@ -197,9 +200,13 @@ public class OAuthAdminService extends AbstractAdmin {
         oauthappdo.setOauthConsumerKey(consumerAppDTO.getOauthConsumerKey());
         oauthappdo.setOauthConsumerSecret(consumerAppDTO.getOauthConsumerSecret());
         oauthappdo.setCallbackUrl(consumerAppDTO.getCallbackUrl());
-        oauthappdo.setLoginPageUrl(consumerAppDTO.getLoginPageUrl());
-        oauthappdo.setErrorPageUrl(consumerAppDTO.getErrorPageUrl());
-        oauthappdo.setConsentPageUrl(consumerAppDTO.getConsentPageUrl());
+        List<String> allowedGrants = new ArrayList<String>(Arrays.asList(getAllowedGrantTypes()));
+        String[] requestGrants = consumerAppDTO.getGrantTypes().split("\\s");
+        for(String requestedGrant:requestGrants){
+            if(!allowedGrants.contains(requestedGrant)){
+                throw new Exception(requestedGrant + " not allowed");
+            }
+        }
         oauthappdo.setGrantTypes(consumerAppDTO.getGrantTypes());
         dao.updateConsumerApplication(oauthappdo);
     }
@@ -251,9 +258,6 @@ public class OAuthAdminService extends AbstractAdmin {
                 OAuthConsumerAppDTO appDTO = new OAuthConsumerAppDTO();
                 appDTO.setApplicationName(appDO.getApplicationName());
                 appDTO.setUsername(appDO.getUserName());
-                appDTO.setLoginPageUrl(appDO.getLoginPageUrl());
-                appDTO.setErrorPageUrl(appDO.getErrorPageUrl());
-                appDTO.setConsentPageUrl(appDO.getConsentPageUrl());
                 appDTO.setGrantTypes(appDO.getGrantTypes());
                 appDTOs[i] = appDTO;
             } catch (IdentityOAuthAdminException e) {
@@ -315,5 +319,15 @@ public class OAuthAdminService extends AbstractAdmin {
             revokeRespDTO.setErrorMsg("Error when processing the revocation request");
             return revokeRespDTO;
         }
+    }
+
+    public String[] getAllowedGrantTypes(){
+        if(allowedGrants == null){
+            allowedGrants = OAuthServerConfiguration.getInstance().getSupportedGrantTypes();
+            if(OAuthServerConfiguration.getInstance().getSupportedResponseTypes().contains("token")){
+                allowedGrants.add("implicit");
+            }
+        }
+        return allowedGrants.toArray(new String[allowedGrants.size()]);
     }
 }
