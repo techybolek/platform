@@ -20,8 +20,16 @@ package org.wso2.carbon.identity.oauth.util;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
+import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO;
+import org.wso2.carbon.ui.CarbonUIUtil;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class EndpointUtil {
 
@@ -100,5 +108,89 @@ public class EndpointUtil {
 	public static String getUserInfoClaimDialect() {
 		return getOAuthServerConfiguration().getOpenIDConnectUserInfoEndpointClaimDialect();
 	}
+
+    /**
+     * Returns the error page URL. If no custom page is defined, then the
+     * default will be returned.
+     *
+     * @param req
+     * @param clienDTO
+     * @param errorCode
+     * @param errorMessage
+     * @return
+     */
+    public static String getErrorPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clienDTO,
+                                         String errorCode, String errorMessage) {
+
+        String errorPageUrl = CarbonUIUtil.getAdminConsoleURL("/") + "../oauth2_login/oauth2_login.do";
+        try {
+            errorPageUrl += "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" + URLEncoder.encode(errorCode, "UTF-8") + "&" +
+                    OAuthConstants.OAUTH_ERROR_MESSAGE + "=" + URLEncoder.encode(errorMessage, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // ignore
+        }
+        return errorPageUrl;
+    }
+
+    /**
+     * Returns the login page URL. If no custom page is defined, then the
+     * default will be returned.
+     *
+     * @param req
+     * @param params
+     * @param clientDTO
+     * @return
+     */
+    public static String getLoginPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clientDTO,
+                                         OAuth2Parameters params) {
+        String loginPage = CarbonUIUtil.getAdminConsoleURL("/") + "../oauth2_login/oauth2_login.do";
+        try {
+            loginPage =
+                loginPage + "?" + OAuthConstants.SCOPE + "=" +
+                        URLEncoder.encode(getScope(params), "UTF-8") + "&" + "application" + "=" +
+                        URLEncoder.encode(params.getApplicationName(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // ignore
+        }
+        return loginPage;
+    }
+
+    /**
+     * Returns the consent page URL. If no custom page is defined, then the
+     * default will be returned.
+     *
+     * @param req
+     * @param params
+     * @param clientDTO
+     * @param redirectUrl
+     * @param loggedInUser
+     * @return
+     */
+    public static String getUserConsentURL(HttpServletRequest req, org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO clientDTO,
+                                           OAuth2Parameters params, String loggedInUser, String redirectUrl) {
+
+        String consentPage = CarbonUIUtil.getAdminConsoleURL("/") + "../oauth2_login/oauth2_login.do";
+
+
+		try {
+			consentPage += "?" + OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER + "=" +
+                    URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
+			        OAuthConstants.OIDCSessionConstant.OIDC_RP + "=" +
+			        URLEncoder.encode(params.getApplicationName(), "UTF-8") + "&" +
+			        OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE + "=" +
+			        URLEncoder.encode(redirectUrl, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// ignore
+		}
+        return consentPage;
+    }
+
+    private static String getScope(OAuth2Parameters params) {
+        StringBuffer scopes = new StringBuffer();
+        for(String scope : params.getScopes() ) {
+            scopes.append(scope+" ");
+        }
+        return scopes.toString();
+    }
 
 }
