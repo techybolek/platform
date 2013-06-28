@@ -79,7 +79,7 @@
 		refreshGrant = grants.contains("refresh_token") ? true : false;
 		samlGrant = grants.contains("urn:ietf:params:oauth:grant-type:saml2-bearer") ? true : false;
 	} catch (Exception e) {
-		String message = resourceBundle.getString("error.while.loading.app.data");
+		String message = resourceBundle.getString("error.while.loading.user.application.data");
 		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
 		forwardTo = "../admin/error.jsp";
 %>
