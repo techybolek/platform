@@ -18,8 +18,11 @@
 package org.wso2.carbon.automation.api.clients.application.mgt;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.application.mgt.stub.ApplicationAdminExceptionException;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploader;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
@@ -27,17 +30,24 @@ import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem
 
 import javax.activation.DataHandler;
 import java.rmi.RemoteException;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 
 public class CarbonAppUploaderClient {
     private static final Log log = LogFactory.getLog(CarbonAppUploader.class);
     private CarbonAppUploaderStub carbonAppUploaderStub;
     private final String serviceName = "CarbonAppUploader";
+    private ApplicationAdminClient adminClient;
 
     public CarbonAppUploaderClient(String backendUrl, String sessionCookie) throws AxisFault {
         String endPoint = backendUrl + serviceName;
         carbonAppUploaderStub = new CarbonAppUploaderStub(endPoint);
         AuthenticateStub.authenticateStub(sessionCookie, carbonAppUploaderStub);
+        adminClient = new ApplicationAdminClient(backendUrl, sessionCookie);
     }
 
     public CarbonAppUploaderClient(String backendUrl, String userName, String password) throws AxisFault {
@@ -59,4 +69,49 @@ public class CarbonAppUploaderClient {
         carbonAppUploaderStub.uploadApp(carbonAppArray);
 
     }
+
+    public boolean isCarbonAppAvailable() {
+        ServiceClient client = adminClient.getServiceClient();
+        Options options = client.getOptions();
+
+        Set<String> apps = new HashSet<String>();
+
+        try {
+            if (adminClient.listAllApplications() != null) {
+                for (String app : adminClient.listAllApplications()) {
+                    log.info("Found application - " + app);
+                    apps.add(app);
+                }
+                if (apps.contains("AxisCApp")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } catch (ApplicationAdminExceptionException e) {
+            log.error("Error during CarbonApp deployment");
+        } catch (RemoteException e) {
+            log.error("Error during CarbonApp deployment");
+        }
+        return false;
+    }
+
+    public void waitForCarbonAppDeployment() {
+        int serviceTimeOut = 0;
+        while (!isCarbonAppAvailable()) {
+            if (serviceTimeOut == 0) {
+            } else if (serviceTimeOut > 50) { //Check for the service for 25 seconds
+                // if Service not available assertfalse;
+                log.info(" CarbonApp is not found");
+                break;
+            }
+            try {
+                Thread.sleep(500);
+                serviceTimeOut++;
+            } catch (InterruptedException ignored) {
+
+            }
+        }
+    }
+
 }
