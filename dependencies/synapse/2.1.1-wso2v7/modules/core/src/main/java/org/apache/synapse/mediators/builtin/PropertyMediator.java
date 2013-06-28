@@ -118,6 +118,7 @@ public class PropertyMediator extends AbstractMediator {
                 org.apache.axis2.context.MessageContext axis2MessageCtx =
                         axis2smc.getAxis2MessageContext();
                 axis2MessageCtx.setProperty(name, resultValue);
+                handleSpecialProperties(resultValue, axis2MessageCtx);
 
             } else if (XMLConfigConstants.SCOPE_CLIENT.equals(scope)
                     && synCtx instanceof Axis2MessageContext) {
@@ -380,5 +381,12 @@ public class PropertyMediator extends AbstractMediator {
 
         } 
         return contentAware;
+    }
+
+    private void handleSpecialProperties(Object resultValue,
+                                         org.apache.axis2.context.MessageContext axis2MessageCtx) {
+        if (org.apache.axis2.Constants.Configuration.MESSAGE_TYPE.equals(name)) {
+            axis2MessageCtx.setProperty(org.apache.axis2.Constants.Configuration.CONTENT_TYPE, resultValue);
+        }
     }
 }
