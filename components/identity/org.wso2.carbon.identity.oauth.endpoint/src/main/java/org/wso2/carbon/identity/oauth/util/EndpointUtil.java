@@ -122,7 +122,7 @@ public class EndpointUtil {
     public static String getErrorPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clienDTO,
                                          String errorCode, String errorMessage) {
 
-        String errorPageUrl = CarbonUIUtil.getAdminConsoleURL("/") + "../applicationauthentication/oauth2_login.do";
+        String errorPageUrl = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_login.do";
         try {
             errorPageUrl += "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" + URLEncoder.encode(errorCode, "UTF-8") + "&" +
                     OAuthConstants.OAUTH_ERROR_MESSAGE + "=" + URLEncoder.encode(errorMessage, "UTF-8");
@@ -143,7 +143,7 @@ public class EndpointUtil {
      */
     public static String getLoginPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clientDTO,
                                          OAuth2Parameters params) {
-        String loginPage = CarbonUIUtil.getAdminConsoleURL("/") + "../applicationauthentication/oauth2_login.do";
+        String loginPage = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_login.do";
         try {
             loginPage =
                 loginPage + "?" + OAuthConstants.SCOPE + "=" +
@@ -169,7 +169,7 @@ public class EndpointUtil {
     public static String getUserConsentURL(HttpServletRequest req, org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO clientDTO,
                                            OAuth2Parameters params, String loggedInUser, String redirectUrl) {
 
-        String consentPage = CarbonUIUtil.getAdminConsoleURL("/") + "../applicationauthentication/oauth2_login.do";
+        String consentPage = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_login.do";
 
 
 		try {
