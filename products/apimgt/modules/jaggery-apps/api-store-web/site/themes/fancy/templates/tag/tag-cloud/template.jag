@@ -1,0 +1,42 @@
+<% jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
+<div id="tag-cloud">
+    <h4><%=i18n.localize("tags")%></h4>
+
+    <div class="tag-content">
+        <div class="clouds">
+            <div class="aCenter box10">
+    <%
+        var tenant=request.getParameter("tenant");
+        var urlPrefix;
+        if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+
+        var i, tag, tags = outputs.tags, length = tags.length;
+        var maxPercent = 150, minPercent = 100;
+        var max = -1, min = 99999999999, count = 0, size, path;
+        for(i = 0; i < length; i++) {
+            tag = tags[i];
+            count = parseInt(tags[i].count);
+            max = (count > max ? count : max);
+            min = (min > count ? count : min);
+        }
+
+        var total, link, size;
+        var multiplier = (maxPercent - minPercent) / (max - min);
+        for(i = 0; i < length; i++) {
+            tag = tags[i];
+            count = parseInt(tag.count);
+            size = minPercent + ((max - (max - (count - min))) * multiplier) + "%";
+            path = jagg.getMappedUrl("/site/pages/list-apis.jag") + "?tag=" + tag.name+"&"+urlPrefix;
+
+            if(tag.name.split(site.tagGroupKey).length == 1){
+                var tagName = tag.name.split(site.tagGroupKey)[0];
+                print('<a href="' + path + '" class="cloud-link" style="font-size:' + size + '">' + tag.name + '</a>');
+            }
+        }
+    %>
+
+            </div>
+        </div>
+    </div>
+    </div>
+<% }); %>
