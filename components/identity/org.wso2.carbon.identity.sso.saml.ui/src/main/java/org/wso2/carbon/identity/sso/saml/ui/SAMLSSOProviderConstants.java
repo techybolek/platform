@@ -58,8 +58,6 @@ public class SAMLSSOProviderConstants {
 
 	public static final String SAMLSSOServiceClient = "ssoServiceClient";
 
-    public static final String LOGIN_PAGE = "customLoginPage";
-
 	public class AuthnModes {
 		public static final String USERNAME_PASSWORD = "usernamePasswordBasedAuthn";
 		public static final String OPENID = "openIDBasedAuthn";
