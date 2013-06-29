@@ -470,7 +470,7 @@
         <module>modules/samples</module>
         <module>modules/interop</module>
         <module>modules/persistence</module>
-        <module>modules/distribution</module>
+       <!-- <module>modules/distribution</module> -->
     </modules>
 
     <properties>
