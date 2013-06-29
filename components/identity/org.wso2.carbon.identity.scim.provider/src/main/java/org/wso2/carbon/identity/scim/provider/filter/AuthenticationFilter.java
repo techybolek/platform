@@ -39,7 +39,6 @@ public class AuthenticationFilter implements RequestHandler {
         if (log.isDebugEnabled()) {
             log.debug("Authenticating SCIM request..");
         }
-        //TODO: get the authenticator from authentication registry. If no authenticators' returned, error.
         SCIMAuthenticatorRegistry SCIMAuthRegistry = SCIMAuthenticatorRegistry.getInstance();
         if (SCIMAuthRegistry != null) {
             SCIMAuthenticationHandler SCIMAuthHandler = SCIMAuthRegistry.getAuthenticator(

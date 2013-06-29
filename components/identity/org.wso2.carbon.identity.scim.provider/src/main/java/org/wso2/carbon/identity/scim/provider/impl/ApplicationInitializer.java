@@ -19,44 +19,69 @@ package org.wso2.carbon.identity.scim.provider.impl;
 
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.scim.provider.auth.BasicAuthHandler;
+import org.wso2.carbon.identity.scim.provider.auth.OAuthHandler;
+import org.wso2.carbon.identity.scim.provider.auth.SCIMAuthConfigReader;
+import org.wso2.carbon.identity.scim.provider.auth.SCIMAuthenticationHandler;
 import org.wso2.carbon.identity.scim.provider.auth.SCIMAuthenticatorRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.charon.core.exceptions.CharonException;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.util.List;
 
 /**
  * This performs one-time initialization tasks at the application startup.
  */
 public class ApplicationInitializer implements ServletContextListener {
+
     private Log logger = LogFactory.getLog(ApplicationInitializer.class);
+
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        if(logger.isDebugEnabled()){
+        if (logger.isDebugEnabled()) {
             logger.debug("Initializing SCIM Webapp...");
         }
-        //Initialize Authentication Registry
-        initSCIMAuthenticatorRegistry();
+        try {
+            //Initialize Authentication Registry
+            initSCIMAuthenticatorRegistry();
+
+            //initialize identity scim manager
+            IdentitySCIMManager.getInstance();
+
+        } catch (CharonException e) {
+            logger.error("Error in initializing the IdentitySCIMManager at the initialization of " +
+                         "SCIM webapp");
+        }
     }
 
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
 
     }
 
-    private void initSCIMAuthenticatorRegistry(){
+    private void initSCIMAuthenticatorRegistry() {
         SCIMAuthenticatorRegistry scimAuthRegistry = SCIMAuthenticatorRegistry.getInstance();
         if (scimAuthRegistry != null) {
-            System.out.println("Initializing the webapp.......................................");    
-        }
-    }
+            //set authenticators after building auth config
+            SCIMAuthConfigReader configReader = new SCIMAuthConfigReader();
+            List<SCIMAuthenticationHandler> SCIMAuthenticators = configReader.buildSCIMAuthenticators();
+            if (SCIMAuthenticators != null && !SCIMAuthenticators.isEmpty()) {
+                for (SCIMAuthenticationHandler scimAuthenticator : SCIMAuthenticators) {
+                    scimAuthRegistry.setAuthenticator(scimAuthenticator);
+                }
+                                
+            } else {
+                //initialize default basic auth authenticator & OAuth authenticator and set it in the auth registry.
+                BasicAuthHandler basicAuthHandler = new BasicAuthHandler();
+                basicAuthHandler.setDefaultPriority();
+                scimAuthRegistry.setAuthenticator(basicAuthHandler);
 
-    private void buildSCIMAuthenticatorConfig(){
-        try {
-            IdentityConfigParser identityConfig = IdentityConfigParser.getInstance();
-            //identityConfig.getConfigElement("SCIMAuthenticators");
-            //TODO:parse the authenticators config and build the authenticators with properties. 
-        } catch (ServerConfigurationException e) {
-            logger.error("Error in reading authenticator config from " +
-                         "identity.xml when initializing the SCIM webapp...");
+                OAuthHandler oauthHandler = new OAuthHandler();
+                oauthHandler.setDefaultPriority();
+                oauthHandler.setDefaultAuthzServer();
+                scimAuthRegistry.setAuthenticator(oauthHandler);
+            }
         }
     }
 }

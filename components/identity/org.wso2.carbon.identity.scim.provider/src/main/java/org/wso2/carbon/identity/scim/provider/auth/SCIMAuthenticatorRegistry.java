@@ -59,13 +59,6 @@ public class SCIMAuthenticatorRegistry {
                                                       ClassResourceInfo classResourceInfo) {
         //since we use a tree map to store authenticators, they are ordered based on the priority.
         //therefore, we iterate over the authenticators and check the can handle method
-        if (SCIMAuthHandlers == null || SCIMAuthHandlers.isEmpty()) {
-            synchronized (this) {
-                if (SCIMAuthHandlers == null || SCIMAuthHandlers.isEmpty()) {
-                    initAuthenticators();
-                }
-            }
-        }
         for (SCIMAuthenticationHandler scimAuthenticationHandler : SCIMAuthHandlers.values()) {
             if (scimAuthenticationHandler.canHandle(message, classResourceInfo)) {
                 return scimAuthenticationHandler;
@@ -81,15 +74,5 @@ public class SCIMAuthenticatorRegistry {
     public void removeAuthenticator(SCIMAuthenticationHandler scimAuthenticationHandler) {
         SCIMAuthHandlers.remove(scimAuthenticationHandler.getPriority());
     }
-
-    //TODO: read authenticators and their properties from identity.xml and initialize authenticator map
-
-    public void initAuthenticators() {
-        //if no authenticators in config, init BasicAuth authenticator.
-        BasicAuthHandler basicAuthHandler = new BasicAuthHandler();
-        SCIMAuthHandlers.put(basicAuthHandler.getPriority(), basicAuthHandler);
-        OAuthHandler oauthHandler = new OAuthHandler();
-        SCIMAuthHandlers.put(oauthHandler.getPriority(), oauthHandler);
-    }
-
+    
 }

@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.identity.scim.provider.auth;
 
-import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
@@ -25,33 +24,51 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO;
-import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.identity.scim.provider.util.SCIMProviderConstants;
 import org.wso2.charon.core.schema.SCIMConstants;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class OAuthHandler implements SCIMAuthenticationHandler {
 
     private static Log log = LogFactory.getLog(BasicAuthHandler.class);
 
-    private String remoteServiceURL = "https://localhost:9443/services";
-    private int priority = 5;
-    private String userName = "admin";
-    private String password = "admin";
+    /*properties map to be initialized*/
+    private Map<String, String> properties;
 
+    /*properties specific to this authenticator*/
+    private String remoteServiceURL;
+    private int priority;
+    private String userName;
+    private String password;
+
+    /*constants specific to this authenticator*/
     private final String BEARER_AUTH_HEADER = "Bearer";
+    private final String LOCAL_PREFIX = "local";
+    private final int DEFAULT_PRIORITY = 10;
+    private final String LOCAL_AUTH_SERVER = "local://services";
 
     //Ideally this should be configurable. For the moment, hard code the priority.
+
     public int getPriority() {
         return priority;
     }
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public void setDefaultPriority() {
+        this.priority = DEFAULT_PRIORITY;
+    }
+
+    public void setDefaultAuthzServer() {
+        this.remoteServiceURL = LOCAL_AUTH_SERVER;
     }
 
     public boolean canHandle(Message message, ClassResourceInfo classResourceInfo) {
@@ -100,6 +117,29 @@ public class OAuthHandler implements SCIMAuthenticationHandler {
         return false;
     }
 
+    /**
+     * To set the properties specific to each authenticator
+     *
+     * @param authenticatorProperties
+     */
+    public void setProperties(Map<String, String> authenticatorProperties) {
+        this.properties = authenticatorProperties;
+        String priorityString = properties.get(SCIMProviderConstants.PROPERTY_NAME_PRIORITY);
+        if (priorityString != null) {
+            priority = Integer.parseInt(priorityString);
+        } else {
+            priority = DEFAULT_PRIORITY;
+        }
+        String remoteURLString = properties.get(SCIMProviderConstants.PROPERTY_NAME_AUTH_SERVER);
+        if (remoteURLString != null) {
+            remoteServiceURL = remoteURLString;
+        } else {
+            remoteServiceURL = LOCAL_AUTH_SERVER;
+        }
+        userName = properties.get(SCIMProviderConstants.PROPERTY_NAME_USERNAME);
+        password = properties.get(SCIMProviderConstants.PROPERTY_NAME_PASSWORD);
+    }
+
     private String getOAuthAuthzServerURL() {
         if (remoteServiceURL != null) {
             if (!remoteServiceURL.endsWith("/")) {
@@ -111,9 +151,23 @@ public class OAuthHandler implements SCIMAuthenticationHandler {
 
     private OAuth2TokenValidationResponseDTO validateAccessToken(String accessToken)
             throws Exception {
-        String carbonHome = CarbonUtils.getCarbonHome();
-        String axis2ClientRepo = carbonHome + File.separator + "repository" + File.separator +
-                                 "deployment" + File.separator + "client";
+        //if it is specified to use local authz server (i.e: local://services)
+        if (remoteServiceURL.startsWith(LOCAL_PREFIX)) {
+            OAuth2TokenValidationRequestDTO oauthValidationRequest = new OAuth2TokenValidationRequestDTO();
+            oauthValidationRequest.setAccessToken(accessToken);
+            oauthValidationRequest.setTokenType(OAuthServiceClient.BEARER_TOKEN_TYPE);
+
+            OAuth2TokenValidationService oauthValidationService = new OAuth2TokenValidationService();
+            org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO oauthValidationResponse =
+                    oauthValidationService.validate(oauthValidationRequest);
+
+            //need to convert to stub.dto
+            OAuth2TokenValidationResponseDTO oauthValidationResp = new OAuth2TokenValidationResponseDTO();
+            oauthValidationResp.setAuthorizedUser(oauthValidationResponse.getAuthorizedUser());
+            oauthValidationResp.setValid(oauthValidationResponse.isValid());
+            return oauthValidationResp;
+        }
+        //else do a web service call to the remote authz server
         try {
             ConfigurationContext configContext =
                     ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);

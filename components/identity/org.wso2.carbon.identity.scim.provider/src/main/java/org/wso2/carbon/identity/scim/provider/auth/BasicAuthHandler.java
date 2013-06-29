@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.scim.provider.util.SCIMProviderConstants;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -32,6 +33,7 @@ import org.wso2.charon.core.exceptions.UnauthorizedException;
 import org.wso2.charon.core.schema.SCIMConstants;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -41,7 +43,19 @@ public class BasicAuthHandler implements SCIMAuthenticationHandler {
 
     private static Log log = LogFactory.getLog(BasicAuthHandler.class);
 
+    /*property map*/
+    private Map<String, String> properties;
+
+    /*properties specific to this authenticator*/
+    private int priority;
+
+    /*constants specific to this authenticator*/
     private final String BASIC_AUTH_HEADER = "Basic";
+    private final int DEFAULT_PRIORITY = 5;
+
+    public void setDefaultPriority() {
+        priority = DEFAULT_PRIORITY;
+    }
 
     /**
      * Ideally this should be configurable. For the moment, hard code the priority.
@@ -49,10 +63,11 @@ public class BasicAuthHandler implements SCIMAuthenticationHandler {
      * @return
      */
     public int getPriority() {
-        return 1;
+        return priority;
     }
 
     public void setPriority(int priority) {
+        this.priority = priority;
     }
 
     public boolean canHandle(Message message, ClassResourceInfo classResourceInfo) {
@@ -138,5 +153,21 @@ public class BasicAuthHandler implements SCIMAuthenticationHandler {
             return false;
         }
 
+    }
+
+    /**
+     * To set the properties specific to each authenticator
+     *
+     * @param authenticatorProperties
+     */
+    public void setProperties(Map<String, String> authenticatorProperties) {
+        //set the priority read from config
+        this.properties = authenticatorProperties;
+        String priorityString = properties.get(SCIMProviderConstants.PROPERTY_NAME_PRIORITY);
+        if (priorityString != null) {
+            priority = Integer.parseInt(properties.get(SCIMProviderConstants.PROPERTY_NAME_PRIORITY));
+        } else {
+            priority = DEFAULT_PRIORITY;
+        }
     }
 }

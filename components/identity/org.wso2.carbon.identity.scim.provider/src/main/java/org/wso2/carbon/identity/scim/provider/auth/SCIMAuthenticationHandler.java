@@ -20,6 +20,8 @@ package org.wso2.carbon.identity.scim.provider.auth;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 
+import java.util.Map;
+
 /**
  * Interface to be implemented by any type of authentication handlers that will be registered
  * to authenticate SCIM requests coming to SCIM REST endpoints.
@@ -56,5 +58,11 @@ public interface SCIMAuthenticationHandler {
      * @return
      */
     public boolean isAuthenticated(Message message, ClassResourceInfo classResourceInfo);
+
+    /**
+     * To set the properties specific to each authenticator
+     * @param authenticatorProperties
+     */
+    public void setProperties(Map<String, String> authenticatorProperties);
 
 }
