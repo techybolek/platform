@@ -161,7 +161,7 @@
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
             <includes>
-                <include>applicationauthentication.war</include>
+                <include>authenticationendpoint.war</include>
             </includes>
         </fileSet>
 
