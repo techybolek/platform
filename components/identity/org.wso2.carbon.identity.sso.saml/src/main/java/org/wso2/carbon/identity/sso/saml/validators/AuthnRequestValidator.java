@@ -17,26 +17,23 @@
 */
 package org.wso2.carbon.identity.sso.saml.validators;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.Subject;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.core.model.SAMLSSOServiceProviderDO;
-import org.wso2.carbon.identity.sso.saml.SAMLSSOConfigService;
-import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
-import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
-import org.wso2.carbon.identity.sso.saml.builders.ErrorResponseBuilder;
-import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOReqValidationResponseDTO;
-import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOServiceProviderDTO;
-import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOServiceProviderInfoDTO;
-import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.common.SAMLVersion;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.core.model.SAMLSSOServiceProviderDO;
+import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
+import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOReqValidationResponseDTO;
+import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
+import org.wso2.carbon.identity.sso.saml.builders.ErrorResponseBuilder;
+import org.wso2.carbon.identity.sso.saml.SAMLSSOConstants;
 
 
 public class AuthnRequestValidator {
@@ -108,16 +105,6 @@ public class AuthnRequestValidator {
             // set the custom login page URL and ACS URL if available
             SSOServiceProviderConfigManager spConfigManager = SSOServiceProviderConfigManager.getInstance();
             SAMLSSOServiceProviderDO spDO = spConfigManager.getServiceProvider(issuer.getValue());
-            SAMLSSOConfigService service = new SAMLSSOConfigService();
-            SAMLSSOServiceProviderInfoDTO spss = service.getServiceProviders();
-            SAMLSSOServiceProviderDTO[] sps = spss.getServiceProviders();
-            for(SAMLSSOServiceProviderDTO sp : sps ){
-                     if(sp.getIssuer().equals(issuer.getValue())){
-                         validationResponse.setLoginPageURL(sp.getLoginPageURL());
-
-                     }
-            }
-
             String spAcsUrl = null;
             if(spDO != null){
                 validationResponse.setLoginPageURL(spDO.getLoginPageURL());
@@ -167,7 +154,7 @@ public class AuthnRequestValidator {
             validationResponse.setPassive(authnReq.isPassive());
 
             if (log.isDebugEnabled()) {
-                log.debug("Authentication Request Validation is successful..");
+            	log.debug("Authentication Request Validation is successful..");
             }
             return validationResponse;
         } catch (Exception e) {

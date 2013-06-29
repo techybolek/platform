@@ -17,6 +17,9 @@
 */
 package org.wso2.carbon.identity.sso.saml;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.xml.XMLObject;
@@ -31,9 +34,6 @@ import org.wso2.carbon.identity.sso.saml.processors.LogoutRequestProcessor;
 import org.wso2.carbon.identity.sso.saml.session.SSOSessionPersistenceManager;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
 import org.wso2.carbon.identity.sso.saml.validators.AuthnRequestValidator;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SAMLSSOService {
 
@@ -78,13 +78,13 @@ public class SAMLSSOService {
 						throw new IdentityException("Error processing the Authentication Request",
 						                            e);
 					}
-                } else if (!isExistingSession && validationResp.isPassive()){
-                    List<String> statusCodes = new ArrayList<String>();
-                    statusCodes.add(SAMLSSOConstants.StatusCodes.NO_PASSIVE);
-                    statusCodes.add(SAMLSSOConstants.StatusCodes.IDENTITY_PROVIDER_ERROR);
-                    validationResp.setResponse(SAMLSSOUtil.buildErrorResponse(
-                    validationResp.getId(), statusCodes,"Cannot authenticate Subject in Passive Mode"));
-                } else if (isExistingSession) { // now should send the Response
+				} else if (!isExistingSession && validationResp.isPassive()){
+					List<String> statusCodes = new ArrayList<String>();
+					statusCodes.add(SAMLSSOConstants.StatusCodes.NO_PASSIVE);
+					statusCodes.add(SAMLSSOConstants.StatusCodes.IDENTITY_PROVIDER_ERROR);
+					validationResp.setResponse(SAMLSSOUtil.buildErrorResponse(
+					validationResp.getId(), statusCodes,"Cannot authenticate Subject in Passive Mode"));
+				} else if (isExistingSession) { // now should send the Response
 					AuthnRequestProcessor authnRequestProcessor = new AuthnRequestProcessor();
 					try {
 						return authnRequestProcessor.process(validationResp, sessionId,
@@ -116,11 +116,11 @@ public class SAMLSSOService {
 	 * @return
 	 * @throws IdentityException
 	 */
-	public SAMLSSORespDTO processAuthentication(SAMLSSOAuthnReqDTO authReqDTO, String sessionId) throws IdentityException {
+	public SAMLSSORespDTO authenticate(SAMLSSOAuthnReqDTO authReqDTO, String sessionId, boolean authenticated, String authMode)
+	                                                                                   throws IdentityException {
 		AuthnRequestProcessor authnRequestProcessor = new AuthnRequestProcessor();
 		try {
-//			return authnRequestProcessor.process(authReqDTO, sessionId, authenticated, authMode);
-            return authnRequestProcessor.process(authReqDTO, sessionId );
+			return authnRequestProcessor.process(authReqDTO, sessionId, authenticated, authMode);
 		} catch (Exception e) {
 			throw new IdentityException("Error when authenticating the users", e);
 		}

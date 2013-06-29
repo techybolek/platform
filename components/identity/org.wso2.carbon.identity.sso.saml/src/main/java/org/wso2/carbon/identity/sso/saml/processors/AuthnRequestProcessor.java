@@ -17,6 +17,9 @@
 */
 package org.wso2.carbon.identity.sso.saml.processors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.saml2.core.Response;
@@ -38,36 +41,36 @@ import org.wso2.carbon.identity.sso.saml.session.SSOSessionPersistenceManager;
 import org.wso2.carbon.identity.sso.saml.session.SessionInfoData;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class AuthnRequestProcessor {
 
     private static Log log = LogFactory.getLog(AuthnRequestProcessor.class);
 
-    public SAMLSSORespDTO process(SAMLSSOAuthnReqDTO authnReqDTO, String sessionId) throws Exception {
-        try {
-          //                                    boolean isAuthencated, String authMode
-            SAMLSSOServiceProviderDO serviceProviderConfigs = getServiceProviderConfig(authnReqDTO);
-            if (serviceProviderConfigs == null) {
-                String msg =
-                        "A Service Provider with the Issuer '" + authnReqDTO.getIssuer() +
-                        "' is not registered." +
-                        " Service Provider should be registered in advance.";
-                log.warn(msg);
-                return buildErrorResponse(authnReqDTO.getId(),
-                                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, msg);
-            }
-            // reading the service provider configs
-            populateServiceProviderConfigs(serviceProviderConfigs, authnReqDTO);
+	public SAMLSSORespDTO process(SAMLSSOAuthnReqDTO authnReqDTO, String sessionId,
+	                              boolean isAuthencated, String authMode) throws Exception {
+		try {
+			SAMLSSOServiceProviderDO serviceProviderConfigs = getServiceProviderConfig(authnReqDTO);
+			if (serviceProviderConfigs == null) {
+				String msg =
+				             "A Service Provider with the Issuer '" + authnReqDTO.getIssuer() +
+				                     "' is not registered." +
+				                     " Service Provider should be registered in advance.";
+				log.warn(msg);
+				return buildErrorResponse(authnReqDTO.getId(),
+				                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, msg);
+			}
+			// reading the service provider configs
+			populateServiceProviderConfigs(serviceProviderConfigs, authnReqDTO);
 
-            if (authnReqDTO.getCertAlias() != null) {
-                
+			if (authnReqDTO.getCertAlias() != null) {
+				                
                 // Validate 'Destination'
                 String idpUrl = IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_IDP_URL);
     
@@ -82,186 +85,243 @@ public class AuthnRequestProcessor {
                 }
                 
                 // validate the signature
-                boolean isSignatureValid = SAMLSSOUtil.validateAuthnRequestSignature(authnReqDTO);
+				boolean isSignatureValid = SAMLSSOUtil.validateAuthnRequestSignature(authnReqDTO);
+				                          
+				if (!isSignatureValid) {
+					String msg = "Signature validation for Authentication Request failed.";
+					log.warn(msg);
+					return buildErrorResponse(authnReqDTO.getId(),
+					                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, msg);
+				}
+			}
 
-                if (!isSignatureValid) {
-                    String msg = "Signature validation for Authentication Request failed.";
-                    log.warn(msg);
-                    return buildErrorResponse(authnReqDTO.getId(),
-                                              SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, msg);
-                }
-            }
+			// if subject is specified in AuthnRequest only that user should be
+			// allowed to logged-in
+			if (authnReqDTO.getSubject() != null && authnReqDTO.getUsername() != null) {
+				if (!authnReqDTO.getUsername().equals(authnReqDTO.getSubject())) {
+					String msg = "Provided username does not match with the requested subject";
+					log.warn(msg);
+					return buildErrorResponse(authnReqDTO.getId(),
+					                          SAMLSSOConstants.StatusCodes.AUTHN_FAILURE, msg);
+				}
+			}
 
-            // if subject is specified in AuthnRequest only that user should be
-            // allowed to logged-in
-            if (authnReqDTO.getSubject() != null && authnReqDTO.getUsername() != null) {
-                if (!authnReqDTO.getUsername().equals(authnReqDTO.getSubject())) {
-                    String msg = "Provided username does not match with the requested subject";
-                    log.warn(msg);
-                    return buildErrorResponse(authnReqDTO.getId(),
-                                              SAMLSSOConstants.StatusCodes.AUTHN_FAILURE, msg);
-                }
-            }
+			// persist the session
+			SSOSessionPersistenceManager sessionPersistenceManager =
+			                                                         SSOSessionPersistenceManager.getPersistenceManager();
 
-            // persist the session
-            SSOSessionPersistenceManager sessionPersistenceManager =
-                    SSOSessionPersistenceManager.getPersistenceManager();
+		
+			// authenticate the user, if required
+			if (!isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
+				RealmService realmService = SAMLSSOUtil.getRealmService();
+				TenantManager tenantManager = realmService.getTenantManager();
+				String tenantDomain = MultitenantUtils.getTenantDomain(authnReqDTO.getUsername());
+				int tenantId = tenantManager.getTenantId(tenantDomain);
+				if (tenantId > 0) {
+					boolean isTenantActive = tenantManager.isTenantActive(tenantId);
+					if (!isTenantActive) {
+						log.warn("Unsuccessful login attempt from the tenant : " + tenantDomain);
+						String errorMsg = "login.fail.inactive.tenant";
+						SAMLSSORespDTO errorResp =
+						                           buildErrorResponse(authnReqDTO.getId(),
+						                                              SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
+						                                              errorMsg);
+						errorResp.setErrorMsg(errorMsg);
+						errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
+						return errorResp;
+					}
+				}
 
-            SAMLSSOServiceProviderDO spDO = new SAMLSSOServiceProviderDO();
-            spDO.setIssuer(authnReqDTO.getIssuer());
-            spDO.setAssertionConsumerUrl(authnReqDTO.getAssertionConsumerURL());
-            spDO.setCertAlias(authnReqDTO.getCertAlias());
-            spDO.setLogoutURL(authnReqDTO.getLogoutURL());
-            sessionPersistenceManager.persistSession(sessionId, authnReqDTO.getUsername(),
-                                                     spDO, authnReqDTO.getRpSessionId());
+				if (CarbonUtils.isRunningOnLocalTransportMode()
+						&& authnReqDTO.getPassword().equals(
+								"federated_idp_login")) {
+					isAuthencated = true;
+				} else if (!authenticate(authnReqDTO.getUsername(),
+						authnReqDTO.getPassword())) {
+					log.warn("Authentication Failure, invalid username or password.");
+					String errorMsg = "login.fail.message";
+					SAMLSSORespDTO errorResp = buildErrorResponse(
+							authnReqDTO.getId(),
+							SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
+							errorMsg);
+					errorResp.setErrorMsg(errorMsg);
+					errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
+					return errorResp;
+				}
 
-            // Build the response for the successful scenario
-            ResponseBuilder respBuilder = new ResponseBuilder();
-            Response response = respBuilder.buildResponse(authnReqDTO, sessionId);
-            SAMLSSORespDTO samlssoRespDTO = new SAMLSSORespDTO();
-            samlssoRespDTO.setRespString(SAMLSSOUtil.encode(SAMLSSOUtil.marshall(response)));
-            samlssoRespDTO.setSessionEstablished(true);
-            samlssoRespDTO.setAssertionConsumerURL(authnReqDTO.getAssertionConsumerURL());
-            samlssoRespDTO.setLoginPageURL(authnReqDTO.getLoginPageURL());
-            samlssoRespDTO.setSubject(authnReqDTO.getUsername());
+				SAMLSSOServiceProviderDO spDO = new SAMLSSOServiceProviderDO();
+				spDO.setIssuer(authnReqDTO.getIssuer());
+				spDO.setAssertionConsumerUrl(authnReqDTO.getAssertionConsumerURL());
+				spDO.setCertAlias(authnReqDTO.getCertAlias());
+				spDO.setLogoutURL(authnReqDTO.getLogoutURL());
+				sessionPersistenceManager.persistSession(sessionId, authnReqDTO.getUsername(),
+				                                         spDO, authnReqDTO.getRpSessionId());
+			}
 
-            return samlssoRespDTO;
-        } catch (Exception e) {
-            log.error("Error processing the authentication request", e);
-            SAMLSSORespDTO errorResp =
-                    buildErrorResponse(authnReqDTO.getId(),
-                                       SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
-                                       "Authentication Failure, invalid username or password.");
-            errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
-            return errorResp;
-        }
-    }
+			if (isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
+				SessionInfoData sessionInfo = sessionPersistenceManager.getSessionInfo(sessionId);
+				authnReqDTO.setUsername(sessionInfo.getSubject());
+				sessionPersistenceManager.persistSession(sessionId, authnReqDTO.getIssuer(),
+				                                         authnReqDTO.getAssertionConsumerURL(),
+				                                         authnReqDTO.getRpSessionId());
+			}
+
+			if (isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.OPENID)) {
+				SAMLSSOServiceProviderDO spDO = new SAMLSSOServiceProviderDO();
+				spDO.setIssuer(authnReqDTO.getIssuer());
+				spDO.setAssertionConsumerUrl(authnReqDTO.getAssertionConsumerURL());
+				spDO.setCertAlias(authnReqDTO.getCertAlias());
+				spDO.setLogoutURL(authnReqDTO.getLogoutURL());
+				sessionPersistenceManager.persistSession(sessionId, authnReqDTO.getUsername(),
+				                                         spDO, authnReqDTO.getRpSessionId());
+			}
+
+			// Build the response for the successful scenario
+			ResponseBuilder respBuilder = new ResponseBuilder();
+			Response response = respBuilder.buildResponse(authnReqDTO, sessionId);
+			SAMLSSORespDTO samlssoRespDTO = new SAMLSSORespDTO();
+			samlssoRespDTO.setRespString(SAMLSSOUtil.encode(SAMLSSOUtil.marshall(response)));
+			samlssoRespDTO.setSessionEstablished(true);
+			samlssoRespDTO.setAssertionConsumerURL(authnReqDTO.getAssertionConsumerURL());
+			samlssoRespDTO.setLoginPageURL(authnReqDTO.getLoginPageURL());
+			samlssoRespDTO.setSubject(authnReqDTO.getUsername());
+
+			return samlssoRespDTO;
+		} catch (Exception e) {
+			log.error("Error processing the authentication request", e);
+			SAMLSSORespDTO errorResp =
+			                           buildErrorResponse(authnReqDTO.getId(),
+			                                              SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
+			                                              "Authentication Failure, invalid username or password.");
+			errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
+			return errorResp;
+		}
+	}
 
 
-    /**
-     * Returns the configured service provider configurations. The
-     * configurations are taken from the user registry or from the
-     * sso-idp-config.xml configuration file. In Stratos deployment the
-     * configurations are read from the sso-idp-config.xml file.
-     *
-     * @param authnReqDTO
-     * @return
-     * @throws IdentityException
-     */
-    private SAMLSSOServiceProviderDO getServiceProviderConfig(SAMLSSOAuthnReqDTO authnReqDTO)
-            throws IdentityException {
-        try {
-            SSOServiceProviderConfigManager stratosIdpConfigManager =
-                                                                      SSOServiceProviderConfigManager.getInstance();
-            SAMLSSOServiceProviderDO ssoIdpConfigs =
-                    stratosIdpConfigManager.getServiceProvider(authnReqDTO.getIssuer());
-            if (ssoIdpConfigs == null) {
-                IdentityPersistenceManager persistenceManager =
-                        IdentityPersistenceManager.getPersistanceManager();
-                UserRegistry registry =
-                        AnonymousSessionUtil.getSystemRegistryByUserName(SAMLSSOUtil.getRegistryService(),
-                                                                         SAMLSSOUtil.getRealmService(),
-                                                                         authnReqDTO.getUsername());
-                ssoIdpConfigs =
-                        persistenceManager.getServiceProvider(registry,
-                                                              authnReqDTO.getIssuer());
-                authnReqDTO.setStratosDeployment(false); // not stratos
-            } else {
-                authnReqDTO.setStratosDeployment(true); // stratos deployment
-            }
-            return ssoIdpConfigs;
-        } catch (Exception e) {
-            log.error("Error while reading Service Provider configurations", e);
-            throw new IdentityException("Error while reading Service Provider configurations");
-        }
-    }
+	/**
+	 * Returns the configured service provider configurations. The
+	 * configurations are taken from the user registry or from the
+	 * sso-idp-config.xml configuration file. In Stratos deployment the
+	 * configurations are read from the sso-idp-config.xml file.
+	 * 
+	 * @param authnReqDTO
+	 * @return
+	 * @throws IdentityException
+	 */
+	private SAMLSSOServiceProviderDO getServiceProviderConfig(SAMLSSOAuthnReqDTO authnReqDTO)
+	                                                                                         throws IdentityException {
+		try {
+			SSOServiceProviderConfigManager stratosIdpConfigManager =
+			                                                          SSOServiceProviderConfigManager.getInstance();
+			SAMLSSOServiceProviderDO ssoIdpConfigs =
+			                                         stratosIdpConfigManager.getServiceProvider(authnReqDTO.getIssuer());
+			if (ssoIdpConfigs == null) {
+				IdentityPersistenceManager persistenceManager =
+				                                                IdentityPersistenceManager.getPersistanceManager();
+				UserRegistry registry =
+				                        AnonymousSessionUtil.getSystemRegistryByUserName(SAMLSSOUtil.getRegistryService(),
+				                                                                         SAMLSSOUtil.getRealmService(),
+				                                                                         authnReqDTO.getUsername());
+				ssoIdpConfigs =
+				                persistenceManager.getServiceProvider(registry,
+				                                                      authnReqDTO.getIssuer());
+				authnReqDTO.setStratosDeployment(false); // not stratos
+			} else {
+				authnReqDTO.setStratosDeployment(true); // stratos deployment
+			}
+			return ssoIdpConfigs;
+		} catch (Exception e) {
+			log.error("Error while reading Service Provider configurations", e);
+			throw new IdentityException("Error while reading Service Provider configurations");
+		}
+	}
 
-    /**
-     * Populate the configurations of the service provider
-     *
-     * @param ssoIdpConfigs
-     * @param authnReqDTO
-     * @throws IdentityException
-     */
-    private void populateServiceProviderConfigs(SAMLSSOServiceProviderDO ssoIdpConfigs,
-                                                SAMLSSOAuthnReqDTO authnReqDTO)
-            throws IdentityException {
-        String acsUrl = authnReqDTO.getAssertionConsumerURL();
-        if (acsUrl != null && !ssoIdpConfigs.getAssertionConsumerUrl().equals(acsUrl)) {
-            log.error("ALERT: Invalid Assertion Consumer URL value '" + acsUrl + "' in the " +
-                      "AuthnRequest message from  the issuer '" + ssoIdpConfigs.getIssuer() +
-                      "'. Possibly " + "an attempt for a spoofing attack");
-            throw new IdentityException("Invalid Assertion Consumer URL value '" + acsUrl +
-                                        "' in the " + "AuthnRequest");
-        }
-        authnReqDTO.setAssertionConsumerURL(ssoIdpConfigs.getAssertionConsumerUrl());
-        authnReqDTO.setLoginPageURL(ssoIdpConfigs.getLoginPageURL());
-        authnReqDTO.setCertAlias(ssoIdpConfigs.getCertAlias());
-        authnReqDTO.setUseFullyQualifiedUsernameAsSubject(ssoIdpConfigs.isUseFullyQualifiedUsername());
-        authnReqDTO.setDoSingleLogout(ssoIdpConfigs.isDoSingleLogout());
-        authnReqDTO.setLogoutURL(ssoIdpConfigs.getLogoutURL());
-        authnReqDTO.setDoSignResponse(ssoIdpConfigs.isDoSignResponse());
-        authnReqDTO.setDoSignAssertions(ssoIdpConfigs.isDoSignAssertions());
-        authnReqDTO.setRequestedClaims((ssoIdpConfigs.getRequestedClaims()));
+	/**
+	 * Populate the configurations of the service provider
+	 * 
+	 * @param ssoIdpConfigs
+	 * @param authnReqDTO
+	 * @throws IdentityException
+	 */
+	private void populateServiceProviderConfigs(SAMLSSOServiceProviderDO ssoIdpConfigs,
+	                                            SAMLSSOAuthnReqDTO authnReqDTO)
+	                                                                           throws IdentityException {
+		String acsUrl = authnReqDTO.getAssertionConsumerURL();
+		if (acsUrl != null && !ssoIdpConfigs.getAssertionConsumerUrl().equals(acsUrl)) {
+			log.error("ALERT: Invalid Assertion Consumer URL value '" + acsUrl + "' in the " +
+			          "AuthnRequest message from  the issuer '" + ssoIdpConfigs.getIssuer() +
+			          "'. Possibly " + "an attempt for a spoofing attack");
+			throw new IdentityException("Invalid Assertion Consumer URL value '" + acsUrl +
+			                            "' in the " + "AuthnRequest");
+		}
+		authnReqDTO.setAssertionConsumerURL(ssoIdpConfigs.getAssertionConsumerUrl());
+		authnReqDTO.setLoginPageURL(ssoIdpConfigs.getLoginPageURL());
+		authnReqDTO.setCertAlias(ssoIdpConfigs.getCertAlias());
+		authnReqDTO.setUseFullyQualifiedUsernameAsSubject(ssoIdpConfigs.isUseFullyQualifiedUsername());
+		authnReqDTO.setDoSingleLogout(ssoIdpConfigs.isDoSingleLogout());
+		authnReqDTO.setLogoutURL(ssoIdpConfigs.getLogoutURL());
+		authnReqDTO.setDoSignResponse(ssoIdpConfigs.isDoSignResponse());
+		authnReqDTO.setDoSignAssertions(ssoIdpConfigs.isDoSignAssertions());
+		authnReqDTO.setRequestedClaims((ssoIdpConfigs.getRequestedClaims()));
         authnReqDTO.setRequestedAudiences((ssoIdpConfigs.getRequestedAudiences()));
-    }
+	}
+	
+	/**
+	 * Creates a <code>SAMLSSOAuthnReqDTO</code> object using the
+	 * <code>SAMLSSOReqValidationResponseDTO</code> object parameters. Then the
+	 * <code>SAMLSSOAuthnReqDTO</code> is fed into the process method for
+	 * further processing of the request message.
+	 * 
+	 * @param valiationDTO
+	 * @param sessionId
+	 * @param rpSessionId
+	 * @param authMode
+	 * @return
+	 * @throws Exception
+	 */
+	public SAMLSSOReqValidationResponseDTO process(SAMLSSOReqValidationResponseDTO valiationDTO,
+	                                               String sessionId, String rpSessionId,
+	                                               String authMode) throws Exception {
+		SAMLSSOAuthnReqDTO authReqDTO = new SAMLSSOAuthnReqDTO();
+		authReqDTO.setIssuer(valiationDTO.getIssuer());
+		authReqDTO.setAssertionConsumerURL(valiationDTO.getAssertionConsumerURL());
+		authReqDTO.setSubject(valiationDTO.getSubject());
+		authReqDTO.setId(valiationDTO.getId());
+		authReqDTO.setRpSessionId(rpSessionId);
+		authReqDTO.setRequestMessageString(valiationDTO.getRequestMessageString());
+		authReqDTO.setQueryString(valiationDTO.getQueryString());
+		authReqDTO.setDestination(valiationDTO.getDestination());
 
-    /**
-     * Creates a <code>SAMLSSOAuthnReqDTO</code> object using the
-     * <code>SAMLSSOReqValidationResponseDTO</code> object parameters. Then the
-     * <code>SAMLSSOAuthnReqDTO</code> is fed into the process method for
-     * further processing of the request message.
-     *
-     * @param valiationDTO
-     * @param sessionId
-     * @param rpSessionId
-     * @param authMode
-     * @return
-     * @throws Exception
-     */
-    public SAMLSSOReqValidationResponseDTO process(SAMLSSOReqValidationResponseDTO valiationDTO,
-                                                   String sessionId, String rpSessionId,
-                                                   String authMode) throws Exception {
-        SAMLSSOAuthnReqDTO authReqDTO = new SAMLSSOAuthnReqDTO();
-        authReqDTO.setIssuer(valiationDTO.getIssuer());
-        authReqDTO.setAssertionConsumerURL(valiationDTO.getAssertionConsumerURL());
-        authReqDTO.setSubject(valiationDTO.getSubject());
-        authReqDTO.setId(valiationDTO.getId());
-        authReqDTO.setRpSessionId(rpSessionId);
-        authReqDTO.setRequestMessageString(valiationDTO.getRequestMessageString());
-        authReqDTO.setQueryString(valiationDTO.getQueryString());
-        authReqDTO.setDestination(valiationDTO.getDestination());
+		if (authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
+			SSOSessionPersistenceManager sessionPersistenceManager =
+			                                                         SSOSessionPersistenceManager.getPersistenceManager();
+			SessionInfoData sessionInfo = sessionPersistenceManager.getSessionInfo(sessionId);
+			authReqDTO.setUsername(sessionInfo.getSubject());
+		} else {
+			authReqDTO.setUsername(valiationDTO.getSubject());
+		}
 
-        if (authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
-            SSOSessionPersistenceManager sessionPersistenceManager =
-                    SSOSessionPersistenceManager.getPersistenceManager();
-            SessionInfoData sessionInfo = sessionPersistenceManager.getSessionInfo(sessionId);
-            authReqDTO.setUsername(sessionInfo.getSubject());
-        } else {
-            authReqDTO.setUsername(valiationDTO.getSubject());
-        }
+		SAMLSSOReqValidationResponseDTO responseDTO = new SAMLSSOReqValidationResponseDTO();
+		SAMLSSORespDTO respDTO = process(authReqDTO, sessionId, true, authMode);
+		
+		responseDTO.setValid(true);
+		responseDTO.setResponse(respDTO.getRespString());
+		responseDTO.setAssertionConsumerURL(respDTO.getAssertionConsumerURL());
+		responseDTO.setLoginPageURL(respDTO.getLoginPageURL());
+		responseDTO.setSubject(respDTO.getSubject());
 
-        SAMLSSOReqValidationResponseDTO responseDTO = new SAMLSSOReqValidationResponseDTO();
-       // SAMLSSORespDTO respDTO = process(authReqDTO, sessionId, true, authMode);
-        SAMLSSORespDTO respDTO = process(authReqDTO, sessionId);
+		return responseDTO;
+	}
 
-
-        responseDTO.setValid(true);
-        responseDTO.setResponse(respDTO.getRespString());
-        responseDTO.setAssertionConsumerURL(respDTO.getAssertionConsumerURL());
-        responseDTO.setLoginPageURL(respDTO.getLoginPageURL());
-        responseDTO.setSubject(respDTO.getSubject());
-
-        return responseDTO;
-    }
-
-    /**
-     * @param id
-     * @param status
-     * @param statMsg
-     * @return
-     * @throws Exception
-     */
+	/**
+	 * 
+	 * @param id
+	 * @param status
+	 * @param statMsg
+	 * @return
+	 * @throws Exception
+	 */
     private SAMLSSORespDTO buildErrorResponse(String id, String status,
                                               String statMsg) throws Exception {
         SAMLSSORespDTO samlSSORespDTO = new SAMLSSORespDTO();
@@ -301,7 +361,7 @@ public class AuthnRequestProcessor {
                 }
                 return false;
             }
-
+            
             int index = username.indexOf("/");
             if (index < 0) {
                 String domain = UserCoreUtil.getDomainFromThreadLocal();
