@@ -190,7 +190,7 @@
 		<Authenticator class="org.wso2.carbon.identity.scim.provider.auth.OAuthHandler">
 			<Property name="Priority">10</Property>
 			<Property name="AuthorizationServer">local://services</Property>
-			<!--Property name="Authorization Server">https://localhost:9443/services</Property>
+			<!--Property name="AuthorizationServer">https://localhost:9443/services</Property>
 			<Property name="UserName">admin</Property>
 			<Property name="Password">admin</Property-->
 		</Authenticator>
