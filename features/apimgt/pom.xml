@@ -36,6 +36,8 @@
         <module>org.wso2.carbon.apimgt.server.feature</module>
         <module>org.wso2.carbon.apimgt.ui.feature</module>
 	<module>org.wso2.carbon.apimgt.server.lite.feature</module>
+	<module>org.wso2.carbon.apimgt.core.feature</module>
+	<module>org.wso2.carbon.apimgt.interceptor.feature</module>
     </modules>
 
     <dependencyManagement>
