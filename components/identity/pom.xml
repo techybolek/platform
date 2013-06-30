@@ -58,6 +58,7 @@
         <module>org.wso2.carbon.identity.entitlement.mediator</module>
         <module>org.wso2.carbon.identity.sts.passive</module>
         <module>org.wso2.carbon.identity.sts.passive.ui</module>
+        <module>org.wso2.carbon.identity.sso.saml.common</module>
         <module>org.wso2.carbon.identity.sso.saml</module>
         <module>org.wso2.carbon.identity.sso.saml.ui</module>
         <module>org.wso2.carbon.identity.provider.openid.admin</module>
