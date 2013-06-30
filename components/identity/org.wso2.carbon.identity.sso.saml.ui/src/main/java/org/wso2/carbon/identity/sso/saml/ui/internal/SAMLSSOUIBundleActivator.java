@@ -22,7 +22,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.sso.saml.ui.util.SAMLSSOUIUtil;
+import org.wso2.carbon.identity.sso.saml.common.Util;
 
 
 public class SAMLSSOUIBundleActivator implements BundleActivator {
@@ -33,16 +33,16 @@ public class SAMLSSOUIBundleActivator implements BundleActivator {
     public void start(BundleContext bundleContext) {
         try {
             IdentityUtil.populateProperties();
-            SAMLSSOUIUtil.setSingleLogoutRetryCount(Integer.parseInt(
+            Util.setSingleLogoutRetryCount(Integer.parseInt(
                     IdentityUtil.getProperty(IdentityConstants.ServerConfig.SINGLE_LOGOUT_RETRY_COUNT)));
-            SAMLSSOUIUtil.setSingleLogoutRetryInterval(Long.parseLong(IdentityUtil.getProperty(
+            Util.setSingleLogoutRetryInterval(Long.parseLong(IdentityUtil.getProperty(
                     IdentityConstants.ServerConfig.SINGLE_LOGOUT_RETRY_INTERVAL)));
-            log.debug("Single logout retry count is set to " + SAMLSSOUIUtil.getSingleLogoutRetryCount());
+            log.debug("Single logout retry count is set to " + Util.getSingleLogoutRetryCount());
             log.debug("Single logout retry interval is set to " +
-                      SAMLSSOUIUtil.getSingleLogoutRetryInterval() + " in seconds.");
+                      Util.getSingleLogoutRetryInterval() + " in seconds.");
         } catch (Exception e) {
-            SAMLSSOUIUtil.setSingleLogoutRetryCount(defaultSingleLogoutRetryCount);
-            SAMLSSOUIUtil.setSingleLogoutRetryInterval(defaultSingleLogoutRetryInterval);
+            Util.setSingleLogoutRetryCount(defaultSingleLogoutRetryCount);
+            Util.setSingleLogoutRetryInterval(defaultSingleLogoutRetryInterval);
             if (log.isDebugEnabled()) {
                 log.debug("Failed to activate SAMLSSOUIBundle Activator," +
                         " which load the single logout retry count and interval values." +

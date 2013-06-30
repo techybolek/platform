@@ -22,7 +22,7 @@
         import="org.wso2.carbon.CarbonError" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOServiceProviderDTO" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOServiceProviderInfoDTO" %>
-<%@ page import="org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProviderConstants" %>
+<%@ page import="org.wso2.carbon.identity.sso.saml.common.SAMLSSOProviderConstants" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.ui.client.SAMLSSOConfigServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page
@@ -30,7 +30,7 @@
 <%@ page
         import="java.util.ArrayList" %>
 <%@ page import="java.util.Collections" %>
-<%@ page import="org.wso2.carbon.identity.sso.saml.ui.util.SAMLSSOUIUtil" %>
+<%@ page import="org.wso2.carbon.identity.sso.saml.common.Util" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
            prefix="carbon" %>
@@ -132,9 +132,9 @@
 
         serviceProviderInfoDTO = spConfigClient.getRegisteredServiceProviders();
         if (serviceProviderInfoDTO.getServiceProviders() != null) {
-            SAMLSSOServiceProviderDTO[] filteredProviders = SAMLSSOUIUtil.doFilter(filter, serviceProviderInfoDTO.getServiceProviders() ) ;
+            SAMLSSOServiceProviderDTO[] filteredProviders = Util.doFilter(filter, serviceProviderInfoDTO.getServiceProviders() ) ;
             numberOfPages = (int) Math.ceil((double) filteredProviders.length / itemsPerPageInt);
-            SAMLSSOServiceProviderDTO[] paginatedServiceProviders = SAMLSSOUIUtil.doPaging(pageNumberInt, filteredProviders);
+            SAMLSSOServiceProviderDTO[] paginatedServiceProviders = Util.doPaging(pageNumberInt, filteredProviders);
             Collections.addAll(providers, paginatedServiceProviders);
         }
         if (reload != null && "true".equals(reload)) {

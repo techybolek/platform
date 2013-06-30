@@ -18,9 +18,9 @@
 <%@page import="org.apache.axis2.context.ConfigurationContext"%>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOServiceProviderDTO" %>
-<%@ page import="org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProviderConstants" %>
+<%@ page import="org.wso2.carbon.identity.sso.saml.common.SAMLSSOProviderConstants" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.ui.client.SAMLSSOConfigServiceClient" %>
-<%@page import="org.wso2.carbon.identity.sso.saml.ui.util.SAMLSSOUIUtil" %>
+<%@page import="org.wso2.carbon.identity.sso.saml.common.Util" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
@@ -57,15 +57,15 @@
 
         SAMLSSOServiceProviderDTO serviceProviderDTO = new SAMLSSOServiceProviderDTO();
         boolean isEditingSP = false; 
-        if ("editServiceProvider".equals(SAMLSSOUIUtil.getSafeInput(request, "SPAction"))) {
+        if ("editServiceProvider".equals(Util.getSafeInput(request, "SPAction"))) {
             isEditingSP = true;
-            serviceProviderDTO.setIssuer(SAMLSSOUIUtil.getSafeInput(request, "hiddenIssuer"));
+            serviceProviderDTO.setIssuer(Util.getSafeInput(request, "hiddenIssuer"));
         } else {
-            serviceProviderDTO.setIssuer(SAMLSSOUIUtil.getSafeInput(request, "issuer"));
+            serviceProviderDTO.setIssuer(Util.getSafeInput(request, "issuer"));
         }
 
-        serviceProviderDTO.setAssertionConsumerUrl(SAMLSSOUIUtil.getSafeInput(request, "assrtConsumerURL"));
-        serviceProviderDTO.setCertAlias(SAMLSSOUIUtil.getSafeInput(request, "alias"));
+        serviceProviderDTO.setAssertionConsumerUrl(Util.getSafeInput(request, "assrtConsumerURL"));
+        serviceProviderDTO.setCertAlias(Util.getSafeInput(request, "alias"));
 
         if ("true".equals(request.getParameter("useFullQualifiedUsername"))) {
             serviceProviderDTO.setUseFullyQualifiedUsername(true);
@@ -91,12 +91,12 @@
 
         if ("true".equals(request.getParameter("enableAttributeProfile"))) {
 
-        String claimsCountParameter = SAMLSSOUIUtil.getSafeInput(request, "claimPropertyCounter");
+        String claimsCountParameter = Util.getSafeInput(request, "claimPropertyCounter");
         if (claimsCountParameter != null && !"".equals(claimsCountParameter)) {
             try {
                 int claimsCount = Integer.parseInt(claimsCountParameter);
                 for (int i = 0; i < claimsCount; i++) {
-                    String claim = SAMLSSOUIUtil.getSafeInput(request, "claimPropertyName" + i);
+                    String claim = Util.getSafeInput(request, "claimPropertyName" + i);
                     if (claim != null && !"".equals(claim) && !"null".equals(claim)) {
                         String[] currentClaims = serviceProviderDTO.getRequestedClaims();
                         boolean isClaimAlreadyAdded = false;
@@ -120,12 +120,12 @@
 
         if ("true".equals(request.getParameter("enableAudienceRestriction"))) {
 
-        	String audiencesCountParameter = SAMLSSOUIUtil.getSafeInput(request, "audiencePropertyCounter");
+        	String audiencesCountParameter = Util.getSafeInput(request, "audiencePropertyCounter");
         	if (audiencesCountParameter != null && !"".equals(audiencesCountParameter)) {
             	try {
                 	int audiencesCount = Integer.parseInt(audiencesCountParameter);
                 	for (int i = 0; i < audiencesCount; i++) {
-                    	String audience = SAMLSSOUIUtil.getSafeInput(request, "audiencePropertyName" + i);
+                    	String audience = Util.getSafeInput(request, "audiencePropertyName" + i);
                     	if (audience != null && !"".equals(audience) && !"null".equals(audience)) {
                         	String[] currentAudiences = serviceProviderDTO.getRequestedAudiences();
                         	boolean isAudienceAlreadyAdded = false;

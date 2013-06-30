@@ -105,6 +105,7 @@
                             org.wso2.carbon.identity.core.*;
                             org.apache.http.client,
                             org.apache.commons.httpclient.*,
+                            org.wso2.carbon.identity.sso.saml.common.*,
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>org.wso2.carbon.identity.sso.saml.ui.*</Export-Package>

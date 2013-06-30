@@ -22,7 +22,7 @@
         import="org.wso2.carbon.CarbonError" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOServiceProviderDTO" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOServiceProviderInfoDTO" %>
-<%@ page import="org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProviderConstants" %>
+<%@ page import="org.wso2.carbon.identity.sso.saml.common.SAMLSSOProviderConstants" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.ui.client.SAMLSSOConfigServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page
@@ -30,7 +30,6 @@
 <%@ page
         import="java.util.ArrayList" %>
 <%@ page import="java.util.Collections" %>
-<%@ page import="org.wso2.carbon.identity.sso.saml.ui.util.SAMLSSOUIUtil" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
            prefix="carbon" %>
@@ -79,18 +78,6 @@
                         null, null);
                 return false;
 
-        }
-
-        var fldLogin = document.getElementsByName("loginPageURL")[0];
-        var loginValue = fldLogin.value;
-
-        if(loginValue.length !=0){
-            if (!regexp.test(loginValue)) {
-                CARBON.showWarningDialog(
-                        "<fmt:message key='sp.enter.valid.login.endpoint.address'/>",
-                        null, null);
-                return false;
-            }
         }
 
         var fld = document.getElementsByName("issuer")[0];
@@ -406,32 +393,6 @@
                value="<%=isEditSP?provider.getAssertionConsumerUrl():""%>"/>
     </td>
 </tr>
-
-<!-- LoginPageUrl -->
-<%
-    if (isEditSP) {
-%>
-<tr>
-    <td style="width: 300px;">
-        <fmt:message key="loginPage.url"/>
-    </td>
-    <td>
-        <input type="text" id="loginPageURL" name="loginPageURL"
-               value="<%=provider.getLoginPageURL()%>"
-               class="text-box-big"/>
-    </td>
-
-</tr>
-<% } else {%>
-<td style="width: 300px;">
-    <fmt:message key="loginPage.url"/>
-</td>
-<td>
-    <input type="text" id="loginPageURL" name="loginPageURL"
-           value=""
-           class="text-box-big"/>
-</td>
-<% } %>
 
 <!-- UseFullQualifiedUsername -->
 

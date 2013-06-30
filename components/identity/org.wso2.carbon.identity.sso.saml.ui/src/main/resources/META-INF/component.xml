@@ -39,14 +39,5 @@
             <require-permission>/permission/admin/manage</require-permission>
          </menu>
 	</menus>
-
-	<servlets>
-		<servlet id="SAMLSSOProvider">
-			<servlet-name>SAMLSSOProviderServlet</servlet-name>
-			<url-pattern>/samlsso</url-pattern>
-			<display-name>SAML SSO Provider Servlet</display-name>
-			<servlet-class>org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProvider</servlet-class>
-		</servlet>
-	</servlets>
 </component>
  
