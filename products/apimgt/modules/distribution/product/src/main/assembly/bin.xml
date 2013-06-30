@@ -113,17 +113,18 @@
             </directory>
             <outputDirectory>wso2am-${pom.version}/dbscripts/migration-1.3.0_to_1.4.0</outputDirectory>
         </fileSet>
+        
+	<fileSet>
+             <directory>../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/repository/deployment/server/jaggeryapps/publisher/</directory>
+             <outputDirectory>wso2am-${pom.version}/repository/deployment/server/jaggeryapps/publisher</outputDirectory>
+         </fileSet>
+         <fileSet>
+             <directory>../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/repository/deployment/server/jaggeryapps/store/</directory>
+             <outputDirectory>wso2am-${pom.version}/repository/deployment/server/jaggeryapps/store</outputDirectory>
+         </fileSet>
+	<!--  copying modules xml -->
         <fileSet>
-            <directory>../../jaggery-apps/api-publisher-web</directory>
-            <outputDirectory>wso2am-${pom.version}/repository/deployment/server/jaggeryapps/publisher</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>../../jaggery-apps/api-store-web</directory>
-            <outputDirectory>wso2am-${pom.version}/repository/deployment/server/jaggeryapps/store</outputDirectory>
-        </fileSet>
-		<!--  copying modules xml -->
-        <fileSet>
-            <directory>../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/modules</directory>
+            <directory>../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/repository/modules</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/modules/</outputDirectory>
 	    	<includes>
                 <include>*/**</include>

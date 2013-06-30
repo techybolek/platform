@@ -1,8 +1,0 @@
-<%
-jagg.block("item-add", {
-    initializer:function (data) {
-
-    }
-
-});
-%>

@@ -6,6 +6,9 @@
     -->
     <DataSourceName>jdbc/WSO2AM_DB</DataSourceName>
 
+    <!-- This parameter is used when adding api management capability to other products like GReg, AS, DSS etc.-->
+    <GatewayType>Synapse</GatewayType>
+
     <!--
         Database configuration used by API publisher, API store and API key manager.
         When these components are deployed separately, each of them should have
