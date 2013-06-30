@@ -16,11 +16,16 @@
 
 package org.wso2.carbon.identity.sso.saml.internal;
 
+import javax.servlet.Servlet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.equinox.http.helper.ContextPathServletAdaptor;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpService;
 import org.wso2.carbon.identity.authenticator.saml2.sso.common.Util;
 import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
+import org.wso2.carbon.identity.sso.saml.servlet.SAMLSSOProviderServlet;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -39,13 +44,30 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * @scr.reference name="user.realmservice.default" interface="org.wso2.carbon.user.core.service.RealmService"
  *                cardinality="1..1" policy="dynamic" bind="setRealmService"
  *                unbind="unsetRealmService"
+ * @scr.reference name="osgi.httpservice" interface="org.osgi.service.http.HttpService"
+ *                cardinality="1..1" policy="dynamic" bind="setHttpService"  
+ *                unbind="unsetHttpService"
  */
 public class IdentitySAMLSSOServiceComponent{
 
     private static Log log = LogFactory.getLog(IdentitySAMLSSOServiceComponent.class);
+    
+    public static final String SAMLSSO_URL = "/samlsso";
 
     protected void activate(ComponentContext ctxt) {
         SAMLSSOUtil.setBundleContext(ctxt.getBundleContext());
+        HttpService httpService = SAMLSSOUtil.getHttpService();
+        
+        // Register SAML SSO servlet
+        Servlet samlSSOServlet = new ContextPathServletAdaptor(new SAMLSSOProviderServlet(), SAMLSSO_URL);
+        try {
+            httpService.registerServlet(SAMLSSO_URL, samlSSOServlet, null, null);
+        } catch (Exception e) {
+            String errMsg = "Error when registering SAML SSO Servlet via the HttpService.";
+            log.error(errMsg, e);
+            throw new RuntimeException(errMsg, e);
+        }
+        
         // Register a SSOServiceProviderConfigManager object as an OSGi Service
         ctxt.getBundleContext().registerService(SSOServiceProviderConfigManager.class.getName(),
                                                 SSOServiceProviderConfigManager.getInstance(), null);
@@ -107,5 +129,18 @@ public class IdentitySAMLSSOServiceComponent{
         }
         SAMLSSOUtil.setConfigCtxService(null);
     }
+    
+    protected void setHttpService(HttpService httpService){
+        if(log.isDebugEnabled()){
+            log.debug("HTTP Service is set in the SAML SSO bundle");
+        }
+        SAMLSSOUtil.setHttpService(httpService);
+    }
 
+    protected void unsetHttpService(HttpService httpService){
+        if(log.isDebugEnabled()){
+            log.debug("HTTP Service is unset in the SAML SSO bundle");
+        }
+        SAMLSSOUtil.setHttpService(null);
+    }
 }

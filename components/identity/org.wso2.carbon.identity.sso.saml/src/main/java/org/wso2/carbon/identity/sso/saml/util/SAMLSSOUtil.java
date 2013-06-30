@@ -91,6 +91,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.osgi.service.http.HttpService;
 
 public class SAMLSSOUtil {
 
@@ -99,6 +100,7 @@ public class SAMLSSOUtil {
 	private static BundleContext bundleContext;
 	private static RealmService realmService;
 	private static ConfigurationContextService configCtxService;
+    private static HttpService httpService;
 	private static boolean isBootStrapped = false;
 	private static Random random = new Random();
     private static ClaimsRetriever claimsRetriever = null;
@@ -136,6 +138,14 @@ public class SAMLSSOUtil {
 	public static void setConfigCtxService(ConfigurationContextService configCtxService) {
 		SAMLSSOUtil.configCtxService = configCtxService;
 	}
+
+    public static HttpService getHttpService() {
+        return httpService;
+    }
+ 
+    public static void setHttpService(HttpService httpService) {
+        SAMLSSOUtil.httpService = httpService;
+    }
 
 	/**
 	 * Constructing the AuthnRequest Object from a String
