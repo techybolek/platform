@@ -79,7 +79,12 @@
         <fileSet>
             <directory>target/database</directory>
             <outputDirectory>${pom.artifactId}-${build.version}/repository/database</outputDirectory>
-        </fileSet>  
+        </fileSet>
+	<!-- Copy APIM DB scripts--> 
+	<fileSet>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/dbscripts/apimgt</directory>
+            <outputDirectory>${pom.artifactId}-${build.version}/dbscripts/apimgt</outputDirectory>
+        </fileSet> 
         <!--fileSet>
             <directory>src/main/resources/bam/dataservice</directory>
             <outputDirectory>${pom.artifactId}-${build.version}/repository/dataservices</outputDirectory>
@@ -260,7 +265,23 @@
         <!-- Asset Store -->
         <fileSet>
             <directory>../jaggery/asset-store-web</directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/store</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/asset-store</outputDirectory>
+        </fileSet>
+	<!-- API Store/ API Publisher -->
+	<fileSet>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/deployment/server/jaggeryapps/publisher/</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/publisher</outputDirectory>
+        </fileSet>
+        <fileSet>
+             <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/deployment/server/jaggeryapps/store/</directory>
+             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaggeryapps/store</outputDirectory>
+        </fileSet>
+	<fileSet>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/modules</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/modules/</outputDirectory>
+	    	<includes>
+                <include>*/**</include>
+            </includes>
         </fileSet>
         <fileSet>
             <directory>../jaggery</directory>
@@ -554,6 +575,11 @@
             <source>../juddi/juddiv3-war/target/juddiv3.war</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps</outputDirectory>
         </file>
+	<!-- Copy APIM DB --> 
+	<file>
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/database/WSO2AM_DB.h2.db</source>
+            <outputDirectory>${pom.artifactId}-${build.version}/repository/database</outputDirectory>
+        </file> 
         <!--<file>
             <source>../cmis-war/cmis/target/cmis.war</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
