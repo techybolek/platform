@@ -19,7 +19,6 @@ package org.wso2.carbon.identity.sso.saml.common;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.provider.IdentityProviderException;
 import org.wso2.carbon.ui.util.CharacterEncoder;
 import org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOServiceProviderDTO;
 
@@ -151,7 +150,7 @@ public class Util {
      * @param userName
      *            User name
      * @return OpenID corresponding the given user name.
-     * @throws org.wso2.carbon.identity.provider.IdentityProviderException
+     * @throws org.wso2.carbon.identity.base.IdentityException 
      */
     public static String getOpenID(String userName) throws IdentityException {
         return generateOpenID(userName);
@@ -163,7 +162,7 @@ public class Util {
      * @param user
      *            User
      * @return Generated OpenID
-     * @throws IdentityProviderException
+     * @throws org.wso2.carbon.identity.base.IdentityException
      */
     public static String generateOpenID(String user) throws IdentityException {
         String openIDUserUrl = null;
