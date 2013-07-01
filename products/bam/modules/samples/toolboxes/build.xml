@@ -17,6 +17,7 @@
 	<property name="Activity_Monitoring_MSSQL_dir" value="Activity_Monitoring_MSSQL" />
 	<property name="JMX_Monitoring_dir" value="JMX_Stats" />
 	<property name="Channel_Monitoring_dir" value="Mobile_Web_Channel_Monitoring" />
+	<property name="WebApp_Stats_Monitoring_dir" value="WebApps_Stats_Monitoring" />
 
 	<target name="clean">
 		<delete dir="${target-dir}" />
@@ -67,6 +68,9 @@
 		</zip>
 		<zip destfile="${target-dir}/${Channel_Monitoring_dir}.tbox">
 		    <zipfileset dir="${Channel_Monitoring_dir}" prefix="${Channel_Monitoring_dir}"/>
+		</zip>
+		<zip destfile="${target-dir}/${WebApp_Stats_Monitoring_dir}.tbox">
+		    <zipfileset dir="${WebApp_Stats_Monitoring_dir}" prefix="${WebApp_Stats_Monitoring_dir}"/>
 		</zip>
 	</target>
 
