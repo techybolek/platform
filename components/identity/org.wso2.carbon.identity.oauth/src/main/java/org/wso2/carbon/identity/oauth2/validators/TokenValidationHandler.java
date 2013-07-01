@@ -96,17 +96,16 @@ public class TokenValidationHandler {
     public OAuth2TokenValidationResponseDTO validate(OAuth2TokenValidationRequestDTO requestDTO)
             throws IdentityOAuth2Exception {
 
-        OAuth2TokenValidator tokenValidator = tokenValidators.get(requestDTO.getTokenType());
+		OAuth2TokenValidator tokenValidator = tokenValidators.get(requestDTO.getTokenType());
 
-        // There is no token validator for the provided token type.
-        if (tokenValidator == null) {
-            log.warn("Unsupported token type.");
-            OAuth2TokenValidationResponseDTO tokenValidationRespDTO =
-                    new OAuth2TokenValidationResponseDTO();
-            tokenValidationRespDTO.setValid(false);
-            tokenValidationRespDTO.setErrorMsg("Unsupported token type.");
-            return tokenValidationRespDTO;
-        }
+		// There is no token validator for the provided token type.
+		if (tokenValidator == null) {
+			log.warn("Unsupported token type.");
+			OAuth2TokenValidationResponseDTO tokenValidationRespDTO = new OAuth2TokenValidationResponseDTO();
+			tokenValidationRespDTO.setValid(false);
+			tokenValidationRespDTO.setErrorMsg("Unsupported token type.");
+			return tokenValidationRespDTO;
+		}
 
         OAuth2TokenValidationResponseDTO tokenRespDTO = tokenValidator.validate(requestDTO);
 

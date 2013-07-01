@@ -183,7 +183,7 @@ public class JWTTokenGenerator implements AuthorizationContextTokenGenerator {
         jwtBuilder.append("\"");
 
         if(claimsRetriever != null){
-            SortedMap<String,String> claimValues = claimsRetriever.getClaims(endUserName);
+            SortedMap<String,String> claimValues = claimsRetriever.getClaims(endUserName, reqDTO.getRequiredClaims());
             Iterator<String> it = new TreeSet(claimValues.keySet()).iterator();
             while(it.hasNext()){
                 String claimURI = it.next();

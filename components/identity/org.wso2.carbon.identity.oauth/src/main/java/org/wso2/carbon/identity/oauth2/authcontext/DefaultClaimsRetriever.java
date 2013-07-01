@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.oauth2.authcontext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.caching.core.CacheKey;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
@@ -43,6 +45,8 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
 
     private ClaimCache claimsLocalCache;
     private String dialectURI;
+    
+    private Log log = LogFactory.getLog(DefaultClaimsRetriever.class);
 
     /**
      * Reads the DialectURI of the ClaimURIs to be retrieved from identity.xml ->
@@ -59,7 +63,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     }
 
     @Override
-    public SortedMap<String, String> getClaims(String endUserName) throws IdentityOAuth2Exception {
+    public SortedMap<String, String> getClaims(String endUserName, String[] requestedClaims) throws IdentityOAuth2Exception {
         SortedMap<String, String> claimValues;
         try {
             int tenantId = JWTTokenGenerator.getTenantId(endUserName);
@@ -67,18 +71,25 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
             String key = endUserName + ":" + tenantId;
             CacheKey cacheKey = new ClaimCacheKey(key);
             Object result = claimsLocalCache.getValueFromCache(cacheKey);
+            
             if (result != null) {
                 claimValues = ((UserClaims) result).getClaimValues();
             } else {
-                ClaimManager claimManager = OAuthComponentServiceHolder.getRealmService().
-                        getTenantUserRealm(tenantId).getClaimManager();
-                ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
-                String[] claimURIs = claim_to_string(claims);
+            	// if no claims were requested, return all
+				if (requestedClaims == null) {
+					log.debug("No claims set requested. Returning all claims in the dialect");
+					ClaimManager claimManager =
+					                            OAuthComponentServiceHolder.getRealmService()
+					                                                       .getTenantUserRealm(tenantId)
+					                                                       .getClaimManager();
+					ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
+					requestedClaims = claimToString(claims);
+				}
+				
                 UserStoreManager userStoreManager = OAuthComponentServiceHolder.getRealmService().
                         getTenantUserRealm(tenantId).getUserStoreManager();
-                claimValues = new TreeMap(userStoreManager.getUserClaimValues(endUserName, claimURIs, null));
+                claimValues = new TreeMap(userStoreManager.getUserClaimValues(endUserName, requestedClaims, null));
                 UserClaims userClaims = new UserClaims(claimValues);
-                //add to cache
                 claimsLocalCache.addToCache(cacheKey, userClaims);
             }
         } catch (UserStoreException e) {
@@ -92,7 +103,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
      * Helper method to convert array of <code>Claim</code> object to
      * array of <code>String</code> objects corresponding to the ClaimURI values.
      */
-    private String[] claim_to_string(ClaimMapping[] claims) {
+    private String[] claimToString(ClaimMapping[] claims) {
         String[] temp = new String[claims.length];
         for (int i = 0; i < claims.length; i++) {
             temp[i] = claims[i].getClaim().getClaimUri();

@@ -33,25 +33,28 @@ public class OAuth2TokenValidationService extends AbstractAdmin {
 
     private static Log log = LogFactory.getLog(OAuth2TokenValidationService.class);
 
-    public OAuth2TokenValidationResponseDTO validate(
-            OAuth2TokenValidationRequestDTO validationReqDTO) {
+    /**
+     * 
+     * @param validationReqDTO
+     * @return
+     */
+	public OAuth2TokenValidationResponseDTO validate(OAuth2TokenValidationRequestDTO validationReqDTO) {
 
-        if (log.isDebugEnabled()) {
-            log.debug("Token validation request received for : " +
-                    "Client Id : " + validationReqDTO.getClientId() +
-                    "Token Type : " + validationReqDTO.getTokenType());
-        }
+		if (log.isDebugEnabled()) {
+			log.debug("Token validation request received for : " + "Client Id : " +
+			          validationReqDTO.getClientId() + "Token Type : " + validationReqDTO.getTokenType());
+		}
 
-        TokenValidationHandler validationHandler = TokenValidationHandler.getInstance();
+		TokenValidationHandler validationHandler = TokenValidationHandler.getInstance();
 
-        try {
-            return validationHandler.validate(validationReqDTO);
-        } catch (IdentityOAuth2Exception e) {
-            log.error("Error when validating the token. ", e);
-            OAuth2TokenValidationResponseDTO errRespDTO = new OAuth2TokenValidationResponseDTO();
-            errRespDTO.setValid(false);
-            errRespDTO.setErrorMsg("Server Error when validating the token.");
-            return errRespDTO;
-        }
-    }
+		try {
+			return validationHandler.validate(validationReqDTO);
+		} catch (IdentityOAuth2Exception e) {
+			log.error("Error when validating the token. ", e);
+			OAuth2TokenValidationResponseDTO errRespDTO = new OAuth2TokenValidationResponseDTO();
+			errRespDTO.setValid(false);
+			errRespDTO.setErrorMsg("Server Error when validating the token.");
+			return errRespDTO;
+		}
+	}
 }
