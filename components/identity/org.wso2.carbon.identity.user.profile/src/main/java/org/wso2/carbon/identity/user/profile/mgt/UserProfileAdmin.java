@@ -92,6 +92,10 @@ public class UserProfileAdmin extends AbstractAdmin {
                 String claimURI = data.getClaimUri();
 				String value = data.getFieldValue();
 				if (!data.isReadOnly()) {
+					// Quick fix for not to remove OTP checkbox when false
+					if(value == "" && "http://wso2.org/claims/identity/otp".equals(claimURI)) {
+						value = "false";
+					}					
 					map.put(claimURI, value);
 				}
 			}
