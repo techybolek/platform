@@ -292,7 +292,7 @@ public class HL7ProcessingContext {
 		String applicationAck = (String) ctx.getProperty(HL7Constants.HL7_APPLICATION_ACK);
 
 		if (resultMode != null) {
-			handleAutoAckNack(resultMode,ctx,hl7Msg);
+			return handleAutoAckNack(resultMode,ctx,hl7Msg);
 		} else if (this.isAutoAck()) {
 			return this.createAck(hl7Msg);
 		}
@@ -347,9 +347,11 @@ public class HL7ProcessingContext {
 				msg = this.createNack(requesthl7message, nackMessage);
 				applicationResponses.offer(msg);
 			}
-		}
-		return this.createNack(hl7Msg,
-				"Application Error: ACK/NACK was not explicitely returned");
+		} else{
+                return this.createNack(hl7Msg,
+                       "Application Error: ACK/NACK was not explicitely returned");
+        }
+        return null;
 	}
 
 	/**
