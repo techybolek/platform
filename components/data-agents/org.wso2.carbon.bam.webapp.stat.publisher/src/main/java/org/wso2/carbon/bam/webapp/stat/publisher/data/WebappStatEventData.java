@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.bam.webapp.stat.publisher.data;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 public class WebappStatEventData {
@@ -22,15 +23,19 @@ public class WebappStatEventData {
     private String webappOwnerTenant;
     private String webappVersion;
     private String userId;
-    private String userTenant;
-    private Timestamp timestamp;
-    private String resourcePath;  //    httpServletRequest.getPathInfo()
+    private long timestamp;
+    private String resourcePath;
     private String browser;
     private String browserVersion;
     private String operatingSystem;
     private String operatingSystemVersion;
-
-    private String httpMethod; //GET, POST etc.
+    private String searchEngine;
+    private String country;
+    private String webappType;
+    private String webappDisplayName;
+    private String webappContext;
+    private String sessionId;
+    private String httpMethod;
     private String contentType;
     private String responseContentType;
     private int responseHttpStatusCode;
@@ -39,10 +44,119 @@ public class WebappStatEventData {
     private String remoteUser;
     private String authType;
     private String userAgent;
-
     private long responseTime;
+    private String serverAddess;
+    private String serverName;
+    private int tenantId;
+    private String  userTenant;
+    private int requestCount;
+    private int responceCount;
+    private int faultCount;
 
-//    private String webappType;
+    public int getRequestCount() {
+        return requestCount;
+    }
+
+    public void setRequestCount(int requestCount) {
+        this.requestCount = requestCount;
+    }
+
+    public int getResponceCount() {
+        return responceCount;
+    }
+
+    public void setResponceCount(int responceCount) {
+        this.responceCount = responceCount;
+    }
+
+    public int getFaultCount() {
+        return faultCount;
+    }
+
+    public void setFaultCount(int faultCount) {
+        this.faultCount = faultCount;
+    }
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getServerAddess() {
+        return serverAddess;
+    }
+
+    public void setServerAddess(String serverAddess) {
+        this.serverAddess = serverAddess;
+    }
+
+    public String getSearchEngine() {
+        return searchEngine;
+    }
+
+    public void setSearchEngine(String searchEngine) {
+        this.searchEngine = searchEngine;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getWebappType() {
+        return webappType;
+    }
+
+    public void setWebappType(String webappType) {
+        this.webappType = webappType;
+    }
+
+    public String getWebappDisplayName() {
+        return webappDisplayName;
+    }
+
+    public void setWebappDisplayName(String webappDisplayName) {
+        this.webappDisplayName = webappDisplayName;
+    }
+
+    public String getWebappContext() {
+        return webappContext;
+    }
+
+    public void setWebappContext(String webappContext) {
+        this.webappContext = webappContext;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public long getResponseTime() {
+        return responseTime;
+    }
+
+    public void setResponseTime(long responseTime) {
+        this.responseTime = responseTime;
+    }
+
 
     public String getWebappName() {
         return webappName;
@@ -85,11 +199,11 @@ public class WebappStatEventData {
         this.userTenant = userTenant;
     }
 
-    public Timestamp getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -188,14 +302,6 @@ public class WebappStatEventData {
     public void setBrowserVersion(String browserVersion) {
         this.browserVersion = browserVersion;
     }
-
-//    public String getWebappType() {
-//        return webappType;
-//    }
-//
-//    public void setWebappType(String webappType) {
-//        this.webappType = webappType;
-//    }
 
     public String getOperatingSystem() {
         return operatingSystem;

@@ -31,6 +31,9 @@ import org.wso2.carbon.databridge.commons.StreamDefinition;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+* Purpose of this class is to publish the event to BAM server.
+*/
 public class EventPublisher {
 
     private static Log log = LogFactory.getLog(EventPublisher.class);
@@ -51,8 +54,6 @@ public class EventPublisher {
 
         String streamId = null;
 
-        //create data publisher
-
         if (!configData.isLoadBalancingConfig()) {
             try {
                 if (eventPublisherConfig == null) {
@@ -62,7 +63,7 @@ public class EventPublisher {
                             eventPublisherConfig = new EventPublisherConfig();
                             AsyncDataPublisher asyncDataPublisher = new AsyncDataPublisher(configData.getUrl(),
                                     configData.getUserName(),
-                                    configData.getPassword(), EventPublisherConfig.getAgent());
+                                    configData.getPassword());
                             asyncDataPublisher.addStreamDefinition(streamDef);
                             eventPublisherConfig.setDataPublisher(asyncDataPublisher);
                             WebappAgentUtil.getEventPublisherConfigMap().put(key, eventPublisherConfig);

@@ -17,6 +17,9 @@ package org.wso2.carbon.bam.webapp.stat.publisher.data;
 
 import java.util.List;
 
+/*
+* Purpose of this class to hold stream definition data of BAM
+*/
 public class WebappStatEvent {
 
     List<Object> correlationData;

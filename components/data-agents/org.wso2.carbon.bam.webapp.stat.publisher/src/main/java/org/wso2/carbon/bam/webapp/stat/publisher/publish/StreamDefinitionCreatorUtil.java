@@ -28,8 +28,6 @@ import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionExc
 import java.util.ArrayList;
 import java.util.List;
 
-//import org.wso2.carbon.bam.webapp.stat.publisher.util.StatisticsType;
-
 public class StreamDefinitionCreatorUtil {
 
     private static Log log = LogFactory.getLog(StreamDefinitionCreatorUtil.class);
@@ -53,14 +51,13 @@ public class StreamDefinitionCreatorUtil {
             streamDef.setDescription(configData.getDescription());
 
             List<Attribute> metaDataAttributeList = new ArrayList<Attribute>();
-            setUserAgentMetadata(metaDataAttributeList);
-            setPropertiesAsMetaData(metaDataAttributeList, configData);
+            metaDataAttributeList = setUserAgentMetadata(metaDataAttributeList);
+            metaDataAttributeList = setPropertiesAsMetaData(metaDataAttributeList, configData);
 
             streamDef.setMetaData(metaDataAttributeList);
 
             List<Attribute> payLoadData = new ArrayList<Attribute>();
             payLoadData = addCommonPayLoadData(payLoadData);
-            payLoadData = addServiceStatsPayLoadData(payLoadData);
             streamDef.setPayloadData(payLoadData);
 
         } catch (MalformedStreamDefinitionException e) {
@@ -69,7 +66,7 @@ public class StreamDefinitionCreatorUtil {
         return streamDef;
     }
 
-    private static void setPropertiesAsMetaData(List<Attribute> metaDataAttributeList,
+    private static List<Attribute>  setPropertiesAsMetaData(List<Attribute> metaDataAttributeList,
                                                 ServiceEventingConfigData configData) {
         Property[] properties = configData.getProperties();
         if (properties != null) {
@@ -80,78 +77,57 @@ public class StreamDefinitionCreatorUtil {
                 }
             }
         }
+        return metaDataAttributeList;
     }
-
-/*    private static List<Attribute> addOutOnlyPayLoadData(List<Attribute> payLoadData) {
-        payLoadData.add(new Attribute(BAMDataPublisherConstants.OUT_MSG_ID,
-                                      AttributeType.STRING));
-        payLoadData.add(new Attribute(BAMDataPublisherConstants.OUT_MSG_BODY,
-                                      AttributeType.STRING));
-        return payLoadData;
-    }*/
 
     private static List<Attribute> addCommonPayLoadData(List<Attribute> payLoadData) {
 
-        payLoadData.add(new Attribute("appName",
-                AttributeType.STRING));
-        payLoadData.add(new Attribute("appOwnerTenant",
-                AttributeType.STRING));
-        payLoadData.add(new Attribute("appVersion",
-                AttributeType.STRING));
-        payLoadData.add(new Attribute("userId",
-                AttributeType.STRING));
-        payLoadData.add(new Attribute("userTenant",
-                AttributeType.STRING));
-        payLoadData.add(new Attribute("resource",
-                AttributeType.STRING));
-        payLoadData.add(new Attribute("requestCount",
-                AttributeType.INT));
-        payLoadData.add(new Attribute("requestTime",
-                AttributeType.LONG));
+        payLoadData.add(new Attribute("webappName" , AttributeType.STRING));
+        payLoadData.add(new Attribute("webappVersion" , AttributeType.STRING));
+        payLoadData.add(new Attribute("userId" , AttributeType.STRING));
+        payLoadData.add(new Attribute("resourcePath" , AttributeType.STRING));
+        payLoadData.add(new Attribute("webappType" , AttributeType.STRING));
+        payLoadData.add(new Attribute("webappDisplayName" , AttributeType.STRING));
+        payLoadData.add(new Attribute("webappContext" , AttributeType.STRING));
+        payLoadData.add(new Attribute("sessionId" , AttributeType.STRING));
+        payLoadData.add(new Attribute("httpMethod" , AttributeType.STRING));
+        payLoadData.add(new Attribute("contentType" , AttributeType.STRING));
+        payLoadData.add(new Attribute("responseContentType" , AttributeType.STRING));
+        payLoadData.add(new Attribute("remoteAddress" , AttributeType.STRING));
+        payLoadData.add(new Attribute("referer" , AttributeType.STRING));
+        payLoadData.add(new Attribute("remoteUser" , AttributeType.STRING));
+        payLoadData.add(new Attribute("authType" , AttributeType.STRING));
+        payLoadData.add(new Attribute("userAgent" , AttributeType.STRING));
+        payLoadData.add(new Attribute("browser" , AttributeType.STRING));
+        payLoadData.add(new Attribute("browserVersion" , AttributeType.STRING));
+        payLoadData.add(new Attribute("operatingSystem" , AttributeType.STRING));
+        payLoadData.add(new Attribute("operatingSystemVersion" , AttributeType.STRING));
+        payLoadData.add(new Attribute("searchEngine" , AttributeType.STRING));
+        payLoadData.add(new Attribute("country" , AttributeType.STRING));
+        payLoadData.add(new Attribute("timestamp" , AttributeType.LONG));
+        payLoadData.add(new Attribute("responseHttpStatusCode" , AttributeType.INT));
+        payLoadData.add(new Attribute("responseTime" , AttributeType.LONG));
+        payLoadData.add(new Attribute("requestCount" , AttributeType.INT));
+        payLoadData.add(new Attribute("responceCount" , AttributeType.INT));
+        payLoadData.add(new Attribute("faultCount" , AttributeType.INT));
 
-
-/*
-        payLoadData.add(new Attribute(BAMDataPublisherConstants.SERVICE_NAME,
-                AttributeType.STRING));
-        payLoadData.add(new Attribute(BAMDataPublisherConstants.OPERATION_NAME,
-                AttributeType.STRING));
-        payLoadData.add(new Attribute(BAMDataPublisherConstants.TIMESTAMP,
-                AttributeType.LONG));
-*/
         return payLoadData;
     }
 
-    private static List<Attribute> addServiceStatsPayLoadData(List<Attribute> payLoadData) {
-/*
-        payLoadData.add(new Attribute(WebappStatisticsPublisherConstants.RESPONSE_TIME,
-                AttributeType.LONG));
-        payLoadData.add(new Attribute(WebappStatisticsPublisherConstants.REQUEST_COUNT,
-                AttributeType.INT));
-        payLoadData.add(new Attribute(WebappStatisticsPublisherConstants.RESPONSE_COUNT,
-                AttributeType.INT));
-        payLoadData.add(new Attribute(WebappStatisticsPublisherConstants.FAULT_COUNT,
-                AttributeType.INT));
-*/
-        return payLoadData;
-    }
 
-    private static void setUserAgentMetadata(List<Attribute> attributeList) {
-        attributeList.add(new Attribute("clientType",
+
+    private static List<Attribute> setUserAgentMetadata(List<Attribute> attributeList) {
+        attributeList.add(new Attribute("serverAddess",
+                AttributeType.STRING));
+        attributeList.add(new Attribute("serverName",
+                AttributeType.STRING));
+        attributeList.add(new Attribute("tenantId",
+                AttributeType.INT));
+        attributeList.add(new Attribute("webappOwnerTenant",
+                AttributeType.STRING));
+        attributeList.add(new Attribute("userTenant",
                 AttributeType.STRING));
 
-/*
-        attributeList.add(new Attribute(BAMDataPublisherConstants.REQUEST_URL,
-                AttributeType.STRING));
-        attributeList.add(new Attribute(BAMDataPublisherConstants.REMOTE_ADDRESS,
-                AttributeType.STRING));
-        attributeList.add(new Attribute(BAMDataPublisherConstants.CONTENT_TYPE,
-                AttributeType.STRING));
-        attributeList.add(new Attribute(BAMDataPublisherConstants.USER_AGENT,
-                AttributeType.STRING));
-        attributeList.add(new Attribute(BAMDataPublisherConstants.HOST,
-                AttributeType.STRING));
-        attributeList.add(new Attribute(BAMDataPublisherConstants.REFERER,
-                AttributeType.STRING));
-*/
+        return attributeList;
     }
 }

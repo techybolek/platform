@@ -32,6 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+/*
+* Purpose of this class is to handle bam configurations data,
+* This class will write and read from the registry. When the server starts up this class will be called
+*/
 public class RegistryPersistenceManager {
 
     private static RegistryService registryService;
@@ -86,10 +90,6 @@ public class RegistryPersistenceManager {
                     WebappStatisticsPublisherConstants.WEBAPP_STATISTICS_REG_PATH,
                     WebappStatisticsPublisherConstants.ENABLE_WEBAPP_STATS_EVENTING);
 
-//            String activityStatus = getConfigurationProperty(
-//                    ActivityPublisherConstants.ACTIVITY_REG_PATH,
-//                    ActivityPublisherConstants.ENABLE_ACTIVITY);
-
             String bamUrl = getConfigurationProperty(WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH,
                     BAMDataPublisherConstants.BAM_URL);
             String bamUserName = getConfigurationProperty(WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH,
@@ -106,21 +106,11 @@ public class RegistryPersistenceManager {
             String nickName = getConfigurationProperty(WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH,
                     BAMDataPublisherConstants.NICK_NAME);
 
-//            String activityStreamName = getConfigurationProperty(WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH,
-//                    BAMDataPublisherConstants.ACTIVIY_STREAM_NAME);
-//            String activityVersion = getConfigurationProperty(WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH,
-//                    BAMDataPublisherConstants.ACTIVITY_VERSION);
-//            String activityDescription = getConfigurationProperty(WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH,
-//                    BAMDataPublisherConstants.ACTIVITY_DESCRIPTION);
-//            String activityNickName = getConfigurationProperty(WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH,
-//                    BAMDataPublisherConstants.ACTIVITY_NICK_NAME);
-
             Properties properties = getAllConfigProperties(WebappStatisticsPublisherConstants.WEBAPP_PROPERTIES_REG_PATH);
 
             if (serviceStatsStatus != null && bamUrl != null && bamUserName != null && bamPassword != null) {
 
                 eventingConfigData.setWebappStatsEnabled(Boolean.parseBoolean(serviceStatsStatus));
-//                eventingConfigData.setMsgDumpingEnabled(Boolean.parseBoolean(activityStatus));
                 eventingConfigData.setUrl(bamUrl);
                 eventingConfigData.setUserName(bamUserName);
                 eventingConfigData.setPassword(bamPassword);
@@ -128,22 +118,6 @@ public class RegistryPersistenceManager {
                 eventingConfigData.setVersion(version);
                 eventingConfigData.setDescription(description);
                 eventingConfigData.setNickName(nickName);
-
-//                if (activityStreamName != null) {
-//                    eventingConfigData.setActivityStreamName(activityStreamName);
-//                }
-//
-//                if (activityVersion != null) {
-//                    eventingConfigData.setActivityStreamVersion(activityVersion);
-//                }
-//
-//                if (activityDescription != null) {
-//                    eventingConfigData.setActivityStreamDescription(activityDescription);
-//                }
-//
-//                if (activityNickName != null) {
-//                    eventingConfigData.setActivityStreamNickName(activityNickName);
-//                }
 
                 if (properties != null) {
                     List<Property> propertyDTOList = new ArrayList<Property>();
@@ -158,31 +132,14 @@ public class RegistryPersistenceManager {
 
                     eventingConfigData.setProperties(propertyDTOList.toArray(new Property[propertyDTOList.size()]));
                 }
-//                StatisticsType statisticsType = WebappAgentUtil.findTheStatisticType(eventingConfigData);
+
 
                 // Handle the case with both stats and activity enabled
                 InternalEventingConfigData eventConfigNStreamDef = null;
-//                if (statisticsType.equals(StatisticsType.ACTIVITY_SERVICE_STATS)) {
-//                    StreamDefinition activityStreamDefinition = StreamDefinitionCreatorUtil.
-//                            getStreamDefinition(eventingConfigData, StatisticsType.ACTIVITY_STATS);
-//                    StreamDefinition statisticsStreamDefinition = StreamDefinitionCreatorUtil.
-//                            getStreamDefinition(eventingConfigData, StatisticsType.SERVICE_STATS);
-//                    eventConfigNStreamDef = fillEventingConfigData(
-//                            eventingConfigData);
-//                    eventConfigNStreamDef.setStreamDefinition(statisticsStreamDefinition);
-//                    eventConfigNStreamDef.setActivityStreamDefinition(activityStreamDefinition);
-//                } else if (statisticsType.equals(StatisticsType.SERVICE_STATS)){
                     StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
                             eventingConfigData);
                     eventConfigNStreamDef = fillEventingConfigData(eventingConfigData);
                     eventConfigNStreamDef.setStreamDefinition(streamDefinition);
-//                } else if (statisticsType.equals(StatisticsType.ACTIVITY_STATS)){
-//                    StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
-//                            eventingConfigData, StatisticsType.ACTIVITY_STATS);
-//                    eventConfigNStreamDef = fillEventingConfigData(eventingConfigData);
-//                    eventConfigNStreamDef.setActivityStreamDefinition(streamDefinition);
-//                }
-
                 int tenantId = CarbonContext.getCurrentContext().getTenantId();       //todo
                 Map<Integer, InternalEventingConfigData> tenantEventConfigData = TenantEventConfigData.getTenantSpecificEventingConfigData();
                 tenantEventConfigData.put(tenantId, eventConfigNStreamDef);
@@ -209,10 +166,7 @@ public class RegistryPersistenceManager {
         eventConfigNStreamDef.setUrl(eventingConfigData.getUrl());
         eventConfigNStreamDef.setUserName(eventingConfigData.getUserName());
         eventConfigNStreamDef.setVersion(eventingConfigData.getVersion());
-//        eventConfigNStreamDef.setActivityStreamName(eventingConfigData.getActivityStreamName());
-//        eventConfigNStreamDef.setActivityStreamDescription(eventingConfigData.getActivityStreamDescription());
-//        eventConfigNStreamDef.setActivityStreamNickName(eventingConfigData.getActivityStreamNickName());
-//        eventConfigNStreamDef.setActivityStreamVersion(eventingConfigData.getActivityStreamVersion());
+
         return eventConfigNStreamDef;
 
     }
@@ -256,9 +210,6 @@ public class RegistryPersistenceManager {
         updateConfigurationProperty(WebappStatisticsPublisherConstants.ENABLE_WEBAPP_STATS_EVENTING,
                 eventingConfigData.isWebappStatsEnabled(),
                 WebappStatisticsPublisherConstants.WEBAPP_STATISTICS_REG_PATH);
-//        updateConfigurationProperty(ActivityPublisherConstants.ENABLE_ACTIVITY,
-//                eventingConfigData.isMsgDumpingEnabled(),
-//                ActivityPublisherConstants.ACTIVITY_REG_PATH);
         updateConfigurationProperty(BAMDataPublisherConstants.BAM_URL, eventingConfigData.getUrl(),
                 WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH);
         updateConfigurationProperty(BAMDataPublisherConstants.BAM_USER_NAME, eventingConfigData.getUserName(),
@@ -274,15 +225,6 @@ public class RegistryPersistenceManager {
                 WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH);
         updateConfigurationProperty(BAMDataPublisherConstants.DESCRIPTION, eventingConfigData.getDescription(),
                 WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH);
-
-//        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVIY_STREAM_NAME, eventingConfigData.getActivityStreamName(),
-//                WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH);
-//        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVITY_VERSION, eventingConfigData.getActivityStreamVersion(),
-//                WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH);
-//        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVITY_NICK_NAME, eventingConfigData.getActivityStreamNickName(),
-//                WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH);
-//        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVITY_DESCRIPTION, eventingConfigData.getActivityStreamDescription(),
-//                WebappStatisticsPublisherConstants.WEBAPP_COMMON_REG_PATH);
 
         Property[] propertiesDTO = eventingConfigData.getProperties();
         if (propertiesDTO != null) {
@@ -300,11 +242,9 @@ public class RegistryPersistenceManager {
         WebappAgentUtil.removeExistingEventPublisherConfigValue(eventingConfigData.getUrl() + "_"
                 + eventingConfigData.getUserName() + "_"
                 + eventingConfigData.getPassword());
-//                + "_" + StatisticsType.ACTIVITY_STATS.name());
         WebappAgentUtil.removeExistingEventPublisherConfigValue(eventingConfigData.getUrl() + "_"
                 + eventingConfigData.getUserName() + "_"
                 + eventingConfigData.getPassword());
-//                + "_" + StatisticsType.SERVICE_STATS.name());
 
     }
 
@@ -360,6 +300,26 @@ public class RegistryPersistenceManager {
 
     public ServiceEventingConfigData getEventingConfigData() {
         return load();
+    }
+
+    public String getWebappConfigProperty(int tenantId, String webappName){
+        String registryPath = WebappStatisticsPublisherConstants.WEBAPP_REG_PATH+"/"+tenantId+"/"+webappName+"/";
+        try {
+            return  getConfigurationProperty(registryPath, WebappStatisticsPublisherConstants.ENABLE_STATISTICS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+          return null;
+    }
+
+    public void setWebappConfigProperty(int tenantId, String webappName, int value){
+        String registryPath = WebappStatisticsPublisherConstants.WEBAPP_REG_PATH+"/"+tenantId+"/"+webappName+"/";
+
+        try {
+            updateConfigurationProperty(WebappStatisticsPublisherConstants.ENABLE_STATISTICS, value, registryPath);
+        } catch (RegistryException e) {
+            e.printStackTrace();
+        }
     }
 
 }

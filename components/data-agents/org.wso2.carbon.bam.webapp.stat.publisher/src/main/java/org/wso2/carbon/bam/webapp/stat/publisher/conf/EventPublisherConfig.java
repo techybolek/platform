@@ -19,6 +19,10 @@ import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 
+  /*
+  * Purpose of this class is keep the configurations of BAM data publisher.
+  */
+
 public class EventPublisherConfig {
 
     private AsyncDataPublisher dataPublisher;

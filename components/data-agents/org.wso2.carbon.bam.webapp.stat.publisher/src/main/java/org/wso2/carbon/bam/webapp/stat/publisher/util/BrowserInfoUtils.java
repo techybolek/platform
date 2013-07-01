@@ -15,6 +15,9 @@
 */
 package org.wso2.carbon.bam.webapp.stat.publisher.util;
 
+/*
+* Purpose of this class is to capture the browser related data of the request.
+*/
 public class BrowserInfoUtils {
     
     private static final String FIREFOX = "Firefox";

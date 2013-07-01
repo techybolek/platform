@@ -53,30 +53,28 @@ public class WebappAgentUtil {
     public static WebappStatEvent makeEventList(WebappStatEventData webappStatEventData,
                                       InternalEventingConfigData eventingConfigData) {
 
-//        EventData event = publishData.getEventData();
-
         List<Object> correlationData = new ArrayList<Object>();
         List<Object> metaData = new ArrayList<Object>();
         List<Object> eventData = new ArrayList<Object>();
 
-//        StatisticsType statisticsType = findTheStatisticType(event);
+        eventData = addCommonEventData(webappStatEventData, eventData);
 
-        addCommonEventData(webappStatEventData, eventData);
+        eventData = addStatisticEventData(webappStatEventData, eventData);
+        metaData = addStatisticsMetaData(webappStatEventData, metaData);
 
-        addStatisticEventData(webappStatEventData, eventData);
-        addStatisticsMetaData(webappStatEventData, metaData);
-
-        addPropertiesAsMetaData(eventingConfigData, metaData);
+        metaData = addPropertiesAsMetaData(eventingConfigData, metaData);
 
         WebappStatEvent publishEvent = new WebappStatEvent();
         publishEvent.setCorrelationData(correlationData);
         publishEvent.setMetaData(metaData);
+
+        // change the event data to pay load data -----------------.
         publishEvent.setEventData(eventData);
 
         return publishEvent;
     }
 
-    private static void addPropertiesAsMetaData(InternalEventingConfigData eventingConfigData,
+    private static List<Object> addPropertiesAsMetaData(InternalEventingConfigData eventingConfigData,
                                                 List<Object> metaData) {
         Property[] properties = eventingConfigData.getProperties();
         if (properties != null) {
@@ -87,121 +85,65 @@ public class WebappAgentUtil {
                 }
             }
         }
+
+        return metaData;
     }
 
-/*
-    private static StatisticsType findTheStatisticType(EventData event) {
-        StatisticsType statisticsType = null;
-        if ((event.getMessageId() != null) &&
-                event.getSystemStatistics() == null) {
-            statisticsType = StatisticsType.ACTIVITY_STATS;
-        } else if (event.getMessageId() == null &&
-                event.getSystemStatistics() != null) {
-            statisticsType = StatisticsType.SERVICE_STATS;
-        } else if ((event.getMessageId() != null) &&
-                event.getSystemStatistics() != null) {
-            statisticsType = StatisticsType.ACTIVITY_SERVICE_STATS;
-        }
-        return statisticsType;
-    }
-*/
 
-/*
-    public static StatisticsType findTheStatisticType(InternalEventingConfigData eventingConfigData) {
-        StatisticsType statisticsType = null;
-        if (!eventingConfigData.isServiceStatsEnable() && eventingConfigData.isMsgDumpingEnable()) {
-            statisticsType = StatisticsType.ACTIVITY_STATS;
-        } else if (eventingConfigData.isServiceStatsEnable() && !eventingConfigData.isMsgDumpingEnable()) {
-            statisticsType = StatisticsType.SERVICE_STATS;
-        } else if (eventingConfigData.isMsgDumpingEnable() && eventingConfigData.isServiceStatsEnable()) {
-            statisticsType = StatisticsType.ACTIVITY_SERVICE_STATS;
-        }
-        return statisticsType;
-    }
-*/
+    private static List<Object> addCommonEventData(WebappStatEventData event, List<Object> eventData) {
 
-    private static void addCommonEventData(WebappStatEventData event, List<Object> eventData) {
         eventData.add(event.getWebappName());
-        eventData.add(event.getWebappOwnerTenant());
         eventData.add(event.getWebappVersion());
         eventData.add(event.getUserId());
-        eventData.add(event.getUserTenant());
-//        eventData.add(event.getResource());
-        eventData.add(1);
-//        eventData.add(event.getRequestTime());
+        eventData.add(event.getResourcePath());
+        eventData.add(event.getWebappType());
+        eventData.add(event.getWebappDisplayName());
+        eventData.add(event.getWebappContext());
+        eventData.add(event.getSessionId());
+        eventData.add(event.getHttpMethod());
+        eventData.add(event.getContentType());
+        eventData.add(event.getResponseContentType());
+        eventData.add(event.getRemoteAddress());
+        eventData.add(event.getReferer());
+        eventData.add(event.getRemoteUser());
+        eventData.add(event.getAuthType());
+        eventData.add(event.getUserAgent());
+        eventData.add(event.getBrowser());
+        eventData.add(event.getBrowserVersion());
+        eventData.add(event.getOperatingSystem());
+        eventData.add(event.getOperatingSystemVersion());
+        eventData.add(event.getSearchEngine());
+        eventData.add(event.getCountry());
+        eventData.add(event.getTimestamp());
+        eventData.add(event.getResponseHttpStatusCode());
+        eventData.add(event.getResponseTime());
+        eventData.add(event.getRequestCount());
+        eventData.add(event.getResponceCount());
+        eventData.add(event.getFaultCount());
+
+
+      return eventData;
+
     }
 
-/*
-    private static void addActivityMetaData(EventData event, List<Object> metaData) {
-        // adding server host or more correctly monitored server url
-        metaData.add(PublisherUtil.getHostAddress());
-
-        metaData.add(event.getRequestURL());
-        metaData.add(event.getRemoteAddress());
-        metaData.add(event.getContentType());
-        metaData.add(event.getUserAgent());
-
-        metaData.add(event.getReferer());
-    }
-*/
-
-
-//    private static void addActivityEventData(EventData event, List<Object> eventData) {
-//        eventData.add(event.getMessageId());
-//        eventData.add(event.getSOAPHeader());
-//        eventData.add(event.getSOAPBody());
-//        eventData.add(event.getMessageDirection());
-//    }
-
-//    private static void addActivityCorrelationData(EventData event,
-//                                                   List<Object> correlationData) {
-//        correlationData.add(event.getActivityId());
-//    }
-
-/*    private static void addActivityOutEventData(EventData event, List<Object> eventData) {
-        eventData.add(event.getOutMessageId());
-        eventData.add(event.getOutMessageBody());
-    }*/
-
-
-    private static void addStatisticEventData(WebappStatEventData event, List<Object> eventData) {
-//        SystemStatistics systemStatistics = event.getSystemStatistics();
-//        eventData.add(systemStatistics.getCurrentInvocationResponseTime());
-//        eventData.add(systemStatistics.getCurrentInvocationRequestCount());
-//        eventData.add(systemStatistics.getCurrentInvocationResponseCount());
-//        eventData.add(systemStatistics.getCurrentInvocationFaultCount());
+    private static List<Object> addStatisticEventData(WebappStatEventData event, List<Object> eventData) {
+        return eventData;
     }
 
-    private static void addStatisticsMetaData(WebappStatEventData event, List<Object> metaData) {
-        metaData.add("external");
-/*
-        metaData.add(event.getRequestURL());
-        metaData.add(event.getRemoteAddress());
-        metaData.add(event.getContentType());
-        metaData.add(event.getUserAgent());
-//        adding server host or more correctly monitored server url
-        metaData.add(PublisherUtil.getHostAddress());
+    private static List<Object> addStatisticsMetaData(WebappStatEventData event, List<Object> metaData) {
+        metaData.add(event.getServerAddess());
+        metaData.add(event.getServerName());
+        metaData.add(event.getTenantId());
+        metaData.add(event.getWebappOwnerTenant());
+        metaData.add(event.getUserTenant());
 
-        metaData.add(event.getReferer());
-*/
+        return metaData;
     }
-
-
 
 
     public static void extractInfoFromHttpHeaders(WebappStatEventData eventData, Object requestProperty) {
 
         if (requestProperty instanceof HttpServletRequest) {
-//            HttpServletRequest httpServletRequest = (HttpServletRequest) requestProperty;
-//            eventData.setRequestURL(httpServletRequest.getRequestURL().toString());
-//            eventData.setRemoteAddress(PublisherUtil.getHostAddress());
-//            eventData.setContentType(httpServletRequest.getContentType());
-//            eventData.setUserAgent(httpServletRequest.getHeader(
-//                    BAMDataPublisherConstants.HTTP_HEADER_USER_AGENT));
-        //            eventData.setHost(httpServletRequest.getHeader(
-        //                    BAMDataPublisherConstants.HTTP_HEADER_HOST));
-//            eventData.setReferer(httpServletRequest.getHeader(
-//                    BAMDataPublisherConstants.HTTP_HEADER_REFERER));
         }
 
     }

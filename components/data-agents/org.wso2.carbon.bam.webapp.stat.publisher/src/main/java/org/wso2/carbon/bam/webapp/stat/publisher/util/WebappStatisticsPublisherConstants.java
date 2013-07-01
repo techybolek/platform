@@ -19,15 +19,6 @@ import org.wso2.carbon.core.RegistryResources;
 
 public class WebappStatisticsPublisherConstants {
 
-    public static final String RESPONSE_TIME = "response_time";
-    public static final String REQUEST_COUNT = "request_count";
-    public static final String RESPONSE_COUNT = "response_count";
-    public static final String FAULT_COUNT = "fault_count";
-
-    public  static final String BAM_CONFIG_PROPERTIES_FILE = "webappStat.properties";
-    public static final String BAM_SERVICE_PUBLISH_PROPERTY = "WebappDataPublishing";
-    public static final String BAM_SERVICE_PUBLISH_ENABLED = "enable";
-
     public static final String CLOUD_DEPLOYMENT_PROP = "IsCloudDeployment";
 
     public static final String SERVER_CONFIG_BAM_URL = "BamServerURL";
@@ -44,5 +35,30 @@ public class WebappStatisticsPublisherConstants {
 
     public static final String WEBAPP_PROPERTIES_REG_PATH = RegistryResources.COMPONENTS
             + "org.wso2.carbon.bam.webapp.stat.publisher/properties";
+
+    public static final String WEBAPP_REG_PATH = RegistryResources.COMPONENTS
+    + "org.wso2.carbon.bam.webapp.stat.publisher/webapp/";
+
+    public static final String ENABLE_STATISTICS = "enable.statistics";
+    public static final String UID_REPLACE_CHAR = "..";
+    public static final String UID_REPLACE_CHAR_REGEX = "\\.\\.";
+    public static final String X_FORWARDED_FOR= "X-Forwarded-For";
+    public static final String UNKNOWN = "unknown";
+    public static final String PROXY_CLIENT_IP= "Proxy-Client-IP";
+    public static final String WL_PROXY_CLIENT_IP = "WL-Proxy-Client-IP";
+    public static final String HTTP_CLIENT_IP = "HTTP_CLIENT_IP";
+    public static final String HTTP_X_FORWARDED_FOR = "HTTP_X_FORWARDED_FOR";
+    public static final String USER_AGENT = "user-agent";
+    public static final String ANNONYMOUS_TENANT = "anonymous.tenant";
+    public static final String ANNONYMOUS_USER = "anonymous.user";
+
+    public static final String STREAM_NAME = "bam_webapp_statistics";
+    public static final String VERSION = "1.0.0";
+    public static final String NICK_NAME = "WebappDataAgent";
+    public static final String DISCRIPTION = "Publish webapp statistics events";
+
+    public static final String WEBAPPDATAPUBLISHING = "WebappDataPublishing";
+    public static final String ENABLE = "enable";
+    public static final String BAMXML = "bam.xml";
 
 }

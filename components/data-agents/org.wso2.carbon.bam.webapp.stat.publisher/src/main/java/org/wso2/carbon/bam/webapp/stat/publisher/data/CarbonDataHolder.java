@@ -18,6 +18,10 @@ package org.wso2.carbon.bam.webapp.stat.publisher.data;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.user.core.service.RealmService;
 
+/*
+*   This class will get the carbon server data.
+*/
+
 public class CarbonDataHolder {
 
     private static ConfigurationContext serverConfigContext;

@@ -15,7 +15,12 @@
 */
 package org.wso2.carbon.bam.webapp.stat.publisher.conf;
 
+import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappStatisticsPublisherConstants;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
+
+/*
+* This class handles the BAM configurations data
+*/
 
 public class InternalEventingConfigData {
 
@@ -26,10 +31,10 @@ public class InternalEventingConfigData {
     private String userName;
     private String password;
 
-    private String streamName = "bam_webapp_stat_publisher";
-    private String version = "1.0.0";
-    private String nickName = "WebappDataAgent";
-    private String description = "Publish webapp statistics events";
+    private String streamName = WebappStatisticsPublisherConstants.STREAM_NAME;
+    private String version = WebappStatisticsPublisherConstants.VERSION;
+    private String nickName = WebappStatisticsPublisherConstants.NICK_NAME;
+    private String description = WebappStatisticsPublisherConstants.DISCRIPTION;
 
     private StreamDefinition streamDefinition;
 

@@ -63,27 +63,7 @@ public class WebappStatisticsAxis2ConfigurationContextObserver extends
 
 
     public void terminatedConfigurationContext(ConfigurationContext configCtx) {
-////        if (log.isDebugEnabled()) {
-//        log.info("BAM webapp statistics data publisher bundle - terminating Configuration Context for ");
-////        }
-//
-//        try {
-//            int tenantId = MultitenantUtils.getTenantId(configCtx);
-//
-//            Map<Integer, InternalEventingConfigData> tenantSpecificEventConfig =
-//                    TenantEventConfigData.getTenantSpecificEventingConfigData();
-//            InternalEventingConfigData configData = tenantSpecificEventConfig.get(tenantId);
-//            String key = configData.getUrl() + "_" + configData.getUserName() + "_" + configData.getPassword();
-//            EventPublisherConfig eventPublisherConfig = WebappAgentUtil.getEventPublisherConfig(key);
-//            if (null != eventPublisherConfig) {
-//                if (null != eventPublisherConfig.getDataPublisher()) eventPublisherConfig.getDataPublisher().stop();
-//                if (null != eventPublisherConfig.getLoadBalancingDataPublisher())
-//                    eventPublisherConfig.getLoadBalancingDataPublisher().stop();
-//            }
-//
-//        } catch (Throwable t) {
-//            log.error("Couldn't stop the webapp data publisher", t);
-//        }
+
     }
 
     public void terminatingConfigurationContext(ConfigurationContext configCtx) {

@@ -18,6 +18,7 @@ package org.wso2.carbon.bam.webapp.stat.publisher.services;
 
 import org.wso2.carbon.bam.webapp.stat.publisher.conf.ServiceEventingConfigData;
 import org.wso2.carbon.bam.webapp.stat.publisher.conf.RegistryPersistenceManager;
+import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappConfig;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappStatisticsPublisherConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.AbstractAdmin;
@@ -52,5 +53,16 @@ public class WebappStatPublisherAdmin extends AbstractAdmin {
         }else {
            return WebappStatisticsPublisherConstants.DEFAULT_BAM_SERVER_URL;
         }
+    }
+
+    public void setWebappConfiguration(String webappName, int value){
+        WebappConfig webappConfig = new WebappConfig();
+        webappConfig.setWebappConfigData(webappName,value);
+    }
+
+    public boolean getWebappConfiguration(String webappName){
+        WebappConfig webappConfig = new WebappConfig();
+        return  webappConfig.getWebappConfigData(webappName);
+
     }
 }
