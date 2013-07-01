@@ -253,6 +253,9 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.bam.service.agent.feature:${carbon.platform.version}
                                 </featureArtifactDef>
+				<featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.bam.webapp.agent.feature:${carbon.platform.version}
+                                </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.event.ui.feature:${carbon.platform.version}
                                 </featureArtifactDef>
@@ -573,6 +576,10 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.bam.service.agent.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                    <id>org.wso2.carbon.bam.webapp.agent.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
