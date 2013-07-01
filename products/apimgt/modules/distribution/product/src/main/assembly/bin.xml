@@ -350,7 +350,7 @@
         </file>
         <file>
             <source>src/main/conf/log4j.properties</source>
-	    <outputDirectory>wso2am-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging</outputDirectory>
+            <outputDirectory>wso2am-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging</outputDirectory>
             <destName>log4j.properties</destName>
             <filtered>true</filtered>
         </file>
