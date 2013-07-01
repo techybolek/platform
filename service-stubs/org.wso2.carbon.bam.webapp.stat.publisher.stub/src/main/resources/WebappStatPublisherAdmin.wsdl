@@ -1,14 +1,37 @@
+
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax215="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://services.publisher.stat.webapp.bam.carbon.wso2.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.publisher.stat.webapp.bam.carbon.wso2.org">
     <wsdl:documentation>WebappStatPublisherAdmin</wsdl:documentation>
     <wsdl:types>
         <xs:schema xmlns:ax216="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
             <xs:import namespace="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd"/>
+            <xs:element name="setWebappConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="webappName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="value" type="xs:int"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="isCloudDeployment">
                 <xs:complexType>
                     <xs:sequence/>
                 </xs:complexType>
             </xs:element>
             <xs:element name="isCloudDeploymentResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getWebappConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="webappName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getWebappConfigurationResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean"/>
@@ -95,6 +118,15 @@
     <wsdl:message name="getServerConfigBAMServerURLResponse">
         <wsdl:part name="parameters" element="ns1:getServerConfigBAMServerURLResponse"/>
     </wsdl:message>
+    <wsdl:message name="setWebappConfigurationRequest">
+        <wsdl:part name="parameters" element="ns1:setWebappConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="getWebappConfigurationRequest">
+        <wsdl:part name="parameters" element="ns1:getWebappConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="getWebappConfigurationResponse">
+        <wsdl:part name="parameters" element="ns1:getWebappConfigurationResponse"/>
+    </wsdl:message>
     <wsdl:message name="isCloudDeploymentRequest">
         <wsdl:part name="parameters" element="ns1:isCloudDeployment"/>
     </wsdl:message>
@@ -115,6 +147,13 @@
         <wsdl:operation name="getServerConfigBAMServerURL">
             <wsdl:input message="tns:getServerConfigBAMServerURLRequest" wsaw:Action="urn:getServerConfigBAMServerURL"/>
             <wsdl:output message="tns:getServerConfigBAMServerURLResponse" wsaw:Action="urn:getServerConfigBAMServerURLResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="setWebappConfiguration">
+            <wsdl:input message="tns:setWebappConfigurationRequest" wsaw:Action="urn:setWebappConfiguration"/>
+        </wsdl:operation>
+        <wsdl:operation name="getWebappConfiguration">
+            <wsdl:input message="tns:getWebappConfigurationRequest" wsaw:Action="urn:getWebappConfiguration"/>
+            <wsdl:output message="tns:getWebappConfigurationResponse" wsaw:Action="urn:getWebappConfigurationResponse"/>
         </wsdl:operation>
         <wsdl:operation name="isCloudDeployment">
             <wsdl:input message="tns:isCloudDeploymentRequest" wsaw:Action="urn:isCloudDeployment"/>
@@ -138,6 +177,21 @@
         </wsdl:operation>
         <wsdl:operation name="getServerConfigBAMServerURL">
             <soap:operation soapAction="urn:getServerConfigBAMServerURL" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setWebappConfiguration">
+            <soap:operation soapAction="urn:setWebappConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getWebappConfiguration">
+            <soap:operation soapAction="urn:getWebappConfiguration" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -184,6 +238,21 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="setWebappConfiguration">
+            <soap12:operation soapAction="urn:setWebappConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getWebappConfiguration">
+            <soap12:operation soapAction="urn:getWebappConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="isCloudDeployment">
             <soap12:operation soapAction="urn:isCloudDeployment" style="document"/>
             <wsdl:input>
@@ -220,6 +289,21 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="setWebappConfiguration">
+            <http:operation location="setWebappConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getWebappConfiguration">
+            <http:operation location="getWebappConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="isCloudDeployment">
             <http:operation location="isCloudDeployment"/>
             <wsdl:input>
@@ -241,13 +325,13 @@
     </wsdl:binding>
     <wsdl:service name="WebappStatPublisherAdmin">
         <wsdl:port name="WebappStatPublisherAdminHttpsSoap11Endpoint" binding="tns:WebappStatPublisherAdminSoap11Binding">
-            <soap:address location="https://10.100.3.88:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap11Endpoint/"/>
+            <soap:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap11Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="WebappStatPublisherAdminHttpsSoap12Endpoint" binding="tns:WebappStatPublisherAdminSoap12Binding">
-            <soap12:address location="https://10.100.3.88:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap12Endpoint/"/>
+            <soap12:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap12Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="WebappStatPublisherAdminHttpsEndpoint" binding="tns:WebappStatPublisherAdminHttpBinding">
-            <http:address location="https://10.100.3.88:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsEndpoint/"/>
+            <http:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsEndpoint/"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
