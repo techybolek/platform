@@ -68,7 +68,7 @@ public abstract class AbstractEmailSendingModule extends NotificationSendingModu
 
         EmailConfig emailConfig = null;
 
-        String notification = notificationData.getNotification();
+        String notification = notificationData.getNotificationType();
 
         if(notification != null && notification.trim().length() > 0){
             emailConfig = emailConfigs.get(notification);

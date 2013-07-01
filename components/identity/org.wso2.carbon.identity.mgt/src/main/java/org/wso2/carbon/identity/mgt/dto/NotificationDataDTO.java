@@ -37,6 +37,8 @@ public class NotificationDataDTO {
     private String notificationCode;
 
     private String notificationType;
+    
+    private String notificationSubject;
 
     private boolean notificationSent;
 
@@ -106,4 +108,13 @@ public class NotificationDataDTO {
     public void setNotificationSent(boolean notificationSent) {
         this.notificationSent = notificationSent;
     }
+
+	public String getNotificationSubject() {
+		return notificationSubject;
+	}
+
+	public void setNotificationSubject(String notificationSubject) {
+		this.notificationSubject = notificationSubject;
+	}
+    
 }

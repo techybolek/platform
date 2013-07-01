@@ -80,9 +80,9 @@ public class UserIdentityClaimsDO {
 		if (userDataMap.get(UserIdentityDataStore.PASSWORD_TIME_STAMP) != null) {
 			setPasswordTimeStamp(Long.parseLong(userDataMap.get(UserIdentityDataStore.PASSWORD_TIME_STAMP)));
 		}
-		if (userDataMap.get(UserIdentityDataStore.PASSWORD_TIME_STAMP) != null) {
-			setPasswordTimeStamp(Long.parseLong(userDataMap.get(UserIdentityDataStore.PASSWORD_TIME_STAMP)));
-		}
+//		if (userDataMap.get(UserIdentityDataStore.PASSWORD_TIME_STAMP) != null) {
+//			setPasswordTimeStamp(Long.parseLong(userDataMap.get(UserIdentityDataStore.PASSWORD_TIME_STAMP)));
+//		}
 	}
 
 	public String getUserName() {
@@ -141,7 +141,7 @@ public class UserIdentityClaimsDO {
 
 	public void setOneTimeLogin(boolean oneTimeLogin) {
 		this.oneTimeLogin = oneTimeLogin;
-		this.userIdentityDataMap.put(UserIdentityDataStore.LAST_LOGON_TIME,
+		this.userIdentityDataMap.put(UserIdentityDataStore.ONE_TIME_PASSWORD,
 		                             Boolean.toString(oneTimeLogin));
 	}
 

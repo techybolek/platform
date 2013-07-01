@@ -16,18 +16,24 @@
 
 package org.wso2.carbon.identity.mgt;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
+import org.wso2.carbon.identity.mgt.dto.NotificationDataDTO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
+import org.wso2.carbon.identity.mgt.mail.DefaultEmailSendingModule;
+import org.wso2.carbon.identity.mgt.mail.EmailConfig;
 import org.wso2.carbon.identity.mgt.policy.PolicyRegistry;
 import org.wso2.carbon.identity.mgt.policy.PolicyViolationException;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
@@ -38,7 +44,9 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.claim.ClaimMapping;
 import org.wso2.carbon.user.core.common.AbstractUserOperationEventListener;
+
 
 /**
  * This is an implementation of UserOperationEventListener. This defines
@@ -161,7 +169,88 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
         if(userIdentityDTO == null){
             userIdentityDTO = new UserIdentityClaimsDO(userName);
         }
+        
+        boolean userOTPEnabled = userIdentityDTO.getOneTimeLogin();
+        
+        // One time password check
+		if (authenticated && config.isAuthPolicyOneTimePasswordCheck() && (!userStoreManager.isReadOnly())) {
 
+			// reset password of the user and notify user of the new password
+			if (userOTPEnabled) {
+
+				String password = UserIdentityManagementUtil.generateTemporaryPassword().toString();
+				userStoreManager.updateCredentialByAdmin(userName, password);
+
+				// Get email user claim value
+				String email =
+				               userStoreManager.getUserClaimValue(userName,
+				                                                  UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS, null);
+
+				if (email == null) {
+					throw new UserStoreException("No user email provided for user " + userName);
+				}
+
+				List<NotificationSendingModule> notificationModules = config.getNotificationSendingModules();
+
+				if (notificationModules != null) {
+
+					NotificationDataDTO notificationData = new NotificationDataDTO();
+					notificationData.setUserId(userName);
+					notificationData.setNotificationType("otp");
+					notificationData.setNotificationAddress(email);
+					notificationData.setFirstName(userName);
+					notificationData.setNotification("otpPassword");
+					notificationData.setNotificationCode(password);
+					notificationData.setNotificationSubject("Your next time login password");
+					NotificationSender sender = new NotificationSender();
+
+					for (NotificationSendingModule notificationSendingModule : notificationModules) {
+						notificationSendingModule.setNotificationData(notificationData);
+						sender.sendNotification(notificationSendingModule);
+					}
+
+				} else {
+					throw new UserStoreException("No notification modules configured");
+				}
+
+			}
+
+		}
+
+		// Password expire check. Not for OTP enabled users.
+		if(authenticated && config.isAuthPolicyExpirePasswordCheck() && !userOTPEnabled && (!userStoreManager.isReadOnly())) {
+			// TODO - password expire impl
+			// Refactor adduser and change password api to stamp the time
+			// Check user's expire time in the claim
+			// if expired redirect to change password
+			// else pass through
+			/*
+			long timestamp = userIdentityDTO.getPasswordTimeStamp();
+			// Only allow behavior to users with this claim. Intent bypass for admin?
+			if (timestamp > 0) {
+				Calendar passwordExpireTime = Calendar.getInstance();
+				passwordExpireTime.setTimeInMillis(timestamp);
+
+				int expireDuration = config.getAuthPolicyPasswordExpireTime();
+				if (expireDuration > 0) {
+
+					passwordExpireTime.add(Calendar.DATE, expireDuration);
+
+					Calendar currentTime = Calendar.getInstance();
+
+					if (currentTime.compareTo(passwordExpireTime) > 0) {
+						// password expired
+						// set flag to redirect
+						log.error("Password is expired ...........");
+						// throw new UserStoreException("Password is expired");
+					}
+
+				}
+			}
+			*/
+		}
+		
+		
 		if (!authenticated && config.isAuthPolicyAccountLockOnFailure()) {
 			userIdentityDTO.setFailAttempts();
 			// reading the max allowed #of failure attempts
@@ -255,14 +344,19 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		// Filtering security question URIs from claims and add them to the thread local dto
 		Map<String,String> userDataMap = new HashMap<String, String>();
 
-		for (Map.Entry<String, String> entry : claims.entrySet()) {  // TODO why challenge Q
-			if (entry.getKey().contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI) ||
-			    entry.getKey().contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
-				userDataMap.put(entry.getKey(), entry.getValue());
-				claims.remove(entry.getKey());
+		// TODO why challenge Q
+		Iterator<Entry<String, String>> it = claims.entrySet().iterator();
+		while (it.hasNext()) {
+
+			Map.Entry<String, String> claim = it.next();
+
+			if (claim.getKey().contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI) ||
+			    claim.getKey().contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
+				userDataMap.put(claim.getKey(), claim.getValue());
+				it.remove();
 			}
 		}
-
+		
         UserIdentityClaimsDO identityDTO = new UserIdentityClaimsDO(userName, userDataMap);
 		// adding dto to thread local to be read again from the doPostAddUser method
 		threadLocalProperties.get().put(USER_IDENTITY_DO, identityDTO);
@@ -458,21 +552,27 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		UserIdentityDataStore identityDataStore =
 		                                          IdentityMgtConfig.getInstance()
 		                                                           .getIdentityDataStore();
-		UserIdentityClaimsDO identityDTO;
+//		  To fix https://wso2.org/jira/browse/IDENTITY-1227 	
+		UserIdentityClaimsDO identityDTO = new UserIdentityClaimsDO(userName);
 
-        identityDTO = identityDataStore.load(userName, userStoreManager);
-        if (identityDTO == null) { // user doesn't exist in the system
-            return false;
-        }
+//        identityDTO = identityDataStore.load(userName, userStoreManager);
+//        if (identityDTO == null) { // user doesn't exist in the system
+//            return false;
+//        }
 
 		// removing identity claims and security questions
-		for (Map.Entry<String, String> entry : claims.entrySet()) {
-			if (entry.getKey().contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI) ||
-			    entry.getKey().contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
-				identityDTO.setUserIdentityDataClaim(entry.getKey(), entry.getValue());
-				claims.remove(entry.getKey());
+		Iterator<Entry<String, String>> it = claims.entrySet().iterator();
+		while (it.hasNext()) {
+
+			Map.Entry<String, String> claim = it.next();
+			
+			if (claim.getKey().contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI) ||
+					claim.getKey().contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
+				identityDTO.setUserIdentityDataClaim(claim.getKey(), claim.getValue());
+				it.remove();
 			}
 		}
+		
 		// storing the identity claims and security questions
 		try {
 			identityDataStore.store(identityDTO, userStoreManager);
@@ -575,20 +675,53 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 	                                       String profileName, UserStoreManager storeManager)
 	                                                                                         throws UserStoreException {
 
-		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
-		if (!config.isListenerEnable()) {
-			return true;
-		}
-		UserIdentityDataStore identityDataStore =
-		                                          IdentityMgtConfig.getInstance()
-		                                                           .getIdentityDataStore();
-		UserIdentityClaimsDO identityDTO = identityDataStore.load(userName, storeManager);
-		// check if its a security question or identity claim 
-		if (identityDTO != null && identityDTO.getUserDataMap().containsKey(claim)) {
-			claimValue.add(identityDTO.getUserDataMap().get(claim));
-			return false;
-		} 
+
+//		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+//		if (!config.isListenerEnable()) {
+//			return true;
+//		}
+//		UserIdentityDataStore identityDataStore =
+//		                                          IdentityMgtConfig.getInstance()
+//		                                                           .getIdentityDataStore();
+//		UserIdentityClaimsDO identityDTO = identityDataStore.load(userName, storeManager);
+//		// check if its a security question or identity claim 
+//		if (identityDTO.getUserDataMap().containsKey(claim)) {
+//			claimValue.add(identityDTO.getUserDataMap().get(claim));
+//			return false;
+//		} 
+
 		return true;
 	}
 
+	@Override
+	public boolean doPostUpdateCredential(String userName, UserStoreManager userStoreManager) throws UserStoreException {
+
+		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+
+		UserIdentityClaimsDO userIdentityDTO = module.load(userName, userStoreManager);
+
+		if (userIdentityDTO == null) {
+			userIdentityDTO = new UserIdentityClaimsDO(userName);
+		}
+
+		// Do not timestamp if OTP enabled.
+		boolean userOTPEnabled = userIdentityDTO.getOneTimeLogin();
+
+		if (config.isAuthPolicyExpirePasswordCheck() && !userOTPEnabled && (!userStoreManager.isReadOnly())) {
+
+			Calendar currentTime = Calendar.getInstance();
+			userIdentityDTO.setPasswordTimeStamp(Calendar.getInstance().getTimeInMillis());
+
+			try {
+				// Store the new timestamp after change password
+				module.store(userIdentityDTO, userStoreManager);
+
+			} catch (IdentityException e) {
+				throw new UserStoreException(e.getMessage());
+			}
+
+		}
+
+		return true;
+	}
 }

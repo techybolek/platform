@@ -60,6 +60,8 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
         String notification = notificationData.getNotification();
         if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)){
 		    userParameters.put("temporary-password", notificationData.getNotificationCode());
+        } else if (IdentityMgtConstants.Notification.OTP_PASSWORD.equals(notification)) {
+        	userParameters.put("otp-password", notificationData.getNotificationCode());
         }
 
 		try {
@@ -67,7 +69,7 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 			if (notificationData.getUserId().length() == 0) {
 				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, EmailConfig.DEFAULT_VALUE_SUBJECT);
 			} else {
-				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, notificationData.getUserId());
+				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, notificationData.getNotificationSubject());
 			}
 
             String requestMessage = replacePlaceHolders(getRequestMessage(emailConfig), userParameters);

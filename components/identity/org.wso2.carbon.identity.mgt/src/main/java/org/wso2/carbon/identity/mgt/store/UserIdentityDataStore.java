@@ -26,7 +26,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
  */
 public abstract class UserIdentityDataStore {
 
-	public static final String ONE_TIME_PASSWORD = "http://wso2.org/claims/identity/onTimePassword";
+	public static final String ONE_TIME_PASSWORD = "http://wso2.org/claims/identity/otp";
 	public static final String PASSWORD_CHANGE_REQUIRED = "http://wso2.org/claims/identity/passwordChangeRequired";
 	public static final String TEMPORARY_LOCK = "http://wso2.org/claims/identity/temporaryLock";
 	public static final String LAST_FAILED_LOGIN_ATTEMPT_TIME = "http://wso2.org/claims/identity/lastFailedLoginAttemptTime";
