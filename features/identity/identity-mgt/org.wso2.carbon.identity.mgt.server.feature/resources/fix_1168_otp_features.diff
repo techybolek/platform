@@ -1,0 +1,27 @@
+Index: email-admin-config.xml
+===================================================================
+--- email-admin-config.xml	(revision 176698)
++++ email-admin-config.xml	(working copy)
+@@ -103,4 +103,20 @@
+     </footer>
+     <redirectPath></redirectPath>
+ </configuration>
++<configuration type="otp">
++    <targetEpr></targetEpr>       
++    <subject>WSO2 Carbon - One time password</subject>
++    <body>
++Hi {first-name},
++
++Please use the password {otp-password} as the new password for your next login.
++
++   </body>
++    <footer>
++Best Regards,
++WSO2 Identity Server Team
++http://www.wso2.com
++    </footer>
++    <redirectPath></redirectPath>
++</configuration>
+ </configurations>
+
+ 
