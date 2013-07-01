@@ -42,6 +42,7 @@ import org.wso2.carbon.identity.oauth.preprocessor.TokenPersistencePreprocessor;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidator;
 import org.wso2.carbon.identity.oauth2.validators.TokenValidationHandler;
+import org.wso2.carbon.identity.openidconnect.CustomClaimsCallbackHandler;
 import org.wso2.carbon.identity.openidconnect.IDTokenBuilder;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -130,6 +131,7 @@ public class OAuthServerConfiguration {
 		// OpenIDConnect confiurations
 		public static final String OPENID_CONNECT = "OpenIDConnect";
 		public static final String OPENID_CONNECT_IDTOKEN_BUILDER = "IDTokenBuilder";
+		public static final String OPENID_CONNECT_IDTOKEN_CUSTOM_CLAIM_CALLBACK_HANDLER = "IDTokenCustomClaimsCallBackHandler";
 		public static final String OPENID_CONNECT_IDTOKEN_SUB_CLAIM = "IDTokenSubjectClaim";
 		public static final String OPENID_CONNECT_IDTOKEN_ISSUER_ID = "IDTokenIssuerID";
 		public static final String OPENID_CONNECT_IDTOKEN_EXPIRATION = "IDTokenExpiration";
@@ -210,7 +212,11 @@ public class OAuthServerConfiguration {
 	// OpenID Connect configurations
 	private String openIDConnectIDTokenBuilderClassName = "org.wso2.carbon.identity.openidconnect.DefaultIDTokenBuilder";
 	
+	private String openIDConnectIDTokenCustomClaimsHanlderClassName = "org.wso2.carbon.identity.openidconnect.SAMLAssertionClaimsCallback";
+	
 	private IDTokenBuilder openIDConnectIDTokenBuilder = null;
+	
+	private CustomClaimsCallbackHandler openidConnectIDTokenCustomClaimsCallbackHandler = null;
 	
 	private String openIDConnectIDTokenIssuerIdentifier = "OIDCAuthzServer";
 	
@@ -473,6 +479,32 @@ public class OAuthServerConfiguration {
 			}
 		}
 		return openIDConnectIDTokenBuilder;
+	}
+	
+	/**
+	 * Returns the custom claims builder for the IDToken
+	 * @return
+	 */
+	public CustomClaimsCallbackHandler getOpenIDConnectCustomClaimsCallbackHandler() {
+		if(openidConnectIDTokenCustomClaimsCallbackHandler == null) {
+			synchronized (CustomClaimsCallbackHandler.class) {
+				if (openidConnectIDTokenCustomClaimsCallbackHandler == null) {
+					try {
+						Class clazz =
+						              Thread.currentThread().getContextClassLoader()
+						                    .loadClass(openIDConnectIDTokenCustomClaimsHanlderClassName);
+						openIDConnectIDTokenBuilder = (IDTokenBuilder) clazz.newInstance();
+					} catch (ClassNotFoundException e) {
+						log.error("Error while instantiating the IDTokenBuilder ", e);
+					} catch (InstantiationException e) {
+						log.error("Error while instantiating the IDTokenBuilder ", e);
+					} catch (IllegalAccessException e) {
+						log.error("Error while instantiating the IDTokenBuilder ", e);
+					}
+				}
+			}
+		}
+		return openidConnectIDTokenCustomClaimsCallbackHandler;
 	}
 
 	/**
@@ -1022,6 +1054,11 @@ public class OAuthServerConfiguration {
 			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_BUILDER)) != null) {
 				openIDConnectIDTokenBuilderClassName =
 				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_BUILDER))
+				                                                    .getText().trim();
+			}
+			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_CUSTOM_CLAIM_CALLBACK_HANDLER)) != null) {
+				openIDConnectIDTokenCustomClaimsHanlderClassName =
+				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_CUSTOM_CLAIM_CALLBACK_HANDLER))
 				                                                    .getText().trim();
 			}
 			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_SUB_CLAIM)) != null) {

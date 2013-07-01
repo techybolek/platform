@@ -69,11 +69,19 @@ public class DefaultIDTokenBuilder implements org.wso2.carbon.identity.openidcon
 		}
 
 		try {
-			return new IDTokenBuilder().setIssuer(issuer)
-			                           .setSubject(subject)
-			                           .setAudience(request.getOauth2AccessTokenReqDTO().getClientId())
-			                           .setAuthorizedParty(request.getOauth2AccessTokenReqDTO().getClientId())
-			                           .setExpiration(curTime + lifetime).setIssuedAt(curTime).buildIDToken();
+			IDTokenBuilder builder =
+			                         new IDTokenBuilder().setIssuer(issuer)
+			                                             .setSubject(subject)
+			                                             .setAudience(request.getOauth2AccessTokenReqDTO().getClientId())
+			                                             .setAuthorizedParty(request.getOauth2AccessTokenReqDTO().getClientId())
+			                                             .setExpiration(curTime + lifetime)
+			                                             .setIssuedAt(curTime);
+			// setting up custom claims 
+			CustomClaimsCallbackHandler claimsCallBackHandler =
+			                                                    OAuthServerConfiguration.getInstance()
+			                                                                            .getOpenIDConnectCustomClaimsCallbackHandler();
+			claimsCallBackHandler.handleCustomClaims(builder);
+			return builder.buildIDToken();
 		} catch (IDTokenException e) {
 			throw new IdentityOAuth2Exception("Erro while generating the IDToken", e);
 		}

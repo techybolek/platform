@@ -28,8 +28,10 @@ public class OAuth2Constants {
 
     public static String OAUTH_SAML2_BEARER_METHOD = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
     public static String OAUTH_SAML2_BEARER_GRANT_ENUM = "SAML20_BEARER";
+    public static final String OAUTH_SAML2_ASSERTION = "SAML2Assertion";
 
     public static String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
+    
 
     public static class ClientAuthMethods {
         public static final String BASIC = "basic";

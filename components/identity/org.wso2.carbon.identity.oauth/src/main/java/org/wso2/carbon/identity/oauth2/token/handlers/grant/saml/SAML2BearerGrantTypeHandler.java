@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.oauth2.token.handlers.grant.saml;
 
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -380,6 +381,10 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
         // TODO: Throw the SAML request through the general SAML2 validation routines
 
         tokReqMsgCtx.setScope(tokReqMsgCtx.getOauth2AccessTokenReqDTO().getScope());
+        
+        // Storing the Assertion. This will be used in OpenID Connect for example
+        MessageContext.getCurrentMessageContext().setProperty(OAuth2Constants.OAUTH_SAML2_ASSERTION, assertion);
+        
         return true;
     }
 
