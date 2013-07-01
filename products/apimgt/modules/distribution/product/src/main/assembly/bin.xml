@@ -136,9 +136,6 @@
             <includes>
                 <include>**/**.xml</include>
             </includes>
-			<excludes>
-				<exclude>apistore/**.xml</exclude>
-			</excludes>
         </fileSet>
         <fileSet>
             <directory>../../../config/rxts</directory>
