@@ -24,6 +24,7 @@
                     <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="clientId" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="requiredClaims" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="tokenType" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
