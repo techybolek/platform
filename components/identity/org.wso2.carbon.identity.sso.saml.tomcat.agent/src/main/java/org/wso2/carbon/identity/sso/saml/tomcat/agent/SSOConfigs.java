@@ -35,6 +35,7 @@ public class SSOConfigs {
     private static String trustStorePassword;
     private static String idPCertAlias;
     private static String errorPage;
+    private static int serverVersion = 4;
 
 
 	public static void initConfigs(FilterConfig fConfigs){
@@ -50,6 +51,11 @@ public class SSOConfigs {
         trustStore = fConfigs.getInitParameter("TrustStore");
         trustStorePassword = fConfigs.getInitParameter("TrustStorePassword");
         idPCertAlias = fConfigs.getInitParameter("IDPCertAlias");
+        idPCertAlias = fConfigs.getInitParameter("IDPCertAlias");
+        String serverVersionString = fConfigs.getInitParameter("ServerVersion");
+        if(serverVersionString != null && serverVersionString.startsWith("3")){
+            serverVersion = 3 ;
+        }
 	}
 
 	public static String getSsoLoginPage() {
@@ -101,5 +107,9 @@ public class SSOConfigs {
 
     public static String getErrorPage() {
         return errorPage;
+    }
+
+    public static int getServerVersion() {
+        return serverVersion;
     }
 }

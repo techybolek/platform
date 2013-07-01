@@ -33,7 +33,6 @@ import java.util.zip.DeflaterOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,10 +96,12 @@ public class SSOManager {
 		if (request.getParameter("logout") == null) {
 			requestMessage = buildAuthnRequestObject();
 
-		} else { 
+		} else {
 			requestMessage = buildLogoutRequest((String) request.getSession().getAttribute("Subject"));
 		}
-
+        if(log.isDebugEnabled()){
+            log.debug("SAML REQUEST IS BUILT. REQUEST : " +  requestMessage);
+        }
 		String encodedRequestMessage = null;
 		try {
 			encodedRequestMessage = encodeRequestMessage(requestMessage);
@@ -110,9 +111,7 @@ public class SSOManager {
 			e.printStackTrace();
 		}
 
-		
-		return SSOConfigs.getIdpUrl() + "?SAMLRequest=" + encodedRequestMessage + "&RelayState=" +
-		       relayState;
+		return SSOConfigs.getIdpUrl() + "?SAMLRequest=" + encodedRequestMessage +"&RelayState=" + relayState;
 	}
 
 	private LogoutRequest buildLogoutRequest(String user) {

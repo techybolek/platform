@@ -65,9 +65,15 @@ public class SSOAgentFilter implements Filter {
 	 */
 	public void doFilter(ServletRequest req, ServletResponse res,
 			FilterChain chain) throws IOException, ServletException {
+
+
+
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
-		
+        if(log.isDebugEnabled()){
+            log.debug("JSESSION ID " + request.getSession().getId());
+            log.debug("REQUESTD URI  " + request.getRequestURI());
+        }
 		String requestWithoutParams = request.getRequestURI();
 		if(requestWithoutParams.indexOf("?")>-1){
 			requestWithoutParams = requestWithoutParams.substring(0, requestWithoutParams.indexOf("?"));
@@ -115,12 +121,20 @@ public class SSOAgentFilter implements Filter {
                                                             throws ServletException, IOException {
 
 		String samlRequest = request.getParameter(SSOConstants.HTTP_POST_PARAM_SAML2_AUTH_REQ);
-
         if (samlRequest != null) {
-			//This is a single logout request from the IdP
+            //This is a single logout request from the IdP
 			try {
+
+                // if identity server version is 4.X.X, response is Base64 encoded. Therefore decoding
+                // is needed
+                if(SSOConfigs.getServerVersion() == 4){
+                    samlRequest = Util.decode(samlRequest);
+                }
 				XMLObject samlObject = ssoManager.unmarshall(samlRequest);
 				if (samlObject instanceof LogoutRequest) {
+                    if(log.isDebugEnabled()){
+                        log.debug("SAML LOGOUT REQUEST IS RECEIVED. REQUEST : " +  samlRequest);
+                    }
 					LogoutRequest logoutRequest = (LogoutRequest) samlObject;
 					String sessionIndex = logoutRequest.getSessionIndexes()
 							.get(0).getSessionIndex();
@@ -133,15 +147,16 @@ public class SSOAgentFilter implements Filter {
 			return;
 		}
 
-		String samlResponseString = request.getParameter(SSOConstants.HTTP_POST_PARAM_SAML2_RESP);
-
-		if (samlResponseString != null) {
+		String samlResponse = request.getParameter(SSOConstants.HTTP_POST_PARAM_SAML2_RESP);
+        if (samlResponse != null) {
             XMLObject samlObject = null;
-            String decodedResponse = null;
-
             try {
-                decodedResponse = Util.decode(samlResponseString);
-                samlObject = ssoManager.unmarshall(decodedResponse);
+                // if identity server version is 4.X.X, response is Base64 encoded. Therefore decoding
+                // is needed
+                if(SSOConfigs.getServerVersion() == 4){
+                    samlResponse = Util.decode(samlResponse);
+                }
+                samlObject = ssoManager.unmarshall(samlResponse);
             } catch (SSOAgentException e) {
                 log.error("Invalid SAML response", e);
                 handleMalformedResponses(request, response, "Invalid SAML response");
@@ -149,23 +164,28 @@ public class SSOAgentFilter implements Filter {
             }
 
             if (samlObject instanceof LogoutResponse) {
+                if(log.isDebugEnabled()){
+                    log.debug("SAML LOGOUT RESPONSE IS RECEIVED. RESPONSE : " +  samlResponse);
+                }
                 //This is a SAML response for a single logout request from the SP
                 SSOSessionManager.invalidateSession(request.getSession());
                 response.sendRedirect(SSOConfigs.getLogoutPage());
                 return;
             } else {
-
-                Response samlResponse = (Response) samlObject;
-                List<Assertion> assertions = samlResponse.getAssertions();
+                if(log.isDebugEnabled()){
+                    log.debug("SAML RESPONSE IS RECEIVED. RESPONSE : " +  samlResponse);
+                }
+                Response samlResponseObject = (Response) samlObject;
+                List<Assertion> assertions = samlResponseObject.getAssertions();
                 Assertion assertion = null;
                 if (assertions != null && assertions.size() > 0) {
                     assertion = assertions.get(0);
                 }
 
                 if (assertion == null) {
-                    if (samlResponse.getStatus() != null &&
-                        samlResponse.getStatus().getStatusMessage() != null) {
-                        log.error(samlResponse.getStatus().getStatusMessage().getMessage());
+                    if (samlResponseObject.getStatus() != null &&
+                            samlResponseObject.getStatus().getStatusMessage() != null) {
+                        log.error(samlResponseObject.getStatus().getStatusMessage().getMessage());
                     } else {
                         log.error("SAML Assertion not found in the Response");
                     }
@@ -194,7 +214,7 @@ public class SSOAgentFilter implements Filter {
                 }
 
                 // validate signature this SP only looking for assertion signature
-                if(!ssoManager.validateSignature(samlResponse)){
+                if(!ssoManager.validateSignature(samlResponseObject)){
                     handleMalformedResponses(request, response,
                             "SAML Assertion is not valid");
                     return;                    
@@ -212,7 +232,7 @@ public class SSOAgentFilter implements Filter {
                 request.getSession().setAttribute(SSOConstants.LAST_ACCESSED_TIME, new Date());
 
                 try {
-                    authenticator.authenticate(request, response, decodedResponse, samlAttributeMap);
+                    authenticator.authenticate(request, response, samlResponse, samlAttributeMap);
                 } catch (Exception e) {
                     log.error(e);
                     handleMalformedResponses(request, response, e.getMessage());

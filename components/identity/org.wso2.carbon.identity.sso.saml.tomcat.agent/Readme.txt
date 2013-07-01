@@ -97,6 +97,11 @@ How to configure
 			<param-name>ErrorPage</param-name>
 			<param-value>sso-errors.jsp</param-value>
 		</init-param>
+		<init-param>
+		    <!-- Identity server version. Whether it is 4 (4.X.X) or 3 (3.X.X) -->
+		    <param-name>ServerVersion</param-name>
+		    <param-value>3.2.3</param-value>
+		</init-param>
 	</filter>
 	<filter-mapping>
 		<filter-name>AuthFilter</filter-name>
