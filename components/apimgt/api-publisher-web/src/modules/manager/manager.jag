@@ -22,15 +22,15 @@ var getAPIProviderObj = function() {
     var user = jagg.getUser();
     var store;
     if (user == null) {
-        store = require('apistore');
+        store = require('apipublisher');
         return new store.APIProvider();
     } else {
-        store = require('apistore');
+        store = require('apipublisher');
         return new store.APIProvider(user.username);
     }
 };
 var getAPIStoreObj = function() {
-    var store = require('apistore');
+    var store = require('apipublisher');
     return new store.APIStore();
 };
 %>
