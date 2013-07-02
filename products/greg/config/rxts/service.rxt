@@ -3,6 +3,7 @@
     <storagePath>/trunk/services/@{namespace}/@{name}</storagePath>
     <nameAttribute>overview_name</nameAttribute>
     <namespaceAttribute>overview_namespace</namespaceAttribute>
+    <lifecycle>ServiceLifeCycle</lifecycle>
     <ui>
         <list>
             <column name="Service Name">
