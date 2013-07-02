@@ -23,14 +23,15 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.AbstractDeployer;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.identity.user.store.configuration.deployer.internal.UserStoreConfigComponent;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
-import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.namespace.QName;
@@ -38,7 +39,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.*;
 
 /**
- * This is to deploy a new User Store Management Configuration file dropped or created at repository/conf/server/userstore.
+ * This is to deploy a new User Store Management Configuration file dropped or created at repository/conf/server/userstores.
  * Whenever a new file with .xml extension is added or a modification is done to an existing file, deployer will
  * automatically update the existing realm configuration org.wso2.carbon.identity.user.store.configuration according to the new file.
  */
@@ -48,9 +49,11 @@ public class UserStoreConfigurationDeployer extends AbstractDeployer {
     private static Log log = LogFactory.getLog(UserStoreConfigurationDeployer.class);
     private File userMgtConfigFile;
     private RealmConfigXMLProcessor realmConfigXMLProcessor = new RealmConfigXMLProcessor();
+    private AxisConfiguration axisConfig;
 
     public void init(ConfigurationContext configurationContext) {
         log.info("User Store Configuration Deployer initiated.");
+        this.axisConfig = configurationContext.getAxisConfiguration();
 
     }
 
@@ -66,17 +69,20 @@ public class UserStoreConfigurationDeployer extends AbstractDeployer {
         OMElement realmElement;
         RealmConfiguration realmConfiguration;
         userMgtConfigFile = new File(path);
-        log.info(path + " deploying...");
-        try {
 
+        try {
             realmElement = getRealmElement();
             realmConfiguration = realmConfigXMLProcessor.buildRealmConfiguration(realmElement);
-            UserStoreConfigComponent.getRealmService().setBootstrapRealmConfiguration(realmConfiguration);
-            log.info(path + " deployed...");
+
+            CarbonContext.getCurrentContext().getUserRealm().getRealmConfiguration().setSecondaryRealmConfig(realmConfiguration.getSecondaryRealmConfig());
+            if (log.isDebugEnabled()) {
+                log.debug("Realm configuration of tenant:" + CarbonContext.getCurrentContext().getTenantId() + "  modified with " + path);
+            }
 
         } catch (Exception ex) {
             throw new DeploymentException("The deployment of " + userMgtConfigFile.getName() + " is not valid.", ex);
         }
+
     }
 
     public void setDirectory(String s) {

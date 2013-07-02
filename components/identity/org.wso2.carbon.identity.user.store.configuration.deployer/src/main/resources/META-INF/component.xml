@@ -18,7 +18,12 @@
 <component xmlns="http://products.wso2.org/carbon">
     <deployers>
         <deployer>
-            <directory>userstore</directory>
+            <directory>userstores</directory>
+            <extension>xml</extension>
+            <class>org.wso2.carbon.identity.user.store.configuration.deployer.UserStoreConfigurationDeployer</class>
+        </deployer>
+        <deployer>
+            <directory>tenants</directory>
             <extension>xml</extension>
             <class>org.wso2.carbon.identity.user.store.configuration.deployer.UserStoreConfigurationDeployer</class>
         </deployer>
