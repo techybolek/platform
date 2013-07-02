@@ -200,6 +200,7 @@ public class OAuthAdminService extends AbstractAdmin {
         oauthappdo.setOauthConsumerKey(consumerAppDTO.getOauthConsumerKey());
         oauthappdo.setOauthConsumerSecret(consumerAppDTO.getOauthConsumerSecret());
         oauthappdo.setCallbackUrl(consumerAppDTO.getCallbackUrl());
+        oauthappdo.setApplicationName(consumerAppDTO.getApplicationName());
         List<String> allowedGrants = new ArrayList<String>(Arrays.asList(getAllowedGrantTypes()));
         String[] requestGrants = consumerAppDTO.getGrantTypes().split("\\s");
         for(String requestedGrant:requestGrants){

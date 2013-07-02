@@ -227,10 +227,11 @@ public class OAuthAppDAO {
         try {
             connection = JDBCPersistenceManager.getInstance().getDBConnection();
             prepStmt = connection.prepareStatement(SQLQueries.OAuthAppDAOSQLQueries.UPDATE_CONSUMER_APP);
-            prepStmt.setString(1, oauthAppDO.getCallbackUrl());
-            prepStmt.setString(2, oauthAppDO.getGrantTypes());
-            prepStmt.setString(3, oauthAppDO.getOauthConsumerKey());
-            prepStmt.setString(4, oauthAppDO.getOauthConsumerSecret());
+            prepStmt.setString(1, oauthAppDO.getApplicationName());
+            prepStmt.setString(2, oauthAppDO.getCallbackUrl());
+            prepStmt.setString(3, oauthAppDO.getGrantTypes());
+            prepStmt.setString(4, oauthAppDO.getOauthConsumerKey());
+            prepStmt.setString(5, oauthAppDO.getOauthConsumerSecret());
 
             int count = prepStmt.executeUpdate();
             if (log.isDebugEnabled()) {
