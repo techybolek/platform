@@ -19,10 +19,12 @@ package org.wso2.carbon.identity.user.store.configuration.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.user.store.configuration.internal.UserStoreConfigComponent;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.user.store.configuration.utils.IdentityUserStoreMgtException;
 import org.wso2.carbon.user.api.Property;
 import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.tracker.UserStoreManagerRegistry;
 
@@ -31,11 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class UserStoreConfigAdminService {
+public class UserStoreConfigAdminService extends AbstractAdmin {
     public static final Log log = LogFactory.getLog(UserStoreConfigAdminService.class);
     private RealmConfiguration realmConfiguration;
     private Map<Integer, Map<String, String>> activeUserStores = new HashMap<Integer, Map<String, String>>();
-    public static final String CLASS="Class";
+    public static final String CLASS = "Class";
     public static final String DESCRIPTION = "Description";
     public static final String DISABLED = "Disabled";
     private UserStoreDTO[] userstoreDTOs;
@@ -47,7 +49,7 @@ public class UserStoreConfigAdminService {
      *
      * @throws IdentityUserStoreMgtException
      */
-    public void initialize() throws IdentityUserStoreMgtException {
+    private void initialize() throws IdentityUserStoreMgtException, UserStoreException {
 
         String className;
         String description;
@@ -56,7 +58,8 @@ public class UserStoreConfigAdminService {
         ArrayList<UserStoreDTO> domains = new ArrayList<UserStoreDTO>();
         UserStoreDTO userstoreDTO = new UserStoreDTO();
 
-        realmConfiguration = UserStoreConfigComponent.getRealmConfiguration();
+        realmConfiguration = CarbonContext.getCurrentContext().getUserRealm().getRealmConfiguration();
+
         RealmConfiguration secondaryRealmConfig = realmConfiguration.getSecondaryRealmConfig();
         className = realmConfiguration.getUserStoreClass();
         description = realmConfiguration.getDescription();
@@ -72,8 +75,8 @@ public class UserStoreConfigAdminService {
         domains.add(userstoreDTO);
 
         Map<String, String> userStoreProperties = realmConfiguration.getUserStoreProperties();
-        if(userStoreProperties.get(DISABLED)!=null){
-        userstoreDTO.setDisabled(Boolean.valueOf(userStoreProperties.get(DISABLED)));
+        if (userStoreProperties.get(DISABLED) != null) {
+            userstoreDTO.setDisabled(Boolean.valueOf(userStoreProperties.get(DISABLED)));
         }
 //        userStoreProperties.put("Class", className);
 //        userStoreProperties.put("Description", description);
@@ -118,7 +121,7 @@ public class UserStoreConfigAdminService {
             userStoreDTO.setOrder(order);
             userStoreDTO.setDescription(description);
             userStoreDTO.setDomainId(domainId);
-            if(userStoreProperties.get("Disabled")!=null){
+            if (userStoreProperties.get("Disabled") != null) {
                 userStoreDTO.setDisabled(Boolean.valueOf(userStoreProperties.get("Disabled")));
             }
             domains.add(userStoreDTO);
@@ -142,7 +145,7 @@ public class UserStoreConfigAdminService {
      * @throws org.wso2.carbon.identity.user.store.configuration.utils.IdentityUserStoreMgtException
      *
      */
-    public UserStoreDTO[] getActiveDomains() throws IdentityUserStoreMgtException {
+    public UserStoreDTO[] getActiveDomains() throws IdentityUserStoreMgtException, UserStoreException {
         initialize();
         return userstoreDTOs.clone();
 
@@ -154,7 +157,7 @@ public class UserStoreConfigAdminService {
      * @param order
      * @return
      */
-    public String[] getActiveUserStoreProperties(int order) throws IdentityUserStoreMgtException {
+    public String[] getActiveUserStoreProperties(int order) throws IdentityUserStoreMgtException, UserStoreException {
         initialize();
         Set<Map.Entry<String, String>> properties = activeUserStores.get(order).entrySet();
         ArrayList<String> propertiesList = new ArrayList<String>();
@@ -166,12 +169,12 @@ public class UserStoreConfigAdminService {
             key = (String) entry.getKey();
             value = (String) entry.getValue();
 
-            if(key.contains("password")||key.contains("Password")){
+            if (key.contains("password") || key.contains("Password")) {
                 value = " ";
             }
 
             if (!key.contains("SQL")) {                                    //Not to add SQL statements
-                propertiesList.add(key + "#" + value);                          //key#value []
+                propertiesList.add(key + "#" + value);                     //key#value []
             }
 
         }
@@ -192,7 +195,6 @@ public class UserStoreConfigAdminService {
     /**
      * Get User Store Manager default properties for a given implementation
      *
-     *
      * @param className
      * @return
      */
@@ -205,7 +207,8 @@ public class UserStoreConfigAdminService {
      *
      * @return
      */
-    public String[] getAuthzProperties() {
+    public synchronized String[] getAuthzProperties() throws UserStoreException, IdentityUserStoreMgtException {
+        initialize();
         Map<String, String> properties = realmConfiguration.getAuthzProperties();
         properties.put(UserCoreConstants.RealmConfig.ATTR_NAME_CLASS, realmConfiguration.getAuthorizationManagerClass());
 
@@ -219,7 +222,8 @@ public class UserStoreConfigAdminService {
      *
      * @return
      */
-    public String[] getConfigProperties() {
+    public synchronized String[] getConfigProperties() throws UserStoreException, IdentityUserStoreMgtException {
+        initialize();
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(UserCoreConstants.RealmConfig.LOCAL_NAME_ADD_ADMIN, realmConfiguration.getAddAdmin());
         properties.put(UserCoreConstants.RealmConfig.LOCAL_NAME_USER_NAME, realmConfiguration.getAdminUserName());
