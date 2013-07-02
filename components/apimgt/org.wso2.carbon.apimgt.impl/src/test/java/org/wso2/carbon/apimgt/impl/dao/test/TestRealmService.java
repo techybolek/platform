@@ -67,7 +67,7 @@ public class TestRealmService implements RealmService {
     }
 
     public void setBootstrapRealmConfiguration(RealmConfiguration realmConfiguration) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        //TODO implement method
     }
 
 	public void clearCachedUserRealm(int arg0) throws UserStoreException {
