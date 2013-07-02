@@ -122,6 +122,7 @@
 			<TokenEndPoint>https://localhost:9443/oauth2endpoints/token</TokenEndPoint>
 			<TokenEndPointAliases>tokenEP</TokenEndPointAliases>
 			<Audience>https://localhost:9443/oauth2endpoints/token</Audience>
+			<!--SAML2TokenHandler></SAML2TokenHandler-->
 		</SAML2Grant>
                 <OpenIDConnect>
                          <IDTokenBuilder>org.wso2.carbon.identity.openidconnect.DefaultIDTokenBuilder</IDTokenBuilder>
