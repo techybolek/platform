@@ -40,6 +40,7 @@ import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.oauth.OAuthConstants;
 import org.wso2.carbon.identity.oauth.preprocessor.TokenPersistencePreprocessor;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.saml.SAML2TokenCallbackHandler;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidator;
 import org.wso2.carbon.identity.oauth2.validators.TokenValidationHandler;
 import org.wso2.carbon.identity.openidconnect.CustomClaimsCallbackHandler;
@@ -110,6 +111,7 @@ public class OAuthServerConfiguration {
 		public static final String ISSUERS = "Issuers";
 		public static final String ISSUER = "Issuer";
 		public static final String AUDIENCE = "Audience";
+		public static final String SAML2_TOKEN_HANDLER = "SAML2TokenHandler";
 		public static final String TOKEN_END_POINT = "TokenEndPoint";
 		public static final String TOKEN_END_POINT_ALIASES = "TokenEndPointAliases";
 
@@ -188,6 +190,10 @@ public class OAuthServerConfiguration {
 	private Map<String, String> saml2Issuers = new HashMap<String, String>();
 
 	private List<String> saml2Audience = new ArrayList<String>();
+	
+	private String saml2TokenCallbackHandlerName = null;
+	
+	private SAML2TokenCallbackHandler saml2TokenCallbackHandler = null;
 	
 	private Map<String,Map<String,String>> loginConfiguration = new ConcurrentHashMap<String, Map<String,String>>();
 
@@ -366,6 +372,31 @@ public class OAuthServerConfiguration {
 
 	public List<String> getSAML2Audience() {
 		return saml2Audience;
+	}
+	
+	public SAML2TokenCallbackHandler getSAML2TokenCallbackHandler() {
+		if (saml2TokenCallbackHandlerName == null) {
+			return null;
+		}
+		if (saml2TokenCallbackHandler == null) {
+			synchronized (SAML2TokenCallbackHandler.class) {
+				if (saml2TokenCallbackHandler == null) {
+					try {
+						Class clazz =
+						              Thread.currentThread().getContextClassLoader()
+						                    .loadClass(saml2TokenCallbackHandlerName);
+						saml2TokenCallbackHandler = (SAML2TokenCallbackHandler) clazz.newInstance();
+					} catch (ClassNotFoundException e) {
+						log.error("Error while instantiating the SAML2TokenCallbackHandler ", e);
+					} catch (InstantiationException e) {
+						log.error("Error while instantiating the SAML2TokenCallbackHandler ", e);
+					} catch (IllegalAccessException e) {
+						log.error("Error while instantiating the SAML2TokenCallbackHandler ", e);
+					}
+				}
+			}
+		}
+		return saml2TokenCallbackHandler;
 	}
 
 	public String getTokenEndPoint() {
@@ -970,11 +1001,18 @@ public class OAuthServerConfiguration {
 			}
 		}
 
+		OMElement saml2TokenHandlerElem =
+                oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.SAML2_GRANT))
+                               .getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.SAML2_TOKEN_HANDLER));
+		if(saml2TokenHandlerElem != null) {
+			saml2TokenCallbackHandlerName = saml2TokenHandlerElem.getText();
+		}
+		
 		OMElement validTokenEPElem =
 		                             oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.SAML2_GRANT))
 		                                            .getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.TOKEN_END_POINT));
 		if (validTokenEPElem != null) {
-			tokenEP = validSAML2AudienceElem.getText();
+			tokenEP = validTokenEPElem.getText();
 		}
 		if (log.isDebugEnabled()) {
 			for (int i = 0; i < saml2Audience.size(); i++) {
