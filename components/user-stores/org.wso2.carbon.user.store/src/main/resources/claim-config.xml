@@ -164,6 +164,19 @@
 				<Description>Full Name</Description>
 				<SupportedByDefault />				
 		    </Claim>
+			<Claim>
+				<ClaimURI>http://wso2.org/claims/identity/otp</ClaimURI>
+				<DisplayName>One Time Password</DisplayName>
+				<AttributeID>oneTimePassword</AttributeID>
+				<Description>One Time Password</Description>
+				<SupportedByDefault />
+			</Claim>
+			<Claim>
+				<ClaimURI>http://wso2.org/claims/identity/passwordTimestamp</ClaimURI>
+				<DisplayName>Password Time Stamp</DisplayName>
+				<AttributeID>telephoneNumber</AttributeID>
+				<Description>Password Time Stamp</Description>
+			</Claim>
 		    <!--Claim> 
 				<ClaimURI>http://wso2.org/claims/primaryChallengeQuestion</ClaimURI> 
 				<DisplayName>Primary Challenge Question</DisplayName> 
