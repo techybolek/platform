@@ -148,8 +148,8 @@
                             </tr>
 				           <tr>
 		                        <td class="leftCol-small"><fmt:message key='application.name'/></td>
-		                        <td><%=app.getApplicationName()%><input id="application" name="application"
-		                                   type="hidden" value="<%=app.getApplicationName()%>" /></td>
+		                        <td><input class="text-box-big" id="application" name="application"
+		                                   type="text" value="<%=app.getApplicationName()%>" /></td>
 		                    </tr>
 		                    <tr>
 		                        <td class="leftCol-small"><fmt:message key='callback'/><font class="required">*</font></td>
