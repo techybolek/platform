@@ -73,8 +73,8 @@ public class APIKeyValidator {
     }
 
     protected Cache initCache() {
-      //  return Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache");
-       return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
+       return Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache");
+       //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
     }
 
     protected Cache initResourceCache(){
