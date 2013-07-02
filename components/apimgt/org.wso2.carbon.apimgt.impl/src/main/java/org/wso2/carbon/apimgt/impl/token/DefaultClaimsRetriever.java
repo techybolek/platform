@@ -73,8 +73,9 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
             } else {
                 ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantId).getClaimManager();
+                //Claim[] claims = claimManager.getAllClaims(dialectURI);
                 ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
-                String[] claimURIs = claim_to_string(claims);
+                String[] claimURIs = claimMappingtoClaimURIString(claims);
                 UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantId).getUserStoreManager();
                 claimValues = new TreeMap(userStoreManager.getUserClaimValues(endUserName, claimURIs, null));
@@ -101,10 +102,10 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
      * Helper method to convert array of <code>Claim</code> object to
      * array of <code>String</code> objects corresponding to the ClaimURI values.
      */
-    private String[] claim_to_string(ClaimMapping[] claims) {
+    private String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
         String[] temp = new String[claims.length];
         for (int i = 0; i < claims.length; i++) {
-            temp[i] = claims[i].getClaim().toString();
+            temp[i] = claims[i].getClaim().getClaimUri().toString();
        
         }
         return temp;
