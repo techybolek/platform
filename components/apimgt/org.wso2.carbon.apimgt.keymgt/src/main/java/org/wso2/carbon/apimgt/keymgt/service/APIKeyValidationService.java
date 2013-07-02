@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
-import net.sf.jsr107cache.Cache;
+//import net.sf.jsr107cache.Cache;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -32,6 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import java.util.ArrayList;
 
 /**
@@ -51,7 +53,8 @@ public class APIKeyValidationService extends AbstractAdmin {
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,String requiredAuthenticationLevel, String clientDomain)
             throws APIKeyMgtException, APIManagementException {
-        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+       // Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         String cacheKey = accessToken + ":" + context + ":" + version+":"+requiredAuthenticationLevel;
         APIKeyValidationInfoDTO info;
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
