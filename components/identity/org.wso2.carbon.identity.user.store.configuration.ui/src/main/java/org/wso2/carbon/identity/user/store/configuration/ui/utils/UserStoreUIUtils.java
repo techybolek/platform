@@ -4,8 +4,10 @@ package org.wso2.carbon.identity.user.store.configuration.ui.utils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,8 +31,11 @@ public class UserStoreUIUtils {
     private Map<String, String> configProperties = UserStoreMgtDataKeeper.getConfigProperties();
     private Map<String, String> authzProperties = UserStoreMgtDataKeeper.getAuthzProperties();
     private final String CarbonHome = CarbonUtils.getCarbonHome();
-    private File userStore = new File("userstore");
-    private String filePath = CarbonHome + "/repository/deployment/server/userstore";
+
+    private String filePath = CarbonHome + "/repository/deployment/server/userstores";
+
+    private String tenantFilePath = CarbonHome + "/repository/deployment/server/tenants";
+
 
     public void saveConfigurationToFile(String[] orders) throws TransformerException, ParserConfigurationException {
 
@@ -110,10 +115,27 @@ public class UserStoreUIUtils {
         DOMSource source = new DOMSource(doc);
 
 
-        if (!userStore.exists()) {
-            new File(filePath).mkdir();
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        StreamResult result;
+
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            File userStore = new File(filePath);
+            if (!userStore.exists()) {
+                new File(filePath).mkdir();
+            } else {
+
+            }
+            result = new StreamResult(new File(filePath + "/user-mgt.xml"));
+        } else {
+            tenantFilePath = tenantFilePath + File.separator + tenantId;
+            File userStore = new File(tenantFilePath);
+            if (!userStore.exists()) {
+                new File(tenantFilePath).mkdir();
+            } else {
+
+            }
+            result = new StreamResult(new File(tenantFilePath + "/user-mgt.xml"));
         }
-        StreamResult result = new StreamResult(new File(filePath + "/user-mgt.xml"));
 
         transformer.transform(source, result);
 

@@ -114,7 +114,6 @@
                 property = properties.get(i);
                 if (tempProperties.get(property.getName()) != null) {
                     properties.get(i).setValue(tempProperties.get(property.getName()));
-                    System.out.println("Order"+rank);
                 }
             }
 

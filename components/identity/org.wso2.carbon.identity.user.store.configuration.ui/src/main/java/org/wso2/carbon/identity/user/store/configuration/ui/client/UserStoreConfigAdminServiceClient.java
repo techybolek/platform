@@ -21,8 +21,9 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.wso2.carbon.identity.user.store.configuration.stub.UserStoreConfigAdminServiceIdentityUserStoreMgtException;
+import org.wso2.carbon.identity.user.store.configuration.stub.IdentityUserStoreMgtException;
 import org.wso2.carbon.identity.user.store.configuration.stub.UserStoreConfigAdminServiceStub;
+import org.wso2.carbon.identity.user.store.configuration.stub.UserStoreException;
 import org.wso2.carbon.identity.user.store.configuration.stub.api.Property;
 import org.wso2.carbon.identity.user.store.configuration.stub.config.UserStoreDTO;
 
@@ -58,7 +59,8 @@ public class UserStoreConfigAdminServiceClient {
      * @return
      * @throws Exception
      */
-    public UserStoreDTO[] getActiveDomains() throws RemoteException, UserStoreConfigAdminServiceIdentityUserStoreMgtException {
+    public UserStoreDTO[] getActiveDomains() throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
+
         return stub.getActiveDomains();
     }
 
@@ -69,7 +71,7 @@ public class UserStoreConfigAdminServiceClient {
      * @return
      * @throws Exception
      */
-    public Map<String, String> getActiveUserStoreProperties(int order) throws RemoteException, UserStoreConfigAdminServiceIdentityUserStoreMgtException {
+    public Map<String, String> getActiveUserStoreProperties(int order) throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
 
         Map<String, String> propertyMap = new HashMap<String, String>();
         String[] properties;
@@ -106,12 +108,11 @@ public class UserStoreConfigAdminServiceClient {
      */
     public ArrayList<Property> getUserStoreProperties(String className) throws RemoteException {
         Property[] properties = stub.getUserStoreManagerProperties(className);
-        ArrayList<Property> propertyList=new ArrayList<Property>(Arrays.asList(properties));
+        ArrayList<Property> propertyList = new ArrayList<Property>(Arrays.asList(properties));
 
 
         return propertyList;
     }
-
 
 
     /**
@@ -120,7 +121,7 @@ public class UserStoreConfigAdminServiceClient {
      * @return
      * @throws java.rmi.RemoteException
      */
-    public Map<String, String> getConfigProperties() throws RemoteException {
+    public Map<String, String> getConfigProperties() throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
         return convertArrayToMap(stub.getConfigProperties());
 
     }
@@ -131,7 +132,7 @@ public class UserStoreConfigAdminServiceClient {
      * @return
      * @throws java.rmi.RemoteException
      */
-    public Map<String, String> getAuthzProperties() throws RemoteException {
+    public Map<String, String> getAuthzProperties() throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
         return convertArrayToMap(stub.getAuthzProperties());
 
     }
