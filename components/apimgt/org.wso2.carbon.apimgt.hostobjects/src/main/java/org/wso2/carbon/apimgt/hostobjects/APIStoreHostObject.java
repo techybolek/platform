@@ -2062,8 +2062,7 @@ public class APIStoreHostObject extends ScriptableObject {
         UserAdminStub userAdminStub = new UserAdminStub(url);
         CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
                 true, userAdminStub._getServiceClient());
-		FlaggedName[] flaggedNames =null ;
-       // FlaggedName[] flaggedNames = userAdminStub.getRolesOfUser(userName);  CHECK THIS,API CHNAGED
+        FlaggedName[] flaggedNames = userAdminStub.getRolesOfUser(userName, "*", -1);
         List<String> roles = new ArrayList<String>();
         if (flaggedNames != null) {
             for (int i = 0; i < flaggedNames.length; i++) {
