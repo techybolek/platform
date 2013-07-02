@@ -108,6 +108,9 @@ public class RegistryBasedArtifactRepository implements ArtifactRepository {
                     registryPath);
         }
         try {
+            if (RegistrySynchronizer.isCheckedOut(filePath)) {
+                RegistrySynchronizer.checkOut(registry, filePath, registryPath);
+            }
             Utils.addResource(filePath);
             Utils.setResourcesDelete(filePath);
             return RegistrySynchronizer.checkIn(registry, filePath, false);
