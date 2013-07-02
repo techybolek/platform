@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cartridge.messages.feature</artifactId>
-            <version>2.2.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <type>zip</type>
             </dependency>
         <dependency>
@@ -66,8 +66,8 @@
                             <id>org.wso2.carbon.cartridge.agent</id>
                             <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cartridge.agent.server.feature</includedFeatureDef>
-				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cartridge.messages.feature:2.2.0-SNAPSHOT</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cartridge.agent.server.feature:${project.version}</includedFeatureDef>
+				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cartridge.messages.feature:${project.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
