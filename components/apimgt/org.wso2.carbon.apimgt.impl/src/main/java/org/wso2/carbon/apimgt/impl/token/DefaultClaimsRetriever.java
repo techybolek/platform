@@ -104,7 +104,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     private String[] claim_to_string(ClaimMapping[] claims) {
         String[] temp = new String[claims.length];
         for (int i = 0; i < claims.length; i++) {
-          //  temp[i] = claims[i].getClaim(); CHECK THIS< INTERFACE CHNAGED
+            temp[i] = claims[i].getClaim().toString();
        
         }
         return temp;
