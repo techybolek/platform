@@ -16,16 +16,24 @@
  ~ under the License.
  -->
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-                  xmlns:ax2339="http://config.configuration.store.user.identity.carbon.wso2.org/xsd"
+                  xmlns:ax2339="http://utils.configuration.store.user.identity.carbon.wso2.org/xsd"
                   xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax2337="http://api.user.carbon.wso2.org/xsd"
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
                   xmlns:tns="http://config.configuration.store.user.identity.carbon.wso2.org"
-                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  xmlns:ax2341="http://config.configuration.store.user.identity.carbon.wso2.org/xsd"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
                   xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
                   targetNamespace="http://config.configuration.store.user.identity.carbon.wso2.org">
     <wsdl:documentation>UserStoreConfigAdminService</wsdl:documentation>
     <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
+                   targetNamespace="http://utils.configuration.store.user.identity.carbon.wso2.org/xsd">
+            <xs:complexType name="IdentityUserStoreMgtException">
+                <xs:sequence/>
+            </xs:complexType>
+        </xs:schema>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
                    targetNamespace="http://api.user.carbon.wso2.org/xsd">
             <xs:complexType name="Property">
@@ -38,33 +46,18 @@
                     <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
-        </xs:schema>
-        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
-                   targetNamespace="http://utils.configuration.store.user.identity.carbon.wso2.org/xsd">
-            <xs:complexType name="IdentityUserStoreMgtException">
+            <xs:complexType name="UserStoreException">
                 <xs:sequence/>
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax2338="http://api.user.carbon.wso2.org/xsd"
-                   xmlns:ax2336="http://utils.configuration.store.user.identity.carbon.wso2.org/xsd"
+        <xs:schema xmlns:ax2340="http://utils.configuration.store.user.identity.carbon.wso2.org/xsd"
+                   xmlns:ax2343="http://config.configuration.store.user.identity.carbon.wso2.org/xsd"
+                   xmlns:ax2338="http://api.user.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd"
                    attributeFormDefault="qualified" elementFormDefault="qualified"
                    targetNamespace="http://org.apache.axis2/xsd">
-            <xs:import namespace="http://utils.configuration.store.user.identity.carbon.wso2.org/xsd"/>
             <xs:import namespace="http://api.user.carbon.wso2.org/xsd"/>
+            <xs:import namespace="http://utils.configuration.store.user.identity.carbon.wso2.org/xsd"/>
             <xs:import namespace="http://config.configuration.store.user.identity.carbon.wso2.org/xsd"/>
-            <xs:element name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="IdentityUserStoreMgtException" nillable="true"
-                                    type="ax2336:IdentityUserStoreMgtException"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="initialize">
-                <xs:complexType>
-                    <xs:sequence/>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="getUserStoreManagerProperties">
                 <xs:complexType>
                     <xs:sequence>
@@ -77,6 +70,22 @@
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
                                     type="ax2338:Property"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="UserStoreException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="UserStoreException" nillable="true"
+                                    type="ax2338:UserStoreException"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="IdentityUserStoreMgtException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="IdentityUserStoreMgtException" nillable="true"
+                                    type="ax2339:IdentityUserStoreMgtException"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -139,12 +148,13 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
-                                    type="ax2339:UserStoreDTO"/>
+                                    type="ax2341:UserStoreDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
         </xs:schema>
-        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
+        <xs:schema xmlns:ax2342="http://api.user.carbon.wso2.org/xsd" attributeFormDefault="qualified"
+                   elementFormDefault="qualified"
                    targetNamespace="http://config.configuration.store.user.identity.carbon.wso2.org/xsd">
             <xs:import namespace="http://api.user.carbon.wso2.org/xsd"/>
             <xs:complexType name="UserStoreDTO">
@@ -172,6 +182,12 @@
     <wsdl:message name="getConfigPropertiesResponse">
         <wsdl:part name="parameters" element="ns1:getConfigPropertiesResponse"/>
     </wsdl:message>
+    <wsdl:message name="UserStoreException">
+        <wsdl:part name="parameters" element="ns1:UserStoreException"/>
+    </wsdl:message>
+    <wsdl:message name="IdentityUserStoreMgtException">
+        <wsdl:part name="parameters" element="ns1:IdentityUserStoreMgtException"/>
+    </wsdl:message>
     <wsdl:message name="getAuthzPropertiesRequest">
         <wsdl:part name="parameters" element="ns1:getAuthzProperties"/>
     </wsdl:message>
@@ -184,17 +200,11 @@
     <wsdl:message name="getActiveDomainsResponse">
         <wsdl:part name="parameters" element="ns1:getActiveDomainsResponse"/>
     </wsdl:message>
-    <wsdl:message name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-        <wsdl:part name="parameters" element="ns1:UserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
-    </wsdl:message>
     <wsdl:message name="getUserStoreManagerPropertiesRequest">
         <wsdl:part name="parameters" element="ns1:getUserStoreManagerProperties"/>
     </wsdl:message>
     <wsdl:message name="getUserStoreManagerPropertiesResponse">
         <wsdl:part name="parameters" element="ns1:getUserStoreManagerPropertiesResponse"/>
-    </wsdl:message>
-    <wsdl:message name="initializeRequest">
-        <wsdl:part name="parameters" element="ns1:initialize"/>
     </wsdl:message>
     <wsdl:message name="getActiveUserStorePropertiesRequest">
         <wsdl:part name="parameters" element="ns1:getActiveUserStoreProperties"/>
@@ -212,17 +222,32 @@
         <wsdl:operation name="getConfigProperties">
             <wsdl:input message="tns:getConfigPropertiesRequest" wsaw:Action="urn:getConfigProperties"/>
             <wsdl:output message="tns:getConfigPropertiesResponse" wsaw:Action="urn:getConfigPropertiesResponse"/>
+            <wsdl:fault message="tns:UserStoreException"
+                        name="UserStoreException"
+                        wsaw:Action="urn:getConfigPropertiesUserStoreException"/>
+            <wsdl:fault message="tns:IdentityUserStoreMgtException"
+                        name="IdentityUserStoreMgtException"
+                        wsaw:Action="urn:getConfigPropertiesIdentityUserStoreMgtException"/>
         </wsdl:operation>
         <wsdl:operation name="getAuthzProperties">
             <wsdl:input message="tns:getAuthzPropertiesRequest" wsaw:Action="urn:getAuthzProperties"/>
             <wsdl:output message="tns:getAuthzPropertiesResponse" wsaw:Action="urn:getAuthzPropertiesResponse"/>
+            <wsdl:fault message="tns:UserStoreException"
+                        name="UserStoreException"
+                        wsaw:Action="urn:getAuthzPropertiesUserStoreException"/>
+            <wsdl:fault message="tns:IdentityUserStoreMgtException"
+                        name="IdentityUserStoreMgtException"
+                        wsaw:Action="urn:getAuthzPropertiesIdentityUserStoreMgtException"/>
         </wsdl:operation>
         <wsdl:operation name="getActiveDomains">
             <wsdl:input message="tns:getActiveDomainsRequest" wsaw:Action="urn:getActiveDomains"/>
             <wsdl:output message="tns:getActiveDomainsResponse" wsaw:Action="urn:getActiveDomainsResponse"/>
-            <wsdl:fault message="tns:UserStoreConfigAdminServiceIdentityUserStoreMgtException"
-                        name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"
-                        wsaw:Action="urn:getActiveDomainsUserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
+            <wsdl:fault message="tns:IdentityUserStoreMgtException"
+                        name="IdentityUserStoreMgtException"
+                        wsaw:Action="urn:getActiveDomainsIdentityUserStoreMgtException"/>
+            <wsdl:fault message="tns:UserStoreException"
+                        name="UserStoreException"
+                        wsaw:Action="urn:getActiveDomainsUserStoreException"/>
         </wsdl:operation>
         <wsdl:operation name="getUserStoreManagerProperties">
             <wsdl:input message="tns:getUserStoreManagerPropertiesRequest"
@@ -230,20 +255,17 @@
             <wsdl:output message="tns:getUserStoreManagerPropertiesResponse"
                          wsaw:Action="urn:getUserStoreManagerPropertiesResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="initialize">
-            <wsdl:input message="tns:initializeRequest" wsaw:Action="urn:initialize"/>
-            <wsdl:fault message="tns:UserStoreConfigAdminServiceIdentityUserStoreMgtException"
-                        name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"
-                        wsaw:Action="urn:initializeUserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
-        </wsdl:operation>
         <wsdl:operation name="getActiveUserStoreProperties">
             <wsdl:input message="tns:getActiveUserStorePropertiesRequest"
                         wsaw:Action="urn:getActiveUserStoreProperties"/>
             <wsdl:output message="tns:getActiveUserStorePropertiesResponse"
                          wsaw:Action="urn:getActiveUserStorePropertiesResponse"/>
-            <wsdl:fault message="tns:UserStoreConfigAdminServiceIdentityUserStoreMgtException"
-                        name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"
-                        wsaw:Action="urn:getActiveUserStorePropertiesUserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
+            <wsdl:fault message="tns:IdentityUserStoreMgtException"
+                        name="IdentityUserStoreMgtException"
+                        wsaw:Action="urn:getActiveUserStorePropertiesIdentityUserStoreMgtException"/>
+            <wsdl:fault message="tns:UserStoreException"
+                        name="UserStoreException"
+                        wsaw:Action="urn:getActiveUserStorePropertiesUserStoreException"/>
         </wsdl:operation>
         <wsdl:operation name="getAvailableUserStoreClasses">
             <wsdl:input message="tns:getAvailableUserStoreClassesRequest"
@@ -262,6 +284,12 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
+            <wsdl:fault name="UserStoreException">
+                <soap:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap:fault use="literal" name="IdentityUserStoreMgtException"/>
+            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAuthzProperties">
             <soap:operation soapAction="urn:getAuthzProperties" style="document"/>
@@ -271,6 +299,12 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
+            <wsdl:fault name="UserStoreException">
+                <soap:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap:fault use="literal" name="IdentityUserStoreMgtException"/>
+            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getActiveDomains">
             <soap:operation soapAction="urn:getActiveDomains" style="document"/>
@@ -280,8 +314,11 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-                <soap:fault use="literal" name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
+            <wsdl:fault name="UserStoreException">
+                <soap:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap:fault use="literal" name="IdentityUserStoreMgtException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getUserStoreManagerProperties">
@@ -293,15 +330,6 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="initialize">
-            <soap:operation soapAction="urn:initialize" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:fault name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-                <soap:fault use="literal" name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
-            </wsdl:fault>
-        </wsdl:operation>
         <wsdl:operation name="getActiveUserStoreProperties">
             <soap:operation soapAction="urn:getActiveUserStoreProperties" style="document"/>
             <wsdl:input>
@@ -310,8 +338,11 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-                <soap:fault use="literal" name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
+            <wsdl:fault name="UserStoreException">
+                <soap:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap:fault use="literal" name="IdentityUserStoreMgtException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAvailableUserStoreClasses">
@@ -334,6 +365,12 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
+            <wsdl:fault name="UserStoreException">
+                <soap12:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap12:fault use="literal" name="IdentityUserStoreMgtException"/>
+            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAuthzProperties">
             <soap12:operation soapAction="urn:getAuthzProperties" style="document"/>
@@ -343,6 +380,12 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
+            <wsdl:fault name="UserStoreException">
+                <soap12:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap12:fault use="literal" name="IdentityUserStoreMgtException"/>
+            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getActiveDomains">
             <soap12:operation soapAction="urn:getActiveDomains" style="document"/>
@@ -352,8 +395,11 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-                <soap12:fault use="literal" name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
+            <wsdl:fault name="UserStoreException">
+                <soap12:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap12:fault use="literal" name="IdentityUserStoreMgtException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getUserStoreManagerProperties">
@@ -365,15 +411,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="initialize">
-            <soap12:operation soapAction="urn:initialize" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:fault name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-                <soap12:fault use="literal" name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
-            </wsdl:fault>
-        </wsdl:operation>
         <wsdl:operation name="getActiveUserStoreProperties">
             <soap12:operation soapAction="urn:getActiveUserStoreProperties" style="document"/>
             <wsdl:input>
@@ -382,8 +419,11 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="UserStoreConfigAdminServiceIdentityUserStoreMgtException">
-                <soap12:fault use="literal" name="UserStoreConfigAdminServiceIdentityUserStoreMgtException"/>
+            <wsdl:fault name="UserStoreException">
+                <soap12:fault use="literal" name="UserStoreException"/>
+            </wsdl:fault>
+            <wsdl:fault name="IdentityUserStoreMgtException">
+                <soap12:fault use="literal" name="IdentityUserStoreMgtException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAvailableUserStoreClasses">
@@ -433,12 +473,6 @@
             <wsdl:output>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="initialize">
-            <http:operation location="initialize"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
         </wsdl:operation>
         <wsdl:operation name="getActiveUserStoreProperties">
             <http:operation location="getActiveUserStoreProperties"/>
