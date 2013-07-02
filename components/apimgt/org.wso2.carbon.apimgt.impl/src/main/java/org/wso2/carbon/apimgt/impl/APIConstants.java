@@ -290,6 +290,10 @@ public final class APIConstants {
 
     public static final String EMAIL_DOMAIN_SEPARATOR_REPLACEMENT = "-AT-";
 
+    //API caching related constants
+    public static final String API_MANAGER_CACHE_MANAGER = "API_MANAGER_CACHE";
+    public static final String RESOURCE_CACHE_NAME = "resourceCache";
+    public static final String KEY_CACHE_NAME = "keyCache";
 
     //URI Authentication Schemes
     public static final String AUTH_NO_AUTHENTICATION = "None";
