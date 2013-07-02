@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import net.sf.jsr107cache.Cache;
+//import net.sf.jsr107cache.Cache;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +36,8 @@ import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -71,11 +73,13 @@ public class APIKeyValidator {
     }
 
     protected Cache initCache() {
-        return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
+      //  return Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache");
+       return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
     }
 
     protected Cache initResourceCache(){
-        return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("resourceCache");
+        return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
+        //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("resourceCache");
     }
 
     /**
