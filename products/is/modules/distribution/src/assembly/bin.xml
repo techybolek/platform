@@ -487,6 +487,13 @@
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/etc</outputDirectory>
         </file-->
+        <!-- copying event broker config file -->
+        <file>
+            <source>
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/event-broker.xml
+            </source>
+            <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
+        </file>
 
     </files>
 </assembly>

@@ -133,6 +133,9 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.core.feature:4.2.0-SNAPSHOT</featureArtifactDef>
                 						<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.core.runtime.feature:4.2.0-SNAPSHOT</featureArtifactDef>   
 
+								<!-- DepSync feature -->
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.event.server.feature:4.2.0-SNAPSHOT</featureArtifactDef>
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 							</featureArtifacts>
 						</configuration>
 					</execution>
@@ -356,6 +359,14 @@
 									<id>org.wso2.carbon.identity.mgt.feature.group</id>
 									<version>4.2.0-SNAPSHOT</version>
 								</feature -->
+								<feature>
+								    <id>org.wso2.carbon.event.server.feature.group</id>
+								    <version>4.2.0-SNAPSHOT</version>
+								</feature>
+								 <feature>
+									<id>org.wso2.carbon.deployment.synchronizer.feature.group</id>
+									<version>4.2.0-SNAPSHOT</version>
+								 </feature>
 							</features>
 						</configuration>
 					</execution>
