@@ -43,7 +43,6 @@ import org.wso2.carbon.registry.activities.stub.RegistryExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
-import org.wso2.carbon.user.mgt.stub.GetAllRolesNamesUserAdminExceptionException;
 
 import javax.activation.DataHandler;
 import java.io.File;
@@ -129,8 +128,7 @@ public class ActivitySearchByUserNameTestCase {
 
     @Test(groups = {"wso2.greg"}, dependsOnMethods = {"searchActivityByAvailableUser"})
     public void searchActivityByUnAvailableUser()
-            throws RegistryExceptionException, RemoteException,
-                   GetAllRolesNamesUserAdminExceptionException {
+            throws Exception {
         int id = 0;
         String unAvailableUser = "testUser" + id;
         while (userManagementClient.userNameExists(unAvailableUser, unAvailableUser)) {

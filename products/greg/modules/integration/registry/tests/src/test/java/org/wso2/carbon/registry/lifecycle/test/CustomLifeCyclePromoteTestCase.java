@@ -42,7 +42,6 @@ import org.wso2.carbon.registry.lifecycle.test.utils.Utils;
 import org.wso2.carbon.registry.search.metadata.test.utils.GregTestUtils;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
-import org.wso2.carbon.user.mgt.stub.GetAllRolesNamesUserAdminExceptionException;
 
 import java.rmi.RemoteException;
 import java.util.Calendar;

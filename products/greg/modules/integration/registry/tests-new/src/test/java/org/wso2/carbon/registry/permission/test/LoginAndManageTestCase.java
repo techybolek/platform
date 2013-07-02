@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.registry.permission.test;
 
-import static org.testng.Assert.assertNotNull;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -27,14 +25,15 @@ import org.wso2.carbon.automation.api.clients.identity.UserProfileMgtServiceClie
 import org.wso2.carbon.automation.api.clients.registry.ReportAdminServiceClient;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
-import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkSettings;
-import org.wso2.carbon.identity.user.profile.stub.UserProfileExceptionException;
+import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
 import org.wso2.carbon.identity.user.profile.stub.types.UserFieldDTO;
 import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
 import org.wso2.carbon.registry.permission.test.utils.PermissionTestUtil;
 import org.wso2.carbon.registry.reporting.stub.beans.xsd.ReportConfigurationBean;
 
 import java.rmi.RemoteException;
+
+import static org.testng.Assert.assertNotNull;
 
 public class LoginAndManageTestCase {
 
@@ -80,7 +79,7 @@ public class LoginAndManageTestCase {
 
     @Test(groups = "wso2.greg", description = "Test whether a non admin can view others profiles",
           expectedExceptions = RemoteException.class)
-    public void testProfile() throws UserProfileExceptionException, RemoteException {
+    public void testProfile() throws UserProfileMgtServiceUserProfileExceptionException, RemoteException {
         UserProfileDTO userProfileDTO = new UserProfileDTO();
         userProfileDTO.setProfileName("testuser2_profile1");
         UserFieldDTO[] fields = new UserFieldDTO[1];
