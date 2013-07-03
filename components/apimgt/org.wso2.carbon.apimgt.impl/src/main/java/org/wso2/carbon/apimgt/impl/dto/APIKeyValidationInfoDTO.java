@@ -44,6 +44,12 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private long validityPeriod;
     private long issuedTime;
 
+    private String apiName;
+
+    private String consumerKey;
+
+    private String apiPublisher;
+
     public boolean isAuthorized() {
         return authorized;
     }
@@ -146,6 +152,30 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public String getApiName() {
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
+    }
+
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
+
+    public String getApiPublisher() {
+        return apiPublisher;
+    }
+
+    public void setApiPublisher(String apiPublisher) {
+        this.apiPublisher = apiPublisher;
     }
 }
 

@@ -131,6 +131,9 @@ public final class APIConstants {
     public static final String SUBSCRIPTION_USER_TYPE = "USER_TYPE";
     public static final String ACCESS_TOKEN_USER_TYPE_APPLICATION = "APPLICATION";
     public static final String USER_TYPE_END_USER = "END_USER";
+    public static final String FIELD_API_NAME = "API_NAME";
+    public static final String FIELD_CONSUMER_KEY = "CONSUMER_KEY";
+    public static final String FIELD_API_PUBLISHER = "API_PROVIDER";
 
     //table columns for AM_APPLICATION
     public static final String APPLICATION_ID = "APPLICATION_ID";

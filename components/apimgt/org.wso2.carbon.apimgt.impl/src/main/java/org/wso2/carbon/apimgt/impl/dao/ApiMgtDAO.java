@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -45,19 +44,12 @@ import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthConstants;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.config.RealmConfiguration;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.model.Comment;
 
 import java.math.BigDecimal;
 import java.sql.*;
 import java.sql.Date;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -458,6 +450,9 @@ public class ApiMgtDAO {
         long issuedTime;
         long timestampSkew;
         long currentTime;
+        String apiName;
+        String consumerKey;
+        String apiPublisher;
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
@@ -483,7 +478,10 @@ public class ApiMgtDAO {
                                      "   APP.APPLICATION_ID," +
                                      "   APP.NAME," +
                                      "   APP.APPLICATION_TIER," +
-                                     "   AKM.KEY_TYPE" +
+                                     "   AKM.KEY_TYPE," +
+                                     "   API.API_NAME," +
+                                     "   AKM.CONSUMER_KEY," +
+                                     "   API.API_PROVIDER" +
                                      " FROM " + accessTokenStoreTable + " IAT," +
                                      "   AM_SUBSCRIPTION SUB," +
                                      "   AM_SUBSCRIBER SUBS," +
@@ -525,6 +523,9 @@ public class ApiMgtDAO {
                         getDefaultTimeStampSkewInSeconds() * 1000;
                 currentTime = System.currentTimeMillis();
                 subscriptionStatus=rs.getString(APIConstants.SUBSCRIPTION_FIELD_SUB_STATUS);
+                apiName = rs.getString(APIConstants.FIELD_API_NAME);
+                consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
+                apiPublisher = rs.getString(APIConstants.FIELD_API_PUBLISHER);
 
                 if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.BLOCKED)) {
                     keyValidationInfoDTO.setValidationStatus(
@@ -578,6 +579,10 @@ public class ApiMgtDAO {
                         keyValidationInfoDTO.setApplicationId(applicationId);
                         keyValidationInfoDTO.setApplicationName(applicationName);
                         keyValidationInfoDTO.setApplicationTier(applicationTier);
+                        keyValidationInfoDTO.setApiName(apiName);
+                        keyValidationInfoDTO.setConsumerKey(consumerKey);
+                        keyValidationInfoDTO.setApiPublisher(apiPublisher);
+
                         if (jwtGenerator != null) {
                             String calleeToken = null;
                             if (removeUserNameInJWTForAppToken &&
