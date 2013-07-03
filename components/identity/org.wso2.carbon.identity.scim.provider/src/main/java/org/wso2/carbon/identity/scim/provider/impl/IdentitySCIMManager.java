@@ -109,7 +109,7 @@ public class IdentitySCIMManager implements CharonManager {
         }
     }
 
-    public IdentitySCIMManager() throws CharonException {
+    private IdentitySCIMManager() throws CharonException {
         init();
     }
 
