@@ -150,7 +150,6 @@
 
                                 <!-- Features related to Asset Store -->
                                 <featureArtifactDef>org.jaggeryjs:org.jaggeryjs.feature:0.9.0.ALPHA2-wso2v4</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.server.lite.feature:${carbon.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.core.feature:${carbon.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.interceptor.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.publisher.feature:${carbon.version}</featureArtifactDef>
@@ -463,10 +462,6 @@
                                <feature>
                                     <id>org.jaggeryjs.feature.group</id>
                                     <version>0.9.0.ALPHA2-wso2v4</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.apimgt.server.lite.feature.group</id>
-                                    <version>${carbon.version}</version>
                                 </feature>
 				<feature>
                                     <id>org.wso2.carbon.apimgt.core.feature.group</id>
