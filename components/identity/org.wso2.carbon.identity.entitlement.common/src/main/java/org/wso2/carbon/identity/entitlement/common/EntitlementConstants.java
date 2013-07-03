@@ -22,4 +22,13 @@ package org.wso2.carbon.identity.entitlement.common;
  *
  */
 public class EntitlementConstants {
+
+    public static final String ENTITLEMENT_REGISTRY_PATH = "repository/identity/entitlement";
+
+    public static final String ENTITLEMENT_POLICY_EDITOR_REGISTRY_PATH =
+            ENTITLEMENT_REGISTRY_PATH + "/policyEditor";
+
+    public static final String ENTITLEMENT_POLICY_EDITOR_CONFIG_FILE_REGISTRY_PATH =
+            ENTITLEMENT_REGISTRY_PATH + "/policyEditor/config.xml";
+
 }

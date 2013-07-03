@@ -73,8 +73,12 @@ public class PolicyEditorEngine {
         return dataHolder;
     }
 
-    public void persistData(String xmlConfig){
-        manager.persistData(xmlConfig);
+    public void persistConfig(String xmlConfig){
+        manager.persistConfig(xmlConfig);
         dataHolder = manager.buildDataHolder();
+    }
+
+    public String getConfig(){
+        return manager.getConfig();
     }
 }
