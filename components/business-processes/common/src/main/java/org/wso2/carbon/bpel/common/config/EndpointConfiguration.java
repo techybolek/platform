@@ -189,14 +189,14 @@ public class EndpointConfiguration {
                 location = uepConfPath.substring(uepConfPath.indexOf(
                         UnifiedEndpointConstants.VIRTUAL_GOV_REG) +
                                                  UnifiedEndpointConstants.VIRTUAL_GOV_REG.length());
-                loadUEPOMFromRegistry(registry, location);
+                uepOMContent = loadUEPOMFromRegistry(registry, location);
             } else if (uepConfPath.startsWith(UnifiedEndpointConstants.VIRTUAL_REG)) {
                 registry =
                         registryService.getLocalRepository(tenantId);
                 location = uepConfPath.substring(uepConfPath.indexOf(
                         UnifiedEndpointConstants.VIRTUAL_REG) +
                                                  UnifiedEndpointConstants.VIRTUAL_REG.length());
-                loadUEPOMFromRegistry(registry, location);
+                uepOMContent = loadUEPOMFromRegistry(registry, location);
             }
         } catch (RegistryException ex) {
             String error = "Error occurred while getting registry service" + ex.getLocalizedMessage();
