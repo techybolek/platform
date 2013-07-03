@@ -10,6 +10,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIContextCache;
+import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.interceptor.valve.internal.DataHolder;
 import org.wso2.carbon.apimgt.core.authenticate.APITokenValidator;
 import org.wso2.carbon.apimgt.core.usage.APIStatsPublisher;
@@ -44,6 +46,8 @@ public class APIMgtValve extends ValveBase {
 
     private String manageAPIs;
 
+    LRUCache<String, Boolean> contextCache = null;
+
     public APIMgtValve(){
         super(true);
     }
@@ -57,14 +61,37 @@ public class APIMgtValve extends ValveBase {
             hostName = DataPublisherUtil.getHostAddress();
             externalAPIManagerURL = CarbonUtils.getServerConfiguration().getFirstProperty("APIGateway");
             manageAPIs = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
+            contextCache = APIContextCache.getInstance().getApiContexts();
             initialized = true;
         }
 
         String context = request.getContextPath();
 
+        if (context == null || context.equals("")) {
+            //Invoke next valve in pipe.
+            getNext().invoke(request, response);
+            //return;
+        }
+
+        boolean contextExist;
+        Boolean contextValueInCache = contextCache.get(context) ;
+
+        if (contextValueInCache != null) {
+            contextExist = contextValueInCache;
+        } else {
+            contextExist = ApiMgtDAO.isContextExist(context);
+            contextCache.put(context, contextExist);
+        }
+
+        if (!contextExist) {
+            //Invoke next valve in pipe.
+            getNext().invoke(request, response);
+            //return;
+        }
+
         long requestTime = System.currentTimeMillis();
 
-        if ("true".equals(manageAPIs) && ApiMgtDAO.isContextExist(context)) {
+        if ("true".equals(manageAPIs) && contextExist) {
 
             //If external API Manager url is null
             if (externalAPIManagerURL == null) {
