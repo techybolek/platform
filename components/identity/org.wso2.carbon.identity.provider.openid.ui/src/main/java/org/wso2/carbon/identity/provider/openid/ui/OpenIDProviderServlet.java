@@ -44,8 +44,9 @@ public class OpenIDProviderServlet extends HttpServlet {
 	                                                                        throws ServletException,
 	                                                                        IOException {
 		String frontEndUrl = OpenIDUtil.getAdminConsoleURL(req);
+		frontEndUrl = frontEndUrl.replace("carbon/", "authenticationendpoint/openid/openid_auth.jsp");
 		OpenIDHandler provider = OpenIDHandler.getInstance(null);
-		provider.setFrontEndUrl(frontEndUrl + "openid-provider/openid_auth.jsp");
+		provider.setFrontEndUrl(frontEndUrl);
 		String response = null;
 
 		try {
@@ -55,7 +56,9 @@ public class OpenIDProviderServlet extends HttpServlet {
 		}
 		// at this time the response may be already committed
 		try {
-			resp.sendRedirect(response);
+			if(response != null){
+				resp.sendRedirect(response);
+			}
 		} catch (Exception e) {
 			log.debug(e);
 			// do nothing

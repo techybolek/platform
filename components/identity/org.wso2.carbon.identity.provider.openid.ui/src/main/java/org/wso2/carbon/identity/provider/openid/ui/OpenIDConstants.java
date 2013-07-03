@@ -79,6 +79,7 @@ public class OpenIDConstants {
 		public static final String USERNAME = "userName";
 		public static final String REMEMBER = "remember";
 		public static final String PASSWORD = "password";
+		public static final String HAS_APPROVED_ALWAYS = "hasApprovedAlways";
 	}
 
 	// cookies 

@@ -18,7 +18,12 @@
 package org.wso2.carbon.identity.provider.openid.ui.handlers;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -35,8 +40,11 @@ import org.wso2.carbon.identity.base.IdentityConstants.OpenId;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDAuthRequestDTO;
 import org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDAuthResponseDTO;
+import org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDClaimDTO;
 import org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDParameterDTO;
+import org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDUserProfileDTO;
 import org.wso2.carbon.identity.provider.openid.ui.OpenIDConstants;
+import org.wso2.carbon.identity.provider.openid.ui.OpenIDProviderServlet;
 import org.wso2.carbon.identity.provider.openid.ui.client.OpenIDAdminClient;
 import org.wso2.carbon.identity.provider.openid.ui.util.OpenIDUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -121,42 +129,52 @@ public class OpenIDHandler {
 			return handleSingleLogout(request, response);
 		}
 		
-		String responseText = null;
-		try {
-			HttpSession session = request.getSession();
-			OpenIDAdminClient client = OpenIDUtil.getOpenIDAdminClient(session);
-			ParameterList paramList = getParameterList(request);
-			String mode = getOpenIDMessageMode(paramList, response, request);
-			
-			if (OpenId.ASSOCIATE.equals(mode)) {
-				OpenIDParameterDTO[] reqDTO = OpenIDUtil.getOpenIDAuthRequest(request);
-				responseText = client.getOpenIDAssociationResponse(reqDTO);
-				if (log.isDebugEnabled()) {
-					log.debug("Association created successfully");
-				}
-			} else if (OpenId.CHECKID_SETUP.equals(mode) || OpenId.CHECKID_IMMEDIATE.equals(mode)) {
-				return checkSetupOrImmediate(request, paramList, client);
-			} else if (OpenId.CHECK_AUTHENTICATION.equals(mode)) {
-				responseText = client.verify(OpenIDUtil.getOpenIDAuthRequest(request));
-				if (log.isDebugEnabled()) {
-					log.debug("Authentication verified successfully");
-				}
-			} else {
-				responseText = getErrorResponseText("Not a valid OpenID request");
-				if (log.isDebugEnabled()) {
-					log.debug("No valid MODE found : " + request.getQueryString());
-				}
+		if(request.getAttribute("nonlogin") == null && 
+				request.getParameter(OpenIDConstants.RequestParameter.PASSWORD) != null){
+	        handleRequestFromLoginPage(request, response);
+		} else {
+			if(request.getParameter(OpenIDConstants.RequestParameter.HAS_APPROVED_ALWAYS) != null){
+				request.getSession().setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED, "true");
 			}
-		} catch (Exception e) {
-			responseText = getErrorResponseText(e.getMessage());
-		}
+			
+			String responseText = null;
+			try {
+				HttpSession session = request.getSession();
+				OpenIDAdminClient client = OpenIDUtil.getOpenIDAdminClient(session);
+				ParameterList paramList = getParameterList(request);
+				String mode = getOpenIDMessageMode(paramList, response, request);
+				
+				if (OpenId.ASSOCIATE.equals(mode)) {
+					OpenIDParameterDTO[] reqDTO = OpenIDUtil.getOpenIDAuthRequest(request);
+					responseText = client.getOpenIDAssociationResponse(reqDTO);
+					if (log.isDebugEnabled()) {
+						log.debug("Association created successfully");
+					}
+				} else if (OpenId.CHECKID_SETUP.equals(mode) || OpenId.CHECKID_IMMEDIATE.equals(mode)) {
+					return checkSetupOrImmediate(request, response, paramList, client);
+				} else if (OpenId.CHECK_AUTHENTICATION.equals(mode)) {
+					responseText = client.verify(OpenIDUtil.getOpenIDAuthRequest(request));
+					if (log.isDebugEnabled()) {
+						log.debug("Authentication verified successfully");
+					}
+				} else {
+					responseText = getErrorResponseText("Not a valid OpenID request");
+					if (log.isDebugEnabled()) {
+						log.debug("No valid MODE found : " + request.getQueryString());
+					}
+				}
+			} catch (Exception e) {
+				responseText = getErrorResponseText(e.getMessage());
+			}
 
-		try { // Return the result to the user.
-			directResponse(response, responseText);
-		} catch (IOException e) {
-			log.error(e.getMessage());
-			throw new IdentityException("OpenID redirect reponse failed");
+			try { // Return the result to the user.
+				directResponse(response, responseText);
+			} catch (IOException e) {
+				log.error(e.getMessage());
+				throw new IdentityException("OpenID redirect reponse failed");
+			}
 		}
+		
 		return null;
 	}
 
@@ -256,7 +274,7 @@ public class OpenIDHandler {
 	 * @param client 
 	 * @throws Exception
 	 */
-	private String checkSetupOrImmediate(HttpServletRequest request, ParameterList params, OpenIDAdminClient client)
+	private String checkSetupOrImmediate(HttpServletRequest request, HttpServletResponse response, ParameterList params, OpenIDAdminClient client)
 	                                                                                      throws Exception {
 		boolean authenticated = false;
 		String profileName = null;
@@ -310,7 +328,7 @@ public class OpenIDHandler {
                 log.debug(openId + " not authenticated. Redirecting for authentication");
 			}
 			session.setAttribute(IdentityConstants.OpenId.PARAM_LIST, params);
-			return getLoginPageUrl(openId, request, params);
+			return getLoginPageUrl(openId, request, response, params);
 		}
 
 		//session.removeAttribute(IdentityConstants.OpenId.PARAM_LIST);
@@ -375,8 +393,13 @@ public class OpenIDHandler {
 	 * @param request
 	 * @param params
 	 * @return loginPageUrl
+	 * @throws IdentityException 
+	 * @throws IOException 
 	 */
-	private String getLoginPageUrl(String openId, HttpServletRequest request, ParameterList params) {
+	private String getLoginPageUrl(String openId, HttpServletRequest request,
+	                               HttpServletResponse response, ParameterList params)
+	                                                                                  throws IdentityException,
+	                                                                                  IOException {
 		String loginPageUrl = frontEndUrl;
 		String tenant = MultitenantUtils.getDomainNameFromOpenId(openId);
 		// checking for OpenID remember me cookie
@@ -397,14 +420,17 @@ public class OpenIDHandler {
         if (token != null && !NULL.equals(token) ||
                 (openId.equals(request.getSession(false).getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID)))) {
             request.getSession(false).setAttribute(OpenIDConstants.SessionAttribute.OPENID, openId);
-			loginPageUrl =
-			               loginPageUrl.replace("openid-provider/openid_auth.jsp",
-			                                    "openid-provider/openid_auth_submit.jsp");
+			handleRequestFromLoginPage(request, response);
+			return null;
+		} else {
+    		loginPageUrl = loginPageUrl + OpenIDUtil.getLoginPageQueryParams(params);
+			request.getSession().setAttribute(OpenIDConstants.SessionAttribute.OPENID, 
+			                                  params.getParameterValue(IdentityConstants.OpenId.ATTR_IDENTITY));
 		}
-		if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenant)) {
-			return loginPageUrl.replace("/carbon/", "/t/" + tenant + "/carbon/");
-		}
-
+//		if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenant)) {
+//			return loginPageUrl.replace("/carbon/", "/t/" + tenant + "/carbon/");
+//		}
+		
 		return loginPageUrl;
 	}
 
@@ -441,5 +467,241 @@ public class OpenIDHandler {
 			}
 		}
 	}
+	
+	private void handleRequestFromLoginPage(HttpServletRequest req, HttpServletResponse resp) throws IdentityException {
 
+		try {
+			HttpSession session = req.getSession();
+
+			String rememberMe = req.getParameter(OpenIDConstants.RequestParameter.REMEMBER);
+			boolean isRemembered = false;
+			String openid =
+			                (req.getParameter(OpenIDConstants.RequestParameter.OPENID) != null)
+                                   ? req.getParameter(OpenIDConstants.RequestParameter.OPENID)
+                                   : (String) session.getAttribute(OpenIDConstants.SessionAttribute.OPENID);
+
+			// Directed Identity handling
+			String userName = req.getParameter(OpenIDConstants.SessionAttribute.USERNAME);
+			if ((userName == null || "".equals(userName.trim())) && openid.endsWith("/openid/")) {
+				userName = (String) session.getAttribute(OpenIDConstants.SessionAttribute.USERNAME);
+				
+				if (userName == null) {
+					Cookie cookie = OpenIDUtil.getCookie(userName, req);
+					
+					if(cookie != null){
+						userName = cookie.getValue();
+					}
+				}
+			} else {
+				session.setAttribute(OpenIDConstants.SessionAttribute.USERNAME, userName);
+			}
+
+			if (userName != null && !"".equals(userName.trim())) {
+				openid = openid + userName;
+			}
+
+			session.setAttribute(OpenIDConstants.SessionAttribute.OPENID, openid);
+
+			if ("true".equals(rememberMe)) {
+				isRemembered = true;
+			}
+
+			OpenIDAdminClient client = OpenIDUtil.getOpenIDAdminClient(session);
+			boolean isAuthenticated = client.authenticateWithOpenID(openid,
+                                                req.getParameter(OpenIDConstants.RequestParameter.PASSWORD),
+                                                session, req, resp,
+                                                isRemembered);
+
+			if (isAuthenticated ||
+			    openid.equals(session.getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID))) {
+				session.setAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED, "true");
+				session.setAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID, openid);
+
+				// user approval is always bypased based on the identity.xml
+				// config
+				if (client.isOpenIDUserApprovalBypassEnabled()) {
+					session.setAttribute(OpenIDConstants.SessionAttribute.SELECTED_PROFILE, "default");
+					session.setAttribute(OpenIDConstants.SessionAttribute.ACTION, "complete");
+					session.setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED, "true");
+					session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);
+
+					if (client.getNewCookieValue() != null) {
+						OpenIDUtil.setCookie("openidtoken", client.getNewCookieValue(),
+						          client.getOpenIDSessionTimeout(), "/", "", true, resp);
+					}
+
+					if (userName != null) {
+						OpenIDUtil.setCookie("openidrememberme", userName, client.getOpenIDSessionTimeout(),
+						          "/", "", true, resp);
+					}
+
+					req.setAttribute("nonlogin", "true");
+					RequestDispatcher dispatcher = req.getRequestDispatcher("../../openidserver");
+					dispatcher.forward(req, resp);
+				} else { // reading RP info from the database
+					String[] rpInfo = client.getOpenIDUserRPInfo(openid,
+					                      ((ParameterList) session.getAttribute(OpenId.PARAM_LIST)).
+					                      			getParameterValue(OpenId.ATTR_RETURN_TO));
+					
+					if (rpInfo[0].equals("true")) { // approve always
+						session.setAttribute(OpenIDConstants.SessionAttribute.ACTION, "complete");
+						session.setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED, "true");
+						session.setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED_ALWAYS, "true");
+						session.setAttribute(OpenIDConstants.SessionAttribute.SELECTED_PROFILE, rpInfo[1]);
+						session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);
+
+						if (client.getNewCookieValue() != null) {
+							OpenIDUtil.setCookie("openidtoken", client.getNewCookieValue(),
+							          client.getOpenIDSessionTimeout(), "/", "", true, resp);
+						}
+
+						if (userName != null) {
+							OpenIDUtil.setCookie("openidrememberme", userName,
+							          client.getOpenIDSessionTimeout(), "/", "", true, resp);
+						}
+						
+						req.setAttribute("nonlogin", "true");
+						RequestDispatcher dispatcher = req.getRequestDispatcher("../../openidserver");
+						dispatcher.forward(req, resp);
+					} else { // redirect to user approval page
+						if (client.getNewCookieValue() != null) {
+							OpenIDUtil.setCookie("openidtoken", client.getNewCookieValue(),
+							          client.getOpenIDSessionTimeout(), "/", "", true, resp);
+						}
+						if (userName != null) {
+							OpenIDUtil.setCookie("openidrememberme", userName,
+							          client.getOpenIDSessionTimeout(), "/", "", true, resp);
+						}
+
+						sendToApprovalPage(req, resp);
+					}
+				}
+
+			} else {
+				session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);
+
+				OpenIDUtil.deleteCookie("openidtoken", "/", req);
+				OpenIDUtil.deleteCookie("openidrememberme", "/", req);
+				
+				String frontEndUrl = OpenIDUtil.getAdminConsoleURL(req);
+				frontEndUrl = frontEndUrl.replace("carbon/", "authenticationendpoint/openid/openid_auth.jsp");
+				
+				resp.sendRedirect(frontEndUrl +
+				                      OpenIDUtil.getLoginPageQueryParams(
+				                         (ParameterList) req.getSession().getAttribute(OpenId.PARAM_LIST)) +
+				                      "&errorMsg=error.while.user.auth");
+			}
+		} catch (Exception e) {
+			throw new IdentityException("Exception while handling request from the login page", e);
+		}
+	}
+	
+	private void sendToApprovalPage(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+		
+		HttpSession session = req.getSession();
+		
+		PrintWriter out = resp.getWriter();
+		out.println("<html>");
+		out.println("<body>");
+		out.println("<p>You are now redirected back to Profile Approval Page.");
+		out.println(" If the redirection fails, please click the post button.</p>");
+		out.println("<form method='post' action='authenticationendpoint/openid/openid_profile_view.jsp'>");
+		out.println("<p>");
+		
+		OpenIDUserProfileDTO[] profiles = null;
+
+		if (session.getAttribute("profiles") == null) {
+			ParameterList requestedClaims = null;
+			String isPhishingResistance = (String) session.getAttribute("papePhishingResistance");
+			String isMultiFactorAuthEnabled = (String) session.getAttribute("multiFactorAuth");
+			String infoCardAuthStatus = (String) session.getAttribute("infoCardAuthenticated");
+			boolean infoCardAuthenticated = false;
+
+			if (infoCardAuthStatus != null && infoCardAuthStatus.equals("true")) {
+				infoCardAuthenticated = true;
+			}
+
+			String openid = (req.getParameter("openid") != null)
+                                    ? req.getParameter("openid")
+                                    : (String) session.getAttribute("openId");
+			try {
+				// we get the openid admin client from the session. This is
+				// created once per session
+				OpenIDAdminClient client = OpenIDUtil.getOpenIDAdminClient(session);
+
+				if (infoCardAuthenticated || session.getAttribute("isOpenIDAuthenticated") != null) {
+					requestedClaims = (ParameterList) session.getAttribute(IdentityConstants.OpenId.PARAM_LIST);
+					profiles = client.getUserProfiles(openid, requestedClaims);
+					session.setAttribute("profiles", profiles);
+					session.setAttribute("selectedProfile", "default");
+					session.setAttribute("_action", "complete");
+					session.removeAttribute("isOpenIDAuthenticated");
+
+					if (isPhishingResistance != null && isPhishingResistance.equals("true")) {
+						session.setAttribute(IdentityConstants.PHISHING_RESISTANCE, IdentityConstants.TRUE);
+					}
+
+					if (isMultiFactorAuthEnabled != null && isMultiFactorAuthEnabled.equals("true")) {
+						session.setAttribute(IdentityConstants.MULTI_FACTOR_AUTH, IdentityConstants.TRUE);
+					}
+				} else {
+					String frontEndUrl = OpenIDUtil.getAdminConsoleURL(req);
+					frontEndUrl = frontEndUrl.replace("carbon/",
+					                                  "authenticationendpoint/openid/openid_auth.jsp");
+
+					resp.sendRedirect(frontEndUrl +
+					                  OpenIDUtil.getLoginPageQueryParams((ParameterList) req.getSession()
+					                                                                        .getAttribute(OpenId.PARAM_LIST)) +
+					                  "&errorMsg=invalid.credentials");
+					return;
+				}
+			} catch (Exception e) {
+				String frontEndUrl = OpenIDUtil.getAdminConsoleURL(req);
+				resp.sendRedirect(frontEndUrl + "admin/login.jsp");
+				return;
+			} finally {
+				session.removeAttribute("papePhishingResistance");
+				session.removeAttribute("multiFactorAuth");
+				session.removeAttribute("infoCardBasedMultiFacotrAuth");
+				session.removeAttribute("xmppBasedMultiFacotrAuth");
+				session.removeAttribute("infoCardAuthenticated");
+				session.removeAttribute("isOpenIDAuthenticated");
+			}
+		} else {
+			profiles = (OpenIDUserProfileDTO[]) session.getAttribute("profiles");
+		}
+
+		String selectedProfile = req.getParameter("selectedProfile") == null
+                                            ? "default"
+                                            : req.getParameter("selectedProfile");
+		out.println("<input type='hidden' name='selectedProfile' value='" + selectedProfile + "'>");
+
+		for (int i = 0; i < profiles.length; i++) {
+			OpenIDUserProfileDTO profile = profiles[i];
+			out.println("<input type='hidden' name='profile' value='" + profile.getProfileName() + "'>");
+
+			if (profile.getProfileName().equals(selectedProfile)) {
+				OpenIDClaimDTO[] claimSet = profile.getClaimSet();
+
+				if (claimSet != null) {
+					for (int j = 0; j < claimSet.length; j++) {
+                        OpenIDClaimDTO claimDto = claimSet[j];
+                        out.println("<input type='hidden' name='claimTag' value='" + claimDto.getDisplayTag() + "'>");
+                        out.println("<input type='hidden' name='claimValue' value='" + claimDto.getClaimValue() != null ? claimDto.getClaimValue() : "" + "'>");
+                    }
+                }
+            }
+        }
+	    
+		out.println("<button type='submit'>POST</button>");
+		out.println("</p>");
+		out.println("</form>");
+		out.println("<script type='text/javascript'>");
+		out.println("document.forms[0].submit();");
+		out.println("</script>");
+		out.println("</body>");
+		out.println("</html>");	
+		
+		return;
+	}
 }

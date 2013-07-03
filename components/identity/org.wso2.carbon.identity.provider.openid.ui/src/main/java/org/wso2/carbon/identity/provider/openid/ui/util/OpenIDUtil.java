@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.axis2.AxisFault;
@@ -307,5 +310,66 @@ public class OpenIDUtil {
             return "localhost";
         }
     }
+    
+    public static String getLoginPageQueryParams(ParameterList params) throws IdentityException{
+    	String queryParams = null;
+        try {
+        	String realm = params.getParameterValue("openid.realm") != null ?
+	                          URLEncoder.encode(params.getParameterValue("openid.realm"), "UTF-8") : "";
+           	String returnTo = params.getParameterValue("openid.return_to") != null ?
+           	                  URLEncoder.encode(params.getParameterValue("openid.return_to"), "UTF-8") : "";
+           	String claimedId = params.getParameterValue("openid.claimed_id") != null ?
+           	                   URLEncoder.encode(params.getParameterValue("openid.claimed_id"), "UTF-8") : "";                                                       
+           	String identity = params.getParameterValue("openid.identity") != null ?
+           	                  URLEncoder.encode(params.getParameterValue("openid.identity"), "UTF-8") : "";                                                     
+           	                  
+           	queryParams = "?openid.realm=" + realm
+               					 + "&openid.return_to=" +  returnTo
+               					 + "&openid.claimed_id=" + claimedId
+               					 + "&openid.identity=" + identity;
+    	
+    		String username = null;
+    		if(params.getParameterValue("openid.identity") != null){
+    			username = OpenIDUtil.getUserName(params.getParameterValue("openid.identity"));
+    			queryParams = queryParams + "&username=" + username;
+    		}
+        } catch (UnsupportedEncodingException e) {
+	        // TODO JVM MUST support UTF-8
+        }
+    	                                       			
+    	return queryParams;
+    }
+    
+    public static Cookie getCookie(String name, HttpServletRequest req) {
+    	Cookie[] reqCookies = req.getCookies();
+		if (reqCookies != null) {
+			for (Cookie cookie : reqCookies) {
+				if (cookie.getName().equalsIgnoreCase(name)) {
+					return cookie;
+				}
+			}
+		}
+		return null;
+    }
+    
+    public static void setCookie(String name, String value, int expires, String path, String domain,
+	                       boolean secure, HttpServletResponse resp) {
+		Cookie cookie = new Cookie(name, value);
+		cookie.setMaxAge(expires);
+		cookie.setPath(path);
+		cookie.setSecure(secure);
+		resp.addCookie(cookie);
+	}
 
+    public static void deleteCookie(String name, String path, HttpServletRequest request) {
+		Cookie[] reqCookies = request.getCookies();
+		if (reqCookies != null) {
+			for (Cookie cookie : reqCookies) {
+				if (cookie.getName().equals(name) && cookie.getPath().equals(path)) {
+					cookie.setMaxAge(0);
+					break;
+				}
+			}
+		}
+	}
 }
