@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
  */
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
-
+    LRUCache<String, Boolean> contextCache = APIContextCache.getInstance().getApiContexts();
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -369,7 +369,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addAPI(API api) throws APIManagementException {
         try {           
             createAPI(api);
-            apiMgtDAO.addAPI(api);       
+            apiMgtDAO.addAPI(api);
+            if (APIUtil.isAPIManagementEnabled()) {
+                Boolean apiContext = contextCache.get(api.getContext());
+                if (apiContext == null) {
+                    contextCache.put(api.getContext(), true);
+                }
+            }
         } catch (APIManagementException e) {          
             throw new APIManagementException("Error in adding API :"+api.getId().getApiName(),e);
         }
@@ -465,6 +471,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 /* Update API Definition for Swagger 
                 createUpdateAPIDefinition(api);*/
+
+                //update apiContext cache
+                if (APIUtil.isAPIManagementEnabled()) {
+                    contextCache.remove(oldApi.getContext());
+                    contextCache.put(api.getContext(), true);
+                }
 
             } catch (APIManagementException e) {
             	handleException("Error while updating the API :" +api.getId().getApiName(),e);
@@ -1354,8 +1366,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
             boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
+
+            API api = new API(identifier);
             if (gatewayExists) {
-                API api = new API(identifier);
                 if (isAPIPublished(api)) {
                     removeFromGateway(api);
                 }
@@ -1363,6 +1376,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug("Gateway is not existed for the current API Provider");
             }
             apiMgtDAO.deleteAPI(identifier);
+            //if manageAPIs == true
+            if (APIUtil.isAPIManagementEnabled()) {
+                contextCache.remove(api.getContext());
+                contextCache.put(api.getContext(), false);
+            }
 
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + path, e);

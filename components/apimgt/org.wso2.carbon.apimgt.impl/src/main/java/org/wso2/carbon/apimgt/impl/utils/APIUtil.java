@@ -1397,4 +1397,8 @@ public final class APIUtil {
     public static int getApplicationId(String appName,String userId) throws APIManagementException {
         return new ApiMgtDAO().getApplicationId(appName,userId);
     }
+
+    public static boolean isAPIManagementEnabled() {
+        return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement"));
+    }
 }

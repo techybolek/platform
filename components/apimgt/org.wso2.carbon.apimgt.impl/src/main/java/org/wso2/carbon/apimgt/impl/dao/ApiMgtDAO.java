@@ -4236,6 +4236,29 @@ public class ApiMgtDAO {
         return false;
     }
 
+    public static List<String> getAllAvailableContexts () {
+        List<String> contexts = new ArrayList<String> ();
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement prepStmt = null;
+
+        String sql = "SELECT CONTEXT FROM AM_API ";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sql);
+            resultSet = prepStmt.executeQuery();
+
+            while (resultSet.next()) {
+                contexts.add(resultSet.getString("CONTEXT"));
+            }
+        } catch (SQLException e) {
+            log.error("Failed to retrieve the API Context ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return contexts;
+    }
+
     private static class SubscriptionInfo {
         private int subscriptionId;
         private String tierId;
