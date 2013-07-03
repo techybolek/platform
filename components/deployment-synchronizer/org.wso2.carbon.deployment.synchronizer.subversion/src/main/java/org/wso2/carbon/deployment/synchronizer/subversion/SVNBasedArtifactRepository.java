@@ -21,14 +21,22 @@ package org.wso2.carbon.deployment.synchronizer.subversion;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tigris.subversion.svnclientadapter.*;
+import org.tigris.subversion.svnclientadapter.ISVNClientAdapter;
+import org.tigris.subversion.svnclientadapter.ISVNDirEntry;
+import org.tigris.subversion.svnclientadapter.ISVNInfo;
+import org.tigris.subversion.svnclientadapter.ISVNStatus;
+import org.tigris.subversion.svnclientadapter.SVNClientAdapterFactory;
+import org.tigris.subversion.svnclientadapter.SVNClientException;
+import org.tigris.subversion.svnclientadapter.SVNNodeKind;
+import org.tigris.subversion.svnclientadapter.SVNRevision;
+import org.tigris.subversion.svnclientadapter.SVNStatusKind;
+import org.tigris.subversion.svnclientadapter.SVNUrl;
 import org.tigris.subversion.svnclientadapter.commandline.CmdLineClientAdapter;
 import org.tigris.subversion.svnclientadapter.utils.Depth;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
-import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.internal.repository.CarbonRepositoryUtils;
 import org.wso2.carbon.deployment.synchronizer.internal.util.DeploymentSynchronizerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.internal.util.RepositoryConfigParameter;
@@ -250,6 +258,10 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         ISVNClientAdapter svnClient = repoContext.getSvnClient();
 
         ISVNStatus[] status = svnClient.getStatus(root, true, false);
+        
+        // This is required to filter exploded web apps and unpack directories of .WAR files.
+        List<String>  dirListToAddSVN= processUnversionedWebappActions(status);
+        
         for (ISVNStatus s : status) {
             if (s.getTextStatus().toInt() == UNVERSIONED) {
                 File file = s.getFile();
@@ -259,9 +271,37 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                     continue;
                 }
 
+                String filePath = file.getPath();
                 if (file.isFile()) {
+                	 if (log.isDebugEnabled()) {
+                		 log.debug(" SVN ADD : " + filePath);
+                		 }
                     svnClient.addFile(file);
+                    
+                    //If this is  a .war file then we need to add svn:ignore for unpack directory.
+                    if (isWARWebApp(filePath)) {
+                        String simpleName = getSimpleFileName(filePath);
+                        String ignorePattern = simpleName.replace(".war", "");
+                        String webAppsDir = getWebAppsDirPath(filePath);
+                        svnClient.addToIgnoredPatterns
+                                    (new File(webAppsDir), ignorePattern);
+                        if (log.isDebugEnabled()) {
+                             log.debug(" SVN Ignore : " + webAppsDir + " - " + ignorePattern);
+                                  }
+                         }
+                    
                 } else {
+                	// For web apps we need to perform extra filtering here before adding to SVN.
+                	if (isWebApp(filePath)) {
+                	     String simpleName = getSimpleFileName(filePath);
+                	     if (!dirListToAddSVN.contains(simpleName)) {
+                	        if (log.isDebugEnabled()) {
+                	           log.debug(" Ignoring directory : " + filePath);
+                	            }
+                	        continue;
+                	          }
+                	   }
+                	
                     // Do not svn add directories with the recursive option.
                     // That will add child directories and files that we don't want to add.
                     // First add the top level directory only.
@@ -690,4 +730,53 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         log.error(msg, e);
         throw new DeploymentSynchronizerException(msg, e);
     }
+    
+    public List<String> processUnversionedWebappActions(ISVNStatus[] status) {
+        List<String> addToSvn = new ArrayList<String>();
+        for (ISVNStatus st : status) {
+            String path = st.getPath();
+            if (path != null && isWebApp(path)) {
+                int lastIdx = path.lastIndexOf(File.separator);
+                String simpleName = lastIdx > 0 ? path.substring(lastIdx + 1) : null;
+                if (simpleName != null) {
+                    if (!simpleName.endsWith(".war")) {
+                        // This is a directory ensure there is no .war exists before adding to SVN
+                        File appBase = new File(path.concat(".war"));
+                        if (!appBase.exists()) {
+                            addToSvn.add(simpleName);
+                        }
+
+                    }
+                }
+            }
+        }
+        return addToSvn;
+    }
+
+
+    private String getSimpleFileName(String filePath) {
+        int lastIdx = filePath.lastIndexOf(File.separator);
+        return lastIdx > 0 ? filePath.substring(lastIdx + 1) : null;
+    }
+
+    private boolean isWARWebApp(String filePath) {
+        return (isWebApp(filePath) && filePath.endsWith(".war"));
+    }
+
+    private boolean isWebApp(String filePath) {
+        /* Decide file is on "webapps" directory or not.
+
+          supper tenant - "repository/deployment/server/webapps";
+          tenant -  "repository/tenants/1/webapps"
+         */
+        return filePath.contains(File.separator + "repository" + File.separator)
+                && filePath.contains(File.separator + "webapps" + File.separator);
+    }
+
+    private String getWebAppsDirPath(String path) {
+        int start = path.indexOf("repository");
+        int end = path.lastIndexOf(File.separator);
+        return path.substring(start, end);
+    }
+
 }

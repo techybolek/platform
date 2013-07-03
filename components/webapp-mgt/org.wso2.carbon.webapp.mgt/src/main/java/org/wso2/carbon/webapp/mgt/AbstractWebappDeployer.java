@@ -143,32 +143,9 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
     }
 
     public void undeploy(String fileName) throws DeploymentException {
-        File webappToUndeploy = new File(fileName);
-        if (isHotUpdating(webappToUndeploy)) {
-            handleUndeployment(fileName, webappToUndeploy);
-            DeploymentSynchronizer depSynchService = DataHolder.
-                    getDeploymentSynchronizerService();
-
-            if (fileName.contains(File.separator + "webapps" + File.separator) &&
-                !fileName.contains("tenants")) {
-                String fileToCommit = fileName.substring(0, fileName.lastIndexOf("webapps"));
-                try {
-                    if (CarbonUtils.isDepSyncEnabled() && !CarbonUtils.isWorkerNode()
-                        && depSynchService != null && depSynchService.isAutoCommitOn(fileToCommit) &&
-                        fileName.endsWith(".war")) {
-                        try {
-                            depSynchService.commit(fileToCommit, fileToCommit + "webapps" + File.separator);
-                        } catch (Exception e) {
-                            log.error("Error occurred while committing : " + fileToCommit, e);
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error("Error occurred while committing : " + fileToCommit, e);
-                }
-            }
-        } else {
-            handleUndeployment(fileName, webappToUndeploy);
-        }
+        File webappToUndeploy = new File(fileName);        
+        handleUndeployment(fileName, webappToUndeploy);         
+        
     }
 
     @Override
@@ -200,18 +177,26 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
         String webappFilePath = webappFile.getPath();
         boolean isSkipped = true;
         // Here we are checking WebappDeployer with .war extension or null extension
-        // If foo.war and foo dir is found, then we will allow directory based WebappDeployer to deploy that webapp.
-        // If only foo.war is found then .war based WebappDeployer will deploy that webapp
+        // If foo.war and foo dir is found, then we will allow  .war based WebappDeployer to deploy that webapp.
+        // If only foo dir found then directory based WebappDeployer will deploy that webapp.
         if ("war".equals(extension)) {
-            webappFilePath = webappFilePath.substring(0, webappFilePath.lastIndexOf("."));
-            File explodedFile = new File(webappFilePath);
-            isSkipped = explodedFile.exists();
+        	 return false;
         } else {
             // return false if jaxwebapp or jaggery app is being deployed
             if (webappFilePath.contains("jaxwebapps") || webappFilePath.contains("jaggeryapps")
                     || webappFilePath.contains("carbonapps")) {
                 return false;
             }
+            
+            
+            // if it's a dir  then make sure it is not a unpacked content of .WAR file.
+            String warFilePath = webappFilePath.concat(".war");
+            File warFile = new File(warFilePath);
+            if (warFile.exists()) {
+                // .WAR exists skip this dir
+                return true;
+               }
+            
             Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
             String webappContext = "/" + webappFile.getName();
             //Make sure we are not re-deploying faulty apps on faulty list again.
