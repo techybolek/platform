@@ -54,11 +54,11 @@ public class APIManagerInterceptorComponent {
         externalAPIManagerURL = CarbonUtils.getServerConfiguration().getFirstProperty("APIGateway");
 
     	// Register the valves with Tomcat
-        if (apiManagementEnabled.equalsIgnoreCase("true")) {
-            ArrayList<CarbonTomcatValve> valves = new ArrayList<CarbonTomcatValve>();
-            valves.add(new APIManagerInterceptorValve());
-            TomcatValveContainer.addValves(valves);
-        }
+        //if (apiManagementEnabled.equalsIgnoreCase("true")) {
+        //    ArrayList<CarbonTomcatValve> valves = new ArrayList<CarbonTomcatValve>();
+        //    valves.add(new APIManagerInterceptorValve());
+        //    TomcatValveContainer.addValves(valves);
+        //}
     }
     
     protected void deactivate(ComponentContext componentContext) {
