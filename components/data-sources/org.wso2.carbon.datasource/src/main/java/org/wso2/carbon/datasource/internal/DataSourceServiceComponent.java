@@ -86,8 +86,10 @@ public class DataSourceServiceComponent {
         if (registryService != null) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getCurrentContext().setTenantId(
-                        MultitenantConstants.SUPER_TENANT_ID);
+
+                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
                 int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
                 Registry registry = registryService.getConfigSystemRegistry(tenantId);
