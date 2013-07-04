@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
@@ -29,6 +30,7 @@ import org.wso2.carbon.reporting.api.ReportingException;
 import org.wso2.carbon.reporting.core.ReportConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -219,6 +221,10 @@ public class CommonUtil {
         return status;
     }
     public static void addJrxmlConfigs(Registry systemRegistry) throws RegistryException {
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+
         String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
                 "resources" + File.separator + "reports";
         File file = new File(rxtDir);

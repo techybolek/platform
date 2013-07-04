@@ -19,11 +19,13 @@ package org.wso2.carbon.reporting.core.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.reporting.core.utils.CommonUtil;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 
 /**
@@ -42,6 +44,9 @@ public class ReportingComponent {
 
     protected void activate(ComponentContext componentContext) {
         try {
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
             ReportingAxis2ConfigurationContextObserver observer =
                     new ReportingAxis2ConfigurationContextObserver();

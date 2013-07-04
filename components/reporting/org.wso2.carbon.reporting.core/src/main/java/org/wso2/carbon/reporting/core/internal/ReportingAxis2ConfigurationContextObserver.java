@@ -23,6 +23,7 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.reporting.core.utils.CommonUtil;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 
 public class ReportingAxis2ConfigurationContextObserver implements Axis2ConfigurationContextObserver {
