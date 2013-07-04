@@ -16,32 +16,46 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
-import net.sf.jsr107cache.Cache;
+//import net.sf.jsr107cache.Cache;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
+import java.util.Iterator;
 import java.util.Set;
 
 public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     public void invalidateKeys(APIKeyMapping[] mappings) {
-        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+
+        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
             String cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
-            Set keys = cache.keySet();
+            Iterator<Object> itr=cache.iterator();
+            while(itr.hasNext()){
+                String key = itr.next().toString();
+                if(key.contains(cacheKey)){
+                    cache.remove(key);
+                }
+            }
+
+
+           /* Set keys = cache.keySet();
             for (Object cKey : keys) {
                 String key = cKey.toString();
                 if (key.contains(cacheKey)) {
                     cache.remove(key);
 
                 }
-            }
+            }*/
         }
     }
 
     public void invalidateOAuthKeys(String consumerKey, String authorizedUser) {
-        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         String cacheKey = consumerKey + ":" + authorizedUser;
         cache.remove(cacheKey);
 
@@ -52,8 +66,9 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
         String resourceVerbCacheKey = apiContext + "/" + apiVersion +
                                       resourceURLContext + ":" + httpVerb;
         String resourceCacheKey = apiContext + ":" + apiVersion;
-        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("resourceCache");
-        Cache keyCache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
+        Cache keyCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
+
         if (keyCache.size() != 0) {
             Set keys = keyCache.keySet();
             for (Object cacheKey : keys) {
