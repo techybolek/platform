@@ -28,8 +28,10 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.schema.SchemaFilter;
 import org.wso2.carbon.governance.api.schema.SchemaManager;
 import org.wso2.carbon.governance.api.schema.dataobjects.Schema;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +46,7 @@ public class SchemaClientTestCase{
     @BeforeClass(groups = {"wso2.greg"})
     public void initTest() throws RegistryException, AxisFault {
         governance = TestUtils.getRegistry();
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
     }
 
     @Test(groups = {"wso2.greg"}, priority = 1, enabled = true)

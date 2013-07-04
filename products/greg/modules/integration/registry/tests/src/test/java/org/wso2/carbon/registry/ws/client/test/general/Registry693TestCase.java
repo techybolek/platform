@@ -24,7 +24,9 @@ import org.wso2.carbon.governance.api.schema.SchemaManager;
 import org.wso2.carbon.governance.api.schema.dataobjects.Schema;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import static org.testng.Assert.assertEquals;
 
@@ -37,8 +39,9 @@ public class Registry693TestCase extends TestSetup {
 
     @Test(groups = {"wso2.greg"})
     public void addSchema() throws RegistryException {
-        SchemaManager manager = new SchemaManager(
-                GovernanceUtils.getGovernanceUserRegistry(registry, FrameworkSettings.USER_NAME));
+        Registry governanceRegistry = GovernanceUtils.getGovernanceUserRegistry(registry, FrameworkSettings.USER_NAME);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
+        SchemaManager manager = new SchemaManager(governanceRegistry);
         Schema schema = manager.newSchema(
                 "https://svn.wso2.org/repos/wso2/trunk/commons/qa/qa-artifacts/greg/xsd/servicecontracts/_2008/_01/GeoIPService.svc.xsd");
         int currentSchemaLength = manager.getAllSchemas().length;

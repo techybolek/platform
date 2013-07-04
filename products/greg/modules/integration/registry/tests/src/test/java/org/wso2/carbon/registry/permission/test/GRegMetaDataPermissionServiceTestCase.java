@@ -59,7 +59,7 @@ public class GRegMetaDataPermissionServiceTestCase {
         userAuthenticationStub = new AuthenticatorClient(SERVER_URL);
 
         roleName = "meta_role";
-        userName = "greg_meta_user";
+        userName = "PRIMARY/greg_meta_user";
 
         if (userAdminStub.roleNameExists(roleName)) {  //delete the role if exists
             userAdminStub.deleteRole(roleName);

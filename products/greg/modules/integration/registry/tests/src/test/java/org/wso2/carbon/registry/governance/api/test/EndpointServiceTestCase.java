@@ -27,11 +27,13 @@ import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import javax.xml.namespace.QName;
@@ -53,6 +55,7 @@ public class EndpointServiceTestCase {
         TestUtils.cleanupResources(governance);
         wsdlManager = new WsdlManager(governance);
         endpointManager = new EndpointManager(governance);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
     }
 
     @Test(groups = {"wso2.greg"}, description = "test adding an Endpoint to G-Reg")

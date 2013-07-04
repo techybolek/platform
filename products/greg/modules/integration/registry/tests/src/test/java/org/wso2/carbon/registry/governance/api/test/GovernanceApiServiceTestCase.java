@@ -27,10 +27,12 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import javax.xml.namespace.QName;
@@ -63,6 +65,7 @@ public class GovernanceApiServiceTestCase {
         wsdlMgr = new WsdlManager(governanceRegistry);
         wsdl = wsdlMgr.newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/branches/4.0.0/products/greg/4.5.0/modules/" +
                 "integration/registry/tests/src/test/java/resources/wsdl/echo.wsdl");
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
     }
 
     @Test(groups = {"wso2.greg", "wso2.greg.GovernanceServiceCreate"})

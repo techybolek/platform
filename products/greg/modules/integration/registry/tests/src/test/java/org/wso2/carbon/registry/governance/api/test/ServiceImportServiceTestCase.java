@@ -19,17 +19,21 @@ package org.wso2.carbon.registry.governance.api.test;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
-import static org.testng.Assert.*;
-
 import javax.xml.namespace.QName;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 
 public class ServiceImportServiceTestCase {
@@ -43,6 +47,7 @@ public class ServiceImportServiceTestCase {
         governance = TestUtils.getRegistry();
         registry = TestUtils.getWSRegistry();
         TestUtils.cleanupResources(governance);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
     }
 
     @Test(groups = {"wso2.greg"}, description = "add a simple service", priority = 1)
@@ -72,8 +77,8 @@ public class ServiceImportServiceTestCase {
         Service service;
         try {
             service = serviceManager.newService(new QName(service_namespace, service_name));
-            service.addAttribute("creator", "Aaaa");
-            service.addAttribute("version", "1.0.0");
+            service.addAttribute("test_creator", "Aaaa");
+            service.addAttribute("test_version", "1.0.0");
             serviceManager.addService(service);
 
             log.info("Service Added Successfully");

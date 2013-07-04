@@ -31,6 +31,7 @@ import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -43,8 +44,9 @@ public class ServiceTestCase {
     private String configPath;
 
     @BeforeClass(groups = {"wso2.greg"})
-    public void initTest() {
+    public void initTest() throws RegistryException {
         governance = TestUtils.getRegistry();
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         try {
             TestUtils.cleanupResources(governance);
             configPath = FrameworkSettings.getFrameworkPath() + File.separator + ".." + File.separator + ".." + File.separator + ".." +
@@ -61,20 +63,21 @@ public class ServiceTestCase {
         ServiceManager serviceManager = new ServiceManager(governance);
 
         Service service = serviceManager.newService(new QName("http://bang.boom.com/mnm/beep", "MyService"));
-        service.addAttribute("testAttribute", "somevalue");
+        service.addAttribute("overview_scopes","http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/DefaultScope");
         serviceManager.addService(service);
 
         String serviceId = service.getId();
         Service newService = serviceManager.getService(serviceId);
 
-        Assert.assertEquals(newService.getAttribute("testAttribute"), "somevalue");
+        Assert.assertEquals(newService.getAttribute("overview_scopes"),
+                "http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/DefaultScope");
 
-        service.addAttribute("testAttribute", "somevalue2");
+        service.addAttribute("overview_scopes","http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/DefaultScope2");
         serviceManager.updateService(service);
 
         newService = serviceManager.getService(serviceId);
 
-        String[] values = newService.getAttributes("testAttribute");
+        String[] values = newService.getAttributes("overview_scopes");
 
         Assert.assertEquals(values.length, 2);
     }
@@ -107,7 +110,7 @@ public class ServiceTestCase {
         ServiceManager serviceManager = new ServiceManager(governance);
         Service service = serviceManager.newService(contentElement);
 
-        service.addAttribute("custom-attribute", "custom-value");
+        service.addAttribute("custom_attribute", "custom-value");
         serviceManager.addService(service);
 
 
@@ -115,26 +118,26 @@ public class ServiceTestCase {
         String serviceId = service.getId();
         Service newService = serviceManager.getService(serviceId);
 
-        Assert.assertEquals(newService.getAttribute("custom-attribute"), "custom-value");
+        Assert.assertEquals(newService.getAttribute("custom_attribute"), "custom-value");
         Assert.assertEquals(newService.getAttribute("interface_wsdlURL"),
                 "/_system/governance/trunk/wsdls/com/foo/abc.wsdl");
         Assert.assertEquals(newService.getQName(), service.getQName());
 
         Service service2 = serviceManager.newService(new QName("http://baps.paps.mug/done", "meep"));
-        service2.addAttribute("custom-attribute", "custom-value2");
+        service2.addAttribute("custom_attribute", "custom-value2");
         serviceManager.addService(service2);
 
         Service service3 = serviceManager.newService(new QName("http://baps.paps.mug/jug", "peem"));
-        service3.addAttribute("custom-attribute", "not-custom-value");
+        service3.addAttribute("custom_attribute", "not-custom-value");
         serviceManager.addService(service3);
 
         Service service4 = serviceManager.newService(new QName("http://baps.dadan.mug/jug", "doon"));
-        service4.addAttribute("not-custom-attribute", "custom-value3");
+        service4.addAttribute("notCustom_attribute", "custom-value3");
         serviceManager.addService(service4);
 
         Service[] services = serviceManager.findServices(new ServiceFilter() {
             public boolean matches(Service service) throws GovernanceException {
-                String attributeVal = service.getAttribute("custom-attribute");
+                String attributeVal = service.getAttribute("custom_attribute");
                 return attributeVal != null && attributeVal.startsWith("custom-value");
             }
         });
