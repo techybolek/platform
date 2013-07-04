@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.identity.oauth2.authz;
 
-import net.sf.jsr107cache.Cache;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+
 import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
 import org.apache.commons.logging.Log;
@@ -36,6 +39,7 @@ import org.wso2.carbon.identity.oauth2.authz.handlers.CodeResponseTypeHandler;
 import org.wso2.carbon.identity.oauth2.authz.handlers.TokenResponseTypeHandler;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -73,7 +77,21 @@ public class AuthorizationHandlerManager {
         supportedRespTypes = OAuthServerConfiguration.getInstance().getSupportedResponseTypes();
         authzHandlers.put(ResponseType.CODE.toString(), new CodeResponseTypeHandler());
         authzHandlers.put(ResponseType.TOKEN.toString(), new TokenResponseTypeHandler());
-        appInfoCache = PrivilegedCarbonContext.getCurrentContext().getCache("AppInfoCache");
+//        appInfoCache = PrivilegedCarbonContext.getCurrentContext().getCache("AppInfoCache");
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(OAuth2Constants.OAUTH_CACHE_MANAGER);
+        if(manager != null){
+        	appInfoCache = manager.getCache("AppInfoCache");
+        } else {
+        	appInfoCache = Caching.getCacheManager().getCache("AppInfoCache");
+        }
+        if(appInfoCache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created AppInfoCache under "+OAuth2Constants.OAUTH_CACHE_MANAGER); 
+            }
+        }
+        else {
+        	log.error("Error while creating AppInfoCache");
+        }
     }
 
     public OAuth2AuthorizeRespDTO handleAuthorization(OAuth2AuthorizeReqDTO authzReqDTO)

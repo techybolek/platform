@@ -18,31 +18,43 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
+
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.CacheInvalidator;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.utils.CarbonUtils;
 
 /**
  *
  */
 public class DecisionClearingCache {
 
-    private Cache cache = null;
+    private Cache<IdentityCacheKey,IdentityCacheEntry> cache = null;
 
     private static DecisionClearingCache decisionClearingCache = null;
 
     private static final Object lock = new Object(); 
 
     private DecisionClearingCache() {
-        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE);
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
+        if(manager != null){
+        	this.cache = manager.getCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE);
+        } else {
+        	this.cache = Caching.getCacheManager().getCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE);
+        }
+//        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE);
+        if(this.cache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created PDP_DECISION_CLEARING_CACHE under ENTITLEMENT_CACHE_MANAGER"); 
+            }
+        }
+        else {
+        	log.error("Error while creating PDP_DECISION_CLEARING_CACHE");
+        }
+        
     }
 
     /**
@@ -110,21 +122,21 @@ public class DecisionClearingCache {
                 log.debug("Local cache is invalidated");
             }
             //sending cluster message
-            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
-            try {
-                if (invalidator != null) {
-                    invalidator.invalidateCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE, cacheKey);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Calling invalidation cache");
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Not calling invalidation cache");
-                    }
-                }
-            } catch (CacheException e) {
-                log.error("Error while invalidating cache", e);
-            }
+//            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
+//            try {
+//                if (invalidator != null) {
+//                    invalidator.invalidateCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE, cacheKey);
+//                    if (log.isDebugEnabled()) {
+//                        log.debug("Calling invalidation cache");
+//                    }
+//                } else {
+//                    if (log.isDebugEnabled()) {
+//                        log.debug("Not calling invalidation cache");
+//                    }
+//                }
+//            } catch (CacheException e) {
+//                log.error("Error while invalidating cache", e);
+//            }
         }
     }
 }

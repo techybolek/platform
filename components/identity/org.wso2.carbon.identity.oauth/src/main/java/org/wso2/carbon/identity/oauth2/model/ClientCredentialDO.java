@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.oauth2.model;
 
-import org.wso2.carbon.caching.core.CacheEntry;
+import org.wso2.carbon.identity.oauth.cache.CacheEntry;
 
 /**
  * This is wrapper for client secret so that it can be added to the cache which extends

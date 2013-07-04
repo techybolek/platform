@@ -18,28 +18,42 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import net.sf.jsr107cache.Cache;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.policy.search.SearchResult;
-import org.wso2.carbon.utils.CarbonUtils;
 
 /**
  *
  */
 public class PolicySearchCache {
 
-    private Cache cache = null;
+	private Cache<IdentityCacheKey,SearchResult> cache = null;
 
     private static PolicySearchCache policySearchCache = null;
 
     private static final Object lock = new Object();  
 
     private PolicySearchCache() {
-        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.POLICY_SEARCH_CACHE);
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
+        if(manager != null){
+        	this.cache = manager.getCache(EntitlementConstants.POLICY_SEARCH_CACHE);
+        } else {
+        	this.cache = Caching.getCacheManager().getCache(EntitlementConstants.POLICY_SEARCH_CACHE);
+        }
+//        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.POLICY_SEARCH_CACHE);
+        if(this.cache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created POLICY_SEARCH_CACHE under ENTITLEMENT_CACHE_MANAGER"); 
+            }
+        }
+        else {
+        	log.error("Error while creating POLICY_SEARCH_CACHE");
+        }
     }
 
     /**
@@ -93,7 +107,7 @@ public class PolicySearchCache {
     }
 
     public void invalidateCache(){
-        cache.clear();
+        cache.removeAll();
     }
 
 }

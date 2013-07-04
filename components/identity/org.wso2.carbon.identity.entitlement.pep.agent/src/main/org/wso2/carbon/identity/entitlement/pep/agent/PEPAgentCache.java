@@ -15,21 +15,23 @@
  */
 package org.wso2.carbon.identity.entitlement.pep.agent;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheManager;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-
 import java.util.Calendar;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 
 
 class PEPAgentCache {
 
+	private static Log log = LogFactory.getLog(PEPAgentCache.class);
+	
     private SimpleCache simpleCache;
     private Cache carbonCache;
     private int invalidationInterval = 0;
@@ -108,16 +110,35 @@ class PEPAgentCache {
      * @return the named cache instance.
      */
     private Cache getCommonCache(String name) {
-        // We create a single cache for all tenants. It is not a good choice to create per-tenant
-        // caches in this case. We qualify tenants by adding the tenant identifier in the cache key.
-        PrivilegedCarbonContext currentContext = PrivilegedCarbonContext.getCurrentContext();
-        currentContext.startTenantFlow();
-        try {
-            currentContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-            return CacheManager.getInstance().getCache(name);
-        } finally {
-            currentContext.endTenantFlow();
+		// TODO Should verify the cache creation done per tenant or as below
+		
+		// We create a single cache for all tenants. It is not a good choice to create per-tenant
+		// caches in this case. We qualify tenants by adding the tenant identifier in the cache key.
+//	    PrivilegedCarbonContext currentContext = PrivilegedCarbonContext.getCurrentContext();
+//	    PrivilegedCarbonContext.startTenantFlow();
+//		try {
+//			currentContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+//			return CacheManager.getInstance().getCache(name);
+//		} finally {
+//		    PrivilegedCarbonContext.endTenantFlow();
+//		}
+		
+    	Cache<IdentityCacheKey, IdentityCacheEntry> cache = null;
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(ProxyConstants.PEP_AGENT_MANAGER);
+    	if(manager != null){
+        	cache = manager.getCache(name);
+        } else {
+        	cache = Caching.getCacheManager().getCache(name);
         }
+        if(cache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created "+name+" under "+ProxyConstants.PEP_AGENT_MANAGER); 
+            }
+        }
+        else {
+        	log.error("Error while creating "+name);
+        }
+        return cache;
     }
 
     void put(String key,String entry){
@@ -157,7 +178,7 @@ class PEPAgentCache {
         if(simpleCache != null){
             simpleCache =  new SimpleCache(simpleCache.maxEntries);
         }else if(carbonCache != null){
-            carbonCache.clear();
+            carbonCache.removeAll();
         }
     }
 

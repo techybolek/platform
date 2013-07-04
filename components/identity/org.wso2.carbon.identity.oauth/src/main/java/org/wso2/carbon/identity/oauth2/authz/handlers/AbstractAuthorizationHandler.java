@@ -44,6 +44,7 @@ public abstract class AbstractAuthorizationHandler implements AuthorizationHandl
     protected TokenPersistencePreprocessor tokenPersistencePreprocessor;
     protected boolean cacheEnabled;
     protected OAuthCache oauthCache;
+    //protected OAuthCache<CacheKey, AccessTokenDO> oauthCache;
 
     public AbstractAuthorizationHandler()
             throws IdentityOAuth2Exception {

@@ -18,16 +18,13 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
+
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.CacheInvalidator;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.Set;
 
@@ -36,14 +33,28 @@ import java.util.Set;
  */
 public class PIPAttributeCache {
 
-    private Cache cache = null;
+	private Cache<IdentityCacheKey,IdentityCacheEntry> cache = null;
 
     private static PIPAttributeCache pipAttributeCache = null;
 
     private static final Object lock = new Object();
     
     private PIPAttributeCache() {
-        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE);
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
+        if(manager != null){
+        	this.cache = manager.getCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE);
+        } else {
+        	this.cache = Caching.getCacheManager().getCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE);
+        }
+//        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE);
+        if(this.cache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created PIP_ATTRIBUTE_CACHE under ENTITLEMENT_CACHE_MANAGER"); 
+            }
+        }
+        else {
+        	log.error("Error while creating PIP_ATTRIBUTE_CACHE");
+        }
     }
 
     /**
@@ -111,51 +122,51 @@ public class PIPAttributeCache {
                 log.debug("Local cache is invalidated");
             }
             //sending cluster message
-            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
-            try {
-                if (invalidator != null) {
-                    invalidator.invalidateCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE, cacheKey);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Calling invalidation cache");
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Not calling invalidation cache");
-                    }
-                }
-            } catch (CacheException e) {
-                log.error("Error while invalidating cache", e);
-            }
+//            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
+//            try {
+//                if (invalidator != null) {
+//                    invalidator.invalidateCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE, cacheKey);
+//                    if (log.isDebugEnabled()) {
+//                        log.debug("Calling invalidation cache");
+//                    }
+//                } else {
+//                    if (log.isDebugEnabled()) {
+//                        log.debug("Not calling invalidation cache");
+//                    }
+//                }
+//            } catch (CacheException e) {
+//                log.error("Error while invalidating cache", e);
+//            }
         }
     }
 
     public void clearCache(int tenantId){
 
-        for(Object cacheKey :this.cache.keySet()){
-            IdentityCacheKey identityCacheKey = (IdentityCacheKey) cacheKey;
-            if(tenantId == identityCacheKey.getTenantId()){
-                cache.remove(identityCacheKey);
-            }
+        for (Cache.Entry<IdentityCacheKey, IdentityCacheEntry> entry : this.cache) {        	
+        	IdentityCacheKey identityCacheKey=entry.getKey();
+            if(tenantId==identityCacheKey.getTenantId()){
+                this.cache.remove(identityCacheKey);
+            }                                  
         }
 
         if (log.isDebugEnabled()) {
             log.debug("Local cache is invalidated for tenant : " + tenantId);
         }
         //sending cluster message
-        CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
-        try {
-            if (invalidator != null) {
-                invalidator.invalidateCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE, tenantId);
-                if (log.isDebugEnabled()) {
-                    log.debug("Calling invalidation cache");
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Not calling invalidation cache");
-                }
-            }
-        } catch (CacheException e) {
-            log.error("Error while invalidating cache", e);
-        }
+//        CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
+//        try {
+//            if (invalidator != null) {
+//                invalidator.invalidateCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE, tenantId);
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Calling invalidation cache");
+//                }
+//            } else {
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Not calling invalidation cache");
+//                }
+//            }
+//        } catch (CacheException e) {
+//            log.error("Error while invalidating cache", e);
+//        }
     }
 }

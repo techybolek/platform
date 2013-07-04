@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.oauth.util;
 
-import org.wso2.carbon.caching.core.CacheEntry;
+import org.wso2.carbon.identity.oauth.cache.CacheEntry;
 
 import java.util.SortedMap;
 

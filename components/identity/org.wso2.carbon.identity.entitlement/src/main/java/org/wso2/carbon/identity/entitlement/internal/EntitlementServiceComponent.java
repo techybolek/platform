@@ -32,7 +32,6 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.ServerConfigurationException;
-import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
@@ -63,11 +62,6 @@ import org.wso2.carbon.utils.NetworkUtils;
  * @scr.reference name="org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent"
  * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
  * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
- * @scr.reference name="cache.invalidation.service"
- *                interface="org.wso2.carbon.caching.core.CacheInvalidator"
- *                cardinality="0..1" policy="dynamic"
- *                bind="setCacheInvalidator"
- *                unbind="removeCacheInvalidator"
  */
 public class EntitlementServiceComponent {
 
@@ -78,7 +72,7 @@ public class EntitlementServiceComponent {
 
     private ThriftAuthenticatorService thriftAuthenticationService;
 
-    private static CacheInvalidator cacheInvalidator;
+//    private static CacheInvalidator cacheInvalidator;
 
     private ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -445,15 +439,15 @@ public class EntitlementServiceComponent {
         return InetAddress.getByAddress(byteAddress);
     }
 
-    protected void setCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = invalidator;
-    }
-
-    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = null;
-    }
-
-    public static CacheInvalidator getCacheInvalidator() {
-    	return cacheInvalidator;
-    }    
+//    protected void setCacheInvalidator(CacheInvalidator invalidator) {
+//        cacheInvalidator = invalidator;
+//    }
+//
+//    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
+//        cacheInvalidator = null;
+//    }
+//
+//    public static CacheInvalidator getCacheInvalidator() {
+//    	return cacheInvalidator;
+//    }    
 }

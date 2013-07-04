@@ -15,28 +15,22 @@
  */
 package org.wso2.carbon.identity.thrift.authentication;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.services.util.CarbonAuthenticationUtil;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.thrift.authentication.dao.ThriftSessionDAO;
-import org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent;
-import org.wso2.carbon.identity.thrift.authentication.util.ThriftAuthenticationConstants;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ThriftSession;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is a utility class that performs authentication related functionalities

@@ -17,64 +17,25 @@
  */
 package org.wso2.carbon.identity.entitlement;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
-import org.wso2.balana.*;
-import org.wso2.balana.attr.BooleanAttribute;
-import org.wso2.balana.attr.DateAttribute;
-import org.wso2.balana.attr.DateTimeAttribute;
-import org.wso2.balana.attr.DoubleAttribute;
-import org.wso2.balana.attr.HexBinaryAttribute;
-import org.wso2.balana.attr.IntegerAttribute;
-import org.wso2.balana.attr.StringAttribute;
-import org.wso2.balana.attr.TimeAttribute;
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.wso2.balana.attr.AttributeValue;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.wso2.balana.combine.PolicyCombiningAlgorithm;
-import org.wso2.balana.combine.xacml2.FirstApplicablePolicyAlg;
-import org.wso2.balana.combine.xacml2.OnlyOneApplicablePolicyAlg;
-import org.wso2.balana.combine.xacml3.*;
-import org.wso2.balana.ctx.AbstractRequestCtx;
-import org.wso2.balana.ctx.Attribute;
-import org.wso2.balana.ctx.xacml2.RequestCtx;
-import org.wso2.balana.ctx.xacml2.Subject;
-import org.wso2.balana.xacml3.Attributes;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
-import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
-import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
-import org.wso2.carbon.identity.entitlement.internal.EntitlementExtensionBuilder;
-import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
-import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
-import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
-import org.wso2.carbon.identity.entitlement.policy.PolicyStoreManager;
-import org.wso2.carbon.identity.entitlement.policy.store.CarbonPolicyStore;
-import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -86,6 +47,59 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 import javax.xml.validation.Validator;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.wso2.balana.AbstractPolicy;
+import org.wso2.balana.Balana;
+import org.wso2.balana.ParsingException;
+import org.wso2.balana.Policy;
+import org.wso2.balana.PolicySet;
+import org.wso2.balana.XACMLConstants;
+import org.wso2.balana.attr.AttributeValue;
+import org.wso2.balana.attr.BooleanAttribute;
+import org.wso2.balana.attr.DateAttribute;
+import org.wso2.balana.attr.DateTimeAttribute;
+import org.wso2.balana.attr.DoubleAttribute;
+import org.wso2.balana.attr.HexBinaryAttribute;
+import org.wso2.balana.attr.IntegerAttribute;
+import org.wso2.balana.attr.StringAttribute;
+import org.wso2.balana.attr.TimeAttribute;
+import org.wso2.balana.combine.PolicyCombiningAlgorithm;
+import org.wso2.balana.combine.xacml2.FirstApplicablePolicyAlg;
+import org.wso2.balana.combine.xacml2.OnlyOneApplicablePolicyAlg;
+import org.wso2.balana.combine.xacml3.DenyOverridesPolicyAlg;
+import org.wso2.balana.combine.xacml3.DenyUnlessPermitPolicyAlg;
+import org.wso2.balana.combine.xacml3.OrderedDenyOverridesPolicyAlg;
+import org.wso2.balana.combine.xacml3.OrderedPermitOverridesPolicyAlg;
+import org.wso2.balana.combine.xacml3.PermitOverridesPolicyAlg;
+import org.wso2.balana.combine.xacml3.PermitUnlessDenyPolicyAlg;
+import org.wso2.balana.ctx.AbstractRequestCtx;
+import org.wso2.balana.ctx.Attribute;
+import org.wso2.balana.ctx.xacml2.RequestCtx;
+import org.wso2.balana.ctx.xacml2.Subject;
+import org.wso2.balana.xacml3.Attributes;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
+import org.wso2.carbon.identity.entitlement.cache.IdentityCacheKey;
+import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
+import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
+import org.wso2.carbon.identity.entitlement.internal.EntitlementExtensionBuilder;
+import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
+import org.wso2.carbon.identity.entitlement.policy.store.CarbonPolicyStore;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -227,17 +241,36 @@ public class EntitlementUtil {
 	 *
 	 * @return the named cache instance.
 	 */
-	public static Cache getCommonCache(String name) {
+	public static Cache<IdentityCacheKey,IdentityCacheEntry> getCommonCache(String name) {
+		// TODO Should verify the cache creation done per tenant or as below
+		
 		// We create a single cache for all tenants. It is not a good choice to create per-tenant
 		// caches in this case. We qualify tenants by adding the tenant identifier in the cache key.
-	    PrivilegedCarbonContext currentContext = PrivilegedCarbonContext.getCurrentContext();
-	    PrivilegedCarbonContext.startTenantFlow();
-		try {
-			currentContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-			return CacheManager.getInstance().getCache(name);
-		} finally {
-		    PrivilegedCarbonContext.endTenantFlow();
-		}
+//	    PrivilegedCarbonContext currentContext = PrivilegedCarbonContext.getCurrentContext();
+//	    PrivilegedCarbonContext.startTenantFlow();
+//		try {
+//			currentContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+//			return CacheManager.getInstance().getCache(name);
+//		} finally {
+//		    PrivilegedCarbonContext.endTenantFlow();
+//		}
+		
+    	Cache<IdentityCacheKey, IdentityCacheEntry> cache = null;
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
+    	if(manager != null){
+        	cache = manager.getCache(name);
+        } else {
+        	cache = Caching.getCacheManager().getCache(name);
+        }
+        if(cache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created "+name+" under ENTITLEMENT_CACHE_MANAGER"); 
+            }
+        }
+        else {
+        	log.error("Error while creating "+name);
+        }
+        return cache;
 	}
 
     /**

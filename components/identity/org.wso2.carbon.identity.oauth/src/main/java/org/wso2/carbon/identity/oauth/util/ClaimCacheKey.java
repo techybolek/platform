@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.oauth.util;
 
-import org.wso2.carbon.caching.core.CacheKey;
+import org.wso2.carbon.identity.oauth.cache.CacheKey;
 
 public class ClaimCacheKey extends CacheKey {
 

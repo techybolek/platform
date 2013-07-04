@@ -26,6 +26,7 @@ public final class ProxyConstants {
     public static final String BASIC_AUTH = "basicAuth";
     public static final String WS_XACML = "wsXacml";
 
+    public static final String PEP_PROXY_CACHE_MANAGER = "PEP_PROXY_CACHE_MANAGER";
     public static final String DECISION_CACHE = "DECISION_CACHE";
     public static final int MAX_CACHE_SIZE = 10000;
 

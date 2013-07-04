@@ -20,9 +20,6 @@ package org.wso2.carbon.identity.provider.openid.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.association.Association;
-import org.wso2.carbon.caching.core.BaseCache;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -31,7 +28,7 @@ import java.util.Date;
 /**
  * Cache implementation for OpenID Associations
  */
-public class OpenIDAssociationCache extends BaseCache {
+public class OpenIDAssociationCache extends OpenIDBaseCache {
 
 	private static OpenIDAssociationCache associationCache = null;
 
@@ -66,13 +63,12 @@ public class OpenIDAssociationCache extends BaseCache {
 	 */
 	public void addToCache(Association association) {
 		if (log.isDebugEnabled()) {
-			log.debug("Trying to add to cache. No of current entries in Cache: " +
-			          associationCache.cache.size());
+			log.debug("Trying to add to cache.");
 		}
 		if (association != null && association.getHandle() != null) {
-			IdentityCacheKey cacheKey = new IdentityCacheKey(0, association.getHandle());
-			IdentityCacheEntry cacheEntry =
-			                                new IdentityCacheEntry(association.getType(),
+			OpenIDIdentityCacheKey cacheKey = new OpenIDIdentityCacheKey(0, association.getHandle());
+			OpenIDIdentityCacheEntry cacheEntry =
+			                                new OpenIDIdentityCacheEntry(association.getType(),
 			                                                       association.getMacKey(),
 			                                                       association.getExpiry());
 			associationCache.addToCache(cacheKey, cacheEntry);
@@ -92,13 +88,12 @@ public class OpenIDAssociationCache extends BaseCache {
 	 */
 	public Association getFromCache(String handle) {
 		if (log.isDebugEnabled()) {
-			log.debug("Trying to get from cache. No of current entries in Cache: " +
-			          associationCache.cache.size());
+			log.debug("Trying to get from cache.");
 		}
 		if (handle != null) {
-			IdentityCacheKey cacheKey = new IdentityCacheKey(0, handle);
-			IdentityCacheEntry cacheEntry =
-			                                (IdentityCacheEntry) associationCache.getValueFromCache(cacheKey);
+			OpenIDIdentityCacheKey cacheKey = new OpenIDIdentityCacheKey(0, handle);
+			OpenIDIdentityCacheEntry cacheEntry =
+			                                (OpenIDIdentityCacheEntry) associationCache.getValueFromCache(cacheKey);
 			if (cacheEntry != null) {
 				if (log.isDebugEnabled()) {
 					log.debug("Cache hit for handle : " + handle);
@@ -137,7 +132,7 @@ public class OpenIDAssociationCache extends BaseCache {
 	 */
 	public void removeCacheEntry(String handle) {
 		if (handle != null) {
-			IdentityCacheKey cacheKey = new IdentityCacheKey(0, handle);
+			OpenIDIdentityCacheKey cacheKey = new OpenIDIdentityCacheKey(0, handle);
 			associationCache.clearCacheEntry(cacheKey);
 		}
 	}

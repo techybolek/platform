@@ -15,27 +15,42 @@
  */
 package org.wso2.carbon.identity.mgt.store;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
-import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.utils.CarbonUtils;
 
 /**
  *
  */
 public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 
-	protected Cache cache = CarbonUtils.getLocalCache("IDENTITY_LOGIN_DATA_CACHE");
+	private static final String IDENTITY_LOGIN_DATA_CACHE_MANAGER = "IDENTITY_LOGIN_DATA_CACHE_MANAGER";
+	private static final String IDENTITY_LOGIN_DATA_CACHE = "IDENTITY_LOGIN_DATA_CACHE";
+	
+	protected Cache<String, UserIdentityClaimsDO> cache = getCache();//CarbonUtils.getLocalCache("IDENTITY_LOGIN_DATA_CACHE");
 
 	private static Log log = LogFactory.getLog(InMemoryIdentityDataStore.class);
+	
+	private Cache<String, UserIdentityClaimsDO> getCache() {
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(InMemoryIdentityDataStore.IDENTITY_LOGIN_DATA_CACHE_MANAGER);
+    	Cache<String, UserIdentityClaimsDO> cache = manager.getCache(InMemoryIdentityDataStore.IDENTITY_LOGIN_DATA_CACHE);
+        if(this.cache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created IDENTITY_LOGIN_DATA_CACHE under IDENTITY_LOGIN_DATA_CACHE_MANAGER"); 
+            }
+        }
+        else {
+        	log.error("Error while creating IDENTITY_LOGIN_DATA_CACHE");
+        }
+        return cache;
+    }
 
 	@Override
 	public void store(UserIdentityClaimsDO userIdentityDTO, UserStoreManager userStoreManager)
@@ -44,9 +59,9 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 			String key =
 			             CarbonContext.getCurrentContext().getTenantId() +
 			                     userIdentityDTO.getUserName();
-			if (cache.containsKey(key)) {
-				invalidateCache(userIdentityDTO.getUserName());
-			}
+//			if (cache.containsKey(key)) {
+//				invalidateCache(userIdentityDTO.getUserName());
+//			}
 			cache.put(key, userIdentityDTO);
 		}
 	}
@@ -69,31 +84,31 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 
 		cache.remove(CarbonContext.getCurrentContext().getTenantId() + userName);
 
-		invalidateCache(userName);
+//		invalidateCache(userName);
 	}
 
-	public void invalidateCache(String userName){
-
-		if (log.isDebugEnabled()) {
-			log.debug("Init invalidation caching process");
-		}
+//	public void invalidateCache(String userName){
+//
+//		if (log.isDebugEnabled()) {
+//			log.debug("Init invalidation caching process");
+//		}
 		// sending cluster message
-		CacheInvalidator invalidator = IdentityMgtServiceComponent.getCacheInvalidator();
-		try {
-			if (invalidator != null) {
-				invalidator.invalidateCache("IDENTITY_LOGIN_DATA_CACHE",
-				                            CarbonContext.getCurrentContext().getTenantId() +
-				                                    userName);
-				if (log.isDebugEnabled()) {
-					log.debug("Calling invalidation cache");
-				}
-			} else {
-				if (log.isDebugEnabled()) {
-					log.debug("Not calling invalidation cache");
-				}
-			}
-		} catch (CacheException e) {
-			log.error("Error while invalidating cache", e);
-		}
-	}
+//		CacheInvalidator invalidator = IdentityMgtServiceComponent.getCacheInvalidator();
+//		try {
+//			if (invalidator != null) {
+//				invalidator.invalidateCache("IDENTITY_LOGIN_DATA_CACHE",
+//				                            CarbonContext.getCurrentContext().getTenantId() +
+//				                                    userName);
+//				if (log.isDebugEnabled()) {
+//					log.debug("Calling invalidation cache");
+//				}
+//			} else {
+//				if (log.isDebugEnabled()) {
+//					log.debug("Not calling invalidation cache");
+//				}
+//			}
+//		} catch (CacheException e) {
+//			log.error("Error while invalidating cache", e);
+//		}
+//	}
 }

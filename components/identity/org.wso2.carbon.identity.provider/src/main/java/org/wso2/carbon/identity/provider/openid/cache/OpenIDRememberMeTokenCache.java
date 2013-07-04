@@ -22,9 +22,6 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.BaseCache;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OpenIDRememberMeDO;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -34,7 +31,7 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
  * @author WSO2 Inc
  *
  */
-public class OpenIDRememberMeTokenCache extends BaseCache {
+public class OpenIDRememberMeTokenCache extends OpenIDBaseCache {
 	
 	private static OpenIDRememberMeTokenCache cache = null;
 	private static final String OPENID_REMEMBER_ME_CACHE = "OPENID_REMEMBER_ME_CACHE";
@@ -72,7 +69,7 @@ public class OpenIDRememberMeTokenCache extends BaseCache {
 				log.debug("Updating RememberMe token in cache for " + username +
 				          " with tenant ID " + tenantId);
 			}
-			IdentityCacheKey key = new IdentityCacheKey(tenantId, username);
+			OpenIDIdentityCacheKey key = new OpenIDIdentityCacheKey(tenantId, username);
 			// if the entry exist, remove it
 			if (cache.getValueFromCache(key) != null) {
 				cache.clearCacheEntry(key);
@@ -84,7 +81,7 @@ public class OpenIDRememberMeTokenCache extends BaseCache {
 			} else {
 				date = new Date();
 			}
-			IdentityCacheEntry entry = new IdentityCacheEntry(rememberMe.getToken(), null, date);
+			OpenIDIdentityCacheEntry entry = new OpenIDIdentityCacheEntry(rememberMe.getToken(), null, date);
 			// add the entry
 			cache.addToCache(key, entry);
 
@@ -108,8 +105,8 @@ public class OpenIDRememberMeTokenCache extends BaseCache {
 				log.debug("Loading RememberMe token in cache for " + username + " with tenant ID " +
 				          tenantId);
 			}
-			IdentityCacheKey key = new IdentityCacheKey(tenantId, username);
-			IdentityCacheEntry entry = (IdentityCacheEntry) cache.getValueFromCache(key);
+			OpenIDIdentityCacheKey key = new OpenIDIdentityCacheKey(tenantId, username);
+			OpenIDIdentityCacheEntry entry = (OpenIDIdentityCacheEntry) cache.getValueFromCache(key);
 			if (entry == null) {
 				return null;
 			}

@@ -22,15 +22,15 @@ import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.attr.AttributeValue;
 import org.wso2.balana.finder.ResourceFinderModule;
 import org.wso2.balana.finder.ResourceFinderResult;
-import net.sf.jsr107cache.Cache;
+import javax.cache.Cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
+import org.wso2.carbon.identity.entitlement.cache.IdentityCacheKey;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 
 import javax.xml.transform.OutputKeys;
@@ -57,7 +57,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
 
     private int tenantId;
     private Set<PIPResourceFinder> resourceFinders = new HashSet<PIPResourceFinder>();
-    private Cache resourceCache = null;
+    private Cache<IdentityCacheKey,IdentityCacheEntry> resourceCache = null;
     boolean isResourceCachingEnabled = false;
 	private static Log log = LogFactory.getLog(CarbonResourceFinder.class);
 
@@ -246,7 +246,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
 	 */
 	public void clearAttributeCache() {
 		if (resourceCache != null) {
-			resourceCache.clear();
+			resourceCache.removeAll();
 			if (log.isDebugEnabled()) {
 				log.debug("Resource cache is cleared for tenant " + tenantId);
 			}

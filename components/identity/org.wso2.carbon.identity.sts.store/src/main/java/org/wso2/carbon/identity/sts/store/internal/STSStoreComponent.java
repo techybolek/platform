@@ -18,20 +18,12 @@ package org.wso2.carbon.identity.sts.store.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.caching.core.CacheInvalidator;
-import org.wso2.carbon.identity.sts.store.DBTokenStore;
 
 /*
-* @scr.reference name="cache.invalidation.service"
-* interface="org.wso2.carbon.caching.core.CacheInvalidator"
-* cardinality="0..1" policy="dynamic"
-* bind="setCacheInvalidator"
-* unbind="unsetCacheInvalidator"
 */
 public class STSStoreComponent {
 
     private static Log log = LogFactory.getLog(STSStoreComponent.class);
-    private static CacheInvalidator cacheInvalidator;
 
     protected void activate(ComponentContext context) {
         if (log.isDebugEnabled()) {
@@ -39,16 +31,4 @@ public class STSStoreComponent {
         }
     }
 
-    protected void setCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = invalidator;
-    }
-
-    protected void unsetCacheInvalidator(CacheInvalidator invalidator) {
-        DBTokenStore.getExecutorService().shutdown();
-        cacheInvalidator = null;
-    }
-
-    public static CacheInvalidator getCacheInvalidator() {
-        return cacheInvalidator;
-    }
 }

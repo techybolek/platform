@@ -18,5 +18,6 @@ package org.wso2.carbon.identity.sts.store;
 
 public class STSMgtConstants {
 
+    public static final String TOKEN_CACHE_MANAGER = "STS_TOKEN_CACHE_MANAGER";
     public static final String TOKEN_CACHE_ID = "STS_TOKEN_CACHE";
 }

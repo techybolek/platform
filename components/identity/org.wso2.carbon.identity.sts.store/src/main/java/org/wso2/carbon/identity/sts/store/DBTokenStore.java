@@ -16,36 +16,54 @@
 
 package org.wso2.carbon.identity.sts.store;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.rahas.STSConstants;
-import org.apache.rahas.Token;
-import org.apache.rahas.TokenStorage;
-import org.apache.rahas.TrustException;
-import org.wso2.carbon.caching.core.CacheInvalidator;
-import org.wso2.carbon.identity.sts.store.dao.DBStsDAO;
-import org.wso2.carbon.identity.sts.store.internal.STSStoreComponent;
-import org.wso2.carbon.identity.sts.store.util.STSStoreUtils;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import javax.xml.stream.XMLStreamException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.rahas.Token;
+import org.apache.rahas.TokenStorage;
+import org.apache.rahas.TrustException;
+import org.wso2.carbon.identity.sts.store.dao.DBStsDAO;
+import org.wso2.carbon.identity.sts.store.util.STSStoreUtils;
 
 public class DBTokenStore implements TokenStorage {
 
     private DBStsDAO dbStsDAO;
     private static Log log = LogFactory.getLog(DBTokenStore.class);
     private static int poolSize = 100;
-    private static Cache tokenCache = CarbonUtils.getLocalCache(STSMgtConstants.TOKEN_CACHE_ID);
+    
+	private static Cache<String, SerializableToken> tokenCache = null;
+	static {
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(STSMgtConstants.TOKEN_CACHE_MANAGER);
+        if(manager != null){
+        	tokenCache = manager.getCache(STSMgtConstants.TOKEN_CACHE_ID);
+        } else {
+        	tokenCache = Caching.getCacheManager().getCache(STSMgtConstants.TOKEN_CACHE_ID);
+        }
+        if(tokenCache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created "+STSMgtConstants.TOKEN_CACHE_ID+" under " + STSMgtConstants.TOKEN_CACHE_MANAGER); 
+            }
+        }
+        else {
+        	log.error("Error while creating "+STSMgtConstants.TOKEN_CACHE_ID);
+        }
+    }
+	
     private static ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
 
     public static ExecutorService getExecutorService() {
         return executorService;
     }
+
+
 
     public void add(Token token) throws TrustException {
         //put the Token to cache.
@@ -112,16 +130,18 @@ public class DBTokenStore implements TokenStorage {
         initDao();
         dbStsDAO.removeToken(id);
         //remove token from cache and send cache invalidation msg
-        if (tokenCache != null && tokenCache.size() > 0) {
-            CacheInvalidator cacheInvalidator =
-                    STSStoreComponent.getCacheInvalidator();
-            try {
-                cacheInvalidator.invalidateCache(STSConstants.KEY_ISSUER_CONFIG, id);
-            } catch (CacheException e) {
-                String msg = "Failed to invalidate token from cache";
-                log.error(msg, e);
-                throw new TrustException(msg, e);
-            }
+        if (tokenCache != null && tokenCache.containsKey(id)) {
+        	tokenCache.remove(id);
+        	// TODO ensure invalidate cache name is correct
+//            CacheInvalidator cacheInvalidator =
+//                    STSStoreComponent.getCacheInvalidator();
+//            try {
+//                cacheInvalidator.invalidateCache(STSConstants.KEY_ISSUER_CONFIG, id);
+//            } catch (CacheException e) {
+//                String msg = "Failed to invalidate token from cache";
+//                log.error(msg, e);
+//                throw new TrustException(msg, e);
+//            }
         }
     }
 

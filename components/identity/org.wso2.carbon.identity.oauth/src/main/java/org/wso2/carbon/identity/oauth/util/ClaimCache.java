@@ -18,9 +18,10 @@
 
 package org.wso2.carbon.identity.oauth.util;
 
-import org.wso2.carbon.caching.core.BaseCache;
-import org.wso2.carbon.caching.core.CacheEntry;
-import org.wso2.carbon.caching.core.CacheKey;
+
+import org.wso2.carbon.identity.oauth.cache.BaseCache;
+import org.wso2.carbon.identity.oauth.cache.CacheEntry;
+import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.utils.CarbonUtils;
 
 public class ClaimCache extends BaseCache {

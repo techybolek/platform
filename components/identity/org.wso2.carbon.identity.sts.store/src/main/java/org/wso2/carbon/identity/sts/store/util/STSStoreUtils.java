@@ -17,7 +17,8 @@
 package org.wso2.carbon.identity.sts.store.util;
 
 
-import net.sf.jsr107cache.Cache;
+import javax.cache.Cache;
+
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.rahas.Token;
 import org.apache.rahas.TrustException;

@@ -133,6 +133,8 @@ public class EntitlementConstants {
 
 	public static final String AUTHORIZATION_PERMISSION = "/permission/admin/configure";
 
+	public static final String ENTITLEMENT_CACHE_MANAGER = "ENTITLEMENT_CACHE_MANAGER";
+
 	public static final String PIP_RESOURCE_CACHE = "PIP_RESOURCE_CACHE";
 
 	public static final String PDP_DECISION_CACHE = "PDP_DECISION_CACHE";

@@ -24,14 +24,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.jsr107cache.Cache;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 
 import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.openidconnect.as.util.OIDCAuthzServerUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -77,8 +78,8 @@ public class AccessTokenIssuer {
     private static AccessTokenIssuer instance;
 
     private static Log log = LogFactory.getLog(AccessTokenIssuer.class);
-    private Cache userClaimsCache;
-    private Cache appInfoCache;
+    private Cache<String, Claim[]> userClaimsCache;
+    private Cache<String, OAuthAppDO> appInfoCache;
 
     public static AccessTokenIssuer getInstance() throws IdentityOAuth2Exception {
 
@@ -116,8 +117,34 @@ public class AccessTokenIssuer {
 
         //TODO: check userClaimsCache = PrivilegedCarbonContext.getCurrentContext().getCache("UserClaimsCache");
         //in org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever
-        userClaimsCache = PrivilegedCarbonContext.getCurrentContext().getCache("UserClaimsCache");
-        appInfoCache = PrivilegedCarbonContext.getCurrentContext().getCache("AppInfoCache");
+//        userClaimsCache = PrivilegedCarbonContext.getCurrentContext().getCache("UserClaimsCache");
+//        appInfoCache = PrivilegedCarbonContext.getCurrentContext().getCache("AppInfoCache");
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(OAuth2Constants.OAUTH_CACHE_MANAGER);
+        if(manager != null){
+        	userClaimsCache = manager.getCache("UserClaimsCache");
+        	appInfoCache = manager.getCache("AppInfoCache");
+        } else {
+        	userClaimsCache = Caching.getCacheManager().getCache("UserClaimsCache");
+        	appInfoCache = Caching.getCacheManager().getCache("AppInfoCache");
+        }
+        if(userClaimsCache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created UserClaimsCache under "+OAuth2Constants.OAUTH_CACHE_MANAGER); 
+            }
+        }
+        else {
+        	log.error("Error while creating UserClaimsCache");
+        }
+        
+        if(appInfoCache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created AppInfoCache under "+OAuth2Constants.OAUTH_CACHE_MANAGER); 
+            }
+        }
+        else {
+        	log.error("Error while creating AppInfoCache");
+        }
+        
     }
 
     public OAuth2AccessTokenRespDTO issue(OAuth2AccessTokenReqDTO tokenReqDTO)

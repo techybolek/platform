@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
@@ -52,11 +51,6 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * @scr.reference name="realm.service"
  * interface="org.wso2.carbon.user.core.service.RealmService"cardinality="1..1"
  * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="cache.invalidation.service"
- *                interface="org.wso2.carbon.caching.core.CacheInvalidator"
- *                cardinality="0..1" policy="dynamic"
- *                bind="setCacheInvalidator"
- *                unbind="removeCacheInvalidator"
  */
 
 public class IdentityMgtServiceComponent {
@@ -68,8 +62,6 @@ public class IdentityMgtServiceComponent {
     private static RegistryService registryService;
 
     private static ConfigurationContextService configurationContextService;
-
-    private static CacheInvalidator cacheInvalidator;
 
     private ServiceRegistration serviceRegistration = null;
     
@@ -144,17 +136,17 @@ public class IdentityMgtServiceComponent {
         return configurationContextService;
     }
 
-    protected void setCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = invalidator;
-    }
-
-    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = null;
-    }
-
-    public static CacheInvalidator getCacheInvalidator() {
-    	return cacheInvalidator;
-    }
+//    protected void setCacheInvalidator(CacheInvalidator invalidator) {
+//        cacheInvalidator = invalidator;
+//    }
+//
+//    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
+//        cacheInvalidator = null;
+//    }
+//
+//    public static CacheInvalidator getCacheInvalidator() {
+//    	return cacheInvalidator;
+//    }
 
     public static RecoveryProcessor getRecoveryProcessor() {
         return recoveryProcessor;

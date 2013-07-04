@@ -18,28 +18,42 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import net.sf.jsr107cache.Cache;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.pdp.PolicyDecision;
-import org.wso2.carbon.utils.CarbonUtils;
 
 /**
  * Simple Decision Cache
  */
 public class SimpleDecisionCache {
 
-    private Cache cache = null;
+    private Cache<IdentityCacheKey,PolicyDecision> cache = null;
 
     private static SimpleDecisionCache decisionCache = null;
 
     private static final Object lock = new Object();
 
     private SimpleDecisionCache() {
-        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
+        if(manager != null){
+        	this.cache = manager.getCache(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
+        } else {
+        	this.cache = Caching.getCacheManager().getCache(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
+        }
+//        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
+        if(this.cache != null) {
+            if (log.isDebugEnabled()) {
+            	log.debug("Successfully created PDP_SIMPLE_DECISION_CACHE under ENTITLEMENT_CACHE_MANAGER"); 
+            }
+        }
+        else {
+        	log.error("Error while creating PDP_SIMPLE_DECISION_CACHE");
+        }
     }
 
     /**
@@ -103,7 +117,7 @@ public class SimpleDecisionCache {
     }
 
     public void clearCache(){
-        this.cache.clear();
+        this.cache.removeAll();
     }
 
 }

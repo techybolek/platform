@@ -44,4 +44,6 @@ public class OAuth2Constants {
         }
     }
 
+    public static final String OAUTH_CACHE_MANAGER = "OAuthCacheManager";
+
 }
