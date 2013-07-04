@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.security.SecurityServiceHolder;
 import org.wso2.carbon.security.config.SecurityConfigAdmin;
@@ -47,11 +46,6 @@ import org.wso2.carbon.base.ServerConfiguration;
  *                interface="org.wso2.carbon.user.core.service.RealmService"
  *                cardinality="1..1" policy="dynamic" bind="setRealmService"
  *                unbind="unsetRealmService"
- * @scr.reference name="cache.invalidation.service"
- *                interface="org.wso2.carbon.caching.core.CacheInvalidator"
- *                cardinality="0..1" policy="dynamic"
- *                bind="setCacheInvalidator"
- *                unbind="removeCacheInvalidator"
  */
 public class SecurityMgtServiceComponent {
     private static String POX_SECURITY_MODULE = "POXSecurityModule";
@@ -59,7 +53,6 @@ public class SecurityMgtServiceComponent {
     private static ConfigurationContextService configContextService = null;
     private static RealmService realmService;
     private static RegistryService registryService;
-    private static CacheInvalidator cacheInvalidator;
    
     public static ConfigurationContext getServerConfigurationContext() {
         return configContextService.getServerConfigContext();
@@ -153,17 +146,17 @@ public class SecurityMgtServiceComponent {
         SecurityServiceHolder.setRegistryService(registryService);  // TODO: Serious OSGi bug here. FIXME Thilina
     }
     
-    protected void setCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = invalidator;
-    }
-    
-    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = null;
-    }
-
-    public static CacheInvalidator getCacheInvalidator() {
-        return cacheInvalidator;
-    }
+//    protected void setCacheInvalidator(CacheInvalidator invalidator) {
+//        cacheInvalidator = invalidator;
+//    }
+//    
+//    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
+//        cacheInvalidator = null;
+//    }
+//
+//    public static CacheInvalidator getCacheInvalidator() {
+//        return cacheInvalidator;
+//    }
 
 
 }

@@ -17,9 +17,10 @@
 package org.wso2.carbon.security.config;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
-import net.sf.jsr107cache.CacheManager;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
@@ -45,8 +46,6 @@ import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.caching.core.CacheInvalidator;
-import org.wso2.carbon.caching.core.StringCacheKey;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.Resources;
 import org.wso2.carbon.core.persistence.PersistenceException;
@@ -65,7 +64,6 @@ import org.wso2.carbon.security.*;
 import org.wso2.carbon.security.config.service.KerberosConfigData;
 import org.wso2.carbon.security.config.service.SecurityConfigData;
 import org.wso2.carbon.security.config.service.SecurityScenarioData;
-import org.wso2.carbon.security.internal.SecurityMgtServiceComponent;
 import org.wso2.carbon.security.pox.POXSecurityHandler;
 import org.wso2.carbon.security.util.*;
 import org.wso2.carbon.user.core.AuthorizationManager;
@@ -662,17 +660,18 @@ public class SecurityConfigAdmin {
                 serviceGroupFilePM.commitTransaction(serviceGroupId);
             }
             
-            Cache cache = CacheManager.getInstance().getCache(POXSecurityHandler.POX_ENABLED);
-            cache.remove(serviceName);
+//            Cache cache = CacheManager.getInstance().getCache(POXSecurityHandler.POX_ENABLED);
+//            cache.remove(serviceName);
+            this.getPOXCache().remove(serviceName);
             
-            CacheInvalidator invalidator = SecurityMgtServiceComponent.getCacheInvalidator();
-            try {
-                invalidator.invalidateCache(POXSecurityHandler.POX_ENABLED, new StringCacheKey(serviceName));
-            } catch (CacheException e1) {
-                String msg = "Failed to propagate changes immediately. It will take time to update nodes in cluster";
-                log.error(msg, e1);
-                throw new SecurityConfigException(msg, e1);
-            }
+//            CacheInvalidator invalidator = SecurityMgtServiceComponent.getCacheInvalidator();
+//            try {
+//                invalidator.invalidateCache(POXSecurityHandler.POX_ENABLED, new StringCacheKey(serviceName));
+//            } catch (CacheException e1) {
+//                String msg = "Failed to propagate changes immediately. It will take time to update nodes in cluster";
+//                log.error(msg, e1);
+//                throw new SecurityConfigException(msg, e1);
+//            }
             
         } catch (PersistenceException e) {
             StringBuilder str = new StringBuilder("Error persisting security scenario ").
@@ -744,17 +743,18 @@ public class SecurityConfigAdmin {
                 updateSecScenarioInGhostFile(service.getFileName().getPath(), serviceName, scenrioId);
             }
             
-            Cache cache = CacheManager.getInstance().getCache(POXSecurityHandler.POX_ENABLED);
-            cache.remove(serviceName);
+//            Cache cache = CacheManager.getInstance().getCache(POXSecurityHandler.POX_ENABLED);
+//            cache.remove(serviceName);
+            this.getPOXCache().remove(serviceName);
             
-            CacheInvalidator invalidator = SecurityMgtServiceComponent.getCacheInvalidator();
-            try {
-                invalidator.invalidateCache(POXSecurityHandler.POX_ENABLED, new StringCacheKey(serviceName));
-            } catch (CacheException e1) {
-                String msg = "Failed to propagate changes immediately. It will take time to update nodes in cluster";
-                log.error(msg, e1);
-                throw new SecurityConfigException(msg, e1);
-            }
+//            CacheInvalidator invalidator = SecurityMgtServiceComponent.getCacheInvalidator();
+//            try {
+//                invalidator.invalidateCache(POXSecurityHandler.POX_ENABLED, new StringCacheKey(serviceName));
+//            } catch (CacheException e1) {
+//                String msg = "Failed to propagate changes immediately. It will take time to update nodes in cluster";
+//                log.error(msg, e1);
+//                throw new SecurityConfigException(msg, e1);
+//            }
             
         } catch (RegistryException e) {
             log.error(e.getMessage(), e);
@@ -1819,6 +1819,21 @@ public class SecurityConfigAdmin {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the default "POX_ENABLED" cache
+     *
+     */
+    private Cache<String, String> getPOXCache() {
+        Cache<String, String> cache = null;
+        CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(POXSecurityHandler.POX_CACHE_MANAGER);
+        if(manager != null){
+        	cache = manager.getCache(POXSecurityHandler.POX_ENABLED);
+        } else {
+        	cache = Caching.getCacheManager().getCache(POXSecurityHandler.POX_ENABLED);
+        }
+    	return cache;
     }
 
 }

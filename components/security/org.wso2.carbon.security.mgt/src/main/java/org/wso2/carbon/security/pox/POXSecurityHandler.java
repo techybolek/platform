@@ -21,10 +21,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheManager;
 
 import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.axiom.om.util.Base64;
@@ -60,6 +60,7 @@ public class POXSecurityHandler implements Handler {
 
     private static Log log = LogFactory.getLog(POXSecurityHandler.class);
     private static String POX_SECURITY_MODULE = "POXSecurityModule";
+    public static final String POX_CACHE_MANAGER = "POX_CACHE_MANAGER";
     public static final String POX_ENABLED = "pox-security";
 
     private HandlerDescription description;
@@ -118,12 +119,16 @@ public class POXSecurityHandler implements Handler {
 
         String isPox = null;
 
-        Cache cache = CacheManager.getInstance().getCache(POX_ENABLED);
+//        Cache cache = CacheManager.getInstance().getCache(POX_ENABLED);
+        Cache<String, String> cache = this.getPOXCache();
 
         if(cache != null){
-            if(cache.getCacheEntry(service.getName()) != null){
-                isPox = (String) cache.getCacheEntry(service.getName()).getValue();
-            }
+        	if(cache.get(service.getName()) != null) {
+        		isPox = cache.get(service.getName());
+        	}
+//            if(cache.getCacheEntry(service.getName()) != null){
+//                isPox = (String) cache.getCacheEntry(service.getName()).getValue();
+//            }
         }
 
         if (isPox != null && JavaUtils.isFalseExplicitly(isPox)) {
@@ -298,5 +303,19 @@ public class POXSecurityHandler implements Handler {
      */
     public Parameter getParameter(String name) {
         return this.description.getParameter(name);
+    }
+    /**
+     * Returns the default "POX_ENABLED" cache
+     *
+     */
+    private Cache<String, String> getPOXCache() {
+        Cache<String, String> cache = null;
+        CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(POXSecurityHandler.POX_CACHE_MANAGER);
+        if(manager != null){
+        	cache = manager.getCache(POXSecurityHandler.POX_ENABLED);
+        } else {
+        	cache = Caching.getCacheManager().getCache(POXSecurityHandler.POX_ENABLED);
+        }
+    	return cache;
     }
 }
