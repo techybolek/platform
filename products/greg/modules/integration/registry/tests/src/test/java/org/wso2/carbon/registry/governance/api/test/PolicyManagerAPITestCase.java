@@ -25,8 +25,10 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.policies.PolicyFilter;
 import org.wso2.carbon.governance.api.policies.PolicyManager;
 import org.wso2.carbon.governance.api.policies.dataobjects.Policy;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import static org.testng.Assert.assertTrue;
 
@@ -42,6 +44,7 @@ public class PolicyManagerAPITestCase {
     @BeforeClass(alwaysRun = true)
     public void initializeAPIObject() throws RegistryException, AxisFault {
         Registry governance = TestUtils.getRegistry();
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         TestUtils.cleanupResources(governance);
         policyManager = new PolicyManager(governance);
     }
@@ -50,7 +53,7 @@ public class PolicyManagerAPITestCase {
     public void testNewPolicy() throws GovernanceException {
         try {
             policyObj = policyManager.newPolicy("http://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                    "platform-integration/system-test-framework/core/org.wso2.automation.platform.core/" +
+                    "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                     "src/main/resources/artifacts/GREG/policy/UTPolicy.xml");
         } catch (GovernanceException e) {
             throw new GovernanceException("Error occurred while executing PolicyManager:newPolicy method" + e);
