@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.registry.extensions.handlers;
 
+import java.util.List;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
@@ -37,22 +38,27 @@ public class ExtensionsSymLinkHandler extends Handler {
 
     }
 
-    @Override
-    public void delete(RequestContext requestContext) throws RegistryException {
-        if (!CommonUtil.isUpdateLockAvailable()) {
-            return;
-        }
-        CommonUtil.acquireUpdateLock();
-        try {
-            Resource resource = requestContext.getRegistry().get(requestContext.getResourcePath().getPath());
-            String symlinkPath = resource.getProperty("registry.resource.symlink.path");
-            if (symlinkPath != null) {
-                if(requestContext.getRegistry().resourceExists(symlinkPath)){
-                    requestContext.getRegistry().delete(symlinkPath);
-                }
-            }
-        } finally {
-            CommonUtil.releaseUpdateLock();
-        }
-    }
+	@Override
+	public void delete(RequestContext requestContext) throws RegistryException {
+		if (!CommonUtil.isUpdateLockAvailable()) {
+			return;
+		}
+		CommonUtil.acquireUpdateLock();
+		try {
+			Resource resource = requestContext.getRegistry().get(
+					requestContext.getResourcePath().getPath());
+			List<String> symlinkPaths = resource.getPropertyValues("registry.resource.symlink.path");
+			for (String symlinkPath : symlinkPaths) {
+				if (symlinkPath != null) {
+					if (requestContext.getRegistry()
+							.resourceExists(symlinkPath)) {
+						requestContext.getRegistry().delete(symlinkPath);
+					}
+				}
+			}
+
+		} finally {
+			CommonUtil.releaseUpdateLock();
+		}
+	}
 }
