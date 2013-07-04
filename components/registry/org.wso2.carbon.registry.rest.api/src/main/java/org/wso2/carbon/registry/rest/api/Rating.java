@@ -1,13 +1,12 @@
-
 /*
  * Copyright (c) 2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,42 +27,59 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.RatingModel;
 
 /**
- * This class retrieved the rating of the requested resource. 
+ * This class retrieved the rating of the requested resource.
  */
 @Path("/rating")
 public class Rating extends RestSuper {
 
-	protected Log log = LogFactory.getLog(Rating.class);
+	private Log log = LogFactory.getLog(Rating.class);
+	private Response response = null;
+
 	/**
-	 * This method get the rating given for the requested resource. 
-	 * @param resourcePath - path of the resource in the registry.
-	 * @param username - username of the enduser
-	 * @param tenantID - tenant ID of the enduser belongs to username
+	 * This method get the rating given for the requested resource.
+	 * 
+	 * @param resourcePath
+	 *            - path of the resource in the registry.
+	 * @param username
+	 *            - username of the enduser
+	 * @param tenantID
+	 *            - tenant ID of the enduser belongs to username
 	 * @return RatingModel object
 	 */
 	@GET
 	@Produces("application/json")
-	public Response getRatingOfAResource(@QueryParam("path")String resourcePath,
-			@QueryParam("username")String username,@QueryParam("tenantid")String tenantID){
-		
-		if(RestPathPaginationValidation.validate(resourcePath)== -1){
-			return Response.status(Response.Status.BAD_REQUEST).build();	
+	public Response getRatingOfAResource(@QueryParam("path") String resourcePath,
+	                                     @QueryParam("user") String username) {
+
+		if (username == null) {
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		} else {
+			String tenantID = super.getTenantID();
+			super.createUserRegistry(username, tenantID);
 		}
-		if(super.createUserRegistry(username,tenantID)== null){
+		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+		if (super.getUserRegistry() == null) {
 			return Response.status(Response.Status.UNAUTHORIZED).build();
 		}
 		boolean exist;
 		try {
-			exist = userRegistry.resourceExists(resourcePath);
-			if (exist){
-				RatingModel result = new RatingModel(userRegistry.getRating(resourcePath, username), userRegistry.getAverageRating(resourcePath));
-				return Response.ok().entity(result).build(); 
-			} else{	
+			exist = super.getUserRegistry().resourceExists(resourcePath);
+			if (exist) {
+				RatingModel result =
+				                     new RatingModel(super.getUserRegistry()
+				                                          .getRating(resourcePath, username),
+				                                     super.getUserRegistry()
+				                                          .getAverageRating(resourcePath));
+				response = Response.ok().entity(result).build();
+				return response;
+			} else {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 		} catch (RegistryException e) {
-			log.error("User does not have permission to read the rating of the resource",e);
+			log.error("User does not have permission to read the rating of the resource", e);
 			return Response.status(Response.Status.UNAUTHORIZED).build();
 		}
-	}	
+	}
 }

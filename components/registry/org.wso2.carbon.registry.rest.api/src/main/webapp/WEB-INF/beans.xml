@@ -15,7 +15,7 @@
  ~ KIND, either express or implied.  See the License for the
  ~ specific language governing permissions and limitations
  ~ under the License.
- -->
+ --> 
 <beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:jaxrs="http://cxf.apache.org/jaxrs"
@@ -48,11 +48,13 @@ http://cxf.apache.org/schemas/jaxrs.xsd">
       <bean class="org.wso2.carbon.registry.rest.api.Properties" />
       <bean class="org.wso2.carbon.registry.rest.api.SingleProperty"/>
       <bean class="org.wso2.carbon.registry.rest.api.SingleRate" />
+      <bean class="org.wso2.carbon.registry.rest.api.Versions" />
+      <bean class="org.wso2.carbon.registry.rest.api.SingleVersion" />
     </jaxrs:serviceBeans>
-    <jaxrs:providers>
+    <jaxrs:providers>    	
         <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-        <bean class="org.wso2.carbon.registry.rest.api.handler.RestApiRequestAuthorizationHandler"/>
     </jaxrs:providers>
-    </jaxrs:server>
+   </jaxrs:server>
 
 </beans>
+

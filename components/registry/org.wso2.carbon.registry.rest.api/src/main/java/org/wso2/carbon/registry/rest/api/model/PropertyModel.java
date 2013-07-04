@@ -24,11 +24,6 @@ public class PropertyModel {
 	private String name;
 	private String[] value;
 
-	public PropertyModel(String name, String[] value){
-		this.name = name;
-		this.value = value;
-	}
-	
 	public void setName(String name) {
 		this.name = name;
 	}
