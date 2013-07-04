@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.AuthorizationManagerListener;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -44,6 +45,12 @@ public class UserMgtDSComponent {
 
     protected void activate(ComponentContext ctxt) {
         log.debug("User Mgt bundle is activated ");
+
+        // for new cahing, every thread should has its own populated CC. During the deployment time we assume super tenant
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantDomain(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        carbonContext.setTenantId(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID);
+
         UserMgtInitializer userMgtInitializer = new UserMgtInitializer();
         try {
             userMgtInitializer.start(ctxt.getBundleContext(), registryService);
