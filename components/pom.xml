@@ -55,6 +55,7 @@
                  <module>claim-mgt</module>
                  <module>cluster-mgt</module>
                  <module>dashboard</module>
+                 <module>transaction-manager</module>
                  <module>data-services</module>
                  <module>data-sources</module>
                  <module>deployment-synchronizer</module>
@@ -140,7 +141,6 @@
                 <module>rss-manager</module>
                 <module>coordination</module>
                 <module>ntask</module>
-                <module>transaction-manager</module>
                 <module>rest-api</module>
 				<module>hostobjects</module>
                 <module>apimgt</module>
