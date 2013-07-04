@@ -679,7 +679,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/bin.xml</descriptor>
                                 <!--descriptor>src/main/assembly/src.xml</descriptor-->
-                                <descriptor>src/main/assembly/docs.xml</descriptor>
+                                <!--descriptor>src/main/assembly/docs.xml</descriptor-->
                             </descriptors>
                         </configuration>
                     </execution>
@@ -705,7 +705,7 @@
                             <pomFile>pom.xml</pomFile>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--execution>
                         <id>install-docs</id>
                         <phase>install</phase>
                         <goals>
@@ -719,7 +719,7 @@
                             <packaging>zip</packaging>
                             <file>target/${project.artifactId}-${build.version}-docs.zip</file>
                         </configuration>
-                    </execution>
+                    </execution-->
                 </executions>
             </plugin>
         </plugins>

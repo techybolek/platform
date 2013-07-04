@@ -33,10 +33,11 @@
         <module>modules/features</module>
         <module>modules/p2-profile-gen</module>
         <!--module>modules/source</module-->
-        <module>modules/distribution</module>
-        <module>modules/integration</module>
         <module>modules/dashboard</module>
         <module>modules/login</module>
+        <module>modules/distribution</module>
+        <module>modules/integration</module>
+
     </modules>
     <dependencyManagement>
         <dependencies>
