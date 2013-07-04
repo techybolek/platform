@@ -165,7 +165,8 @@ public class APIManagerComponent {
             //Load initially available api contexts at the server startup. This Map is only use by the products other than the api-manager
             String apiManagementEnabled = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
             String loadAPIContextsAtStartup = CarbonUtils.getServerConfiguration().getFirstProperty("LoadAPIContextsInServerStartup");
-            if (apiManagementEnabled.equals("true") && loadAPIContextsAtStartup.equals("true")) {
+            if ((apiManagementEnabled != null && apiManagementEnabled.equals("true")) &&
+                    (loadAPIContextsAtStartup != null && loadAPIContextsAtStartup.equals("true"))) {
                 List<String> contextList = ApiMgtDAO.getAllAvailableContexts();
                 LRUCache<String, Boolean> contextCache = new LRUCache<String, Boolean> (contextList.size());
                 for (String context : contextList) {
