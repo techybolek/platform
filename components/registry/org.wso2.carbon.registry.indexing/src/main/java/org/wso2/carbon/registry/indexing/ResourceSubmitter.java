@@ -20,6 +20,7 @@ package org.wso2.carbon.registry.indexing;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.LogEntry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -68,6 +69,10 @@ public class ResourceSubmitter implements Runnable {
      */
     @SuppressWarnings({"REC_CATCH_EXCEPTION"})
     public void run() {
+
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         try {
             if (isShutdown || Thread.currentThread().isInterrupted()) {
                 // interruption can happen due to shutdown or some other reason.
