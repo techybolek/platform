@@ -65,6 +65,7 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import java.net.URL;
@@ -104,6 +105,10 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
     protected void activate(ComponentContext ctxt) {
         BundleContext bundleCtx = ctxt.getBundleContext();
         try {
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+
             loadSecurityScenarios(SecurityServiceHolder.getRegistryService().getConfigSystemRegistry(),
                                   bundleCtx);
         } catch (Exception e) {
