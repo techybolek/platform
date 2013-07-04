@@ -22,6 +22,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
@@ -30,6 +31,7 @@ import org.wso2.carbon.utils.component.xml.Component;
 import org.wso2.carbon.utils.component.xml.ComponentConfigFactory;
 import org.wso2.carbon.utils.component.xml.builder.ManagementPermissionsBuilder;
 import org.wso2.carbon.utils.component.xml.config.ManagementPermission;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -43,6 +45,10 @@ public class ManagementPermissionsAdder implements BundleListener {
     public void bundleChanged(BundleEvent event) {
         Bundle bundle = event.getBundle();
         try {
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+
             if (event.getType() == BundleEvent.STARTED) {
                 addUIPermissionFromBundle(bundle);
             }
