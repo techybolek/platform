@@ -77,48 +77,32 @@ public class RXTTestBase {
         GenericArtifactManager manager = new GenericArtifactManager(registry, key);
 
         GenericArtifact artifact = manager.newGovernanceArtifact(new QName("MyArtifact"));
-        artifact.addAttribute("testAttribute", "somevalue");
+        artifact.addAttribute("testTable_testAttribute", "somevalue");
         addMandatoryAttributes(artifact);
         manager.addGenericArtifact(artifact);
 
         String artifactId = artifact.getId();
         GenericArtifact newArtifact = manager.getGenericArtifact(artifactId);
 
-        Assert.assertEquals(newArtifact.getAttribute("testAttribute"), "somevalue");
+        Assert.assertEquals(newArtifact.getAttribute("testTable_testAttribute"), "somevalue");
 
-        artifact.addAttribute("testAttribute", "somevalue2");
+        artifact.addAttribute("testTable_testAttribute", "somevalue2");
         manager.updateGenericArtifact(artifact);
 
         newArtifact = manager.getGenericArtifact(artifactId);
 
-        String[] values = newArtifact.getAttributes("testAttribute");
+        String[] values = newArtifact.getAttributes("testTable_testAttribute");
 
         Assert.assertEquals(values.length, 2);
     }
 
-    @Test(groups = {"wso2.greg"})
-    public void testArtifactContentXMLInvalid() throws RegistryException,
-            XMLStreamException {
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)registry);
-        GenericArtifactManager manager = new GenericArtifactManager(registry, key);
-        String content = "<metadata xmlns=\"http://www.wso2.org/governance/metadata\"><overview><namespace>UserA</namespace></overview></metadata>";
-        OMElement XMLContent = AXIOMUtil.stringToOM(content);
-        try {
-            manager.newGovernanceArtifact(XMLContent);
-        } catch (GovernanceException e) {
-            Assert.assertEquals(e.getMessage(), "Unable to compute QName from given XML payload, " +
-                    "please ensure that the content passed in matches the configuration.");
-            return;
-        }
-        Assert.fail("An exception was expected to be thrown, but did not.");
-    }
     @Test(groups = {"wso2.greg"})
     public void testArtifactDelete() throws Exception {
         GovernanceUtils.loadGovernanceArtifacts((UserRegistry)registry);
         GenericArtifactManager manager = new GenericArtifactManager(registry, key);
 
         GenericArtifact artifact = manager.newGovernanceArtifact(new QName("MyArtifactName"));
-        artifact.addAttribute("testAttribute", "somevalue");
+        artifact.addAttribute("testTable_testAttribute", "somevalue");
         addMandatoryAttributes(artifact);
         manager.addGenericArtifact(artifact);
 
