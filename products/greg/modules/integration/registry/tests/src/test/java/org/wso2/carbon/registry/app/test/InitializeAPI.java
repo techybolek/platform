@@ -38,7 +38,7 @@ public class InitializeAPI {
             System.setProperty("javax.net.ssl.trustStore", FrameworkSettings.CARBON_HOME + File.separator + "repository" + File.separator + "resources" + File.separator + "security" + File.separator + "wso2carbon.jks");
             System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
             System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-            registry = new RemoteRegistry(new URL(REMOTE_REGISTRY_URL), "admin", "admin");
+            registry = new RemoteRegistry(new URL(REMOTE_REGISTRY_URL), "PRIMARY/admin", "admin");
 
         } catch (Exception e) {
             e.printStackTrace();

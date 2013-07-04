@@ -17,22 +17,16 @@
 package org.wso2.carbon.registry.ws.client.test.general;
 
 import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.testng.annotations.BeforeClass;
-
-import static org.testng.Assert.*;
-
-import org.testng.annotations.Test;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.integration.core.ServerUtils;
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import java.io.File;
-import java.net.URL;
+
+import static org.testng.Assert.fail;
 
 /**
  * A test case which is a util parent test of its peers
@@ -41,7 +35,7 @@ public class TestSetup {
 
     protected static Registry registry = null;
     static boolean isInitialized = false;
-    protected String userName ="admin";
+    protected String userName ="PRIMARY/admin";
     protected String password ="admin";
 
     private static final Log log = LogFactory.getLog(TestSetup.class);
