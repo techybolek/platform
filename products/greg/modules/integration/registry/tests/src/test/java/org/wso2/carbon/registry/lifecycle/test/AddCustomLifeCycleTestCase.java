@@ -26,6 +26,7 @@ import org.wso2.carbon.automation.api.clients.governance.LifeCycleAdminServiceCl
 import org.wso2.carbon.automation.api.clients.registry.SearchAdminServiceClient;
 import org.wso2.carbon.automation.api.clients.governance.LifeCycleManagementClient;
 import org.wso2.carbon.automation.api.clients.registry.ActivityAdminServiceClient;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.beans.xsd.LifecycleBean;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.util.xsd.Property;
@@ -38,6 +39,7 @@ import org.wso2.carbon.registry.activities.stub.beans.xsd.ActivityBean;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.lifecycle.test.utils.Utils;
 import org.wso2.carbon.registry.search.metadata.test.bean.SearchParameterBean;
 import org.wso2.carbon.registry.search.metadata.test.utils.GregTestUtils;
@@ -78,6 +80,7 @@ public class AddCustomLifeCycleTestCase {
         searchAdminService = new SearchAdminServiceClient(SERVER_URL, sessionCookie);
         registry = GregTestUtils.getRegistry();
         Registry governance = GregTestUtils.getGovernanceRegistry(registry);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
         String serviceName = "CustomLifeCycleTestService";
         Utils.deleteLifeCycleIfExist(sessionCookie, ASPECT_NAME, lifeCycleManagerAdminService);
