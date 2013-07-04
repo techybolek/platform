@@ -17,6 +17,7 @@ package org.wso2.carbon.governance.lcm.internal;
 
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.governance.lcm.listener.LifecycleLoader;
@@ -24,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.services.callback.LoginSubscriptionManagerService;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * @scr.component name="org.wso2.carbon.governance.lcm"
@@ -48,6 +50,10 @@ public class LCMServiceComponent {
     }
 
     protected void setRegistryService(RegistryService registryService) {
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+
         CommonUtil.setRegistryService(registryService);
         // Generate LCM search query if it doesn't exist.
         try {
