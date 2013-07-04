@@ -34,15 +34,10 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
             String cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
-            Iterator<Object> itr=cache.iterator();
-            while(itr.hasNext()){
-                String key = itr.next().toString();
-                if(key.contains(cacheKey)){
-                    cache.remove(key);
-                }
+            if(cache.containsKey(cacheKey)){
+                cache.remove(cacheKey);
             }
-
-
+            //TODO Review and fix
            /* Set keys = cache.keySet();
             for (Object cKey : keys) {
                 String key = cKey.toString();
@@ -69,7 +64,11 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
         Cache keyCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
 
-        if (keyCache.size() != 0) {
+        if(keyCache.containsKey(apiContext + ":" + apiVersion))  {
+            keyCache.remove(apiContext + ":" + apiVersion);
+        }
+        //TODO Review and fix
+       /* if (keyCache.size() != 0) {
             Set keys = keyCache.keySet();
             for (Object cacheKey : keys) {
                 String key = cacheKey.toString();
@@ -77,8 +76,14 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
                     keyCache.remove(key);
                 }
             }
+        }*/
+
+
+        if(keyCache.containsKey(apiContext + "/" + apiVersion + resourceURLContext))  {
+            keyCache.remove(apiContext + "/" + apiVersion + resourceURLContext);
         }
-        if (cache.size() != 0) {
+        //TODO Review and fix
+        /*if (cache.size() != 0) {
             if (resourceURLContext.equals("/")) {
                 Set keys = cache.keySet();
                 for (Object cacheKey : keys) {
@@ -92,7 +97,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
             }
 
             cache.remove(resourceCacheKey);
-        }
+        } */
 
     }
 
@@ -101,13 +106,17 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
      * @param accessToken The access token to be remove from the cache
      */
     public void invalidateKey(String accessToken) {
-        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+        //TODO Review and fix
+        Cache keyCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
+        keyCache.remove(accessToken);
+
+        /*Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
         for (int i = 0; i < cache.keySet().size(); i++) {
             String cacheAccessKey = cache.keySet().toArray()[i].toString().split(":")[0];
             if (cacheAccessKey.equals(accessToken)) {
                 cache.remove(cache.keySet().toArray()[i]);
             }
 
-        }
+        } */
     }
 }
