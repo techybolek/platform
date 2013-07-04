@@ -26,6 +26,14 @@
             <package name="org.wso2.carbon.registry.subscription.test"/>
             <package name="org.wso2.carbon.registry.discovery.test"/>
             <package name="org.wso2.carbon.registry.reporting.test"/>
+	    <package name="org.wso2.carbon.registry.rest.test.comment"/> 
+            <package name="org.wso2.carbon.registry.rest.test.association"/>
+	    <package name="org.wso2.carbon.registry.rest.test.metadata"/>
+	    <package name="org.wso2.carbon.registry.rest.test.resource"/> 
+	    <package name="org.wso2.carbon.registry.rest.test.rating"/>
+     	    <package name="org.wso2.carbon.registry.rest.test.property"/>
+	    <package name="org.wso2.carbon.registry.rest.test.tag"/>
+            <package name="org.wso2.carbon.registry.rest.test.version"/>
             <!--<package name="org.wso2.carbon.registry.uddi.test"/>-->
 
             <!--<package name="org.wso2.carbon.registry.ws.client.test.general.old"/>-->

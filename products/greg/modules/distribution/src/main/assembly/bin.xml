@@ -94,7 +94,13 @@
                 <include>BAMDataCollectionDS.dbs</include>
             </includes>
         </fileSet-->
-
+	<fileSet>
+           <directory>../jaxwebapps</directory>
+           <outputDirectory>${pom.artifactId}-${build.version}/repository/deployment/server/jaxwebapps</outputDirectory>
+           <includes>
+               <include>resource.war</include>
+           </includes>
+       </fileSet>
         <fileSet>
             <directory>src/main/resources/carbon-home/conf</directory>
             <outputDirectory>${pom.artifactId}-${build.version}/repository/conf</outputDirectory>

@@ -277,6 +277,27 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+		    <!-- for REST APi -->
+		    <execution>
+                       <id>copy-resources</id>
+                       <phase>package</phase>
+                       <goals>
+                           <goal>copy</goal>
+                       </goals>
+                       <configuration>
+                           <artifactItems>
+                               <artifactItem>
+                                   <groupId>org.wso2.carbon</groupId>
+                                   <artifactId>org.wso2.carbon.registry.rest.api</artifactId>
+                                   <version>4.2.0-SNAPSHOT</version>
+                                   <type>war</type>
+                                   <overWrite>true</overWrite>
+				   <outputDirectory>../jaxwebapps</outputDirectory>
+                                   <destFileName>resource.war</destFileName>
+                               </artifactItem>
+                           </artifactItems>
+                       </configuration>
+                   </execution>
                 </executions>
             </plugin>
 
