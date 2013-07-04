@@ -45,7 +45,7 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                 getCurrentContext(configCtx);
         int tenantId = privilegedCarbonContext.getTenantId();
         String tenantDomain = privilegedCarbonContext.getTenantDomain();
-        String webContextPrefix = (tenantDomain != null) ?
+        String webContextPrefix = (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) ?
                 "/" + MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain + "/" + this.webappsDir + "/" :
                 "";
         // try to get the webapps holder from config ctx. if null, create one..
