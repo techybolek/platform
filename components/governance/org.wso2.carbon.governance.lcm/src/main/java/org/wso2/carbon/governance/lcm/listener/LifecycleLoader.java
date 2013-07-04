@@ -25,6 +25,8 @@ import org.wso2.carbon.core.services.callback.LoginEvent;
 import org.wso2.carbon.core.services.callback.LoginListener;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -50,6 +50,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.PaginationContext;
@@ -66,6 +67,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.StringReader;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utilities used by various Governance API related functionality.
@@ -576,6 +579,45 @@ public class GovernanceUtils {
                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
     }
 
+    public static String parameterizeString(RequestContext requestContext, String parameterString){
+		String parameterizedString = parameterString;
+		Pattern pattern = Pattern.compile("\\{@(\\w)*\\}");
+		Matcher matcher = pattern.matcher(parameterString);
+		GovernanceArtifact governanceArtifact = null;
+		Registry registry = requestContext.getRegistry();
+		String resourcePath = requestContext.getResourcePath().getPath();
+		Set<String> matchSet = new HashSet<String>();
+
+		while (matcher.find()) {
+			matchSet.add(matcher.group());
+		}
+
+		Iterator<String> iter = matchSet.iterator();
+		while (iter.hasNext()) {
+			String current = iter.next();
+			String name = current.substring(2,current.length()-1);
+
+			try {
+				governanceArtifact = GovernanceUtils.retrieveGovernanceArtifactByPath(requestContext.getSystemRegistry(), resourcePath);
+				if (governanceArtifact!=null&&governanceArtifact.getAttribute(name)!=null) {
+					parameterizedString = parameterizedString.replaceAll("\\"+current.replace("}", "\\}"), governanceArtifact.getAttribute(name));
+				}else if(registry.get(resourcePath).getProperty(name)!=null) {
+					parameterizedString = parameterizedString.replaceAll("\\"+current.replace("}", "\\}"), registry.get(resourcePath).getProperty(name));
+				}else{
+					log.error("Unable to locate the given value in properties or attributes");
+				}
+			} catch (RegistryException e) {
+				log.error(e.getMessage(),e);
+			}
+
+			 
+
+		}
+		
+		return parameterizedString;
+
+	}
+    
     /**
      * Method to remove a governance artifact from the registry.
      *

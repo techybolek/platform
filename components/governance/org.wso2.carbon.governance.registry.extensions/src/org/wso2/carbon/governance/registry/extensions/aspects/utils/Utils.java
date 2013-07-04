@@ -115,8 +115,20 @@ public class Utils {
         while (parameters.hasNext()) {
             // this loop is for the parameter name and values
             OMElement paramChild = (OMElement) parameters.next();
-            paramNameValues.put(paramChild.getAttributeValue(new QName(LifecycleConstants.NAME)),
-                    paramChild.getAttributeValue(new QName("value")));
+            
+            if ((paramChild.getAttributeValue(new QName("value")))!=null) {
+            	paramNameValues.put(paramChild.getAttributeValue(new QName(LifecycleConstants.NAME)),
+                        paramChild.getAttributeValue(new QName("value")));
+			} else {
+				if (!(paramChild.getText()).equals("")) {
+					paramNameValues.put(paramChild.getAttributeValue(new QName(LifecycleConstants.NAME)),
+	                        paramChild.getText());
+				} else {
+					paramNameValues.put(paramChild.getAttributeValue(new QName(LifecycleConstants.NAME)),
+	                        paramChild.getFirstElement().toString());
+				}
+			}
+            
         }
         if (type.equals(LifecycleConstants.VALIDATION)) {
             customCodeBean.setClassObeject(loadCustomValidators(
