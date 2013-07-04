@@ -16,17 +16,13 @@
 package org.wso2.carbon.bpel.core.ode.integration.jmx;
 
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.ode.bpel.iapi.ProcessState;
-import org.infinispan.jmx.annotations.ManagedAttribute;
 import org.wso2.carbon.bpel.core.internal.BPELServiceComponent;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServer;
 import org.wso2.carbon.bpel.core.ode.integration.store.MultiTenantProcessStore;
 import org.wso2.carbon.bpel.core.ode.integration.store.ProcessStoreImpl;
 
-import javax.management.DescriptorKey;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
 
 
 public class Processes implements ProcessesMXBean {
