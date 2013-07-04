@@ -26,6 +26,7 @@ import org.wso2.carbon.governance.api.policies.PolicyManager;
 import org.wso2.carbon.governance.api.policies.dataobjects.Policy;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.beans.xsd.LifecycleBean;
 import org.wso2.carbon.integration.framework.ClientConnectionUtil;
@@ -35,6 +36,7 @@ import org.wso2.carbon.registry.activities.stub.RegistryExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.lifecycle.test.utils.Utils;
 import org.wso2.carbon.registry.search.metadata.test.utils.GregTestUtils;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
@@ -65,6 +67,7 @@ public class LifeCycleStateWhenUpdatingResourceTestCase {
         lifeCycleAdminService = new LifeCycleAdminServiceClient(SERVER_URL, sessionCookie);
         registry = GregTestUtils.getRegistry();
         governance = GregTestUtils.getGovernanceRegistry(registry);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
     }
 
@@ -185,7 +188,7 @@ public class LifeCycleStateWhenUpdatingResourceTestCase {
         Assert.assertEquals(Utils.getLifeCycleState(lifeCycle), "Development", "LifeCycle State Mismatched");
 
         Service service1 = serviceManager.getService(serviceNew.getId());
-        service1.addAttribute("rrr","ppp");
+        service1.addAttribute("overview_scopes","http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/DefaultScope");
         serviceManager.updateService(service1);
 
         servicePathDev = "/_system/governance" + service1.getPath();
