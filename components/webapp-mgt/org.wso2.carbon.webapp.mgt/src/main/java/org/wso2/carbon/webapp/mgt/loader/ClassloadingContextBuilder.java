@@ -236,17 +236,13 @@ public class ClassloadingContextBuilder {
                     continue;
                 }
 
-                String fileNames[] = directory.list();
-                Arrays.sort(fileNames);
-                for (String fileName : fileNames) {
-                    if (!fileName.endsWith(".jar"))
-                        continue;
-                    File file = new File(directory, fileName);
-                    if (!file.isFile()) {
-                        continue;
-                    }
-                    entryList.add(file.toURI().toString());
+                List<String> fileList = new ArrayList<String>();
+                getFileList(directory, fileList);
+                if (!fileList.isEmpty()){
+                    entryList.addAll(fileList);
                 }
+
+
 
             } else {
                 // single file or directory
@@ -257,6 +253,16 @@ public class ClassloadingContextBuilder {
                 entryList.add(file.toURI().toString());
             }
         }
+
+        Collections.sort(entryList);
+
+        if (log.isDebugEnabled()) {
+            for (String s : entryList) {
+                log.debug("Classpath Entry : " + s);
+
+            }
+        }
+
         return entryList.toArray(new String[entryList.size()]);
     }
 
@@ -323,5 +329,28 @@ public class ClassloadingContextBuilder {
         }
 
         return envList.toArray(new String[envList.size()]);
+    }
+
+
+    private static void getFileList(File directory, List fileList) {
+        if (directory.exists()) {
+            for (String fileName : directory.list()) {
+                File file = new File(directory, fileName);
+                if (file.exists()) {
+                    //If file is a single Jar file.
+                    if (file.isFile() && fileName.endsWith(".jar")) {
+                        fileList.add(file.toURI().toString());
+
+                    } else if (file.isDirectory()) {
+                        // If file is a directory.
+                        File nastedDir = new File(directory, fileName);
+                        getFileList(nastedDir, fileList);
+                    }
+                }
+
+
+            }
+        }
+
     }
 }
