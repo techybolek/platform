@@ -116,11 +116,13 @@ public class OpenIDProviderService {
 
 		if (multiFactAuthnStatus && isAutheticated) {
 			MessageContext msgContext = MessageContext.getCurrentMessageContext();
-			HttpServletRequest request =
-			                             (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
-			HttpSession httpSession = request.getSession(false);
-			if (httpSession != null) {
-				httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
+			if(msgContext != null){
+				HttpServletRequest request =
+                        (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
+                    HttpSession httpSession = request.getSession(false);
+                    if (httpSession != null) {
+                    httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
+                }
 			}
 		}
 
@@ -202,13 +204,17 @@ public class OpenIDProviderService {
 			dto.setAuthenticated(true);
 
 			MessageContext msgContext = MessageContext.getCurrentMessageContext();
-			HttpServletRequest request =
-			                             (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
-			HttpSession httpSession = request.getSession(false);
-
-			if (httpSession != null) {
-				httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
+			
+			if(msgContext != null){
+				HttpServletRequest request =
+                        (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
+                HttpSession httpSession = request.getSession(false);
+                
+                if (httpSession != null) {
+                	httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
+                }
 			}
+			
 			return dto;
 		}
 
@@ -221,13 +227,17 @@ public class OpenIDProviderService {
 			dto.setAuthenticated(true);
 
 			MessageContext msgContext = MessageContext.getCurrentMessageContext();
-			HttpServletRequest request =
-			                             (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
-			HttpSession httpSession = request.getSession(false);
-
-			if (httpSession != null) {
-				httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
+			
+			if(msgContext != null){
+				HttpServletRequest request =
+                        (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
+                HttpSession httpSession = request.getSession(false);
+                
+                if (httpSession != null) {
+                	httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
+                }
 			}
+			
 			return dto;
 		}
 		return dto;

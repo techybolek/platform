@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.identity.provider.internal;
 
+import javax.servlet.ServletContext;
+
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,6 +79,10 @@ public class IdentityProviderServiceComponent {
         try {
             ctxt.getBundleContext().registerService(IdentityProviderUtil.class.getName(),
                     new IdentityProviderUtil(), null);
+            
+            String filter = "(objectclass=" + ServletContext.class.getName() + ")";
+            ctxt.getBundleContext().addServiceListener(
+                    new ServletContextListener(ctxt.getBundleContext()), filter);
         } catch (Throwable e) {
             log.error("Failed to initialize Identity Provider", e);
         }
