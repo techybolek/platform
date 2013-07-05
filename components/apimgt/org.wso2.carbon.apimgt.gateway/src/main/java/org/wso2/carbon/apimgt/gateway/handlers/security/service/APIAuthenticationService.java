@@ -103,12 +103,21 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     /**
      * This method is to invalidate an access token which is already in gateway cache.
+     *
      * @param accessToken The access token to be remove from the cache
      */
     public void invalidateKey(String accessToken) {
         //TODO Review and fix
         Cache keyCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         keyCache.remove(accessToken);
+        Iterator<Object> iterator = keyCache.iterator();
+        while (iterator.hasNext()) {
+            Cache.Entry cacheEntry = (javax.cache.Cache.Entry) iterator.next();
+            String cacheAccessKey = cacheEntry.getKey().toString().split(":")[0];
+            if (cacheAccessKey.equals(accessToken)) {
+                keyCache.remove(cacheEntry.getKey());
+            }
+        }
 
         /*Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
         for (int i = 0; i < cache.keySet().size(); i++) {
