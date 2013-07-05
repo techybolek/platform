@@ -20,6 +20,8 @@ package org.wso2.carbon.deployment.synchronizer.internal.repository;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
@@ -42,6 +44,7 @@ import java.util.List;
  * repositories
  */
 public class CarbonRepositoryUtils {
+    private static final Log log = LogFactory.getLog(CarbonRepositoryUtils.class);
 
     /**
      * Create and initialize a new DeploymentSynchronizer for the Carbon repository of the
@@ -72,6 +75,10 @@ public class CarbonRepositoryUtils {
             synchronizer.setAutoCheckout(config.isAutoCheckout());
             synchronizer.setPeriod(config.getPeriod());
             synchronizer.setUseEventing(config.isUseEventing());
+
+            if (log.isDebugEnabled()) {
+                log.debug("Registered file path:" + filePath + " for tenant: " + tenantId);
+            }
 
             return synchronizer;
         }
@@ -122,6 +129,7 @@ public class CarbonRepositoryUtils {
      * of Carbon.
      *
      * @return a DeploymentSynchronizerConfiguration instance
+     * @throws org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException on error
      */
     public static DeploymentSynchronizerConfiguration getDeploymentSyncConfiguration() throws DeploymentSynchronizerException{
 

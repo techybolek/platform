@@ -72,7 +72,6 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     private Map<Integer, TenantSVNRepositoryContext> tenantSVNRepositories;
 
     private  List<RepositoryConfigParameter> parameters;
-    private DeploymentSynchronizerConfiguration conf;
 
     public SVNBasedArtifactRepository(){
         tenantSVNRepositories = new HashMap<Integer, TenantSVNRepositoryContext>();
@@ -82,7 +81,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     public void init(int tenantId) throws DeploymentSynchronizerException {
 
         ServerConfiguration serverConfig = ServerConfiguration.getInstance();
-        conf = CarbonRepositoryUtils.getActiveSynchronizerConfiguration(tenantId);
+        DeploymentSynchronizerConfiguration conf = CarbonRepositoryUtils.getActiveSynchronizerConfiguration(tenantId);
 
         String url = null;
         boolean appendTenantId = true;
