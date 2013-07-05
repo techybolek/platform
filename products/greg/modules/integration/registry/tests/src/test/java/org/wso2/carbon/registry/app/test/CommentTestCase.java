@@ -18,8 +18,6 @@ package org.wso2.carbon.registry.app.test;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert.*;
-import org.wso2.carbon.integration.core.TestTemplate;
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
 import org.wso2.carbon.registry.app.RemoteRegistry;
 import org.wso2.carbon.registry.core.Collection;
@@ -58,7 +56,7 @@ public class CommentTestCase {
         Comment c1 = new Comment();
         c1.setResourcePath(path);
         c1.setText("This is default comment");
-        c1.setUser("admin1");
+        c1.setUser("PRIMARY/admin1");
 
         registry.addComment(path, c1);
         registry.addComment(path, new Comment(comment1));
@@ -73,7 +71,7 @@ public class CommentTestCase {
                 commentFound = true;
                 //System.out.println(comment.getPath());
                 assertEquals(comment.getText(), comment1);
-                assertEquals(comment.getUser(), "admin");
+                assertEquals(comment.getUser(), "PRIMARY/admin");
                 assertEquals(comment.getResourcePath(), path);
                 //System.out.println(comment.getPath());
                 //break;
@@ -82,7 +80,7 @@ public class CommentTestCase {
             if (comment.getText().equals(comment2)) {
                 commentFound = true;
                 assertEquals(comment.getText(), comment2);
-                assertEquals(comment.getUser(), "admin");
+                assertEquals(comment.getUser(), "PRIMARY/admin");
                 assertEquals(comment.getResourcePath(), path);
                 //break;
             }
@@ -90,7 +88,7 @@ public class CommentTestCase {
             if (comment.getText().equals("This is default comment")) {
                 commentFound = true;
                 assertEquals(comment.getText(), "This is default comment");
-                assertEquals(comment.getUser(), "admin");
+                assertEquals(comment.getUser(), "PRIMARY/admin");
                 //break;
             }
         }
@@ -124,7 +122,7 @@ public class CommentTestCase {
         Comment c1 = new Comment();
         c1.setResourcePath("/d1/r3");
         c1.setText("This is default comment");
-        c1.setUser("admin");
+        c1.setUser("PRIMARY/admin");
 
         registry.addComment("/d1/r3", c1);
         registry.addComment("/d1/r3", new Comment(comment1));
@@ -201,7 +199,7 @@ public class CommentTestCase {
         Comment c1 = new Comment();
         c1.setResourcePath("/d11/d12");
         c1.setText("This is default comment for d12");
-        c1.setUser("admin");
+        c1.setUser("PRIMARY/admin");
 
         try {
             registry.addComment("/d11/d12", c1);
@@ -287,7 +285,7 @@ public class CommentTestCase {
         Comment c1 = new Comment();
         c1.setResourcePath("/");
         c1.setText("This is default comment for root");
-        c1.setUser("admin");
+        c1.setUser("PRIMARY/admin");
 
         try {
             registry.addComment("/", c1);
@@ -376,7 +374,7 @@ public class CommentTestCase {
         Comment c1 = new Comment();
         c1.setResourcePath("/c10/c11/r1");
         c1.setText("This is default comment ");
-        c1.setUser("admin");
+        c1.setUser("PRIMARY/admin");
 
         registry.addComment("/c101/c11/r1", c1);
 

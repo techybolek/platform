@@ -121,7 +121,7 @@ public class RatingTestCase {
 
         assertEquals(ratingPaths.length, 0, "No ratings should be returned.");
 
-        ratings = registry.get("/c1/r5;ratings:admin");
+        ratings = registry.get("/c1/r5;ratings:PRIMARY/admin");
         ratingPaths = (String[]) ratings.getContent();
 
         assertEquals(ratingPaths.length, 1, "1 rating should be returned.");
