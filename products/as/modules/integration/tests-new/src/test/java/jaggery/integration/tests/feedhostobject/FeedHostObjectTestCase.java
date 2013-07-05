@@ -31,6 +31,7 @@ import java.net.URLConnection;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This class sends requests to feed.jag and validates the response
@@ -82,7 +83,8 @@ public class FeedHostObjectTestCase extends ASIntegrationTest {
 
         in.close();
         log.info("Response :" + response);
-        assertEquals(response, "Feed author : Madhuka, Testing feed members success");
+        assert response != null;
+        assertTrue(response.contains("Testing feed members success"));
     }
 
     @Test(groups = {"wso2.as"}, description = "Test feed host object toXML",
