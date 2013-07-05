@@ -84,10 +84,9 @@ public class SecurityServiceAdmin {
      * This method add Policy to service at the Registry. Does not add the
      * policy to Axis2. To all Bindings available
      * 
-     * @param axisService
-     * @param policy
-     * @throws Exception
-     * @throws org.wso2.carbon.utils.ServerException
+     * @param axisService Service
+     * @param policy Policy
+     * @throws org.wso2.carbon.utils.ServerException se
      */
     public void addSecurityPolicyToAllBindings(AxisService axisService, Policy policy)
 	    throws ServerException {
@@ -106,9 +105,6 @@ public class SecurityServiceAdmin {
         OMFactory omFactory = OMAbstractFactory.getOMFactory();
         String serviceXPath = PersistenceUtils.getResourcePath(axisService);
 
-//        String servicePath = RegistryResources.SERVICE_GROUPS
-//                + axisService.getAxisServiceGroup().getServiceGroupName()
-//                + RegistryResources.SERVICES + axisService.getName();
         String policiesXPath = serviceXPath+"/"+Resources.POLICIES;
 
         String policyResourcePath = policiesXPath+
@@ -132,15 +128,6 @@ public class SecurityServiceAdmin {
             if (!serviceGroupFilePM.elementExists(serviceGroupId, policiesXPath)) {
                 serviceGroupFilePM.put(serviceGroupId,
                         omFactory.createOMElement(Resources.POLICIES, null), serviceXPath);
-//            } else {                              // we already perform a NOT element exists check
-//                //you must manually delete the existing policy before adding new one.
-//                String pathToPolicy = serviceXPath+"/"+Resources.POLICIES+
-//                        "/"+Resources.POLICY+
-//                        PersistenceUtils.getXPathTextPredicate(
-//                                Resources.ServiceProperties.POLICY_UUID, policy.getId() );
-//                if (serviceGroupFilePM.elementExists(serviceGroupId, pathToPolicy)) {
-//                    serviceGroupFilePM.delete(serviceGroupId, pathToPolicy);
-//                }
             }
             serviceGroupFilePM.put(serviceGroupId, policyWrapperElement, policiesXPath);
 
@@ -168,8 +155,13 @@ public class SecurityServiceAdmin {
             Map.Entry entry = (Map.Entry) o;
             AxisEndpoint point = (AxisEndpoint) entry.getValue();
             AxisBinding binding = point.getBinding();
-            binding.getPolicySubject().attachPolicy(policy);
             String bindingName = binding.getName().getLocalPart();
+
+            if (bindingName.endsWith("HttpBinding")) {
+                continue;
+            }
+
+            binding.getPolicySubject().attachPolicy(policy);
             if (lst.contains(bindingName)) {
                 continue;
             } else {
@@ -180,6 +172,10 @@ public class SecurityServiceAdmin {
         Iterator<String> ite = lst.iterator();
         while (ite.hasNext()) {
             String bindingName = ite.next();
+            if (bindingName.endsWith("HttpBinding")) { //we should not add ws-sec policies to http binding
+                continue;
+            }
+
             String bindingElementPath = serviceXPath+
                     "/"+Resources.ServiceProperties.BINDINGS+
                     "/"+Resources.ServiceProperties.BINDING_XML_TAG+
@@ -189,7 +185,7 @@ public class SecurityServiceAdmin {
                     "/"+Resources.ServiceProperties.POLICY_UUID+
                     PersistenceUtils.getXPathTextPredicate(null, policy.getId())) ) {
 
-                OMElement bindingElement = null;
+                OMElement bindingElement;
                 if (serviceGroupFilePM.elementExists(serviceGroupId, bindingElementPath)) {
                     bindingElement = (OMElement) serviceGroupFilePM.get(serviceGroupId, bindingElementPath);
                 } else {
@@ -220,14 +216,6 @@ public class SecurityServiceAdmin {
         String serviceGroupId = axisService.getAxisServiceGroup().getServiceGroupName();
 	try {
         String serviceXPath = PersistenceUtils.getResourcePath(axisService);
-//        String policiesPath = serviceXPath+"/"+Resources.POLICIES;
-
-        // The following logic has been moved to SecurityConfigAdmin
-        // Please verify and remove the following commented out block permanently
-        /*String policyResourcePath = servicePath + RegistryResources.POLICIES + uuid;
-        if (registry.resourceExists(policyResourcePath)) {
-            registry.delete(policyResourcePath);
-        }*/
 
         Map endPointMap = axisService.getEndpoints();
         List<String> lst = new ArrayList<String>();
@@ -250,12 +238,10 @@ public class SecurityServiceAdmin {
         if (!transactionStarted) {
             serviceGroupFilePM.beginTransaction(serviceGroupId);
         }
-        Iterator<String> ite = lst.iterator();
-        while (ite.hasNext()) {
-            String bindingName = ite.next();
-            String bindingElementPath = serviceXPath+
-                    "/"+Resources.ServiceProperties.BINDINGS+
-                    "/"+Resources.ServiceProperties.BINDING_XML_TAG+
+        for (String bindingName : lst) {
+            String bindingElementPath = serviceXPath +
+                    "/" + Resources.ServiceProperties.BINDINGS +
+                    "/" + Resources.ServiceProperties.BINDING_XML_TAG +
                     PersistenceUtils.getXPathAttrPredicate(Resources.NAME, bindingName);
             serviceGroupFilePM.delete(serviceGroupId, bindingElementPath +
                     "/" + Resources.ServiceProperties.POLICY_UUID +

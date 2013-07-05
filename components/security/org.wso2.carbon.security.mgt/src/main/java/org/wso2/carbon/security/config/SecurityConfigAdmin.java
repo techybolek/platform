@@ -1024,7 +1024,7 @@ public class SecurityConfigAdmin {
 
     }
 
-    protected void persistData(AxisService service, String scenrioId, String privateStore,
+    protected void persistData(AxisService service, String scenarioId, String privateStore,
             String[] trustedStores, String[] userGroups, boolean isRahasEngaged)
             throws SecurityConfigException {
         String serviceGroupId = service.getAxisServiceGroup().getServiceGroupName();
@@ -1247,13 +1247,13 @@ public class SecurityConfigAdmin {
                 getGovernanceSystemRegistry(tenantId);
 
         if (trustedCertStores != null && trustedCertStores.length > 0) {
-            StringBuilder trstString = new StringBuilder();
-            for (int i = 0; i < trustedCertStores.length; i++) {
-                trstString.append(trustedCertStores[i]).append(",");
+            StringBuilder trustString = new StringBuilder();
+            for (String trustedCertStore : trustedCertStores) {
+                trustString.append(trustedCertStore).append(",");
             }
 
             if (trustedCertStores.length != 0) {
-                props.setProperty(ServerCrypto.PROP_ID_TRUST_STORES, trstString.toString());
+                props.setProperty(ServerCrypto.PROP_ID_TRUST_STORES, trustString.toString());
             }
         }
 
@@ -1652,11 +1652,7 @@ public class SecurityConfigAdmin {
         String serviceGroupId = axisService.getAxisServiceGroup().getServiceGroupName();
         String serviceName = axisService.getName();
         String serviceXPath = PersistenceUtils.getResourcePath(axisService);
-//        String servicePath = RegistryResources.SERVICE_GROUPS
-//                + axisService.getAxisServiceGroup().getServiceGroupName()
-//                + RegistryResources.SERVICES + serviceName;
 
-//        Resource resource = registry.get(servicePath);
         List pvtStores = serviceGroupFilePM.getAssociations(serviceGroupId, serviceXPath,
                 SecurityConstants.ASSOCIATION_PRIVATE_KEYSTORE);
         List tstedStores = serviceGroupFilePM.getAssociations(serviceGroupId, serviceXPath,
