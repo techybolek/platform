@@ -22,8 +22,8 @@
 <%@ page import="org.w3c.dom.Element" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 
-<%@ page import="org.wso2.carbon.identity.provider.openid.ui.client.OpenIDAdminClient" %>
-<%@ page import="org.wso2.carbon.identity.provider.openid.ui.util.TokenDecrypter" %>
+<%@ page import="org.wso2.carbon.identity.provider.openid.client.OpenIDAdminClient" %>
+<%@ page import="org.wso2.carbon.identity.provider.openid.util.TokenDecrypter" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
