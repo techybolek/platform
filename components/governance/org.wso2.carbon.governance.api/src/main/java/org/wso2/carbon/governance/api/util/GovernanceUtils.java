@@ -211,7 +211,7 @@ public class GovernanceUtils {
             parameter.put("query", "SELECT DISTINCT REG_PATH_ID, REG_NAME FROM REG_RESOURCE WHERE REG_MEDIA_TYPE=?");
             result = (String[]) registry.executeQuery(null, parameter).getContent();
             if (result == null || result.length == 0) {
-                return result;
+                return new String[0];
             }
             result = removeMountPaths(result, registry);
 
