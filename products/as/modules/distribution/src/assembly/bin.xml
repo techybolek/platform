@@ -280,6 +280,9 @@
             <includes>
                 <include>**/**.sh</include>
             </includes>
+            <excludes>
+                <exclude>**/STS/**</exclude>
+            </excludes>
             <fileMode>755</fileMode>
         </fileSet>
 
