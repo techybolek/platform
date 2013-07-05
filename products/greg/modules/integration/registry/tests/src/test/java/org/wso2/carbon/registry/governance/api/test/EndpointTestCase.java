@@ -31,6 +31,7 @@ import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.extensions.utils.CommonConstants;
 
 import javax.xml.namespace.QName;
@@ -44,8 +45,9 @@ public class EndpointTestCase {
     private Registry registry;
 
     @BeforeClass(groups = {"wso2.greg"})
-    public void initTest() {
+    public void initTest() throws RegistryException {
         registry = TestUtils.getRegistry();
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
         try {
             TestUtils.cleanupResources(registry);
         } catch (RegistryException e) {
@@ -60,7 +62,7 @@ public class EndpointTestCase {
         EndpointManager endpointManager = new EndpointManager(registry);
 
         Endpoint endpoint1 = endpointManager.newEndpoint("http://localhost/papapa/booom");
-        endpoint1.addAttribute("status", "QA");
+        endpoint1.addAttribute("endpoint_status", "QA");
 
         endpointManager.addEndpoint(endpoint1);
         Assert.assertEquals(endpoint1.getPath(), "/trunk/endpoints/localhost/papapa/ep-booom");
@@ -68,7 +70,7 @@ public class EndpointTestCase {
         // now get the endpoint back.
         Endpoint endpoint2 = endpointManager.getEndpoint(endpoint1.getId());
         Assert.assertEquals(endpoint2.getUrl(), "http://localhost/papapa/booom");
-        Assert.assertEquals(endpoint1.getAttribute("status"), "QA");
+        Assert.assertEquals(endpoint1.getAttribute("endpoint_status"), "QA");
 
         // so we will be deleting the endpoint
         endpointManager.removeEndpoint(endpoint2.getId());
@@ -91,7 +93,6 @@ public class EndpointTestCase {
 
         Assert.assertEquals(endpoints[0].getUrl(), "http://localhost:8080/axis2/services/BizService");
         Assert.assertEquals(endpoints[0].getAttributeKeys().length, 1);
-        Assert.assertEquals(endpoints[0].getAttribute(CommonConstants.SOAP11_ENDPOINT_ATTRIBUTE), "true");
 
         // now we are trying to remove the endpoint
         EndpointManager endpointManager = new EndpointManager(registry);
@@ -277,21 +278,21 @@ public class EndpointTestCase {
         ServiceManager serviceManager = new ServiceManager(registry);
         Service service = serviceManager.newService(contentElement);
 
-        service.addAttribute("custom-attribute", "custom-value");
+        service.addAttribute("custom_attribute", "custom-value");
         serviceManager.addService(service);
 
 
         // so retrieve it back
         String serviceId = service.getId();
         Service newService = serviceManager.getService(serviceId);
-        Assert.assertEquals(newService.getAttribute("custom-attribute"), "custom-value");
+        Assert.assertEquals(newService.getAttribute("custom_attribute"), "custom-value");
         Assert.assertEquals(newService.getAttribute("endpoints_entry"),
                 ":http://localhost:8080/axis2/services/BizService");
 
         // now we just add an endpoints
         WsdlManager wsdlManager = new WsdlManager(registry);
         Wsdl wsdl = wsdlManager.newWsdl("http://svn.wso2.org/repos/wso2/carbon/platform/trunk/components/governance/org.wso2.carbon.governance.api/src/test/resources/test-resources/wsdl/MyChangedBizService.wsdl");
-        wsdl.addAttribute("boom", "hahahaha");
+        wsdl.addAttribute("beem_boom", "hahahaha");
 
         wsdlManager.addWsdl(wsdl);
 
