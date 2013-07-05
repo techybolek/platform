@@ -75,7 +75,9 @@ public class GovApiGetChildrenTestCase {
     @Test(groups = {"wso2.greg", "wso2.greg.GovernanceServiceCreation"})
     public void deployArtifact() throws InterruptedException, RemoteException,
                                         MalformedURLException, GovernanceException {
-        wsdl = wsdlMgr.newWsdl("http://ws.strikeiron.com/donotcall2_5?WSDL");
+        wsdl = wsdlMgr.newWsdl("http://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
+                "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/" +
+                "artifacts/GREG/wsdl/donotcall2_5.wsdl");
         wsdlMgr.addWsdl(wsdl);
         service = serviceManager.newService(new QName("http://my.service.ns1", "MyService"));
 
