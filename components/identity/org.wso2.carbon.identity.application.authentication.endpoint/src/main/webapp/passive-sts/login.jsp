@@ -16,15 +16,8 @@
 ~ under the License.
 -->
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
-           prefix="carbon" %>
 
-
-<link
-        media="all" type="text/css" rel="stylesheet"
-        href="css/registration.css"/>
-
-<fmt:bundle basename="org.wso2.carbon.identity.sts.passive.ui.i18n.Resources">
+<fmt:bundle basename="org.wso2.carbon.identity.application.authentication.endpoint.i18n.passivests.Resources">
 
     <script type="text/javascript">
         function doLogin() {

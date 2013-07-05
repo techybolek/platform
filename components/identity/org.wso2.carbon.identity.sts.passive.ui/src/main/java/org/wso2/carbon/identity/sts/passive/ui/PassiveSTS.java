@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
@@ -150,26 +151,32 @@ public class PassiveSTS extends HttpServlet {
                           ResponseToken respToken, String frontEndUrl, String action)
             throws ServletException,
                    IOException {
-        String page = null;
-        HttpSession session = null;
-        page = frontEndUrl + "passive-sts/redirect.jsp";
 
-        session = httpReq.getSession();
         String responseTokenResult = respToken.getResults();
-        if (responseTokenResult != null) {
-            responseTokenResult = responseTokenResult.replace("<", "&lt;").replace(">", "&gt;").replace("\"", "'");
-            respToken.setResults(responseTokenResult);
-        } else {
-            httpResp.sendRedirect(frontEndUrl + "passive-sts/login.jsp");
+        
+        if (responseTokenResult == null) {
+        	httpResp.sendRedirect(frontEndUrl + "passive-sts/login.jsp");
             return;
         }
 
-        // HTML FORM Redirection
-        session.setAttribute("replyTo", respToken.getReplyTo());
-        session.setAttribute("results", respToken.getResults());
-        session.setAttribute("context", respToken.getContext());
-        session.setAttribute("action", action);
-        httpResp.sendRedirect(page);
+        PrintWriter out = httpResp.getWriter();
+		out.println("<html>");
+		out.println("<body>");
+		out.println("<form method='post' action='" + respToken.getReplyTo() + "'>");
+		out.println("<p>");
+		out.println("<input type='hidden' name='wa' value='" + action + "'>");
+		out.println("<input type='hidden' name='wresult' value='" + respToken.getResults() + "'>");
+		out.println("<input type='hidden' name='wctx' value='" + respToken.getContext() + "'>");
+		out.println("<button type='submit'>POST</button>");
+		out.println("</p>");
+		out.println("</form>");
+		out.println("<script type='text/javascript'>");
+		out.println("document.forms[0].submit();");
+		out.println("</script>");
+		out.println("</body>");
+		out.println("</html>");	
+		
+		return;
     }
 
     private String getAttribute(Map paramMap, String name) {
@@ -189,6 +196,7 @@ public class PassiveSTS extends HttpServlet {
         if (url.indexOf("/passivests/") != -1) {
             url = url.replace("/passivests", "");
         }
+        url = url.replace("carbon/", "authenticationendpoint/");
         return url;
     }
 

@@ -16,19 +16,6 @@
  ~ under the License.
  -->
 <component xmlns="http://products.wso2.org/carbon">
-    <menus>
-        <menu>
-            <id>opprovider_menu</id>
-            <i18n-key>passive.sts</i18n-key>
-            <i18n-bundle>org.wso2.carbon.identity.sts.passive.ui.i18n.Resources</i18n-bundle>
-            <link>../passive-sts/login.jsp</link>
-            <skip-authentication>
-                <skip-link>../passive-sts/login.jsp</skip-link>
-                <skip-link>../passive-sts/redirect.jsp</skip-link>
-            </skip-authentication>
-        </menu>
-    </menus>
-
     <servlets>
         <servlet id="passiveSTS">
             <servlet-name>PassiveSTSServlet</servlet-name>
