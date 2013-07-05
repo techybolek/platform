@@ -23,18 +23,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import javax.xml.namespace.QName;
@@ -63,6 +64,7 @@ public class GovApiGetChildrenTestCase {
                    MalformedURLException {
         governanceRegistry = TestUtils.getRegistry();
         TestUtils.cleanupResources(governanceRegistry);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
         registryWS = TestUtils.getWSRegistry();
         serviceManager = new ServiceManager(governanceRegistry);
 
@@ -82,7 +84,7 @@ public class GovApiGetChildrenTestCase {
     @Test(groups = {"wso2.greg", "wso2.greg.GovernanceServiceCreation"}, dependsOnMethods = "deployArtifact")
     public void testCheckChildList() throws Exception {
         serviceManager.addService(service);
-        service.addAttribute("Owner", "Financial Department");
+        service.addAttribute("Application_Owner", "Financial Department");
         serviceManager.updateService(service);
 
 
