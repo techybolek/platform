@@ -180,7 +180,8 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
         // If foo.war and foo dir is found, then we will allow  .war based WebappDeployer to deploy that webapp.
         // If only foo dir found then directory based WebappDeployer will deploy that webapp.
         if ("war".equals(extension)) {
-        	 return false;
+             // We should not deploy .WAR files inside a another application. e.g- webapps/mvcapp/newapp.war
+        	 return isInsideAnotherApp(webappFilePath);
         } else {
             // return false if jaxwebapp or jaggery app is being deployed
             if (webappFilePath.contains("jaxwebapps") || webappFilePath.contains("jaggeryapps")
@@ -250,6 +251,27 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                 return true;
             }
         }
+        return false;
+    }
+
+    private boolean isInsideAnotherApp(String path) {
+        if (path != null && path.endsWith(".war")) {
+            String base = path.substring(0, path.lastIndexOf(File.separator));
+            int index = base.lastIndexOf(File.separator) + 1;
+            String baseName = base.substring(index);
+            if (base != null && !"webapps".equals(baseName)) {
+                // .WAR file is not directly under "webapps" dir hence ignore.
+                return true;
+            } else {
+                // make sure .WAR file is not under a webapp called as "webapps"
+                String preBase = base.substring(0, index - 1);
+                String preBaseName = preBase.substring(preBase.lastIndexOf(File.separator) + 1);
+                if (preBaseName != null && "webapps".equals(preBaseName)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
