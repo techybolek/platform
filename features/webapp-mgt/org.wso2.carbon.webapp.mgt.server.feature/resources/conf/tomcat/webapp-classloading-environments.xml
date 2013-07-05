@@ -23,30 +23,30 @@
     Other system properties can be specified in a similar manner.
 -->
 <Classloading xmlns="http://wso2.org/projects/as/classloading-environments">
-    
-   <!-- 
-	We define three different environments. 
-	
-	1) Delegated environment - This is a virtual environment where all the resources belongs to these environments are loaded from the parent. This way you can control whats being loaded from the parent classloader. Only the packages and resources specified in the delegated environments are loaded from the parent. All the others are loaded from the local webapp's classpath. If a webapps has speficied two or more delegated environments, they all get merged at runtime. 
-    -->
+
+    <!--
+     We define three different environments.
+
+     1) Delegated environment - This is a virtual environment where all the resources belongs to these environments are loaded from the parent. This way you can control whats being loaded from the parent classloader. Only the packages and resources specified in the delegated environments are loaded from the parent. All the others are loaded from the local webapp's classpath. If a webapps has speficied two or more delegated environments, they all get merged at runtime.
+     -->
     <DelegatedEnvironments>
 
         <DelegatedEnvironment>
             <Name>Tomcat</Name>
-            <DelegatedPackages>javax.annotation.*,javax.ejb,javax.el,javax.persistence,javax.servlet.*,javax.xml,javax.xml.ws,org.apache.catalina.*,org.apache.coyote.*,org.apache.el.*,org.apache.jasper.*,org.apache.naming.*,org.apache.tomcat.*</DelegatedPackages>
+            <DelegatedPackages>javax.annotation.*,javax.ejb,javax.el,javax.persistence,javax.servlet.*,javax.xml,javax.xml.ws,org.apache.catalina.*,org.apache.coyote.*,org.apache.el.*,com.sun.el.*,org.apache.jasper.*,org.apache.naming.*,org.apache.tomcat.*</DelegatedPackages>
         </DelegatedEnvironment>
 
         <DelegatedEnvironment>
             <Name>Carbon</Name>
-            <DelegatedPackages>*</DelegatedPackages>
+            <DelegatedPackages>*,!org.springframework.*</DelegatedPackages>
         </DelegatedEnvironment>
 
     </DelegatedEnvironments>
 
 
-   <!-- 
-        2) Shared  environment - These environments are loaded once and shared between multiple webapps. Certain runtimes can be shared by multiple webapps. So no need to load them per webapp.
-    -->
+    <!--
+         2) Shared  environment - These environments are loaded once and shared between multiple webapps. Certain runtimes can be shared by multiple webapps. So no need to load them per webapp.
+     -->
 
     <!--SharedEnvironments>
         <SharedEnvironment>
@@ -55,9 +55,9 @@
         </SharedEnvironment>
     </SharedEnvironments-->
 
-   <!-- 
-	3) Exclusive environment - These environments are loaded per webapp. Exclusive environments define a set of resources(jars) which should be loaded per webapp. e.g. CXF runtime.
-    -->	
+    <!--
+     3) Exclusive environment - These environments are loaded per webapp. Exclusive environments define a set of resources(jars) which should be loaded per webapp. e.g. CXF runtime.
+     -->
     <ExclusiveEnvironments>
         <ExclusiveEnvironment>
             <Name>CXF</Name>
