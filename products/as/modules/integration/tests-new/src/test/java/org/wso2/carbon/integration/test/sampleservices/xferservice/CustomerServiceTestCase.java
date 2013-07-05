@@ -87,10 +87,10 @@ public class CustomerServiceTestCase extends ASIntegrationTest {
 
         ModuleMetaData[] moduleMetaData = moduleAdminServiceClient.listModulesForService("CustomerService");
         for (int x = 0; x <= moduleMetaData.length; x++) {
-            if (moduleMetaData[x].getModulename().equals("wso2xfer")) {
+            if (moduleMetaData[x].getModulename().contains("wso2xfer")) {
                 moduleExists = true;
                 //engaging the module to the service
-                moduleAdminServiceClient.engageModule("wso2xfer-4.1.0", "CustomerService");
+                moduleAdminServiceClient.engageModule(moduleMetaData[x].getModuleId(), "CustomerService");
                 break;
             }
         }
