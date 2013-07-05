@@ -69,11 +69,9 @@ public class CreateGroup {
 
 
             PostMethod postMethod = new PostMethod(SCIMSamplesUtils.groupEndpointURL);
-            //add basic auth header
-            postMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER,
-                                        SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(
-                                                SCIMSamplesUtils.userName,
-                                                SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            postMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
             //create request entity with the payload.
             RequestEntity requestEntity = new StringRequestEntity(encodedGroup, SCIMSamplesUtils.CONTENT_TYPE, null);
             postMethod.setRequestEntity(requestEntity);
@@ -108,9 +106,9 @@ public class CreateGroup {
             HttpClient httpFilterUserClient = new HttpClient();
             //create get method for filtering
             GetMethod getMethod = new GetMethod(SCIMSamplesUtils.userEndpointURL);
-            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER,
-                                       SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(
-                                               SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
             //get corresponding userIds
             String filter = SCIMSamplesUtils.USER_FILTER + userName;
             getMethod.setQueryString(filter);

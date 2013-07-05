@@ -11,10 +11,12 @@
     <property name="create-user-main-class" value="org.wso2.scim.sample.user.CreateUser"/>
     <property name="update-user-main-class" value="org.wso2.scim.sample.user.UpdateUser"/>
     <property name="delete-user-main-class" value="org.wso2.scim.sample.user.DeleteUser"/>
+    <property name="list-user-main-class" value="org.wso2.scim.sample.user.ListUsers"/>
 
     <property name="create-group-main-class" value="org.wso2.scim.sample.group.CreateGroup"/>
     <property name="update-group-main-class" value="org.wso2.scim.sample.group.UpdateGroup"/>
     <property name="delete-group-main-class" value="org.wso2.scim.sample.group.DeleteGroup"/>
+    <property name="list-group-main-class" value="org.wso2.scim.sample.group.ListGroups"/>
 
     <path  id="classpath">
         <fileset dir="${scim.samples.lib}" includes="**/*.jar"/>
@@ -99,6 +101,24 @@
         </jar>
     </target>
 
+    <target name="jarit-list-users" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/list-user.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.scim.sample.user.ListUsers"/>
+        </manifest>
+        </jar>
+    </target>
+
+    <target name="jarit-list-groups" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/list-group.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.scim.sample.group.ListGroups"/>
+        </manifest>
+        </jar>
+    </target>
+
     <target name="create-user" depends="jarit-create-user">
         <java classname="${create-user-main-class}" fork="true">
             <classpath>
@@ -149,6 +169,24 @@
             <classpath>
                 <path refid="classpath"/>
                 <path location="${jar.dir}/delete-group.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="list-users" depends="jarit-list-users">
+        <java classname="${list-user-main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/list-user.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="list-groups" depends="jarit-list-groups">
+        <java classname="${list-group-main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/list-group.jar"/>
             </classpath>
         </java>
     </target>

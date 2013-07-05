@@ -68,9 +68,9 @@ public class UpdateUser {
             String url = SCIMSamplesUtils.userEndpointURL + "/" + userId;
             //now send the update request.
             PutMethod putMethod = new PutMethod(url);
-            putMethod.addRequestHeader(
-                    SCIMConstants.AUTHORIZATION_HEADER,
-                    SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            putMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
 
             RequestEntity putRequestEntity = new StringRequestEntity(encodedUser, SCIMSamplesUtils.CONTENT_TYPE, null);
             putMethod.setRequestEntity(putRequestEntity);
@@ -105,9 +105,9 @@ public class UpdateUser {
             HttpClient httpFilterUserClient = new HttpClient();
             //create get method for filtering
             GetMethod getMethod = new GetMethod(SCIMSamplesUtils.userEndpointURL);
-            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER,
-                                       SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(
-                                               SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
             //get corresponding userIds
             String filter = SCIMSamplesUtils.USER_FILTER + userName;
             getMethod.setQueryString(filter);

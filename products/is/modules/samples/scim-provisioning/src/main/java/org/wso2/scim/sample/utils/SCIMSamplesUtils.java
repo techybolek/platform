@@ -35,7 +35,7 @@ public class SCIMSamplesUtils {
 
     public static final String TRUST_STORE_PATH = IS_HOME + "repository" + File.separator + "resources" +
                                                   File.separator + "security" + File.separator + "wso2carbon.jks";
-    
+
     public static final String TRUST_STORE_PASS = "wso2carbon";
 
     public static final String PROPERTIES_FILE_NAME = "client.properties";
@@ -44,6 +44,8 @@ public class SCIMSamplesUtils {
     public static final String PROPERTY_NAME_GROUP_ENDPOINT_URL = "group.endpoint";
     public static final String PROPERTY_NAME_USER_NAME = "provisioning.user.name";
     public static final String PROPERTY_NAME_PASSWORD = "provisioning.password";
+    public static final String PROPERTY_NAME_ENABLE_OAUTH = "enable.oauth";
+    public static final String PROPERTY_NAME_ACCESS_TOKEN = "oauth.access.token";
 
     public static final String USER_FILTER = "filter=userNameEq";
     public static final String GROUP_FILTER = "filter=displayNameEq";
@@ -55,7 +57,10 @@ public class SCIMSamplesUtils {
     public static String userName = null;
     public static String password = null;
 
-    public static String userNameToCreateUser = "HasiniG";
+    public static boolean enableOAuth = false;
+    public static String oauthAccessToken = null;
+
+    public static String userNameToCreateUser = "HasiniTG";
     public static String userNameToUpdateUser = "HasiniG";
     public static String userNameToDeleteUser = "HasiniG";
 
@@ -78,12 +83,24 @@ public class SCIMSamplesUtils {
 
     public static void loadConfiguration() throws IOException {
         Properties properties = new Properties();
-		FileInputStream freader = new FileInputStream(PROPERTIES_FILE_NAME);
-		properties.load(freader);
+        FileInputStream freader = new FileInputStream(PROPERTIES_FILE_NAME);
+        properties.load(freader);
 
         userEndpointURL = properties.getProperty(PROPERTY_NAME_USER_ENDPOINT_URL);
         groupEndpointURL = properties.getProperty(PROPERTY_NAME_GROUP_ENDPOINT_URL);
         userName = properties.getProperty(PROPERTY_NAME_USER_NAME);
         password = properties.getProperty(PROPERTY_NAME_PASSWORD);
+        String isOAuth = properties.getProperty(PROPERTY_NAME_ENABLE_OAUTH);
+        enableOAuth = Boolean.parseBoolean(isOAuth);
+        oauthAccessToken = properties.getProperty(PROPERTY_NAME_ACCESS_TOKEN);
+    }
+
+    /*Util method to get authorization header according to the authentication method specified*/
+
+    public static String getAuthorizationHeader() {
+        if (enableOAuth) {
+            return "Bearer " + oauthAccessToken;
+        }
+        return getBase64EncodedBasicAuthHeader(userName, password);
     }
 }

@@ -49,9 +49,9 @@ public class DeleteGroup {
             String url = SCIMSamplesUtils.groupEndpointURL + "/" + groupId;
             //now send the delete request.
             DeleteMethod deleteMethod = new DeleteMethod(url);
-            deleteMethod.addRequestHeader(
-                    SCIMConstants.AUTHORIZATION_HEADER,
-                    SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            deleteMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
             HttpClient httpDeleteClient = new HttpClient();
             int deleteResponseStatus = httpDeleteClient.executeMethod(deleteMethod);
             String deleteResponse = deleteMethod.getResponseBodyAsString();
@@ -82,9 +82,9 @@ public class DeleteGroup {
             HttpClient httpFilterUserClient = new HttpClient();
             //create get method for filtering
             GetMethod getMethod = new GetMethod(SCIMSamplesUtils.groupEndpointURL);
-            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER,
-                                       SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(
-                                               SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
             //get corresponding userIds
             String filter = SCIMSamplesUtils.GROUP_FILTER + groupName;
             getMethod.setQueryString(filter);

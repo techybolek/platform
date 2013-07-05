@@ -51,9 +51,10 @@ public class DeleteUser {
             String url = SCIMSamplesUtils.userEndpointURL + "/" + userId;
             //now send the delete request.
             DeleteMethod deleteMethod = new DeleteMethod(url);
-            deleteMethod.addRequestHeader(
-                    SCIMConstants.AUTHORIZATION_HEADER,
-                    SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            deleteMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
+            
             HttpClient httpDeleteClient = new HttpClient();
             int deleteResponseStatus = httpDeleteClient.executeMethod(deleteMethod);
             String deleteResponse = deleteMethod.getResponseBodyAsString();
@@ -84,9 +85,9 @@ public class DeleteUser {
             HttpClient httpFilterUserClient = new HttpClient();
             //create get method for filtering
             GetMethod getMethod = new GetMethod(SCIMSamplesUtils.userEndpointURL);
-            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER,
-                                       SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(
-                                               SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
+            //add authorization header
+            String authHeader = SCIMSamplesUtils.getAuthorizationHeader();
+            getMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER, authHeader);
             //get corresponding userIds
             String filter = SCIMSamplesUtils.USER_FILTER + userName;
             getMethod.setQueryString(filter);
