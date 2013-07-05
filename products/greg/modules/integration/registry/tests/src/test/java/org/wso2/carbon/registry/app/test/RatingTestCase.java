@@ -16,18 +16,13 @@
 
 package org.wso2.carbon.registry.app.test;
 
-import org.apache.commons.io.IOUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
-import org.wso2.carbon.integration.core.TestTemplate;
 import org.wso2.carbon.registry.app.RemoteRegistry;
 import org.wso2.carbon.registry.core.Resource;
 
-import java.io.InputStream;
-import java.io.StringWriter;
-
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * A test case which tests registry ratings operations
@@ -57,7 +52,7 @@ public class RatingTestCase {
         assertEquals(rating, (float) 5.0, (float) 0.01,
                 "Rating of the resource /d16/d17/r1 should be 5.");
 
-        int ratingVal = registry.getRating("/d16/d17/r1", "admin");
+        int ratingVal = registry.getRating("/d16/d17/r1", "PRIMARY/admin");
 
         assertEquals(ratingVal, 5, "Rating of the resource /d16/d17/r1 should be 5.");
     }
@@ -75,7 +70,7 @@ public class RatingTestCase {
         assertEquals(rating, (float) 4.0, (float) 0.01,
                 "Rating of the resource /d16/d18 should be 4.");
 
-        int ratingVal = registry.getRating("/d16/d18", "admin");
+        int ratingVal = registry.getRating("/d16/d18", "PRIMARY/admin");
 
         assertEquals(ratingVal, 4, "Rating of the resource /d16/d18 should be 4.");
     }
