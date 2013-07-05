@@ -7,14 +7,15 @@ import org.apache.catalina.valves.ValveBase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.core.authenticate.APITokenValidator;
+import org.wso2.carbon.apimgt.core.gateway.APITokenAuthenticator;
+import org.wso2.carbon.apimgt.core.usage.APIStatsPublisher;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIContextCache;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.interceptor.valve.internal.DataHolder;
-import org.wso2.carbon.apimgt.core.authenticate.APITokenValidator;
-import org.wso2.carbon.apimgt.core.usage.APIStatsPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -47,6 +48,8 @@ public class APIMgtValve extends ValveBase {
     private String manageAPIs;
 
     LRUCache<String, Boolean> contextCache = null;
+
+    APITokenAuthenticator authenticator = new APITokenAuthenticator();
 
     public APIMgtValve(){
         super(true);
@@ -113,14 +116,13 @@ public class APIMgtValve extends ValveBase {
                                    API Version is hardcoded as 1.0.0 since this need to be test with GReg rest API and currently it don't have the version support.
                                    we can change this to get the version as  getAPIVersion(request) later.
                                     */
-                    isAuthorized = doAuthenticate(context, "1.0.0", accessToken, request.getAuthType(),
+                    isAuthorized = doAuthenticate(context, "1.0.0", accessToken,
+                            authenticator.getResourceAuthenticationScheme(context, "1.0.0", request.getRequestURI(), request.getMethod()),
                             request.getHeader(APITokenValidator.getAPIManagerClientDomainHeader()));
                 } catch (APIManagementException e) {
                     //ignore
                 }
-                if (isAuthorized) {
-                    System.out.println("Authorized...");
-                } else {
+                if (!isAuthorized) {
                     try {
                         response.sendError(403, "Unauthorized");
                         return;
@@ -157,7 +159,7 @@ public class APIMgtValve extends ValveBase {
     private boolean doAuthenticate(String context, String version, String accessToken, String requiredAuthenticationLevel, String clientDomain)
             throws APIManagementException {
         APITokenValidator tokenValidator = new APITokenValidator();
-        apiKeyValidationDTO = tokenValidator.validateKey(context, version,accessToken, APIConstants.AUTH_APPLICATION_LEVEL_TOKEN,
+        apiKeyValidationDTO = tokenValidator.validateKey(context, version,accessToken, requiredAuthenticationLevel,
                 clientDomain);
         return apiKeyValidationDTO.isAuthorized();
     }
