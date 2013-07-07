@@ -10,7 +10,7 @@
         </packages>
 
         <classes>
-            <!--<class name="org.wso2.carbon.integration.test.jndi.JNDITestCase"/>-->
+            <!--<class name="org.wso2.carbon.integration.test.sampleservices.axis2module.Axis2ModuleTestCase"/>-->
             <!--<class name="org.wso2.carbon.integration.test.qualityofservice.throtllingservice.ThrottlingTestCase"/>-->
             <!--<class name="org.wso2.carbon.integration.test.webapp.mgt.WebApplicationFaultyDeploymentTestCase"/>-->
             <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityByAdminTestCase"/>-->
