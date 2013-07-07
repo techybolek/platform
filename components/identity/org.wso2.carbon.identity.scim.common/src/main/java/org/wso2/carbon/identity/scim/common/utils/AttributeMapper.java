@@ -17,6 +17,11 @@
 */
 package org.wso2.carbon.identity.scim.common.utils;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.wso2.charon.core.attributes.Attribute;
 import org.wso2.charon.core.attributes.ComplexAttribute;
 import org.wso2.charon.core.attributes.DefaultAttributeFactory;
@@ -32,15 +37,10 @@ import org.wso2.charon.core.schema.AttributeSchema;
 import org.wso2.charon.core.schema.ResourceSchema;
 import org.wso2.charon.core.schema.SCIMAttributeSchema;
 import org.wso2.charon.core.schema.SCIMConstants;
+import org.wso2.charon.core.schema.SCIMResourceSchemaManager;
 import org.wso2.charon.core.schema.SCIMSchemaDefinitions;
 import org.wso2.charon.core.schema.SCIMSubAttributeSchema;
 import org.wso2.charon.core.util.AttributeUtil;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This class is responsible for converting SCIM attributes in a SCIM object to
@@ -313,12 +313,80 @@ public class AttributeMapper {
                     }
 
                 }
+            } else if(attributeNames.length == 3) {
+            	//get immediate parent attribute name
+                String immediateParentAttributeName = attributeNames[1];
+                AttributeSchema immediateParentAttributeSchema = getAttributeSchema(immediateParentAttributeName,
+                                                                           scimObjectType);
+                /*differenciate between sub attribute of Complex attribute and a Multivalued attribute
+                with complex value*/
+                if (isMultivalued(immediateParentAttributeName, scimObjectType)) {
+                    //create map with complex value
+                    Map<String, Object> complexValue = new HashMap<String, Object>();
+                    complexValue.put(SCIMConstants.CommonSchemaConstants.TYPE, attributeNames[1]);
+                    complexValue.put(SCIMConstants.CommonSchemaConstants.VALUE,
+                                     AttributeUtil.getAttributeValueFromString(attributeEntry.getValue(),
+                                                                               immediateParentAttributeSchema.getType()));
+                    //check whether parent multivalued attribute already exists
+                    if (((AbstractSCIMObject) scimObject).isAttributeExist(immediateParentAttributeName)) {
+                        //create attribute value as complex value
+                        MultiValuedAttribute multiValuedAttribute =
+                                (MultiValuedAttribute) scimObject.getAttribute(immediateParentAttributeName);
+                        multiValuedAttribute.setComplexValue(complexValue);
+                    } else {
+                        //create the attribute and set it in the scim object
+                        MultiValuedAttribute multivaluedAttribute = new MultiValuedAttribute(
+                                immediateParentAttributeName);
+                        multivaluedAttribute.setComplexValue(complexValue);
+                        DefaultAttributeFactory.createAttribute(immediateParentAttributeSchema, multivaluedAttribute);
+                        ((AbstractSCIMObject) scimObject).setAttribute(multivaluedAttribute);
+                    }
+                } else {
+                    //sub attribute of a complex attribute
+                    AttributeSchema subAttributeSchema = getAttributeSchema(attributeNames[2], attributeNames[1], scimObjectType);
+                    //we assume sub attribute is simple attribute
+					SimpleAttribute simpleAttribute = new SimpleAttribute( attributeNames[2],
+					                                                      AttributeUtil.getAttributeValueFromString(attributeEntry.getValue(),
+					                                                                                                subAttributeSchema.getType()));
+                    DefaultAttributeFactory.createAttribute(subAttributeSchema, simpleAttribute);
+                    
+                    // check if the super parent exist 
+                    boolean superParentExist = ((AbstractSCIMObject)scimObject).isAttributeExist(attributeNames[0]);
+                    if (superParentExist) { 
+                    	ComplexAttribute superParentAttribute = (ComplexAttribute) ((AbstractSCIMObject)scimObject).getAttribute(attributeNames[0]);
+                    	// check if the immediate parent exist 
+                    	boolean immediateParentExist = superParentAttribute.isSubAttributeExist(immediateParentAttributeName);
+                    	if (immediateParentExist) { 
+                    		// both the parent and super parent exists
+                    		ComplexAttribute immediateParentAttribute = (ComplexAttribute) superParentAttribute.getSubAttribute(immediateParentAttributeName);
+                    		immediateParentAttribute.setSubAttribute(simpleAttribute);
+                    	} else { // immediate parent does not exist
+                    		ComplexAttribute immediateParentAttribute = new ComplexAttribute(immediateParentAttributeName);
+                            immediateParentAttribute.setSubAttribute(simpleAttribute);
+                            DefaultAttributeFactory.createAttribute(immediateParentAttributeSchema, immediateParentAttribute);
+                            // created the immediate parent and now set to super
+                            superParentAttribute.setSubAttribute(immediateParentAttribute); 
+                    	}
+            		} else { // now have to create both the super parent and immediate parent
+            			// immediate first
+            			ComplexAttribute immediateParentAttribute = new ComplexAttribute(immediateParentAttributeName);
+                        immediateParentAttribute.setSubAttribute(simpleAttribute);
+                        DefaultAttributeFactory.createAttribute(immediateParentAttributeSchema, immediateParentAttribute);
+                        // now super parent
+                        ComplexAttribute superParentAttribute = new ComplexAttribute(attributeNames[0]);
+            			superParentAttribute.setSubAttribute(immediateParentAttribute);
+            			AttributeSchema superParentAttributeSchema = getAttributeSchema(attributeNames[0], scimObjectType);
+            			DefaultAttributeFactory.createAttribute(superParentAttributeSchema, superParentAttribute);
+            			// now add the super to the scim object
+            			((AbstractSCIMObject) scimObject).setAttribute(superParentAttribute);
+            		}
+                }
             }
         }
         return scimObject;
     }
 
-    private static boolean isMultivalued(String attributeName, int scimObjectType) {
+	private static boolean isMultivalued(String attributeName, int scimObjectType) {
         AttributeSchema attributeSchema = getAttributeSchema(attributeName, scimObjectType);
         if (attributeSchema != null) {
             return attributeSchema.getMultiValued();
@@ -327,22 +395,58 @@ public class AttributeMapper {
     }
 
     private static AttributeSchema getAttributeSchema(String attributeName, int scimObjectType) {
+	    return getAttributeSchema(attributeName, null, scimObjectType);
+    }
+
+	private static AttributeSchema getAttributeSchema(String attributeName, String parentAttributeName, int scimObjectType) {
         ResourceSchema resourceSchema = getResourceSchema(scimObjectType);
         if (resourceSchema != null) {
             List<AttributeSchema> attributeSchemas = resourceSchema.getAttributesList();
             for (AttributeSchema attributeSchema : attributeSchemas) {
                 if (attributeName.equals(attributeSchema.getName())) {
-                    return attributeSchema;
+                	if (parentAttributeName == null ||
+						    attributeSchema.getURI().contains(parentAttributeName)) {
+							return attributeSchema;
+						}
                 }
                 //check for sub attributes
                 List<SCIMSubAttributeSchema> subAttributeSchemas =
                         ((SCIMAttributeSchema) attributeSchema).getSubAttributes();
-                if (subAttributeSchemas != null && !subAttributeSchemas.isEmpty()) {
-                    for (SCIMSubAttributeSchema subAttributeSchema : subAttributeSchemas) {
-                        if (attributeName.equals(subAttributeSchema.getName())) {
-                            return subAttributeSchema;
-                        }
-                    }
+				if (subAttributeSchemas != null && !subAttributeSchemas.isEmpty()) {
+					for (SCIMSubAttributeSchema subAttributeSchema : subAttributeSchemas) {
+						if (attributeName.equals(subAttributeSchema.getName())) {
+							if (parentAttributeName == null ||
+							    subAttributeSchema.getURI().contains(parentAttributeName)) {
+								return subAttributeSchema;
+							}
+						}
+					}
+				}
+                // check for attributes of the attribute
+                List<SCIMAttributeSchema> attribSchemas = ((SCIMAttributeSchema) attributeSchema).getAttributes();
+                if(attribSchemas != null && !attribSchemas.isEmpty()) {
+                	for(SCIMAttributeSchema attribSchema : attribSchemas) {
+                		// if the attribute a simple attribute
+                		if(attributeName.equals(attribSchema.getName())) {
+                			return attribSchema;
+                		}
+                		// if the attribute a complex attribute having sub attributes
+                		//check for sub attributes
+						List<SCIMSubAttributeSchema> subSubAttribSchemas =
+						                                                   ((SCIMAttributeSchema) attribSchema).getSubAttributes();
+						if (subSubAttribSchemas != null && !subSubAttribSchemas.isEmpty()) {
+							for (SCIMSubAttributeSchema subSubAttribSchema : subSubAttribSchemas) {
+								if (attributeName.equals(subSubAttribSchema.getName())) {
+									if (parentAttributeName == null ||
+									    subSubAttribSchema.getURI().contains(parentAttributeName)) {
+										return subSubAttribSchema;
+									}
+								}
+							}
+						}
+                		
+                	}
+                	
                 }
             }
         }
@@ -353,7 +457,7 @@ public class AttributeMapper {
         ResourceSchema resourceSchema = null;
         switch (scimObjectType) {
             case SCIMConstants.USER_INT:
-                resourceSchema = SCIMSchemaDefinitions.SCIM_USER_SCHEMA;
+                resourceSchema = SCIMResourceSchemaManager.getInstance().getUserResourceSchema();
                 break;
             case SCIMConstants.GROUP_INT:
                 resourceSchema = SCIMSchemaDefinitions.SCIM_GROUP_SCHEMA;
