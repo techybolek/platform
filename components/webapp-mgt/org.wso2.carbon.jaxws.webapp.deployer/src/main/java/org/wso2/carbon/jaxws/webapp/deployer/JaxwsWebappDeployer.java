@@ -27,6 +27,7 @@ import org.wso2.carbon.webapp.mgt.WebappsConstants;
 
 /**
  * Axis2 Deployer for deploying JAX-WS/JAX-RS Web applications
+ * @deprecated Use {@link org.wso2.carbon.webapp.deployer.WebappDeployer} instead
  */
 public class JaxwsWebappDeployer extends AbstractWebappDeployer {
 
@@ -35,7 +36,7 @@ public class JaxwsWebappDeployer extends AbstractWebappDeployer {
     @Override
     public void init(ConfigurationContext configCtx) {
         super.init(configCtx);
-        configCtx.setProperty(WebappsConstants.TOMCAT_JAX_WEBAPP_DEPLOYER, tomcatWebappDeployer);
+//        configCtx.setProperty(WebappsConstants.TOMCAT_JAX_WEBAPP_DEPLOYER, tomcatWebappDeployer);
     }
 
     @Override

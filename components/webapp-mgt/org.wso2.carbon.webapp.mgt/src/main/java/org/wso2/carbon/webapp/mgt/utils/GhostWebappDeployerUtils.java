@@ -343,10 +343,10 @@ public class GhostWebappDeployerUtils {
                 if (WebappsConstants.WEBAPP_FILTER_PROP.equals(filterProp)) {
                     applicationDeployer = (TomcatGenericWebappsDeployer)
                             configContext.getProperty(WebappsConstants.TOMCAT_GENERIC_WEBAPP_DEPLOYER);
-                } else if (WebappsConstants.JAX_WEBAPP_FILTER_PROP.equals(filterProp)) {
+                } /*else if (WebappsConstants.JAX_WEBAPP_FILTER_PROP.equals(filterProp)) {
                     applicationDeployer = (TomcatGenericWebappsDeployer)
                             configContext.getProperty(WebappsConstants.TOMCAT_JAX_WEBAPP_DEPLOYER);
-                } else if (WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equals(filterProp)) {
+                }*/ else if (WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equals(filterProp)) {
                     applicationDeployer = (TomcatGenericWebappsDeployer)
                             configContext.getProperty(WebappsConstants.TOMCAT_JAGGERY_WEBAPP_DEPLOYER);
                 }

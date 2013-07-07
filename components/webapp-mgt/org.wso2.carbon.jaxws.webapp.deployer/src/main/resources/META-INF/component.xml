@@ -16,11 +16,11 @@
  ~ under the License.
  -->
 <component xmlns="http://products.wso2.org/carbon">
-    <deployers>
+    <!--deployers>
         <deployer>
             <directory>jaxwebapps</directory>
             <extension>war</extension>
             <class>org.wso2.carbon.jaxws.webapp.deployer.JaxwsWebappDeployer</class>
         </deployer>
-    </deployers>
+    </deployers-->
 </component>

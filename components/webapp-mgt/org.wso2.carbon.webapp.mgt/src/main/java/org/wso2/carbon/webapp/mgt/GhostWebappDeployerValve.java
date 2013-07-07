@@ -199,9 +199,9 @@ public class GhostWebappDeployerValve implements CarbonTomcatValve {
 
         if (webappType.equals(WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP)) {
             deploymentDir = WebappsConstants.JAGGERY_WEBAPP_REPO;
-        } else if (webappType.equals(WebappsConstants.JAX_WEBAPP_FILTER_PROP)) {
+        } /*else if (webappType.equals(WebappsConstants.JAX_WEBAPP_FILTER_PROP)) {
             deploymentDir = WebappsConstants.JAX_WEBAPP_REPO;
-        }
+        }*/
         String repoPath = configurationContext.getAxisConfiguration().getRepository().getPath();
 
         // this method should run only in tenant mode

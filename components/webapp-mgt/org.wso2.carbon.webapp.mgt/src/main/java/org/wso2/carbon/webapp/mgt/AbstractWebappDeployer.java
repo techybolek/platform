@@ -16,6 +16,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.webapp.mgt.utils.GhostWebappDeployerUtils;
+import org.wso2.carbon.webapp.mgt.utils.WebAppUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -132,7 +133,14 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                     configContext, deploymentFileData.getFile().getName());
 
             if (webApplication != null) {
-                webApplication.setProperty(WebappsConstants.WEBAPP_FILTER, getType());
+                //since both Jax-WS/RS applications and web application use same deployer
+                //when the application type if webapp, we need to check which type it is.
+                String webappType = getType();
+                if (webappType.equals(WebappsConstants.WEBAPP_FILTER_PROP) &&
+                        WebAppUtils.checkJaxApplication(webApplication) != null) {
+                    webappType = WebappsConstants.JAX_WEBAPP_FILTER_PROP;
+                }
+                webApplication.setProperty(WebappsConstants.WEBAPP_FILTER, webappType);
             }
 
         } catch (Exception e) {

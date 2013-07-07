@@ -36,6 +36,7 @@ import org.wso2.carbon.utils.DataPaginator;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.webapp.mgt.sync.ApplicationSynchronizeRequest;
 import org.wso2.carbon.webapp.mgt.WebappsConstants.ApplicationOpType;
+import org.wso2.carbon.webapp.mgt.utils.WebAppUtils;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -133,16 +134,11 @@ public class WebappAdmin extends AbstractAdmin {
         WebappMetadata webappMetadata;
         webappMetadata = new WebappMetadata();
 
-        String appContext = "/";
-        for (Container container : webApplication.getContext().findChildren()) {
-            if(((StandardWrapper) container).getServletClass().equals(
-                    "org.apache.cxf.transport.servlet.CXFServlet")) {
-                appContext = (((StandardWrapper) container).findMappings())[0];
-                if(appContext.endsWith("/*")) {
-                    appContext = appContext.substring(0, appContext.indexOf("/*"));
-                }
-                break;
-            }
+        String appContext = WebAppUtils.checkJaxApplication(webApplication);
+        if (appContext == null) {
+            appContext = "/";
+        } else if(appContext.endsWith("/*")) {
+            appContext = appContext.substring(0, appContext.indexOf("/*"));
         }
 
         webappMetadata.setDisplayName(webApplication.getDisplayName());
@@ -245,34 +241,14 @@ public class WebappAdmin extends AbstractAdmin {
             if (!isWebappRelevant(webapp, webappType)) {
                 continue;
             }
-            String appContext = "/";
-            for (Container container : webapp.getContext().findChildren()) {
-/*
-                try {
-                    Class servletClass = Class.forName(((StandardWrapper) container).getServletClass(), false,
-                            container.getLoader().getClassLoader());
-                    Class cXFServletClass = Class.forName("org.apache.cxf.transport.servlet.CXFServlet", false,
-                            container.getLoader().getClassLoader());
-*/
-                if(((StandardWrapper) container).getServletClass().equals("org.apache.cxf.transport.servlet.CXFServlet")) {
-                    appContext = (((StandardWrapper) container).findMappings())[0];
-                }
-                else if (((StandardWrapper) container).getServletName().toLowerCase().contains("cxf")) {
-                    appContext = (((StandardWrapper) container).findMappings())[0];
-                }
-/*
-                } catch (ClassNotFoundException e) {
-                    log.warn(e);
-                } catch (InstantiationException e) {
-                    log.warn(e);
-                } catch (IllegalAccessException e) {
-                    log.warn(e);
-                }
-*/
-            }
-            if(appContext.endsWith("/*")) {
+
+            String appContext = WebAppUtils.checkJaxApplication(webapp);
+            if (appContext == null) {
+                appContext = "/";
+            } else if(appContext.endsWith("/*")) {
                 appContext = appContext.substring(0, appContext.indexOf("/*"));
             }
+
             WebappMetadata webappMetadata = new WebappMetadata();
             webappMetadata.setDisplayName(webapp.getDisplayName());
             webappMetadata.setContext(webapp.getContextName());
@@ -783,9 +759,7 @@ public class WebappAdmin extends AbstractAdmin {
 
     protected String getWebappDeploymentDirPath(String webappType) {
         String webappDeploymentDir;
-        if(WebappsConstants.JAX_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
-            webappDeploymentDir = WebappsConstants.JAX_WEBAPP_REPO;
-        } else if(WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
+        if(WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
             webappDeploymentDir = WebappsConstants.JAGGERY_WEBAPP_REPO;
         } else {
             webappDeploymentDir = WebappsConstants.WEBAPP_DEPLOYMENT_FOLDER;
