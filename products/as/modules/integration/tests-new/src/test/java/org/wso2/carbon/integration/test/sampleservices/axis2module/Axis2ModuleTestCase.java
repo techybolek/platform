@@ -44,7 +44,7 @@ import static org.testng.Assert.assertTrue;
 /**
  * This class can be used for testing purposes of Axis2Module sample scenario.
  */
-public class Axis2ModuleTestCase extends ASIntegrationTest {
+public abstract class Axis2ModuleTestCase extends ASIntegrationTest {
 
     private static final Log log = LogFactory.getLog(Axis2ModuleTestCase.class);
     private ModuleAdminServiceClient moduleAdminServiceClient;
@@ -60,17 +60,19 @@ public class Axis2ModuleTestCase extends ASIntegrationTest {
 
     @AfterClass(alwaysRun = true)
     public void disengageAndDeleteModule() throws Exception {
-        moduleAdminServiceClient = new ModuleAdminServiceClient
-                (asServer.getBackEndUrl(), asServer.getSessionCookie());
-        // disengage logmodule from HelloService
-        assertTrue(moduleAdminServiceClient.disengageModule("logmodule", "HelloService"));
+        moduleAdminServiceClient =
+                new ModuleAdminServiceClient(asServer.getBackEndUrl(), asServer.getSessionCookie());
+        String moduleId = null;
+        ModuleMetaData[] moduleMetaData = moduleAdminServiceClient.getModuleList();
 
-        // delete logmodule
-        moduleAdminServiceClient.deleteModule("logmodule");
-
-        // restoring the default log4j.properties file
+        for (ModuleMetaData module : moduleMetaData) {
+            if (module.getModulename().contains("logmodule")) {
+                moduleId = module.getModuleId();
+            }
+        }
+        assertTrue(moduleAdminServiceClient.disengageModule(moduleId, "HelloService"));
+        moduleAdminServiceClient.deleteModule(moduleId);
         removeLogLevel();
-
         // restarting the server
         serverConfigurationManager = new ServerConfigurationManager(asServer.getBackEndUrl());
         serverConfigurationManager.restartGracefully();
@@ -83,11 +85,11 @@ public class Axis2ModuleTestCase extends ASIntegrationTest {
                 new ModuleAdminServiceClient(asServer.getBackEndUrl(), asServer.getSessionCookie());
 
         URL url = new URL("file://" + ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION +
-                "artifacts" + File.separator + "AS" + File.separator + "mar" + File.separator +
-                "LogModule-1.0.0.mar");
+                          "artifacts" + File.separator + "AS" + File.separator + "mar" + File.separator +
+                          "LogModule-1.0.0.mar");
         DataHandler dh = new DataHandler(url);
-
         moduleAdminServiceClient.uploadModule(dh);  // upload logmodule
+        serverConfigurationManager.restartGracefully();
 
         // server restart point after engaging the module
 
@@ -109,11 +111,11 @@ public class Axis2ModuleTestCase extends ASIntegrationTest {
         }
 
         assertTrue(moduleExists, "module engagement failure due to the unavailability of logmodule" +
-                " module at service level context");
+                                 " module at service level context");
     }
 
     @Test(groups = "wso2.as", description = "Invoke service - HelloService",
-            dependsOnMethods = "engageModule")
+          dependsOnMethods = "engageModule")
     public void invokeService() throws Exception {
         AxisServiceClient axisServiceClient = new AxisServiceClient();
         String endpoint = asServer.getServiceUrl() + "/HelloService";
@@ -122,40 +124,39 @@ public class Axis2ModuleTestCase extends ASIntegrationTest {
         log.info("Response for Invoke Service : " + response);
 
         assertTrue(response.toString().contains("<ns:greetResponse xmlns:ns=" +
-                "\"http://www.wso2.org/types\"><return>Hello World, Hello Wso2 !!!" +
-                "</return></ns:greetResponse>"));
+                                                "\"http://www.wso2.org/types\"><return>Hello World, Hello Wso2 !!!" +
+                                                "</return></ns:greetResponse>"));
     }
 
     @Test(groups = "wso2.as", description = "Retrieve DEBUG type log records from the log file and" +
-            " perform the verification of request and response messages ",
-            dependsOnMethods = "invokeService")
+                                            " perform the verification of request and response messages ",
+          dependsOnMethods = "invokeService")
     public void readLog() throws Exception {
         boolean incomingMessageStatus = false;  //  check expected incoming message
         boolean outgoingMessageStatus = false;  //  check expected outgoing message
 
         LogViewerClient logViewerClient = new LogViewerClient(asServer.getBackEndUrl(),
-                userInfo.getUserName(), userInfo.getPassword());
-        LogEvent[] logEvent = logViewerClient.getLogs("DEBUG", "Hello Wso2", "", "");
+                                                              userInfo.getUserName(), userInfo.getPassword());
+        LogEvent[] logEvent = logViewerClient.getAllSystemLogs();
 
         for (LogEvent aLogEvent : logEvent) {
-            if (aLogEvent.getAppName().equals("HelloService")) {
+            if (aLogEvent.getLogger().contains("DEBUG")) {
                 if (aLogEvent.getMessage().contains("Incoming Message")) {
 
                     assertTrue(aLogEvent.getMessage().equals("Incoming Message : <?xml version" +
-                            "='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=" +
-                            "\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body>" +
-                            "<ns:greet xmlns:ns=\"http://www.wso2.org/types\"><ns:name>Hello Wso2" +
-                            "</ns:name></ns:greet></soapenv:Body></soapenv:Envelope>"));
+                                                             "='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=" +
+                                                             "\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body>" +
+                                                             "<ns:greet xmlns:ns=\"http://www.wso2.org/types\"><ns:name>Hello Wso2" +
+                                                             "</ns:name></ns:greet></soapenv:Body></soapenv:Envelope>"));
                     incomingMessageStatus = true;
-
                 } else if (aLogEvent.getMessage().contains("Outgoing Message")) {
 
                     assertTrue(aLogEvent.getMessage().equals("Outgoing Message : " +
-                            "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope " +
-                            "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
-                            "<soapenv:Body><ns:greetResponse xmlns:ns=\"http://www.wso2.org/types\">" +
-                            "<return>Hello World, Hello Wso2 !!!</return></ns:greetResponse>" +
-                            "</soapenv:Body></soapenv:Envelope>"));
+                                                             "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope " +
+                                                             "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+                                                             "<soapenv:Body><ns:greetResponse xmlns:ns=\"http://www.wso2.org/types\">" +
+                                                             "<return>Hello World, Hello Wso2 !!!</return></ns:greetResponse>" +
+                                                             "</soapenv:Body></soapenv:Envelope>"));
 
                     outgoingMessageStatus = true;
                 }
@@ -167,17 +168,21 @@ public class Axis2ModuleTestCase extends ASIntegrationTest {
     }
 
     private void defineLogLevel() throws IOException {
-        String log4jFilePath = CarbonUtils.getCarbonHome() + "/repository/conf/log4j.properties";
+        String log4jFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "conf" +
+                               File.separator + "bundle-config" + File.separator + "org.wso2.carbon.logging" +
+                               File.separator + "log4j.properties";
+
         FileWriter fileWriter = new FileWriter(new File(log4jFilePath), true);
         BufferedWriter bufferWriter = new BufferedWriter(fileWriter);
         // Prerequisite  - appending 'log4j.logger.org.wso2.carbon.log.module=DEBUG' entry to
-        // CARBON_HOME/repository/conf/log4j.properties.(This will set the log level to DEBUG only for logging module.)
         bufferWriter.write("log4j.logger.org.wso2.carbon.log.module=DEBUG");
         bufferWriter.close();
     }
 
     private void removeLogLevel() throws IOException {
-        String log4jFilePath = CarbonUtils.getCarbonHome() + "/repository/conf/log4j.properties";
+        String log4jFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "conf" +
+                               File.separator + "bundle-config" + File.separator + "org.wso2.carbon.logging" +
+                               File.separator + "log4j.properties";
 
         File inFile = new File(log4jFilePath);
 
