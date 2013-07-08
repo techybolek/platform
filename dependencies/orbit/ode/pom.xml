@@ -584,6 +584,28 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+	    <groupId>org.wso2.bpel</groupId>
+	    <artifactId>ode-dao-hibernate</artifactId>
+            <version>${ode.version}</version>
+            <exclusions>
+            <exclusion>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+                </exclusion>               
+            </exclusions>
+         </dependency>
+	 <dependency>
+    		<groupId>org.wso2.bpel</groupId>
+    		<artifactId>ode-dao-hibernate-db</artifactId>
+	        <version>${ode.version}</version>
+            	<exclusions>
+                <exclusion>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+                </exclusion>               
+            </exclusions>
+         </dependency>
+        <dependency>
             <groupId>org.wso2.bpel</groupId>
             <artifactId>ode-bpel-obj</artifactId>
             <version>${ode.version}</version>
@@ -735,7 +757,7 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
-			    ode-agents|ode-axis2|ode-bpel-api-jca|ode-bpel-api|ode-scheduler-simple|ode-bpel-compiler|ode-bpel-connector|ode-bpel-dao|ode-bpel-ql|ode-bpel-schemas|ode-bpel-store|ode-dao-jpa|ode-bpel-runtime|ode-jacob|ode-jca-ra|ode-jca-server|ode-bpel-epr|ode-bpel-obj|ode-bpel-extensions-e4x|ode-bpel-extensions-long-running|ode-utils;scope=compile|runtime;inline=false;
+			    ode-agents|ode-axis2|ode-bpel-api-jca|ode-bpel-api|ode-scheduler-simple|ode-bpel-compiler|ode-bpel-connector|ode-bpel-dao|ode-bpel-ql|ode-bpel-schemas|ode-bpel-store|ode-dao-jpa|ode-dao-hibernate|ode-dao-hibernate-db|ode-bpel-runtime|ode-jacob|ode-jca-ra|ode-jca-server|ode-bpel-epr|ode-bpel-obj|ode-bpel-extensions-e4x|ode-bpel-extensions-long-running|ode-utils;scope=compile|runtime;inline=false;
                         </Embed-Dependency>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <JPA-PersistenceUnits>ode-dao,ode-store</JPA-PersistenceUnits>
