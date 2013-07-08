@@ -29,8 +29,6 @@ import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.policies.PolicyManager;
-import org.wso2.carbon.governance.api.policies.dataobjects.Policy;
 import org.wso2.carbon.governance.api.schema.SchemaManager;
 import org.wso2.carbon.governance.api.schema.dataobjects.Schema;
 import org.wso2.carbon.governance.api.services.ServiceManager;
@@ -39,7 +37,6 @@ import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import javax.xml.namespace.QName;
 import java.net.MalformedURLException;
@@ -73,7 +70,9 @@ public class GovernanceApiWsdlTestCase {
     @BeforeClass(alwaysRun = true, groups = {"wso2.greg", "wso2.greg.GovernanceApiWsdl"})
     public void deployArtifact() throws InterruptedException, RemoteException,
             MalformedURLException, GovernanceException {
-        wsdl = wsdlMgr.newWsdl("http://svn.wso2.org/repos/wso2/trunk/commons/qa/qa-artifacts/greg/wsdl/calculator.wsdl");
+        wsdl = wsdlMgr.newWsdl("http://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
+                "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/" +
+                "artifacts/GREG/wsdl/calculator.wsdl");
         wsdlMgr.addWsdl(wsdl);
     }
 
