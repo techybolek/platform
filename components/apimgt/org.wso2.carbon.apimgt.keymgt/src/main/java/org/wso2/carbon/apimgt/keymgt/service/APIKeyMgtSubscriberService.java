@@ -66,7 +66,9 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 public class APIKeyMgtSubscriberService extends AbstractAdmin {
 	
 	 private static final Log log = LogFactory.getLog(APIKeyMgtSubscriberService.class);
-
+	 private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+	 private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
+	 private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
 
     /**
      * Get the access token for a user per given API. Users/developers can use this access token
@@ -178,7 +180,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
 		// Request parameters.
 		List<NameValuePair> params = new ArrayList<NameValuePair>(3);
-		params.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, "client_credentials"));
+		params.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
 		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
 		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
 		try {
@@ -193,8 +195,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 			} else {
 				String responseStr = EntityUtils.toString(responseEntity);
 				JSONObject obj = new JSONObject(responseStr);
-				newAccessToken = obj.get("access_token").toString();
-				validityPeriod = Long.parseLong(obj.get("expires_in").toString());
+				newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
+				validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
 			}
 
 		} catch (Exception e2) {
