@@ -13,14 +13,14 @@ import org.wso2.carbon.apimgt.core.usage.APIStatsPublisher;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIContextCache;
-import org.wso2.carbon.apimgt.impl.utils.LRUCache;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.interceptor.valve.internal.DataHolder;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import javax.cache.Cache;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -46,8 +46,8 @@ public class APIMgtValve extends ValveBase {
     private String externalAPIManagerURL = null;
 
     private String manageAPIs;
-
-    LRUCache<String, Boolean> contextCache = null;
+    
+    Cache contextCache = null;
 
     APITokenAuthenticator authenticator = new APITokenAuthenticator();
 
@@ -64,7 +64,7 @@ public class APIMgtValve extends ValveBase {
             hostName = DataPublisherUtil.getHostAddress();
             externalAPIManagerURL = CarbonUtils.getServerConfiguration().getFirstProperty("APIGateway");
             manageAPIs = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
-            contextCache = APIContextCache.getInstance().getApiContexts();
+            contextCache = APIUtil.getAPIContextCache();
             initialized = true;
         }
 
@@ -77,7 +77,7 @@ public class APIMgtValve extends ValveBase {
         }
 
         boolean contextExist;
-        Boolean contextValueInCache = contextCache.get(context) ;
+        Boolean contextValueInCache = Boolean.parseBoolean(contextCache.get(context).toString()) ;
 
         if (contextValueInCache != null) {
             contextExist = contextValueInCache;
