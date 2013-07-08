@@ -1804,6 +1804,9 @@ public class APIStoreHostObject extends ScriptableObject {
         String oldAccessToken = (String) args[3];
         NativeArray accessAllowDomainsArr = (NativeArray) args[4];
         String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
+        String clientId = (String) args[5];
+        String clientSecret = (String) args[6];
+        
         for (Object domain : accessAllowDomainsArr.getIds()) {
             int index = (Integer) domain;
             accessAllowDomainsArray[index] = (String) accessAllowDomainsArr.get(index, null);
@@ -1818,7 +1821,7 @@ public class APIStoreHostObject extends ScriptableObject {
             try {
                 //Regenerate the application access key
                 accessToken = keyMgtClient.regenerateApplicationAccessKey(tokenType, oldAccessToken,
-                        accessAllowDomainsArray);
+                        accessAllowDomainsArray,clientId,clientSecret);
                 if (accessToken != null) {
                     //If a new access token generated successfully,remove the old access token from cache.
                     APIAuthenticationServiceClient authKeyMgtClient = getAPIKeyManagementClient();
