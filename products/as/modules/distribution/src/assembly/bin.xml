@@ -266,7 +266,7 @@
         </fileSet>
         <fileSet>
             <directory>../samples/product/Jaxws-Jaxrs/jaxrs_basic/target</directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps
             </outputDirectory>
             <includes>
                 <include>**/**.war</include>
