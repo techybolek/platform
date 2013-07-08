@@ -268,6 +268,7 @@ HUMANTASK.createDeleteCommentLink = function(commentJSON) {
 };
 
 HUMANTASK.deleteComment = function (taskId, commentId) {
+if (confirm('Do you want to delete the comment?'))
 
     var deleteCommentURL = 'task-operations-ajaxprocessor.jsp?operation=deleteComment&taskClient=' +
                            HUMANTASK.taskClient + '&taskId=' + taskId + '&commentId=' + commentId;
