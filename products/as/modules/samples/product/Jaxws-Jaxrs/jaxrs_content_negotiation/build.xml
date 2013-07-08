@@ -63,7 +63,7 @@
 
     <target name="build-all" depends ="war">
         <echo message="Copying the created war file in to the deployment directory"/>
-        <copy file="${webapps}/${warName}" todir="${repo.location}/jaxwebapps"/>
+        <copy file="${webapps}/${warName}" todir="${repo.location}/webapps"/>
     </target>
 
     <target name="clean">

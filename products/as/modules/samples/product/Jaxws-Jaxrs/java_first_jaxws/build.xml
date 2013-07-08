@@ -25,7 +25,7 @@
     <property name="webapps" value="webapps"/>
     <property name="warName" value="java_first_jaxws.war"/>    
     <property name="src" value="src"/>
-    <property name="repo.jaxwebapps" value="jaxwebapps"/>
+    <property name="repo.webapps" value="webapps"/>
 
     <path id="as.samples.jaxws">
         <pathelement path="${java.class.path}"/>
@@ -77,7 +77,7 @@
 	
     <target name="build-all" depends="war">
         <echo message="Copying the created war and war files in to the repository"/>
-        <copy toDir="${repo.location}/${repo.jaxwebapps}">
+        <copy toDir="${repo.location}/${repo.webapps}">
             <fileset dir="${webapps}">
                 <include name="**/*.war"/>
             </fileset>
