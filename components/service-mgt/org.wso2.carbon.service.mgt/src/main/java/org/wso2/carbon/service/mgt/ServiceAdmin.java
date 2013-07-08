@@ -472,6 +472,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         serviceTypes.add("axis2");
 
         HashMap<String, AxisService> axisServices = getAxisConfig().getServices();
+        Set<String> axisFaultServices = (getAxisConfig().getFaultyServices()).keySet();
         List<AxisService> axisServicesList = new ArrayList<AxisService>();
 
         // we have to check services in transit ghost state as well..
@@ -589,7 +590,9 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                     service.setSecurityScenarioId(securityScenario.getScenarioId());
                 }
             }
-            serviceList.add(service);
+            if(!axisFaultServices.contains(axisService.getName())){
+            	serviceList.add(service);
+            }
         }
 
 
@@ -620,7 +623,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
     }
 
     public int getNumberOfServiceGroups() throws AxisFault {
-        List<String> sgList = new ArrayList<String>();
+        List<String> sgList = new ArrayList<String>();        
         for (Iterator<AxisServiceGroup> serviceGroups = getAxisConfig().getServiceGroups();
              serviceGroups.hasNext(); ) {
             AxisServiceGroup serviceGroup = serviceGroups.next();
@@ -642,15 +645,19 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                 sgList.add(sg.getServiceGroupName());
             }
         }
+        Set<String> faultServices = (getAxisConfig().getFaultyServices()).keySet();
+        sgList.removeAll(faultServices);
         return sgList.size();
     }
 
     public int getNumberOfActiveServices() throws AxisFault {
         List<String> activeList = new ArrayList<String>();
         Map<String, AxisService> services = getAxisConfig().getServices();
+        Set<String> faultServices = (getAxisConfig().getFaultyServices()).keySet();
         for (AxisService service : services.values()) {
             if (!SystemFilter.isFilteredOutService((AxisServiceGroup) service.getParent()) &&
-                !service. isClientSide() && service.isActive()) {
+                !service. isClientSide() && service.isActive() &&
+                !faultServices.contains(service.getName())) {
                 activeList.add(service.getName());
             }
         }
