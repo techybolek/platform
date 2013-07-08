@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><api xmlns="http://ws.apache.org/ns/synapse" name="_WSO2AMRevokeAPI_" context="/revoke">
+    <resource methods="POST" url-mapping="/*">
+        <inSequence>
+            <send>
+                <endpoint>
+                    <address uri="https://localhost:9443/oauth2endpoints/revoke"/>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <send/>
+        </outSequence>
+    </resource>
+</api>
