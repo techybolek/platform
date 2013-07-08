@@ -185,8 +185,10 @@ include("/jagg/jagg.jag");
         oldAccessToken = request.getParameter("oldAccessToken");
         accessAllowDomains = request.getParameter("authorizedDomains");
         accessAllowDomainsArr = accessAllowDomains.split(",");
+        clientId = request.getParameter("clientId");
+        clientSecret = request.getParameter("clientSecret");
         mod = jagg.module("subscription");
-        result = mod.refreshToken(username,application,keyType,oldAccessToken,accessAllowDomainsArr);
+        result = mod.refreshToken(username,application,keyType,oldAccessToken,accessAllowDomainsArr,clientId, clientSecret);
 
         if (result.error) {
             obj = {

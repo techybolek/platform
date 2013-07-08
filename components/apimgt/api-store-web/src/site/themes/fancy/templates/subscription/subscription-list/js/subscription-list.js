@@ -90,7 +90,7 @@ $(document).ready(function () {
 
 });
 
-var regenerate=function(appName,keyType,i,btn,div) {
+var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
     //$('.show-hide-key pull-right').attr('disabled');
     $(btn).prev().show();
     $(btn).hide();
@@ -99,6 +99,8 @@ var regenerate=function(appName,keyType,i,btn,div) {
     var oldAccessToken;
     var inputId;
     var authorizedDomainsTemp;
+    var clientId;
+    var clientSecret;
     if (keyType == 'PRODUCTION') {
         inputId=$('#prodOldAccessToken'+i);
         divId = 'prodTable'+i;
@@ -115,7 +117,9 @@ var regenerate=function(appName,keyType,i,btn,div) {
         application:appName,
         keytype:keyType,
         oldAccessToken:oldAccessToken,
-        authorizedDomains:authorizedDomainsTemp
+        authorizedDomains:authorizedDomainsTemp,
+        clientId:clientId,
+        clientSecret:clientSecret
     }, function (result) {
         if (!result.error) {
 

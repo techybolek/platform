@@ -60,7 +60,7 @@
                                                                 <div>
                                                                     <span class="show-hide-key processing-msg" style="display:none;"><%=i18n.localize("generating")%></span>
                                                                     <a class="show-hide-key"
-                                                                         onclick="regenerate('<%=app.name%>','PRODUCTION',<%=str_i%>,this,'pull-right'+<%=str_i%>)" ><i class="icon-refresh"></i>
+                                                                         onclick="regenerate('<%=app.name%>','PRODUCTION',<%=str_i%>,this,'pull-right'+<%=str_i%>,'<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="icon-refresh"></i>
                                                                          <%=i18n.localize("regenerate")%></a>
                                                                 </div>
                                                             </th>
