@@ -56,12 +56,12 @@ public class LocalTransportTestCase extends ASIntegrationTest {
         super.init(ProductConstant.ADMIN_USER_ID);
         AARServiceUploaderClient aarServiceUploaderClient
                 = new AARServiceUploaderClient(asServer.getBackEndUrl(),
-                                               asServer.getSessionCookie());
+                asServer.getSessionCookie());
 
         aarServiceUploaderClient.uploadAARFile("SimpleStockQuoteService.aar",
-                                               ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
-                                               File.separator + "AS" + File.separator + "aar" + File.separator +
-                                               "SimpleStockQuoteService.aar", "");
+                ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
+                        File.separator + "AS" + File.separator + "aar" + File.separator +
+                        "SimpleStockQuoteService.aar", "");
 
         isServiceDeployed(serviceName);
         log.info("Service uploaded successfully");
@@ -70,24 +70,24 @@ public class LocalTransportTestCase extends ASIntegrationTest {
     @Test(groups = {"wso2.as"}, description = "Unauthorize module engagement")
     public void testToEngageModuleToService()
             throws IOException, EndpointAdminEndpointAdminException,
-                   LoginAuthenticationExceptionException,
-                   XMLStreamException, ModuleAdminServiceModuleMgtExceptionException {
+            LoginAuthenticationExceptionException,
+            XMLStreamException, ModuleAdminServiceModuleMgtExceptionException {
 
         ModuleAdminServiceClient moduleAdminServiceClient =
                 new ModuleAdminServiceClient(asServer.getBackEndUrl(), asServer.getSessionCookie());
-        ModuleMetaData[] modulesBefore = moduleAdminServiceClient.getModuleList();
+        ModuleMetaData[] modulesBefore = moduleAdminServiceClient.listModulesForService(serviceName);
 
         String moduleId = null;
         for (ModuleMetaData moduleBefore : modulesBefore) {
-            if (moduleBefore.getModuleId().contains("rahas")) { //engage rahas module
+            if (!moduleBefore.getEngagedServiceLevel()) {
                 moduleId = moduleBefore.getModuleId();
                 break;
             }
         }
 
         String url = ProductUrlGeneratorUtil.getProductHomeURL(ProductConstant.APP_SERVER_NAME) +
-                     "/modulemgt/service_eng_ajaxprocessor.jsp?action=engage&moduleId=" + moduleId +
-                     "&serviceName=" + serviceName;
+                "/modulemgt/service_eng_ajaxprocessor.jsp?action=engage&moduleId=" + moduleId +
+                "&serviceName=" + serviceName;
         HttpsResponse response = HttpsURLConnectionClient.getRequest(url, null);
         log.info("HTTPS client response code " + response.getResponseCode());
         ModuleMetaData[] moduleListAfterEngage =
@@ -96,7 +96,9 @@ public class LocalTransportTestCase extends ASIntegrationTest {
         boolean status = false;
         for (ModuleMetaData modulesAfter : moduleListAfterEngage) {
             if (modulesAfter.getModuleId().equals(moduleId)) {
-                status = true;
+                if ((modulesAfter.getEngagedServiceLevel())) {
+                    status = true;
+                }
                 break;
             }
         }
@@ -111,14 +113,14 @@ public class LocalTransportTestCase extends ASIntegrationTest {
         boolean statusBefore = serviceMetaData.getActive();
         assertTrue(statusBefore, "service is not active");
         String url = ProductUrlGeneratorUtil.getProductHomeURL(ProductConstant.APP_SERVER_NAME) +
-                     "/service-mgt/change_service_state_ajaxprocessor.jsp?serviceName=" + serviceName + "&isActive=false";
+                "/service-mgt/change_service_state_ajaxprocessor.jsp?serviceName=" + serviceName + "&isActive=false";
 
         HttpsResponse response = HttpsURLConnectionClient.getRequest(url, null);
         log.info("HTTPS client response code " + response.getResponseCode());
 
         ServiceMetaData serviceMetaDataAfter = serviceAdminClient.getServicesData(serviceName);
         assertTrue(serviceMetaDataAfter.getActive(), "Authorization skipped when activate/deactivate " +
-                                                     "service though change_service_state_ajaxprocessor");
+                "service though change_service_state_ajaxprocessor");
     }
 
     @Test(groups = {"wso2.as"}, description = "Unauthorize restart of carbon server")
@@ -126,7 +128,7 @@ public class LocalTransportTestCase extends ASIntegrationTest {
             throws InterruptedException, IOException {
 
         String url = ProductUrlGeneratorUtil.getProductHomeURL(ProductConstant.APP_SERVER_NAME) +
-                     "/server-admin/proxy_ajaxprocessor.jsp?action=restartGracefully";
+                "/server-admin/proxy_ajaxprocessor.jsp?action=restartGracefully";
 
         HttpsResponse response = HttpsURLConnectionClient.getRequest(url, null);
         log.info("HTTPS client response code " + response.getResponseCode());
@@ -137,7 +139,7 @@ public class LocalTransportTestCase extends ASIntegrationTest {
             //try to login while server is restaring
             AuthenticatorClient authenticatorClient = new AuthenticatorClient(asServer.getBackEndUrl());
             authenticatorClient.login(userInfo.getUserName(), userInfo.getPassword(),
-                                      asServer.getProductVariables().getHostName());
+                    asServer.getProductVariables().getHostName());
         } catch (AxisFault axisFault) {
             status = true;
         } catch (LoginAuthenticationExceptionException e) {
@@ -147,8 +149,8 @@ public class LocalTransportTestCase extends ASIntegrationTest {
 
         //wait for server startup
         ClientConnectionUtil.waitForLogin(Integer.parseInt(asServer.getProductVariables().getHttpsPort()),
-                                          asServer.getProductVariables().getHostName(),
-                                          asServer.getBackEndUrl());
+                asServer.getProductVariables().getHostName(),
+                asServer.getBackEndUrl());
     }
 
     @AfterClass(alwaysRun = true)
