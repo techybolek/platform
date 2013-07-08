@@ -21,7 +21,10 @@ import org.wso2.carbon.bam.webapp.stat.publisher.conf.RegistryPersistenceManager
 import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappConfig;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappStatisticsPublisherConstants;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.webapp.statistics.ComputeData;
+import org.wso2.carbon.webapp.statistics.data.StatisticData;
 
 public class WebappStatPublisherAdmin extends AbstractAdmin {
     private RegistryPersistenceManager registryPersistenceManager;
@@ -64,5 +67,17 @@ public class WebappStatPublisherAdmin extends AbstractAdmin {
         WebappConfig webappConfig = new WebappConfig();
         return  webappConfig.getWebappConfigData(webappName);
 
+    }
+
+    public StatisticData getWebappRelatedData(String webAppName) {
+        try {
+
+            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+            StatisticData statisticData = ComputeData.map.get(tenantId).get(webAppName);
+            return statisticData;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
