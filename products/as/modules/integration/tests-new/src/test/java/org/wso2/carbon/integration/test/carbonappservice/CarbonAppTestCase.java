@@ -57,7 +57,7 @@ public class CarbonAppTestCase extends ASIntegrationTest {
     public void carAppDelete() throws Exception {   // deletes the car application and the service
         ApplicationAdminClient appAdminClient = new ApplicationAdminClient(asServer.getBackEndUrl(),
                 asServer.getSessionCookie());
-        appAdminClient.deleteApplication("AxisCApp");
+        appAdminClient.deleteApplication("AxisCApp_1.0.0");
         deleteService("Calculator");
         log.info("Calculator service deleted");
     }
@@ -84,7 +84,7 @@ public class CarbonAppTestCase extends ASIntegrationTest {
         ApplicationAdminClient applicationAdminClient =
                 new ApplicationAdminClient(asServer.getBackEndUrl(), asServer.getSessionCookie());
         String[] applicationList = applicationAdminClient.listAllApplications();
-        assertTrue(Arrays.asList(applicationList).contains("AxisCApp"));
+        assertTrue(Arrays.asList(applicationList).contains("AxisCApp_1.0.0"));
     }
 
     @Test(groups = "wso2.as", description = "invoke the service", dependsOnMethods = "verifyAppList")
