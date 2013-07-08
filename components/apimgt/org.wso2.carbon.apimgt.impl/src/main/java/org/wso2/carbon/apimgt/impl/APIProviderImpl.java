@@ -37,6 +37,7 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.cache.Cache;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -61,7 +62,8 @@ import java.util.regex.Pattern;
  */
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
-    LRUCache<String, Boolean> contextCache = APIContextCache.getInstance().getApiContexts();
+    //LRUCache<String, Boolean> contextCache = APIContextCache.getInstance().getApiContexts();
+    Cache contextCache = APIUtil.getAPIContextCache();
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -371,7 +373,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             createAPI(api);
             apiMgtDAO.addAPI(api);
             if (APIUtil.isAPIManagementEnabled()) {
-                Boolean apiContext = contextCache.get(api.getContext());
+                Boolean apiContext = Boolean.parseBoolean(contextCache.get(api.getContext()).toString());
                 if (apiContext == null) {
                     contextCache.put(api.getContext(), true);
                 }

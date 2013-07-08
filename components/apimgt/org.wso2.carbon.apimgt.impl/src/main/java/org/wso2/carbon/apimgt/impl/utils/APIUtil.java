@@ -60,6 +60,10 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -68,6 +72,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -1400,5 +1405,13 @@ public final class APIUtil {
 
     public static boolean isAPIManagementEnabled() {
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement"));
+    }
+
+    public static Cache getAPIContextCache() {
+        CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                getCache(APIConstants.API_CONTEXT_CACHE).getCacheManager();
+        return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_MANAGER_CACHE_MANAGER).
+                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
+                        APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
     }
 }

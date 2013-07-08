@@ -32,7 +32,9 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
@@ -59,6 +61,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
+import javax.cache.Cache;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -162,17 +165,16 @@ public class APIManagerComponent {
                             new UserAddListener(), null);
                 }
             }
-            //Load initially available api contexts at the server startup. This Map is only use by the products other than the api-manager
+            //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             String apiManagementEnabled = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
             String loadAPIContextsAtStartup = CarbonUtils.getServerConfiguration().getFirstProperty("LoadAPIContextsInServerStartup");
             if ((apiManagementEnabled != null && apiManagementEnabled.equals("true")) &&
                     (loadAPIContextsAtStartup != null && loadAPIContextsAtStartup.equals("true"))) {
                 List<String> contextList = ApiMgtDAO.getAllAvailableContexts();
-                LRUCache<String, Boolean> contextCache = new LRUCache<String, Boolean> (contextList.size());
+                Cache contextCache = APIUtil.getAPIContextCache();
                 for (String context : contextList) {
                     contextCache.put(context, true);
                 }
-                APIContextCache.getInstance().setApiContexts(contextCache);
             }
         } catch (APIManagementException e) {
             log.fatal("Error while initializing the API manager component", e);
