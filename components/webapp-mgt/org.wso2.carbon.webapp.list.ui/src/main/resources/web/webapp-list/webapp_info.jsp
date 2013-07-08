@@ -30,6 +30,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="org.wso2.carbon.webapp.list.ui.WebAppDataExtractor" %>
+<%@ page import="org.wso2.carbon.webapp.list.ui.WebappStatPublisherAdminClient" %>
 
 <fmt:bundle basename="org.wso2.carbon.webapp.list.ui.i18n.Resources">
 <carbon:breadcrumb
@@ -198,6 +199,9 @@
         var responseTextValue = returnElementList[0].firstChild.nodeValue;
         window.open(responseTextValue);
     }
+
+
+
 </script>
 
 <script type="text/javascript">
@@ -308,9 +312,9 @@
 
                 <td width="10px">&nbsp;</td>
 
-                <td>
+
                             <% if (webappType.equalsIgnoreCase("JaxWebapp") && wsdlURLS != null) { %>
-                <td width="10px">&nbsp;</td>
+                <%--<td width="10px">&nbsp;</td>--%>
 
                 <td width="50%">
                     <table class="styledLeft" id="wsClientTable"
@@ -365,7 +369,7 @@
                 </td>
                         <% } %>
                         <% if (webappType.equalsIgnoreCase("JaxWebapp") && wadlURLS != null) { %>
-                <td width="10px">&nbsp;</td>
+                <%--<td width="10px">&nbsp;</td>--%>
 
                 <td width="50%">
                     <table class="styledLeft" id="rsClientTable"
@@ -418,10 +422,12 @@
                 </td>
             <%}%>
 
-            <div id="sessionStatsDiv">
+
                 <%
                     if(!"JaxWebapp".equalsIgnoreCase(webappType)) {
                 %>
+                <td width="50%" id="sessionStatsDiv">
+
                 <table class="styledLeft" id="sessionStatsTable"
                        style="margin-left: 0px;" width="100%">
                     <%
@@ -474,15 +480,17 @@
                         <td><%= stats.getMaxSessionInactivityInterval()%>&nbsp;s</td>
                     </tr>
                 </table>
+                </td>
                 <%}%>
-            </div>
-            </td>
+
+
             </tr>
             <tr>
                 <td colspan="3">&nbsp;</td>
             </tr>
             <tr>
                 <td width="50%">
+
                     <table class="styledLeft" id="operationsTable"
                            style="margin-left: 0px;" width="100%">
                         <thead>
@@ -550,6 +558,40 @@
                                 <% } %>
                             </td>
                         </tr>
+                        <tr>
+                            <script type="text/javascript">
+
+                            </script>
+                            <%--<td>--%>
+                                        <% /* String cek = "";
+                                            boolean checked = false;
+                                            String webAppName = webappFileName;
+                                            if(webappFileName.contains(".war")){
+                                                webAppName = webappFileName.trim().substring(0, webappFileName.length()-4);
+                                            }
+                                            WebappStatPublisherAdminClient adminClient = new WebappStatPublisherAdminClient(
+                                                    cookie, backendServerURL, configContext, request.getLocale());
+
+
+                                            try{
+
+                                                checked = adminClient.getWebappConfigData(webAppName);
+
+                                            }catch (Exception e) {
+                                                CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+                                                session.setAttribute(CarbonUIMessage.ID, uiMsg);
+                                                e.printStackTrace();
+                                             }
+
+                                            if(checked){
+                                                cek = "checked=\"checked\"";
+                                            }
+*/
+
+                                %>
+                         <%--       <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" >  Enable BAM Statistics--%>
+                           <%-- </td>--%>
+                        </tr>
                          <%
                     if(CarbonUIUtil.isContextRegistered(config, "/urlmapper/")){ %>
                          <tr>
@@ -566,9 +608,125 @@
            				   %>
                         <tr>
                     </table>
+                    <br>
+
+                    <table class="styledLeft" id="serviceTable"
+                           style="margin-left: 0px;" width="100%">
+                        <thead>
+                        <tr>
+                            <th><fmt:message key="services"/></th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <script type="text/javascript">
+
+                            </script>
+                            <td>
+                                <%  String cek = "";
+                                    boolean checked = false;
+                                    String webAppName = webappFileName;
+                                    if(webappFileName.contains(".war")){
+                                        webAppName = webappFileName.trim().substring(0, webappFileName.length()-4);
+                                    }
+                                    WebappStatPublisherAdminClient adminClient = new WebappStatPublisherAdminClient(
+                                            cookie, backendServerURL, configContext, request.getLocale());
+
+
+                                    try{
+
+                                        checked = adminClient.getWebappConfigData(webAppName);
+
+                                    }catch (Exception e) {
+                                        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+                                        session.setAttribute(CarbonUIMessage.ID, uiMsg);
+                                        e.printStackTrace();
+                                    }
+
+                                    if(checked){
+                                        cek = "checked=\"checked\"";
+                                    }
+
+
+                                %>
+                                <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" <%= cek %>>  Enable BAM Statistics
+                            </td>
+                        </tr>
+                        <%
+                            if(CarbonUIUtil.isContextRegistered(config, "/urlmapper/")){ %>
+                        <tr>
+                            <td width="50%"><nobr>
+                                <a class="icon-link" style="background-image: url(images/url-rewrite.png);"
+                                   href="../urlmapper/index.jsp?carbonEndpoint=<%=webapp.getContext()%>&apptype=<%=webappType%>&servletContext=<%=servletContext%>">
+                                    URL Mappings
+                                </a></nobr>
+                            </td>
+                        </tr>
+                        <%
+
+                            }
+                        %>
+                        <tr>
+                    </table>
+
                 </td>
                 <td width="10px">&nbsp;</td>
-                <td>&nbsp;</td>
+                <td>
+                    <%   if(CarbonUIUtil.isContextRegistered(config, "/statistics/")){ %>
+
+                    <div id="result"></div>
+                    <div id="statsDiv" >
+                        <script type="text/javascript" src="../statistics/js/statistics.js"></script>
+                        <script type="text/javascript" src="../statistics/js/graphs.js"></script>
+
+                        <script type="text/javascript" src="../admin/js/jquery.flot.js"></script>
+                        <script type="text/javascript" src="../admin/js/excanvas.js"></script>
+                        <script type="text/javascript" src="global-params.js"></script>
+                        <script type="text/javascript">
+                            initResponseTimeGraph('50');
+                        </script>
+                        <script type="text/javascript">
+                            jQuery.noConflict();
+                            var refresh;
+                            function refreshStats() {
+                                var url = "../statistics/webapplication_stats_ajaxprocessor.jsp?webAppNameName=<%=  webappFileName %>";
+                                try {
+                                    jQuery("#result").load(url, null, function (responseText, status, XMLHttpRequest) {
+                                        if (status != "success") {
+                                            stopRefreshStats();
+                                            document.getElementById('result').innerHTML = responseText;
+                                        }
+                                    });
+                                } catch (e){} // ignored
+                            }
+                            function stopRefreshStats() {
+                                if (refresh) {
+                                    clearInterval(refresh);
+                                }
+                            }
+                            try {
+                                jQuery(document).ready(function() {
+                                    refreshStats();
+                                    if (document.getElementById('statsDiv').style.display == ''){
+                                        refresh = setInterval("refreshStats()", 6000);
+                                    }
+                                });
+                            } catch (e){} // ignored
+                        </script>
+                    </div>
+
+
+                    <%
+
+                        }
+                        else {
+                    %>
+                    &nbsp;
+
+                    <%
+
+                        }
+                    %>
+                </td>
             </tr>
         </table>
 
@@ -585,4 +743,32 @@
         %>
     </div>
 </div>
+<script type="text/javascript">
+    jQuery(function(){
+        jQuery(".bam_statistics").click(function(){
+            <%
+         String webAppName = webappFileName;
+         if(webappFileName.contains(".war")){
+            webAppName = webappFileName.trim().substring(0, webappFileName.length()-4);
+         }
+
+         %>
+            //var webappFileName=
+            var dataVal = "webappFileName="+'<%=webAppName%>';
+            if(jQuery(this).is(":checked")){
+                dataVal = dataVal + '&value=1'
+            } else{
+                dataVal = dataVal + '&value=0'
+            }
+            jQuery.ajax({
+                type: "POST",
+                url: "bam_activator.jsp",
+                data: dataVal,
+                success: function(msg){
+                    //  CARBON.showConfirmationDialog( msg.trim());
+                }
+            });
+        });
+    });
+</script>
 </fmt:bundle>
