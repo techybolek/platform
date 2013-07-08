@@ -23,23 +23,23 @@ Use cases:
 1. Simple dispatch
  - servlet does startAsync()
  - background thread calls ctx.dispatch()
-   &lt;a href="&lt;%=response.encodeURL("/examples/async/async0")%>"> Async 0 &lt;/a>
+   &lt;a href="&lt;%=response.encodeURL("/example/async/async0")%>"> Async 0 &lt;/a>
 
 2. Simple dispatch
  - servlet does startAsync()
  - background thread calls dispatch(/path/to/jsp)
-   &lt;a href="&lt;%=response.encodeURL("/examples/async/async1")%>"> Async 1 &lt;/a>
+   &lt;a href="&lt;%=response.encodeURL("/example/async/async1")%>"> Async 1 &lt;/a>
 
 3. Simple dispatch
  - servlet does startAsync()
  - background thread calls writes and calls complete()
-   &lt;a href="&lt;%=response.encodeURL("/examples/async/async2")%>"> Async 2 &lt;/a>
+   &lt;a href="&lt;%=response.encodeURL("/example/async/async2")%>"> Async 2 &lt;/a>
 
 4. Simple dispatch
  - servlet does a startAsync()
  - servlet calls dispatch(/path/to/jsp)
  - servlet calls complete()
-   &lt;a href="&lt;%=response.encodeURL("/examples/async/async3")%>"> Async 3 &lt;/a>
+   &lt;a href="&lt;%=response.encodeURL("/example/async/async3")%>"> Async 3 &lt;/a>
 
 3. Timeout s1
  - servlet does a startAsync()
@@ -66,6 +66,6 @@ Use cases:
 
 
 7. Stock ticker
-   &lt;a href="&lt;%=response.encodeURL("/examples/async/stockticker")%>"> StockTicker &lt;/a>
+   &lt;a href="&lt;%=response.encodeURL("/example/async/stockticker")%>"> StockTicker &lt;/a>
 &lt;/pre>
 </pre></body></html>

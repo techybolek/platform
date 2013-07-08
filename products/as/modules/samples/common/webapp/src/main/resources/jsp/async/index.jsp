@@ -22,23 +22,23 @@ Use cases:
 1. Simple dispatch
  - servlet does startAsync()
  - background thread calls ctx.dispatch()
-   <a href="<%=response.encodeURL("/examples/async/async0")%>"> Async 0 </a>
+   <a href="<%=response.encodeURL("/example/async/async0")%>"> Async 0 </a>
 
 2. Simple dispatch
  - servlet does startAsync()
  - background thread calls dispatch(/path/to/jsp)
-   <a href="<%=response.encodeURL("/examples/async/async1")%>"> Async 1 </a>
+   <a href="<%=response.encodeURL("/example/async/async1")%>"> Async 1 </a>
 
 3. Simple dispatch
  - servlet does startAsync()
  - background thread calls writes and calls complete()
-   <a href="<%=response.encodeURL("/examples/async/async2")%>"> Async 2 </a>
+   <a href="<%=response.encodeURL("/example/async/async2")%>"> Async 2 </a>
 
 4. Simple dispatch
  - servlet does a startAsync()
  - servlet calls dispatch(/path/to/jsp)
  - servlet calls complete()
-   <a href="<%=response.encodeURL("/examples/async/async3")%>"> Async 3 </a>
+   <a href="<%=response.encodeURL("/example/async/async3")%>"> Async 3 </a>
 
 3. Timeout s1
  - servlet does a startAsync()
@@ -65,5 +65,5 @@ Use cases:
 
 
 7. Stock ticker
-   <a href="<%=response.encodeURL("/examples/async/stockticker")%>"> StockTicker </a>
+   <a href="<%=response.encodeURL("/example/async/stockticker")%>"> StockTicker </a>
 </pre>
