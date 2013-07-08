@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.amber.oauth2.common.OAuth;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -28,17 +32,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -52,18 +51,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
-import org.apache.http.client.CookieStore;
-import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * This service class exposes the functionality required by the application developers who will be
@@ -170,7 +164,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 	public String renewAccessToken(String tokenType, String oldAccessToken,
 	                               String[] allowedDomains, String clientId, String clientSecret)
 	                                                                                             throws Exception {
-		String accessToken = null;
+		String newAccessToken = null;
 		long validityPeriod = 0;
 		// create a post request to getNewAccessToken for client_credentials
 		// grant type.
@@ -199,7 +193,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 			} else {
 				String responseStr = EntityUtils.toString(responseEntity);
 				JSONObject obj = new JSONObject(responseStr);
-				accessToken = obj.get("access_token").toString();
+				newAccessToken = obj.get("access_token").toString();
 				validityPeriod = Long.parseLong(obj.get("expires_in").toString());
 			}
 
@@ -210,7 +204,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
 		}
 		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-		return apiMgtDAO.updateRefreshedAccessToken(tokenType, oldAccessToken, allowedDomains, accessToken,
+		return apiMgtDAO.updateRefreshedApplicationAccessToken(tokenType, oldAccessToken, allowedDomains, newAccessToken,
 		                                    validityPeriod);
 
 	}

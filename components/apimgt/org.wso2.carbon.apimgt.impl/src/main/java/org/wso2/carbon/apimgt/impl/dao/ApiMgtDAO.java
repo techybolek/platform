@@ -46,8 +46,6 @@ import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.model.Comment;
-import org.apache.amber.oauth2.common.OAuth;
-
 import java.math.BigDecimal;
 import java.sql.*;
 import java.sql.Date;
@@ -56,17 +54,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.codehaus.jettison.json.JSONObject;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -1927,11 +1914,11 @@ public class ApiMgtDAO {
    * @throws IdentityException
    * @throws APIManagementException
    */
-	public String updateRefreshedAccessToken(String keyType, String oldAccessToken,
+	public String updateRefreshedApplicationAccessToken(String keyType, String oldAccessToken,
 	                                 String[] accessAllowDomains, String accessToken,
 	                                 long validityPeriod) throws IdentityException,
 	                                                     APIManagementException {
-
+		String newAccessToken = accessToken;
 		String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
 		if (APIUtil.checkUserNameAssertionEnabled()) {
 			String userName = APIUtil.getUserIdFromAccessToken(oldAccessToken);
@@ -1941,7 +1928,7 @@ public class ApiMgtDAO {
 			if (userName != null && !userName.equalsIgnoreCase("")) {
 				// use ':' for token & userName separation
 				String accessTokenStrToEncode = accessToken + ":" + userName;
-				accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
+				newAccessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
 			}
 
 			if (APIUtil.checkAccessTokenPartitioningEnabled()) {
@@ -1960,7 +1947,7 @@ public class ApiMgtDAO {
 			connection = APIMgtDBUtil.getConnection();
 			connection.setAutoCommit(false);
 			prepStmt = connection.prepareStatement(sqlUpdateAccessToken);
-			prepStmt.setString(1, accessToken);
+			prepStmt.setString(1, newAccessToken);
 			prepStmt.setString(2, APIConstants.TokenStatus.ACTIVE);
 			prepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()),
 			                      Calendar.getInstance(TimeZone.getTimeZone("UTC")));
@@ -1989,7 +1976,7 @@ public class ApiMgtDAO {
 		} finally {
 			IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
 		}
-		return accessToken;
+		return newAccessToken;
 	}
 
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
