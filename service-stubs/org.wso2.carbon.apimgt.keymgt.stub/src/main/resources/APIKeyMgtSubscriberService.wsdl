@@ -1,4 +1,4 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax27="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax28="http://util.java/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax216="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax218="http://base.identity.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax213="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:ax211="http://api.apimgt.carbon.wso2.org/xsd" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax27="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax28="http://util.java/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax216="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ax218="http://base.identity.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax213="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax211="http://api.apimgt.carbon.wso2.org/xsd" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
     <wsdl:documentation>APIKeyMgtSubscriberService</wsdl:documentation>
     <wsdl:types>
         <xs:schema xmlns:ax214="http://util.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.api.apimgt.carbon.wso2.org/xsd">
@@ -101,6 +101,8 @@
                         <xs:element minOccurs="0" name="tokenType" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="oldAccessToken" nillable="true" type="xs:string"/>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="allowedDomains" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="clientId" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="clientSecret" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -636,13 +638,13 @@
     </wsdl:binding>
     <wsdl:service name="APIKeyMgtSubscriberService">
         <wsdl:port name="APIKeyMgtSubscriberServiceHttpsSoap11Endpoint" binding="tns:APIKeyMgtSubscriberServiceSoap11Binding">
-            <soap:address location="https://dinusha-laptop:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap11Endpoint"/>
+            <soap:address location="https://10.200.1.129:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap11Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIKeyMgtSubscriberServiceHttpsSoap12Endpoint" binding="tns:APIKeyMgtSubscriberServiceSoap12Binding">
-            <soap12:address location="https://dinusha-laptop:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap12Endpoint"/>
+            <soap12:address location="https://10.200.1.129:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsSoap12Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIKeyMgtSubscriberServiceHttpsEndpoint" binding="tns:APIKeyMgtSubscriberServiceHttpBinding">
-            <http:address location="https://dinusha-laptop:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsEndpoint"/>
+            <http:address location="https://10.200.1.129:8243/services/APIKeyMgtSubscriberService.APIKeyMgtSubscriberServiceHttpsEndpoint"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
