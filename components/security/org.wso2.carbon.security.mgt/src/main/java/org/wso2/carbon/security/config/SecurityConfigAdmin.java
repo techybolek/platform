@@ -18,6 +18,7 @@ package org.wso2.carbon.security.config;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import javax.cache.Cache;
+//import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 
@@ -743,18 +744,11 @@ public class SecurityConfigAdmin {
                 updateSecScenarioInGhostFile(service.getFileName().getPath(), serviceName, scenrioId);
             }
             
-//            Cache cache = CacheManager.getInstance().getCache(POXSecurityHandler.POX_ENABLED);
-//            cache.remove(serviceName);
             this.getPOXCache().remove(serviceName);
-            
-//            CacheInvalidator invalidator = SecurityMgtServiceComponent.getCacheInvalidator();
-//            try {
-//                invalidator.invalidateCache(POXSecurityHandler.POX_ENABLED, new StringCacheKey(serviceName));
-//            } catch (CacheException e1) {
-//                String msg = "Failed to propagate changes immediately. It will take time to update nodes in cluster";
-//                log.error(msg, e1);
-//                throw new SecurityConfigException(msg, e1);
-//            }
+            Cache<String, String> cache = getPOXCache();
+            if(cache != null){
+            	cache.remove(serviceName);
+            }
             
         } catch (RegistryException e) {
             log.error(e.getMessage(), e);
@@ -1822,13 +1816,8 @@ public class SecurityConfigAdmin {
      *
      */
     private Cache<String, String> getPOXCache() {
-        Cache<String, String> cache = null;
         CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(POXSecurityHandler.POX_CACHE_MANAGER);
-        if(manager != null){
-        	cache = manager.getCache(POXSecurityHandler.POX_ENABLED);
-        } else {
-        	cache = Caching.getCacheManager().getCache(POXSecurityHandler.POX_ENABLED);
-        }
+        Cache<String, String> cache = manager.getCache(POXSecurityHandler.POX_ENABLED);
     	return cache;
     }
 

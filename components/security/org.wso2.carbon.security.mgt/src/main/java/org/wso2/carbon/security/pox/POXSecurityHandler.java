@@ -119,16 +119,12 @@ public class POXSecurityHandler implements Handler {
 
         String isPox = null;
 
-//        Cache cache = CacheManager.getInstance().getCache(POX_ENABLED);
         Cache<String, String> cache = this.getPOXCache();
 
         if(cache != null){
         	if(cache.get(service.getName()) != null) {
         		isPox = cache.get(service.getName());
         	}
-//            if(cache.getCacheEntry(service.getName()) != null){
-//                isPox = (String) cache.getCacheEntry(service.getName()).getValue();
-//            }
         }
 
         if (isPox != null && JavaUtils.isFalseExplicitly(isPox)) {
@@ -309,13 +305,8 @@ public class POXSecurityHandler implements Handler {
      *
      */
     private Cache<String, String> getPOXCache() {
-        Cache<String, String> cache = null;
         CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(POXSecurityHandler.POX_CACHE_MANAGER);
-        if(manager != null){
-        	cache = manager.getCache(POXSecurityHandler.POX_ENABLED);
-        } else {
-        	cache = Caching.getCacheManager().getCache(POXSecurityHandler.POX_ENABLED);
-        }
+        Cache<String, String> cache = manager.getCache(POXSecurityHandler.POX_ENABLED);
     	return cache;
     }
 }
