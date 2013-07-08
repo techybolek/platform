@@ -134,10 +134,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         return ApiMgtDAO.getSubscribedAPIsOfUser(userId);
     }
 
-    public String renewAccessToken(String tokenType, String oldAccessToken, String[] allowedDomains)
+    public String renewAccessToken(String tokenType, String oldAccessToken, String[] allowedDomains,String clientId,String clientSecret)
             throws Exception {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        return apiMgtDAO.refreshAccessToken(tokenType, oldAccessToken, allowedDomains);
+        return apiMgtDAO.refreshAccessToken(tokenType, oldAccessToken, allowedDomains,clientId, clientSecret);
 
     }
 
