@@ -98,6 +98,7 @@
                             ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Export-Package>
+                            org.wso2.carbon.webapp.statistics.data.*,
                             org.wso2.carbon.bam.webapp.stat.publisher.stub.*;
                             version="${carbon.platform.package.export.version}"
                         </Export-Package>
