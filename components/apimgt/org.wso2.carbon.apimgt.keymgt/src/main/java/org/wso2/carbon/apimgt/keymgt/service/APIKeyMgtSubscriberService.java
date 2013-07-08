@@ -18,7 +18,24 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
+import org.apache.amber.oauth2.common.OAuth;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -35,6 +52,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.apache.http.client.CookieStore;
 import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
@@ -52,6 +70,9 @@ import java.util.Set;
  * consuming the APIs published in the API Store.
  */
 public class APIKeyMgtSubscriberService extends AbstractAdmin {
+	
+	 private static final Log log = LogFactory.getLog(APIKeyMgtSubscriberService.class);
+
 
     /**
      * Get the access token for a user per given API. Users/developers can use this access token
@@ -133,13 +154,66 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
         return ApiMgtDAO.getSubscribedAPIsOfUser(userId);
     }
+    
+	/**
+	 * Renew the ApplicationAccesstoken
+	 * 
+	 * @param tokenType
+	 * @param oldAccessToken
+	 * @param allowedDomains
+	 * @param clientId
+	 * @param clientSecret
+	 * @return
+	 * @throws Exception
+	 */
 
-    public String renewAccessToken(String tokenType, String oldAccessToken, String[] allowedDomains,String clientId,String clientSecret)
-            throws Exception {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        return apiMgtDAO.refreshAccessToken(tokenType, oldAccessToken, allowedDomains,clientId, clientSecret);
+	public String renewAccessToken(String tokenType, String oldAccessToken,
+	                               String[] allowedDomains, String clientId, String clientSecret)
+	                                                                                             throws Exception {
+		String accessToken = null;
+		long validityPeriod = 0;
+		// create a post request to getNewAccessToken for client_credentials
+		// grant type.
+//		HttpContext httpContext = new BasicHttpContext();
+//		CookieStore cookieStore = new BasicCookieStore();
+//		httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+		
+		String tokenEndpoint = OAuthServerConfiguration.getInstance().getTokenEndPoint();
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpPost httppost = new HttpPost(tokenEndpoint);
 
-    }
+		// Request parameters.
+		List<NameValuePair> params = new ArrayList<NameValuePair>(3);
+		params.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, "client_credentials"));
+		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
+		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
+		try {
+			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+		//	HttpResponse response = httpclient.execute(httppost,httpContext);
+			HttpResponse response = httpclient.execute(httppost);
+			HttpEntity responseEntity = response.getEntity();
+
+			if (response.getStatusLine().getStatusCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " +
+				                           response.getStatusLine().getStatusCode());
+			} else {
+				String responseStr = EntityUtils.toString(responseEntity);
+				JSONObject obj = new JSONObject(responseStr);
+				accessToken = obj.get("access_token").toString();
+				validityPeriod = Long.parseLong(obj.get("expires_in").toString());
+			}
+
+		} catch (Exception e2) {
+			String errMsg = "Error in getting new accessToken";
+			log.error(errMsg);
+			throw new APIKeyMgtException(errMsg, e2);
+
+		}
+		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+		return apiMgtDAO.updateRefreshedAccessToken(tokenType, oldAccessToken, allowedDomains, accessToken,
+		                                    validityPeriod);
+
+	}
 
     public void unsubscribeFromAPI(String userId, APIInfoDTO apiInfoDTO) {
 

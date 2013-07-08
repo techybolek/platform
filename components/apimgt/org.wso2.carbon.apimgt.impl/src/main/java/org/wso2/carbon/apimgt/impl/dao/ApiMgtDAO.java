@@ -1917,117 +1917,80 @@ public class ApiMgtDAO {
     }
 
   /**
-   * To renew the Application Accesstoken
+   * Update refresed ApplicationAccesstoken
    * @param keyType
    * @param oldAccessToken
    * @param accessAllowDomains
-   * @param clientId
-   * @param clientSecret
+   * @param accessToken
+   * @param validityPeriod
    * @return
    * @throws IdentityException
    * @throws APIManagementException
    */
-    public String refreshAccessToken(String keyType, String oldAccessToken,
-                                     String[] accessAllowDomains, String clientId,String clientSecret)
-            throws IdentityException, APIManagementException {
+	public String updateRefreshedAccessToken(String keyType, String oldAccessToken,
+	                                 String[] accessAllowDomains, String accessToken,
+	                                 long validityPeriod) throws IdentityException,
+	                                                     APIManagementException {
 
-		String accessToken = null;
-    	long validityPeriod = 0;
-    	
-    	// create a post request to getNewAccessToken for client_credentials grant type.
-    	String tokenEndpoint = "https://localhost:9443/oauth2endpoints/token"; //TODO :FIX THIS,
-    	HttpClient httpclient = new DefaultHttpClient();
-    	HttpPost httppost = new HttpPost(tokenEndpoint);
-    	
-    	// Request parameters.
-		List<NameValuePair> params = new ArrayList<NameValuePair>(3);
-		params.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE,"client_credentials"));
-		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
-		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET,clientSecret));
-		try {
-			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-			HttpResponse response = httpclient.execute(httppost);
- 
-
-			HttpEntity responseEntity = response.getEntity();
-
-			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " +
-				                           response.getStatusLine().getStatusCode());
-			} else {
-				String responseStr = EntityUtils.toString(responseEntity);
-				JSONObject obj = new JSONObject(responseStr);
-				accessToken = obj.get("access_token").toString();
-				validityPeriod= Long.parseLong(obj.get("expires_in").toString());
+		String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+		if (APIUtil.checkUserNameAssertionEnabled()) {
+			String userName = APIUtil.getUserIdFromAccessToken(oldAccessToken);
+			// If the application key was generated with the
+			// UserName_Assertion=false and later changed it to true
+			// and regenerate the token, userName can be null.
+			if (userName != null && !userName.equalsIgnoreCase("")) {
+				// use ':' for token & userName separation
+				String accessTokenStrToEncode = accessToken + ":" + userName;
+				accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
 			}
 
-		} catch (Exception e2) {
-			handleException("Error in getting new accessToken", e2);
+			if (APIUtil.checkAccessTokenPartitioningEnabled()) {
+				accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(userName);
+			}
 		}
 
-		
-      //  String accessToken = OAuthUtil.getRandomNumber();
-          String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        if (APIUtil.checkUserNameAssertionEnabled()) {
-            String userName = APIUtil.getUserIdFromAccessToken(oldAccessToken);
-            //If the application key was generated with the UserName_Assertion=false and later changed it to true
-            //and regenerate the token, userName can be null. 
-            if (userName != null && !userName.equalsIgnoreCase("")) {
-                //use ':' for token & userName separation
-                String accessTokenStrToEncode = accessToken + ":" + userName;
-                accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
-            }
+		// Update Access Token
+		String sqlUpdateAccessToken = "UPDATE " + accessTokenStoreTable +
+		                                      " SET ACCESS_TOKEN=?, TOKEN_STATE=?, TIME_CREATED=?, VALIDITY_PERIOD=? " +
+		                                      " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
 
-            if (APIUtil.checkAccessTokenPartitioningEnabled()) {
-                accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(userName);
-            }
-        }
+		Connection connection = null;
+		PreparedStatement prepStmt = null;
+		try {
+			connection = APIMgtDBUtil.getConnection();
+			connection.setAutoCommit(false);
+			prepStmt = connection.prepareStatement(sqlUpdateAccessToken);
+			prepStmt.setString(1, accessToken);
+			prepStmt.setString(2, APIConstants.TokenStatus.ACTIVE);
+			prepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()),
+			                      Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+			if (validityPeriod < 0) {
+				prepStmt.setLong(4, Long.MAX_VALUE);
+			} else {
+				prepStmt.setLong(4, validityPeriod * 1000);
+			}
+			prepStmt.setString(5, oldAccessToken);
+			prepStmt.setString(6, keyType);
 
-        // Update Access Token
-        String sqlUpdateAccessToken = "UPDATE " +
-                                      accessTokenStoreTable +
-                                      " SET ACCESS_TOKEN=?, TOKEN_STATE=?, TIME_CREATED=?, VALIDITY_PERIOD=? " +
-                                      " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
-        
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-          //  long validityPeriod = getApplicationAccessTokenValidityPeriod();
-            prepStmt = connection.prepareStatement(sqlUpdateAccessToken);
-            prepStmt.setString(1, accessToken);
-            prepStmt.setString(2, APIConstants.TokenStatus.ACTIVE);
-            prepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()),
-                                  Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-            if (validityPeriod < 0) {
-            prepStmt.setLong(4, Long.MAX_VALUE);
-            } else {
-            prepStmt.setLong(4, validityPeriod * 1000);
-            }
-            prepStmt.setString(5, oldAccessToken);
-            prepStmt.setString(6, keyType);
+			prepStmt.execute();
+			prepStmt.close();
+			connection.commit();
 
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (SQLException e1) {
+					log.error("Failed to rollback the add access token ", e);
+				}
+			}
 
-            prepStmt.execute();
-            prepStmt.close();
-            connection.commit();
-
-        } catch (SQLException e) {
-            log.error(e.getMessage(), e);
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
-                }
-            }
-
-        } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
-        }
-        return accessToken;
-    }
+		} finally {
+			IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+		}
+		return accessToken;
+	}
 
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
             throws APIManagementException {
