@@ -33,9 +33,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -83,6 +80,7 @@ import org.wso2.balana.ctx.xacml2.RequestCtx;
 import org.wso2.balana.ctx.xacml2.Subject;
 import org.wso2.balana.xacml3.Attributes;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementBaseCache;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheKey;
 import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
@@ -241,7 +239,7 @@ public class EntitlementUtil {
 	 *
 	 * @return the named cache instance.
 	 */
-	public static Cache<IdentityCacheKey,IdentityCacheEntry> getCommonCache(String name) {
+	public static EntitlementBaseCache<IdentityCacheKey, IdentityCacheEntry> getCommonCache(String name) {
 		// TODO Should verify the cache creation done per tenant or as below
 		
 		// We create a single cache for all tenants. It is not a good choice to create per-tenant
@@ -255,22 +253,7 @@ public class EntitlementUtil {
 //		    PrivilegedCarbonContext.endTenantFlow();
 //		}
 		
-    	Cache<IdentityCacheKey, IdentityCacheEntry> cache = null;
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
-    	if(manager != null){
-        	cache = manager.getCache(name);
-        } else {
-        	cache = Caching.getCacheManager().getCache(name);
-        }
-        if(cache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created "+name+" under ENTITLEMENT_CACHE_MANAGER"); 
-            }
-        }
-        else {
-        	log.error("Error while creating "+name);
-        }
-        return cache;
+		return new EntitlementBaseCache<IdentityCacheKey, IdentityCacheEntry>(name);
 	}
 
     /**

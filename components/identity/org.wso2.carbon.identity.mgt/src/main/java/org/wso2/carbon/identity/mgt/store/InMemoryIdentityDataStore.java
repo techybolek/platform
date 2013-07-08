@@ -34,21 +34,13 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 	private static final String IDENTITY_LOGIN_DATA_CACHE_MANAGER = "IDENTITY_LOGIN_DATA_CACHE_MANAGER";
 	private static final String IDENTITY_LOGIN_DATA_CACHE = "IDENTITY_LOGIN_DATA_CACHE";
 	
-	protected Cache<String, UserIdentityClaimsDO> cache = getCache();//CarbonUtils.getLocalCache("IDENTITY_LOGIN_DATA_CACHE");
+	//protected Cache<String, UserIdentityClaimsDO> cache = getCache();//CarbonUtils.getLocalCache("IDENTITY_LOGIN_DATA_CACHE");
 
 	private static Log log = LogFactory.getLog(InMemoryIdentityDataStore.class);
 	
-	private Cache<String, UserIdentityClaimsDO> getCache() {
+	protected Cache<String, UserIdentityClaimsDO> getCache() {
     	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(InMemoryIdentityDataStore.IDENTITY_LOGIN_DATA_CACHE_MANAGER);
     	Cache<String, UserIdentityClaimsDO> cache = manager.getCache(InMemoryIdentityDataStore.IDENTITY_LOGIN_DATA_CACHE);
-        if(this.cache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created IDENTITY_LOGIN_DATA_CACHE under IDENTITY_LOGIN_DATA_CACHE_MANAGER"); 
-            }
-        }
-        else {
-        	log.error("Error while creating IDENTITY_LOGIN_DATA_CACHE");
-        }
         return cache;
     }
 
@@ -62,14 +54,19 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 //			if (cache.containsKey(key)) {
 //				invalidateCache(userIdentityDTO.getUserName());
 //			}
-			cache.put(key, userIdentityDTO);
+			
+			Cache<String, UserIdentityClaimsDO> cache = getCache();
+			if(cache != null) {
+				cache.put(key, userIdentityDTO);
+			}
 		}
 	}
 
 	@Override
 	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager) {
-
-		if (userName != null) {
+		
+		Cache<String, UserIdentityClaimsDO> cache = getCache();
+		if (userName != null && cache != null) {
 			return (UserIdentityClaimsDO) cache.get(CarbonContext.getCurrentContext().getTenantId() +
 			                                   userName);
 		}
@@ -77,7 +74,7 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 	}
 
 	public void remove(String userName, UserStoreManager userStoreManager)  throws IdentityException {
-
+		Cache<String, UserIdentityClaimsDO> cache = getCache();
 		if (userName == null) {
 			return;
 		}

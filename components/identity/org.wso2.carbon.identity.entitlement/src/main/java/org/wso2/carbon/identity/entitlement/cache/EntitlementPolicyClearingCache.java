@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -29,30 +26,13 @@ import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 /**
  * 
  */
-public class EntitlementPolicyClearingCache {
-
-	private Cache<IdentityCacheKey,IdentityCacheEntry> cache = null;
+public class EntitlementPolicyClearingCache extends EntitlementBaseCache<IdentityCacheKey, IdentityCacheEntry>{
 
     private static EntitlementPolicyClearingCache entitlementPolicyCache = null;
-
     private static final Object lock = new Object(); 
 
     private EntitlementPolicyClearingCache() {
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
-        if(manager != null){
-        	this.cache = manager.getCache(EntitlementConstants.ENTITLEMENT_POLICY_CACHE);
-        } else {
-        	this.cache = Caching.getCacheManager().getCache(EntitlementConstants.ENTITLEMENT_POLICY_CACHE);
-        }
-//        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.ENTITLEMENT_POLICY_CACHE);
-        if(this.cache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created ENTITLEMENT_POLICY_CACHE under ENTITLEMENT_CACHE_MANAGER"); 
-            }
-        }
-        else {
-        	log.error("Error while creating ENTITLEMENT_POLICY_CACHE");
-        }
+    	super(EntitlementConstants.ENTITLEMENT_POLICY_CACHE);
     }
 
     /**
@@ -81,7 +61,7 @@ public class EntitlementPolicyClearingCache {
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
         IdentityCacheEntry cacheEntry = new IdentityCacheEntry(hashCode);
-        this.cache.put(cacheKey, cacheEntry);
+        entitlementPolicyCache.addToCache(cacheKey, cacheEntry);
         if (log.isDebugEnabled()) {
             log.debug("Cache entry is added");
         }
@@ -92,7 +72,7 @@ public class EntitlementPolicyClearingCache {
         int hashCode = 0;
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
-        Object entry = this.cache.get(cacheKey);
+        Object entry = entitlementPolicyCache.getValueFromCache(cacheKey);
         if(entry != null){
             IdentityCacheEntry cacheEntry = (IdentityCacheEntry) entry;
             hashCode =  cacheEntry.getHashEntry();
@@ -113,13 +93,7 @@ public class EntitlementPolicyClearingCache {
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
 
-        if(this.cache.containsKey(cacheKey)){
-            
-            this.cache.remove(cacheKey);
-
-            if (log.isDebugEnabled()) {
-                log.debug("Local cache is invalidated");
-            }
+        entitlementPolicyCache.clearCacheEntry(cacheKey);
             //sending cluster message
 //            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
 //            try {
@@ -136,6 +110,5 @@ public class EntitlementPolicyClearingCache {
 //            } catch (CacheException e) {
 //                log.error("Error while invalidating cache", e);
 //            }
-        }
     }
 }

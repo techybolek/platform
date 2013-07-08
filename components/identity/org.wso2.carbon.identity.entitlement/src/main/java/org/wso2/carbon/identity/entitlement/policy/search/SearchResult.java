@@ -1,13 +1,20 @@
 package org.wso2.carbon.identity.entitlement.policy.search;
 
+import java.io.Serializable;
+
 import org.wso2.carbon.identity.entitlement.dto.EntitledResultSetDTO;
 
 /**
  * Encapsulate result with time stamp 
  */
-public class SearchResult {
+public class SearchResult implements Serializable{
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8176277439664665138L;
+
+	/**
      * Result
      */
     private EntitledResultSetDTO resultSetDTO;

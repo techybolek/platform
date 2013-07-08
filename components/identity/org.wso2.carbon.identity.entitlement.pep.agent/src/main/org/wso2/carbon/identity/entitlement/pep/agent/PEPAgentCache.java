@@ -32,16 +32,17 @@ class PEPAgentCache {
 
 	private static Log log = LogFactory.getLog(PEPAgentCache.class);
 	
-    private SimpleCache simpleCache;
-    private Cache carbonCache;
+    private SimpleCache<String, EntitlementDecision> simpleCache;
+    private boolean isCarbonCache = false;
     private int invalidationInterval = 0;
 
     PEPAgentCache(String enableCaching, int invalidationInterval, int maxEntries){
         if(enableCaching.equalsIgnoreCase("simple")){
-            simpleCache = new SimpleCache(maxEntries);
+            simpleCache = new SimpleCache<String, EntitlementDecision>(maxEntries);
             this.invalidationInterval = invalidationInterval;
         }else if(enableCaching.equalsIgnoreCase("carbon")){
-            carbonCache = getCommonCache(ProxyConstants.DECISION_CACHE);
+        	isCarbonCache = true;
+//            carbonCache = getCommonCache(ProxyConstants.DECISION_CACHE);
         }
     }
 
@@ -109,7 +110,7 @@ class PEPAgentCache {
      * @param name the name of the cache.
      * @return the named cache instance.
      */
-    private Cache getCommonCache(String name) {
+    private Cache<IdentityCacheKey, IdentityCacheEntry> getCommonCache() {
 		// TODO Should verify the cache creation done per tenant or as below
 		
 		// We create a single cache for all tenants. It is not a good choice to create per-tenant
@@ -123,21 +124,8 @@ class PEPAgentCache {
 //		    PrivilegedCarbonContext.endTenantFlow();
 //		}
 		
-    	Cache<IdentityCacheKey, IdentityCacheEntry> cache = null;
     	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(ProxyConstants.PEP_AGENT_MANAGER);
-    	if(manager != null){
-        	cache = manager.getCache(name);
-        } else {
-        	cache = Caching.getCacheManager().getCache(name);
-        }
-        if(cache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created "+name+" under "+ProxyConstants.PEP_AGENT_MANAGER); 
-            }
-        }
-        else {
-        	log.error("Error while creating "+name);
-        }
+    	Cache<IdentityCacheKey, IdentityCacheEntry> cache = manager.getCache(ProxyConstants.DECISION_CACHE);
         return cache;
     }
 
@@ -145,11 +133,14 @@ class PEPAgentCache {
         if(simpleCache != null){
             EntitlementDecision entitlementDecision = new EntitlementDecision(entry,Calendar.getInstance().getTimeInMillis());
             simpleCache.put(key,entitlementDecision);
-        }else if(carbonCache != null){
-            int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            IdentityCacheKey identityKey = new IdentityCacheKey(tenantId,key);
-            IdentityCacheEntry identityEntry = new IdentityCacheEntry(entry);
-            carbonCache.put(identityKey,identityEntry);
+        }else if(isCarbonCache){
+        	Cache<IdentityCacheKey, IdentityCacheEntry> carbonCache = getCommonCache();
+        	if(carbonCache != null){
+	            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+	            IdentityCacheKey identityKey = new IdentityCacheKey(tenantId,key);
+	            IdentityCacheEntry identityEntry = new IdentityCacheEntry(entry);
+	            carbonCache.put(identityKey,identityEntry);
+            }
         }
     }
 
@@ -161,24 +152,28 @@ class PEPAgentCache {
                 Calendar.getInstance().getTimeInMillis())){
                 return entitlementDecision.getResponse();
             }
-        }else if(carbonCache != null){
-            int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            IdentityCacheKey identityKey = new IdentityCacheKey(tenantId,key);
-            IdentityCacheEntry identityCacheEntry = (IdentityCacheEntry)carbonCache.get(identityKey);
-            if(identityCacheEntry != null){
-                return identityCacheEntry.getCacheEntry();
-            }else{
-                return null;
-            }
+        }else if(isCarbonCache){
+        	Cache<IdentityCacheKey, IdentityCacheEntry> carbonCache = getCommonCache();
+        	if(carbonCache != null){
+	            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+	            IdentityCacheKey identityKey = new IdentityCacheKey(tenantId,key);
+	            IdentityCacheEntry identityCacheEntry = (IdentityCacheEntry)carbonCache.get(identityKey);
+	            if(identityCacheEntry != null){
+	                return identityCacheEntry.getCacheEntry();
+	            }
+        	}
         }
         return null;
     }
 
     void clear(){
         if(simpleCache != null){
-            simpleCache =  new SimpleCache(simpleCache.maxEntries);
-        }else if(carbonCache != null){
-            carbonCache.removeAll();
+            simpleCache =  new SimpleCache<String, EntitlementDecision>(simpleCache.maxEntries);
+        }else if(isCarbonCache){
+        	Cache<IdentityCacheKey, IdentityCacheEntry> carbonCache = getCommonCache();
+        	if(carbonCache != null){
+        		carbonCache.removeAll();
+        	}
         }
     }
 

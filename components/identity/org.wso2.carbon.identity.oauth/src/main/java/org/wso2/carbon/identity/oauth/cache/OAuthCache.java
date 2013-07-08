@@ -20,7 +20,7 @@ package org.wso2.carbon.identity.oauth.cache;
 
 import org.wso2.carbon.utils.CarbonUtils;
 
-public class OAuthCache extends BaseCache {
+public class OAuthCache extends BaseCache<CacheKey, CacheEntry> {
 
     private static final String OAUTH_CACHE_NAME = "OAuthCache";
 

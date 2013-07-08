@@ -28,20 +28,18 @@ import java.util.Date;
 /**
  * Cache implementation for OpenID Associations
  */
-public class OpenIDAssociationCache extends OpenIDBaseCache {
+public class OpenIDAssociationCache extends OpenIDBaseCache<OpenIDIdentityCacheKey, OpenIDIdentityCacheEntry> {
 
-	private static OpenIDAssociationCache associationCache = null;
-
+    private static OpenIDAssociationCache associationCache = null;
 	private final static String OPENID_ASSOCIATION_CACHE = "OPENID_ASSOCIATION_CACHE";
-
 	private static Log log = LogFactory.getLog(OpenIDAssociationCache.class);
 
 	/**
 	 * Private constructor
 	 * @param cacheName
 	 */
-	private OpenIDAssociationCache(String cacheName) {
-		super(cacheName);
+	private OpenIDAssociationCache() {
+		super(OPENID_ASSOCIATION_CACHE);
 	}
 
 	/**
@@ -51,10 +49,12 @@ public class OpenIDAssociationCache extends OpenIDBaseCache {
 	 */
 	public synchronized static OpenIDAssociationCache getCacheInstance() {
 		if (associationCache == null) {
-			associationCache = new OpenIDAssociationCache(OPENID_ASSOCIATION_CACHE);
+			associationCache = new OpenIDAssociationCache();
 		}
 		return associationCache;
 	}
+	
+
 
 	/**
 	 * Add the entry to the cache.

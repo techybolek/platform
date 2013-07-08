@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Set;
+//import java.util.Set;
 
 /**
  * Identity Cache entry which wraps the identity related cache entry values
@@ -30,7 +30,7 @@ import java.util.Set;
 public class IdentityCacheEntry implements Serializable {
 
     private String cacheEntry;
-    private Set<String> cacheEntrySet;
+//    private Set<String> cacheEntrySet;
     private String[] cacheEntryArray;
     private int hashEntry;
     private long cacheInterval;
@@ -60,9 +60,9 @@ public class IdentityCacheEntry implements Serializable {
         this.cacheEntryArray = Arrays.copyOf(cacheEntryArray, cacheEntryArray.length);
     }
 
-    public IdentityCacheEntry(Set<String> cacheEntrySet) {
-        this.cacheEntrySet = cacheEntrySet;
-    }
+//    public IdentityCacheEntry(Set<String> cacheEntrySet) {
+//        this.cacheEntrySet = cacheEntrySet;
+//    }
 
     public IdentityCacheEntry(String cacheEntry, Key secretKey, Date date) {
         this.cacheEntry = cacheEntry;
@@ -82,9 +82,9 @@ public class IdentityCacheEntry implements Serializable {
         return cacheInterval;
     }
 
-    public Set<String> getCacheEntrySet() {
-        return cacheEntrySet;
-    }
+//    public Set<String> getCacheEntrySet() {
+//        return cacheEntrySet;
+//    }
 
     public boolean isCacheClearing() {
         return cacheClearing;

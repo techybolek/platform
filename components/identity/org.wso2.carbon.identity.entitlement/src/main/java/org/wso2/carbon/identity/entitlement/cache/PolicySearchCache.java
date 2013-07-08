@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -30,30 +27,13 @@ import org.wso2.carbon.identity.entitlement.policy.search.SearchResult;
 /**
  *
  */
-public class PolicySearchCache {
-
-	private Cache<IdentityCacheKey,SearchResult> cache = null;
+public class PolicySearchCache extends EntitlementBaseCache<IdentityCacheKey,SearchResult>{
 
     private static PolicySearchCache policySearchCache = null;
-
     private static final Object lock = new Object();  
 
     private PolicySearchCache() {
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
-        if(manager != null){
-        	this.cache = manager.getCache(EntitlementConstants.POLICY_SEARCH_CACHE);
-        } else {
-        	this.cache = Caching.getCacheManager().getCache(EntitlementConstants.POLICY_SEARCH_CACHE);
-        }
-//        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.POLICY_SEARCH_CACHE);
-        if(this.cache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created POLICY_SEARCH_CACHE under ENTITLEMENT_CACHE_MANAGER"); 
-            }
-        }
-        else {
-        	log.error("Error while creating POLICY_SEARCH_CACHE");
-        }
+    	super(EntitlementConstants.POLICY_SEARCH_CACHE);
     }
 
     /**
@@ -80,7 +60,7 @@ public class PolicySearchCache {
     public void addToCache(String key, SearchResult result){
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        cache.put(cacheKey, result);
+        policySearchCache.addToCache(cacheKey, result);
         if (log.isDebugEnabled()) {
             log.debug("Cache entry is added");
         }
@@ -91,7 +71,7 @@ public class PolicySearchCache {
         SearchResult searchResult = null;
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        Object entry = this.cache.get(cacheKey);
+        Object entry = policySearchCache.getValueFromCache(cacheKey);
         if(entry != null){
             searchResult = (SearchResult) entry;
             if (log.isDebugEnabled()) {
@@ -107,7 +87,7 @@ public class PolicySearchCache {
     }
 
     public void invalidateCache(){
-        cache.removeAll();
+        policySearchCache.clear();
     }
 
 }

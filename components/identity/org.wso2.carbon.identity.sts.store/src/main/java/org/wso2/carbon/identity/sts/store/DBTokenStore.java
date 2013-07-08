@@ -39,42 +39,28 @@ public class DBTokenStore implements TokenStorage {
     private static Log log = LogFactory.getLog(DBTokenStore.class);
     private static int poolSize = 100;
     
-	private static Cache<String, SerializableToken> tokenCache = null;
-	static {
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(STSMgtConstants.TOKEN_CACHE_MANAGER);
-        if(manager != null){
-        	tokenCache = manager.getCache(STSMgtConstants.TOKEN_CACHE_ID);
-        } else {
-        	tokenCache = Caching.getCacheManager().getCache(STSMgtConstants.TOKEN_CACHE_ID);
-        }
-        if(tokenCache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created "+STSMgtConstants.TOKEN_CACHE_ID+" under " + STSMgtConstants.TOKEN_CACHE_MANAGER); 
-            }
-        }
-        else {
-        	log.error("Error while creating "+STSMgtConstants.TOKEN_CACHE_ID);
-        }
-    }
-	
     private static ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
 
+
+	
     public static ExecutorService getExecutorService() {
         return executorService;
     }
 
-
-
     public void add(Token token) throws TrustException {
         //put the Token to cache.
-        tokenCache.put(token.getId(), STSStoreUtils.getSerializableToken(token));
-        executorService.submit(new TokenPersisterTask(token));
+    	Cache<String, SerializableToken> tokenCache = getTokenCache();
+    	if(tokenCache != null) {
+	        tokenCache.put(token.getId(), STSStoreUtils.getSerializableToken(token));
+	        executorService.submit(new TokenPersisterTask(token));
+    	}
     }
 
     public void update(Token token) throws TrustException {
         initDao();
         dbStsDAO.updateToken(token);
         //update the cache is that token present in cache
+    	Cache<String, SerializableToken> tokenCache = getTokenCache();
         if (tokenCache != null && tokenCache.containsKey(token.getId())) {
             tokenCache.put(token.getId(), STSStoreUtils.getSerializableToken(token));
         }
@@ -106,6 +92,7 @@ public class DBTokenStore implements TokenStorage {
     }
 
     public Token getToken(String id) throws TrustException {
+    	Cache<String, SerializableToken> tokenCache = getTokenCache();
         if (tokenCache != null && tokenCache.containsKey(id)) {
             try {
                 return STSStoreUtils.getToken((SerializableToken) tokenCache.get(id));
@@ -130,6 +117,7 @@ public class DBTokenStore implements TokenStorage {
         initDao();
         dbStsDAO.removeToken(id);
         //remove token from cache and send cache invalidation msg
+    	Cache<String, SerializableToken> tokenCache = getTokenCache();
         if (tokenCache != null && tokenCache.containsKey(id)) {
         	tokenCache.remove(id);
         	// TODO ensure invalidate cache name is correct
@@ -167,9 +155,15 @@ public class DBTokenStore implements TokenStorage {
             this.dbStsDAO = new DBStsDAO();
         }
     }
-
-    public static Cache getTokenCache() {
-        return tokenCache;
+    
+	/**
+	 * Getting existing cache if the cache available, else returns a newly created cache.
+	 * This logic handles by javax.cache implementation
+	 */
+    public static Cache<String, SerializableToken> getTokenCache() {
+        CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(STSMgtConstants.TOKEN_CACHE_MANAGER);
+    	Cache<String, SerializableToken> tokenCache = manager.getCache(STSMgtConstants.TOKEN_CACHE_ID);
+		return tokenCache;
     }
 
     /**

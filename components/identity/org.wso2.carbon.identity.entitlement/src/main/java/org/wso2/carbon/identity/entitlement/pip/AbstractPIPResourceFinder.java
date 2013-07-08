@@ -24,7 +24,6 @@ import org.wso2.balana.attr.AttributeValue;
 import org.wso2.balana.attr.BagAttribute;
 import org.wso2.balana.attr.StringAttribute;
 import org.wso2.balana.cond.EvaluationResult;
-import javax.cache.Cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
@@ -32,6 +31,7 @@ import org.w3c.dom.NodeList;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementBaseCache;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheKey;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
@@ -48,7 +48,7 @@ import java.util.Set;
 public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
 
 	private static Log log = LogFactory.getLog(CarbonAttributeFinder.class);
-	private Cache<IdentityCacheKey,IdentityCacheEntry> abstractResourceCache = null;
+	private EntitlementBaseCache<IdentityCacheKey, IdentityCacheEntry> abstractResourceCache = null;
 	private boolean isAbstractResourceCacheEnabled = false;
 	private int tenantId;
 
@@ -99,7 +99,7 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
                                         (environmentId != null ? environmentId:"");
             tenantId = CarbonContext.getCurrentContext().getTenantId();
             cacheKey = new IdentityCacheKey(tenantId, key);
-            IdentityCacheEntry cacheEntry = (IdentityCacheEntry) abstractResourceCache.get(cacheKey);
+            IdentityCacheEntry cacheEntry = (IdentityCacheEntry) abstractResourceCache.getValueFromCache(cacheKey);
             if(cacheEntry != null){
                 String[] values= cacheEntry.getCacheEntryArray();
                 resourceNames = new HashSet<String>(Arrays.asList(values));
@@ -115,7 +115,7 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
                 }
                 if(resourceNames != null && !resourceNames.isEmpty()){
                     cacheEntry = new IdentityCacheEntry(resourceNames.toArray(new String[resourceNames.size()]));
-                    abstractResourceCache.put(cacheKey, cacheEntry);
+                    abstractResourceCache.addToCache(cacheKey, cacheEntry);
                 }
             }
         } else {
@@ -141,7 +141,7 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
     @Override
     public void clearCache() {
         if(abstractResourceCache != null){
-            abstractResourceCache.removeAll();
+            abstractResourceCache.clear();
         }
     }
 

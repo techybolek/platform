@@ -24,10 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-
 import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.commons.logging.Log;
@@ -37,6 +33,7 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
+import org.wso2.carbon.identity.oauth.cache.BaseCache;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
@@ -78,8 +75,8 @@ public class AccessTokenIssuer {
     private static AccessTokenIssuer instance;
 
     private static Log log = LogFactory.getLog(AccessTokenIssuer.class);
-    private Cache<String, Claim[]> userClaimsCache;
-    private Cache<String, OAuthAppDO> appInfoCache;
+    private BaseCache<String, Claim[]> userClaimsCache;
+    private BaseCache<String, OAuthAppDO> appInfoCache;
 
     public static AccessTokenIssuer getInstance() throws IdentityOAuth2Exception {
 
@@ -119,14 +116,8 @@ public class AccessTokenIssuer {
         //in org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever
 //        userClaimsCache = PrivilegedCarbonContext.getCurrentContext().getCache("UserClaimsCache");
 //        appInfoCache = PrivilegedCarbonContext.getCurrentContext().getCache("AppInfoCache");
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(OAuth2Constants.OAUTH_CACHE_MANAGER);
-        if(manager != null){
-        	userClaimsCache = manager.getCache("UserClaimsCache");
-        	appInfoCache = manager.getCache("AppInfoCache");
-        } else {
-        	userClaimsCache = Caching.getCacheManager().getCache("UserClaimsCache");
-        	appInfoCache = Caching.getCacheManager().getCache("AppInfoCache");
-        }
+        userClaimsCache = new BaseCache<String, Claim[]>("UserClaimsCache");
+        appInfoCache = new BaseCache<String,OAuthAppDO>("AppInfoCache");
         if(userClaimsCache != null) {
             if (log.isDebugEnabled()) {
             	log.debug("Successfully created UserClaimsCache under "+OAuth2Constants.OAUTH_CACHE_MANAGER); 
@@ -314,23 +305,19 @@ public class AccessTokenIssuer {
     }
 
     private OAuthAppDO getAppInformation(OAuth2AccessTokenReqDTO tokenReqDTO) throws IdentityOAuthAdminException, InvalidOAuthClientException {
-        OAuthAppDO oAuthAppDO;
-        Object obj = appInfoCache.get(tokenReqDTO.getClientId());
-        if(obj != null){
-            oAuthAppDO = (OAuthAppDO)obj;
+        OAuthAppDO oAuthAppDO = appInfoCache.getValueFromCache(tokenReqDTO.getClientId());
+        if(oAuthAppDO != null){
             return oAuthAppDO;
         }else{
             oAuthAppDO = new OAuthAppDAO().getAppInformation(tokenReqDTO.getClientId());
-            appInfoCache.put(tokenReqDTO.getClientId(),oAuthAppDO);
+            appInfoCache.addToCache(tokenReqDTO.getClientId(),oAuthAppDO);
             return oAuthAppDO;
         }
     }
 
     private Claim[] getUserClaimValues(OAuth2AccessTokenReqDTO tokenReqDTO, UserStoreManager userStoreManager) throws UserStoreException {
-        Claim[] userClaims;
-        Object obj = userClaimsCache.get(tokenReqDTO.getResourceOwnerUsername());
-        if(obj != null){
-            userClaims = (Claim[])obj;
+        Claim[] userClaims = userClaimsCache.getValueFromCache(tokenReqDTO.getResourceOwnerUsername());
+        if(userClaims != null){
             return userClaims;
         }else{
             if(log.isDebugEnabled()){
@@ -338,7 +325,7 @@ public class AccessTokenIssuer {
             }
             userClaims = userStoreManager.getUserClaimValues(
                     tokenReqDTO.getResourceOwnerUsername(), null);
-            userClaimsCache.put(tokenReqDTO.getResourceOwnerUsername(),userClaims);
+            userClaimsCache.addToCache(tokenReqDTO.getResourceOwnerUsername(),userClaims);
             return userClaims;
         }
     }

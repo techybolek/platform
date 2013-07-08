@@ -24,7 +24,7 @@ import org.wso2.carbon.identity.oauth.cache.CacheEntry;
 import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.utils.CarbonUtils;
 
-public class ClaimCache extends BaseCache {
+public class ClaimCache extends BaseCache<CacheKey, CacheEntry> {
 
     private static final String CLAIM_CACHE_NAME = "ClaimCache";
 

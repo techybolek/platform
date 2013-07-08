@@ -22,13 +22,13 @@ import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.attr.AttributeValue;
 import org.wso2.balana.finder.ResourceFinderModule;
 import org.wso2.balana.finder.ResourceFinderResult;
-import javax.cache.Cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementBaseCache;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheKey;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
@@ -57,7 +57,8 @@ public class CarbonResourceFinder extends ResourceFinderModule{
 
     private int tenantId;
     private Set<PIPResourceFinder> resourceFinders = new HashSet<PIPResourceFinder>();
-    private Cache<IdentityCacheKey,IdentityCacheEntry> resourceCache = null;
+    //private Cache<IdentityCacheKey,IdentityCacheEntry> resourceCache = null;
+    private EntitlementBaseCache<IdentityCacheKey, IdentityCacheEntry> resourceCache = null;
     boolean isResourceCachingEnabled = false;
 	private static Log log = LogFactory.getLog(CarbonResourceFinder.class);
 
@@ -109,7 +110,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                     String key = EntitlementConstants.RESOURCE_DESCENDANTS + parentResourceId.encode() +
                             domToString(context.getRequestRoot());
                     cacheKey = new IdentityCacheKey(tenantId, key);
-                    IdentityCacheEntry cacheEntry = (IdentityCacheEntry) resourceCache.get(cacheKey);
+                    IdentityCacheEntry cacheEntry = (IdentityCacheEntry) resourceCache.getValueFromCache(cacheKey);
                     if(cacheEntry != null){
                         String[] values= cacheEntry.getCacheEntryArray();
                         resourceNames = new HashSet<String>(Arrays.asList(values));
@@ -124,7 +125,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                             log.debug("Carbon Resource Cache Miss");
                         }
                         cacheEntry = new IdentityCacheEntry(resourceNames.toArray(new String[resourceNames.size()]));
-                        resourceCache.put(cacheKey, cacheEntry);
+                        resourceCache.addToCache(cacheKey, cacheEntry);
                     }
                 } else {
                     resourceNames = finder.findDescendantResources(parentResourceId.encode(), context);
@@ -169,7 +170,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                     String key = EntitlementConstants.RESOURCE_CHILDREN + parentResourceId.encode() +
                             domToString(context.getRequestRoot());
                     cacheKey = new IdentityCacheKey(tenantId, key);
-                    IdentityCacheEntry cacheEntry = (IdentityCacheEntry) resourceCache.get(cacheKey);
+                    IdentityCacheEntry cacheEntry = (IdentityCacheEntry) resourceCache.getValueFromCache(cacheKey);
                     if(cacheEntry != null){
                         String cacheEntryString= cacheEntry.getCacheEntry();
                         String[] attributes = cacheEntryString.split(EntitlementConstants.ATTRIBUTE_SEPARATOR);
@@ -196,7 +197,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                             }
                         }
                         cacheEntry = new IdentityCacheEntry(cacheEntryString);
-                        resourceCache.put(cacheKey, cacheEntry);
+                        resourceCache.addToCache(cacheKey, cacheEntry);
                     }
                 } else {
                     resourceNames = finder.findChildResources(parentResourceId.encode(), context);
@@ -246,7 +247,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
 	 */
 	public void clearAttributeCache() {
 		if (resourceCache != null) {
-			resourceCache.removeAll();
+			resourceCache.clear();
 			if (log.isDebugEnabled()) {
 				log.debug("Resource cache is cleared for tenant " + tenantId);
 			}

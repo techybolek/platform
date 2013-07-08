@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.identity.entitlement.cache;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -30,30 +27,13 @@ import org.wso2.carbon.identity.entitlement.pdp.PolicyDecision;
 /**
  * Simple Decision Cache
  */
-public class SimpleDecisionCache {
-
-    private Cache<IdentityCacheKey,PolicyDecision> cache = null;
+public class SimpleDecisionCache extends EntitlementBaseCache<IdentityCacheKey, PolicyDecision>{
 
     private static SimpleDecisionCache decisionCache = null;
-
     private static final Object lock = new Object();
 
     private SimpleDecisionCache() {
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
-        if(manager != null){
-        	this.cache = manager.getCache(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
-        } else {
-        	this.cache = Caching.getCacheManager().getCache(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
-        }
-//        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
-        if(this.cache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created PDP_SIMPLE_DECISION_CACHE under ENTITLEMENT_CACHE_MANAGER"); 
-            }
-        }
-        else {
-        	log.error("Error while creating PDP_SIMPLE_DECISION_CACHE");
-        }
+    	super(EntitlementConstants.PDP_SIMPLE_DECISION_CACHE);
     }
 
     /**
@@ -81,7 +61,7 @@ public class SimpleDecisionCache {
         
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        this.cache.put(cacheKey, decision);
+        decisionCache.addToCache(cacheKey, decision);
         if (log.isDebugEnabled()) {
             log.debug("Cache entry is added");
         }
@@ -91,7 +71,7 @@ public class SimpleDecisionCache {
 
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        Object entry = this.cache.get(cacheKey);
+        Object entry = decisionCache.getValueFromCache(cacheKey);
         if(entry != null){
             if (log.isDebugEnabled()) {
                 log.debug("Cache entry is found");
@@ -110,14 +90,14 @@ public class SimpleDecisionCache {
 
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        this.cache.remove(cacheKey);
+        decisionCache.clearCacheEntry(cacheKey);
         if (log.isDebugEnabled()) {
             log.debug("Cache entry is removed");
         }
     }
 
     public void clearCache(){
-        this.cache.removeAll();
+        decisionCache.clear();
     }
 
 }

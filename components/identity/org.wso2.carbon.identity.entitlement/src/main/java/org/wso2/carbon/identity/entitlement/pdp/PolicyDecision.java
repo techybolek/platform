@@ -18,12 +18,19 @@
 
 package org.wso2.carbon.identity.entitlement.pdp;
 
+import java.io.Serializable;
+
 /**
  * Encapsulate the XACML Decision with XACML response and time stamp 
  */
-public class PolicyDecision {
+public class PolicyDecision implements Serializable{
 
-    /**
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8535578409960954316L;
+
+	/**
      * XACML response
      */
     private String response;

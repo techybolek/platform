@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.identity.sts.store.util;
 
-
 import javax.cache.Cache;
 
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -102,7 +101,7 @@ public class STSStoreUtils {
     }
 
     public static void removeTokenFromCache(String cacheId) {
-        Cache cache = DBTokenStore.getTokenCache();
+        Cache<String, SerializableToken> cache = DBTokenStore.getTokenCache();
         if (cache != null && cache.containsKey(cacheId)) {
             cache.remove(cacheId);
         }

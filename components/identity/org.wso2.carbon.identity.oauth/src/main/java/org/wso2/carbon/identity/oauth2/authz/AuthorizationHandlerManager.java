@@ -18,17 +18,13 @@
 
 package org.wso2.carbon.identity.oauth2.authz;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-
 import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
+import org.wso2.carbon.identity.oauth.cache.BaseCache;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -56,7 +52,7 @@ public class AuthorizationHandlerManager {
     private Map<String, AuthorizationHandler> authzHandlers = new Hashtable<String, AuthorizationHandler>();
     private List<String> supportedRespTypes;
 
-    private Cache appInfoCache;
+   private BaseCache<String, OAuthAppDO> appInfoCache;
 
     public static AuthorizationHandlerManager getInstance() throws IdentityOAuth2Exception {
 
@@ -77,13 +73,7 @@ public class AuthorizationHandlerManager {
         supportedRespTypes = OAuthServerConfiguration.getInstance().getSupportedResponseTypes();
         authzHandlers.put(ResponseType.CODE.toString(), new CodeResponseTypeHandler());
         authzHandlers.put(ResponseType.TOKEN.toString(), new TokenResponseTypeHandler());
-//        appInfoCache = PrivilegedCarbonContext.getCurrentContext().getCache("AppInfoCache");
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(OAuth2Constants.OAUTH_CACHE_MANAGER);
-        if(manager != null){
-        	appInfoCache = manager.getCache("AppInfoCache");
-        } else {
-        	appInfoCache = Caching.getCacheManager().getCache("AppInfoCache");
-        }
+        appInfoCache = new BaseCache<String, OAuthAppDO>("AppInfoCache");
         if(appInfoCache != null) {
             if (log.isDebugEnabled()) {
             	log.debug("Successfully created AppInfoCache under "+OAuth2Constants.OAUTH_CACHE_MANAGER); 
@@ -193,13 +183,13 @@ public class AuthorizationHandlerManager {
 
     private OAuthAppDO getAppInformation(OAuth2AuthorizeReqDTO authzReqDTO) throws IdentityOAuthAdminException, InvalidOAuthClientException {
         OAuthAppDO oAuthAppDO;
-        Object obj = appInfoCache.get(authzReqDTO.getConsumerKey());
+        Object obj = appInfoCache.getValueFromCache(authzReqDTO.getConsumerKey());
         if(obj != null){
             oAuthAppDO = (OAuthAppDO)obj;
             return oAuthAppDO;
         }else{
             oAuthAppDO = new OAuthAppDAO().getAppInformation(authzReqDTO.getConsumerKey());
-            appInfoCache.put(authzReqDTO.getConsumerKey(),oAuthAppDO);
+            appInfoCache.addToCache(authzReqDTO.getConsumerKey(),oAuthAppDO);
             return oAuthAppDO;
         }
     }

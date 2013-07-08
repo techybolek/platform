@@ -12,7 +12,7 @@ import java.util.Set;
 public class OpenIDIdentityCacheEntry extends OpenIDCacheEntry {
 
     private String cacheEntry;
-    private Set<String> cacheEntrySet;
+//    private Set<String> cacheEntrySet;
     private String[] cacheEntryArray;
     private int hashEntry;
     private long cacheInterval;
@@ -42,9 +42,9 @@ public class OpenIDIdentityCacheEntry extends OpenIDCacheEntry {
         this.cacheEntryArray = Arrays.copyOf(cacheEntryArray, cacheEntryArray.length);
     }
 
-    public OpenIDIdentityCacheEntry(Set<String> cacheEntrySet) {
-        this.cacheEntrySet = cacheEntrySet;
-    }
+//    public OpenIDIdentityCacheEntry(Set<String> cacheEntrySet) {
+//        this.cacheEntrySet = cacheEntrySet;
+//    }
 
     public OpenIDIdentityCacheEntry(String cacheEntry, Key secretKey, Date date) {
         this.cacheEntry = cacheEntry;
@@ -64,9 +64,9 @@ public class OpenIDIdentityCacheEntry extends OpenIDCacheEntry {
         return cacheInterval;
     }
 
-    public Set<String> getCacheEntrySet() {
-        return cacheEntrySet;
-    }
+//    public Set<String> getCacheEntrySet() {
+//        return cacheEntrySet;
+//    }
 
     public boolean isCacheClearing() {
         return cacheClearing;

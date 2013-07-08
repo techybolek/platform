@@ -3,6 +3,7 @@ package org.wso2.carbon.identity.oauth.cache;
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,31 +30,22 @@ import org.apache.commons.logging.LogFactory;
 /**
  * A base class for all cache implementations in user core module.
  */
-public abstract class BaseCache {
+public class BaseCache <K extends Serializable, V extends Serializable> {
 
 	private static Log log = LogFactory.getLog(BaseCache.class);
 	
-	protected Cache<CacheKey, CacheEntry> cache = null;
     private static final String OAUTH_CACHE_MANAGER = "OAuthCacheManager";
+    private String CACHE_NAME;
 
-	protected BaseCache(String cacheName) {
-    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(BaseCache.OAUTH_CACHE_MANAGER);
-        if(manager != null){
-        	this.cache = manager.getCache(cacheName);
-        } else {
-        	this.cache = Caching.getCacheManager().getCache(cacheName);
-        }
-//        this.cache = CacheManager.getInstance().getCache(cacheName);
-        if(this.cache != null) {
-            if (log.isDebugEnabled()) {
-            	log.debug("Successfully created "+cacheName+" under "+BaseCache.OAUTH_CACHE_MANAGER); 
-            }
-        }
-        else {
-        	log.error("Error while creating "+cacheName);
-        }
+	public BaseCache(String cacheName) {
+		this.CACHE_NAME = cacheName;
 	}
 
+	private Cache<K,V> getBaseCache() {
+    	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(BaseCache.OAUTH_CACHE_MANAGER);
+        Cache<K,V> cache = manager.getCache(CACHE_NAME);
+        return cache;
+	}
     
 
 	/**
@@ -64,13 +56,14 @@ public abstract class BaseCache {
 	 * @param entry
 	 *            Actual object where cache entry is placed.
 	 */
-	public void addToCache(CacheKey key, CacheEntry entry) {
-		if (this.cache.containsKey(key)) {
-			// Element already in the cache. Remove it first
-			this.cache.remove(key);
+	public void addToCache(K key, V entry) {
+		// Element already in the cache. Remove it first
+		clearCacheEntry(key);
+		
+		Cache<K,V> cache = getBaseCache();
+		if (cache != null) {
+			cache.put(key, entry);
 		}
-
-		this.cache.put(key, entry);
 	}
 
 	/**
@@ -80,14 +73,14 @@ public abstract class BaseCache {
 	 *            CacheKey
 	 * @return Cached entry.
 	 */
-	public CacheEntry getValueFromCache(CacheKey key) {
-
-		if (this.cache.containsKey(key)) {
-			return (CacheEntry) this.cache.get(key);
+	public V getValueFromCache(K key) {
+		Cache<K,V> cache = getBaseCache();
+		if (cache != null) {
+			if (cache.containsKey(key)) {
+				return (V) cache.get(key);
+			}
 		}
-
 		return null;
-
 	}
 
 	/**
@@ -96,9 +89,12 @@ public abstract class BaseCache {
 	 * @param key
 	 *            Key to clear cache.
 	 */
-	public void clearCacheEntry(CacheKey key) {
-		if (this.cache.containsKey(key)) {
-			this.cache.remove(key);
+	public void clearCacheEntry(K key) {
+		Cache<K,V> cache = getBaseCache();
+		if (cache != null) {
+			if (cache.containsKey(key)) {
+				cache.remove(key);
+			}
 		}
 	}
 
@@ -106,7 +102,10 @@ public abstract class BaseCache {
 	 * Remove everything in the cache.
 	 */
 	public void clear() {
-		this.cache.removeAll();
+		Cache<K,V> cache = getBaseCache();
+		if (cache != null) {
+			cache.removeAll();
+		}
 	}
 
 }
