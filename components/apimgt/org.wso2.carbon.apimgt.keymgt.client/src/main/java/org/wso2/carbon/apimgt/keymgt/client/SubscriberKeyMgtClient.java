@@ -77,9 +77,9 @@ public class SubscriberKeyMgtClient {
         return subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType, callbackUrl, allowedDomains);
     }
 
-    public String regenerateApplicationAccessKey(String keyType, String oldAccessToken, String[] allowedDomains)
+    public String regenerateApplicationAccessKey(String keyType, String oldAccessToken, String[] allowedDomains,String clientId,String clientSecret)
             throws Exception {
-        return subscriberServiceStub.renewAccessToken(keyType, oldAccessToken, allowedDomains);
+        return subscriberServiceStub.renewAccessToken(keyType, oldAccessToken, allowedDomains, clientId, clientSecret);
 
     }
 
