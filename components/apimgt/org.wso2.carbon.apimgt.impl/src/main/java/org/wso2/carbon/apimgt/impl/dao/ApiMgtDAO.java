@@ -46,6 +46,7 @@ import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.apache.amber.oauth2.common.OAuth;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -56,6 +57,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.codehaus.jettison.json.JSONObject;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -1905,20 +1916,58 @@ public class ApiMgtDAO {
 
     }
 
-    /**
-     * This method is to renew access token
-     *
-     * @param keyType        key type
-     * @param oldAccessToken old access token
-     * @return Access Token
-     * @throws IdentityException throws IdentityException
-     */
+  /**
+   * To renew the Application Accesstoken
+   * @param keyType
+   * @param oldAccessToken
+   * @param accessAllowDomains
+   * @param clientId
+   * @param clientSecret
+   * @return
+   * @throws IdentityException
+   * @throws APIManagementException
+   */
     public String refreshAccessToken(String keyType, String oldAccessToken,
-                                     String[] accessAllowDomains)
+                                     String[] accessAllowDomains, String clientId,String clientSecret)
             throws IdentityException, APIManagementException {
 
-        String accessToken = OAuthUtil.getRandomNumber();
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+		String accessToken = null;
+    	long validityPeriod = 0;
+    	
+    	// create a post request to getNewAccessToken for client_credentials grant type.
+    	String tokenEndpoint = "https://localhost:9443/oauth2endpoints/token"; //TODO :FIX THIS,
+    	HttpClient httpclient = new DefaultHttpClient();
+    	HttpPost httppost = new HttpPost(tokenEndpoint);
+    	
+    	// Request parameters.
+		List<NameValuePair> params = new ArrayList<NameValuePair>(3);
+		params.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE,"client_credentials"));
+		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
+		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET,clientSecret));
+		try {
+			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+			HttpResponse response = httpclient.execute(httppost);
+ 
+
+			HttpEntity responseEntity = response.getEntity();
+
+			if (response.getStatusLine().getStatusCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " +
+				                           response.getStatusLine().getStatusCode());
+			} else {
+				String responseStr = EntityUtils.toString(responseEntity);
+				JSONObject obj = new JSONObject(responseStr);
+				accessToken = obj.get("access_token").toString();
+				validityPeriod= Long.parseLong(obj.get("expires_in").toString());
+			}
+
+		} catch (Exception e2) {
+			handleException("Error in getting new accessToken", e2);
+		}
+
+		
+      //  String accessToken = OAuthUtil.getRandomNumber();
+          String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         if (APIUtil.checkUserNameAssertionEnabled()) {
             String userName = APIUtil.getUserIdFromAccessToken(oldAccessToken);
             //If the application key was generated with the UserName_Assertion=false and later changed it to true
@@ -1945,7 +1994,7 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            long validityPeriod = getApplicationAccessTokenValidityPeriod();
+          //  long validityPeriod = getApplicationAccessTokenValidityPeriod();
             prepStmt = connection.prepareStatement(sqlUpdateAccessToken);
             prepStmt.setString(1, accessToken);
             prepStmt.setString(2, APIConstants.TokenStatus.ACTIVE);
