@@ -82,6 +82,7 @@
                             org.apache.taglibs.standard.tlv,
                             org.eclipse.equinox.http.helper,
                             org.eclipse.equinox.jsp.jasper,
+                            org.wso2.carbon.webapp.statistics.data.*,
                             org.wso2.carbon.statistics.stub.*; version="${carbon.platform.package.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>
@@ -106,6 +107,11 @@
 	 <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.statistics.stub</artifactId>
+            <version>4.2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.bam.webapp.stat.publisher.stub</artifactId>
             <version>4.2.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
