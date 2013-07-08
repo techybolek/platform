@@ -52,21 +52,19 @@
     List<ResourceData> resources = (ArrayList<ResourceData>) session.getAttribute("apiResources");
     ResourceData selectedResource;
     String index = request.getParameter("index");
-//    if (session.getAttribute("resourceData") == null) {
-    if (!"-1".equals(index)) {
-        selectedResource = resources.get(Integer.parseInt(index));
-    } else {
-        index = (String) session.getAttribute("index");
-        if ("-1".equals(index)) {
-            //return;
-            selectedResource = (ResourceData)session.getAttribute("resourceData");
-        } else{
+    if (session.getAttribute("resourceData") == null) {
+        if (!"-1".equals(index)) {
+            selectedResource = resources.get(Integer.parseInt(index));
+        } else {
+            index = (String) session.getAttribute("index");
+            if ("-1".equals(index)) {
+                return;
+            }
             selectedResource = resources.get(Integer.parseInt(index));
         }
+    } else {
+        selectedResource = (ResourceData)session.getAttribute("resourceData");
     }
-//    } else {
-//        selectedResource = (ResourceData)session.getAttribute("resourceData");
-//    }
 
     boolean hasGet = false;
     boolean hasPost = false;
