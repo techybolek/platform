@@ -562,8 +562,8 @@
         </file>
 	<!-- Including log4j.properties file -->
          <file>
-            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/bundle-config/org.wso2.carbon.logging/log4j.properties</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging</outputDirectory>
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/log4j.properties</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf</outputDirectory>
             <destName>log4j.properties</destName>
             <filtered>true</filtered>
         </file>      
