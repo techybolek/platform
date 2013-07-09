@@ -31,26 +31,26 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import java.io.File;
 import java.io.IOException;
 
-public class TomcatServerManager{
+public class TomcatServerManager {
     private final static Log log = LogFactory.getLog(TomcatServerManager.class);
     Tomcat tomcat;
     boolean isRunning = false;
-    private Thread tomcatThread = null;
     int tomcatPort;
-    String tomcatClass= null;
+    String tomcatClass = null;
+    String basedir = null;
+    private Thread tomcatThread = null;
 
-    public TomcatServerManager(String className,String server, int port)
-    {
-             this.tomcatPort =port;
+    public TomcatServerManager(String className, String server, int port, String baseDirLocation) {
+        this.tomcatPort = port;
         this.tomcatClass = className;
-
+        this.basedir = baseDirLocation;
     }
 
     public void startJaxRsServer() throws Exception {
-        final File base = createBaseDirectory();
+        final File base = createBaseDirectory(basedir);
         log.info("Using base folder: " + base.getAbsolutePath());
 
-      tomcat = new Tomcat();
+        tomcat = new Tomcat();
         tomcat.setPort(tomcatPort);
         tomcat.setBaseDir(base.getAbsolutePath());
 
@@ -68,11 +68,9 @@ public class TomcatServerManager{
         tomcat.getServer().await();
     }
 
-    public synchronized  void startServer()
-    {
-        if(tomcatThread==null)
-        {
-            tomcatThread= new Thread(){
+    public synchronized void startServer() {
+        if (tomcatThread == null) {
+            tomcatThread = new Thread() {
                 public void run() {
                     try {
                         startJaxRsServer();
@@ -86,9 +84,8 @@ public class TomcatServerManager{
         }
     }
 
-
-    private File createBaseDirectory() throws IOException {
-        final File base = File.createTempFile("jaxrs-tmp-", "", new File("/home/dharshana/wso2source/carbon/platform/trunk/platform-integration/test-automation-framework/org.wso2.carbon.automation.core/src/main/resources"));
+    private File createBaseDirectory(String basedirLocal) throws IOException {
+        final File base = File.createTempFile("jaxrs-tmp-", "", new File(basedirLocal));
 
         if (!base.delete()) {
             throw new IOException("Cannot (re)create base folder: " + base.getAbsolutePath());
@@ -101,13 +98,10 @@ public class TomcatServerManager{
     }
 
     public void stop() throws LifecycleException {
-        if(!isRunning) {
-            //LOG.warn("Tomcat server is not running @ port={}", port);
+        if (!isRunning) {
+            log.info("Tomcat server is running at the port " + tomcatPort);
             return;
         }
-
-       // if(isInfo) LOG.info("Stopping the Tomcat server");
-
         tomcat.stop();
         isRunning = false;
     }
@@ -120,8 +114,7 @@ public class TomcatServerManager{
         try {
             startJaxRsServer();
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            log.error("Server startup failed :" + e.getMessage());
         }
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 }
