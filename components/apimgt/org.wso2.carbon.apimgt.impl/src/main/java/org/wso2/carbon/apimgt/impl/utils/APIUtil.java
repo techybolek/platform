@@ -1076,7 +1076,7 @@ public final class APIUtil {
      * @return String modifiedString
      */
     public static String replaceEmailDomain(String input){
-        if(input!=null&& input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR) && !MultitenantUtils.isEmailUserName() ){
+        if(input!=null&& input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR) ){
             input=input.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR,APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT);
         }
         return input;
@@ -1088,7 +1088,7 @@ public final class APIUtil {
      * @return String modifiedString
      */
     public static String replaceEmailDomainBack(String input) {
-        if (input!=null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)&& !MultitenantUtils.isEmailUserName()) {
+        if (input!=null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
             input = input.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
                                   APIConstants.EMAIL_DOMAIN_SEPARATOR);
         }
