@@ -19,11 +19,12 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.wso2.carbon.caching.core.CacheEntry;
 
+import javax.cache.Cache;
 import java.util.SortedMap;
 
-public class UserClaims extends CacheEntry {
+public class UserClaims{
+    //TODO refactor caching implementation
     private static final long serialVersionUID = -8123522530178387354L;
 
     public SortedMap<String, String> getClaimValues() {
