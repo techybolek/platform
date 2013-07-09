@@ -43,6 +43,7 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * This class can be used for testing purposes of Axis2Module sample scenario.
+ * test class disabled due to https://wso2.org/jira/browse/WSAS-1300
  */
 public abstract class Axis2ModuleTestCase extends ASIntegrationTest {
 
@@ -142,22 +143,11 @@ public abstract class Axis2ModuleTestCase extends ASIntegrationTest {
         for (LogEvent aLogEvent : logEvent) {
             if (aLogEvent.getLogger().contains("DEBUG")) {
                 if (aLogEvent.getMessage().contains("Incoming Message")) {
-
-                    assertTrue(aLogEvent.getMessage().equals("Incoming Message : <?xml version" +
-                                                             "='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=" +
-                                                             "\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body>" +
-                                                             "<ns:greet xmlns:ns=\"http://www.wso2.org/types\"><ns:name>Hello Wso2" +
-                                                             "</ns:name></ns:greet></soapenv:Body></soapenv:Envelope>"));
+                    assertTrue(aLogEvent.getMessage().contains("<ns:name>Hello Wso2</ns:name></ns:greet>"));
                     incomingMessageStatus = true;
+
                 } else if (aLogEvent.getMessage().contains("Outgoing Message")) {
-
-                    assertTrue(aLogEvent.getMessage().equals("Outgoing Message : " +
-                                                             "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope " +
-                                                             "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
-                                                             "<soapenv:Body><ns:greetResponse xmlns:ns=\"http://www.wso2.org/types\">" +
-                                                             "<return>Hello World, Hello Wso2 !!!</return></ns:greetResponse>" +
-                                                             "</soapenv:Body></soapenv:Envelope>"));
-
+                    assertTrue(aLogEvent.getMessage().equals("<return>Hello World, Hello Wso2 !!!</return>"));
                     outgoingMessageStatus = true;
                 }
             }
