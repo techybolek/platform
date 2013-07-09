@@ -28,10 +28,11 @@ import org.wso2.carbon.identity.entitlement.dto.PDPDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PIPFinderDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PolicyFinderDataHolder;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
+import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 import org.wso2.carbon.identity.entitlement.pip.*;
-import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.finder.PolicyFinderModule;
 
 import java.util.*;
 
@@ -289,10 +290,10 @@ public class EntitlementAdminService extends AbstractAdmin {
      */
     public void refreshPolicyFinders(String policyFinder) throws IdentityException {
 
-        Map<CarbonPolicyFinderModule, Properties> policyFinders = EntitlementServiceComponent.getEntitlementConfig()
+        Map<PolicyFinderModule, Properties> policyFinders = EntitlementServiceComponent.getEntitlementConfig()
                 .getPolicyFinderModules();
         if(policyFinder != null && policyFinders != null && !policyFinders.isEmpty()){
-            for (Map.Entry<CarbonPolicyFinderModule, Properties> entry : policyFinders.entrySet()) {
+            for (Map.Entry<PolicyFinderModule, Properties> entry : policyFinders.entrySet()) {
                 if (policyFinder.equals(entry.getKey().getClass().getName()) ||
                                             policyFinder.equals(entry.getKey().getModuleName())) {
                     try {
@@ -352,7 +353,7 @@ public class EntitlementAdminService extends AbstractAdmin {
 
         PDPDataHolder pdpDataHolder = new PDPDataHolder();
 
-		Map<CarbonPolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
+		Map<PolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
                                                 getEntitlementConfig().getPolicyFinderModules();
  		Map<PIPAttributeFinder, Properties> attributeModules = EntitlementServiceComponent.
                                                 getEntitlementConfig().getDesignators();
@@ -361,8 +362,8 @@ public class EntitlementAdminService extends AbstractAdmin {
 
         if(finderModules != null){
             List<String> list = new ArrayList<String>();
-            for(Map.Entry<CarbonPolicyFinderModule, Properties> entry : finderModules.entrySet()){
-                CarbonPolicyFinderModule module = entry.getKey();
+            for(Map.Entry<PolicyFinderModule, Properties> entry : finderModules.entrySet()){
+                PolicyFinderModule module = entry.getKey();
                 if(module != null){
                     if(module.getModuleName() != null){
                         list.add(module.getModuleName());
@@ -416,14 +417,14 @@ public class EntitlementAdminService extends AbstractAdmin {
 
         PolicyFinderDataHolder holder = null;
         // get registered finder modules
-		Map<CarbonPolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
+		Map<PolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
                                                 getEntitlementConfig().getPolicyFinderModules();
         if(finderModules == null || finder == null){
             return null;
         }
 
-        for(Map.Entry<CarbonPolicyFinderModule, Properties> entry : finderModules.entrySet()){
-            CarbonPolicyFinderModule module = entry.getKey();
+        for(Map.Entry<PolicyFinderModule, Properties> entry : finderModules.entrySet()){
+            PolicyFinderModule module = entry.getKey();
             if(module != null && (finder.equals(module.getModuleName()) ||
                                                         finder.equals(module.getClass().getName()))){
                 holder = new PolicyFinderDataHolder();
@@ -433,9 +434,7 @@ public class EntitlementAdminService extends AbstractAdmin {
                     holder.setModuleName(module.getClass().getName());
                 }
                 holder.setClassName(module.getClass().getName());
-                holder.setPriority(module.getModulePriority());
                 holder.setPolicyIdentifiers(module.getPolicyIdentifiers());
-                holder.setCombiningAlgorithm(module.getPolicyCombiningAlgorithm());
                 break;
             }
 
@@ -508,4 +507,32 @@ public class EntitlementAdminService extends AbstractAdmin {
         }
         return holder;
     }
+
+    /**
+     * Gets globally defined policy combining algorithm
+     *
+     * @return policy combining algorithm as a String
+     * @throws IdentityException throws
+     */
+    public String getGlobalPolicyAlgorithm() throws IdentityException {
+
+        return EntitlementAdminEngine.getInstance().
+                                            getPolicyDataStore().getGlobalPolicyAlgorithmName();
+    }
+
+    /**
+     * Sets policy combining algorithm globally
+     *
+     * @param policyCombiningAlgorithm policy combining algorithm as a String
+     * @throws IdentityException throws
+     */
+    public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws IdentityException {
+
+        EntitlementAdminEngine.getInstance().
+                        getPolicyDataStore().setGlobalPolicyAlgorithm(policyCombiningAlgorithm);
+        // clear cache
+        DecisionClearingCache.getInstance().invalidateCache();
+        EntitlementPolicyClearingCache.getInstance().invalidateCache();
+    }
+
 }

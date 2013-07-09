@@ -1,19 +1,20 @@
 /*
- * Copyright 2004,2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.identity.entitlement.internal;
 
 import java.io.File;
@@ -32,6 +33,7 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.ServerConfigurationException;
+import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
@@ -69,11 +71,7 @@ public class EntitlementServiceComponent {
     private static RegistryService registryService = null;
     private static EntitlementConfigHolder entitlementConfig = null;
     private static RealmService realmservice;
-
     private ThriftAuthenticatorService thriftAuthenticationService;
-
-//    private static CacheInvalidator cacheInvalidator;
-
     private ExecutorService executor = Executors.newFixedThreadPool(2);
 
     /**
@@ -92,10 +90,6 @@ public class EntitlementServiceComponent {
         }
 
         try {
-            EntitlementServiceInitializer entitlementServiceInitializer = new EntitlementServiceInitializer(
-                    registryService);
-            entitlementServiceInitializer.putEntitlementPolicyResourcesToRegistry();
-
             // build configuration file
             entitlementConfig = new EntitlementConfigHolder();
             EntitlementExtensionBuilder builder = new EntitlementExtensionBuilder();
@@ -430,7 +424,7 @@ public class EntitlementServiceComponent {
         }
         byte[] byteAddress = new byte[4];
         for(int i=0;i<splittedString.length;i++){
-            if(Integer.parseInt(splittedString[i]) > 127){
+            if(Integer.parseInt(splittedString[i]) > 127){   //TODO ?
                 byteAddress[i] = new Integer(Integer.parseInt(splittedString[i]) - 256).byteValue();
             } else {
                 byteAddress[i] = Byte.parseByte(splittedString[i]);
@@ -438,16 +432,4 @@ public class EntitlementServiceComponent {
         }
         return InetAddress.getByAddress(byteAddress);
     }
-
-//    protected void setCacheInvalidator(CacheInvalidator invalidator) {
-//        cacheInvalidator = invalidator;
-//    }
-//
-//    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
-//        cacheInvalidator = null;
-//    }
-//
-//    public static CacheInvalidator getCacheInvalidator() {
-//    	return cacheInvalidator;
-//    }    
 }

@@ -18,8 +18,13 @@
 
 package org.wso2.carbon.identity.entitlement.policy.publisher;
 
-import org.wso2.carbon.identity.entitlement.dto.ModuleDataHolder;
-import org.wso2.carbon.identity.entitlement.dto.ModulePropertyDTO;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
+import org.wso2.carbon.identity.entitlement.dto.PublisherPropertyDTO;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 
 import java.util.ArrayList;
@@ -32,7 +37,6 @@ import java.util.Properties;
  * method.
  * If you want to configure properties of a publisher module from management UI, 
  * you want to write your publisher module by extending this abstract class
- *
  * Then you can init() your module each time policy is published.
  */
 public abstract class AbstractPolicyPublisherModule implements PolicyPublisherModule{
@@ -45,9 +49,11 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
 
     protected static final String SECRET = "password";
 
-    public void init(Properties properties) throws Exception {
+    private static Log log = LogFactory.getLog(AbstractPolicyPublisherModule.class);
 
-        List<ModulePropertyDTO>  propertyDTOs = new ArrayList<ModulePropertyDTO>();
+    public void init(Properties properties) {
+
+        List<PublisherPropertyDTO>  propertyDTOs = new ArrayList<PublisherPropertyDTO>();
         
         if(properties == null || properties.size() == 0){
             properties = loadProperties();
@@ -65,13 +71,13 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
                     return;
                 }
 
-                ModulePropertyDTO dto = new ModulePropertyDTO();
+                PublisherPropertyDTO dto = new PublisherPropertyDTO();
                 dto.setModule(getModuleName());
                 dto.setId((String)entry.getKey());
                 if(attributeMap.get(DISPLAY_NAME) != null){
                     dto.setDisplayName((String)attributeMap.get(DISPLAY_NAME));
                 } else {
-                    throw new Exception("Invalid policy publisher configuration : Display name can not be null");
+                    log.error("Invalid policy publisher configuration : Display name can not be null");
                 }
                 if(attributeMap.get(ORDER) != null){
                     dto.setDisplayOrder(Integer.parseInt((String)attributeMap.get(ORDER)));
@@ -86,7 +92,7 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
             }
         }
 
-        ModulePropertyDTO preDefined1 = new ModulePropertyDTO();
+        PublisherPropertyDTO preDefined1 = new PublisherPropertyDTO();
         preDefined1.setId(PolicyPublisher.SUBSCRIBER_ID);
         preDefined1.setModule(getModuleName());
         preDefined1.setDisplayName(PolicyPublisher.SUBSCRIBER_DISPLAY_NAME);
@@ -94,9 +100,8 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
         preDefined1.setDisplayOrder(0);
         propertyDTOs.add(preDefined1);
 
-        ModuleDataHolder holder = new ModuleDataHolder();
-        holder.setModuleName(getModuleName());
-        holder.setPropertyDTOs(propertyDTOs.toArray(new ModulePropertyDTO[propertyDTOs.size()]));
+        PublisherDataHolder holder = new PublisherDataHolder(getModuleName());
+        holder.setPropertyDTOs(propertyDTOs.toArray(new PublisherPropertyDTO[propertyDTOs.size()]));
         EntitlementServiceComponent.getEntitlementConfig().
                             addModulePropertyHolder(PolicyPublisherModule.class.getName(), holder);
 
@@ -107,12 +112,31 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
         return null;
     }
 
+    @Override
+    public void publish(PolicyDTO policyDTO, String action) throws IdentityException {
+
+        if(EntitlementConstants.PolicyPublish.ACTION_CREATE.equals(action)){
+            publishNew(policyDTO);
+        } else if(EntitlementConstants.PolicyPublish.ACTION_DELETE.equals(action)){
+
+        } else if(EntitlementConstants.PolicyPublish.ACTION_UPDATE.equals(action)){
+
+        } else if(EntitlementConstants.PolicyPublish.ACTION_ENABLE.equals(action)){
+
+        }
+    }
+
     /**
      * This would init module, each time policy is published
      *
-     * @param propertyHolder publisher module data as ModuleDataHolder
+     * @param propertyHolder publisher module data as PublisherDataHolder
      * @throws Exception throws if init fails
      */
-    public abstract void init(ModuleDataHolder propertyHolder) throws Exception;
+    public abstract void init(PublisherDataHolder propertyHolder) throws IdentityException;
 
+    public abstract void publishNew(PolicyDTO policyDTO) throws IdentityException;
+
+    public abstract void update(PolicyDTO policyDTO) throws IdentityException;
+
+    public abstract void delete(PolicyDTO policyDTO) throws IdentityException;
 }

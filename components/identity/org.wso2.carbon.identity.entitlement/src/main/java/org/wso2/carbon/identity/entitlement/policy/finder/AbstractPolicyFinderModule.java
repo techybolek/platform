@@ -28,7 +28,7 @@ import java.util.*;
  * Abstract implementation of a policy finder module. This can be easily extended by any module
  * that support dynamic policy changes. 
  */
-public abstract class AbstractPolicyFinderModule implements CarbonPolicyFinderModule {
+public abstract class AbstractPolicyFinderModule implements PolicyFinderModule {
 
 
     /**
@@ -59,11 +59,6 @@ public abstract class AbstractPolicyFinderModule implements CarbonPolicyFinderMo
     @Override
     public boolean isDefaultCategoriesSupported() {
         return true;
-    }
-
-    @Override
-    public String getPolicyCombiningAlgorithm() {
-        return null;
     }
 
     @Override

@@ -22,16 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.core.IdentityRegistryResources;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
-import org.wso2.carbon.identity.entitlement.policy.PolicyMetaDataBuilder;
+import org.wso2.carbon.identity.entitlement.policy.PolicyAttributeBuilder;
 import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -191,7 +190,7 @@ public class RegistryPolicyReader {
         PolicyDTO dto = null;
 
         try {
-            policy = new String((byte[]) resource.getContent());
+            policy = new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
             absPolicy = PolicyReader.getInstance(null).getPolicy(policy);
             dto = new PolicyDTO();
             dto.setPolicyId(absPolicy.getId().toASCIIString());
@@ -203,9 +202,9 @@ public class RegistryPolicyReader {
             } else {
                 dto.setPolicyOrder(0);
             }   // TODO  policy refe IDs ???
-            PolicyMetaDataBuilder policyMetaDataBuilder = new PolicyMetaDataBuilder();
-            dto.setPolicyMetaData(policyMetaDataBuilder.
-                                getPolicyMetaDataFromRegistryProperties(resource.getProperties()));            
+            PolicyAttributeBuilder policyAttributeBuilder = new PolicyAttributeBuilder();
+            dto.setAttributeDTOs(policyAttributeBuilder.
+                    getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (RegistryException e) {
             log.error("Error while loading entitlement policy", e);

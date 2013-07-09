@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.identity.entitlement.policy.finder.registry;
+package org.wso2.carbon.identity.entitlement.policy.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,48 +24,135 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
 import org.wso2.carbon.identity.entitlement.policy.finder.AbstractPolicyFinderModule;
-import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.finder.PolicyFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.finder.registry.RegistryPolicyReader;
+import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import java.util.*;
 
 /**
- * WSO2 specific policy finder module, That reads policies from registry
+ *
  */
-public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
-
-    private static final String MODULE_NAME = "Registry Policy Finder Module";
+public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
+                                                                implements PolicyStoreManageModule {
 
     private String policyStorePath;
 
-    public static final String POLICY_COMBINING_PREFIX_1 = "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:";
+    private static final String MODULE_NAME = "Registry Policy Finder Module";
 
-    public static final String POLICY_COMBINING_PREFIX_3 = "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:";
+    private static final String PROPERTY_POLICY_STORE_PATH = "policyStorePath";
 
-	private static Log log = LogFactory.getLog(RegistryPolicyFinderModule.class);
+    private static final String PROPERTY_ATTRIBUTE_SEPARATOR = "attributeValueSeparator";
+
+    private static final String DEFAULT_POLICY_STORE_PATH = "/repository/identity/entitlement" +
+            "/policy/pdp";
+
+    private static final String KEY_VALUE_POLICY_ODER = "policyOrder";
+
+    private static final String KEY_VALUE_POLICY_META_DATA = "policyMetaData";
+
+    private static final String POLICY_MEDIA_TYPE = "application/xacml-policy+xml";
+
+	private static Log log = LogFactory.getLog(RegistryPolicyStoreManageModule.class);
 
     @Override
-    public void init(Properties properties) throws Exception {
-        policyStorePath = properties.getProperty("policyStorePath");
+    public void init(Properties properties) {
+        policyStorePath = properties.getProperty(PROPERTY_POLICY_STORE_PATH);
         if(policyStorePath == null){
-            policyStorePath = "/repository/identity/Entitlement/actualStore/";
+            policyStorePath = DEFAULT_POLICY_STORE_PATH;
         }
     }
 
-       
     @Override
-    public String getModuleName() {
-        return MODULE_NAME;
+    public void addPolicy(PolicyStoreDTO policy) throws IdentityException{
+
+        Registry registry;
+        String policyPath;
+        Collection policyCollection;
+        Resource resource;
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+        if(policy == null || policy.getPolicy() == null || policy.getPolicy().trim().length() == 0
+                 || policy.getPolicyId() == null || policy.getPolicyId().trim().length() == 0){
+            throw new IdentityException("Policy can not be null");
+        }
+
+        try {
+            registry = EntitlementServiceComponent.getRegistryService().
+                                                            getGovernanceSystemRegistry(tenantId);
+
+            if(registry.resourceExists(policyStorePath)){
+                policyCollection = (Collection) registry.get(policyStorePath);
+            } else {
+                policyCollection = registry.newCollection();
+            }
+
+            registry.put(policyStorePath, policyCollection);
+
+            policyPath = policyStorePath + policy.getPolicyId();
+
+            if (registry.resourceExists(policyPath)) {
+                resource = registry.get(policyPath);
+            } else {
+                resource = registry.newResource();
+            }
+
+            resource.setProperty(KEY_VALUE_POLICY_ODER, Integer.toString(policy.getPolicyOrder()));
+            resource.setContent(policy.getPolicy());
+            resource.setMediaType(POLICY_MEDIA_TYPE);
+            AttributeDTO[] attributeDTOs = policy.getAttributeDTOs();
+            if(attributeDTOs != null){
+                setAttributesAsProperties(attributeDTOs, resource);
+            }
+            registry.put(policyPath, resource);
+        } catch (RegistryException e) {
+            log.error("Error while persisting policy",e);
+            throw new IdentityException("Error while persisting policy" , e);
+        }
     }
 
     @Override
-    public int getModulePriority() {
-        return 0;
+    public void updatePolicy(PolicyStoreDTO policy) {
+
+    }
+
+
+    @Override
+    public boolean deletePolicy(String policyIdentifier) {
+
+        Registry registry;
+        String policyPath;
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+        if(policyIdentifier == null || policyIdentifier.trim().length() == 0){
+            return false;
+        }
+
+        try {
+            registry = EntitlementServiceComponent.getRegistryService().
+                                                            getGovernanceSystemRegistry(tenantId);
+
+            policyPath = policyStorePath + policyIdentifier;
+            registry.delete(policyPath);
+            return true;
+        } catch (RegistryException e) {
+            log.error(e);
+            return false;
+        }
+    }
+
+
+    @Override
+    public String getModuleName() {
+        return MODULE_NAME;
     }
 
     @Override
@@ -94,7 +181,7 @@ public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
                 }
             }
         } catch (Exception e) {
-            log.error("Policies can not be retrieved from registry policy finder module" , e); 
+            log.error("Policies can not be retrieved from registry policy finder module" , e);
         }
         return  policies.toArray(new String[policies.size()]);
     }
@@ -138,30 +225,30 @@ public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
         try {
             policyDTOs =  getPolicyReader().readAllPolicies();
         } catch (Exception e) {
-            log.error("Policies can not be retrieved from registry policy finder module" , e);         
+            log.error("Policies can not be retrieved from registry policy finder module" , e);
         }
 
         if(policyDTOs != null){
             attributeMap = new  HashMap<String, Set<AttributeDTO>>();
             for (PolicyDTO policyDTO : policyDTOs) {
                 Set<AttributeDTO> attributeDTOs =
-                        new HashSet<AttributeDTO>(Arrays.asList(policyDTO.getPolicyMetaData()));
+                        new HashSet<AttributeDTO>(Arrays.asList(policyDTO.getAttributeDTOs()));
                 String[] policyIdRef = policyDTO.getPolicyIdReferences();
                 String[] policySetIdRef = policyDTO.getPolicySetIdReferences();
 
                 if(policyIdRef != null && policyIdRef.length > 0 || policySetIdRef != null &&
-                                                                        policySetIdRef.length > 0){
+                        policySetIdRef.length > 0){
                     for(PolicyDTO dto : policyDTOs){
                         if(policyIdRef != null){
                             for(String policyId : policyIdRef){
                                 if(dto.getPolicyId().equals(policyId)){
-                                    attributeDTOs.addAll(Arrays.asList(dto.getPolicyMetaData()));
+                                    attributeDTOs.addAll(Arrays.asList(dto.getAttributeDTOs()));
                                 }
                             }
                         }
                         for(String policySetId : policySetIdRef){
                             if(dto.getPolicyId().equals(policySetId)){
-                                attributeDTOs.addAll(Arrays.asList(dto.getPolicyMetaData()));
+                                attributeDTOs.addAll(Arrays.asList(dto.getAttributeDTOs()));
                             }
                         }
                     }
@@ -173,21 +260,10 @@ public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
         return attributeMap;
     }
 
-    @Override
-    public String getPolicyCombiningAlgorithm() {
-        String algorithm = null;
-        try {
-            algorithm =  getPolicyReader().readPolicyCombiningAlgorithm();
-            return getPolicyCombiningAlgorithmUri(algorithm);
-        } catch (Exception e) {
-            log.error("Policy combining algorithm can not be retrieved from registry policy finder module" , e);
-        }
-        return algorithm;
-    }    
 
     @Override
     public int getSupportedSearchAttributesScheme() {
-        return CarbonPolicyFinderModule.COMBINATIONS_BY_CATEGORY_AND_PARAMETER;
+        return PolicyFinderModule.COMBINATIONS_BY_CATEGORY_AND_PARAMETER;
     }
 
     @Override
@@ -204,7 +280,7 @@ public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
      *
      */
     public static void clearCache(){
-        invalidateCache();    
+        invalidateCache();
     }
 
 
@@ -218,31 +294,32 @@ public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         try {
             registry = EntitlementServiceComponent.getRegistryService().
-                                                            getGovernanceSystemRegistry(tenantId);
+                    getGovernanceSystemRegistry(tenantId);
         } catch (RegistryException e) {
             log.error("Error while obtaining registry for tenant :  " + tenantId, e);
         }
         return new RegistryPolicyReader(registry, policyStorePath);
     }
 
-	/**
-	 * Creates PolicyCombiningAlgorithm object based on policy combining url
-	 *
-	 * @param name policy combining name as String
-	 * @return PolicyCombiningAlgorithm object
-	 * @throws IdentityException throws if unsupported algorithm
-	 */
-	private String getPolicyCombiningAlgorithmUri(String name)
-			throws IdentityException {
-
-        if(name == null){
-            return null;
+    /**
+     * This helper method creates properties object which contains the policy meta data.
+     *
+     * @param attributeDTOs List of AttributeDTO
+     * @param resource registry resource
+     */
+    private void setAttributesAsProperties(AttributeDTO[] attributeDTOs, Resource resource) {
+        
+        int attributeElementNo = 0;
+        if(attributeDTOs != null){
+            for(AttributeDTO attributeDTO : attributeDTOs){
+                resource.setProperty(KEY_VALUE_POLICY_META_DATA + attributeElementNo,
+                       attributeDTO.getCategory() + "," +
+                       attributeDTO.getAttributeValue() + "," +
+                       attributeDTO.getAttributeId() + "," +
+                       attributeDTO.getAttributeDataType());
+                attributeElementNo ++;
+            }
         }
+    }
 
-        if("first-applicable".equals(name) || "only-one-applicable".equals(name)){
-            return POLICY_COMBINING_PREFIX_1 + name;
-        } else {
-            return POLICY_COMBINING_PREFIX_3 + name;
-        }                                             
-	}
 }

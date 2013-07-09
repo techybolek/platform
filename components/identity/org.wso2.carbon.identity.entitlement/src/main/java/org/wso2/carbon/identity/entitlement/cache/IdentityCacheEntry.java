@@ -93,7 +93,7 @@ public class IdentityCacheEntry implements Serializable {
     }
 
     public String[] getCacheEntryArray() {
-        return cacheEntryArray;
+        return Arrays.copyOf(cacheEntryArray, cacheEntryArray.length);
     }
 
     public Key getSecretKey() {

@@ -29,7 +29,7 @@ import org.wso2.carbon.identity.entitlement.cache.PolicySearchCache;
 import org.wso2.carbon.identity.entitlement.dto.*;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
-import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.finder.PolicyFinderModule;
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ public class PolicySearch {
 	private static Log log = LogFactory.getLog(PolicySearch.class);
 
 
-    private List<CarbonPolicyFinderModule>  finderModules = null;
+    private List<PolicyFinderModule> finderModules = null;
 
     private EntitlementEngine engine;
 
@@ -53,11 +53,11 @@ public class PolicySearch {
     public PolicySearch(EntitlementEngine engine) {
 
         // get registered finder modules
-		Map<CarbonPolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
+		Map<PolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
                                                 getEntitlementConfig().getPolicyFinderModules();
 
         if(finderModules != null){
-            this.finderModules = new ArrayList<CarbonPolicyFinderModule>(finderModules.keySet());
+            this.finderModules = new ArrayList<PolicyFinderModule>(finderModules.keySet());
         }
 
         this.engine = engine;
@@ -106,7 +106,7 @@ public class PolicySearch {
 
         if(subjectName != null && subjectName.trim().length() > 0){
             subjectAttributeDTO = new AttributeDTO();
-            subjectAttributeDTO.setAttributeType(EntitlementConstants.SUBJECT_CATEGORY_URI);
+            subjectAttributeDTO.setCategory(EntitlementConstants.SUBJECT_CATEGORY_URI);
             subjectAttributeDTO.setAttributeValue(subjectName);
             subjectAttributeDTO.setAttributeDataType(EntitlementConstants.STRING_DATA_TYPE);
             if(subjectId != null && subjectId.trim().length() > 0){
@@ -127,9 +127,9 @@ public class PolicySearch {
             return setDTO;
         }
 
-        for(CarbonPolicyFinderModule module : finderModules){
+        for(PolicyFinderModule module : finderModules){
             if(module.isDefaultCategoriesSupported() &&
-                    CarbonPolicyFinderModule.COMBINATIONS_BY_CATEGORY_AND_PARAMETER ==
+                    PolicyFinderModule.COMBINATIONS_BY_CATEGORY_AND_PARAMETER ==
                                                     module.getSupportedSearchAttributesScheme()){
                 Map<String, Set<AttributeDTO>> requestMap = module.
                     getSearchAttributes(null, new HashSet<AttributeDTO>(Arrays.asList(subjectAttributeDTO)));
@@ -145,7 +145,7 @@ public class PolicySearch {
                             resourceAttribute.setAttributeValue(resourceName);
                             resourceAttribute.setAttributeDataType(EntitlementConstants.STRING_DATA_TYPE);
                             resourceAttribute.setAttributeId(EntitlementConstants.RESOURCE_ID_DEFAULT);
-                            resourceAttribute.setAttributeType(EntitlementConstants.RESOURCE_CATEGORY_URI);
+                            resourceAttribute.setCategory(EntitlementConstants.RESOURCE_CATEGORY_URI);
                             resources.add(resourceAttribute);
                             hierarchicalResource = true;
                         }
@@ -154,16 +154,16 @@ public class PolicySearch {
                         resourceScopeAttribute.setAttributeValue(EntitlementConstants.RESOURCE_DESCENDANTS);
                         resourceScopeAttribute.setAttributeDataType(EntitlementConstants.STRING_DATA_TYPE);
                         resourceScopeAttribute.setAttributeId(EntitlementConstants.RESOURCE_SCOPE_ID);
-                        resourceScopeAttribute.setAttributeType(EntitlementConstants.RESOURCE_CATEGORY_URI);
+                        resourceScopeAttribute.setCategory(EntitlementConstants.RESOURCE_CATEGORY_URI);
 
                         for(AttributeDTO attributeDTO : attributeDTOs){
                             if (EntitlementConstants.ENVIRONMENT_CATEGORY_URI.equals(attributeDTO
-                                                    .getAttributeType())) {
+                                                    .getCategory())) {
                                 requestAttributes.add(attributeDTO);
                                 attributeDTO.setAttributeId(EntitlementConstants.ENVIRONMENT_ID_DEFAULT);
                                 requestAttributes.add(attributeDTO);
                             } else if (EntitlementConstants.ACTION_CATEGORY_URI.equals(attributeDTO
-                                                    .getAttributeType())) {
+                                                    .getCategory())) {
                                 if(action != null && action.trim().length() > 0){
                                     attributeDTO.setAttributeValue(action);
                                 }
@@ -171,7 +171,7 @@ public class PolicySearch {
                                 attributeDTO.setAttributeId(EntitlementConstants.ACTION_ID_DEFAULT);
                                 actions.add(attributeDTO);
                             } else if (EntitlementConstants.RESOURCE_CATEGORY_URI.equals(attributeDTO
-                                                    .getAttributeType()) && !hierarchicalResource){
+                                                    .getCategory()) && !hierarchicalResource){
                                 attributeDTO.setAttributeId(EntitlementConstants.RESOURCE_ID_DEFAULT);
                                 resources.add(attributeDTO);
                             }
@@ -194,7 +194,7 @@ public class PolicySearch {
                             }
 
                             for (AttributeDTO resource : resources) {
-                                if (EntitlementConstants.RESOURCE_CATEGORY_URI.equals(resource.getAttributeType())){
+                                if (EntitlementConstants.RESOURCE_CATEGORY_URI.equals(resource.getCategory())){
 
                                     boolean allActionsAllowed = false;
 
@@ -323,25 +323,20 @@ public class PolicySearch {
         Set<EntitledAttributesDTO> resultAttributes = new HashSet<EntitledAttributesDTO>();
         Set<AttributeDTO> attributeDTOs = new HashSet<AttributeDTO>(Arrays.asList(givenAttributes));
 
-        int[] moduleOrders = getPolicyModuleOrder();
-        for (int moduleOrder : moduleOrders) {
-            for(CarbonPolicyFinderModule finderModule : finderModules){
-                if(finderModule.getModulePriority() == moduleOrder){
-                    Map<String, Set<AttributeDTO>> attributesMap = finderModule.
-                                                    getSearchAttributes(identifier, attributeDTOs);
-                    int supportedSearchScheme = finderModule.getSupportedSearchAttributesScheme();
-                    Set<List<AttributeDTO>> requestSet =  getPossibleRequests(attributesMap, supportedSearchScheme);
-                    if(requestSet == null){
-                        log.error("Invalid Search scheme in policy finder : " + finderModule.getModuleName());
-                    } else {
-                        for(List<AttributeDTO> attributeDTOList : requestSet){
-                            if(getResponse(attributeDTOList)){
-                                EntitledAttributesDTO dto = new EntitledAttributesDTO();
-                                dto.setAttributeDTOs(attributeDTOs.
-                                            toArray(new AttributeDTO[attributeDTOList.size()]));
-                                resultAttributes.add(dto);
-                            }
-                        }
+        for(PolicyFinderModule finderModule : finderModules){
+            Map<String, Set<AttributeDTO>> attributesMap = finderModule.
+                                            getSearchAttributes(identifier, attributeDTOs);
+            int supportedSearchScheme = finderModule.getSupportedSearchAttributesScheme();
+            Set<List<AttributeDTO>> requestSet =  getPossibleRequests(attributesMap, supportedSearchScheme);
+            if(requestSet == null){
+                log.error("Invalid Search scheme in policy finder : " + finderModule.getModuleName());
+            } else {
+                for(List<AttributeDTO> attributeDTOList : requestSet){
+                    if(getResponse(attributeDTOList)){
+                        EntitledAttributesDTO dto = new EntitledAttributesDTO();
+                        dto.setAttributeDTOs(attributeDTOs.
+                                    toArray(new AttributeDTO[attributeDTOList.size()]));
+                        resultAttributes.add(dto);
                     }
                 }
             }
@@ -375,17 +370,17 @@ public class PolicySearch {
     private Set<List<AttributeDTO>> getPossibleRequests(Map<String, Set<AttributeDTO>> attributesMap,
                                                                         int supportedSearchScheme){
 
-        if(CarbonPolicyFinderModule.ALL_COMBINATIONS == supportedSearchScheme){
+        if(PolicyFinderModule.ALL_COMBINATIONS == supportedSearchScheme){
 
             if(attributesMap.entrySet() != null){
                 return getAllCombinations(attributesMap.entrySet().iterator().next().getValue());
             }
 
-        } else if(CarbonPolicyFinderModule.COMBINATIONS_BY_CATEGORY == supportedSearchScheme){
+        } else if(PolicyFinderModule.COMBINATIONS_BY_CATEGORY == supportedSearchScheme){
 
             return getAllCombinationsWithCategory(attributesMap);
 
-        } else if(CarbonPolicyFinderModule.COMBINATIONS_BY_PARAMETER == supportedSearchScheme){
+        } else if(PolicyFinderModule.COMBINATIONS_BY_PARAMETER == supportedSearchScheme){
 
             Set<List<AttributeDTO>> requestSet = new HashSet<List<AttributeDTO>>();
             for(Map.Entry<String, Set<AttributeDTO>> entry : attributesMap.entrySet()){
@@ -393,23 +388,23 @@ public class PolicySearch {
             }
             return  requestSet;
 
-        } else if(CarbonPolicyFinderModule.COMBINATIONS_BY_CATEGORY_AND_PARAMETER == supportedSearchScheme){
+        } else if(PolicyFinderModule.COMBINATIONS_BY_CATEGORY_AND_PARAMETER == supportedSearchScheme){
 
             Set<List<AttributeDTO>> requestSet = new HashSet<List<AttributeDTO>>();
             for(Map.Entry<String, Set<AttributeDTO>> entry : attributesMap.entrySet()){
                 Map<String, Set<AttributeDTO>> map = new HashMap<String, Set<AttributeDTO>>();
                 for(AttributeDTO dto : entry.getValue()){
-                    if(!map.containsKey(dto.getAttributeType())){
+                    if(!map.containsKey(dto.getCategory())){
                         Set<AttributeDTO> attributeDTOSet = new HashSet<AttributeDTO>();
                         attributeDTOSet.add(dto);
-                        map.put(dto.getAttributeType(), attributeDTOSet);
+                        map.put(dto.getCategory(), attributeDTOSet);
                     }
-                    map.get(dto.getAttributeType()).add(dto);
+                    map.get(dto.getCategory()).add(dto);
                 }
                 requestSet.addAll(getAllCombinationsWithCategory(map));
             }
             return  requestSet;
-        } else if(CarbonPolicyFinderModule.NO_COMBINATIONS == supportedSearchScheme){
+        } else if(PolicyFinderModule.NO_COMBINATIONS == supportedSearchScheme){
             Set<List<AttributeDTO>> requestSet = new HashSet<List<AttributeDTO>>();
             for(Map.Entry<String, Set<AttributeDTO>> entry : attributesMap.entrySet()){
                 requestSet.add(new ArrayList<AttributeDTO>(entry.getValue()));    
@@ -531,31 +526,4 @@ public class PolicySearch {
 
         return false;
     }
-
-    
-    /**
-     * Helper method to order the module according to module number  //TODO : with Comparator class
-     *
-     * @return int array with ordered values
-     */
-    private int[] getPolicyModuleOrder(){
-
-        int[] moduleOrder = new int[finderModules.size()];
-
-        for(int i = 0; i < finderModules.size(); i++){
-            CarbonPolicyFinderModule module = finderModules.get(i);
-            moduleOrder[i] = module.getModulePriority();
-        }
-
-        int[] tempArray = new int[moduleOrder.length];
-        Arrays.sort(moduleOrder);
-        for (int i = 0; i < tempArray.length; i++) {
-            int j = (moduleOrder.length-1)-i;
-            tempArray[j] = moduleOrder[i];
-        }
-        moduleOrder = tempArray;
-
-        return moduleOrder;
-    }
-
 }

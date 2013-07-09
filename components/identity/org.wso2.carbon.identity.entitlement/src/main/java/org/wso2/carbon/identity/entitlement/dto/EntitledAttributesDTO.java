@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.entitlement.dto;
 
+import java.util.Arrays;
+
 /**
  * Encapsulates the entitled attributes that user has been entitled for
  */
@@ -77,11 +79,11 @@ public class EntitledAttributesDTO {
     }
 
     public AttributeDTO[] getAttributeDTOs() {
-        return attributeDTOs;
+        return Arrays.copyOf(attributeDTOs, attributeDTOs.length);
     }
 
     public void setAttributeDTOs(AttributeDTO[] attributeDTOs) {
-        this.attributeDTOs = attributeDTOs;
+        this.attributeDTOs = Arrays.copyOf(attributeDTOs, attributeDTOs.length);
     }
     
     @Override

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.policy.finder.registry;
 
+import org.wso2.carbon.identity.entitlement.policy.store.RegistryPolicyStoreManageModule;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
@@ -29,15 +30,15 @@ public class RegistryPolicyHandler extends Handler {
 
     @Override
     public void put(RequestContext requestContext) throws RegistryException {
-       
-        RegistryPolicyFinderModule.clearCache();
+
+        RegistryPolicyStoreManageModule.clearCache();
         super.put(requestContext);     
     }
 
     @Override
     public void delete(RequestContext requestContext) throws RegistryException {
 
-        RegistryPolicyFinderModule.clearCache();
+        RegistryPolicyStoreManageModule.clearCache();
         super.delete(requestContext);
     }
 }

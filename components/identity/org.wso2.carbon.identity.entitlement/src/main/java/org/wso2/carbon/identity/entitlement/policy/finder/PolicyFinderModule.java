@@ -25,45 +25,44 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Policy finder module is a extension point where XACML policies can be load in to the PDP
- * from different sources.
- *
+ * Policy manage module is a extension point where XACML policies can be stored and loaded in to the PDP
+ * from different sources. There can be more than one policy store modules.
  */
-public interface CarbonPolicyFinderModule {
+public interface PolicyFinderModule {
 
     /**
      * Policy search is done by creating requests from all combinations of the attributes that is
-     * found by policy finder module 
+     * found by policy manage module
      */
     public final static int ALL_COMBINATIONS = 0;
 
     /**
      * Policy search is done by creating requests from combinations of category of the attributes that is
-     * found by policy finder module
+     * found by policy manage module
      */
     public final static int COMBINATIONS_BY_CATEGORY = 1;
 
     /**
      * Policy search is done by creating requests from combinations of given parameter
-     * of the attributes that is found by policy finder module
+     * of the attributes that is found by policy manage module
      */
     public final static int COMBINATIONS_BY_PARAMETER = 2;
 
     /**
      * Policy search is done by creating requests from combinations of given parameter
-     * and category of the attributes that is found by policy finder module
+     * and category of the attributes that is found by policy manage module
      */
     public final static int COMBINATIONS_BY_CATEGORY_AND_PARAMETER = 3;
 
     /**
      * Policy search is done by creating requests from the attributes that is
-     * found by policy finder module
+     * found by policy manage module
      */
     public final static int NO_COMBINATIONS = 4;
 
 
     /**
-     * initializes policy finder retriever module
+     * initializes policy manage module
      *
 	 * @param properties Properties, that need to initialize the module
      * @throws Exception throws when initialization is failed
@@ -76,20 +75,6 @@ public interface CarbonPolicyFinderModule {
      * @return name as String
      */
     public String getModuleName();
-
-    /**
-     * gets priority of the module, if integer value is high, then priority is also high
-     *
-     * when selecting policy combining algorithm by the PDP, it will select algorithm
-     * this is defined by highest priority module
-     *
-     * when all policies are ordered by the PDP,  it would order based on the priority of the
-     * module
-     *
-     *
-     * @return  integer value
-     */
-    public int getModulePriority();
 
     /**
      * gets all supported policies. policies are fetched as Strings.
@@ -159,13 +144,5 @@ public interface CarbonPolicyFinderModule {
      * @return whether supported or not
      */
     public boolean isPolicyOrderingSupport();
-
-    /**
-     * gets policy combining algorithm
-     *
-     * @return valid policy combining algorithm uri
-     */
-    public String getPolicyCombiningAlgorithm();
-
 
 }

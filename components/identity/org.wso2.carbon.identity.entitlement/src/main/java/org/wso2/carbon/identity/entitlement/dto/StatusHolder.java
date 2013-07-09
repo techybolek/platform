@@ -18,22 +18,37 @@
 
 package org.wso2.carbon.identity.entitlement.dto;
 
+import org.wso2.carbon.context.CarbonContext;
+
 import java.util.Date;
 
 /**
  *
  */
-public class ModuleStatusHolder {
+public class StatusHolder {
 
+    public static final String TYPE_PUBLISH = "PUBLISH";
+
+    public static final String TYPE_POLICY = "POLICY";
+
+    /**
+     * Status type
+     */
+    private String type;    
     /**
      * key to identify status. basically policy Id
      */
     private String key;
-
+    
     /**
      * whether this is success status or not
      */
     private boolean success;
+
+    /**
+     * the user who is involved with this
+     */
+    private String user;
 
     /**
      * time instance
@@ -45,24 +60,27 @@ public class ModuleStatusHolder {
      */
     private String message;
 
-    public static final String SEPARATOR = ",";
-
     public static final String STATUS_HOLDER_NAME = "status_holder";
 
-    public ModuleStatusHolder(String key, String message) {
+    public StatusHolder(String type, String key, String message) {
+        this.type = type;
         this.key = key;
+        this.user = CarbonContext.getCurrentContext().getUsername();
         this.message = message;
         this.success = false;
         this.timeInstance = (new Date()).toString();
     }
 
-    public ModuleStatusHolder(String key) {
+    public StatusHolder(String type, String key) {
+        this.type = type;
         this.key = key;
+        this.user = CarbonContext.getCurrentContext().getUsername();
         this.success = true;
         this.timeInstance = (new Date()).toString();
     }
 
-    public ModuleStatusHolder() {
+    public StatusHolder(String type) {
+        this.type = type;
     }
 
     public String getKey() {
@@ -95,5 +113,21 @@ public class ModuleStatusHolder {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

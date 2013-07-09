@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.entitlement.policy.publisher;
 
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+
 import java.util.Properties;
 
 /**
@@ -31,16 +34,17 @@ public interface PolicyPublisherModule {
     /**
      * initializes policy publisher retriever module
      * 
-	 * @param properties Properties, that need to initialize the module or that need to populate
-     * in the publisher configuration user interface. These properties can be
-     * defined in entitlement-config.xml file
-     * @throws Exception throws when initialization is failed
+	 * @param properties Properties, that are needed to initialize the module or
+     * that are needed to populate the management console ui of publisher configuration.
+     * These properties can be defined in entitlement-properties file.
+     *
      */
-    public void init(Properties properties) throws Exception;
+    public void init(Properties properties);
 
     /**
-     * Load the properties need to initialize the module or that need to populate
-     * in the publisher configuration user interface. These properties can be
+     * Load the properties are needed to initialize the module or that are needed to populate
+     * to populate the management console ui of publisher configuration.
+     * These properties can be loaded from external source
      * 
      * @return Properties
      */
@@ -56,9 +60,10 @@ public interface PolicyPublisherModule {
     /**
      * publishes policy to given subscriber
      *
-     * @param policy policy as String
-     * @throws Exception throws, if any error is occurred.
+     * @param policyDTO policy as PolicyDTO
+     * @param action
+     * @throws IdentityException throws, if any error is occurred.
      */
-    public void publish(String policy) throws Exception;
+    public void publish(PolicyDTO policyDTO , String action) throws IdentityException;
 
 }

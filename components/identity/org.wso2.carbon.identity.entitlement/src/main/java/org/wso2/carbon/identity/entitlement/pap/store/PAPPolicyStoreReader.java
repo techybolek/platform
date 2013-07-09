@@ -18,10 +18,10 @@
 package org.wso2.carbon.identity.entitlement.pap.store;
 
 import org.wso2.balana.finder.PolicyFinder;
-import org.wso2.carbon.identity.entitlement.policy.PolicyMetaDataBuilder;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.core.IdentityRegistryResources;
+import org.wso2.carbon.identity.entitlement.policy.PolicyAttributeBuilder;
 import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
-import org.wso2.carbon.identity.entitlement.policy.PolicyTarget;
-import org.wso2.carbon.registry.core.Collection;
 import org.wso2.balana.AbstractPolicy;
 
 import org.apache.commons.logging.Log;
@@ -33,20 +33,13 @@ import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import java.nio.charset.Charset;
 import java.util.*;
 
 public class PAPPolicyStoreReader {
-
-    /**
-     * The property which is used to specify the schema file to validate against (if any). Note that
-     * this isn't used directly by <code>PolicyRepository</code>, but is referenced by many classes that
-     * use this class to load policies.
-     */
-    public static final String POLICY_SCHEMA_PROPERTY = "com.sun.xacml.PolicySchema";
 
     // the optional logger used for error reporting
     private static Log log = LogFactory.getLog(PAPPolicyStoreReader.class);
@@ -61,17 +54,6 @@ public class PAPPolicyStoreReader {
         this.store = store;
     }
 
-    /**
-     *
-     * @param policyId
-     * @return
-     * @throws IdentityException
-     */
-    public synchronized AbstractPolicy readPolicy(String policyId) throws IdentityException {
-        Resource resource = null;
-        resource = store.getPolicy(policyId);
-        return readPolicy(resource, null);
-    }
 
     /**
      *
@@ -82,167 +64,20 @@ public class PAPPolicyStoreReader {
      */
     public synchronized AbstractPolicy readActivePolicy(String policyId, PolicyFinder finder)
                                                                         throws IdentityException {
-        Resource resource = null;
-        resource = store.getPolicy(policyId);
+        Resource resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
         if(resource != null){
             if ("true".equals(resource.getProperty(EntitlementConstants.ACTIVE_POLICY))) {
-                return readPolicy(resource, finder);
+                try {
+                    String policy = new String((byte[]) resource.getContent(),  Charset.forName("UTF-8"));
+                    return PolicyReader.getInstance(null).getPolicy(policy);
+                } catch (RegistryException e) {
+                    log.error("Error while parsing entitlement policy", e);
+                    throw new IdentityException("Error while loading entitlement policy");
+                }
             }                       
         }
-
         return null;
     }
-
-    /**
-     * 
-     * @return
-     * @throws IdentityException
-     */
-    public synchronized AbstractPolicy[] readPolicies(PolicyFinder finder) throws IdentityException {
-        Resource[] resources = null;
-        AbstractPolicy[] policies = null;
-        resources = store.getActivePolicies();
-
-        if (resources == null) {
-            return new AbstractPolicy[0];
-        }
-        policies = new AbstractPolicy[resources.length];
-
-        for (int i = 0; i < resources.length; i++) {
-            if(resources[i] != null){
-                policies[i] = readPolicy(resources[i], finder);
-            }
-        }
-
-        return policies;
-    }
-
-    /**
-     * Gets all policy targets in policies
-     * @return policy targets as PolicyTarget object Array
-     * @throws IdentityException throws
-     */
-    public synchronized PolicyTarget[] readTargets() throws IdentityException {
-        Resource[] resources = null;
-        PolicyTarget[] targets = null;
-        resources = store.getActivePolicies();  // TODO need to give limit for this or load one my one
-
-        if (resources == null) {
-            return new PolicyTarget[0];
-        }
-        targets = new PolicyTarget[resources.length];
-
-        for (int i = 0; i < resources.length; i++) {
-            if(resources[i] != null){
-                targets[i] = readTarget(resources[i]);                
-            }
-        }
-
-        return targets;
-    }
-
-    /**
-     * 
-     * @param resource
-     * @return
-     * @throws IdentityException
-     */
-    private AbstractPolicy readPolicy(Resource resource, PolicyFinder finder) throws IdentityException {
-        String policy = null;
-        try {
-            policy = new String((byte[]) resource.getContent());
-            return PolicyReader.getInstance(null).getPolicy(policy);
-        } catch (RegistryException e) {
-            log.error("Error while parsing entitlement policy", e);
-            throw new IdentityException("Error while loading entitlement policy");
-        }
-    }
-
-    /**
-     * Gets policy targets in a policy
-     * @param resource registry resource name
-     * @return policy targets as PolicyTarget object 
-     * @throws IdentityException throws
-     */
-    private PolicyTarget readTarget(Resource resource) throws IdentityException {
-        String policy = null;
-        try {
-            policy = new String((byte[]) resource.getContent());
-            return PolicyReader.getInstance(null).getTarget(policy);
-        } catch (RegistryException e) {
-            log.error("Error while parsing entitlement policy", e);
-            throw new IdentityException("Error while parsing entitlement policy");
-        }
-    }
-
-    /**
-     * Reads All policies as PolicyDTO
-     * @return Array of PolicyDTO 
-     * @throws IdentityException throws, if fails
-     */
-    public PolicyDTO[] readAllPolicyDTOs() throws IdentityException {
-        Resource[] resources = null;
-        PolicyDTO[] policies = null;
-        resources = store.getAllPolicies();
-
-        if (resources == null) {
-            return new PolicyDTO[0];
-        }
-        policies = new PolicyDTO[resources.length];
-
-        List<PolicyDTO> policyDTOList = new ArrayList<PolicyDTO>();
-        int[] policyOrder = new int[resources.length];
-
-        for(int i = 0; i < resources.length; i++){
-            PolicyDTO policyDTO = readPolicyDTO(resources[i]);
-            policyDTOList.add(policyDTO);
-            policyOrder[i] = policyDTO.getPolicyOrder();
-        }
-
-        // sorting array            TODO  : with Comparator class
-        int[] tempArray = new int[policyOrder.length];
-        Arrays.sort(policyOrder);
-        for (int i = 0; i < tempArray.length; i++) {
-            int j = (policyOrder.length-1)-i;
-            tempArray[j] = policyOrder[i];
-        }
-        policyOrder = tempArray;
-
-        for (int i = 0; i < policyOrder.length; i++) {
-            for(PolicyDTO policyDTO : policyDTOList){
-                if(policyOrder[i] == policyDTO.getPolicyOrder()){
-                    policies[i] = policyDTO;
-                }                
-            }
-        }
-        
-        return policies;
-    }
-
-    /**
-     * Reads All policies as Light Weight PolicyDTO with attribute meta data
-     * @return Array of PolicyDTO but don not contains XACML policy
-     * @throws IdentityException throws, if fails
-     */
-    public Set<PolicyDTO> readAllMetaDataPolicyDTOs() throws IdentityException {
-        
-        String[] resources = null;
-        Set<PolicyDTO> policies = new HashSet<PolicyDTO>();
-        resources = store.getAllPolicyIds();
-
-        if (resources == null) {
-            return null;
-        }
-
-        for(String resource : resources){
-            PolicyDTO policyDTO = readMetaDataPolicyDTO(resource);
-            policies.add(policyDTO);
-        }
-
-        // sorting is not done as only meta data are required.
-        return policies;
-    }
-
 
     /**
      * Reads All policies as Light Weight PolicyDTO
@@ -300,26 +135,24 @@ public class PAPPolicyStoreReader {
         boolean policyEditable = false;
         boolean policyCanDelete = false;        
         try {
-            resource = store.getPolicy(policyId);
+            resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
             if (resource == null) {
                 return null;
             }
-            if(store.getRegistry() != null){
-                String userName = ((UserRegistry)store.getRegistry()).getUserName();
-                int tenantId = ((UserRegistry)store.getRegistry()).getTenantId();
-                RealmService realmService = EntitlementServiceComponent.getRealmservice();
-                if(realmService != null){
-                    policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"write" );
-                    policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"delete" );
-                }
+            String userName = CarbonContext.getCurrentContext().getUsername();
+            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+            RealmService realmService = EntitlementServiceComponent.getRealmservice();
+            if(realmService != null){
+                policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(),"write" );
+                policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(),"delete" );
             }
             dto = new PolicyDTO();
             dto.setPolicyId(policyId);
-            dto.setPolicy(new String((byte[]) resource.getContent()));
+            dto.setPolicy(new String((byte[]) resource.getContent(), Charset.forName("UTF-8")));
             dto.setPolicyEditable(policyEditable);
             dto.setPolicyCanDelete(policyCanDelete);            
             if ("true".equals(resource.getProperty(EntitlementConstants.ACTIVE_POLICY))) {
@@ -328,13 +161,6 @@ public class PAPPolicyStoreReader {
 
             if ("true".equals(resource.getProperty(EntitlementConstants.PROMOTED_POLICY))) {
                 dto.setPromote(true);
-            }
-
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
-            if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
-            } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
             }
 
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
@@ -365,10 +191,10 @@ public class PAPPolicyStoreReader {
                     basicPolicyEditorMetaData[i] = resource.
                             getProperty(EntitlementConstants.BASIC_POLICY_EDITOR_META_DATA + i);
                 }
-                dto.setBasicPolicyEditorMetaData(basicPolicyEditorMetaData);
+                dto.setPolicyEditorData(basicPolicyEditorMetaData);
             }
-            PolicyMetaDataBuilder policyMetaDataBuilder = new PolicyMetaDataBuilder();
-            dto.setPolicyMetaData(policyMetaDataBuilder.
+            PolicyAttributeBuilder policyAttributeBuilder = new PolicyAttributeBuilder();
+            dto.setAttributeDTOs(policyAttributeBuilder.
                     getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (RegistryException e) {
@@ -390,27 +216,26 @@ public class PAPPolicyStoreReader {
      * @throws IdentityException throws, if fails
      */
     public PolicyDTO readLightPolicyDTO(String policyId) throws IdentityException {
+
         Resource resource = null;
         PolicyDTO dto = null;
         boolean policyEditable = false;
         boolean policyCanDelete = false;
         try {
-            resource = store.getPolicy(policyId);
+            resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
             if (resource == null) {
                 return null;
             }
-            if(store.getRegistry() != null){
-                String userName = ((UserRegistry)store.getRegistry()).getUserName();
-                int tenantId = ((UserRegistry)store.getRegistry()).getTenantId();
-                RealmService realmService = EntitlementServiceComponent.getRealmservice();
-                if(realmService != null){
-                    policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"write" );
-                    policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"delete" );
-                }
+            String userName = CarbonContext.getCurrentContext().getUsername();
+            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+            RealmService realmService = EntitlementServiceComponent.getRealmservice();
+            if(realmService != null){
+                policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(), "write");
+                policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(), "delete");
             }
             dto = new PolicyDTO();
             dto.setPolicyId(policyId);
@@ -423,12 +248,6 @@ public class PAPPolicyStoreReader {
                 dto.setPromote(true);
             }
 
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
-            if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
-            } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
-            }
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
             if(policyOrder != null){
                 dto.setPolicyOrder(Integer.parseInt(policyOrder));
@@ -469,22 +288,20 @@ public class PAPPolicyStoreReader {
         boolean policyEditable = false;
         boolean policyCanDelete = false;
         try {
-            resource = store.getPolicy(policyId);
+            resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
             if (resource == null) {
                 return null;
             }
-            if(store.getRegistry() != null){
-                String userName = ((UserRegistry)store.getRegistry()).getUserName();
-                int tenantId = ((UserRegistry)store.getRegistry()).getTenantId();
-                RealmService realmService = EntitlementServiceComponent.getRealmservice();
-                if(realmService != null){
-                    policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"write" );
-                    policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"delete" );
-                }
+            String userName = CarbonContext.getCurrentContext().getUsername();
+            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+            RealmService realmService = EntitlementServiceComponent.getRealmservice();
+            if(realmService != null){
+                policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(), "write");
+                policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(), "delete");
             }
             dto = new PolicyDTO();
             dto.setPolicyId(policyId);
@@ -497,12 +314,6 @@ public class PAPPolicyStoreReader {
                 dto.setPromote(true);
             }
 
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
-            if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
-            } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
-            }
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
             if(policyOrder != null){
                 dto.setPolicyOrder(Integer.parseInt(policyOrder));
@@ -532,11 +343,11 @@ public class PAPPolicyStoreReader {
                     basicPolicyEditorMetaData[i] = resource.
                             getProperty(EntitlementConstants.BASIC_POLICY_EDITOR_META_DATA + i);
                 }
-                dto.setBasicPolicyEditorMetaData(basicPolicyEditorMetaData);
+                dto.setPolicyEditorData(basicPolicyEditorMetaData);
             }
-            PolicyMetaDataBuilder policyMetaDataBuilder = new PolicyMetaDataBuilder();
-            dto.setPolicyMetaData(policyMetaDataBuilder.
-                                getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
+            PolicyAttributeBuilder policyAttributeBuilder = new PolicyAttributeBuilder();
+            dto.setAttributeDTOs(policyAttributeBuilder.
+                    getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (UserStoreException e) {
             log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
@@ -551,7 +362,7 @@ public class PAPPolicyStoreReader {
      * @return  PolicyDTO
      * @throws IdentityException throws, if fails
      */
-    private PolicyDTO readPolicyDTO(Resource resource) throws IdentityException {
+    public PolicyDTO readPolicyDTO(Resource resource) throws IdentityException {
         String policy = null;
         String policyId = null;
         AbstractPolicy absPolicy = null;
@@ -559,21 +370,18 @@ public class PAPPolicyStoreReader {
         boolean policyEditable = false;
         boolean policyCanDelete = false;
         try {
-            if(store.getRegistry() != null){
-                String userName = ((UserRegistry)store.getRegistry()).getUserName();
-                int tenantId = ((UserRegistry)store.getRegistry()).getTenantId();
-                RealmService realmService = EntitlementServiceComponent.getRealmservice();
-                if(realmService != null){
-                    policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"write" );
-                    policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
-                            isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                                       resource.getPath(),"delete" );
-                }
+            String userName = CarbonContext.getCurrentContext().getUsername();
+            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+            RealmService realmService = EntitlementServiceComponent.getRealmservice();
+            if(realmService != null){
+                policyEditable = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(),"write" );
+                policyCanDelete = realmService.getTenantUserRealm(tenantId).getAuthorizationManager().
+                        isUserAuthorized(userName, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                resource.getPath(),"delete" );
             }
-
-            policy = new String((byte[]) resource.getContent());
+            policy = new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
             absPolicy = PolicyReader.getInstance(null).getPolicy(policy);
             policyId = absPolicy.getId().toASCIIString();
             dto = new PolicyDTO();
@@ -587,12 +395,6 @@ public class PAPPolicyStoreReader {
                 dto.setPromote(true);
             }
 
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
-            if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
-            } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
-            }
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
             if(policyOrder != null){
                 dto.setPolicyOrder(Integer.parseInt(policyOrder));
@@ -623,10 +425,10 @@ public class PAPPolicyStoreReader {
                     basicPolicyEditorMetaData[i] = resource.
                             getProperty(EntitlementConstants.BASIC_POLICY_EDITOR_META_DATA + i);
                 }
-                dto.setBasicPolicyEditorMetaData(basicPolicyEditorMetaData);
+                dto.setPolicyEditorData(basicPolicyEditorMetaData);
             }
-            PolicyMetaDataBuilder policyMetaDataBuilder = new PolicyMetaDataBuilder();
-            dto.setPolicyMetaData(policyMetaDataBuilder.
+            PolicyAttributeBuilder policyAttributeBuilder = new PolicyAttributeBuilder();
+            dto.setAttributeDTOs(policyAttributeBuilder.
                     getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (RegistryException e) {
@@ -639,24 +441,4 @@ public class PAPPolicyStoreReader {
                     " from PAP policy store");
         }
     }
-
-    /**
-     * This reads the policy combining algorithm from registry resource property
-     * @return policy combining algorithm as String
-     * @throws IdentityException throws
-     */
-    public String readPolicyCombiningAlgorithm() throws IdentityException {
-
-        try {
-            Collection policyCollection = store.getPolicyCollection();
-            if(policyCollection != null){
-                return policyCollection.getProperty("globalPolicyCombiningAlgorithm");
-            }            
-            return null;
-        } catch (RegistryException e) {
-            log.error("Error while reading policy combining algorithm from PAP policy store", e);
-            throw new IdentityException("Error while reading policy combining algorithm from " +
-                    "PAP policy store");
-        }
-    }    
 }

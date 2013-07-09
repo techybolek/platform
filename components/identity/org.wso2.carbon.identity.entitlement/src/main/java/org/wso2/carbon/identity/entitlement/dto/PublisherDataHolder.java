@@ -25,36 +25,41 @@ import java.util.*;
 /**
  * 
  */
-public class ModuleDataHolder {
+public class PublisherDataHolder {
 
     public static final String MODULE_NAME = "EntitlementModuleName";
 
     private String moduleName;
 
-    private ModulePropertyDTO[] propertyDTOs;
+    private PublisherPropertyDTO[] propertyDTOs;
 
-    private ModuleStatusHolder[] statusHolders;
+    private StatusHolder[] statusHolders;
 
-    private ModuleStatusHolder latestStatus;
+    private StatusHolder latestStatus;
 
-    public ModuleDataHolder() {
+    public PublisherDataHolder() {
     }
 
-    public ModuleDataHolder(Resource resource) {
+    public PublisherDataHolder(String moduleName) {
+        this.moduleName = moduleName;
+    }
 
-        List<ModulePropertyDTO> propertyDTOs = new ArrayList<ModulePropertyDTO>();
-        List<ModuleStatusHolder> statusHolders = new ArrayList<ModuleStatusHolder>();
+    public PublisherDataHolder(Resource resource) {
+
+        List<PublisherPropertyDTO> propertyDTOs = new ArrayList<PublisherPropertyDTO>();
+        List<StatusHolder> statusHolders = new ArrayList<StatusHolder>();
         if(resource != null && resource.getProperties() != null){
             Properties properties = resource.getProperties();
+            int i = 0;
             for(Map.Entry<Object, Object> entry : properties.entrySet()){
-                ModulePropertyDTO dto = new ModulePropertyDTO();
+                PublisherPropertyDTO dto = new PublisherPropertyDTO();
                 dto.setId((String)entry.getKey());
                 Object value = entry.getValue();
                 if(value instanceof ArrayList){
                     List list = (ArrayList) entry.getValue();
                     if(list != null && list.size() > 0 && list.get(0) != null){
-                        if(((String)entry.getKey()).startsWith(ModuleStatusHolder.STATUS_HOLDER_NAME)){
-                            ModuleStatusHolder statusHolder = new ModuleStatusHolder();
+                        if(((String)entry.getKey()).equals(StatusHolder.STATUS_HOLDER_NAME + i)){
+                            StatusHolder statusHolder = new StatusHolder(StatusHolder.TYPE_PUBLISH);
                             if(list.size() > 0  && list.get(0) != null){
                                 statusHolder.setTimeInstance((String)list.get(0));
                             }
@@ -62,12 +67,16 @@ public class ModuleDataHolder {
                                 statusHolder.setKey((String)list.get(1));
                             }
                             if(list.size() > 2  && list.get(2) != null){
-                                statusHolder.setMessage((String)list.get(2));
+                                statusHolder.setKey((String)list.get(2));
+                            }
+                            if(list.size() > 3  && list.get(3) != null){
+                                statusHolder.setMessage((String)list.get(3));
                                 statusHolder.setSuccess(false);
                             } else {
                                 statusHolder.setSuccess(true);
                             }
                             statusHolders.add(statusHolder);
+                            i++;
                             continue;
                         }
 
@@ -101,8 +110,8 @@ public class ModuleDataHolder {
             }
         }
 
-        this.propertyDTOs = propertyDTOs.toArray(new ModulePropertyDTO[propertyDTOs.size()]);
-        this.statusHolders = statusHolders.toArray(new ModuleStatusHolder[statusHolders.size()]);
+        this.propertyDTOs = propertyDTOs.toArray(new PublisherPropertyDTO[propertyDTOs.size()]);
+        this.statusHolders = statusHolders.toArray(new StatusHolder[statusHolders.size()]);
     }
 
     public String getModuleName() {
@@ -113,30 +122,29 @@ public class ModuleDataHolder {
         this.moduleName = moduleName;
     }
 
-    public ModulePropertyDTO[] getPropertyDTOs() {
-        return propertyDTOs;
+    public PublisherPropertyDTO[] getPropertyDTOs() {
+        return Arrays.copyOf(propertyDTOs, propertyDTOs.length);
     }
 
-    public void setPropertyDTOs(ModulePropertyDTO[] propertyDTOs) {
-        this.propertyDTOs = propertyDTOs;
+    public void setPropertyDTOs(PublisherPropertyDTO[] propertyDTOs) {
+        this.propertyDTOs = Arrays.copyOf(propertyDTOs, propertyDTOs.length);
     }
 
-    public ModuleStatusHolder getLatestStatus() {
+    public StatusHolder getLatestStatus() {
         return latestStatus;
     }
 
-    public void setLatestStatus(ModuleStatusHolder latestStatus) {
+    public void setLatestStatus(StatusHolder latestStatus) {
         this.latestStatus = latestStatus;
     }
 
-    public ModuleStatusHolder[] getStatusHolders() {
-        return statusHolders;
+    public StatusHolder[] getStatusHolders() {
+        return Arrays.copyOf(statusHolders, statusHolders.length);
     }
 
-    public void addStatusHolders(List<ModuleStatusHolder> statusHolders) {
-        List<ModuleStatusHolder> arrayList =
-                                new ArrayList<ModuleStatusHolder>(Arrays.asList(this.statusHolders));
-        arrayList.addAll(statusHolders);
-        this.statusHolders = arrayList.toArray(new ModuleStatusHolder[arrayList.size()]);
+    public void addStatusHolders(List<StatusHolder> statusHolders) {
+        for(int i =0; i < 10 ; i ++){
+            this.statusHolders[i] = statusHolders.get(i);
+        }
     }
 }

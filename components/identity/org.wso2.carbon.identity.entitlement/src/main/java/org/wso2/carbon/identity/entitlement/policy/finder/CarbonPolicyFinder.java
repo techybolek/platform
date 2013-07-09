@@ -27,11 +27,13 @@ import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.finder.*;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementAdminService;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
+import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 import org.wso2.carbon.identity.entitlement.policy.collection.PolicyCollection;
 import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
@@ -44,9 +46,9 @@ import java.util.*;
  * Policy finder of the WSO2 entitlement engine.  This an implementation of <code>PolicyFinderModule</code>
  * of Balana engine. Extensions can be plugged with this. 
  */
-public class CarbonPolicyFinder extends PolicyFinderModule {
+public class CarbonPolicyFinder extends org.wso2.balana.finder.PolicyFinderModule {
 
-    private List<CarbonPolicyFinderModule> finderModules = null;
+    private List<PolicyFinderModule> finderModules = null;
 
     private PolicyCollection policyCollection;
 
@@ -55,7 +57,7 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
     /**
      * this is a flag to keep whether init it has finished or not.
      */
-    private static volatile boolean initFinish;
+    private volatile boolean initFinish;
 
 	private EntitlementPolicyClearingCache policyClearingCache = EntitlementPolicyClearingCache.getInstance();
 
@@ -105,11 +107,11 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
 
         PolicyCombiningAlgorithm policyCombiningAlgorithm = null;        
         // get registered finder modules
-		Map<CarbonPolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
+		Map<PolicyFinderModule, Properties> finderModules = EntitlementServiceComponent.
                                                 getEntitlementConfig().getPolicyFinderModules();
 
         if(finderModules != null){
-            this.finderModules = new ArrayList<CarbonPolicyFinderModule>(finderModules.keySet());
+            this.finderModules = new ArrayList<PolicyFinderModule>(finderModules.keySet());
         }
 
         PolicyCollection tempPolicyCollection = null;
@@ -126,50 +128,24 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
         // get policy reader
         policyReader = PolicyReader.getInstance(finder);
 
-        // get order of the policy finder modules
-        int[] moduleOrders = getPolicyModuleOrder();
-
         if(this.finderModules != null && this.finderModules.size() > 0){
             // find policy combining algorithm.
-            // only check in highest order module and it would be the
-            // PDP policy combining algorithm
-            for(CarbonPolicyFinderModule finderModule : this.finderModules){
-                if(finderModule.getModulePriority() == moduleOrders[0]){
-                    String algorithm = finderModule.getPolicyCombiningAlgorithm();
-                    try {
-                        policyCombiningAlgorithm = EntitlementUtil.getPolicyCombiningAlgorithm(algorithm);
-                    } catch (IdentityException e) {
-                        // ignore
-                    }
-                    break;
-                }
-            }
-
-            // if policy combining algorithm is null, set default one
-            if(policyCombiningAlgorithm == null){
-                policyCombiningAlgorithm  = new DenyOverridesPolicyAlg();
-            }
+            policyCombiningAlgorithm = EntitlementAdminEngine.getInstance().
+                                                    getPolicyDataStore().getGlobalPolicyAlgorithm();
 
             tempPolicyCollection.setPolicyCombiningAlgorithm(policyCombiningAlgorithm);
 
-            for (int moduleOrder : moduleOrders) {
-                for(CarbonPolicyFinderModule finderModule : this.finderModules){
-                    // policy collection is created by using all policies in
-                    // the modules.  highest ordered module's policies would
-                    // be picked 1st
-                    if(finderModule.getModulePriority() == moduleOrder){
-                        String[] policies = finderModule.getPolicies();
-                        // check whether module itself support for policy ordering
-                        // if not, sort them according to natural order
-                        if(!finderModule.isPolicyOrderingSupport()){
-                            Arrays.sort(policies);
-                        }
-                        for(String policy : policies){
-                            AbstractPolicy abstractPolicy = policyReader.getPolicy(policy);
-                            if(abstractPolicy != null){
-                                tempPolicyCollection.addPolicy(abstractPolicy);
-                            }
-                        }
+            for(PolicyFinderModule finderModule : this.finderModules){
+                String[] policies = finderModule.getPolicies();
+                // check whether module itself support for policy ordering
+                // if not, sort them according to natural order
+                if(!finderModule.isPolicyOrderingSupport()){
+                    Arrays.sort(policies);
+                }
+                for(String policy : policies){
+                    AbstractPolicy abstractPolicy = policyReader.getPolicy(policy);
+                    if(abstractPolicy != null){
+                        tempPolicyCollection.addPolicy(abstractPolicy);
                     }
                 }
             }
@@ -234,7 +210,7 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
         
         if(policy == null){
             if(this.finderModules != null){
-                for(CarbonPolicyFinderModule finderModule : this.finderModules){
+                for(PolicyFinderModule finderModule : this.finderModules){
                     String policyString = finderModule.getReferencedPolicy(idReference.toString());
                     if(policyString != null){
                         policy = policyReader.getPolicy(policyString);
@@ -260,32 +236,5 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
         }
 
         return new PolicyFinderResult();
-    }
-
-
-    /**
-     * Helper method to order the module according to module number  //TODO : with Comparator class
-     * Highest module number would be the 1st ordered value
-     * 
-     * @return int array with ordered values
-     */
-    private int[] getPolicyModuleOrder(){
-
-        int[] moduleOrder = new int[finderModules.size()];
-
-        for(int i = 0; i < finderModules.size(); i++){
-            CarbonPolicyFinderModule module = finderModules.get(i);
-            moduleOrder[i] = module.getModulePriority();
-        }
-
-        int[] tempArray = new int[moduleOrder.length];
-        Arrays.sort(moduleOrder);
-        for (int i = 0; i < tempArray.length; i++) {
-            int j = (moduleOrder.length-1)-i;
-            tempArray[j] = moduleOrder[i];
-        }        
-        moduleOrder = tempArray;
-
-        return moduleOrder;
     }
 }

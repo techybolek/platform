@@ -21,7 +21,7 @@ package org.wso2.carbon.identity.entitlement.dto;
 /**
  *
  */
-public class ModulePropertyDTO {
+public class PublisherPropertyDTO {
 
     private String id;
 

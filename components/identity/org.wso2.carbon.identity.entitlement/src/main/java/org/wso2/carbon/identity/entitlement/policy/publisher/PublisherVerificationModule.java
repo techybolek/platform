@@ -16,45 +16,34 @@
 * under the License.
 */
 
-package org.wso2.carbon.identity.entitlement.policy.store;
+package org.wso2.carbon.identity.entitlement.policy.publisher;
 
-import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 
 import java.util.Properties;
 
 /**
  *
  */
-public interface CarbonPolicyStore {
+public abstract class PublisherVerificationModule {
 
     /**
-     * init policy store module
+     * initializes policy publisher retriever module
      *
-     * @param properties
+     * @param properties Properties, that are needed to initialize the module
+     *
+     * @throws Exception throws when initialization is failed
      */
-    public void init(Properties properties);
+    public abstract void init(Properties properties) throws Exception;
+
 
     /**
-     * add policy in to the store
      *
-     * @param policy
+     * @param holder
      */
-    public boolean addPolicy(PolicyStoreDTO policy);
+    public abstract String  getVerificationCode(PublisherDataHolder holder) throws IdentityException;
 
-    /**
-     * set policy combining algorithm
-     *
-     * @param algorithm
-     */
-    public void setPolicyCombiningAlgorithm(String algorithm);
-
-    /**
-     * delete policy from the store
-     *
-     * @param policyIdentifier
-     */
-    public boolean deletePolicy(String policyIdentifier);
-
-
+    public abstract boolean doVerify(String code);
 
 }

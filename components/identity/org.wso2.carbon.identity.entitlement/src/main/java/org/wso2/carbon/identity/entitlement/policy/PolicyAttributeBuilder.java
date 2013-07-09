@@ -38,13 +38,13 @@ import java.util.Properties;
  * This class phrase the xml representation of policy and build the policy meta data such as
  * resource names, subject names action names and environment names, attribute ids and data types.
  */
-public class PolicyMetaDataBuilder {
+public class PolicyAttributeBuilder {
 
     private String policy;
 
     private int version;
 
-    public PolicyMetaDataBuilder() {
+    public PolicyAttributeBuilder() {
         
     }
 
@@ -52,7 +52,7 @@ public class PolicyMetaDataBuilder {
      *
      * @param policy policy as a String
      */
-    public PolicyMetaDataBuilder(String policy) {
+    public PolicyAttributeBuilder(String policy) {
         this.policy = policy;
         String version = EntitlementUtil.getPolicyVersion(policy);
         if(XACMLConstants.XACML_1_0_IDENTIFIER.equals(version)){
@@ -84,7 +84,7 @@ public class PolicyMetaDataBuilder {
         if(attributeDTOs != null){
             for(AttributeDTO attributeDTO : attributeDTOs){
                 properties.setProperty(EntitlementConstants.POLICY_META_DATA + attributeElementNo,
-                       attributeDTO.getAttributeType() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
+                       attributeDTO.getCategory() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
                        attributeDTO.getAttributeValue() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
                        attributeDTO.getAttributeId() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
                        attributeDTO.getAttributeDataType());
@@ -111,7 +111,7 @@ public class PolicyMetaDataBuilder {
                             split(EntitlementConstants.ATTRIBUTE_SEPARATOR);
                     if(attributeData.length == EntitlementConstants.POLICY_META_DATA_ARRAY_LENGTH){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(attributeData[0]);
+                        attributeDTO.setCategory(attributeData[0]);
                         attributeDTO.setAttributeValue(attributeData[1]);
                         attributeDTO.setAttributeId(attributeData[2]);
                         attributeDTO.setAttributeDataType(attributeData[3]);
@@ -392,7 +392,7 @@ public class PolicyMetaDataBuilder {
                     attributeDTO.setAttributeValue(attributeElement.getText());
                     attributeDTO.setAttributeId(attributeId);
                     attributeDTO.setAttributeDataType(dataType);
-                    attributeDTO.setAttributeType(subElementName);
+                    attributeDTO.setCategory(subElementName);
                     attributeDTOs.add(attributeDTO);
                 }
             }
@@ -437,7 +437,7 @@ public class PolicyMetaDataBuilder {
                     attributeDTO.setAttributeValue(attributeElement.getText());
                     attributeDTO.setAttributeId(attributeId);
                     attributeDTO.setAttributeDataType(dataType);
-                    attributeDTO.setAttributeType(category);
+                    attributeDTO.setCategory(category);
                     attributeDTOs.add(attributeDTO);
                 }
             }
@@ -470,14 +470,14 @@ public class PolicyMetaDataBuilder {
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
                         attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -487,7 +487,7 @@ public class PolicyMetaDataBuilder {
                             AttributeDTO attributeDTO = new AttributeDTO();
                             attributeDTO.setAttributeValue(value);
                             attributeDTO.setAttributeDataType(dataType);
-                            attributeDTO.setAttributeType(EntitlementConstants.RESOURCE_ELEMENT);
+                            attributeDTO.setCategory(EntitlementConstants.RESOURCE_ELEMENT);
                             attributeDTO.setAttributeId(attributeId);
                             attributeDTOs.add(attributeDTO);
                         }
@@ -509,7 +509,7 @@ public class PolicyMetaDataBuilder {
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -517,7 +517,7 @@ public class PolicyMetaDataBuilder {
                         attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -527,7 +527,7 @@ public class PolicyMetaDataBuilder {
                             AttributeDTO attributeDTO = new AttributeDTO();
                             attributeDTO.setAttributeValue(value);
                             attributeDTO.setAttributeDataType(dataType);
-                            attributeDTO.setAttributeType(EntitlementConstants.SUBJECT_ELEMENT);
+                            attributeDTO.setCategory(EntitlementConstants.SUBJECT_ELEMENT);
                             attributeDTO.setAttributeId(attributeId);
                             attributeDTOs.add(attributeDTO);
                         }
@@ -549,7 +549,7 @@ public class PolicyMetaDataBuilder {
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -557,7 +557,7 @@ public class PolicyMetaDataBuilder {
                         attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -567,7 +567,7 @@ public class PolicyMetaDataBuilder {
                             AttributeDTO attributeDTO = new AttributeDTO();
                             attributeDTO.setAttributeValue(value);
                             attributeDTO.setAttributeDataType(dataType);
-                            attributeDTO.setAttributeType(EntitlementConstants.ACTION_ELEMENT);
+                            attributeDTO.setCategory(EntitlementConstants.ACTION_ELEMENT);
                             attributeDTO.setAttributeId(attributeId);
                             attributeDTOs.add(attributeDTO);
                         }
@@ -589,7 +589,7 @@ public class PolicyMetaDataBuilder {
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -597,7 +597,7 @@ public class PolicyMetaDataBuilder {
                         attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -607,7 +607,7 @@ public class PolicyMetaDataBuilder {
                             AttributeDTO attributeDTO = new AttributeDTO();
                             attributeDTO.setAttributeValue(value);
                             attributeDTO.setAttributeDataType(dataType);
-                            attributeDTO.setAttributeType(EntitlementConstants.ENVIRONMENT_ELEMENT);
+                            attributeDTO.setCategory(EntitlementConstants.ENVIRONMENT_ELEMENT);
                             attributeDTO.setAttributeId(attributeId);
                             attributeDTOs.add(attributeDTO);
                         }
@@ -629,13 +629,13 @@ public class PolicyMetaDataBuilder {
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
 
                         attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
 
                     } else {
@@ -643,11 +643,11 @@ public class PolicyMetaDataBuilder {
                             AttributeDTO attributeDTO = new AttributeDTO();
                             attributeDTO.setAttributeValue(value);
                             attributeDTO.setAttributeDataType(dataType);
-                            attributeDTO.setAttributeType(subElementName);
+                            attributeDTO.setCategory(subElementName);
                             attributeDTO.setAttributeId(attributeId);
                             attributeDTOs.add(attributeDTO);
                             // Remove following after fixing XPath issues
-                            attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                            attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                             attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
                         }
                     }
@@ -660,14 +660,14 @@ public class PolicyMetaDataBuilder {
                 List<String> attributeValues = searchAttributeValues(omElement, new ArrayList<String>(), false);
                 if(attributeValues == null){
                     AttributeDTO attributeDTO = new AttributeDTO();
-                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                    attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
                     attributeDTOs.add(attributeDTO);
                 } else if(attributeValues.isEmpty()){
                     AttributeDTO attributeDTO = new AttributeDTO();
-                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                    attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -685,8 +685,8 @@ public class PolicyMetaDataBuilder {
                                 searchDesignatorOrSelector(applyElement, attributeDTO);
                             }
                         }
-                        if(attributeDTO.getAttributeType() != null ||
-                                                        "".equals(attributeDTO.getAttributeType())) {
+                        if(attributeDTO.getCategory() != null ||
+                                                        "".equals(attributeDTO.getCategory())) {
                             attributeDTOs.add(attributeDTO);
                         }
                     }
@@ -730,14 +730,14 @@ public class PolicyMetaDataBuilder {
                                                                      new ArrayList<String>(), true);
                     if(attributeValues == null){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
                         attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
                         AttributeDTO attributeDTO = new AttributeDTO();
-                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -747,7 +747,7 @@ public class PolicyMetaDataBuilder {
                             AttributeDTO attributeDTO = new AttributeDTO();
                             attributeDTO.setAttributeValue(value);
                             attributeDTO.setAttributeDataType(dataType);
-                            attributeDTO.setAttributeType(category);
+                            attributeDTO.setCategory(category);
                             attributeDTO.setAttributeId(attributeId);
                             attributeDTOs.add(attributeDTO);
                         }
@@ -762,14 +762,14 @@ public class PolicyMetaDataBuilder {
                 List<String> attributeValues = searchAttributeValues(omElement, new ArrayList<String>(), false);
                 if(attributeValues == null){
                     AttributeDTO attributeDTO = new AttributeDTO();
-                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                    attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
                     attributeDTOs.add(attributeDTO);
                 } else if(attributeValues.isEmpty()){
                     AttributeDTO attributeDTO = new AttributeDTO();
-                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                    attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                         attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
@@ -783,8 +783,8 @@ public class PolicyMetaDataBuilder {
                             OMElement applyElement = (OMElement)iterator8.next();
                             searchXACML3Designator(applyElement, attributeDTO);
                         }
-                        if(attributeDTO.getAttributeType() != null ||
-                                                        "".equals(attributeDTO.getAttributeType())) {
+                        if(attributeDTO.getCategory() != null ||
+                                                        "".equals(attributeDTO.getCategory())) {
                             attributeDTOs.add(attributeDTO);
                         }
                     }
@@ -837,7 +837,7 @@ public class PolicyMetaDataBuilder {
                     searchDesignatorOrSelector(applyElement, attributeDTO);
                 }
             }
-            if(attributeDTO.getAttributeType() != null || attributeDTO.getAttributeId() != null ||
+            if(attributeDTO.getCategory() != null || attributeDTO.getAttributeId() != null ||
                     attributeDTO.getAttributeDataType() != null){
                 values = null;
             }
@@ -868,7 +868,7 @@ public class PolicyMetaDataBuilder {
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
                 attributeDTO.setAttributeDataType(dataType);
-                attributeDTO.setAttributeType(EntitlementConstants.RESOURCE_ELEMENT);
+                attributeDTO.setCategory(EntitlementConstants.RESOURCE_ELEMENT);
                 attributeDTO.setAttributeId(attributeId);
             }
         }
@@ -884,7 +884,7 @@ public class PolicyMetaDataBuilder {
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
                 attributeDTO.setAttributeDataType(dataType);
-                attributeDTO.setAttributeType(EntitlementConstants.SUBJECT_ELEMENT);
+                attributeDTO.setCategory(EntitlementConstants.SUBJECT_ELEMENT);
                 attributeDTO.setAttributeId(attributeId);
             }
         }
@@ -900,7 +900,7 @@ public class PolicyMetaDataBuilder {
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
                 attributeDTO.setAttributeDataType(dataType);
-                attributeDTO.setAttributeType(EntitlementConstants.ACTION_ELEMENT);
+                attributeDTO.setCategory(EntitlementConstants.ACTION_ELEMENT);
                 attributeDTO.setAttributeId(attributeId);
             }
         }
@@ -916,7 +916,7 @@ public class PolicyMetaDataBuilder {
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
                 attributeDTO.setAttributeDataType(dataType);
-                attributeDTO.setAttributeType(EntitlementConstants.ENVIRONMENT_ELEMENT);
+                attributeDTO.setCategory(EntitlementConstants.ENVIRONMENT_ELEMENT);
                 attributeDTO.setAttributeId(attributeId);
             }
         }
@@ -932,7 +932,7 @@ public class PolicyMetaDataBuilder {
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
                 attributeDTO.setAttributeDataType(dataType);
-                attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
                 attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
                 attributeDTO.setAttributeId(attributeId);
             }
@@ -962,7 +962,7 @@ public class PolicyMetaDataBuilder {
                         getAttributeValue(new QName(EntitlementConstants.CATEGORY));
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
-                attributeDTO.setAttributeType(category);
+                attributeDTO.setCategory(category);
                 attributeDTO.setAttributeId(attributeId);
                 attributeDTO.setAttributeDataType(dataType);
             }
@@ -990,7 +990,7 @@ public class PolicyMetaDataBuilder {
             }
         } else {
             AttributeDTO attributeDTO = new AttributeDTO();
-            attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+            attributeDTO.setCategory(EntitlementConstants.UNKNOWN);
             attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE4);
         }
 

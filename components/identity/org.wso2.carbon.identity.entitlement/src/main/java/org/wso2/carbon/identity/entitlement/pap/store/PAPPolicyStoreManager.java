@@ -20,23 +20,52 @@ package org.wso2.carbon.identity.entitlement.pap.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.core.IdentityRegistryResources;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+import org.wso2.carbon.registry.core.Resource;
 
 public class PAPPolicyStoreManager {
 
     private PAPPolicyStore store;
-    
+
+    private PAPPolicyStoreReader storeReader;
+
     private static Log log = LogFactory.getLog(PAPPolicyStoreManager.class);
 
-    public PAPPolicyStoreManager(PAPPolicyStore store) {
-        this.store = store;
+    public PAPPolicyStoreManager() {
+        store = new PAPPolicyStore();
+        storeReader = new PAPPolicyStoreReader(store);
     }
 
     public void addOrUpdatePolicy(PolicyDTO policy) throws IdentityException {
-        store.addOrUpdatePolicy(policy);
+        store.addOrUpdatePolicy(policy, IdentityRegistryResources.ENTITLEMENT);
     }
 
     public void removePolicy(PolicyDTO policy) throws IdentityException {
         store.removePolicy(policy.getPolicyId());
+    }
+    
+    public String[] getPolicyIds() throws IdentityException {
+        return store.getAllPolicyIds();
+    }
+    
+    public PolicyDTO getPolicy(String policyId) throws IdentityException {
+        return storeReader.readPolicyDTO(policyId);
+    }
+
+    public PolicyDTO getLightPolicy(String policyId) throws IdentityException {
+        return storeReader.readLightPolicyDTO(policyId);
+    }
+
+    public PolicyDTO getMetaDataPolicy(String policyId) throws IdentityException {
+        return storeReader.readMetaDataPolicyDTO(policyId);
+    }
+
+    public PolicyDTO getPolicy(Resource resource) throws IdentityException {
+        return storeReader.readPolicyDTO(resource);
+    }
+
+    public PolicyDTO[] getAllLightPolicyDTOs() throws IdentityException {
+        return storeReader.readAllLightPolicyDTOs();
     }
 }

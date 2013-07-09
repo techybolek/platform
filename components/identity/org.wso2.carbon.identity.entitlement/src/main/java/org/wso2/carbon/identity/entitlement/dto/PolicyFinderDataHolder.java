@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.entitlement.dto;
 
+import java.util.Arrays;
+
 /**
  * encapsulates policy finder related data
  */
@@ -26,8 +28,6 @@ public class PolicyFinderDataHolder {
     private String moduleName;
 
     private String className;
-
-    private int priority;
 
     private String[] policyIdentifiers;
 
@@ -42,19 +42,11 @@ public class PolicyFinderDataHolder {
     }
 
     public String[] getPolicyIdentifiers() {
-        return policyIdentifiers;
+        return Arrays.copyOf(policyIdentifiers, policyIdentifiers.length);
     }
 
     public void setPolicyIdentifiers(String[] policyIdentifiers) {
-        this.policyIdentifiers = policyIdentifiers;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
+        this.policyIdentifiers = Arrays.copyOf(policyIdentifiers, policyIdentifiers.length);
     }
 
     public String getClassName() {

@@ -29,11 +29,7 @@ public class AttributeDTO {
 
     private String attributeId;
 
-    private String attributeType;
-
-    private String functionId;
-
-    private String policyId;
+    private String attributeCategory;
 
     public String getAttributeDataType() {
         return attributeDataType;
@@ -43,12 +39,12 @@ public class AttributeDTO {
         this.attributeDataType = attributeDataType;
     }
 
-    public String getAttributeType() {
-        return attributeType;
+    public String getCategory() {
+        return attributeCategory;
     }
 
-    public void setAttributeType(String attributeType) {
-        this.attributeType = attributeType;
+    public void setCategory(String category) {
+        this.attributeCategory = category;
     }
 
     public String getAttributeId() {
@@ -67,22 +63,6 @@ public class AttributeDTO {
         this.attributeValue = attributeValue;
     }
 
-    public String getFunctionId() {
-        return functionId;
-    }
-
-    public void setFunctionId(String functionId) {
-        this.functionId = functionId;
-    }
-
-    public String getPolicyId() {
-        return policyId;
-    }
-
-    public void setPolicyId(String policyId) {
-        this.policyId = policyId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,13 +74,10 @@ public class AttributeDTO {
             return false;
         if (attributeId != null ? !attributeId.equals(dto.attributeId) : dto.attributeId != null)
             return false;
-        if (attributeType != null ? !attributeType.equals(dto.attributeType) : dto.attributeType != null)
+        if (attributeCategory != null ? !attributeCategory.equals(dto.attributeCategory) : dto.attributeCategory != null)
             return false;
         if (attributeValue != null ? !attributeValue.equals(dto.attributeValue) : dto.attributeValue != null)
             return false;
-        if (functionId != null ? !functionId.equals(dto.functionId) : dto.functionId != null)
-            return false;
-        if (policyId != null ? !policyId.equals(dto.policyId) : dto.policyId != null) return false;
 
         return true;
     }
@@ -110,9 +87,7 @@ public class AttributeDTO {
         int result = attributeValue != null ? attributeValue.hashCode() : 0;
         result = 31 * result + (attributeDataType != null ? attributeDataType.hashCode() : 0);
         result = 31 * result + (attributeId != null ? attributeId.hashCode() : 0);
-        result = 31 * result + (attributeType != null ? attributeType.hashCode() : 0);
-        result = 31 * result + (functionId != null ? functionId.hashCode() : 0);
-        result = 31 * result + (policyId != null ? policyId.hashCode() : 0);
+        result = 31 * result + (attributeCategory != null ? attributeCategory.hashCode() : 0);
         return result;
     }
 }

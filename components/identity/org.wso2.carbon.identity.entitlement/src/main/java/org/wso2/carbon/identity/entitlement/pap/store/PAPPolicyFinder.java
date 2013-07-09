@@ -32,6 +32,7 @@ import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
+import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
 import org.wso2.carbon.identity.entitlement.policy.collection.DefaultPolicyCollection;
 import org.wso2.balana.combine.PolicyCombiningAlgorithm;
 import org.wso2.balana.finder.PolicyFinder;
@@ -53,12 +54,6 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 
     private int maxInMemoryPolicies;
 
-	private String globalPolicyCombiningAlgorithm;
-   
-    public static final String POLICY_COMBINING_PREFIX_1 = "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:";
-
-    public static final String POLICY_COMBINING_PREFIX_3 = "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:";
-    
 	// the logger we'll use for all messages
 	private static Log log = LogFactory.getLog(PAPPolicyFinder.class);
 
@@ -88,7 +83,7 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.wso2.balana.finder.CarbonPolicyFinderModule#isRequestSupported()
+	 * @see org.wso2.balana.finder.PolicyFinderModule#isRequestSupported()
 	 */
 	public boolean isRequestSupported() {
 		return true;
@@ -97,7 +92,7 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.wso2.balana.finder.CarbonPolicyFinderModule#init(org.wso2.balana.finder.CarbonPolicyFinder)
+	 * @see org.wso2.balana.finder.PolicyFinderModule#init(org.wso2.balana.finder.CarbonPolicyFinder)
 	 */
 	public void init(PolicyFinder finder) {
 
@@ -105,13 +100,9 @@ public class PAPPolicyFinder extends PolicyFinderModule {
         this.policyFinder = finder;
         
 		try {
-			globalPolicyCombiningAlgorithm = findPolicyCombiningAlgorithm();
 
-			if (globalPolicyCombiningAlgorithm == null) {
-				globalPolicyCombiningAlgorithm = DenyOverridesPolicyAlg.algId;
-			}
-			algorithm = EntitlementUtil.getPolicyCombiningAlgorithm(globalPolicyCombiningAlgorithm);
-
+			algorithm = EntitlementAdminEngine.getInstance().
+                                                    getPolicyDataStore().getGlobalPolicyAlgorithm();
             policyIds = new ArrayList<String>();
 
             PolicyDTO[] policyDTOs = policyReader.readAllLightPolicyDTOs();
@@ -127,12 +118,8 @@ public class PAPPolicyFinder extends PolicyFinderModule {
                 maxInMemoryPolicies = Integer.parseInt(maxInMemoryPoliciesValue);
             }
             
-            this.policies = new DefaultPolicyCollection(algorithm, maxInMemoryPolicies);
+            this.policies = new DefaultPolicyCollection(algorithm, 0);
 
-			if (log.isDebugEnabled()) {
-				log.debug("Global XACML policy combining algorithm used "
-						+ globalPolicyCombiningAlgorithm);
-			}
 		} catch (IdentityException e) {
 			log.error("Error while initializing PAPPolicyFinder", e);
 		}
@@ -141,7 +128,7 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.wso2.balana.finder.CarbonPolicyFinderModule#findPolicy(java.net.URI, int,
+	 * @see org.wso2.balana.finder.PolicyFinderModule#findPolicy(java.net.URI, int,
 	 * org.wso2.balana.VersionConstraints, org.wso2.balana.PolicyMetaData)
 	 */
 	public PolicyFinderResult findPolicy(URI idReference, int type, VersionConstraints constraints,
@@ -183,7 +170,7 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.wso2.balana.finder.CarbonPolicyFinderModule#findPolicy(org.wso2.balana.EvaluationCtx)
+	 * @see org.wso2.balana.finder.PolicyFinderModule#findPolicy(org.wso2.balana.EvaluationCtx)
 	 */
 	public PolicyFinderResult findPolicy(EvaluationCtx context) {
 
@@ -243,37 +230,6 @@ public class PAPPolicyFinder extends PolicyFinderModule {
         }
 	}
 
-
-	/**
-	 * Finds PolicyCombiningAlgorithm in registry
-	 * 
-	 * @return PolicyCombiningAlgorithm as String
-	 */
-	public String findPolicyCombiningAlgorithm() {
-		try {                        
-			String name = policyReader.readPolicyCombiningAlgorithm();
-            if(name == null || name.trim().length() == 0){
-                return null;
-            }
-            if("first-applicable".equals(name) || "only-one-applicable".equals(name)){
-                return POLICY_COMBINING_PREFIX_1 + name;
-            } else {
-                return POLICY_COMBINING_PREFIX_3 + name;
-            }
-		} catch (IdentityException e) {
-			log.warn("Error occurs while finding policy combining algorithm");
-		}
-		return null;
-	}
-
-	/**
-	 * Returns PolicyCombiningAlgorithm
-	 * 
-	 * @return PolicyCombiningAlgorithm as String
-	 */
-	public String getGlobalPolicyCombiningAlgorithm() {
-		return globalPolicyCombiningAlgorithm;
-	}
 
     /**
      * Sets polices ids that is evaluated

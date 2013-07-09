@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.identity.entitlement.dto;
 
+import java.util.Arrays;
+
 /**
  * 
  */
@@ -33,27 +35,27 @@ public class PDPDataHolder {
     private boolean decisionCacheEnable;
 
     public String[] getPolicyFinders() {
-        return policyFinders;
+        return Arrays.copyOf(policyFinders, policyFinders.length);
     }
 
     public void setPolicyFinders(String[] policyFinders) {
-        this.policyFinders = policyFinders;
+        this.policyFinders = Arrays.copyOf(policyFinders, policyFinders.length);
     }
 
     public String[] getPipAttributeFinders() {
-        return pipAttributeFinders;
+        return Arrays.copyOf(pipAttributeFinders, pipAttributeFinders.length);
     }
 
     public void setPipAttributeFinders(String[] pipAttributeFinders) {
-        this.pipAttributeFinders = pipAttributeFinders;
+        this.pipAttributeFinders = Arrays.copyOf(pipAttributeFinders, pipAttributeFinders.length);
     }
 
     public String[] getPipResourceFinders() {
-        return pipResourceFinders;
+        return Arrays.copyOf(pipResourceFinders, pipResourceFinders.length);
     }
 
     public void setPipResourceFinders(String[] pipResourceFinders) {
-        this.pipResourceFinders = pipResourceFinders;
+        this.pipResourceFinders = Arrays.copyOf(pipResourceFinders, pipResourceFinders.length);
     }
 
     public boolean isDecisionCacheEnable() {

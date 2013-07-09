@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.dto;
 
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -58,10 +59,10 @@ public class PolicyStoreDTO {
     }
 
     public AttributeDTO[] getAttributeDTOs() {
-        return attributeDTOs;
+        return Arrays.copyOf(attributeDTOs, attributeDTOs.length);
     }
 
     public void setAttributeDTOs(AttributeDTO[] attributeDTOs) {
-        this.attributeDTOs = attributeDTOs;
+        this.attributeDTOs = Arrays.copyOf(attributeDTOs, attributeDTOs.length);
     }
 }

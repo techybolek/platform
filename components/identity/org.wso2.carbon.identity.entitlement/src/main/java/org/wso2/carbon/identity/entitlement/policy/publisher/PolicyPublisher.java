@@ -20,13 +20,13 @@ package org.wso2.carbon.identity.entitlement.policy.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.dto.ModuleDataHolder;
-import org.wso2.carbon.identity.entitlement.dto.ModulePropertyDTO;
-import org.wso2.carbon.identity.entitlement.dto.ModuleStatusHolder;
+import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
+import org.wso2.carbon.identity.entitlement.dto.PublisherPropertyDTO;
+import org.wso2.carbon.identity.entitlement.dto.StatusHolder;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -52,48 +52,75 @@ public class PolicyPublisher{
     private static Log log = LogFactory.getLog(PolicyPublisher.class);
 
     /**
-     * List of meta data finder modules
+     * set of publisher modules
      */
     Set<PolicyPublisherModule> publisherModules = new HashSet<PolicyPublisherModule>();
+
+    /**
+     * set of post publisher modules
+     */
+    Set<PostPublisherModule> postPublisherModules = new HashSet<PostPublisherModule>();
+
+    /**
+     * Verification publisher modules
+     */
+    PublisherVerificationModule verificationModule = null;
 
     private static ExecutorService threadPool = Executors.newFixedThreadPool(2);
 
     /**
      * Creates PolicyPublisher instance
-     * @param registry  WSO2 governance registry instance
      */
-    public PolicyPublisher(Registry registry) {
-        this.registry = registry;
-    }
-
-    /**
-     * init policy publisher
-     */
-    public void init(){
-
-		Map<PolicyPublisherModule, Properties> publisherModuleConfigs = EntitlementServiceComponent.
+    public PolicyPublisher() {
+        
+        this.registry = EntitlementServiceComponent.
+                            getGovernanceRegistry(CarbonContext.getCurrentContext().getTenantId());
+        Map<PolicyPublisherModule, Properties> publisherModules = EntitlementServiceComponent.
                 getEntitlementConfig().getPolicyPublisherModules();
-        if(publisherModuleConfigs != null && !publisherModuleConfigs.isEmpty()){
-            publisherModules = publisherModuleConfigs.keySet();
+        if(publisherModules != null && !publisherModules.isEmpty()){
+            this.publisherModules = publisherModules.keySet();
         }
+
+        Map<PostPublisherModule, Properties> postPublisherModules = EntitlementServiceComponent.
+                getEntitlementConfig().getPolicyPostPublisherModules();
+        if(postPublisherModules != null && !postPublisherModules.isEmpty()){
+            this.postPublisherModules = postPublisherModules.keySet();
+        }
+
+        Map<PublisherVerificationModule, Properties> prePublisherModules = EntitlementServiceComponent.
+                getEntitlementConfig().getPublisherVerificationModule();
+        if(prePublisherModules != null && !prePublisherModules.isEmpty()){
+            this.verificationModule = prePublisherModules.keySet().iterator().next();
+        }        
     }
 
     /**
      * publish policy
      *
+     *
      * @param policyIds policy ids to publish,
+     * @param version
+     * @param action
      * @param subscriberIds subscriber ids to publish,
+     * @param verificationCode verificationCode as String
      * @throws IdentityException throws if can not be created PolicyPublishExecutor instant
      */
-    public void publishPolicy(String[] policyIds, String[] subscriberIds) throws IdentityException {
+    public void publishPolicy(String[] policyIds, int version, String action, String[] subscriberIds,
+                                            String verificationCode) throws IdentityException {
 
-        PolicyPublishExecutor executor =
-                new PolicyPublishExecutor(policyIds, subscriberIds, this, new PAPPolicyStore(registry));
+        boolean toPDP = false;
+        
+        if(subscriberIds == null){
+            toPDP = true;
+        }
+        
+        PolicyPublishExecutor executor = new PolicyPublishExecutor(policyIds, version, action,
+                        subscriberIds, this, toPDP, verificationCode);
         threadPool.execute(executor);
     }
 
 
-    public void persistSubscriber(ModuleDataHolder holder, boolean update) throws IdentityException {
+    public void persistSubscriber(PublisherDataHolder holder, boolean update) throws IdentityException {
 
         Collection policyCollection;
         String subscriberPath;
@@ -103,7 +130,7 @@ public class PolicyPublisher{
             return;
         }
 
-        for(ModulePropertyDTO dto  : holder.getPropertyDTOs()){
+        for(PublisherPropertyDTO dto  : holder.getPropertyDTOs()){
             if(SUBSCRIBER_ID.equals(dto.getId())){
                 subscriberId = dto.getValue();
             }
@@ -128,7 +155,7 @@ public class PolicyPublisher{
                 if(update){
                     resource = registry.get(subscriberPath);
                 } else {
-                    throw new IdentityException("Subscriber ID already exists!");
+                    throw new IdentityException("Subscriber ID already exists");
                 }
             } else {
                 resource = registry.newResource();
@@ -165,7 +192,7 @@ public class PolicyPublisher{
         }
     }
 
-    public ModuleDataHolder retrieveSubscriber(String id) throws IdentityException {
+    public PublisherDataHolder retrieveSubscriber(String id) throws IdentityException {
 
         try{
             if(registry.resourceExists(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
@@ -173,7 +200,7 @@ public class PolicyPublisher{
                 Resource resource = registry.get(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
                                                         RegistryConstants.PATH_SEPARATOR + id);
 
-                return new ModuleDataHolder(resource);
+                return new PublisherDataHolder(resource);
             }
         } catch (RegistryException e) {
             log.error("Error while retrieving subscriber detail of id : " + id, e);
@@ -211,10 +238,10 @@ public class PolicyPublisher{
         return null;
     }
 
-    private void populateProperties(ModuleDataHolder holder, Resource resource){
+    private void populateProperties(PublisherDataHolder holder, Resource resource){
 
-        ModulePropertyDTO[] propertyDTOs = holder.getPropertyDTOs();
-        for(ModulePropertyDTO dto : propertyDTOs){
+        PublisherPropertyDTO[] propertyDTOs = holder.getPropertyDTOs();
+        for(PublisherPropertyDTO dto : propertyDTOs){
             if(dto.getId() != null && dto.getValue() != null) {
                 ArrayList<String> list = new ArrayList<String>();
                 //password must be encrypted TODO
@@ -230,25 +257,34 @@ public class PolicyPublisher{
             }
         }
 
-        ModuleStatusHolder[] statusHolders = holder.getStatusHolders();
+        StatusHolder[] statusHolders = holder.getStatusHolders();
         int num = 0;
         if(statusHolders != null){
-            for(ModuleStatusHolder statusHolder : statusHolders){
+            for(StatusHolder statusHolder : statusHolders){
                 List<String>  list = new ArrayList<String>();
                 list.add(statusHolder.getTimeInstance());
+                list.add(statusHolder.getUser());
                 list.add(statusHolder.getKey());
                 if(statusHolder.getMessage() != null){
                     list.add(statusHolder.getMessage());
                 }
-                resource.setProperty(ModuleStatusHolder.STATUS_HOLDER_NAME + num, list);
+                resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + num, list);
                 num ++;
             }
         }
 
-        resource.setProperty(ModuleDataHolder.MODULE_NAME, holder.getModuleName());
+        resource.setProperty(PublisherDataHolder.MODULE_NAME, holder.getModuleName());
     }
 
     public Set<PolicyPublisherModule> getPublisherModules() {
         return publisherModules;
+    }
+
+    public Set<PostPublisherModule> getPostPublisherModules() {
+        return postPublisherModules;
+    }
+
+    public PublisherVerificationModule getVerificationModule() {
+        return verificationModule;
     }
 }

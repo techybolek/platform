@@ -107,6 +107,10 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
 	public boolean getBooleanDecision(String subject, String resource, String action) throws Exception {
 		try {
 			EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
+            String response = entitlementEngine.evaluate(subject, resource, action, null);
+            if(response.contains("Permit")){
+                return true;
+            }
             return false;
 		} catch (Exception e) {
 			log.error("Error occurred while evaluating XACML request", e);

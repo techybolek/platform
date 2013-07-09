@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.entitlement.dto;
 
+import java.util.Arrays;
+
 /**
  * encapsulates policy finder related data
  */
@@ -46,10 +48,10 @@ public class PIPFinderDataHolder {
     }
 
     public String[] getSupportedAttributeIds() {
-        return supportedAttributeIds;
+        return Arrays.copyOf(supportedAttributeIds, supportedAttributeIds.length);
     }
 
     public void setSupportedAttributeIds(String[] supportedAttributeIds) {
-        this.supportedAttributeIds = supportedAttributeIds;
+        this.supportedAttributeIds = Arrays.copyOf(supportedAttributeIds, supportedAttributeIds.length);
     }
 }

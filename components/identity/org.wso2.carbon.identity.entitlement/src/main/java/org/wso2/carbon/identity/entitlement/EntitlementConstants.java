@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -133,7 +133,7 @@ public class EntitlementConstants {
 
 	public static final String AUTHORIZATION_PERMISSION = "/permission/admin/configure";
 
-	public static final String ENTITLEMENT_CACHE_MANAGER = "ENTITLEMENT_CACHE_MANAGER";
+    public static final String ENTITLEMENT_CACHE_MANAGER = "ENTITLEMENT_CACHE_MANAGER";
 
 	public static final String PIP_RESOURCE_CACHE = "PIP_RESOURCE_CACHE";
 
@@ -208,9 +208,16 @@ public class EntitlementConstants {
 
     public static final String XACML_1_POLICY_SCHEMA_FILE = "xacml1.xsd";
 
-    public static final String ENTITLEMENT_POLICY_PUBLISHER = "/repository/identity/Entitlement/publisher/";
+    public static final String ENTITLEMENT_POLICY_PUBLISHER = "/repository/identity/entitlement/publisher/";
 
+    public static final String ENTITLEMENT_POLICY_PUBLISHER_VERIFICATION =
+                                        "/repository/identity/entitlement/publisher/verification";
 
+    public static final String ENTITLEMENT_POLICY_VERSION =
+                                        "/repository/identity/entitlement/policy/version";
+
+    public static final String ENTITLEMENT_POLICY_DATA =
+                                            "/repository/identity/entitlement/policy/data";
     // entitlement.properties file configurations
 
     public static final String ON_DEMAND_POLICY_LOADING = "PDP.OnDemangPolicyLoading.Enable";
@@ -245,4 +252,17 @@ public class EntitlementConstants {
     public static final String FILESYSTEM_POLICY_PATH = "PAP.Policy.Add.Start.Policy.File.Path";
 
     public static final String START_UP_POLICY_ADDING = "PAP.Policy.Add.Start.Enable";
+
+    public static final class PolicyPublish {
+
+        public static final String ACTION_CREATE = "CREATE";
+
+        public static final String ACTION_UPDATE = "UPDATE";
+
+        public static final String ACTION_DELETE = "DELETE";
+
+        public static final String ACTION_ENABLE = "ENABLE";
+
+    }
+
 }

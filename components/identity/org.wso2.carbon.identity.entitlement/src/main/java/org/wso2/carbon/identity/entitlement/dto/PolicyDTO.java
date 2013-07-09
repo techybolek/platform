@@ -18,6 +18,7 @@
 package org.wso2.carbon.identity.entitlement.dto;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class encapsulate the XACML policy related the data
@@ -32,13 +33,11 @@ public class PolicyDTO {
 
     private boolean promote;
 
-    private int policyLifeCycle;
-
     private String policyType;
 
     private String policyEditor;
 
-    private String[] basicPolicyEditorMetaData = new String[0];
+    private String[] policyEditorData = new String[0];
 
     private boolean policyEditable;
 
@@ -46,19 +45,25 @@ public class PolicyDTO {
 
     private int policyOrder;
 
+    private int version;
+
     private String neighborId;    
 
-    private AttributeDTO[] policyMetaData = new AttributeDTO[0];
+    private AttributeDTO[] attributeDTOs = new AttributeDTO[0];
 
     private String[] policySetIdReferences = new String[0];
 
     private String[] policyIdReferences = new String[0];
 
-    public final static int PAP_POLICY = 0;
+    private StatusHolder[] publishStatusHolders = new StatusHolder[0];
 
-    public final static int PDP_PROMOTED_POLICY = 1;
+    private StatusHolder[] policyStatusHolders = new StatusHolder[0];
 
-    public final static int PAP_UN_SYNC_POLICY = 2;
+    private StatusHolder lastPublishStatus;
+
+    private StatusHolder firstPolicyStatus;
+
+    private StatusHolder lastPolicyStatus;
 
     public String getPolicyId() {
         return policyId;
@@ -101,21 +106,21 @@ public class PolicyDTO {
         this.policyEditor = policyEditor;
     }
 
-    public String[] getBasicPolicyEditorMetaData() {
-        return Arrays.copyOf(basicPolicyEditorMetaData, basicPolicyEditorMetaData.length);
+    public String[] getPolicyEditorData() {
+        return Arrays.copyOf(policyEditorData, policyEditorData.length);
     }
 
-    public void setBasicPolicyEditorMetaData(String[] basicPolicyEditorMetaData) {
-        this.basicPolicyEditorMetaData = Arrays.copyOf(basicPolicyEditorMetaData,
-                                                                basicPolicyEditorMetaData.length);
+    public void setPolicyEditorData(String[] policyEditorData) {
+        this.policyEditorData = Arrays.copyOf(policyEditorData,
+                                                                policyEditorData.length);
     }
 
-    public AttributeDTO[] getPolicyMetaData() {
-        return Arrays.copyOf(policyMetaData, policyMetaData.length);
+    public AttributeDTO[] getAttributeDTOs() {
+        return Arrays.copyOf(attributeDTOs, attributeDTOs.length);
     }
 
-    public void setPolicyMetaData(AttributeDTO[] policyMetaData) {
-        this.policyMetaData = Arrays.copyOf(policyMetaData, policyMetaData.length);
+    public void setAttributeDTOs(AttributeDTO[] attributeDTOs) {
+        this.attributeDTOs = Arrays.copyOf(attributeDTOs, attributeDTOs.length);
     }
 
     public boolean isPolicyEditable() {
@@ -174,11 +179,53 @@ public class PolicyDTO {
         this.promote = promote;
     }
 
-    public int getPolicyLifeCycle() {
-        return policyLifeCycle;
+    public int getVersion() {
+        return version;
     }
 
-    public void setPolicyLifeCycle(int policyLifeCycle) {
-        this.policyLifeCycle = policyLifeCycle;
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public StatusHolder[] getPublishStatusHolders() {
+        return publishStatusHolders;
+    }
+
+    public StatusHolder[] getPolicyStatusHolders() {
+        return Arrays.copyOf(policyStatusHolders, policyStatusHolders.length);
+    }
+
+    public void setPolicyStatusHolders(StatusHolder[] policyStatusHolders) {
+        this.policyStatusHolders = Arrays.copyOf(policyStatusHolders, policyStatusHolders.length);
+    }
+
+    public StatusHolder getLastPublishStatus() {
+        return lastPublishStatus;
+    }
+
+    public void setLastPublishStatus(StatusHolder lastPublishStatus) {
+        this.lastPublishStatus = lastPublishStatus;
+    }
+
+    public StatusHolder getLastPolicyStatus() {
+        return lastPolicyStatus;
+    }
+
+    public void setLastPolicyStatus(StatusHolder lastPolicyStatus) {
+        this.lastPolicyStatus = lastPolicyStatus;
+    }
+
+    public StatusHolder getFirstPolicyStatus() {
+        return firstPolicyStatus;
+    }
+
+    public void setFirstPolicyStatus(StatusHolder firstPolicyStatus) {
+        this.firstPolicyStatus = firstPolicyStatus;
+    }
+
+    public void addPublishStatusHolders(List<StatusHolder> statusHolders) {
+        for(int i = 0; i < 10 ; i ++){
+            this.publishStatusHolders[i] = statusHolders.get(i);
+        }
     }
 }

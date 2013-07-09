@@ -42,7 +42,7 @@ import org.wso2.carbon.identity.entitlement.cache.DecisionCache;
 import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
 import org.wso2.carbon.identity.entitlement.cache.SimpleDecisionCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinder;
+import org.wso2.carbon.identity.entitlement.pap.EntitlementDataFinder;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
@@ -59,6 +59,7 @@ import org.wso2.balana.finder.impl.CurrentEnvModule;
 import org.wso2.balana.finder.impl.SelectorModule;
 import org.wso2.carbon.identity.entitlement.pip.CarbonResourceFinder;
 import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
+import org.wso2.carbon.identity.entitlement.policy.store.PolicyStoreManager;
 import org.wso2.carbon.utils.CarbonUtils;
 
 public class EntitlementEngine {
@@ -66,10 +67,7 @@ public class EntitlementEngine {
 	private PolicyFinder papPolicyFinder;
 	private CarbonAttributeFinder carbonAttributeFinder;
     private CarbonResourceFinder carbonResourceFinder;
-    private PolicyEditorDataFinder metaDataFinder;
-    private PolicyPublisher policyPublisher;
     private PolicyFinder carbonPolicyFinder;
-    private PolicyStoreManager policyStoreManager;
 	private PDP pdp;
     private PDP pdpTest;
     private Balana balana;
@@ -135,14 +133,6 @@ public class EntitlementEngine {
         setUpResourceFinders();
 
 		this.tenantId = tenantId;
-
-        metaDataFinder = new PolicyEditorDataFinder(tenantId);
-        metaDataFinder.init();
-
-        policyPublisher = new PolicyPublisher(EntitlementServiceComponent.getGovernanceRegistry(tenantId));
-        policyPublisher.init();
-
-        this.policyStoreManager = new PolicyStoreManager();
 
         //init caches
         decisionClearingCache = DecisionClearingCache.getInstance();
@@ -350,15 +340,6 @@ public class EntitlementEngine {
 	}
 
     /**
-     * This method returns the policy meta data finder for the current tenant
-     *
-     * @return  PolicyMetaDataFinder
-     */
-    public PolicyEditorDataFinder getMetaDataFinder() {
-        return metaDataFinder;
-    }
-
-    /**
      *  This method returns the carbon based resource finder for the current tenant
      * 
      * @return  CarbonResourceFinder
@@ -374,24 +355,6 @@ public class EntitlementEngine {
      */
     public PolicyFinder getCarbonPolicyFinder() {
         return carbonPolicyFinder;
-    }
-
-    /**
-     * This method returns policy publisher
-     * 
-     * @return PolicyPublisher
-     */
-    public PolicyPublisher getPolicyPublisher() {
-        return policyPublisher;
-    }
-
-    /**
-     * This returns policy store manager
-     * 
-     * @return
-     */
-    public PolicyStoreManager getPolicyStoreManager() {
-        return policyStoreManager;
     }
 
     /**

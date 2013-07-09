@@ -18,10 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.internal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.Properties;
 
@@ -29,14 +26,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinderModule;
+import org.wso2.carbon.identity.entitlement.EntitlementNotificationHandler;
+import org.wso2.carbon.identity.entitlement.pap.EntitlementDataFinderModule;
 import org.wso2.carbon.identity.entitlement.pip.PIPAttributeFinder;
 import org.wso2.carbon.identity.entitlement.pip.PIPExtension;
 import org.wso2.carbon.identity.entitlement.pip.PIPResourceFinder;
 import org.wso2.carbon.identity.entitlement.policy.collection.PolicyCollection;
-import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.finder.PolicyFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.publisher.PostPublisherModule;
+import org.wso2.carbon.identity.entitlement.policy.publisher.PublisherVerificationModule;
+import org.wso2.carbon.identity.entitlement.policy.store.PolicyDataStore;
+import org.wso2.carbon.identity.entitlement.policy.store.PolicyStoreManageModule;
 import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisherModule;
-import org.wso2.carbon.identity.entitlement.policy.store.CarbonPolicyStore;
+import org.wso2.carbon.identity.entitlement.policy.version.PolicyVersionManager;
 import org.wso2.carbon.utils.CarbonUtils;
 
 /**
@@ -61,7 +63,7 @@ import org.wso2.carbon.utils.CarbonUtils;
  * PIP.AttributeDesignators.Designator.1=org.wso2.carbon.identity.entitlement.pip.DefaultAttributeFinder
  * PIP.ResourceFinders.Finder.1="org.wso2.carbon.identity.entitlement.pip.DefaultResourceFinder
  * 
- * PAP.MetaDataFinders.Finder.1=org.wso2.carbon.identity.entitlement.pap.CarbonPolicyEditorDataFinder
+ * PAP.MetaDataFinders.Finder.1=org.wso2.carbon.identity.entitlement.pap.CarbonEntitlementDataFinder
  * PAP.PolicyPublishers.Publisher.1=org.wso2.carbon.identity.entitlement.policy.publisher.CarbonBasicPolicyPublisherModule
  * 
  * # Properties needed for each extension. #
@@ -69,46 +71,12 @@ import org.wso2.carbon.utils.CarbonUtils;
  * org.wso2.carbon.identity.entitlement.pip.DefaultAttributeFinder.2=name,value #
  * org.wso2.carbon.identity.entitlement.pip.DefaultResourceFinder.1=name.value #
  * org.wso2.carbon.identity.entitlement.pip.DefaultResourceFinder.2=name,value #
- * org.wso2.carbon.identity.entitlement.pap.CarbonPolicyEditorDataFinder.1=name,value #
- * org.wso2.carbon.identity.entitlement.pap.CarbonPolicyEditorDataFinder.2=name,value
+ * org.wso2.carbon.identity.entitlement.pap.CarbonEntitlementDataFinder.1=name,value #
+ * org.wso2.carbon.identity.entitlement.pap.CarbonEntitlementDataFinder.2=name,value
  */
 public class EntitlementExtensionBuilder {
 
-    public static final String LOCAL_NAME_PIP_CONFIG = "PIPConfig";
-    public static final String LOCAL_NAME_CACHING_CONFIG = "CachingConfig";
-    public static final String LOCAL_NAME_PAP_CONFIG = "PAPConfig";
 
-    public static final String LOCAL_NAME_EXTENSIONS = "Extensions";
-    public static final String LOCAL_NAME_EXTENSION = "Extension";
-    public static final String LOCAL_NAME_EXTENSION_CLASS_ATTR = "class";
-
-    public static final String LOCAL_NAME_ATTR_DESIGNATORS = "AttributeDesignators";
-    public static final String LOCAL_NAME_ATTR_DESIGNATOR = "Designator";
-    public static final String LOCAL_NAME_ATTR_CLASS_ATTR = "class";
-
-    public static final String LOCAL_NAME_RESOURCE_FINDERS = "ResourceFinders";
-    public static final String LOCAL_NAME_RESOURCE_FINDER = "Finder";
-    public static final String LOCAL_NAME_RESOURCE_FINDER_CLASS = "class";
-
-    public static final String LOCAL_NAME_PUBLISHER_FINDERS = "PAP.PolicyPublishers";
-    public static final String LOCAL_NAME_PUBLISHER_FINDER = "Publisher";
-    public static final String LOCAL_NAME_PUBLISHER_FINDER_CLASS = "class";
-
-    public static final String LOCAL_NAME_META_DATA_FINDERS = "MetaDataFinders";
-    public static final String LOCAL_NAME_META_DATA_FINDER = "Finder";
-    public static final String LOCAL_NAME_META_DATA_FINDER_CLASS = "class";
-
-    public static final String LOCAL_NAME_PROPERTY = "Property";
-    public static final String LOCAL_NAME_PROPERTY_NAME = "name";
-
-    public static final String LOCAL_NAME_ATTRIBUTE_CACHING = "PDP.AttributeCaching";
-    public static final String LOCAL_NAME_RESOURCE_CACHING = "PDP.ResourceCaching";
-    public static final String LOCAL_NAME_DECISION_CACHING = "PDP.DecisionCaching";
-    public static final String LOCAL_NAME_ON_DEMAND_LOADING = "PDP.OnDemandPolicyLoading";
-    public static final String LOCAL_NAME_MAX_POLICIES = "MaxInMemoryPolicies";
-    public static final String LOCAL_NAME_CACHING_INTERVAL = "CachingInterval";
-    public static final String LOCAL_NAME_ENABLE = "Enable";
-    
     public static final String PDP_SCHEMA_VALIDATION ="PDP.SchemaValidation.Enable";
 
     private static final String ENTITLEMENT_CONFIG = "entitlement.properties";
@@ -126,15 +94,20 @@ public class EntitlementExtensionBuilder {
         Properties properties;
 
         if ((properties = loadProperties()) != null) {
-            populateCachingAttributes(properties, holder);
+            populateEntitlementAttributes(properties, holder);
             populatePDPExtensions(properties, holder);
             populateAttributeFinders(properties, holder);
-            populateMetadataFinders(properties, holder);
+            populateEntitlementDataFinders(properties, holder);
             populateResourceFinders(properties, holder);
             populatePolicyPublishers(properties, holder);
             populatePolicyFinders(properties, holder);
             populatePolicyCollection(properties, holder);
-            populatePolicyStore(properties, holder);
+            populatePolicyStoreModule(properties, holder);
+            populatePolicyDataStore(properties, holder);
+            populatePolicyVersionModule(properties, holder);
+            populatePolicyPostPublishers(properties, holder);
+            populateAdminNotificationHandlers(properties, holder);
+            populatePublisherVerificationHandler(properties, holder);
         }
     }
 
@@ -150,42 +123,58 @@ public class EntitlementExtensionBuilder {
         String warningMessage = null;
 
         File pipConfigXml = new File(CarbonUtils.getCarbonSecurityConfigDirPath(), ENTITLEMENT_CONFIG);
-        if (pipConfigXml.exists()) {
-            inStream = new FileInputStream(pipConfigXml);
-        } else {
-            URL url;
-            if (bundleContext != null) {
-                if ((url = bundleContext.getBundle().getResource(ENTITLEMENT_CONFIG)) != null) {
-                    inStream = url.openStream();
-                } else {
-                    warningMessage = "Bundle context could not find resource "
-                            + ENTITLEMENT_CONFIG
-                            + " or user does not have sufficient permission to access the resource.";
-                }
-
-            } else {
-
-                if ((url = this.getClass().getClassLoader().getResource(ENTITLEMENT_CONFIG)) != null) {
-                    inStream = url.openStream();
-                } else {
-                    warningMessage = "PIP Config Builder could not find resource "
-                            + ENTITLEMENT_CONFIG
-                            + " or user does not have sufficient permission to access the resource.";
-                }
-            }
-        }
-
-        if (inStream == null) {
-            log.warn(warningMessage);
-            return null;
-        }
-
-        properties.load(inStream);
 
         try{
-            inStream.close();
-        } catch (Exception e){
-            log.error("Error while closing input stream ", e);
+            if (pipConfigXml.exists()) {
+                inStream = new FileInputStream(pipConfigXml);
+            } else {
+                URL url;
+                if (bundleContext != null) {
+                    if ((url = bundleContext.getBundle().getResource(ENTITLEMENT_CONFIG)) != null) {
+                        inStream = url.openStream();
+                    } else {
+                        warningMessage = "Bundle context could not find resource "
+                                + ENTITLEMENT_CONFIG
+                                + " or user does not have sufficient permission to access the resource.";
+                    }
+
+                } else {
+
+                    if ((url = this.getClass().getClassLoader().getResource(ENTITLEMENT_CONFIG)) != null) {
+                        inStream = url.openStream();
+                    } else {
+                        warningMessage = "PIP Config Builder could not find resource "
+                                + ENTITLEMENT_CONFIG
+                                + " or user does not have sufficient permission to access the resource.";
+                    }
+                }
+            }
+
+            if (inStream == null) {
+                log.warn(warningMessage);
+                return null;
+            }
+
+            properties.load(inStream);
+
+        } catch (FileNotFoundException e) {
+            if(log.isDebugEnabled()){
+                log.debug(e);
+            }
+            throw e;
+        } catch (IOException e) {
+            if(log.isDebugEnabled()){
+                log.debug(e);
+            }
+            throw e;
+        } finally {
+            try{
+                if(inStream != null){
+                    inStream.close();
+                }
+            } catch (Exception e){
+                log.error("Error while closing input stream ", e);
+            }
         }
 
         return properties;
@@ -196,7 +185,7 @@ public class EntitlementExtensionBuilder {
      * @param properties
      * @param holder
      */
-    private void populateCachingAttributes(Properties properties, EntitlementConfigHolder holder) {
+    private void populateEntitlementAttributes(Properties properties, EntitlementConfigHolder holder) {
 
         Properties pdpProperties = new Properties();
         
@@ -256,36 +245,7 @@ public class EntitlementExtensionBuilder {
     }
 
     /**
-     * 
-     * @param properties
-     * @param holder
-     * @throws Exception
-     */
-    private void populatePDPExtensions(Properties properties, EntitlementConfigHolder holder)
-            throws Exception {
-
-        int i = 1;
-        PIPExtension extension = null;
-
-        while (properties.getProperty("PDP.Extensions.Extension." + i) != null) {
-            String className = properties.getProperty("PDP.Extensions.Extension." + i++);
-            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            extension = (PIPExtension) clazz.newInstance();
-
-            int j = 1;
-            Properties extensionProps = new Properties();
-            while (properties.getProperty(className + "." + j) != null) {
-                String[] props = properties.getProperty(className + "." + j++).split(",");
-                extensionProps.put(props[0], props[1]);
-            }
-
-            extension.init(extensionProps);
-            holder.addExtensions(extension, extensionProps);
-        }
-    }
-
-    /**
-     * 
+     *
      * @param properties
      * @param holder
      * @throws Exception
@@ -319,55 +279,26 @@ public class EntitlementExtensionBuilder {
      * @param holder
      * @throws Exception
      */
-    private void populateMetadataFinders(Properties properties, EntitlementConfigHolder holder)
-            throws Exception {
-        int i = 1;
-        PolicyEditorDataFinderModule metadata = null;
-
-        while (properties.getProperty("PAP.MetaDataFinders.Finder." + i) != null) {
-            String className = properties.getProperty("PAP.MetaDataFinders.Finder." + i++);
-            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            metadata = (PolicyEditorDataFinderModule) clazz.newInstance();
-
-            int j = 1;
-            Properties metadataProps = new Properties();
-            while (properties.getProperty(className + "." + j) != null) {
-                String value = properties.getProperty(className + "." + j++);
-                metadataProps.put(value.substring(0,value.indexOf(",")),
-                        value.substring(value.indexOf(",") + 1));
-            }
-
-            metadata.init(metadataProps);
-            holder.addPolicyMetaDataFinderModules(metadata, metadataProps);
-        }
-    }
-
-    /**
-     * 
-     * @param properties
-     * @param holder
-     * @throws Exception
-     */
-    private void populatePolicyPublishers(Properties properties, EntitlementConfigHolder holder)
+    private void populatePDPExtensions(Properties properties, EntitlementConfigHolder holder)
             throws Exception {
 
         int i = 1;
-        PolicyPublisherModule publisher = null;
+        PIPExtension extension = null;
 
-        while (properties.getProperty("PAP.PolicyPublishers.Publisher." + i) != null) {
-            String className = properties.getProperty("PAP.PolicyPublishers.Publisher." + i++);
+        while (properties.getProperty("PDP.Extensions.Extension." + i) != null) {
+            String className = properties.getProperty("PDP.Extensions.Extension." + i++);
             Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            publisher = (PolicyPublisherModule) clazz.newInstance();
+            extension = (PIPExtension) clazz.newInstance();
 
             int j = 1;
-            Properties publisherProps = new Properties();
+            Properties extensionProps = new Properties();
             while (properties.getProperty(className + "." + j) != null) {
                 String[] props = properties.getProperty(className + "." + j++).split(",");
-                publisherProps.put(props[0], props[1]);
+                extensionProps.put(props[0], props[1]);
             }
 
-            publisher.init(publisherProps);
-            holder.addPolicyPublisherModule(publisher, publisherProps);
+            extension.init(extensionProps);
+            holder.addExtensions(extension, extensionProps);
         }
     }
 
@@ -381,12 +312,12 @@ public class EntitlementExtensionBuilder {
             throws Exception {
 
         int i = 1;
-        CarbonPolicyFinderModule finderModule = null;
+        PolicyFinderModule finderModule = null;
 
-        while (properties.getProperty("PDP.PolicyFinders.Finder." + i) != null) {
-            String className = properties.getProperty("PDP.PolicyFinders.Finder." + i++);
+        while (properties.getProperty("PDP.Policy.Finder." + i) != null) {
+            String className = properties.getProperty("PDP.Policy.Finder." + i++);
             Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            finderModule = (CarbonPolicyFinderModule) clazz.newInstance();
+            finderModule = (PolicyFinderModule) clazz.newInstance();
 
             int j = 1;
             Properties finderModuleProps = new Properties();
@@ -396,6 +327,9 @@ public class EntitlementExtensionBuilder {
             }
 
             finderModule.init(finderModuleProps);
+            if(finderModule instanceof PolicyStoreManageModule){
+                holder.addPolicyStore((PolicyStoreManageModule)finderModule, finderModuleProps);
+            }
             holder.addPolicyFinderModule(finderModule, finderModuleProps);
         }
     }
@@ -412,8 +346,8 @@ public class EntitlementExtensionBuilder {
         PolicyCollection collection = null;
 
         //only one policy collection can be there
-        if(properties.getProperty("PDP.PolicyCollection") != null) {
-            String className = properties.getProperty("PDP.PolicyCollection");
+        if(properties.getProperty("PDP.Policy.Collection") != null) {
+            String className = properties.getProperty("PDP.Policy.Collection");
             Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
             collection = (PolicyCollection) clazz.newInstance();
 
@@ -435,16 +369,15 @@ public class EntitlementExtensionBuilder {
      * @param holder
      * @throws Exception
      */
-    private void populatePolicyStore(Properties properties, EntitlementConfigHolder holder)
+    private void populatePolicyStoreModule(Properties properties, EntitlementConfigHolder holder)
             throws Exception {
 
-        CarbonPolicyStore policyStore = null;
+        PolicyStoreManageModule policyStoreStore = null;
 
-        //only one policy collection can be there
-        if(properties.getProperty("PDP.Policy.Store") != null) {
-            String className = properties.getProperty("PDP.Policy.Store");
+        if(properties.getProperty("PDP.Policy.Store.Module") != null) {
+            String className = properties.getProperty("PDP.Policy.Store.Module");
             Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            policyStore = (CarbonPolicyStore) clazz.newInstance();
+            policyStoreStore = (PolicyStoreManageModule) clazz.newInstance();
 
             int j = 1;
             Properties storeProps = new Properties();
@@ -453,8 +386,209 @@ public class EntitlementExtensionBuilder {
                 storeProps.put(props[0], props[1]);
             }
 
-            policyStore.init(storeProps);
-            holder.addPolicyStore(policyStore, storeProps);
+            policyStoreStore.init(storeProps);
+            holder.addPolicyStore(policyStoreStore, storeProps);
+        }
+    }
+
+    /**
+     *
+     * @param properties
+     * @param holder
+     * @throws Exception
+     */
+    private void populatePolicyDataStore(Properties properties, EntitlementConfigHolder holder)
+            throws Exception {
+
+        PolicyDataStore policyDataStore = null;
+
+        if(properties.getProperty("PDP.Policy.Data.Store.Module") != null) {
+            String className = properties.getProperty("PDP.Policy.Data.Store.Module");
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            policyDataStore = (PolicyDataStore) clazz.newInstance();
+
+            int j = 1;
+            Properties storeProps = new Properties();
+            while (properties.getProperty(className + "." + j) != null) {
+                String[] props = properties.getProperty(className + "." + j++).split(",");
+                storeProps.put(props[0], props[1]);
+            }
+
+            policyDataStore.init(storeProps);
+            holder.addPolicyDataStore(policyDataStore, storeProps);
+        }
+    }
+
+    /**
+     *
+     * @param properties
+     * @param holder
+     * @throws Exception
+     */
+    private void populateEntitlementDataFinders(Properties properties, EntitlementConfigHolder holder)
+            throws Exception {
+        int i = 1;
+        EntitlementDataFinderModule metadata = null;
+
+        while (properties.getProperty("PAP.Entitlement.Data.Finder." + i) != null) {
+            String className = properties.getProperty("PAP.Entitlement.Data.Finder." + i++);
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            metadata = (EntitlementDataFinderModule) clazz.newInstance();
+
+            int j = 1;
+            Properties metadataProps = new Properties();
+            while (properties.getProperty(className + "." + j) != null) {
+                String value = properties.getProperty(className + "." + j++);
+                metadataProps.put(value.substring(0,value.indexOf(",")),
+                        value.substring(value.indexOf(",") + 1));
+            }
+
+            metadata.init(metadataProps);
+            holder.addPolicyEntitlementDataFinder(metadata, metadataProps);
+        }
+    }
+
+    /**
+     * 
+     * @param properties
+     * @param holder
+     * @throws Exception
+     */
+    private void populatePolicyPublishers(Properties properties, EntitlementConfigHolder holder)
+            throws Exception {
+
+        int i = 1;
+        PolicyPublisherModule publisher = null;
+
+        while (properties.getProperty("PAP.Policy.Publisher.Module." + i) != null) {
+            String className = properties.getProperty("PAP.Policy.Publisher.Module." + i++);
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            publisher = (PolicyPublisherModule) clazz.newInstance();
+
+            int j = 1;
+            Properties publisherProps = new Properties();
+            while (properties.getProperty(className + "." + j) != null) {
+                String[] props = properties.getProperty(className + "." + j++).split(",");
+                publisherProps.put(props[0], props[1]);
+            }
+
+            publisher.init(publisherProps);
+            holder.addPolicyPublisherModule(publisher, publisherProps);
+        }
+    }
+
+    /**
+     *
+     * @param properties
+     * @param holder
+     * @throws Exception
+     */
+    private void populatePolicyVersionModule(Properties properties, EntitlementConfigHolder holder)
+            throws Exception {
+
+        PolicyVersionManager versionManager= null;
+
+        if(properties.getProperty("PAP.Policy.Version.Module") != null) {
+            String className = properties.getProperty("PAP.Policy.Version.Module");
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            versionManager = (PolicyVersionManager) clazz.newInstance();
+
+            int j = 1;
+            Properties storeProps = new Properties();
+            while (properties.getProperty(className + "." + j) != null) {
+                String[] props = properties.getProperty(className + "." + j++).split(",");
+                storeProps.put(props[0], props[1]);
+            }
+
+            versionManager.init(storeProps);
+            holder.addPolicyVersionModule(versionManager, storeProps);
+        }
+
+    }
+
+    /**
+     *
+     * @param properties
+     * @param holder
+     * @throws Exception
+     */
+    private void populatePolicyPostPublishers(Properties properties, EntitlementConfigHolder holder)
+            throws Exception {
+
+        int i = 1;
+        PostPublisherModule postPublisherModule = null;
+
+        while (properties.getProperty("PAP.Policy.Post.Publisher.Module." + i) != null) {
+            String className = properties.getProperty("PAP.Policy.Post.Publisher.Module." + i++);
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            postPublisherModule = (PostPublisherModule) clazz.newInstance();
+
+            int j = 1;
+            Properties publisherProps = new Properties();
+            while (properties.getProperty(className + "." + j) != null) {
+                String[] props = properties.getProperty(className + "." + j++).split(",");
+                publisherProps.put(props[0], props[1]);
+            }
+
+            postPublisherModule.init(publisherProps);
+            holder.addPolicyPostPublisherModule(postPublisherModule, publisherProps);
+        }
+    }
+
+    /**
+     *
+     * @param properties
+     * @param holder
+     * @throws Exception
+     */
+    private void populatePublisherVerificationHandler(Properties properties, EntitlementConfigHolder holder)
+            throws Exception {
+
+        PublisherVerificationModule verificationModule= null;
+
+        if(properties.getProperty("PAP.Policy.Publisher.Verification.Handler") != null) {
+            String className = properties.getProperty("PAP.Policy.Publisher.Verification.Handler");
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            verificationModule = (PublisherVerificationModule) clazz.newInstance();
+
+            int j = 1;
+            Properties storeProps = new Properties();
+            while (properties.getProperty(className + "." + j) != null) {
+                String[] props = properties.getProperty(className + "." + j++).split(",");
+                storeProps.put(props[0], props[1]);
+            }
+
+            verificationModule.init(storeProps);
+            holder.addPublisherVerificationModule(verificationModule, storeProps);
+        }
+    }
+
+    /**
+     *
+     * @param properties
+     * @param holder
+     * @throws Exception
+     */
+    private void populateAdminNotificationHandlers(Properties properties, EntitlementConfigHolder holder)
+            throws Exception {
+
+        int i = 1;
+        EntitlementNotificationHandler handler = null;
+
+        while (properties.getProperty("PAP.Policy.Admin.Notification.Handler." + i) != null) {
+            String className = properties.getProperty("PAP.Policy.Admin.Notification.Handler." + i++);
+            Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            handler = (EntitlementNotificationHandler) clazz.newInstance();
+
+            int j = 1;
+            Properties publisherProps = new Properties();
+            while (properties.getProperty(className + "." + j) != null) {
+                String[] props = properties.getProperty(className + "." + j++).split(",");
+                publisherProps.put(props[0], props[1]);
+            }
+
+            handler.init(publisherProps);
+            holder.addNotificationHandler(handler, publisherProps);
         }
     }
 }
