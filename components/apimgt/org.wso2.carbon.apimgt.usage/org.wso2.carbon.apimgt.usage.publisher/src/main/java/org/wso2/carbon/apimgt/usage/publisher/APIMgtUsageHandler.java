@@ -31,10 +31,9 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.usage.agent.beans.APIManagerRequestStats;
 import org.wso2.carbon.usage.agent.util.PublisherUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.regex.Matcher;
@@ -81,7 +80,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String consumerKey = "";
             String username = "";
             if (authContext != null) {
-                consumerKey = authContext.getApiKey();
+                consumerKey = authContext.getConsumerKey();
                 username = authContext.getUsername();
             }
             String hostName = DataPublisherUtil.getHostAddress();
