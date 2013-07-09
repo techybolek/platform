@@ -191,12 +191,24 @@ public class PolicyConstants {
                 FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL,
                 FUNCTION_GREATER_AND_LESS_EQUAL, FUNCTION_GREATER_EQUAL_AND_LESS, FUNCTION_LESS,
                 FUNCTION_GREATER_AND_LESS, FUNCTION_GREATER, FUNCTION_GREATER_EQUAL, FUNCTION_LESS_EQUAL};
+
+        public static final String[] functions = new String[] {
+                FUNCTION_EQUAL, FUNCTION_EQUAL_MATCH_REGEXP,
+                FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL,
+                FUNCTION_IS_IN, FUNCTION_IS_IN_MATCH_REGEXP,
+                FUNCTION_AT_LEAST_ONE, FUNCTION_AT_LEAST_ONE_MATCH_REGEXP,
+                FUNCTION_SET_EQUALS, FUNCTION_SET_EQUALS_MATCH_REGEXP,
+                FUNCTION_GREATER_AND_LESS_EQUAL, FUNCTION_GREATER_EQUAL_AND_LESS, FUNCTION_LESS,
+                FUNCTION_GREATER_AND_LESS, FUNCTION_GREATER, FUNCTION_GREATER_EQUAL, FUNCTION_LESS_EQUAL};
     }
     
 
     public static final class PreFunctions {
 
         public static final String PRE_FUNCTION_NOT = "not";
+        public static final String PRE_FUNCTION = "is";
+
+        public static final String[] preFunctions = new String[] {PRE_FUNCTION, PRE_FUNCTION_NOT};
     }
 
     public static final class DataType {
@@ -218,6 +230,10 @@ public class PolicyConstants {
         public static final String DOUBLE = "http://www.w3.org/2001/XMLSchema#double";
 
         public static final String INT = "http://www.w3.org/2001/XMLSchema#integer";
+        
+        public static final String[] dataTypes = new String[]{
+                DAY_TIME_DURATION, YEAR_MONTH_DURATION, STRING, TIME, IP_ADDRESS, DATE_TIME,
+                DATE, DOUBLE, INT};
 
     }
 
@@ -237,6 +253,10 @@ public class PolicyConstants {
         public static final String DENY_UNLESS_PERMIT_ID = "urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-unless-permit";
 
         public static final String PERMIT_UNLESS_DENY_ID = "urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:permit-unless-deny";
+
+        public static final String[] algorithms = new String[]{
+                DENY_OVERRIDE_ID, PERMIT_OVERRIDE_ID, FIRST_APPLICABLE_ID, ORDER_PERMIT_OVERRIDE_ID,
+                ORDER_DENY_OVERRIDE_ID, DENY_UNLESS_PERMIT_ID, PERMIT_UNLESS_DENY_ID};
     }
 
     public static final class PolicyCombiningAlog {
@@ -257,6 +277,9 @@ public class PolicyConstants {
 
         public static final String ONLY_ONE_APPLICABLE_ID = "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:only-one-applicable";
 
+        public static final String[] algorithms = new String[]{
+                DENY_OVERRIDE_ID, PERMIT_OVERRIDE_ID, FIRST_APPLICABLE_ID, ORDER_PERMIT_OVERRIDE_ID,
+                ORDER_DENY_OVERRIDE_ID, DENY_UNLESS_PERMIT_ID, PERMIT_UNLESS_DENY_ID, ONLY_ONE_APPLICABLE_ID};
     }
 
 
@@ -294,6 +317,8 @@ public class PolicyConstants {
         public static final String PERMIT = "Permit";
 
         public static final String DENY = "Deny";
+
+        public static final String[] effect = new String[]{PERMIT, DENY};
     }
 
 }

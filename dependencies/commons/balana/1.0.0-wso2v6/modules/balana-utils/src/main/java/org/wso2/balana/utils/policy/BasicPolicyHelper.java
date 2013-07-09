@@ -1041,6 +1041,9 @@ public class BasicPolicyHelper {
      * @return
      */
     private static String processFunction(String function, String type){
+        if(type == null || type.trim().length() == 0){
+            type = PolicyConstants.STRING_DATA_TYPE;
+        }
         return  "urn:oasis:names:tc:xacml:1.0:function:" + getDataTypePrefix(type) + "-" + function;
     }
 

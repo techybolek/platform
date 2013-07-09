@@ -15,6 +15,7 @@
     <artifactId>org.wso2.balana.utils</artifactId>
     <version>1.0.0-wso2v6</version>
     <packaging>bundle</packaging>
+    <name>WSO2 Balana Utils</name>
     <description>
         This is the pom file that defines the build process for the WSO2 Balana Core. Balana is XACML
         open source project which is based on the sunxacml http://sunxacml.sourceforge.net/ under the license

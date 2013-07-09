@@ -50,16 +50,19 @@ public class PolicyBuilder {
      */
     public static PolicyBuilder getInstance() {
 
-        if (policyBuilder != null) {
+        if (policyBuilder == null) {
             synchronized (lock){
-                if (policyBuilder != null) {
+                if (policyBuilder == null) {
                     policyBuilder = new PolicyBuilder();
                 }
             }
         }
         return policyBuilder;
     }
-    
+
+    private PolicyBuilder() {
+    }
+
     public String build(BasicPolicyDTO basicPolicyDTO) throws PolicyBuilderException {
 
         Document doc = null;

@@ -37,6 +37,7 @@
 
     <modules>
         <module>modules/balana-core</module>
+	<module>modules/balana-utils</module>
         <module>modules/balana-samples</module>
         <module>modules/balana-documentation</module>
         <module>modules/balana-distribution</module>
