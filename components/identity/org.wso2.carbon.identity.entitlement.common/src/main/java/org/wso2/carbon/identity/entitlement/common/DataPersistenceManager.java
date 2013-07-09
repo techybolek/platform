@@ -28,15 +28,17 @@ public interface DataPersistenceManager {
      * Build and Load the policy editor data from persistence storage
      *
      * @return  PolicyEditorDataHolder
+     * @throws PolicyEditorException throws
      */
-    public PolicyEditorDataHolder buildDataHolder();
+    public PolicyEditorDataHolder buildDataHolder()  throws PolicyEditorException;
 
     /**
      * Persist policy editor data in to  persistence storage
      *
      * @param xmlConfig String
+     * @throws PolicyEditorException throws
      */
-    public void persistConfig(String xmlConfig);
+    public void persistConfig(String xmlConfig) throws PolicyEditorException;
 
     /**
      * Get policy editor data in to  persistence storage

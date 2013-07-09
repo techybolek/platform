@@ -64,21 +64,30 @@ public class PolicyEditorEngine {
 
     public PolicyEditorEngine(int tenantId) {
         this.tenantId = tenantId;
-        this.manager = new InMemoryPersistenceManager();
-        this.dataHolder = this.manager.buildDataHolder();
+        this.manager = new RegistryPersistenceManager();
+        try {
+            this.dataHolder = this.manager.buildDataHolder();
+        } catch (PolicyEditorException e) {
+            log.error("Error while building policy editor config", e);
+        }
     }
 
     public PolicyEditorDataHolder getPolicyEditorData(){
 
+        if(dataHolder == null){
+            dataHolder = new PolicyEditorDataHolder();
+        }
         return dataHolder;
     }
 
-    public void persistConfig(String xmlConfig){
+    public void persistConfig(String xmlConfig) throws PolicyEditorException{
+
         manager.persistConfig(xmlConfig);
         dataHolder = manager.buildDataHolder();
     }
 
     public String getConfig(){
+
         return manager.getConfig();
     }
 }
