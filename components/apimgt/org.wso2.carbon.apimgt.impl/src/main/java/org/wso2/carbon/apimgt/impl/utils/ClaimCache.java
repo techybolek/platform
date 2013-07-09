@@ -18,19 +18,21 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.wso2.carbon.caching.core.BaseCache;
-import org.wso2.carbon.caching.core.CacheEntry;
-import org.wso2.carbon.caching.core.CacheKey;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
-public class ClaimCache extends BaseCache {
+import javax.cache.Cache;
+import javax.cache.Caching;
+
+public class ClaimCache {
+    //TODO refactor caching implementation
 
     private static final String CLAIM_CACHE_NAME = "ClaimCache";
 
     private static final ClaimCache instance = new ClaimCache(CLAIM_CACHE_NAME);
 
     private ClaimCache(String cacheName) {
-        super(cacheName);
+
     }
 
     public static ClaimCache getInstance() {
@@ -38,18 +40,18 @@ public class ClaimCache extends BaseCache {
         return instance;
     }
 
-    @Override
-    public void addToCache(CacheKey key, CacheEntry entry) {
-        super.addToCache(key, entry);
+
+    public void addToCache(ClaimCacheKey key, UserClaims entry) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(CLAIM_CACHE_NAME).put(key,entry);
     }
 
-    @Override
-    public CacheEntry getValueFromCache(CacheKey key) {
-        return super.getValueFromCache(key);
+
+    public Cache.Entry getValueFromCache(ClaimCacheKey key) {
+        return (Cache.Entry)Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(CLAIM_CACHE_NAME).get(key);
     }
 
-    @Override
-    public void clearCacheEntry(CacheKey key) {
-        super.clearCacheEntry(key);
+
+    public void clearCacheEntry(ClaimCacheKey key) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(CLAIM_CACHE_NAME).removeAll();
     }
 }
