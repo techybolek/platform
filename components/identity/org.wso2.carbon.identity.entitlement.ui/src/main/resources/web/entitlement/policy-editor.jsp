@@ -140,7 +140,7 @@
     Set<String>  ruleFunctions = entitlementPolicyBean.getRuleFunctionMap().keySet();
 
     List<RuleDTO> ruleDTOs = entitlementPolicyBean.getRuleDTOs();
-    BasicTargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();
+    TargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();
     List<ObligationDTO> obligationDTOs = entitlementPolicyBean.getObligationDTOs();
     List<ExtendAttributeDTO>  extendAttributeDTOs = entitlementPolicyBean.getExtendAttributeDTOs();
 %>
@@ -338,7 +338,7 @@
             currentRuleCombineFunction =  rowDTO.getCombineFunction();
         }
 
-        BasicTargetDTO targetRuleDTO = ruleDTO.getTargetDTO();
+        TargetDTO targetRuleDTO = ruleDTO.getTargetDTO();
         
         if(targetRuleDTO != null  && targetRuleDTO.getRowDTOList() != null &&
                                                 targetRuleDTO.getRowDTOList().size() > 0){            
@@ -499,7 +499,7 @@ function doAdd() {
 function selectAttributesForRule(index) {
     preSubmit();
     if (doValidationPolicyNameOnly()) {
-        document.dataForm.action = "update-rule.jsp?nextPage=select_attribute_values&updateRule=true&ruleRowIndex="
+        document.dataForm.action = "update-rule.jsp?nextPage=select-attribute&updateRule=true&ruleRowIndex="
                 + index ;
         document.dataForm.submit();
     }
@@ -1083,7 +1083,7 @@ function preSubmit(){
 <%
 
     if(ruleDTO != null){
-        BasicTargetDTO ruleTargetDTO = ruleDTO.getTargetDTO();
+        TargetDTO ruleTargetDTO = ruleDTO.getTargetDTO();
         if(ruleTargetDTO != null && ruleTargetDTO.getRowDTOList() != null && ruleTargetDTO.getRowDTOList().size() > 0){
             List<RowDTO> rowDTOs = ruleTargetDTO.getRowDTOList();
             rowDTOs.remove(0);

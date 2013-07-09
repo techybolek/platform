@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.ui;
 
-import org.wso2.carbon.identity.entitlement.stub.dto.ModulePropertyDTO;
+import org.wso2.carbon.identity.entitlement.stub.dto.PublisherPropertyDTO;
 
 import java.util.Comparator;
 
@@ -30,8 +30,8 @@ public class PropertyDTOComparator implements Comparator {
     @Override
     public int compare(Object o1, Object o2) {
 
-        ModulePropertyDTO dto1 = (ModulePropertyDTO)o1;
-        ModulePropertyDTO dto2 = (ModulePropertyDTO)o2;
+        PublisherPropertyDTO dto1 = (PublisherPropertyDTO)o1;
+        PublisherPropertyDTO dto2 = (PublisherPropertyDTO)o2;
         if(dto1.getDisplayOrder() < dto2.getDisplayOrder()){
             return -1;
         } else if(dto1.getDisplayOrder() == dto2.getDisplayOrder()){

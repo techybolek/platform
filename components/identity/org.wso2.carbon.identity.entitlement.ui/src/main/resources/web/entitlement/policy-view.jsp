@@ -36,13 +36,10 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
 
 <%
-	String serverURL = CarbonUIUtil.getServerURL(config
-			.getServletContext(), session);
-	ConfigurationContext configContext = (ConfigurationContext) config
-			.getServletContext().getAttribute(
-					CarbonConstants.CONFIGURATION_CONTEXT);
-	String cookie = (String) session
-			.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+	String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+	ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
+                                        getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+	String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 	String forwardTo = null;
 	PolicyDTO dto = null;
 	String policyId = null;

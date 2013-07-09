@@ -78,8 +78,8 @@
     String selectedFinderModule;
     String attributeType;
 
-//    BasicTargetElementDTO basicTargetElementDTO = entitlementPolicyBean.getBasicTargetElementDTO();
-//    String resourceList  = basicTargetElementDTO.getResourceList();
+//    BasicTargetDTO basicTargetDTO = entitlementPolicyBean.getBasicTargetDTO();
+//    String resourceList  = basicTargetDTO.getResourceList();
 //    String[] resourceNames = resourceList.split(",");
 
     String ruleId = (String)request.getParameter("ruleId");

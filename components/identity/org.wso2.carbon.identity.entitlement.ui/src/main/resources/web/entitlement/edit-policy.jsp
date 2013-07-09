@@ -41,9 +41,9 @@
             PolicySetDTO policySetDTO = PolicyCreatorUtil.createPolicySetDTO(policyDTO.getPolicy());
             entitlementPolicyBean.setPolicySetDTO(policySetDTO);
             String[] policyMetaData = policyDTO.getBasicPolicyEditorMetaData();            
-            BasicTargetElementDTO basicTargetElementDTO = PolicyCreatorUtil.
-                    createBasicTargetElementDTO(policyMetaData);
-            entitlementPolicyBean.setBasicTargetElementDTO(basicTargetElementDTO);
+            BasicTargetDTO basicTargetDTO = PolicyCreatorUtil.
+                    createBasicTargetDTO(policyMetaData);
+            entitlementPolicyBean.setBasicTargetDTO(basicTargetDTO);
             forwardTo="create-policy-set.jsp";
         } else {
             PolicyElementDTO elementDTO = PolicyCreatorUtil.createPolicyElementDTO(policy);
@@ -52,12 +52,23 @@
             entitlementPolicyBean.setPolicyDescription(elementDTO.getPolicyDescription());
 
             List<RuleElementDTO> ruleElementDTOs = PolicyCreatorUtil.createRuleElementDTOs(policy);// TODO
-            String[] policyMetaData = policyDTO.getBasicPolicyEditorMetaData();
+            String[] policyEditorData = policyDTO.getBasicPolicyEditorMetaData();
 
             if(EntitlementPolicyConstants.BASIC_POLICY_EDITOR.equals(policyDTO.getPolicyEditor())){
 
+                BasicTargetDTO basicTargetElementDTO = PolicyCreatorUtil.
+                                                createBasicTargetDTO(policyEditorData);
+
+                List<BasicRuleDTO> basicRuleDTOs = PolicyCreatorUtil.createBasicRuleDTOs(policyEditorData);
+
+                entitlementPolicyBean.setBasicTargetDTO(basicTargetElementDTO);
+                entitlementPolicyBean.setBasicRuleDTOs(basicRuleDTOs);
+                forwardTo="basic-policy-editor.jsp";
+
+            } else if(EntitlementPolicyConstants.STANDARD_POLICY_EDITOR.equals(policyDTO.getPolicyEditor())){
+
                 try{
-                    BasicTargetDTO basicTargetDTO = new BasicTargetDTO();
+                    TargetDTO targetDTO = new TargetDTO();
                     List<RuleDTO> ruleDTOs = new ArrayList<RuleDTO>();
                     List<ObligationDTO> obligationDTOs = new ArrayList<ObligationDTO>();
 
@@ -69,11 +80,11 @@
                         ruleDTOs.add(ruleDTO);
                     }
 
-                    PolicyCreatorUtil.processTargetPolicyEditorData(basicTargetDTO, policyMetaData);
-                    PolicyCreatorUtil.processRulePolicyEditorData(ruleDTOs, policyMetaData);
-                    PolicyCreatorUtil.processObligationPolicyEditorData(obligationDTOs, policyMetaData);
+                    PolicyCreatorUtil.processTargetPolicyEditorData(targetDTO, policyEditorData);
+                    PolicyCreatorUtil.processRulePolicyEditorData(ruleDTOs, policyEditorData);
+                    PolicyCreatorUtil.processObligationPolicyEditorData(obligationDTOs, policyEditorData);
 
-                    entitlementPolicyBean.setTargetDTO(basicTargetDTO);
+                    entitlementPolicyBean.setTargetDTO(targetDTO);
                     entitlementPolicyBean.setRuleDTOs(ruleDTOs);
                     entitlementPolicyBean.setObligationDTOs(obligationDTOs);
                     entitlementPolicyBean.setEditPolicy(true);
@@ -82,10 +93,10 @@
                     forwardTo="policy-view.jsp?policyid=" + policyId;
                 }
             } else if (EntitlementPolicyConstants.SOA_POLICY_EDITOR.equals(policyDTO.getPolicyEditor())) {
-                BasicPolicyEditorDTO editorDTO = PolicyEditorUtil.createBasicPolicyEditorDTO(policyMetaData);
-                entitlementPolicyBean.setBasicPolicyEditorDTO(editorDTO);
+                SOAPolicyEditorDTO editorDTO = PolicyEditorUtil.createBasicPolicyEditorDTO(policyEditorData);
+                entitlementPolicyBean.setSOAPolicyEditorDTO(editorDTO);
                 entitlementPolicyBean.setEditPolicy(true);
-                forwardTo="basic-policy-editor.jsp";
+                forwardTo="rbac-policy-editor.jsp";
             } else {
                 forwardTo="policy-view.jsp?policyid=" + policyId;
             }

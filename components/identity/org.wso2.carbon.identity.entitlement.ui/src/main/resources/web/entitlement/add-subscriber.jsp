@@ -25,20 +25,20 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="java.util.ResourceBundle" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.ModuleDataHolder" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.ModulePropertyDTO" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.ModuleStatusHolder" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PropertyDTOComparator" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page
         import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.ClientUtil" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PublisherDataHolder" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PublisherPropertyDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.StatusHolder" %>
 
 <%
     String subscriberId;
-    ModuleDataHolder subscriber = null;
-    ModuleDataHolder[] dataHolders;
-    ModulePropertyDTO[] propertyDTOs = null;
+    PublisherDataHolder subscriber = null;
+    PublisherDataHolder[] dataHolders;
+    PublisherPropertyDTO[] propertyDTOs = null;
     String selectedModule = null;
     String forwardTo = null;
     boolean fromIndexPage = false;
@@ -71,7 +71,7 @@
     String viewString = request.getParameter("view");
     subscriberId = request.getParameter("subscriberId");
     String fromIndex = request.getParameter("fromIndexPage");
-    dataHolders = (ModuleDataHolder[]) session.
+    dataHolders = (PublisherDataHolder[]) session.
                     getAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_MODULE);
 
     if((viewString != null)){
@@ -104,16 +104,16 @@
             if(subscriber != null){
                 propertyDTOs = subscriber.getPropertyDTOs();
                 selectedModule = subscriber.getModuleName();
-                dataHolders = new ModuleDataHolder[]{subscriber};
+                dataHolders = new PublisherDataHolder[]{subscriber};
             }
         } else {
             if(dataHolders == null){
-                dataHolders = client.getPublisherModuleProperties();
+                dataHolders = client.getPublisherModuleData();
             }
             if(dataHolders != null){
                 session.setAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_MODULE, dataHolders);
                 if(selectedModule != null){
-                    for(ModuleDataHolder holder : dataHolders){
+                    for(PublisherDataHolder holder : dataHolders){
                         if(selectedModule.equals(holder.getModuleName())){
                             propertyDTOs = holder.getPropertyDTOs();
                             break;
@@ -241,7 +241,7 @@
             <table  class="styledLeft"  style="width: 100%;margin-top:10px;">
             <%
                 if(propertyDTOs != null){
-                    for(ModulePropertyDTO dto : propertyDTOs){
+                    for(PublisherPropertyDTO dto : propertyDTOs){
                         if(dto.getSecret()){
                             continue;
                         }
@@ -275,12 +275,12 @@
             <%
                 if(subscriber != null && subscriber.getStatusHolders() != null){
 
-                    ModuleStatusHolder[] dtos = subscriber.getStatusHolders();
+                    StatusHolder[] dtos = subscriber.getStatusHolders();
                     int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
                            numberOfPages = (int) Math.ceil((double) dtos.length / itemsPerPageInt);
-                    ModuleStatusHolder[] paginatedDTOs = ClientUtil.doModuleStatusHoldersPaging(pageNumberInt, dtos);
+                    StatusHolder[] paginatedDTOs = ClientUtil.doModuleStatusHoldersPaging(pageNumberInt, dtos);
 
-                    for(ModuleStatusHolder dto : paginatedDTOs){
+                    for(StatusHolder dto : paginatedDTOs){
                         if(dto != null && dto.getTimeInstance() != null &&
                                                                 dto.getKey() != null){
             %>
@@ -332,7 +332,7 @@
                             <option value="Selected" selected="selected">---Select----</option>
                             <%
                                 if(dataHolders != null){
-                                    for (ModuleDataHolder module : dataHolders) {
+                                    for (PublisherDataHolder module : dataHolders) {
                                         if(module.getModuleName().equals(selectedModule)) {
                             %>
                                 <option value="<%=selectedModule%>" selected="selected"><%=CharacterEncoder.getSafeText(selectedModule)%></option>
@@ -351,7 +351,7 @@
 
                 <%
                     if(propertyDTOs != null){
-                        for (ModulePropertyDTO dto : propertyDTOs) {
+                        for (PublisherPropertyDTO dto : propertyDTOs) {
                             if(dto.getDisplayName() == null){
                                 continue;
                             }

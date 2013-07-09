@@ -36,9 +36,7 @@
     	EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);        
         String[] selectedPolicies = request.getParameterValues("policies");
         for(String policyId :selectedPolicies){
-            dto.setPolicyId(policyId);
-            client.removePolicy(dto);
-
+            client.removePolicy(policyId);
         }
         forwardTo="index.jsp?region=region1&item=policy_menu";
     } catch (Exception e) {

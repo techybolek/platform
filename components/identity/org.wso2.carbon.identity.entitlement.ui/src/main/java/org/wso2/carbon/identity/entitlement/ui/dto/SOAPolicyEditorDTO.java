@@ -23,7 +23,7 @@ import java.util.*;
 /**
  *
  */
-public class BasicPolicyEditorDTO {
+public class SOAPolicyEditorDTO {
 
     private String policyId;
 
@@ -51,8 +51,8 @@ public class BasicPolicyEditorDTO {
 
     private Map<String, Set<String>> dataTypeMap = new HashMap<String, Set<String>>();
     
-    private List<BasicPolicyEditorElementDTO> basicPolicyEditorElementDTOs =
-                                                    new ArrayList<BasicPolicyEditorElementDTO>();
+    private List<SOAPolicyEditorElementDTO> SOAPolicyEditorElementDTOs =
+                                                    new ArrayList<SOAPolicyEditorElementDTO>();
 
     public String getPolicyId() {
         return policyId;
@@ -78,18 +78,18 @@ public class BasicPolicyEditorDTO {
         this.description = description;
     }
 
-    public List<BasicPolicyEditorElementDTO> getBasicPolicyEditorElementDTOs() {
-        return basicPolicyEditorElementDTOs;
+    public List<SOAPolicyEditorElementDTO> getSOAPolicyEditorElementDTOs() {
+        return SOAPolicyEditorElementDTOs;
     }
 
-    public void setBasicPolicyEditorElementDTOs(List<BasicPolicyEditorElementDTO>
-                                                                    basicPolicyEditorElementDTOs) {
-        this.basicPolicyEditorElementDTOs = basicPolicyEditorElementDTOs;
+    public void setSOAPolicyEditorElementDTOs(List<SOAPolicyEditorElementDTO>
+                                                      SOAPolicyEditorElementDTOs) {
+        this.SOAPolicyEditorElementDTOs = SOAPolicyEditorElementDTOs;
     }
 
-     public void setBasicPolicyEditorElementDTO(BasicPolicyEditorElementDTO
-                                                                    basicPolicyEditorElementDTO) {
-        this.basicPolicyEditorElementDTOs.add(basicPolicyEditorElementDTO);
+     public void setBasicPolicyEditorElementDTO(SOAPolicyEditorElementDTO
+                                                        SOAPolicyEditorElementDTO) {
+        this.SOAPolicyEditorElementDTOs.add(SOAPolicyEditorElementDTO);
     }
 
     public String getUserAttributeValue() {

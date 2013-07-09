@@ -59,10 +59,15 @@
 
     //new
     List<RuleDTO> ruleDTOs = entitlementPolicyBean.getRuleDTOs();
-    BasicTargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();
+    TargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();
     List<ObligationDTO> obligationDTOs = entitlementPolicyBean.getObligationDTOs();
 
-    ///
+    ///////////////////////////////////////////////////
+    
+    List<BasicRuleDTO> basicRuleDTOs = entitlementPolicyBean.getBasicRuleDTOs();
+    BasicTargetDTO basicTargetDTO = entitlementPolicyBean.getBasicTargetDTO();
+    
+    ///////////////////////////////////////////////
 
     String policyName = entitlementPolicyBean.getPolicyName();
     String algorithmName = entitlementPolicyBean.getAlgorithmName();
@@ -92,7 +97,9 @@
             policyDTO = new PolicyDTO();
         }
 
-        if (ruleDTOs != null && ruleDTOs.size() > 0 || targetDTO != null){
+        if(basicRuleDTOs != null && basicTargetDTO != null){
+            policy = policyCreator.createBasicPolicy(policyElement, basicRuleDTOs, basicTargetDTO);
+        } else if (ruleDTOs != null && ruleDTOs.size() > 0 || targetDTO != null){
             policyMetaData = PolicyEditorUtil.processPolicyData(targetDTO, ruleDTOs, obligationDTOs,
                                                             ruleElementOrder, entitlementPolicyBean);
             policy = policyCreator.createBasicPolicy(policyElement, ruleDTOs, targetDTO, obligationDTOs);
@@ -102,8 +109,8 @@
             }
 
             //create policy meta data that helps to edit the policy using basic editor
-//            policyMetaData = PolicyCreatorUtil.createPolicyMetaData(basicTargetElementDTO,
-//                                                                    basicRuleElementDTOs, ruleElementOrder);
+//            policyMetaData = PolicyCreatorUtil.generateBasicPolicyEditorData(basicTargetDTO,
+//                                                                    basicRuleDTOs, ruleElementOrder);
 //            policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
 //            if(policyMetaData != null){
 //                policyDTO.setBasicPolicyEditorMetaData(policyMetaData);

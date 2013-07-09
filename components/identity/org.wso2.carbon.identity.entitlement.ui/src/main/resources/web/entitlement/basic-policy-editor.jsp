@@ -15,107 +15,359 @@
 * limitations under the License.
 */
 -->
-
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicPolicyEditorDTO" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicPolicyEditorElementDTO" %>
+<%@ page import="java.util.ResourceBundle" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.PolicyEditorEngine" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="java.util.HashSet" %>
+<%@ page import="org.wso2.balana.utils.policy.dto.BasicRuleDTO" %>
+<%@ page import="org.wso2.balana.utils.policy.dto.BasicTargetDTO" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
-<jsp:useBean id="entitlementPolicyBean"
-             type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
+<jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
-<jsp:setProperty name="entitlementPolicyBean" property="*"/>
+<jsp:setProperty name="entitlementPolicyBean" property="*" />
 
 <%
-    BasicPolicyEditorDTO policyEditorDTO = entitlementPolicyBean.getBasicPolicyEditorDTO();
-    List<BasicPolicyEditorElementDTO> elementDTOList = null;
-    String selectedPolicyApplied = request.getParameter("policyApplied");
-    String policyId = request.getParameter("policyId");
-    String policyDescription = request.getParameter("policyDescription");
+    BasicRuleDTO basicRuleDTO = null;
+    PolicyEditorDataHolder holder = PolicyEditorEngine.getInstance().getPolicyEditorData();
+    Set<String> functionIds = holder.getRuleFunctions();
+    Set<String> preFunctionIds = holder.getPreFunctionMap().keySet();
+    Set<String> targetFunctionIds = holder.getTargetFunctions();
+    Set<String> ruleEffects = holder.getRuleEffectMap().keySet();
+    Set<String> subjectIds =  holder.getCategoryAttributeIdMap().get(PolicyEditorConstants.SOA_CATEGORY_SUBJECT);
+    Set<String> environmentIds = holder.getCategoryAttributeIdMap().get(PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT);
+    Set<String> algorithmNames = holder.getRuleCombiningAlgorithms().keySet();
+    Set<String> availableCategories = holder.getCategoryMap().keySet();
 
-    String[] policyApplies  = new String[]{PolicyEditorConstants.SOA_CATEGORY_RESOURCE ,
-            PolicyEditorConstants.SOA_CATEGORY_USER, PolicyEditorConstants.SOA_CATEGORY_ACTION,
-            PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT};
-    
-    Set<String> userAttributeIds = entitlementPolicyBean.getAttributeIdMap().keySet();
-    // adding entry if attrbutes ids are null or empty. we want to show something in UI
-    if(userAttributeIds != null){
-        userAttributeIds = new HashSet<String>(userAttributeIds);
-        userAttributeIds.add("User Name");
-    } else {
-        userAttributeIds = new HashSet<String>();
-        userAttributeIds.add("User Name");
+    String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+
+    List<BasicRuleDTO> basicRuleDTOs = entitlementPolicyBean.getBasicRuleDTOs();
+    BasicTargetDTO basicTargetDTO = entitlementPolicyBean.getBasicTargetDTO();
+
+    String selectedAttributeDataType = request.getParameter("selectedAttributeDataType");
+    String selectedAttributeId = request.getParameter("selectedAttributeId");
+    String category = request.getParameter("category");
+
+    String ruleId = CharacterEncoder.getSafeText(request.getParameter("ruleId"));
+    if(ruleId != null && ruleId.trim().length() > 0 && !ruleId.trim().equals("null") ) {
+        basicRuleDTO = entitlementPolicyBean.getBasicRuleElement(ruleId);
     }
 
-    String[] envAttributeIds  = new String[] {PolicyEditorConstants.AttributeId.ENV_DATE,
-            PolicyEditorConstants.AttributeId.ENV_DATE_TIME, PolicyEditorConstants.AttributeId.ENV_TIME,
-            PolicyEditorConstants.AttributeId.ENV_IP, PolicyEditorConstants.AttributeId.ENV_DOMAIN };
+    // Why null  TODO
+    if("null".equals(selectedAttributeId)){
+        selectedAttributeId = null;
+    }
 
-    //String[] environmentIds = new String[]{"between", "from ip-address", "on date"};
-    String[] operationTypes = new String[]{PolicyEditorConstants.PreFunctions.CAN_DO,
-                                                PolicyEditorConstants.PreFunctions.CAN_NOT_DO};
-    String[] functions = new String[]{};
+    if("null".equals(selectedAttributeDataType)){
+        selectedAttributeDataType = null;
+    }
+
+    String selectedAttributeNames = "";
+
+    String selectedCategory = request.getParameter("policyApplied");
+    if(selectedCategory == null || selectedCategory.trim().length() == 0){
+        selectedCategory =  PolicyEditorConstants.SOA_CATEGORY_RESOURCE;
+    }
+
+    String selectedSubjectNames = "";
+    String selectedResourceNames = "";
+    String selectedActionNames = "";
+    String selectedEnvironmentNames = "";
+    String selectedResourceId="";
+    String selectedResourceDataType="";
+    String selectedSubjectId="";
+    String selectedSubjectDataType="";
+    String selectedActionId="";
+    String selectedActionDataType="";
+    String selectedEnvironmentId="";
+    String selectedEnvironmentDataType="";
+
+    String resourceNames = "";
+    String environmentNames = "";
+    String subjectNames = "";
+    String actionNames = "";
+    String functionOnResources = "";
+    String functionOnSubjects = "";
+    String functionOnActions = "";
+    String functionOnEnvironment = "";
+    String preFunctionOnResources = "";
+    String preFunctionOnSubjects = "";
+    String preFunctionOnActions = "";
+    String preFunctionOnEnvironment = "";
+    String resourceDataType = "";
+    String subjectDataType = "";
+    String actionDataType = "";
+    String environmentDataType = "";
+    String resourceId= "";
+    String subjectId = "";
+    String actionId = "";
+    String environmentId = "";
+    String ruleDescription = "";
+    String ruleEffect = "";
+
+    String resourceNamesTarget = "";
+    String environmentNamesTarget = "";
+    String subjectNamesTarget = "";
+    String actionNamesTarget = "";
+
+    String functionOnResourcesTarget = "";
+    String functionOnSubjectsTarget = "";
+    String functionOnActionsTarget = "";
+    String functionOnEnvironmentTarget = "";
+
+    String preFunctionOnSubjectsTarget = "";
+    String preFunctionOnActionsTarget = "";
+    String preFunctionOnEnvironmentTarget = "";
+    String preFunctionOnResourcesTarget = "";
+
+    String resourceDataTypeTarget = "";
+    String subjectDataTypeTarget = "";
+    String actionDataTypeTarget = "";
+    String environmentDataTypeTarget = "";
+
+    String resourceIdTarget = "";
+    String subjectIdTarget = "";
+    String actionIdTarget = "";
+    String environmentIdTarget = "";
+
+    int noOfSelectedAttributes = 1;
+    /**
+     *  Get posted resources from jsp pages and put then in to a String object
+     */
+    while(true) {
+        String attributeName  = request.getParameter("attributeValue" + noOfSelectedAttributes);
+        if (attributeName == null || attributeName.trim().length() < 1) {
+            break;
+        }
+        if(selectedAttributeNames.equals("")) {
+            selectedAttributeNames = attributeName.trim();
+        } else {
+            selectedAttributeNames = selectedAttributeNames + "," + attributeName.trim();
+        }
+        noOfSelectedAttributes ++;
+    }
 
 
+    if(category != null){
+        if (EntitlementPolicyConstants.RESOURCE_ELEMENT.equals(category)){
+            selectedResourceNames = selectedAttributeNames;
+            selectedResourceId = selectedAttributeId;
+            selectedResourceDataType = selectedAttributeDataType;
+        } else if (EntitlementPolicyConstants.SUBJECT_ELEMENT.equals(category)){
+            selectedSubjectNames = selectedAttributeNames;
+            selectedSubjectId = selectedAttributeId;
+            selectedSubjectDataType = selectedAttributeDataType;
+        } else if (EntitlementPolicyConstants.ACTION_ELEMENT.equals(category)){
+            selectedActionNames = selectedAttributeNames;
+            selectedActionId = selectedAttributeId;
+            selectedActionDataType = selectedAttributeDataType;
+        } else if (EntitlementPolicyConstants.ENVIRONMENT_ELEMENT.equals(category)){
+            selectedEnvironmentNames = selectedAttributeNames;
+            selectedEnvironmentId = selectedAttributeId;
+            selectedEnvironmentDataType = selectedAttributeDataType;
+        }
+    }
+    /**
+     * Assign current BasicRule Object Values to variables to show on UI
+     */
+    if(basicRuleDTO != null){
 
-    String selectedRuleUserAttributeId = null;
-    String selectedRuleUserAttributeValue = null;
-    String selectedRuleActionValue = null;
-    String selectedRuleResourceValue = null;
-    String selectedRuleEnvironmentValue= null;
-    String selectedRuleEnvironmentId= null;
-    String selectedRuleOperationType= null;
-    String selectedRuleResourceFunction = null;
-    String selectedRuleUserFunction = null;
-    String selectedRuleActionFunction = null;
+        ruleEffect = basicRuleDTO.getRuleEffect();
+        ruleId = basicRuleDTO.getRuleId();
+        ruleDescription = basicRuleDTO.getRuleDescription();
 
+        resourceNames =  basicRuleDTO.getResourceList();
+        subjectNames = basicRuleDTO.getSubjectList();
+        actionNames = basicRuleDTO.getActionList();
+        environmentNames = basicRuleDTO.getEnvironmentList();
 
+        functionOnActions = basicRuleDTO.getFunctionOnActions();
+        functionOnResources = basicRuleDTO.getFunctionOnResources();
+        functionOnSubjects = basicRuleDTO.getFunctionOnSubjects();
+        functionOnEnvironment = basicRuleDTO.getFunctionOnEnvironment();
 
-    String selectedUserAttributeId = null;
-    String selectedUserAttributeValue = null;
-    String selectedActionValue = null;
-    String selectedResourceValue = null;
-    String selectedEnvironmentValue= null;
-    String selectedEnvironmentId= null;
-
-    String selectedFunction = null;
-
-    if(policyEditorDTO != null){
-        policyId = policyEditorDTO.getPolicyId();
-        policyDescription = policyEditorDTO.getDescription();
-        selectedFunction = policyEditorDTO.getFunction();
-        selectedUserAttributeId = policyEditorDTO.getUserAttributeId();
-        selectedUserAttributeValue = policyEditorDTO.getUserAttributeValue();
-        selectedActionValue= policyEditorDTO.getActionValue();
-        selectedEnvironmentValue= policyEditorDTO.getEnvironmentValue();
-        selectedResourceValue = policyEditorDTO.getResourceValue();
-        if(selectedPolicyApplied == null || selectedPolicyApplied.trim().length() == 0){
-            selectedPolicyApplied = policyEditorDTO.getAppliedCategory();
+        if(selectedResourceDataType != null && selectedResourceDataType.trim().length() > 0){
+            resourceDataType = selectedResourceDataType;
+        } else {
+            resourceDataType = basicRuleDTO.getResourceDataType();
         }
 
-        elementDTOList = policyEditorDTO.getBasicPolicyEditorElementDTOs();
+        if(selectedSubjectDataType != null && selectedSubjectDataType.trim().length() > 0){
+            subjectDataType = selectedSubjectDataType;
+        } else {
+            subjectDataType = basicRuleDTO.getSubjectDataType();
+        }
 
-        if(elementDTOList != null && elementDTOList.size() > 0){
-            BasicPolicyEditorElementDTO elementDTO = elementDTOList.get(0);
-            if(elementDTO != null){
-                selectedRuleActionValue = elementDTO.getActionValue();
-                selectedRuleUserAttributeId = elementDTO.getUserAttributeId();
-                selectedRuleUserAttributeValue = elementDTO.getUserAttributeValue();
-                selectedRuleResourceValue = elementDTO.getResourceValue();
-                selectedRuleEnvironmentValue= elementDTO.getEnvironmentValue();
-                selectedRuleEnvironmentId= elementDTO.getEnvironmentId();
-                selectedRuleOperationType= elementDTO.getOperationType();
-                selectedRuleResourceFunction = elementDTO.getFunctionOnResources();
-                selectedRuleUserFunction = elementDTO.getFunctionOnUsers();
+        if(selectedActionDataType != null && selectedActionDataType.trim().length() > 0){
+            actionDataType = selectedActionDataType;
+        } else {
+            actionDataType = basicRuleDTO.getActionDataType();
+        }
+
+        if(selectedEnvironmentDataType != null && selectedEnvironmentDataType.trim().length() > 0){
+            environmentDataType = selectedEnvironmentDataType;
+        } else {
+            environmentDataType = basicRuleDTO.getEnvironmentDataType();
+        }
+
+        if(selectedResourceId != null && selectedResourceId.trim().length() > 0){
+            resourceId = selectedResourceId;
+        } else {
+            resourceId = basicRuleDTO.getResourceId();
+        }
+
+        if(selectedSubjectId != null && selectedSubjectId.trim().length() > 0){
+            subjectId = selectedSubjectId;
+        } else {
+            subjectId = basicRuleDTO.getSubjectId();
+        }
+
+        if(selectedActionId != null && selectedActionId.trim().length() > 0){
+            actionId = selectedActionId;
+        } else {
+            actionId = basicRuleDTO.getActionId();
+        }
+
+        if(selectedEnvironmentId != null && selectedEnvironmentId.trim().length() > 0){
+            environmentId = selectedEnvironmentId;
+        } else {
+            environmentId = basicRuleDTO.getEnvironmentId();
+        }
+
+        if(selectedResourceNames != null && selectedResourceNames.trim().length() > 0){
+            if(resourceNames != null && resourceNames.trim().length() > 0){
+                resourceNames = resourceNames + ","  + selectedResourceNames;
+            } else {
+                resourceNames = selectedResourceNames;
+            }
+        }
+
+        if(selectedSubjectNames != null && selectedSubjectNames.trim().length() > 0){
+            if(subjectNames != null && subjectNames.trim().length() > 0){
+                subjectNames = subjectNames + ","  + selectedSubjectNames;
+            } else {
+                subjectNames = selectedSubjectNames;
+            }
+        }
+
+        if(selectedActionNames != null && selectedActionNames.trim().length() > 0){
+            if(actionNames != null && actionNames.trim().length() > 0){
+                actionNames = actionNames + ","  + selectedActionNames;
+            } else {
+                actionNames = selectedActionNames;
+            }
+        }
+
+        if(selectedEnvironmentNames != null && selectedEnvironmentNames.trim().length() > 0){
+            if(environmentNames != null && environmentNames.trim().length() > 0){
+                environmentNames = environmentNames + ","  + selectedEnvironmentNames;
+            } else {
+                environmentNames = selectedEnvironmentNames;
             }
         }
 
     }
 
+    /**
+     * Assign current BasicTarget Object Values to variables to show on UI.
+     */
+    if(basicTargetDTO != null){
+
+        resourceNamesTarget =  basicTargetDTO.getResourceList();
+        subjectNamesTarget = basicTargetDTO.getSubjectList();
+        actionNamesTarget = basicTargetDTO.getActionList();
+        environmentNamesTarget = basicTargetDTO.getEnvironmentList();
+
+        functionOnActionsTarget = basicTargetDTO.getFunctionOnActions();
+        functionOnResourcesTarget = basicTargetDTO.getFunctionOnResources();
+        functionOnSubjectsTarget = basicTargetDTO.getFunctionOnSubjects();
+        functionOnEnvironmentTarget = basicTargetDTO.getFunctionOnEnvironment();
+
+        resourceDataTypeTarget  = basicTargetDTO.getResourceDataType();
+        subjectDataTypeTarget  = basicTargetDTO.getSubjectDataType();
+        actionDataTypeTarget  = basicTargetDTO.getActionDataType();
+        environmentDataTypeTarget  = basicTargetDTO.getEnvironmentDataType();
+
+        resourceIdTarget = basicTargetDTO.getResourceId();
+        subjectIdTarget = basicTargetDTO.getSubjectId();
+        actionIdTarget = basicTargetDTO.getActionId();
+        environmentIdTarget = basicTargetDTO.getEnvironmentId();
+
+        if(basicRuleDTO == null) {
+            if(selectedResourceNames != null && selectedResourceNames.trim().length() > 0){
+                if(resourceNamesTarget != null && resourceNamesTarget.trim().length() > 0){
+                    resourceNamesTarget = resourceNamesTarget + ","  + selectedResourceNames;
+                } else {
+                    resourceNamesTarget = selectedResourceNames;
+                }
+            }
+
+            if(selectedSubjectNames != null && selectedSubjectNames.trim().length() > 0){
+                if(subjectNamesTarget != null && subjectNamesTarget.trim().length() > 0){
+                    subjectNamesTarget = subjectNamesTarget + ","  + selectedSubjectNames;
+                } else {
+                    subjectNamesTarget = selectedSubjectNames;
+                }
+            }
+
+            if(selectedActionNames != null && selectedActionNames.trim().length() > 0){
+                if(actionNamesTarget != null && actionNamesTarget.trim().length() > 0){
+                    actionNamesTarget = actionNamesTarget + ","  + selectedActionNames;
+                } else {
+                    actionNamesTarget = selectedActionNames;
+                }
+            }
+
+            if(selectedEnvironmentNames != null && selectedEnvironmentNames.trim().length() > 0){
+                if(environmentNamesTarget != null && environmentNamesTarget.trim().length() > 0){
+                    environmentNamesTarget = environmentNamesTarget + ","  + selectedEnvironmentNames;
+                } else {
+                    environmentNamesTarget = selectedEnvironmentNames;
+                }
+            }
+
+            if(selectedResourceDataType != null && selectedResourceDataType.trim().length() > 0){
+                resourceDataTypeTarget = selectedResourceDataType;
+            }
+
+            if(selectedSubjectDataType != null && selectedSubjectDataType.trim().length() > 0){
+                subjectDataTypeTarget  = selectedSubjectDataType;
+            }
+
+            if(selectedActionDataType != null && selectedActionDataType.trim().length() > 0){
+                actionDataTypeTarget  = selectedActionDataType;
+            }
+
+            if(selectedEnvironmentDataType != null && selectedEnvironmentDataType.trim().length() > 0){
+                environmentDataTypeTarget  = selectedEnvironmentDataType;
+            }
+
+            if(selectedResourceId != null && selectedResourceId.trim().length() > 0){
+                resourceIdTarget = selectedResourceId;
+            }
+
+            if(selectedSubjectId != null && selectedSubjectId.trim().length() > 0){
+                subjectIdTarget = selectedSubjectId;
+            }
+
+            if(selectedActionId != null && selectedActionId.trim().length() > 0){
+                actionIdTarget = selectedActionId;
+            }
+
+            if(selectedEnvironmentId != null && selectedEnvironmentId.trim().length() > 0){
+                environmentIdTarget = selectedEnvironmentId;
+            }
+        }
+    }
+
 %>
+
 
 
 <fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
@@ -123,27 +375,60 @@
         label="create.basic.policy"
         resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
         topPage="false"
-        request="<%=request%>"/>
+        request="<%=request%>" />
 <script type="text/javascript" src="../carbon/admin/js/breadcrumbs.js"></script>
 <script type="text/javascript" src="../carbon/admin/js/cookies.js"></script>
 <script type="text/javascript" src="resources/js/main.js"></script>
 <!--Yahoo includes for dom event handling-->
 <script src="../yui/build/yahoo-dom-event/yahoo-dom-event.js" type="text/javascript"></script>
-<script src="../entitlement/js/policy-editor.js" type="text/javascript"></script>
+<script src="../entitlement/js/create-basic-policy.js" type="text/javascript"></script>
 <link href="../entitlement/css/entitlement.css" rel="stylesheet" type="text/css" media="all"/>
 
-
-
-
 <script type="text/javascript">
-    jQuery(document).ready(function(){
-        jQuery('#policyTypeTitle').html("Select a <strong>"+jQuery('#policyApplied').val() + "</strong> to apply policy");
-        jQuery('#policyTypeTitleSub').html("Add rules to <strong>"+jQuery('#policyApplied').val()+"</strong>");
-    });
+
+    function preSubmit(){
+
+        var ruleElementOrder = new Array();
+        var tmp = jQuery("#dataTable tbody tr input");
+        for (var j = 0; j < tmp.length; j++) {
+            ruleElementOrder.push(tmp[j].value);
+        }
+        jQuery('#dataForm > tbody:last').append('<tr><td><input type="hidden" name="ruleElementOrder" id="ruleElementOrder" value="' + ruleElementOrder +'"/></td></tr>') ;
+    }
+
+
+    function submitForm() {
+        if(doValidationPolicyNameOnly()){
+            preSubmit();
+            document.dataForm.action = "basic-policy-update.jsp?nextPage=basic-policy-finish";
+            document.dataForm.submit();
+        }
+    }
+
+    function doCancel() {
+        location.href  = 'index.jsp';
+    }
+
+    function doValidation() {
+
+        var value = document.getElementsByName("policyName")[0].value;
+        if (value == '') {
+            CARBON.showWarningDialog('<fmt:message key="policy.name.is.required"/>');
+            return false;
+        }
+
+        value = document.getElementsByName("ruleId")[0].value;
+        if (value == '') {
+            CARBON.showWarningDialog('<fmt:message key="rule.id.is.required"/>');
+            return false;
+        }
+
+        return true;
+    }
 
     function doValidationPolicyNameOnly() {
 
-        var value = document.getElementsByName("policyId")[0].value;
+        var value = document.getElementsByName("policyName")[0].value;
         if (value == '') {
             CARBON.showWarningDialog('<fmt:message key="policy.name.is.required"/>');
             return false;
@@ -152,905 +437,953 @@
         return true;
     }
 
-    function doSubmit(){
-        if(doValidationPolicyNameOnly()){
+    function doUpdate(){
+        if(doValidation()){
             preSubmit();
-            document.dataForm.action = "basic-policy-finish.jsp";
+            document.dataForm.action = "basic-policy-update.jsp?nextPage=basic-policy-editor&completedRule=true&updateRule=true";
             document.dataForm.submit();
         }
     }
 
-    function preSubmit(){
-
-        var userRuleTable = "";
-        var actionRuleTable = "";
-        var resourceRuleTable = "";
-        var environmentRuleTable = "";
-
-        if(document.getElementById('userRuleTable') != null){
-            userRuleTable =  jQuery(document.getElementById('userRuleTable').rows[document.
-                        getElementById('userRuleTable').rows.length-1]).attr('data-value');
+    function doCancelRule(){
+        if(doValidation()){
+            preSubmit();
+            document.dataForm.action = "basic-policy-update.jsp?nextPage=basic-policy-editor&ruleId=";
+            document.dataForm.submit();
         }
+    }
 
-        if(document.getElementById('resourceRuleTable') != null){
-            resourceRuleTable = jQuery(document.getElementById('resourceRuleTable').rows[document.
-                    getElementById('resourceRuleTable').rows.length-1]).attr('data-value');
+    function deleteRule(ruleId) {
+        preSubmit();
+        document.dataForm.action = "basic-policy-update.jsp?nextPage=delete-rule-entry&ruleId=" + ruleId;
+        document.dataForm.submit();
+    }
+
+    function editRule(ruleId){
+        preSubmit();
+        document.dataForm.action = "basic-policy-update.jsp?nextPage=basic-policy-editor&editRule=true&ruleId=" + ruleId;
+        document.dataForm.submit();
+    }
+
+    function doAdd() {
+        if(doValidation()){
+            preSubmit();
+            document.dataForm.action = "basic-policy-update.jsp?nextPage=basic-policy-editor&completedRule=true";
+            document.dataForm.submit();
         }
+    }
 
-        if(document.getElementById('environmentRuleTable') != null){
-            environmentRuleTable = jQuery(document.getElementById('environmentRuleTable').rows[document.
-                    getElementById('environmentRuleTable').rows.length-1]).attr('data-value');
+    function selectAttributes(attributeType){
+        if(doValidationPolicyNameOnly()){
+            preSubmit();
+            document.dataForm.action = "basic-policy-update.jsp?nextPage=select-attribute-values&updateRule=true&category="
+                    + attributeType + "&returnPage=basic-policy-editor.jsp";
+            document.dataForm.submit();
         }
+    }
 
-        if(document.getElementById('actionRuleTable') != null){
-            actionRuleTable = jQuery(document.getElementById('actionRuleTable').rows[document.
-                    getElementById('actionRuleTable').rows.length-1]).attr('data-value');
+
+    function selectAttributesForTarget(attributeType){
+        if(doValidationPolicyNameOnly()){
+            preSubmit();
+            document.dataForm.action = "basic-policy-update.jsp?nextPage=select-attribute-values&ruleId=&attributeType="
+                    + attributeType  + "&returnPage=basic-policy-editor.jsp";
+            document.dataForm.submit();
         }
-
-        jQuery('#mainTable > tbody:last').append('<tr><td><input type="hidden" name="maxUserRow" id="maxUserRow" value="' + userRuleTable +'"/></td></tr>') ;
-        jQuery('#mainTable > tbody:last').append('<tr><td><input type="hidden" name="maxResourceRow" id="maxResourceRow" value="' + resourceRuleTable +'"/></td></tr>') ;
-        jQuery('#mainTable > tbody:last').append('<tr><td><input type="hidden" name="maxEnvironmentRow" id="maxEnvironmentRow" value="' + environmentRuleTable +'"/></td></tr>') ;
-        jQuery('#mainTable > tbody:last').append('<tr><td><input type="hidden" name="maxActionRow" id="maxActionRow" value="' + actionRuleTable +'"/></td></tr>') ;
     }
 
-    function doCancel(){
-        location.href = "index.jsp";
-    }
 
-    function removeRow(link){
-        link.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.
-                removeChild(link.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
-    }
-    
-    function createNewResourceRuleRow() {
-        var rowIndex =  jQuery(document.getElementById('resourceRuleTable').rows[document.
-                            getElementById('resourceRuleTable').rows.length-1]).attr('data-value');
-        var index = parseInt(rowIndex, 10) + 1;
-        jQuery('#resourceRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr><td style="white-space:nowrap;">Child resource</td><td>User</td><td></td><td>Action</td><td>Enironment</td><td></td></tr>' +
-            '<td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '"  /><% }%> </td>' +
-            '<td><select id="userRuleAttributeId_'  + index + '"  name="userRuleAttributeId_'  + index + '"  ><%for (String userAttribute : userAttributeIds) {if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-            '<td><%if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  value="<%=selectedRuleUserAttributeValue%>"/><%} else {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  /><%}%></td>' +
-            '<td><%if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  value="<%=selectedRuleActionValue%>"/><%} else {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  /><%}%></td>' +
-            '<td><select id="environmentRuleId_'  + index + '"  name="environmentRuleId_'  + index + '"  ><%for (String userAttribute : envAttributeIds) {if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-            '<td><%if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  value="<%=selectedRuleEnvironmentValue%>"/><%} else {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  /><%}%></td>' +
-            '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-            '</tr></table></td></tr>');
-    }
-    
-
-    function createNewUserRuleRow() {
-        var rowIndex =  jQuery(document.getElementById('userRuleTable').rows[document.
-                            getElementById('userRuleTable').rows.length-1]).attr('data-value');
-        var index = parseInt(rowIndex, 10) + 1;
-        jQuery('#userRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr></tr><tr><td> Action </td>' +
-            '<td><%if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {%><input type="text" name="actionRuleValue_'  + index + '" id="actionRuleValue_'  + index + '" value="<%=selectedRuleActionValue%>"/><%} else {%><input type="text" name="actionRuleValue_'  + index + '" id="actionRuleValue_'  + index + '" /><%}%></td>' +
-            '<td> Resource </td>' +
-            '<td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '" id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '" id="resourceRuleValue_'  + index + '" /><%}%></td>' +
-            '<td> Environment </td>' +
-            '<td><select id="environmentRuleId_'  + index + '"  name="environmentRuleId_'  + index + '"  ><%for (String userAttribute : envAttributeIds) {if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-            '<td><%if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  value="<%=selectedRuleEnvironmentValue%>"/><%} else {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  /><%}%></td>' +
-            '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-            '</tr><tr></tr></table></td></tr>');
-    }
-
-    function createNewActionRuleRow() {
-        var rowIndex =  jQuery(document.getElementById('actionRuleTable').rows[document.
-                            getElementById('actionRuleTable').rows.length-1]).attr('data-value');
-        var index = parseInt(rowIndex, 10) + 1;
-        jQuery('#actionRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr></tr><tr><td>Resource</td>' +
-                '<td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '"  /><% }%> </td>' +
-                '<td>User</td>' +
-                '<td><select id="userRuleAttributeId_'  + index + '" name="userRuleAttributeId_'  + index + '" ><%for (String userAttribute : userAttributeIds) {if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {%><option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                '<td><%if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {%><input type="text" name="userRuleAttributeValue_'  + index + '" id="userRuleAttributeValue_'  + index + '" value="<%=selectedRuleUserAttributeValue%>"/><% } else {%><input type="text" name="userRuleAttributeValue_'  + index + '" id="userRuleAttributeValue_'  + index + '" /><%}%></td>' +
-                '<td> Environment </td>' +
-                '<td><select id="environmentRuleId_'  + index + '"  name="environmentRuleId_'  + index + '"  ><%for (String userAttribute : envAttributeIds) {if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                '<td><%if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  value="<%=selectedRuleEnvironmentValue%>"/><%} else {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  /><%}%></td>' +
-                '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-                '</tr><tr></tr></table></td></tr>');
-    }
-
-    function createNewEnvironmentRuleRow() {
-        var rowIndex =  jQuery(document.getElementById('environmentRuleTable').rows[document.
-                            getElementById('environmentRuleTable').rows.length-1]).attr('data-value');
-        var index = parseInt(rowIndex, 10) + 1;
-        jQuery('#environmentRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr></tr><tr><td> Resource </td>' +
-            '<td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '"  /><% }%> </td>' +
-            '<td> User </td>'+
-            '<td><select id="userRuleAttributeId_'  + index + '"  name="userRuleAttributeId_'  + index + '"  ><%for (String userAttribute : userAttributeIds) {if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-            '<td><%if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  value="<%=selectedRuleUserAttributeValue%>"/><%} else {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  /><%}%></td>' +
-            '<td> Action </td>' +
-            '<td><%if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  value="<%=selectedRuleActionValue%>"/><%} else {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  /><%}%></td>' +
-            '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-            '</tr></table></td></tr>');
+    function updownthis(thislink,updown){
+        var sampleTable = document.getElementById('dataTable');
+        var clickedRow = thislink.parentNode.parentNode;
+        var addition = -1;
+        if(updown == "down"){
+            addition = 1;
+        }
+        var otherRow = sampleTable.rows[clickedRow.rowIndex + addition];
+        var numrows = jQuery("#dataTable tbody tr").length;
+        if(numrows <= 1){
+            return;
+        }
+        if(clickedRow.rowIndex == 1 && updown == "up"){
+            return;
+        } else if(clickedRow.rowIndex == numrows && updown == "down"){
+            return;
+        }
+        var rowdata_clicked = new Array();
+        for(var i=0;i<clickedRow.cells.length;i++){
+            rowdata_clicked.push(clickedRow.cells[i].innerHTML);
+            clickedRow.cells[i].innerHTML = otherRow.cells[i].innerHTML;
+        }
+        for(i=0;i<otherRow.cells.length;i++){
+            otherRow.cells[i].innerHTML =rowdata_clicked[i];
+        }
     }
 
     function getCategoryType() {
         document.dataForm.submit();
     }
-
-
 </script>
+
+
 
 <div id="middle">
 <h2><fmt:message key="create.entitlement.policy"/></h2>
 <div id="workArea">
-<div class="goToAdvance">
-    <a class='icon-link' href="../entitlement/policy-editor.jsp"
-       style='background-image:url(images/advanceview.png);float:none'><fmt:message
-            key="use.advance.view"/></a>
-</div>
-<div class="goToAdvance">
-    <a class='icon-link' href="../entitlement/add-policy.jsp"
-       style='background-image:url(images/advanceview.png);float:none'><fmt:message
-            key="use.xml.view"/></a>
-</div>
-    <form id="dataForm" name="dataForm" method="post" action="">
-        <div class="sectionSeperator">Basic Information</div>
-        <div class="sectionSub">
-            <table id="mainTable">
-                <tr>
-                    <td class="leftCol-med"><fmt:message key="policy.name"/><span class="required">*</span></td>
-                    <%
-                        if (policyId != null && policyId.trim().length() > 0) {
-                    %>
-                        <td><input type="text" name="policyId" id="policyId" value="<%=policyId%>"/></td>
-                    <%
-                        } else {
-                    %>
-                        <td><input type="text" name="policyId" id="policyId" /></td>
-                    <%
+<form id="dataForm" name="dataForm" method="post" action="">
+<table class="styledLeft noBorders">
+
+    <tr>
+        <td class="leftCol-med"><fmt:message key='policy.name'/><span class="required">*</span></td>
+        <%
+            if(entitlementPolicyBean.getPolicyName() != null) {
+        %>
+        <td><input type="text" name="policyName" id="policyName" value="<%=entitlementPolicyBean.getPolicyName()%>" class="text-box-big"/></td>
+        <%
+        } else {
+        %>
+        <td><input type="text" name="policyName" id="policyName" class="text-box-big"/></td>
+        <%
+            }
+        %>
+    </tr>
+
+    <%
+        if(holder.isShowRuleAlgorithms()){
+    %>
+    <tr>
+        <td><fmt:message key="rule.combining.algorithm"/></td>
+        <td>
+            <select id="algorithmName" name="algorithmName" class="text-box-big">
+                <%
+                    for (String algorithmName : algorithmNames) {
+                        if(algorithmName.equals(entitlementPolicyBean.getAlgorithmName())){
+                %>
+                <option value="<%=algorithmName%>" selected="selected"><%=entitlementPolicyBean.getAlgorithmName()%></option>
+                <%
+                } else {
+                %>
+                <option value="<%=algorithmName%>"><%=algorithmName%></option>
+                <%
                         }
-                    %>
-                </tr>
-                <tr>
-                    <td><fmt:message key="policy.description"/></td>
-                    <%
-                        if (policyDescription != null && policyDescription.trim().length() > 0) {
-                    %>
-                        <td><textarea name="policyDescription" id="policyDescription"  class="text-box-big" value="<%=policyDescription%>"></textarea></td>
-                    <%
-                        } else {
-                    %>
-                        <td><textarea type="text" name="policyDescription" id="policyDescription"  class="text-box-big"></textarea></td>
-                    <%
+                    }
+                %>
+            </select>
+        </td>
+    </tr>
+    <%
+        }
+    %>
+    <%
+        if(holder.isShowPolicyDescription()){
+    %>
+    <tr>
+        <td class="leftCol-small" style="vertical-align:top !important"><fmt:message key='policy.description'/></td>
+        <%
+            if(entitlementPolicyBean.getPolicyDescription() != null) {
+        %>
+        <td><textarea name="policyDescription" id="policyDescription" value="<%=entitlementPolicyBean.getPolicyDescription()%>" class="text-box-big"><%=entitlementPolicyBean.getPolicyDescription()%></textarea></td>
+        <%
+        } else {
+        %>
+        <td><textarea type="text" name="policyDescription" id="policyDescription" class="text-box-big"></textarea></td>
+        <%
+            }
+        %>
+    </tr>
+    <%
+        }
+    %>
+    <tr>
+        <td class="leftCol-small">
+            This policy is based on
+        </td>
+        <td>
+            <select id="policyApplied" name="policyApplied" onchange="getCategoryType();">
+                <%
+                    for (String availableCategory : availableCategories) {
+                        if(availableCategory != null && availableCategory.equals(selectedCategory)){
+                %>
+                <option value="<%=availableCategory%>" selected="selected" ><%=availableCategory%></option>
+                <%
+                } else {
+                %>
+                <option value="<%=availableCategory%>" ><%=availableCategory%></option>
+                <%
                         }
-                    %>
-                </tr>
+                    }
+                %>
+            </select>
+    
+            <%--<div class="sectionHelp">--%>
+                <%--Depending on the selection, you will be given different options to define rules.--%>
+            <%--</div>--%>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="leftCol-small">
+            <%=selectedCategory%>
+        </td>
+        <td>
+        <%
+            if(PolicyEditorConstants.SOA_CATEGORY_USER.equals(selectedCategory)) {
+        %>
+            <table class="normal" style="padding-left:0px !important">
                 <tr>
-                    <td class="leftCol-small">
-                        This policy is based on
-                    </td>
-                    <td>
-                        <select id="policyApplied" name="policyApplied" onchange="getCategoryType();">
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="subjectIdTarget" name="subjectIdTarget" class="leftCol-small">
                             <%
-                                for (String  policyApply : policyApplies) {
-                                    if(selectedPolicyApplied != null && policyApply.equals(selectedPolicyApplied)){
+                                for (String id : subjectIds) {
+                                    if (id.equals(subjectIdTarget)) {
                             %>
-                                <option value="<%=policyApply%>" selected="selected" ><%=policyApply%></option>
+                            <option value="<%=id%>" selected="selected"><%=id%></option>
                             <%
-                                    } else {
+                            } else {
                             %>
-                                <option value="<%=policyApply%>" ><%=policyApply%></option>
+                            <option value="<%=id%>"><%=id%></option>
                             <%
                                     }
                                 }
                             %>
                         </select>
-
-
-
-
-                         <div class="sectionHelp">
-                            Depending on the selection, you will be given different options to define rules.
-                        </div>
                     </td>
-                </tr>
-            </table>
-        </div>
-        <%--END Basic information section --%>
-
-
-
-                <%--**********************--%>
-                <%--**********************--%>
-                <%--START user policy type--%>
-                <%--**********************--%>
-                <%--**********************--%>
-
-                <%
-                    if(PolicyEditorConstants.SOA_CATEGORY_USER.equals(selectedPolicyApplied)) {
-                %>
-                <div class="sectionSeperator" id="policyTypeTitle"></div>
-                <div class="sectionSub sectionSubShifter">
-                    <table class="oneline-listing">
-                        <tr>
-                            <td>User whose</td>
-                            <td>
-                                <select id="userAttributeId" name="userAttributeId" >
-                                    <%
-                                        for (String userAttribute : userAttributeIds) {
-                                            if (selectedUserAttributeId != null && userAttribute.equals(selectedUserAttributeId)) {
-                                    %>
-                                        <option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option>
-                                    <%
-                                            } else {
-                                    %>
-                                        <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </td>
-                            <td> is equal to </td>
-                            <td>
-                                <%
-                                    if (selectedUserAttributeValue != null && selectedUserAttributeValue.trim().length() > 0) {
-                                %>
-                                    <input type="text" name="userAttributeValue" id="userAttributeValue" value="<%=selectedUserAttributeValue%>"/>
-                                <%
-                                    } else {
-                                %>
-                                    <input type="text" name="userAttributeValue" id="userAttributeValue" />
-                                <%
-                                    }
-                                %>
-                            </td>
-                        </tr>
-                    </table>
-                        <div class="sectionSeperator" id="policyTypeTitleSub"></div>
-                        <div class="sectionSub sectionSubShifter">
-                                <table  id="userRuleTable" >
-                                    <tr data-value="0">
-                                    <td>
-                                    <table class="oneline-listing">
-                                    <tr></tr>
-                                    <tr>
-                                        <td> Action </td>
-                                        <td>
-                                        <%
-                                            if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {
-                                        %>
-                                            <input type="text" name="actionRuleValue_0" id="actionRuleValue_0" value="<%=selectedRuleActionValue%>"/>
-                                        <%
-                                            } else {
-                                        %>
-                                            <input type="text" name="actionRuleValue_0" id="actionRuleValue_0" />
-                                        <%
-                                            }
-                                        %>
-                                        </td>
-                                        <td> Resource </td>
-                                        <td>
-                                        <%
-                                            if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {
-                                        %>
-                                            <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" value="<%=selectedRuleResourceValue%>"/>
-                                        <%
-                                            } else {
-                                        %>
-                                            <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" />
-                                        <%
-                                            }
-                                        %>
-                                        </td>
-                                        <td> Environment </td>
-                                        <td>
-                                            <select id="environmentRuleId_0" name="environmentRuleId_0"  >
-                                                <%
-                                                    for (String userAttribute : envAttributeIds) {
-                                                        if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {
-                                                %>
-                                                    <option value="<%=userAttribute%>"  selected="selected"><%=selectedRuleEnvironmentId%></option>
-                                                <%
-                                                        } else {
-                                                %>
-                                                    <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                                <%
-                                                        }
-                                                    }
-                                                %>
-                                            </select>
-                                        </td>
-                                        <td>  <%
-                                            if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {
-                                        %>
-                                            <input type="text" name="environmentRuleValue_0" id="environmentRuleValue_0" value="<%=selectedRuleEnvironmentValue%>"/>
-                                        <%
-                                            } else {
-                                        %>
-                                            <input type="text" name="environmentRuleValue_0" id="environmentRuleValue_0" />
-                                        <%
-                                            }
-                                        %>
-                                        </td>
-                                        <td>
-                                            <a onclick="createNewUserRuleRow();" style="background-image:url(images/add.gif);float:none" type="button"
-                                               class="icon-link"></a>
-                                        </td>
-                                    </tr>
-                                    <tr></tr>
-                                    </table>
-                                    </td>
-                                    </tr>
-                    <%
-                        if(elementDTOList != null && elementDTOList.size() > 0){
-                            elementDTOList.remove(0);
-                            for(BasicPolicyEditorElementDTO elementDTO : elementDTOList){
-                                selectedRuleActionValue = elementDTO.getActionValue();
-                                selectedRuleUserAttributeId = elementDTO.getUserAttributeId();
-                                selectedRuleUserAttributeValue = elementDTO.getUserAttributeValue();
-                                selectedRuleResourceValue = elementDTO.getResourceValue();
-                                selectedRuleEnvironmentValue= elementDTO.getEnvironmentValue();
-                                selectedRuleEnvironmentId= elementDTO.getEnvironmentId();
-                                selectedRuleOperationType= elementDTO.getOperationType();
-                                selectedRuleResourceFunction = elementDTO.getFunctionOnResources();
-                                selectedRuleUserFunction = elementDTO.getFunctionOnUsers();
-                    %>
-                            <script type="text/javascript">
-                                function createUserRuleRow() {
-                                    var rowIndex =  jQuery(document.getElementById('userRuleTable').rows[document.
-                                                getElementById('userRuleTable').rows.length-1]).attr('data-value');
-                                    var index = parseInt(rowIndex, 10) + 1;
-                                    jQuery('#userRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr></tr><tr><td> Action </td>' +
-                                        '<td><%if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {%><input type="text" name="actionRuleValue_'  + index + '" id="actionRuleValue_'  + index + '" value="<%=selectedRuleActionValue%>"/><%} else {%><input type="text" name="actionRuleValue_'  + index + '" id="actionRuleValue_'  + index + '" /><%}%></td>' +
-                                        '<td> Resource </td>' +
-                                        '<td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '" id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '" id="resourceRuleValue_'  + index + '" /><%}%></td>' +
-                                        '<td> Environment </td>' +
-                                        '<td><select id="environmentRuleId_'  + index + '"  name="environmentRuleId_'  + index + '"  ><%for (String userAttribute : envAttributeIds) {if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                                        '<td><%if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  value="<%=selectedRuleEnvironmentValue%>"/><%} else {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  /><%}%></td>' +
-                                        '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-                                        '</tr><tr></tr></table></td></tr>');
-                                }
-                                createUserRuleRow();
-                            </script>
-                                <%
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnSubjectsTarget" name="functionOnSubjectsTarget" class="leftCol-small">
+                            <%
+                                for (String functionId : targetFunctionIds) {
+                                    if (functionId.equals(functionOnSubjectsTarget)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionId%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
                                     }
                                 }
-                                %>
-                    </table>
-                    </div>
-
-
-
-
-
-
-        </div>
-        <%--********************--%>
-        <%--********************--%>
-        <%--END user policy type--%>
-        <%--********************--%>
-        <%--********************--%>
-        <%--********************--%>
-
-
-        <%--************************--%>
-        <%--************************--%>
-        <%--START action policy type--%>
-        <%--************************--%>
-        <%--************************--%>
-        <%--************************--%>
-
-        <%
-            } else if(PolicyEditorConstants.SOA_CATEGORY_ACTION.equals(selectedPolicyApplied)){
-        %>
-
-        <div class="sectionSub sectionSubShifter">
-                    <div class="sectionSeperator" id="policyTypeTitle"></div>
-                    <table class="oneline-listing-alt">
-                        <tr>
-                            <td>Action which is equals to</td>
-                            <%
-                                if (selectedActionValue != null && selectedActionValue.trim().length() > 0) {
                             %>
-                                <td><input type="text" name="actionValue" id="actionValue" value="<%=selectedActionValue%>"/></td>
-                            <%
-                                } else {
-                            %>
-                                <td><input type="text" name="actionValue" id="actionValue" /></td>
-                            <%
-                                }
-                            %>
-                        </tr>
-                    </table>
-
-
-                    <div class="sectionSeperator" id="policyTypeTitleSub"></div>
-                    <div class="sectionSub sectionSubShifter">
-                    <table  id="actionRuleTable" >
-                        <tr data-value="0">
-                        <td>
-                        <table class="oneline-listing">
-                        <tr></tr>
-                        <tr>
-                            <td> Resource</td>
-                            <td>
-                            <%
-                                if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {
-                            %>
-                                <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" value="<%=selectedRuleResourceValue%>"/>
-                            <%
-                                } else {
-                            %>
-                                <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" />
-                            <%
-                                }
-                            %>
-                            </td>
-                            <td>User</td>
-                            <td>
-                                <select id="userRuleAttributeId_0" name="userRuleAttributeId_0" >
-                                    <%
-                                        for (String userAttribute : userAttributeIds) {
-                                            if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {
-                                    %>
-                                        <option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option>
-                                    <%
-                                            } else {
-                                    %>
-                                        <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </td>
-                            <td>
-                                <%
-                                    if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {
-                                %>
-                                    <input type="text" name="userRuleAttributeValue_0" id="userRuleAttributeValue_0" value="<%=selectedRuleUserAttributeValue%>"/>
-                                <%
-                                    } else {
-                                %>
-                                    <input type="text" name="userRuleAttributeValue_0" id="userRuleAttributeValue_0" />
-                                <%
-                                    }
-                                %>
-                            </td>
-                        <td> Environment </td>
-                        <td>
-                            <select id="environmentRuleId_0" name="environmentRuleId_0"  >
-                                <%
-                                    for (String userAttribute : envAttributeIds) {
-                                        if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {
-                                %>
-                                    <option value="<%=userAttribute%>"  selected="selected"><%=selectedRuleEnvironmentId%></option>
-                                <%
-                                        } else {
-                                %>
-                                    <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                <%
-                                        }
-                                    }
-                                %>
-                            </select>
-                        </td>
-                        <td>  <%
-                            if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (subjectNamesTarget != null && subjectNamesTarget.trim().length() > 0) {
                         %>
-                            <input type="text" name="environmentRuleValue_0" id="environmentRuleValue_0" value="<%=selectedRuleEnvironmentValue%>"/>
+                        <input type="text" name="subjectNamesTarget" id="subjectNamesTarget"
+                               value="<%=subjectNamesTarget%>" class="text-box-big"/>
                         <%
                             } else {
                         %>
-                            <input type="text" name="environmentRuleValue_0" id="environmentRuleValue_0" />
+                        <input type="text" name="subjectNamesTarget" id="subjectNamesTarget" class="text-box-big"/>
                         <%
                             }
                         %>
-                        </td>
-                            <td>
-                                <a onclick="createNewActionRuleRow();" style="background-image:url(images/add.gif);float:none" type="button"
-                                   class="icon-link"></a>
-                            </td>
-                        </tr>
-                        <tr></tr>
-                        </table>
-                        </td>
-                        </tr>
+                    </td>
+                    <td>
+                        <a title="Select Subject Names" class='icon-link' onclick='selectAttributes("Subject");'
+                           style='background-image:url(images/user-store.gif); float:right;'></a>
+                    </td>
+                </tr>
+            </table>
         <%
-            if(elementDTOList != null && elementDTOList.size() > 0){
-                elementDTOList.remove(0);
-                for(BasicPolicyEditorElementDTO elementDTO : elementDTOList){
-                    selectedRuleActionValue = elementDTO.getActionValue();
-                    selectedRuleUserAttributeId = elementDTO.getUserAttributeId();
-                    selectedRuleUserAttributeValue = elementDTO.getUserAttributeValue();
-                    selectedRuleResourceValue = elementDTO.getResourceValue();
-                    selectedRuleEnvironmentValue= elementDTO.getEnvironmentValue();
-                    selectedRuleEnvironmentId= elementDTO.getEnvironmentId();
-                    selectedRuleOperationType= elementDTO.getOperationType();
-                    selectedRuleResourceFunction = elementDTO.getFunctionOnResources();
-                    selectedRuleUserFunction = elementDTO.getFunctionOnUsers();
+            } else if(PolicyEditorConstants.SOA_CATEGORY_ACTION.equals(selectedCategory)) {
         %>
-                <script type="text/javascript">
-                    function createActionRuleRow() {
-                        var rowIndex =  jQuery(document.getElementById('actionRuleTable').rows[document.
-                                    getElementById('actionRuleTable').rows.length-1]).attr('data-value');
-                        var index = parseInt(rowIndex, 10) + 1;
-                        jQuery('#actionRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr></tr><tr><td>Resource</td>' +
-                                '<td><select id="resourceRuleFunction_'  + index + '" name="resourceRuleFunction_'  + index + '"><%for (String function : functions) {if (selectedRuleResourceFunction != null && selectedRuleResourceFunction.equals(function)) { %><option value="<%=function%>"  selected="selected"><%=function%></option><%} else {%><option value="<%=function%>"><%=function%></option><%}}%></select></td><td>to</td><td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '" id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '" id="resourceRuleValue_'  + index + '" /><%}%></td>' +
-                                '<td>User</td>' +
-                                '<td><select id="userRuleAttributeId_'  + index + '" name="userRuleAttributeId_'  + index + '" ><%for (String userAttribute : userAttributeIds) {if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {%><option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                                '<td><%if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {%><input type="text" name="userRuleAttributeValue_'  + index + '" id="userRuleAttributeValue_'  + index + '" value="<%=selectedRuleUserAttributeValue%>"/><% } else {%><input type="text" name="userRuleAttributeValue_'  + index + '" id="userRuleAttributeValue_'  + index + '" /><%}%></td>' +
-                                '<td> Environment </td>' +
-                                '<td><select id="environmentRuleId_'  + index + '"  name="environmentRuleId_'  + index + '"  ><%for (String userAttribute : envAttributeIds) {if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                                '<td><%if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  value="<%=selectedRuleEnvironmentValue%>"/><%} else {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  /><%}%></td>' +
-                                '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-                                '</tr><tr></tr></table></td></tr>');
-                    }
-                    createActionRuleRow();
-                </script>
-        <%
-                }
-            }
-        %>
-                    </table>
-        </div>
-        </div>
-
-        <%--********************--%>
-        <%--********************--%>
-        <%--END action policy type--%>
-        <%--********************--%>
-        <%--********************--%>
-        <%--********************--%>
-
-
-        <%--************************--%>
-        <%--************************--%>
-        <%--START environment policy type--%>
-        <%--************************--%>
-        <%--************************--%>
-        <%--************************--%>
-
-        <%
-            } else if(PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT.equals(selectedPolicyApplied)){
-        %>
-
-          <div class="sectionSub sectionSubShifter">
-                    <div class="sectionSeperator" id="policyTypeTitle"></div>
-                    <table class="oneline-listing-alt">
-
-                        <tr>
-                            <td>Environment which </td>
-                            <td>
-                                <select id="environmentId" name="environmentId"  >
-                                    <%
-                                    for (String userAttribute : envAttributeIds) {
-                                        if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {
-                                        %>
-                                            <option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option>
-                                        <%
-                                        } else {
-                                        %>
-                                            <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                        <%
-                                        }
+            <table class="normal" style="padding-left:0px !important">
+                <tr>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnActionsTarget" name="functionOnActionsTarget" class="leftCol-small">
+                            <%
+                                for (String functionId : targetFunctionIds) {
+                                    if (functionId.equals(functionOnActionsTarget)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionId%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
                                     }
-                                    %>
-                                </select>
-                            </td>
-                            <td> is equals to </td>
-                            <%
-                                if (selectedEnvironmentValue != null && selectedEnvironmentValue.trim().length() > 0) {
-                            %>
-                                <td><input type="text" name="environmentValue" id="environmentValue" value="<%=selectedEnvironmentValue%>"/></td>
-                            <%
-                                } else {
-                            %>
-                                <td><input type="text" name="environmentValue" id="environmentValue" /></td>
-                            <%
                                 }
                             %>
-                        </tr>
-                        </table>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (actionNamesTarget != null && actionNamesTarget.trim().length() > 0) {
 
-                      <div class="sectionSeperator" id="policyTypeTitleSub"></div>
-                      <div class="sectionSub sectionSubShifter">
-                      <table  id="environmentRuleTable" >
-                          <tr data-value="0">
-                          <td>
-                          <table class="oneline-listing">
-                          <tr></tr>
-                          <tr>
-                              <td> Resource </td>
-                              <td>
-                              <%
-                                  if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {
-                              %>
-                                  <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" value="<%=selectedRuleResourceValue%>"/>
-                              <%
-                                  } else {
-                              %>
-                                  <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" />
-                              <%
-                                  }
-                              %>
-                              </td>
-                              <td> User </td>
-                              <td>
-                                  <select id="userRuleAttributeId_0" name="userRuleAttributeId_0"  >
-                                      <%
-                                          for (String userAttribute : userAttributeIds) {
-                                              if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {
-                                      %>
-                                          <option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option>
-                                      <%
-                                              } else {
-                                      %>
-                                          <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                      <%
-                                              }
-                                          }
-                                      %>
-                                  </select>
-                              </td>
-                              <td> <%
-                                  if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {
-                              %>
-                                  <input type="text" name="userRuleAttributeValue_0" id="userRuleAttributeValue_0" value="<%=selectedRuleUserAttributeValue%>"/>
-                              <%
-                                  } else {
-                              %>
-                                  <input type="text" name="userRuleAttributeValue_0" id="userRuleAttributeValue_0" />
-                              <%
-                                  }
-                              %>
-                              </td>
-                              <td> Action </td>
-                              <td>  <%
-                                  if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {
-                              %>
-                                  <input type="text" name="actionRuleValue_0" id="actionRuleValue_0" value="<%=selectedRuleActionValue%>"/>
-                              <%
-                                  } else {
-                              %>
-                                  <input type="text" name="actionRuleValue_0" id="actionRuleValue_0" />
-                              <%
-                                  }
-                              %>
-                              </td>
-                              <td>
-                                  <a onclick="createNewEnvironmentRuleRow();" style="background-image:url(images/add.gif);float:none" type="button"
-                                     class="icon-link"></a>
-                              </td>
-                          </tr>
-                          </table>
-                          </td>
-                          </tr>
-          <%
-              if(elementDTOList != null && elementDTOList.size() > 0){
-                  elementDTOList.remove(0);
-                  for(BasicPolicyEditorElementDTO elementDTO : elementDTOList){
-                      selectedRuleActionValue = elementDTO.getActionValue();
-                      selectedRuleUserAttributeId = elementDTO.getUserAttributeId();
-                      selectedRuleUserAttributeValue = elementDTO.getUserAttributeValue();
-                      selectedRuleResourceValue = elementDTO.getResourceValue();
-                      selectedRuleEnvironmentValue= elementDTO.getEnvironmentValue();
-                      selectedRuleEnvironmentId= elementDTO.getEnvironmentId();
-                      selectedRuleOperationType= elementDTO.getOperationType();
-                      selectedRuleResourceFunction = elementDTO.getFunctionOnResources();
-                      selectedRuleUserFunction = elementDTO.getFunctionOnUsers();
-          %>
-                  <script type="text/javascript">
-                      function createEnvironmentRuleRow() {
-                          var rowIndex =  jQuery(document.getElementById('environmentRuleTable').rows[document.
-                                      getElementById('environmentRuleTable').rows.length-1]).attr('data-value');
-                          var index = parseInt(rowIndex, 10) + 1;
-                          jQuery('#environmentRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr></tr><tr><td> Resource </td>' +
-                              '<td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '"  /><% }%> </td>' +
-                              '<td> User </td>' +
-                              '<td><select id="userRuleAttributeId_'  + index + '"  name="userRuleAttributeId_'  + index + '"  ><%for (String userAttribute : userAttributeIds) {if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                              '<td><%if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  value="<%=selectedRuleUserAttributeValue%>"/><%} else {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  /><%}%></td>' +
-                              '<td> Action </td>' +
-                              '<td><%if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  value="<%=selectedRuleActionValue%>"/><%} else {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  /><%}%></td>' +
-                              '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-                              '</tr></table></td></tr>');
-                      }
-                      createEnvironmentRuleRow();
-                  </script>
-          <%
-                  }
-              }
-          %>
-                      </table>
-                  </div>
+                        %>
+                        <input type="text" name="actionNamesTarget" id="actionNamesTarget" value="<%=actionNamesTarget%>"
+                               class="text-box-big"/>
+                        <%
+                        } else {
+                        %>
+                        <input type="text" name="actionNamesTarget" id="actionNamesTarget" class="text-box-big"/>
 
-                </div>
-                <%--********************--%>
-                <%--********************--%>
-                <%--END environment policy type--%>
-                <%--********************--%>
-                <%--********************--%>
-                <%--********************--%>
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td>
+                        <a title="Select Action Names" class='icon-link' onclick='selectAttributes("Action");'
+                           style='background-image:url(images/actions.png); float:right;'></a>
+                    </td>
 
-
-                <%--************************--%>
-                <%--************************--%>
-                <%--START Resource policy type--%>
-                <%--************************--%>
-                <%--************************--%>
-                <%--************************--%>
-                <%
-                    } else {
-                %>
-                 <div class="sectionSub sectionSubShifter">
-                    <div class="sectionSeperator" id="policyTypeTitle"></div>
-                    <table class="oneline-listing-alt">
-                        <tr>
-                            <td>Resource which is equals to</td>
-
-                            <%
-                                if (selectedResourceValue != null && selectedResourceValue.trim().length() > 0) {
-                            %>
-                                <td><input type="text" name="resourceValue" id="resourceValue" value="<%=selectedResourceValue%>"/></td>
-                            <%
-                                } else {
-                            %>
-                                <td><input type="text" name="resourceValue" id="resourceValue" /></td>
-                            <%
-                                }
-                            %>
-                        </tr>
-                    </table>
-
-                    <div class="sectionSeperator" id="policyTypeTitleSub"></div>
-                    <div class="sectionSub sectionSubShifter">
-                    <table  id="resourceRuleTable" >
-                        <tr data-value="0">
-                        <td>
-                        <table class="oneline-listing">
-                        <tr>
-                            <td style="white-space:nowrap;">Child resource</td>
-                            <td>User</td>
-                            <td></td>
-                            <td>Action</td>
-                            <td>Enironment</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>
-                            <%
-                                if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {
-                            %>
-                                <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" value="<%=selectedRuleResourceValue%>"/>
-                            <%
-                                } else {
-                            %>
-                                <input type="text" name="resourceRuleValue_0" id="resourceRuleValue_0" />
-                            <%
-                                }
-                            %>
-                            </td>
-                            <td>
-                                <select id="userRuleAttributeId_0" name="userRuleAttributeId_0"  >
-                                    <%
-                                        for (String userAttribute : userAttributeIds) {
-                                            if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {
-                                    %>
-                                        <option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option>
-                                    <%
-                                            } else {
-                                    %>
-                                        <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </td>
-                            <td> <%
-                                if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {
-                            %>
-                                <input type="text" name="userRuleAttributeValue_0" id="userRuleAttributeValue_0" value="<%=selectedRuleUserAttributeValue%>"/>
-                            <%
-                                } else {
-                            %>
-                                <input type="text" name="userRuleAttributeValue_0" id="userRuleAttributeValue_0" />
-                            <%
-                                }
-                            %>
-                            </td>
-                            <td>  <%
-                                if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {
-                            %>
-                                <input type="text" name="actionRuleValue_0" id="actionRuleValue_0" value="<%=selectedRuleActionValue%>"/>
-                            <%
-                                } else {
-                            %>
-                                <input type="text" name="actionRuleValue_0" id="actionRuleValue_0" />
-                            <%
-                                }
-                            %>
-                            </td>
-                            <td>
-                                <select id="environmentRuleId_0" name="environmentRuleId_0"  >
-                                    <%
-                                        for (String userAttribute : envAttributeIds) {
-                                            if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {
-                                    %>
-                                        <option value="<%=userAttribute%>"  selected="selected"><%=userAttribute%></option>
-                                    <%
-                                            } else {
-                                    %>
-                                        <option value="<%=userAttribute%>"><%=userAttribute%></option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </td>
-                            <td>  <%
-                                if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {
-                            %>
-                                <input type="text" name="environmentRuleValue_0" id="environmentRuleValue_0" value="<%=selectedRuleEnvironmentValue%>"/>
-                            <%
-                                } else {
-                            %>
-                                <input type="text" name="environmentRuleValue_0" id="environmentRuleValue_0" />
-                            <%
-                                }
-                            %>
-                            </td>
-
-                            <td>
-                                <a onclick="createNewResourceRuleRow();" style="background-image:url(images/add.gif);float:none" type="button"
-                                   class="icon-link"></a>
-                            </td>
-                        </tr>
-                        </table>
-                        </td>
-                        </tr>
+                    <td>
+                        <input type="hidden" name="actionIdTarget" id="actionIdTarget" value="<%=actionIdTarget%>" />
+                    </td>
+                </tr>
+            </table>
         <%
-            if(elementDTOList != null && elementDTOList.size() > 0){
-                elementDTOList.remove(0);
-                for(BasicPolicyEditorElementDTO elementDTO : elementDTOList){
-                    selectedRuleActionValue = elementDTO.getActionValue();
-                    selectedRuleUserAttributeId = elementDTO.getUserAttributeId();
-                    selectedRuleUserAttributeValue = elementDTO.getUserAttributeValue();
-                    selectedRuleResourceValue = elementDTO.getResourceValue();
-                    selectedRuleEnvironmentValue= elementDTO.getEnvironmentValue();
-                    selectedRuleEnvironmentId= elementDTO.getEnvironmentId();
-                    selectedRuleOperationType= elementDTO.getOperationType();
-                    selectedRuleResourceFunction = elementDTO.getFunctionOnResources();
-                    selectedRuleUserFunction = elementDTO.getFunctionOnUsers();
+            } else if(PolicyEditorConstants.SOA_CATEGORY_RESOURCE.equals(selectedCategory)) {
         %>
-                <script type="text/javascript">
-                    function createResourceRuleRow() {
-                        var rowIndex =  jQuery(document.getElementById('resourceRuleTable').rows[document.
-                                    getElementById('resourceRuleTable').rows.length-1]).attr('data-value');
-                        var index = parseInt(rowIndex, 10) + 1;
-                        jQuery('#resourceRuleTable > tbody:last').append('<tr data-value="'+ index +'"><td><table class="oneline-listing"><tr><td style="white-space:nowrap;">Resource  which is</td><td></td><td></td><td></td><td>User whose</td><td></td><td></td><td></td><td></td><td>and perform</td></tr>' +
-                            '<td><%if (selectedRuleResourceValue != null && selectedRuleResourceValue.trim().length() > 0) {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '" value="<%=selectedRuleResourceValue%>"/><%} else {%><input type="text" name="resourceRuleValue_'  + index + '"  id="resourceRuleValue_'  + index + '"  /><% }%> </td>' +
-                            '<td><select id="userRuleAttributeId_'  + index + '"  name="userRuleAttributeId_'  + index + '"  ><%for (String userAttribute : userAttributeIds) {if (selectedRuleUserAttributeId != null && userAttribute.equals(selectedRuleUserAttributeId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                            '<td><%if (selectedRuleUserAttributeValue != null && selectedRuleUserAttributeValue.trim().length() > 0) {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  value="<%=selectedRuleUserAttributeValue%>"/><%} else {%><input type="text" name="userRuleAttributeValue_'  + index + '"  id="userRuleAttributeValue_'  + index + '"  /><%}%></td>' +
-                            '<td><%if (selectedRuleActionValue != null && selectedRuleActionValue.trim().length() > 0) {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  value="<%=selectedRuleActionValue%>"/><%} else {%><input type="text" name="actionRuleValue_'  + index + '"  id="actionRuleValue_'  + index + '"  /><%}%></td>' +
-                            '<td><select id="environmentRuleId_'  + index + '"  name="environmentRuleId_'  + index + '"  ><%for (String userAttribute : envAttributeIds) {if (selectedRuleEnvironmentId != null && userAttribute.equals(selectedRuleEnvironmentId)) {%><option value="<%=userAttribute%>" selected="selected"><%=userAttribute%></option><%} else {%><option value="<%=userAttribute%>"><%=userAttribute%></option><%}}%></select></td>' +
-                            '<td><%if (selectedRuleEnvironmentValue != null && selectedRuleEnvironmentValue.trim().length() > 0) {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  value="<%=selectedRuleEnvironmentValue%>"/><%} else {%><input type="text" name="environmentRuleValue_'  + index + '"  id="environmentRuleValue_'  + index + '"  /><%}%></td>' +
-                            '<td><a onclick="removeRow(this)" style="background-image:url(images/delete.gif);" type="button" class="icon-link"></a></td>' +
-                            '</tr></table></td></tr>');
-                    }
-                    createResourceRuleRow();
-                </script>
+            <table class="normal" style="padding-left:0px !important">
+                <tr>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnResourcesTarget" name="functionOnResourcesTarget" class="leftCol-small">
+                            <%
+                                for (String functionId : targetFunctionIds) {
+                                    if (functionId.equals(functionOnResourcesTarget)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionId%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (resourceNamesTarget != null && resourceNamesTarget.trim().length() > 0) {
+
+                        %>
+                        <input type="text" size="60" name="resourceNamesTarget" id="resourceNamesTarget"
+                               value="<%=resourceNamesTarget%>" class="text-box-big"/>
+                        <%
+                        } else {
+                        %>
+                        <input type="text" size="60" name="resourceNamesTarget" id="resourceNamesTarget"
+                               class="text-box-big"/>
+
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td>
+                        <a title="Select Resources Names" class='icon-link' onclick='selectAttributes("Resource");'
+                           style='background-image:url(images/registry.gif); float:right;'></a>
+                    </td>
+                    <td>
+                        <input type="hidden" name="resourceIdTarget" id="resourceIdTarget" value="<%=resourceIdTarget%>" />
+                    </td>
+                </tr>
+            </table>
         <%
-                }
+            } else if(PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT.equals(selectedCategory)) {
+        %>
+            <table class="normal" style="padding-left:0px !important">
+                <tr>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="environmentIdTarget" name="environmentIdTarget" class="leftCol-small">
+                            <%
+                                for (String id : environmentIds) {
+                                    if (id.equals(environmentIdTarget)) {
+                            %>
+                            <option value="<%=id%>" selected="selected"><%=id%></option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=id%>"><%=id%></option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnEnvironmentTarget" name="functionOnEnvironmentTarget" class="leftCol-small">
+                            <%
+                                for (String functionId : targetFunctionIds) {
+                                    if (functionId.equals(functionOnEnvironmentTarget)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionId%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (environmentNamesTarget != null && environmentNamesTarget.trim().length() > 0) {
+
+                        %>
+                        <input type="text" name="environmentNamesTarget" id="environmentNamesTarget"
+                               value="<%=environmentNamesTarget%>" class="text-box-big"/>
+                        <%
+                        } else {
+                        %>
+                        <input type="text" name="environmentNamesTarget" id="environmentNamesTarget" class="text-box-big"/>
+
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td>
+                        <a title="Select Environment Names" class='icon-link' onclick='selectAttributes("Environment");'
+                           style='background-image:url(images/calendar.jpg); float:right;'></a>
+                    </td>
+                </tr>
+            </table>
+        <%
             }
         %>
-                    </table>
-                        </div>
-               </div><!-- Section Sub -->
-                <%
+    </td>
+    </tr>
+
+    <tr>
+    <td colspan="2" style="margin-top:10px;">
+    <h2 class="trigger  <%if(basicRuleDTO == null){%>active<%} %>"><a href="#"><fmt:message key="add.new.entitlement.rule"/></a></h2>
+    <div class="toggle_container" id="newRuleLinkRow">
+    <table class="noBorders" id="ruleTable" style="width: 100%">
+        <tr>
+        <td class="formRow" style="padding:0 !important">
+        <table class="normal" cellspacing="0">
+        <%
+            if(holder.isShowRuleId()){
+        %>
+            <tr>
+                <td class="leftCol-small"><fmt:message key='rule.name'/><span class="required">*</span>
+                </td>
+                <td>
+                    <%
+                        if (ruleId != null && ruleId.trim().length() > 0 && !ruleId.trim().equals("null")) {
+                    %>
+                    <input type="text" name="ruleId" id="ruleId" class="text-box-big"
+                           value="<%=basicRuleDTO.getRuleId()%>"/>
+                    <%
+                    } else {
+                    %>
+                    <input type="text" name="ruleId" id="ruleId" class="text-box-big"/>
+                    <%
+                        }
+                    %>
+                </td>
+            </tr>
+        <%
+            }
+        %>
+
+        <%
+            if(holder.isShowRuleEffect()){
+        %>
+            <tr>
+                <td><fmt:message key="rule.effect"/></td>
+                <td>
+                    <select id="ruleEffect" name="ruleEffect" class="leftCol-small">
+                        <%
+                            if (ruleEffects != null) {
+                                for (String effect : ruleEffects) {
+                                    if (effect.equals(ruleEffect)) {
+
+                        %>
+                        <option value="<%=effect%>" selected="selected"><%=ruleEffect%>
+                        </option>
+                        <%
+                        } else {
+
+                        %>
+                        <option value="<%=effect%>"><%=effect%>
+                        </option>
+                        <%
+                                    }
+                                }
+                            }
+                        %>
+                    </select>
+                </td>
+            </tr>
+        <%
+            }
+        %>
+
+        <%
+            if(holder.isShowRuleDescription()){
+        %>
+        <tr>
+            <td class="leftCol-small" style="vertical-align:top !important"><fmt:message key='policy.description'/></td>
+            <%
+                if(ruleDescription != null) {
+            %>
+            <td><input name="ruleDescription" id="ruleDescription" value="<%=ruleDescription%>" class="text-box-big"/></td>
+            <%
+            } else {
+            %>
+            <td><input type="text" name="ruleDescription" id="ruleDescription" class="text-box-big" /></td>
+            <%
+                }
+            %>
+        </tr>
+        <%
+            }
+        %>
+
+            <tr>
+            <% if(PolicyEditorConstants.SOA_CATEGORY_RESOURCE.equals(selectedCategory)) {%>
+                <td><fmt:message key='child.resource.names'/></td>
+            <% } else { %>
+                <td><fmt:message key='resource.names'/></td>
+            <% } %>
+            <td>
+            <table class="normal" style="padding-left:0px !important">
+                <tr>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="preFunctionOnResources" name="preFunctionOnResources" class="leftCol-small">
+                            <%
+                                for (String preFunctionId : preFunctionIds) {
+                                    if (preFunctionId.equals(preFunctionOnResources)) {
+                            %>
+                            <option value="<%=preFunctionId%>" selected="selected"><%=preFunctionId%>
+                            </option>
+                            <%
+                                    } else {
+                            %>
+                            <option value="<%=preFunctionId%>"><%=preFunctionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnResources" name="functionOnResources" class="leftCol-small">
+                            <%
+                                for (String functionId : functionIds) {
+                                    if (functionId.equals(functionOnResources)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionOnResources%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (resourceNames != null && !resourceNames.equals("")) {
+
+                        %>
+                        <input type="text" size="60" name="resourceNames" id="resourceNames"
+                               value="<%=resourceNames%>" class="text-box-big"/>
+                        <%
+                        } else {
+                        %>
+                        <input type="text" size="60" name="resourceNames" id="resourceNames"
+                               class="text-box-big"/>
+
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td>
+                        <a title="Select Resources Names" class='icon-link' onclick='selectAttributes("Resource");'
+                           style='background-image:url(images/registry.gif); float:right;'></a>
+                    </td>
+                    <td>
+                        <input type="hidden" name="resourceId" id="resourceId" value="<%=resourceId%>" />
+                    </td>
+
+                    <td>
+                        <input type="hidden" name="resourceDataType" id="resourceDataType" value="<%=resourceDataType%>" />
+                    </td>
+                </tr>
+            </table>
+            </td>
+            </tr>
+
+            <tr>
+            <td class="leftCol-small"><fmt:message key='roles.users'/></td>
+            <td>
+            <table class="normal" style="padding-left:0px !important">
+                <tr>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="subjectId" name="subjectId" class="leftCol-small">
+                            <%
+                                for (String id : subjectIds) {
+                                    if (id.equals(subjectId)) {
+                            %>
+                            <option value="<%=id%>" selected="selected"><%=id%></option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=id%>"><%=id%></option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="preFunctionOnSubjects" name="preFunctionOnSubjects" class="leftCol-small">
+                            <%
+                                for (String preFunctionId : preFunctionIds) {
+                                    if (preFunctionId.equals(preFunctionOnSubjects)) {
+                            %>
+                            <option value="<%=preFunctionId%>" selected="selected"><%=preFunctionId%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=preFunctionId%>"><%=preFunctionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnSubjects" name="functionOnSubjects" class="leftCol-small">
+                            <%
+                                for (String functionId : functionIds) {
+                                    if (functionId.equals(functionOnSubjects)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionOnSubjects%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (subjectNames != null && !subjectNames.equals("")) {
+
+                        %>
+                        <input type="text" name="subjectNames" id="subjectNames"
+                               value="<%=subjectNames%>" class="text-box-big"/>
+                        <%
+                        } else {
+                        %>
+                        <input type="text" name="subjectNames" id="subjectNames" class="text-box-big"/>
+
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td>
+                        <a title="Select Subject Names" class='icon-link' onclick='selectAttributes("Subject");'
+                           style='background-image:url(images/user-store.gif); float:right;'></a>
+                    </td>
+
+                    <td>
+                        <input type="hidden" name="subjectDataType" id="subjectDataType" value="<%=subjectDataType%>" />
+                    </td>
+                </tr>
+            </table>
+            </td>
+            </tr>
+
+
+            <tr>
+            <td class="leftCol-small"><fmt:message key='action.names'/></td>
+            <td>
+            <table class="normal" style="padding-left:0px !important">
+                <tr>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="preFunctionOnActions" name="preFunctionOnActions" class="leftCol-small">
+                            <%
+                            for (String preFunctionId : preFunctionIds) {
+                                if (preFunctionId.equals(preFunctionOnActions)) {
+                            %>
+                            <option value="<%=preFunctionId%>" selected="selected"><%=preFunctionId%></option>
+                            <%
+                                } else {
+                            %>
+                            <option value="<%=preFunctionId%>"><%=preFunctionId%></option>
+                            <%
+                                }
+                            }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnActions" name="functionOnActions" class="leftCol-small">
+                            <%
+                                for (String functionId : functionIds) {
+                                    if (functionId.equals(functionOnActions)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionOnActions%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (actionNames != null && !actionNames.equals("")) {
+
+                        %>
+                        <input type="text" name="actionNames" id="actionNames" value="<%=actionNames%>"
+                               class="text-box-big"/>
+                        <%
+                        } else {
+                        %>
+                        <input type="text" name="actionNames" id="actionNames" class="text-box-big"/>
+
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td>
+                        <a title="Select Action Names" class='icon-link' onclick='selectAttributes("Action");'
+                           style='background-image:url(images/actions.png); float:right;'></a>
+                    </td>
+
+                    <td>
+                        <input type="hidden" name="actionId" id="actionId" value="<%=actionId%>" />
+                    </td>
+
+                    <td>
+                        <input type="hidden" name="actionDataType" id="actionDataType" value="<%=actionDataType%>" />
+                    </td>
+                </tr>
+            </table>
+            </td>
+            </tr>
+
+            <tr>
+            <td class="leftCol-small"><fmt:message key='environment.names'/></td>
+            <td>
+            <table class="normal" style="padding-left:0px !important">
+                <tr>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="environmentId" name="environmentId" class="leftCol-small">
+                            <%
+                                for (String id : environmentIds) {
+                                    if (id.equals(environmentId)) {
+                            %>
+                            <option value="<%=id%>" selected="selected"><%=id%></option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=id%>"><%=id%></option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="preFunctionOnEnvironment" name="preFunctionOnEnvironment" class="leftCol-small">
+                            <%
+                                for (String preFunctionId : preFunctionIds) {
+                                    if (preFunctionId.equals(preFunctionOnEnvironment)) {
+                            %>
+                            <option value="<%=preFunctionId%>" selected="selected"><%=preFunctionId%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=preFunctionId%>"><%=preFunctionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <select id="functionOnEnvironment" name="functionOnEnvironment" class="leftCol-small">
+                            <%
+                                for (String functionId : functionIds) {
+                                    if (functionId.equals(functionOnEnvironment)) {
+                            %>
+                            <option value="<%=functionId%>" selected="selected"><%=functionOnEnvironment%>
+                            </option>
+                            <%
+                            } else {
+                            %>
+                            <option value="<%=functionId%>"><%=functionId%>
+                            </option>
+                            <%
+                                    }
+                                }
+                            %>
+                        </select>
+                    </td>
+                    <td style="padding-left:0px !important;padding-right:0px !important">
+                        <%
+                            if (environmentNames != null && !environmentNames.equals("")) {
+
+                        %>
+                        <input type="text" name="environmentNames" id="environmentNames" value="<%=environmentNames%>"
+                               class="text-box-big"/>
+                        <%
+                        } else {
+                        %>
+                        <input type="text" name="environmentNames" id="environmentNames" class="text-box-big"/>
+
+                        <%
+                            }
+                        %>
+                    </td>
+                    <td>
+                        <a title="Select Environment Names" class='icon-link' onclick='selectAttributes("Environment");'
+                           style='background-image:url(images/calendar.jpg); float:right;'></a>
+                    </td>
+
+                    <td>
+                        <input type="hidden" name="environmentDataType" id="environmentDataType" value="<%=environmentDataType%>" />
+                    </td>
+                </tr>
+            </table>
+            </td>
+            </tr>
+        </table>
+        </td>
+        </tr>
+
+        <tr>
+        <td colspan="2" class="buttonRow">
+            <%
+                if (basicRuleDTO != null && basicRuleDTO.isCompletedRule()) {
+            %>
+            <input class="button" type="button" value="<fmt:message key='update'/>"
+                   onclick="doUpdate();"/>
+
+            <input class="button" type="button" value="<fmt:message key='cancel'/>"
+                   onclick="doCancelRule();"/>
+
+            <%
+            } else {
+            %>
+
+            <input class="button" type="button" value="<fmt:message key='add'/>"
+                   onclick="doAdd();"/>
+            <%
+                }
+            %>
+        </td>
+        </tr>
+
+    </table>
+    </div>
+    </td>
+    </tr>
+
+    <tr>
+    <td>
+        <table class="normal" cellspacing="0">
+            <thead>
+            <tr>
+                <th><fmt:message key="rule.id"/></th>
+                <th><fmt:message key="rule.effect"/></th>
+                <th><fmt:message key="action"/></th>
+            </tr>
+            </thead>
+            <%
+                if (basicRuleDTOs != null && basicRuleDTOs.size() > 0) {
+                    List<BasicRuleDTO> orderedBasicRuleDTOs = new ArrayList<BasicRuleDTO>();
+                    String ruleElementOrder = entitlementPolicyBean.getRuleElementOrder();
+                    if(ruleElementOrder != null){
+                        String[] orderedRuleIds = ruleElementOrder.split(EntitlementPolicyConstants.ATTRIBUTE_SEPARATOR);
+                        for(String orderedRuleId : orderedRuleIds){
+                            for(BasicRuleDTO orderedBasicRuleElementDTO : basicRuleDTOs) {
+                                if(orderedRuleId.trim().equals(orderedBasicRuleElementDTO.getRuleId())){
+                                    orderedBasicRuleDTOs.add(orderedBasicRuleElementDTO);
+                                }
+                            }
+                        }
                     }
-                %>
 
-        <div class="buttonRow">
-            <input type="button" onclick="doSubmit();" value="<fmt:message key="finish"/>"
-                   class="button"/>
-            <input type="button" onclick="doCancel();" value="<fmt:message key="cancel" />"
-                   class="button"/>
-        </div>
+                    if(orderedBasicRuleDTOs.size() < 1){
+                        orderedBasicRuleDTOs = basicRuleDTOs;
+                    }
+                    for (BasicRuleDTO ruleElementDTO : orderedBasicRuleDTOs) {
+                        if(ruleElementDTO.isCompletedRule()){
+            %>
+            <tr>
 
-    </form>
+                <td>
+                    <a class="icon-link" onclick="updownthis(this,'up')" style="background-image:url(../admin/images/up-arrow.gif)"></a>
+                    <a class="icon-link" onclick="updownthis(this,'down')" style="background-image:url(../admin/images/down-arrow.gif)"></a>
+                    <input type="hidden" value="<%=ruleElementDTO.getRuleId()%>"/>
+                    <%=ruleElementDTO.getRuleId()%>
+                </td>
+                <td><%=ruleElementDTO.getRuleEffect()%></td>
+                <td>
+                    <a href="#" onclick="editRule('<%=ruleElementDTO.getRuleId()%>')"
+                       class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message
+                            key="edit"/></a>
+                    <a href="#" onclick="deleteRule('<%=ruleElementDTO.getRuleId()%>')"
+                       class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message
+                            key="delete"/></a>
+                </td>
+            </tr>
+            <%
+                    }
+                }
+            } else {
+            %>
+            <tr class="noRuleBox">
+                <td colspan="3"><fmt:message key="no.rule.defined"/><br/></td>
+            </tr>
+            <%
+                }
+            %>
+        </table>
+    </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+
+        </td>
+    </tr>
+    <tr>
+        <td class="buttonRow" colspan="2">
+            <input type="button" onclick="submitForm();" value="<fmt:message key="finish"/>"  class="button"/>
+            <input type="button" onclick="doCancel();" value="<fmt:message key="cancel" />" class="button"/>
+        </td>
+    </tr>
+</table>
+</form>
 </div>
 </div>
 </fmt:bundle>

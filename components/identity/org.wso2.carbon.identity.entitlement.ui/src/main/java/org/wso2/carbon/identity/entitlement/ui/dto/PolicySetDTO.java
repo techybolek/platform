@@ -32,9 +32,7 @@ public class PolicySetDTO {
 
     private String version;
 
-    private TargetElementDTO targetElementDTO;
-
-    private BasicTargetElementDTO basicTargetElementDTO;
+    private TargetDTO targetDTO;
 
     private String description;
 
@@ -112,14 +110,6 @@ public class PolicySetDTO {
         PolicyIdReferences = policyIdReferences;
     }
 
-    public TargetElementDTO getTargetElementDTO() {
-        return targetElementDTO;
-    }
-
-    public void setTargetElementDTO(TargetElementDTO targetElementDTO) {
-        this.targetElementDTO = targetElementDTO;
-    }
-
     public List<String> getPolicyIds() {
         return policyIds;
     }
@@ -128,11 +118,4 @@ public class PolicySetDTO {
         this.policyIds.add(policyId);
     }
 
-    public BasicTargetElementDTO getBasicTargetElementDTO() {
-        return basicTargetElementDTO;
-    }
-
-    public void setBasicTargetElementDTO(BasicTargetElementDTO basicTargetElementDTO) {
-        this.basicTargetElementDTO = basicTargetElementDTO;
-    }
 }

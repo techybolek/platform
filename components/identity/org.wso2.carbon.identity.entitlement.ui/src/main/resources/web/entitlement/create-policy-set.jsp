@@ -30,7 +30,7 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="org.wso2.carbon.claim.mgt.ui.client.ClaimAdminClient" %>
 <%@ page import="org.wso2.carbon.claim.mgt.stub.dto.ClaimDialectDTO" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicTargetElementDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicTargetDTO" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="org.wso2.carbon.claim.mgt.stub.dto.ClaimMappingDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
@@ -61,7 +61,7 @@
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     ClaimDialectDTO claimDialectDTO = null;
-    BasicTargetElementDTO basicTargetElementDTO = entitlementPolicyBean.getBasicTargetElementDTO();
+    BasicTargetDTO basicTargetDTO = entitlementPolicyBean.getBasicTargetDTO();
 
     String selectedSubjectNames = "";
     String selectedResourceNames = "";
@@ -128,34 +128,34 @@
     /**
      * Assign current BasicTarget Object Values to variables to show on UI.
      */
-    if(basicTargetElementDTO != null){
+    if(basicTargetDTO != null){
 
-        resourceNamesTarget =  basicTargetElementDTO.getResourceList();
-        subjectNamesTarget = basicTargetElementDTO.getSubjectList();
-        actionNamesTarget = basicTargetElementDTO.getActionList();
-        environmentNamesTarget = basicTargetElementDTO.getEnvironmentList();
-        userAttributeValueTarget = basicTargetElementDTO.getUserAttributeValue();
+        resourceNamesTarget =  basicTargetDTO.getResourceList();
+        subjectNamesTarget = basicTargetDTO.getSubjectList();
+        actionNamesTarget = basicTargetDTO.getActionList();
+        environmentNamesTarget = basicTargetDTO.getEnvironmentList();
+        userAttributeValueTarget = basicTargetDTO.getUserAttributeValue();
 
-        functionOnActionsTarget = basicTargetElementDTO.getFunctionOnActions();
-        functionOnResourcesTarget = basicTargetElementDTO.getFunctionOnResources();
-        functionOnSubjectsTarget = basicTargetElementDTO.getFunctionOnSubjects();
-        functionOnEnvironmentTarget = basicTargetElementDTO.getFunctionOnEnvironment();
-        functionOnAttributesTarget = basicTargetElementDTO.getFunctionOnAttributes();
+        functionOnActionsTarget = basicTargetDTO.getFunctionOnActions();
+        functionOnResourcesTarget = basicTargetDTO.getFunctionOnResources();
+        functionOnSubjectsTarget = basicTargetDTO.getFunctionOnSubjects();
+        functionOnEnvironmentTarget = basicTargetDTO.getFunctionOnEnvironment();
+        functionOnAttributesTarget = basicTargetDTO.getFunctionOnAttributes();
 
-        resourceDataTypeTarget = basicTargetElementDTO.getResourceDataType();
-        actionDataTypeTarget = basicTargetElementDTO.getActionDataType();
-        subjectDataTypeTarget = basicTargetElementDTO.getSubjectDataType();
-        environmentDataTypeTarget = basicTargetElementDTO.getEnvironmentDataType();
-        userAttributeValueDataTypeTarget = basicTargetElementDTO.getUserAttributeValueDataType();
+        resourceDataTypeTarget = basicTargetDTO.getResourceDataType();
+        actionDataTypeTarget = basicTargetDTO.getActionDataType();
+        subjectDataTypeTarget = basicTargetDTO.getSubjectDataType();
+        environmentDataTypeTarget = basicTargetDTO.getEnvironmentDataType();
+        userAttributeValueDataTypeTarget = basicTargetDTO.getUserAttributeValueDataType();
 
-        resourceIdTarget = basicTargetElementDTO.getResourceId();
-        actionIdTarget = basicTargetElementDTO.getActionId();
-        subjectIdTarget = basicTargetElementDTO.getSubjectId();
-        environmentIdTarget = basicTargetElementDTO.getEnvironmentId();
-        attributeIdTarget = basicTargetElementDTO.getAttributeId();
+        resourceIdTarget = basicTargetDTO.getResourceId();
+        actionIdTarget = basicTargetDTO.getActionId();
+        subjectIdTarget = basicTargetDTO.getSubjectId();
+        environmentIdTarget = basicTargetDTO.getEnvironmentId();
+        attributeIdTarget = basicTargetDTO.getAttributeId();
 
         if(!entitlementPolicyBean.getSubjectTypeMap().containsKey("Target")){
-            entitlementPolicyBean.getSubjectTypeMap().put("Target", basicTargetElementDTO.getSubjectType());
+            entitlementPolicyBean.getSubjectTypeMap().put("Target", basicTargetDTO.getSubjectType());
         }
     }
 
@@ -324,7 +324,7 @@
             <td colspan="2">
             <script type="text/javascript">
                 jQuery(document).ready(function() {
-                    <%if(basicTargetElementDTO == null){%>
+                    <%if(basicTargetDTO == null){%>
                         jQuery("#newTargetLinkRow").hide();
                     <%}else{ %>
                         jQuery("#newTargetLinkRow").show();
@@ -350,7 +350,7 @@
                     });
                 });
             </script>
-            <h2 class="trigger  <%if(basicTargetElementDTO == null){%>active<%} %>"><a href="#"><fmt:message key="policy.set.apply.to"/></a></h2>
+            <h2 class="trigger  <%if(basicTargetDTO == null){%>active<%} %>"><a href="#"><fmt:message key="policy.set.apply.to"/></a></h2>
 
             <div class="toggle_container" style="padding:0;margin-bottom:10px;" id="newTargetLinkRow">
 

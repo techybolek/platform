@@ -20,24 +20,25 @@ package org.wso2.carbon.identity.entitlement.ui.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
  */
-public class NewTargetElementDTO {
+public class TargetDTO {
 
-    private List<AnyOfElementDTO> anyOfElementDTOs = new ArrayList<AnyOfElementDTO>();
+    private List<RowDTO> rowDTOList = new ArrayList<RowDTO>();
 
-    public List<AnyOfElementDTO> getAnyOfElementDTOs() {
-        return anyOfElementDTOs;
+    public List<RowDTO> getRowDTOList() {
+        return rowDTOList;
     }
 
-    public void setAnyOfElementDTOs(List<AnyOfElementDTO> anyOfElementDTOs) {
-        this.anyOfElementDTOs = anyOfElementDTOs;
+    public void setRowDTOList(List<RowDTO> rowDTOList) {
+        this.rowDTOList = rowDTOList;
     }
 
-    public void addAnyOfElementDTO(AnyOfElementDTO anyOfElementDTO) {
-        this.anyOfElementDTOs.add(anyOfElementDTO);
+    public void addRowDTO(RowDTO rowDTO) {
+        this.rowDTOList.add(rowDTO);
     }
+
+
 }

@@ -1,5 +1,5 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ WSO2 Inc. licenses this file to you under the Apache License,
  ~ Version 2.0 (the "License"); you may not use this file except
@@ -24,22 +24,21 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient" %>
-<%@ page import="java.util.ResourceBundle"%><jsp:include page="../dialog/display_messages.jsp"/>
+<%@ page import="java.util.ResourceBundle"%>
+<jsp:include page="../dialog/display_messages.jsp"/>
 <%@ page import="java.lang.Exception" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PaginatedPolicySetDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyEditorAttributeDTO" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.EntitlementFinderDataHolder" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.PolicyEditorEngine" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
 
 <%
+
     entitlementPolicyBean.cleanEntitlementPolicyBean();
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -92,79 +91,14 @@
                              "&policySearchString=" + policySearchString;
 
     try {
-        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
+        EntitlementPolicyAdminServiceClient client =
+                new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
         paginatedPolicySetDTO = client.getAllPolicies(policyTypeFilter, policySearchString, pageNumberInt);
-        if(globalPolicyCombiningAlgorithm != null && globalPolicyCombiningAlgorithm.trim().length() > 0){
-            client.setGlobalPolicyAlgorithm(globalPolicyCombiningAlgorithm);
-        } else {
-            globalPolicyCombiningAlgorithm = client.getGlobalPolicyAlgorithm();              
-        }
-
-        PolicyEditorAttributeDTO[] policyAttributeDTOs =  client.getPolicyAttributeValues();
-        if(policyAttributeDTOs != null){
-
-            Map<String, String> targetFunctionMap = new HashMap<String, String>();
-            Map<String, String> ruleFunctionMap = new HashMap<String, String>();
-            Map<String, String> categoryMap = new HashMap<String, String>();
-            Map<String, String> attributeIdMap = new HashMap<String, String>();
-            Map<String, String> attributeIdDataTypeMap = new HashMap<String, String>();
-
-            for(PolicyEditorAttributeDTO policyAttributeDTO : policyAttributeDTOs){
-
-                AttributeTreeNodeDTO[] nodeDTOs =  policyAttributeDTO.getNodeDTOs();
-                if(nodeDTOs != null){
-                    for(AttributeTreeNodeDTO nodeDTO : nodeDTOs){
-                        entitlementPolicyBean.putAttributeValueNodeMap(nodeDTO.getCategoryId(), nodeDTO);
-                        entitlementPolicyBean.addDefaultAttributeId(nodeDTO.getCategoryId(),
-                                                                    nodeDTO.getDefaultAttributeId());
-                        entitlementPolicyBean.addDefaultDataType(nodeDTO.getCategoryId(),
-                                                                    nodeDTO.getDefaultAttributeDataType());
-                        // This basic editor is always assume there is category called Subject
-                        if("Subject".equals(nodeDTO.getCategoryId())){
-                            String[] attributeIdArray = nodeDTO.getSupportedAttributeIds();
-                            if(attributeIdArray != null && attributeIdArray.length > 1){
-                                for(int i = 0; i < attributeIdArray.length-1; i = i+2){
-                                    attributeIdMap.put(attributeIdArray[i], attributeIdArray[i+1]);
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                String[] targetFunctionArray = policyAttributeDTO.getSupportedTargetFunctions();
-                if(targetFunctionArray != null && targetFunctionArray.length > 1){
-                    for(int i = 0; i < targetFunctionArray.length-1; i = i+2){
-                        targetFunctionMap.put(targetFunctionArray[i], targetFunctionArray[i+1]);
-                    }
-                }
-
-                String[] ruleFunctionArray = policyAttributeDTO.getSupportedRuleFunctions();
-                if(ruleFunctionArray != null && ruleFunctionArray.length > 1){
-                    for(int i = 0; i < ruleFunctionArray.length-1; i = i+2){
-                        ruleFunctionMap.put(ruleFunctionArray[i], ruleFunctionArray[i+1]);
-                    }
-                }
-
-                String[] categoryArray = policyAttributeDTO.getSupportedCategories();
-                if(categoryArray != null && categoryArray.length > 1){
-                    for(int i = 0; i < categoryArray.length -1; i = i+2){
-                        categoryMap.put(categoryArray[i], categoryArray[i+1]);
-                    }
-                }
-
-                String[] attributeIdDataTypeArray = policyAttributeDTO.getSupportedCategories();
-                if(attributeIdDataTypeArray != null && attributeIdDataTypeArray.length > 1){
-                    for(int i = 0; i < attributeIdDataTypeArray.length -1; i = i+2){
-                        attributeIdDataTypeMap.put(attributeIdDataTypeArray[i], attributeIdDataTypeArray[i+1]);
-                    }
-                }
+        EntitlementFinderDataHolder [] entitlementFinders = client.getEntitlementDataModules();
+        if(entitlementFinders != null){
+            for(EntitlementFinderDataHolder holder : entitlementFinders){
+                entitlementPolicyBean.getEntitlementFinders().put(holder.getName(), holder);
             }
-
-            entitlementPolicyBean.setTargetFunctionMap(targetFunctionMap);
-            entitlementPolicyBean.setRuleFunctionMap(ruleFunctionMap);
-            entitlementPolicyBean.setCategoryMap(categoryMap);
-            entitlementPolicyBean.setAttributeIdMap(attributeIdMap);
-            entitlementPolicyBean.setAttributeIdDataTypeMap(attributeIdDataTypeMap);
         }
         policies = paginatedPolicySetDTO.getPolicySet();
         numberOfPages = paginatedPolicySetDTO.getNumberOfPages();
@@ -447,22 +381,22 @@
         <tr>
             <td>
                 <div style="height:30px;">
-                    <a href="javascript:document.location.href='basic-policy-editor.jsp'" class="icon-link"
+                    <a href="javascript:document.location.href='add-policy.jsp'" class="icon-link"
                        style="background-image:url(../admin/images/add.gif);"><fmt:message key='add.new.ent.policy'/></a>
                 </div>
             </td>
-            <td>
-                <div style="height:30px;">
-                    <a href="javascript:document.location.href='create-policy-set.jsp'" class="icon-link"
-                       style="background-image:url(../admin/images/add.gif);"><fmt:message key='add.new.policy.set'/></a>
-                </div>
-            </td>            
-            <td>
-                <div style="height:30px;">
-                    <a href="javascript:document.location.href='import-policy.jsp'" class="icon-link"
-                       style="background-image:url(images/import.gif);"><fmt:message key='import.new.ent.policy'/></a>
-                </div>
-            </td>
+            <%--<td>--%>
+                <%--<div style="height:30px;">--%>
+                    <%--<a href="javascript:document.location.href='create-policy-set.jsp'" class="icon-link"--%>
+                       <%--style="background-image:url(../admin/images/add.gif);"><fmt:message key='add.new.policy.set'/></a>--%>
+                <%--</div>--%>
+            <%--</td>            --%>
+            <%--<td>--%>
+                <%--<div style="height:30px;">--%>
+                    <%--<a href="javascript:document.location.href='import-policy.jsp'" class="icon-link"--%>
+                       <%--style="background-image:url(images/import.gif);"><fmt:message key='import.new.ent.policy'/></a>--%>
+                <%--</div>--%>
+            <%--</td>--%>
         </tr>
     </table>
 
@@ -647,22 +581,6 @@
                     <% if(edit){%> onclick="enable('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
                     href="#" style="background-image: url(images/enable.gif);" class="icon-link">
                     <fmt:message key='enable.policy'/></a>
-                    <%} %>
-                    <% if (policies[i].getPolicyLifeCycle() == 1) { %>
-                    <a title="<fmt:message key='not.promote.policy'/>"
-                    <% if(edit){%> onclick="dePromote('<%=policies[i].getPolicyId()%>');return false;" <%}%>
-                    href="#" style="background-image: url(images/delete.gif);" class="icon-link">
-                    <fmt:message key='not.promote.policy'/></a>
-                    <% } else if(policies[i].getPolicyLifeCycle() == 2) { %>
-                    <a title="<fmt:message key='sync.policy'/>"
-                    <% if(edit){%> onclick="promote('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
-                    href="#" style="background-image: url(images/sync.png);" class="icon-link">
-                    <fmt:message key='sync.policy'/></a>
-                    <%} else { %>
-                    <a title="<fmt:message key='promote.policy'/>"
-                    <% if(edit){%> onclick="promote('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
-                    href="#" style="background-image: url(images/publish-pdp.gif);" class="icon-link">
-                    <fmt:message key='promote.policy'/></a>
                     <%} %>
                 </td>
             </tr>

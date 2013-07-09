@@ -37,7 +37,7 @@
 
     String categoryType = null;
     RuleDTO ruleDTO = new RuleDTO();
-    BasicTargetDTO targetDTO = new BasicTargetDTO();
+    TargetDTO targetDTO = new TargetDTO();
     entitlementPolicyBean.setRuleElementOrder(null);
     
     String targetRowIndexString = CharacterEncoder.getSafeText(request.getParameter("targetRowIndex"));
@@ -168,7 +168,7 @@
             ruleDTO.setCompletedRule(true);
         }
 
-        BasicTargetDTO ruleTargetDTO = new BasicTargetDTO();
+        TargetDTO ruleTargetDTO = new TargetDTO();
 
         for(rowNumber = 0; rowNumber < maxTargetRuleRows + 1; rowNumber ++){
 

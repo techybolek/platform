@@ -25,11 +25,9 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.entitlement.stub.EntitlementAdminServiceStub;
-import org.wso2.carbon.identity.entitlement.stub.dto.ModuleDataHolder;
 import org.wso2.carbon.identity.entitlement.stub.dto.PDPDataHolder;
 import org.wso2.carbon.identity.entitlement.stub.dto.PIPFinderDataHolder;
 import org.wso2.carbon.identity.entitlement.stub.dto.PolicyFinderDataHolder;
-import org.wso2.carbon.identity.entitlement.ui.util.ClientUtil;
 
 /**
  * 
@@ -176,6 +174,34 @@ public class EntitlementAdminServiceClient {
 
         try {
             stub.refreshPolicyFinders(finderName);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     *  Get  globally defined policy combining algorithm
+     * @return policy combining algorithm as a String
+     * @throws AxisFault
+     */
+    public String getGlobalPolicyAlgorithm() throws AxisFault {
+        try {
+            return stub.getGlobalPolicyAlgorithm();
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
+        }
+
+        return null;
+    }
+
+    /**
+     * Set policy combining algorithm globally
+     * @param policyAlgorithm policy combining algorithm as a String
+     * @throws AxisFault
+     */
+    public void setGlobalPolicyAlgorithm(String policyAlgorithm) throws AxisFault {
+        try {
+            stub.setGlobalPolicyAlgorithm(policyAlgorithm);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }

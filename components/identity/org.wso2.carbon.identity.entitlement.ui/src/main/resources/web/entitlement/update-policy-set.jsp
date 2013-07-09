@@ -30,7 +30,7 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicTargetElementDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicTargetDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyCreatorUtil" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
@@ -39,7 +39,7 @@
 <%
 
     PolicySetDTO policySetDTO = new PolicySetDTO();
-    BasicTargetElementDTO basicTargetElementDTO = new BasicTargetElementDTO();
+    BasicTargetDTO basicTargetDTO = new BasicTargetDTO();
     String policySetName =  CharacterEncoder.getSafeText(request.getParameter("policySetName"));
     String policyAlgorithmName = CharacterEncoder.getSafeText(request.getParameter("policyAlgorithmName"));
     String policySetDescription = CharacterEncoder.getSafeText(request.getParameter("policySetDescription"));
@@ -65,82 +65,82 @@
     String userAttributeValueTarget = request.getParameter("userAttributeValueTarget");
 
     if(resourceNamesTarget != null && !resourceNamesTarget.equals("")){
-        basicTargetElementDTO.setResourceList(resourceNamesTarget);
+        basicTargetDTO.setResourceList(resourceNamesTarget);
     }
 
     if(functionOnResourcesTarget != null && !functionOnResourcesTarget.equals("")){
-        basicTargetElementDTO.setFunctionOnResources(functionOnResourcesTarget);
+        basicTargetDTO.setFunctionOnResources(functionOnResourcesTarget);
     }
 
     if(resourceDataTypeTarget != null && !resourceDataTypeTarget.equals("")){
-        basicTargetElementDTO.setResourceDataType(resourceDataTypeTarget);
+        basicTargetDTO.setResourceDataType(resourceDataTypeTarget);
     }
 
     if(resourceIdTarget != null && !resourceIdTarget.equals("")){
-        basicTargetElementDTO.setResourceId(resourceIdTarget);
+        basicTargetDTO.setResourceId(resourceIdTarget);
     }
 
     if(subjectNamesTarget != null && !subjectNamesTarget.equals("")){
-        basicTargetElementDTO.setSubjectList(subjectNamesTarget);
+        basicTargetDTO.setSubjectList(subjectNamesTarget);
     }
 
     if(functionOnSubjectsTarget != null && !functionOnSubjectsTarget.equals("")){
-        basicTargetElementDTO.setFunctionOnSubjects(functionOnSubjectsTarget);
+        basicTargetDTO.setFunctionOnSubjects(functionOnSubjectsTarget);
     }
 
     if(subjectDataTypeTarget != null && !subjectDataTypeTarget.equals("")){
-        basicTargetElementDTO.setSubjectDataType(subjectDataTypeTarget);
+        basicTargetDTO.setSubjectDataType(subjectDataTypeTarget);
     }
 
     if(subjectIdTarget != null && !subjectIdTarget.equals("")){
-        basicTargetElementDTO.setSubjectId(subjectIdTarget);
+        basicTargetDTO.setSubjectId(subjectIdTarget);
     }
 
     if(attributeIdTarget != null && !attributeIdTarget.equals("")){
-        basicTargetElementDTO.setAttributeId(attributeIdTarget);
+        basicTargetDTO.setAttributeId(attributeIdTarget);
     }
 
     if(functionOnAttributesTarget != null && !functionOnAttributesTarget.equals("")){
-        basicTargetElementDTO.setFunctionOnAttributes(functionOnAttributesTarget);
+        basicTargetDTO.setFunctionOnAttributes(functionOnAttributesTarget);
     }
 
     if(userAttributeValueTarget != null && !userAttributeValueTarget.equals("")){
-        basicTargetElementDTO.setUserAttributeValue(userAttributeValueTarget);
+        basicTargetDTO.setUserAttributeValue(userAttributeValueTarget);
     }
 
     if(actionNamesTarget != null && !actionNamesTarget.equals("")){
-        basicTargetElementDTO.setActionList(actionNamesTarget);
+        basicTargetDTO.setActionList(actionNamesTarget);
     }
 
     if(functionOnActionsTarget != null && !functionOnActionsTarget.equals("")){
-        basicTargetElementDTO.setFunctionOnActions(functionOnActionsTarget);
+        basicTargetDTO.setFunctionOnActions(functionOnActionsTarget);
     }
 
     if(actionDataTypeTarget != null && !actionDataTypeTarget.equals("")){
-        basicTargetElementDTO.setActionDataType(actionDataTypeTarget);
+        basicTargetDTO.setActionDataType(actionDataTypeTarget);
     }
 
     if(actionIdTarget != null && !actionIdTarget.equals("")){
-        basicTargetElementDTO.setActionId(actionIdTarget);
+        basicTargetDTO.setActionId(actionIdTarget);
     }
 
     if(environmentNamesTarget != null && !environmentNamesTarget.equals("")){
-        basicTargetElementDTO.setEnvironmentList(environmentNamesTarget);
+        basicTargetDTO.setEnvironmentList(environmentNamesTarget);
     }
 
     if(functionOnEnvironmentTarget != null && !functionOnEnvironmentTarget.equals("")){
-        basicTargetElementDTO.setFunctionOnEnvironment(functionOnEnvironmentTarget);
+        basicTargetDTO.setFunctionOnEnvironment(functionOnEnvironmentTarget);
     }
 
     if(environmentDataTypeTarget != null && !environmentDataTypeTarget.equals("")){
-        basicTargetElementDTO.setEnvironmentDataType(environmentDataTypeTarget);
+        basicTargetDTO.setEnvironmentDataType(environmentDataTypeTarget);
     }
 
     if(environmentIdTarget != null && !environmentIdTarget.equals("")){
-        basicTargetElementDTO.setEnvironmentId(environmentIdTarget);
+        basicTargetDTO.setEnvironmentId(environmentIdTarget);
     }
 
-    entitlementPolicyBean.setBasicTargetElementDTO(basicTargetElementDTO);
+    entitlementPolicyBean.setBasicTargetDTO(basicTargetDTO);
 
 
     String forwardTo = "index.jsp";
@@ -175,7 +175,7 @@
 
             policySetDTO.setPolicySetId(policySetName);
 
-            policySetDTO.setBasicTargetElementDTO(basicTargetElementDTO);
+            policySetDTO.setBasicTargetDTO(basicTargetDTO);
 
             if(policyAlgorithmName != null && !policyAlgorithmName.equals("")){
                 policySetDTO.setPolicyCombiningAlgId(policyAlgorithmName);
@@ -212,7 +212,7 @@
 
             EntitlementPolicyCreator entitlementPolicyCreator = new EntitlementPolicyCreator();
             String policySet = entitlementPolicyCreator.createPolicySet(policySetDTO);
-            String[] policyMetaData = PolicyCreatorUtil.createPolicyMetaData(basicTargetElementDTO, null, null);
+            String[] policyMetaData = PolicyCreatorUtil.generateBasicPolicyEditorData(basicTargetDTO, null, null);
             PolicyDTO policyDTO = new PolicyDTO();
             policyDTO.setPolicy(policySet);
             policyDTO.setBasicPolicyEditorMetaData(policyMetaData);

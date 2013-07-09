@@ -20,7 +20,7 @@ package org.wso2.carbon.identity.entitlement.ui.util;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.llom.util.AXIOMUtil;
-import org.wso2.carbon.identity.entitlement.stub.dto.ModuleStatusHolder;
+import org.wso2.carbon.identity.entitlement.stub.dto.StatusHolder;
 import org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants;
 
 import javax.xml.namespace.QName;
@@ -84,25 +84,24 @@ public class ClientUtil {
            return returnedSubscriberNameSet;
        }
 
-    public static ModuleStatusHolder[] doModuleStatusHoldersPaging(int pageNumber, ModuleStatusHolder[] moduleStatusHolderSet) {
+    public static StatusHolder[] doModuleStatusHoldersPaging(int pageNumber,
+                                                             StatusHolder[] moduleStatusHolderSet) {
 
-              int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
-        ModuleStatusHolder[] returnedModuleStatusHolderSet;
+        int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
+        StatusHolder[] returnedModuleStatusHolderSet;
 
-           int startIndex = pageNumber * itemsPerPageInt;
-           int endIndex = (pageNumber + 1) * itemsPerPageInt;
-           if (itemsPerPageInt < moduleStatusHolderSet.length) {
-               returnedModuleStatusHolderSet = new ModuleStatusHolder[itemsPerPageInt];
-           } else {
-               returnedModuleStatusHolderSet = new ModuleStatusHolder[moduleStatusHolderSet.length];
-           }
-           for (int i = startIndex, j = 0; i < endIndex && i < moduleStatusHolderSet.length; i++, j++) {
-               returnedModuleStatusHolderSet[j] = moduleStatusHolderSet[i];
-           }
+        int startIndex = pageNumber * itemsPerPageInt;
+        int endIndex = (pageNumber + 1) * itemsPerPageInt;
+        if (itemsPerPageInt < moduleStatusHolderSet.length) {
+           returnedModuleStatusHolderSet = new StatusHolder[itemsPerPageInt];
+        } else {
+           returnedModuleStatusHolderSet = new StatusHolder[moduleStatusHolderSet.length];
+        }
+        for (int i = startIndex, j = 0; i < endIndex && i < moduleStatusHolderSet.length; i++, j++) {
+           returnedModuleStatusHolderSet[j] = moduleStatusHolderSet[i];
+        }
 
-           return returnedModuleStatusHolderSet;
-       }
-
-
+        return returnedModuleStatusHolderSet;
+    }
 
 }

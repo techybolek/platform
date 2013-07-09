@@ -128,26 +128,26 @@ public class EntitlementPolicyAdminServiceClient {
 	 *
 	 * @param policyId policy id
 	 * @return returns policy DTO
-     * @throws AxisFault throws
+     * @throws AxisFault throws        // TODO
      */
-    public PolicyDTO getMetaDataPolicy(String policyId) throws AxisFault {
-        PolicyDTO dto = null;
-        try {
-            dto = stub.getMetaDataPolicy(policyId);
-        } catch (Exception e) {
-            String message = "Error while loading the policy from backend service";
-            handleException(message, e);
-        }
-        return dto;
-    }
+//    public PolicyDTO getMetaDataPolicy(String policyId) throws AxisFault {
+//        PolicyDTO dto = null;
+//        try {
+//            dto = stub.getMetaDataPolicy(policyId);
+//        } catch (Exception e) {
+//            String message = "Error while loading the policy from backend service";
+//            handleException(message, e);
+//        }
+//        return dto;
+//    }
     /**
      * 
-     * @param policy
+     * @param policyId
      * @throws AxisFault
      */
-    public void removePolicy(PolicyDTO policy) throws AxisFault {
+    public void removePolicy(String policyId) throws AxisFault {
         try {
-            stub.removePolicy(policy);
+            stub.removePolicy(policyId);
         } catch (Exception e) {
             String message = "Error while removing the policy from backend service";
             handleException(message, e);
@@ -233,33 +233,6 @@ public class EntitlementPolicyAdminServiceClient {
         return null;
     }
 
-    /**
-     *  Get  globally defined policy combining algorithm
-     * @return policy combining algorithm as a String
-     * @throws AxisFault
-     */
-    public String getGlobalPolicyAlgorithm() throws AxisFault {
-        try {
-            return stub.getGlobalPolicyAlgorithm();
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    /**
-     * Set policy combining algorithm globally
-     * @param policyAlgorithm policy combining algorithm as a String
-     * @throws AxisFault
-     */
-    public void setGlobalPolicyAlgorithm(String policyAlgorithm) throws AxisFault {
-        try {
-            stub.setGlobalPolicyAlgorithm(policyAlgorithm);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-    }
     
      /**
      * 
@@ -278,12 +251,23 @@ public class EntitlementPolicyAdminServiceClient {
      * @return attribute value tree
      * @throws AxisFault throws
      */
-    public PolicyEditorAttributeDTO[] getPolicyAttributeValues()
-            throws AxisFault {
+    public EntitlementTreeNodeDTO getEntitlementData(String dataModule, String category,
+                                       String regexp, int dataLevel, int limit) throws AxisFault {
         try {
-           return  stub.getPolicyAttributeValues();
+           return  stub.getEntitlementData(dataModule, category, regexp, dataLevel, limit);
         } catch (Exception e) {
            handleException(e.getMessage(), e);
+        }
+
+        return null;
+    }
+
+    public EntitlementFinderDataHolder[] getEntitlementDataModules() throws AxisFault {
+
+        try {
+            return  stub.getEntitlementDataModules();
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
 
         return null;
@@ -295,14 +279,14 @@ public class EntitlementPolicyAdminServiceClient {
      * @param policyDTOs policies as PolicyDTO arrays
      * @throws AxisFault throws
      */
-    public void reOderPolicies(PolicyDTO[] policyDTOs)
-            throws AxisFault {
-        try {
-           stub.reOderPolicies(policyDTOs);
-        } catch (Exception e) {
-           handleException(e.getMessage(), e);
-        }
-    }
+//    public void reOderPolicies(PolicyDTO[] policyDTOs)
+//            throws AxisFault {
+//        try {
+//           stub.reOderPolicies(policyDTOs);
+//        } catch (Exception e) {
+//           handleException(e.getMessage(), e);
+//        }
+//    }
 
     /**
      * Gets all subscriber ids
@@ -328,7 +312,7 @@ public class EntitlementPolicyAdminServiceClient {
      * @return subscriber data as SubscriberDTO object
      * @throws AxisFault throws
      */
-    public ModuleDataHolder getSubscriber(String id) throws AxisFault {
+    public PublisherDataHolder getSubscriber(String id) throws AxisFault {
 
         try {
             return stub.getSubscriber(id);
@@ -343,12 +327,17 @@ public class EntitlementPolicyAdminServiceClient {
      * Updates or creates subscriber data
      *
      * @param holder subscriber data as ModuleDataHolder object
+     * @param update
      * @throws AxisFault throws
      */
-    public void updateSubscriber(ModuleDataHolder holder,boolean update) throws AxisFault {
+    public void updateSubscriber(PublisherDataHolder holder,boolean update) throws AxisFault {
 
         try {
-            stub.updateSubscriber(holder,update);
+            if(update){
+                stub.updateSubscriber(holder);
+            } else {
+                stub.addSubscriber(holder);
+            }
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -379,7 +368,7 @@ public class EntitlementPolicyAdminServiceClient {
     public void publishAll(String[] policies, String[] subscriberId) throws AxisFault {
 
         try {
-            stub.publishPolicies(policies, subscriberId);
+            stub.publishPolicies(policies, 0, null, subscriberId);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -391,10 +380,10 @@ public class EntitlementPolicyAdminServiceClient {
      * @return publisher modules properties as ModuleDataHolder
      * @throws AxisFault throws
      */
-    public ModuleDataHolder[] getPublisherModuleProperties() throws AxisFault {
+    public PublisherDataHolder[] getPublisherModuleData() throws AxisFault {
 
         try {
-            return stub.getPublisherModuleProperties();
+            return stub.getPublisherModuleData();
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }

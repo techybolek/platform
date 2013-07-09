@@ -149,7 +149,7 @@
         <tr>
             <td>
                 <div style="height:30px;">
-                    <a href="javascript:document.location.href='basic-policy-editor.jsp'" class="icon-link"
+                    <a href="javascript:document.location.href='rbac-policy-editor.jsp'" class="icon-link"
                        style="background-image:url(../admin/images/add.gif);"><fmt:message key='add.new.ent.policy'/></a>
                 </div>
             </td>

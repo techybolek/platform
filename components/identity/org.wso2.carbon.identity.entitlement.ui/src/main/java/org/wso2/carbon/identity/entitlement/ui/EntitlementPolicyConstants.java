@@ -219,13 +219,17 @@ public class EntitlementPolicyConstants {
 
     public static final String BASIC_POLICY_EDITOR = "Basic";
 
+    public static final String STANDARD_POLICY_EDITOR = "Standard";
+
     public static final String SOA_POLICY_EDITOR = "SOA";
 
     public static final String SEARCH_ERROR = "Search_Error";
 
     public static final String DEFAULT_META_DATA_MODULE_NAME = "Carbon Attribute Finder Module";
 
-    public static final int BASIC_POLICY_OPTIONAL_META_DATA_AMOUNT = 20;
+    public static final int BASIC_POLICY_EDITOR_RULE_DATA_AMOUNT = 23;
+
+    public static final int BASIC_POLICY_EDITOR_TARGET_DATA_AMOUNT = 16;
 
     public static final String ENTITLEMENT_PUBLISHER_PROPERTY = "entitlementPublisherPropertyDTO";
 
