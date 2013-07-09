@@ -10,7 +10,7 @@ instructions to run sample.
 Steps:
 ------
 
-1. Extract wso2am-xxx.zip (eg: wso2am-1.3.0.zip)
+1. Extract wso2am-xxx.zip (eg: wso2am-1.4.1.zip)
 
 2. Build workflow sample project (Available at samples/BPSWorkFlow/UserCreation/UserCreationProcess) using maven. Goto
    that project location and run "mvn clean install" command. If you want to change edit this service open this project
