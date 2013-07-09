@@ -318,12 +318,14 @@ public final class APIConstants {
     
     public static final String SWAGGER_VERSION = "1.1";
     
-    public static class AuthParameter {
+    public static class OperationParameter {
     	public static final String AUTH_PARAM_NAME = "Authorization";
     	public static final String AUTH_PARAM_DESCRIPTION = "Access Token";
     	public static final String AUTH_PARAM_TYPE = "header";
     	public static final String PAYLOAD_PARAM_NAME = "Payload";
     	public static final String PAYLOAD_PARAM_DESCRIPTION = "Request Payload";
+    	public static final String QUERY_PARAM_NAME = "Query Parameters";
+    	public static final String QUERY_PARAM_DESCRIPTION = "Request Query Parameters";
     	public static final String PAYLOAD_PARAM_TYPE = "body";
     }
     

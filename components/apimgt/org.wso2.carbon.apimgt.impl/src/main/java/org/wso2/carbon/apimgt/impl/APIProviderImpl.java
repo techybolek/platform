@@ -6,6 +6,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -626,31 +627,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     		List<Parameter> parameters = null;
     		String path = urlPrefix + 
     				APIUtil.removeAnySymbolFromUriTempate(template.getUriTemplate());
+    		/* path exists in uriTemplateDefinitions */
     		if (uriTemplateDefinitions.get(path) != null) {
     			ops = uriTemplateDefinitions.get(path);
     			parameters = new ArrayList<Parameter>();
     			if (!(template.getAuthType().equals(APIConstants.AUTH_NO_AUTHENTICATION))) {
-    				Parameter authParam = new Parameter(APIConstants.AuthParameter.AUTH_PARAM_NAME, 
-    						APIConstants.AuthParameter.AUTH_PARAM_DESCRIPTION, APIConstants.AuthParameter.AUTH_PARAM_TYPE, true, false, "String");
+    				Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME, 
+    						APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, true, false, "String");
     				parameters.add(authParam);
     			}
-    			Parameter payLoadParam = new Parameter(APIConstants.AuthParameter.PAYLOAD_PARAM_NAME, 
-						APIConstants.AuthParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.AuthParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-    			parameters.add(payLoadParam);
-    			Operation op = new Operation(template.getHTTPVerb(), description, description, parameters);
+    			String httpVerb = template.getHTTPVerb();
+    			/* For GET and DELETE Parameter name - Query Parameters*/
+    			if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
+    					httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
+    				Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME, 
+    						APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(queryParam);
+    			} else {/* For POST and PUT Parameter name - Payload*/
+    				Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, 
+    						APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(payLoadParam);
+    			}
+    			Operation op = new Operation(httpVerb, description, description, parameters);
     			ops.add(op);
-    		} else {
+    		} else {/* path not exists in uriTemplateDefinitions */
     			ops = new ArrayList<Operation>();
     			parameters = new ArrayList<Parameter>();
 				if (!(template.getAuthType().equals(APIConstants.AUTH_NO_AUTHENTICATION))) {
-    				Parameter authParam = new Parameter(APIConstants.AuthParameter.AUTH_PARAM_NAME, 
-    						APIConstants.AuthParameter.AUTH_PARAM_DESCRIPTION, APIConstants.AuthParameter.AUTH_PARAM_TYPE, true, false, "String");
+    				Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME, 
+    						APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, true, false, "String");
     				parameters.add(authParam);
     			}
-    			Parameter payLoadParam = new Parameter(APIConstants.AuthParameter.PAYLOAD_PARAM_NAME, 
-						APIConstants.AuthParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.AuthParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-    			parameters.add(payLoadParam);
-    			Operation op = new Operation(template.getHTTPVerb(), description, description, parameters);
+				String httpVerb = template.getHTTPVerb();
+				/* For GET and DELETE Parameter name - Query Parameters*/
+    			if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
+    					httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
+    				Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME, 
+    						APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(queryParam);
+    			} else {/* For POST and PUT Parameter name - Payload*/
+    				Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, 
+    						APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(payLoadParam);
+    			}
+    			Operation op = new Operation(httpVerb, description, description, parameters);
     			ops.add(op);
     			uriTemplateDefinitions.put(path, ops);
     		}
