@@ -51,6 +51,7 @@ public class EventBrokerHandler implements EventBundleNotificationService {
             // run is supertenants
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getCurrentContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             PrivilegedCarbonContext.getCurrentContext().setUsername(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
 
             EventBroker eventBroker = EventBrokerBuilder.createEventBroker();
