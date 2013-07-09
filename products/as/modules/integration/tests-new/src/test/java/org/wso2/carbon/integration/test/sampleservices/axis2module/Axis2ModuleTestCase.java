@@ -45,7 +45,7 @@ import static org.testng.Assert.assertTrue;
  * This class can be used for testing purposes of Axis2Module sample scenario.
  * test class disabled due to https://wso2.org/jira/browse/WSAS-1300
  */
-public abstract class Axis2ModuleTestCase extends ASIntegrationTest {
+public class Axis2ModuleTestCase extends ASIntegrationTest {
 
     private static final Log log = LogFactory.getLog(Axis2ModuleTestCase.class);
     private ModuleAdminServiceClient moduleAdminServiceClient;
