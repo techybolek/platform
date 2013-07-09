@@ -17,9 +17,10 @@
 */
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.wso2.carbon.caching.core.CacheKey;
 
-public class ClaimCacheKey extends CacheKey {
+
+public class ClaimCacheKey {
+    //TODO refactor caching implementation
 
     private String cacheKeyString;
 
@@ -31,7 +32,7 @@ public class ClaimCacheKey extends CacheKey {
         return cacheKeyString;
     }
 
-    @Override
+
     public boolean equals(Object o) {
         if (!(o instanceof ClaimCacheKey)) {
             return false;
@@ -39,7 +40,6 @@ public class ClaimCacheKey extends CacheKey {
         return this.cacheKeyString.equals(((ClaimCacheKey) o).getCacheKeyString());
     }
 
-    @Override
     public int hashCode() {
         return cacheKeyString.hashCode();
     }
