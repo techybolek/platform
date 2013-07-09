@@ -300,6 +300,7 @@
 
     <properties>
         <carbon.version>4.2.0-SNAPSHOT</carbon.version>
+	<carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
         <eclipse.version>3.2.0</eclipse.version>
         <registry.rampart.version>1.5.0-wso2v1</registry.rampart.version>
         <!-- Component versions == Carbon version, if not, please change the properties below. -->

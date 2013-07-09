@@ -96,7 +96,7 @@
         </fileSet-->
 	<fileSet>
            <directory>../jaxwebapps</directory>
-           <outputDirectory>${pom.artifactId}-${build.version}/repository/deployment/server/jaxwebapps</outputDirectory>
+           <outputDirectory>${pom.artifactId}-${build.version}/repository/deployment/server/webapps</outputDirectory>
            <includes>
                <include>resource.war</include>
            </includes>
@@ -378,6 +378,44 @@
                 <include>javax.xml:jaxr-api:jar</include>
             </includes>
         </dependencySet>
+	<dependencySet>
+            <outputDirectory>${pom.artifactId}-${pom.version}/lib/runtimes/cxf
+            </outputDirectory>
+            <includes>
+		<include>org.apache.cxf:cxf-bundle:jar</include>
+		<include>net.sf.ehcache:ehcache-core:jar</include>
+		<include>org.apache.httpcomponents:httpasyncclient:jar</include>
+		<include>org.apache.httpcomponents:httpclient:jar</include>
+		<include>org.apache.httpcomponents:httpcore:jar</include>
+		<include>org.apache.httpcomponents:httpcore-nio:jar</include>
+		<include>javax.ws.rs:javax.ws.rs-api:jar</include>
+		<include>com.sun.xml.bind:jaxb-impl:jar</include>
+		<include>com.sun.xml.bind:jaxb-xjc:jar</include>
+		<include>org.apache.neethi:neethi:jar</include>
+		<include>org.apache.ws.security:wss4j:jar</include>
+		<include>xml-resolver:xml-resolver:jar</include>
+		<include>org.apache.ws.xmlschema:xmlschema-core:jar</include>
+		<include>wsdl4j:wsdl4j:jar</include>
+                <include>commons-collections:commons-collections:jar</include>
+                <include>org.apache.cxf.xjcplugins:cxf-xjc-dv:jar</include>
+                <include>commons-lang:commons-lang:jar</include>
+                <include>org.apache.cxf.xjc-utils:cxf-xjc-runtime:jar</include>
+                <include>org.apache.velocity:velocity:jar</include>
+                <include>org.apache.cxf.xjcplugins:cxf-xjc-ts:jar</include>
+                <include>org.apache.cxf.xjcplugins:cxf-xjc-boolean:jar</include>
+                <include>org.apache.cxf.xjcplugins:cxf-xjc-bug671:jar</include>
+                <include>aopalliance:aopalliance:jar</include>
+                <include>commons-logging:commons-logging:jar</include>
+		<include>org.apache.santuario:xmlsec:jar</include>
+		<include>org.springframework:spring-aop:jar</include>
+		<include>org.springframework:spring-asm:jar</include>
+		<include>org.springframework:spring-beans:jar</include>
+		<include>org.springframework:spring-context:jar</include>
+		<include>org.springframework:spring-core:jar</include>
+		<include>org.springframework:spring-expression:jar</include>
+		<include>org.springframework:spring-web:jar</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
     
     <files>
@@ -494,6 +532,18 @@
             <outputDirectory>${pom.artifactId}-${build.version}/repository/conf/axis2/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
+        </file>
+	<file>
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/tomcat/webapp-classloading.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/tomcat</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/tomcat/webapp-classloading-environments.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/tomcat</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
         </file>        
         <file>
             <source>../../LICENSE.txt</source>
@@ -579,7 +629,7 @@
         </file>
         <file>
             <source>../juddi/juddiv3-war/target/juddiv3.war</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
         </file>
 	<!-- Copy APIM DB --> 
 	<file>
