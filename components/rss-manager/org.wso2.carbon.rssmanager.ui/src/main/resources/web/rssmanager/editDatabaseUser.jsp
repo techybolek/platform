@@ -19,11 +19,12 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
+<%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabasePrivilegeSet" %>
+<%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabaseUserMetaData" %>
+<%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabaseUserMetaData" %>
-<%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabasePrivilegeSet" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -38,6 +39,7 @@
         String rssInstanceName = request.getParameter("rssInstanceName");
         String username = request.getParameter("username");
         String databaseName = request.getParameter("databaseName");
+        String envName = request.getParameter("envName");
 
         RSSManagerClient client;
         DatabaseUserMetaData user = null;
@@ -46,11 +48,15 @@
         ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
                 getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+
+        RSSEnvironmentContext rssEnvContext = new RSSEnvironmentContext();
+    	rssEnvContext.setEnvironmentName(envName);
+    	rssEnvContext.setRssInstanceName(rssInstanceName);
         try {
             client = new RSSManagerClient(cookie, backendServerURL, configContext, request.getLocale());
             privileges =
-                    client.getUserDatabasePermissions(rssInstanceName, databaseName, username);
-            user = client.getDatabaseUser(rssInstanceName, username);
+                    client.getUserDatabasePermissions(rssEnvContext, databaseName, username);
+            user = client.getDatabaseUser(rssEnvContext, username);
         } catch (Exception e) {
             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
         }
@@ -245,25 +251,27 @@
                         <td class="buttonRow" colspan="2">
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.save"/>"
-                                    onclick="editDatabaseUser('<%=(user != null) ? user.getRssInstanceName() : ""%>', '<%=(user != null) ? user.getUsername() : ""%>', '<%=databaseName%>'); return false;"/>
+                                    onclick="editDatabaseUser('<%=rssInstanceName%>', '<%=(user != null) ? user.getUsername() : ""%>', '<%=databaseName%>', '<%=envName%>'); return false;"/>
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.cancel"/>"
-                                   onclick="dispatchCancelEditDatabaseUserRequest('<%=rssInstanceName%>', '<%=databaseName%>')"/>
+                                   onclick="dispatchCancelEditDatabaseUserRequest('<%=rssInstanceName%>', '<%=databaseName%>', '<%=envName%>')"/>
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </form>
             <script type="text/javascript">
-                function dispatchCancelEditDatabaseUserRequest(rssInstanceName, databaseName) {
+                function dispatchCancelEditDatabaseUserRequest(rssInstanceName, databaseName, envName) {
                     document.getElementById("rssInstanceName").value = rssInstanceName;
                     document.getElementById("databaseName").value = databaseName;
+                    document.getElementById("envName").value = envName;
                     document.getElementById("cancelForm").submit();
                 }
             </script>
-            <form id="cancelForm" action="attachedDatabaseUsers.jsp" method="post">
+            <form id="cancelForm" action="attachedDatabaseUsers.jsp?ordinal=1" method="post">
                 <input type="hidden" name="rssInstanceName" id="rssInstanceName"/>
                 <input type="hidden" name="databaseName" id="databaseName"/>
+                <input type="hidden" name="envName" id="envName"/>
             </form>
         </div>
     </div>

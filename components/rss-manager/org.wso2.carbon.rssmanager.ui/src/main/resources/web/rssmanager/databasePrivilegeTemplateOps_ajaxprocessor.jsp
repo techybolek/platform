@@ -16,6 +16,7 @@
 ~ under the License.
 -->
 
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext"%>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
@@ -32,6 +33,11 @@
     RSSManagerClient client;
     String flag = request.getParameter("flag");
     String privilegeTemplateName = request.getParameter("privilegeTemplateName");
+    String envName = request.getParameter("envName");
+    
+    RSSEnvironmentContext rssEnvContext= new RSSEnvironmentContext();
+    rssEnvContext.setEnvironmentName(envName);
+    
 
     //Database privileges
     String selectPriv = request.getParameter("select_priv");
@@ -80,6 +86,16 @@
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     client = new RSSManagerClient(cookie, backendServerUrl, configContext, request.getLocale());
     String msg;
+    String xml;
+
+    response.setContentType("text/xml; charset=UTF-8");
+    // Set standard HTTP/1.1 no-cache headers.
+    response.setHeader("Cache-Control",
+            "no-store, max-age=0, no-cache, must-revalidate");
+    // Set IE extended HTTP/1.1 no-cache headers.
+    response.addHeader("Cache-Control", "post-check=0, pre-check=0");
+    // Set standard HTTP/1.0 no-cache header.
+    response.setHeader("Pragma", "no-cache");
 
     if ("create".equals(flag)) {
         try {
@@ -107,47 +123,36 @@
             DatabasePrivilegeTemplate template = new DatabasePrivilegeTemplate();
             template.setName(privilegeTemplateName);
             template.setPrivileges(privileges);
-            client.createDatabasePrivilegesTemplate(template);
-
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.createDatabasePrivilegesTemplate(rssEnvContext, template);
 
             PrintWriter pw = response.getWriter();
             msg = "Database privilege template '" + template.getName() +
                     "' has been successfully created";
-            pw.write(msg);
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
     } else if ("drop".equals(flag)) {
         try {
-            client.dropDatabasePrivilegesTemplate(privilegeTemplateName);
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.dropDatabasePrivilegesTemplate(rssEnvContext,privilegeTemplateName);
 
             PrintWriter pw = response.getWriter();
             msg = "Database privilege template '" + privilegeTemplateName +
                     "' has been successfully dropped";
-            pw.write(msg);
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>";
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
     } else if ("edit".equals(flag)) {
@@ -176,25 +181,19 @@
             DatabasePrivilegeTemplate template = new DatabasePrivilegeTemplate();
             template.setName(privilegeTemplateName);
             template.setPrivileges(privileges);
-            client.editDatabasePrivilegesTemplate(template);
-
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.editDatabasePrivilegesTemplate(rssEnvContext,template);
 
             PrintWriter pw = response.getWriter();
             msg = "Database privilege template '" + privilegeTemplateName +
                     "' has been successfully edited";
-            pw.write(msg);
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>";
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
 

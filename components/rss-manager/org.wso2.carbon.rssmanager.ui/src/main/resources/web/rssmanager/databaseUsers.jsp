@@ -16,6 +16,7 @@
 ~ under the License.
 -->
 
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
@@ -39,10 +40,14 @@
 
         <%
             RSSManagerClient client = null;
+            RSSEnvironmentContext rssEnvContext = null;
+
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
                     getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+            String environmentName = request.getParameter("envName");
+            String[] environments = (String[]) session.getAttribute("environments");
 
             try {
                 client = new RSSManagerClient(cookie, backendServerURL, configContext, request.getLocale());
@@ -51,21 +56,63 @@
                 CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
                         CarbonUIMessage.ERROR, request, e);
             }
+
+            if (environments == null) {
+                if (client != null) {
+                    try {
+                        environments = client.getRSSEnvironmentNames();
+                        session.setAttribute("environments", environments);
+                    } catch (Exception e) {
+                        CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
+                                CarbonUIMessage.ERROR, request, e);
+                    }
+                }
+            }
+            if (environments == null) {
+                environments = new String[0];
+            }
+            if (environmentName == null) {
+                environmentName = environments[0];
+            }
+            rssEnvContext = new RSSEnvironmentContext();
+            rssEnvContext.setEnvironmentName(environmentName);
         %>
+
         <div id="workArea">
+            <div>
+                <fmt:message key="rss.environment.name"/> <select id="envCombo" name="envCombo"
+                                                                      onchange="onComboChange(this)">
+                <%
+
+                    for (String env : environments) {
+                        if (environmentName != null && env.equals(environmentName.trim())) {
+                %>
+                <option id="<%=env%>" value="<%=env%>" selected="selected"><%=env%>
+                </option>
+                <%
+                } else {
+                %>
+                <option id="<%=env%>" value="<%=env%>"><%=env%>
+                </option>
+                <%
+                        }
+                    }
+                %>
+            </select><br><br>
+            </div>
             <form method="post" action="#" name="dataForm">
                 <table class="styledLeft" id="databaseUserTable">
                     <%
                         if (client != null) {
                             try {
-                                DatabaseUserMetaData[] users = client.getDatabaseUsers();
+                                DatabaseUserMetaData[] users = client.getDatabaseUsers(rssEnvContext);
                                 if (users != null && users.length > 0) {
                     %>
                     <thead>
                     <tr>
-                        <th width="20%"><fmt:message key="rss.manager.user"/></th>
-                        <th><fmt:message key="rss.manager.instance.name"/></th>
-                        <th width="60%"><fmt:message key="rss.manager.actions"/></th>
+                        <th width="30%"><fmt:message key="rss.manager.user"/></th>
+                        <th width="30%"><fmt:message key="rss.manager.instance.name"/></th>
+                        <th width="40%"><fmt:message key="rss.manager.actions"/></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -76,11 +123,12 @@
                     <tr>
                         <td id="<%=user.getUsername()%>"><%=user.getUsername()%>
                         </td>
-                        <td><%=user.getRssInstanceName()%></td>
+                        <td><%=user.getRssInstanceName()%>
+                        </td>
                         <td>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/delete.gif);"
-                               onclick="dropDatabaseUser('<%=user.getRssInstanceName()%>', '<%=user.getUsername()%>')"
+                               onclick="dropDatabaseUser('<%=user.getRssInstanceName()%>', '<%=user.getUsername()%>', '<%=environmentName%>')"
                                href="#"><fmt:message
                                     key="rss.manager.delete.database"/></a>
                         </td>
@@ -108,7 +156,7 @@
                 <a class="icon-link"
                    style="background-image:url(../admin/images/add.gif);"
                    href="javascript:submitAddForm()"><fmt:message key="rss.manager.add.user"/></a>
-                
+
                 <div style="clear:both;"></div>
             </form>
             <script type="text/javascript">
@@ -118,6 +166,7 @@
             </script>
             <form action="createDatabaseUser.jsp" method="post" id="addForm">
                 <input type="hidden" id="rssInstanceName1" name="rssInstanceName"/>
+                <input type="hidden" id="envName" name="envName" value="<%=environmentName%>"/>
             </form>
             <script type="text/javascript">
                 function submitCancelForm() {
@@ -133,6 +182,10 @@
                     document.getElementById('url').value = encodeURIComponent(url);
                     document.getElementById('driver').value = encodeURIComponent(driver);
                     document.getElementById('exploreForm').submit();
+                }
+                function onComboChange(envCombo) {
+                    var opt = envCombo.options[envCombo.selectedIndex].value;
+                    window.location = 'databaseUsers.jsp?envName=' + opt;
                 }
             </script>
             <form action="../dbconsole/login.jsp" method="post" id="exploreForm">

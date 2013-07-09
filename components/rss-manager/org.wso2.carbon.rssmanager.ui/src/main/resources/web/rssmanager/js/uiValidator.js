@@ -83,7 +83,10 @@ function setRssInsId() {
 }
 
 function createDatabase() {
-    var rssInstances = document.getElementById("rssInstances");
+	
+	var environments = document.getElementById("envCombo");
+	var envName = trim(environments[environments.selectedIndex].value);
+	var rssInstances = document.getElementById("rssInstances");
     var rssInstanceName = trim(rssInstances[rssInstances.selectedIndex].value);
     var databaseName = trim(document.getElementById("databaseName").value);
 
@@ -100,10 +103,11 @@ function createDatabase() {
         CARBON.showWarningDialog("Alphanumeric characters and underscores are only allowed in database name");
         return false;
     }
-    dispatchDatabaseActionRequest('create', rssInstanceName, databaseName);
+    dispatchDatabaseActionRequest('create', rssInstanceName, databaseName, envName);
 }
 
 function attachUserToDatabase() {
+	var envName = document.getElementById('envName').value;
     var rssInstanceName = document.getElementById('rssInstanceName').value;
     var databaseName = document.getElementById('databaseName').value;
     var templates = document.getElementById('privilegeTemplates');
@@ -127,10 +131,10 @@ function attachUserToDatabase() {
         CARBON.showWarningDialog("Select a valid database user");
         return false;
     }
-    dispatchDatabaseManageAction('attach', rssInstanceName, username, databaseName);
+    dispatchDatabaseManageAction('attach', rssInstanceName, username, databaseName, envName);
 }
 
-function dispatchDatabaseManageAction(flag, rssInstanceName, username, databaseName) {
+function dispatchDatabaseManageAction(flag, rssInstanceName, username, databaseName, envName) {
     var tmpPassword = document.getElementById('password');
     var password = '';
     if (tmpPassword != null) {
@@ -150,15 +154,16 @@ function dispatchDatabaseManageAction(flag, rssInstanceName, username, databaseN
             encodeURIComponent(rssInstanceName) + '&flag=' + encodeURIComponent(flag) +
             '&username=' + encodeURIComponent(username) + '&password=' +
             encodeURIComponent(password) + '&privilegeTemplateName=' +
-            encodeURIComponent(privilegeTemplate) + '&databaseName=' + databaseName;
+            encodeURIComponent(privilegeTemplate) + '&databaseName=' + 
+            databaseName + '&envName=' + envName;
     jQuery('#connectionStatusDiv').load(url, displayDatabaseManageActionStatus);
 }
 
-function displayDatabaseManageActionStatus(msg) {
+function displayDatabaseManageActionStatus(msg) {createDatabase
     if (msg.search(/has been successfully attached/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -166,7 +171,7 @@ function displayDatabaseManageActionStatus(msg) {
     } else if (msg.search(/has been successfully detached/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -174,7 +179,7 @@ function displayDatabaseManageActionStatus(msg) {
     } else if (msg.search(/Failed to attach user/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -182,7 +187,7 @@ function displayDatabaseManageActionStatus(msg) {
     } else if (msg.search(/Failed to detach user/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -190,7 +195,7 @@ function displayDatabaseManageActionStatus(msg) {
     } else {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showErrorDialog(msg, handleOK());
@@ -198,11 +203,12 @@ function displayDatabaseManageActionStatus(msg) {
     }
 }
 
-function createDatabaseUser() {
+function createDatabaseUser(envName) {
     var username = trim(document.getElementById('username').value);
     var password = document.getElementById('password').value;
     var repeatPass = document.getElementById('repeatPassword').value;
     var rssInstances = document.getElementById('rssInstances');
+       
     var rssInstanceName = rssInstances[rssInstances.selectedIndex].value;
     if (username == '' || username == null) {
         CARBON.showWarningDialog("Username field cannot be left blank");
@@ -223,16 +229,16 @@ function createDatabaseUser() {
         CARBON.showErrorDialog("Values in Password and Repeat password fields do not match");
         return false;
     }
-    dispatchDatabaseUserActionRequest('create', rssInstanceName, username, '');
+    dispatchDatabaseUserActionRequest('create', rssInstanceName, username, '', envName);
 }
 
-function editDatabaseUser(rssInstanceName, username, databaseName) {
+function editDatabaseUser(rssInstanceName, username, databaseName, envName) {
     var password = document.getElementById('password').value;
     if (password == '' || password == null) {
         CARBON.showWarningDialog("Password field cannot be left blank");
         return false;
     }
-    dispatchAttachedDatabaseUserActionRequest('edit', rssInstanceName, username, databaseName);
+    dispatchAttachedDatabaseUserActionRequest('edit', rssInstanceName, username, databaseName, envName);
     return true;
 }
 
@@ -300,17 +306,17 @@ function retrieveValidatedUrl(url) {
     return 'jdbc:' + prefix + "://" + hostname;
 }
 
-function dropDatabaseUser(rssInstanceName, username) {
+function dropDatabaseUser(rssInstanceName, username, envName) {
     function forwardToDel() {
-        dispatchDatabaseUserActionRequest('drop', rssInstanceName, username, '')
+        dispatchDatabaseUserActionRequest('drop', rssInstanceName, username, '', envName)
     }
 
     CARBON.showConfirmationDialog("Do you want to drop the user?", forwardToDel);
 }
 
-function dropDatabase(rssInstanceName, databaseName) {
+function dropDatabase(rssInstanceName, databaseName, envName) {
     function forwardToDel() {
-        dispatchDatabaseActionRequest('drop', rssInstanceName, databaseName);
+        dispatchDatabaseActionRequest('drop', rssInstanceName, databaseName, envName);
     }
 
     CARBON.showConfirmationDialog("Do you want to drop the database?", forwardToDel);
@@ -332,7 +338,7 @@ function redirectToEditPage(obj, rssInsId) {
             encodeURIComponent(rssInsId);
 }
 
-function dispatchDatabaseUserActionRequest(flag, rssInstanceName, username, databaseName) {
+function dispatchDatabaseUserActionRequest(flag, rssInstanceName, username, databaseName, envName) {
     var tmpPassword = document.getElementById('password');
     var password = '';
     if (tmpPassword != null) {
@@ -355,12 +361,12 @@ function dispatchDatabaseUserActionRequest(flag, rssInstanceName, username, data
             encodeURIComponent(rssInstanceName) + '&flag=' + encodeURIComponent(flag) +
             '&username=' + encodeURIComponent(username) + '&password=' +
             encodeURIComponent(password) + '&privilegeTemplateName=' +
-            encodeURIComponent(privilegeTemplate) + '&databaseName=' + databaseName;
+            encodeURIComponent(privilegeTemplate) + '&databaseName=' + databaseName + '&envName='+envName;
     jQuery('#connectionStatusDiv').load(url, displayMessagesForUser);
     return false;
 }
 
-function dispatchAttachedDatabaseUserActionRequest(flag, rssInstanceName, username, databaseName) {
+function dispatchAttachedDatabaseUserActionRequest(flag, rssInstanceName, username, databaseName, envName) {
     var tmpPassword = document.getElementById('password');
     var password = '';
     if (tmpPassword != null) {
@@ -412,7 +418,7 @@ function dispatchAttachedDatabaseUserActionRequest(flag, rssInstanceName, userna
             lock_tables_priv + '&create_view_priv=' + create_view_priv + '&show_view_priv=' +
             show_view_priv + '&create_routine_priv=' + create_routine_priv + '&alter_routine_priv='
             + alter_routine_priv + '&execute_priv=' + execute_priv + '&event_priv=' + event_priv +
-            '&trigger_priv=' + trigger_priv;
+            '&trigger_priv=' + trigger_priv +'&envName='+ envName;
     jQuery('#connectionStatusDiv').load(url, displayMessagesForEditedUser);
 }
 
@@ -428,10 +434,10 @@ function forwardToRedirector(rssInstId, dbInstId) {
             selectedUsername);
 }
 
-function dispatchDatabaseActionRequest(flag, rssInstanceName, databaseName) {
+function dispatchDatabaseActionRequest(flag, rssInstanceName, databaseName, envName) {
     var url = 'databaseOps_ajaxprocessor.jsp?flag=' + flag + '&rssInstanceName=' +
             encodeURIComponent(rssInstanceName) + '&databaseName=' +
-            encodeURIComponent(databaseName);
+            encodeURIComponent(databaseName)+'&envName='+envName;
     jQuery('#connectionStatusDiv').load(url, displayDatabaseActionStatus);
 }
 
@@ -502,13 +508,18 @@ function checkSelectedPrivileges() {
     }
 }
 
-function createDatabasePrivilegeTemplate(flag) {
+function createDatabasePrivilegeTemplate(flag, envName) {
+	if(envName == null)
+	{
+		var environments = document.getElementById("envCombo");
+		var envName = trim(environments[environments.selectedIndex].value);
+	}
     var templateName = trim(document.getElementById('privilegeTemplateName').value);
     if (templateName == '' || templateName == null) {
         CARBON.showWarningDialog("'Database privilege template name' field cannot be left blank");
         return false;
     }
-    var url = composeDatabasePrivilegeTemplateActionUrl(flag, templateName);
+    var url = composeDatabasePrivilegeTemplateActionUrl(flag, templateName, envName);
     jQuery('#connectionStatusDiv').load(url, displayPrivilegeTemplateActionStatus);
 }
 
@@ -521,19 +532,21 @@ function validateDatabasePrivilegeTemplateName() {
     return true;
 }
 
-function displayPrivilegeTemplateActionStatus(msg) {
+function displayPrivilegeTemplateActionStatus(msg, status, xmlhttp) {
+    var xmlDoc=xmlhttp.responseXML;
+    var msg = xmlDoc.getElementsByTagName("Message")[0].childNodes[0].nodeValue;
+    var env = xmlDoc.getElementsByTagName("Environment")[0].childNodes[0].nodeValue;
     if (msg.search(/has been successfully created/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databasePrivilegeTemplates.jsp';
+                window.location = 'databasePrivilegeTemplates.jsp?region=region1&item=privilege_groups_submenu&envName='+env;
             }
-
             CARBON.showInfoDialog(msg, handleOK);
         });
     } else if (msg.search(/has been successfully edited/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databasePrivilegeTemplates.jsp';
+                window.location = 'databasePrivilegeTemplates.jsp?region=region1&item=privilege_groups_submenu&envName='+env;
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -541,7 +554,7 @@ function displayPrivilegeTemplateActionStatus(msg) {
     } else if (msg.search(/has been successfully dropped/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databasePrivilegeTemplates.jsp';
+                window.location = 'databasePrivilegeTemplates.jsp?region=region1&item=privilege_groups_submenu&envName='+env;
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -549,7 +562,7 @@ function displayPrivilegeTemplateActionStatus(msg) {
     } else if (msg.search(/Failed to drop database privilege template/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databasePrivilegeTemplates.jsp';
+                window.location = 'databasePrivilegeTemplates.jsp?region=region1&item=privilege_groups_submenu&envName='+env;
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -557,7 +570,7 @@ function displayPrivilegeTemplateActionStatus(msg) {
     } else if (msg.search(/Failed to create database privilege template/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databasePrivilegeTemplates.jsp';
+                window.location = 'databasePrivilegeTemplates.jsp?region=region1&item=privilege_groups_submenu&envName='+env;
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -565,7 +578,7 @@ function displayPrivilegeTemplateActionStatus(msg) {
     } else {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databasePrivilegeTemplates.jsp';
+                window.location = 'databasePrivilegeTemplates.jsp?region=region1&item=privilege_groups_submenu&envName='+env;
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -573,7 +586,7 @@ function displayPrivilegeTemplateActionStatus(msg) {
     }
 }
 
-function composeDatabasePrivilegeTemplateActionUrl(flag, templateName) {
+function composeDatabasePrivilegeTemplateActionUrl(flag, templateName, envName) {
     var select_priv = document.getElementById("select_priv").checked;
     var insert_priv = document.getElementById("insert_priv").checked;
     var update_priv = document.getElementById("update_priv").checked;
@@ -603,13 +616,13 @@ function composeDatabasePrivilegeTemplateActionUrl(flag, templateName) {
             lock_tables_priv + '&create_view_priv=' + create_view_priv + '&show_view_priv=' +
             show_view_priv + '&create_routine_priv=' + create_routine_priv + '&alter_routine_priv='
             + alter_routine_priv + '&execute_priv=' + execute_priv + '&event_priv=' + event_priv +
-            '&trigger_priv=' + trigger_priv;
+            '&trigger_priv=' + trigger_priv + '&envName='+envName;
 }
 
-function dispatchDropDatabasePrivilegeTemplateRequest(privilegeTemplateName) {
+function dispatchDropDatabasePrivilegeTemplateRequest(privilegeTemplateName, envName) {
     function forwardToDel() {
         var url = 'databasePrivilegeTemplateOps_ajaxprocessor.jsp?privilegeTemplateName=' +
-                encodeURIComponent(privilegeTemplateName) + '&flag=drop';
+                encodeURIComponent(privilegeTemplateName) + '&flag=drop'+ '&envName='+envName;
         jQuery('#connectionStatusDiv').load(url, displayPrivilegeTemplateActionStatus);
         return false;
     }
@@ -669,11 +682,14 @@ function displayMessages(msg) {
     }
 }
 
-function displayDatabaseActionStatus(msg) {
-    if (msg.search(/has been successfully created/) != -1) {
+function displayDatabaseActionStatus(msg, status, xmlhttp) {
+        var xmlDoc=xmlhttp.responseXML;
+        var msg = xmlDoc.getElementsByTagName("Message")[0].childNodes[0].nodeValue;
+        var env = xmlDoc.getElementsByTagName("Environment")[0].childNodes[0].nodeValue;
+        if (msg.search(/has been successfully created/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databases.jsp';
+                window.location = 'databases.jsp?region=region1&item=databases_submenu&ordinal=0&envName='+env;
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -681,7 +697,7 @@ function displayDatabaseActionStatus(msg) {
     } else if (msg.search(/has been successfully dropped/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databases.jsp';
+                window.location = 'databases.jsp?region=region1&item=databases_submenu&ordinal=0&envName='+env;
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -689,7 +705,7 @@ function displayDatabaseActionStatus(msg) {
     } else if (msg.search(/Failed to drop database/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databases.jsp';
+                window.location = 'databases.jsp?region=region1&item=databases_submenu&ordinal=0&envName='+env;
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -697,15 +713,16 @@ function displayDatabaseActionStatus(msg) {
     } else if (msg.search(/Failed to create database/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databases.jsp';
+                window.location = 'databases.jsp?region=region1&item=databases_submenu&ordinal=0&envName='+env;
             }
 
             CARBON.showErrorDialog(msg, handleOK);
+            //CARBON.showErrorDialog(msg);
         });
     } else {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databases.jsp';
+                window.location = 'databases.jsp?region=region1&item=databases_submenu&ordinal=0&envName='+env;
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -713,21 +730,22 @@ function displayDatabaseActionStatus(msg) {
     }
 }
 
-
-function displayMessagesForUser(msg) {
+function displayMessagesForUser(msg, status, xmlhttp) {
+    var xmlDoc=xmlhttp.responseXML;
+    var msg = xmlDoc.getElementsByTagName("Message")[0].childNodes[0].nodeValue;
+    var env = xmlDoc.getElementsByTagName("Environment")[0].childNodes[0].nodeValue;
     if (msg.search(/has been successfully created/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databaseUsers.jsp';
+                window.location = 'databaseUsers.jsp?region=region1&item=database_users_submenu&envName='+env;
             }
 
             CARBON.showInfoDialog(msg, handleOK);
         });
-
     } else if (msg.search(/has been successfully edited/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databaseUsers.jsp';
+                window.location = 'databaseUsers.jsp?region=region1&item=database_users_submenu&envName='+env;
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -735,34 +753,36 @@ function displayMessagesForUser(msg) {
     } else if (msg.search(/has been successfully dropped/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databaseUsers.jsp';
+                window.location = 'databaseUsers.jsp?region=region1&item=database_users_submenu&envName='+env;
             }
 
             CARBON.showInfoDialog(msg, handleOK);
         });
     } else if (msg.search(/Failed to create user/) != -1) {
         jQuery(document).ready(function() {
-            function handleOK() {
-                window.location = 'databaseUsers.jsp';
-            }
-
-            CARBON.showErrorDialog(msg, handleOK);
+//            function handleOK() {
+//                window.location = 'databaseUsers.jsp?region=region1&item=database_users_submenu&envName='+env;
+//            }
+//
+//            CARBON.showErrorDialog(msg, handleOK);
+            CARBON.showErrorDialog(msg);
         });
     } else if (msg.search(/Failed to edit user/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'databaseUsers.jsp';
+                window.location = 'databaseUsers.jsp?region=region1&item=database_users_submenu&envName='+env;
             }
 
             CARBON.showErrorDialog(msg, handleOK);
         });
     } else {
         jQuery(document).ready(function() {
-            function handleOK() {
-                window.location = 'databaseUsers.jsp';
-            }
-
-            CARBON.showErrorDialog(msg, handleOK());
+//            function handleOK() {
+//                window.location = 'databaseUsers.jsp?region=region1&item=database_users_submenu&envName='+env;
+//            }
+//
+//            CARBON.showErrorDialog(msg, handleOK());
+            CARBON.showErrorDialog(msg);
         });
     }
 }
@@ -771,7 +791,7 @@ function displayMessagesForEditedUser(msg) {
     if (msg.search(/has been successfully created/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -780,7 +800,7 @@ function displayMessagesForEditedUser(msg) {
     } else if (msg.search(/has been successfully edited/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -788,7 +808,7 @@ function displayMessagesForEditedUser(msg) {
     } else if (msg.search(/has been successfully dropped/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showInfoDialog(msg, handleOK);
@@ -796,7 +816,7 @@ function displayMessagesForEditedUser(msg) {
     } else if (msg.search(/Failed to create user/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -804,7 +824,7 @@ function displayMessagesForEditedUser(msg) {
     } else if (msg.search(/Failed to edit user/) != -1) {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showErrorDialog(msg, handleOK);
@@ -812,7 +832,7 @@ function displayMessagesForEditedUser(msg) {
     } else {
         jQuery(document).ready(function() {
             function handleOK() {
-                window.location = 'attachedDatabaseUsers.jsp';
+                window.location = 'attachedDatabaseUsers.jsp?ordinal=1';
             }
 
             CARBON.showErrorDialog(msg, handleOK());
@@ -920,16 +940,16 @@ function getJdbcDriver(instanceUrl) {
     return '';
 }
 
-function createDataSource(rssInstanceName, databaseName, username) {
+function createDataSource(rssInstanceName, databaseName, username, envName) {
     var url = 'databaseUserOps_ajaxprocessor.jsp?databaseName=' + databaseName + '&username=' +
-            username + '&rssInstanceName=' + rssInstanceName + '&flag=createDS';
+            username + '&rssInstanceName=' + rssInstanceName + '&flag=createDS'+ '&envName='+envName;
     jQuery('#connectionStatusDiv').load(url, displayMessagesForCarbonDS);
 }
 
-function detachDatabaseUser(rssInstanceName, databaseName, username) {
+function detachDatabaseUser(rssInstanceName, databaseName, username, envnName) {
     function forwardToDetach() {
         var url = 'databaseUserOps_ajaxprocessor.jsp?databaseName=' + databaseName + '&username=' +
-                username + '&rssInstanceName=' + rssInstanceName + '&flag=detach';
+                username + '&rssInstanceName=' + rssInstanceName + '&flag=detach' + '&envName=' +envnName;
         jQuery('#connectionStatusDiv').load(url, displayMessagesForDatabaseUserActions);
     }
 

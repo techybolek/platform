@@ -26,22 +26,12 @@ public class DatabasePrivilegeTemplate {
 
     private DatabasePrivilegeSet privileges;
 
-    private int tenantId;
-
     public DatabasePrivilegeTemplate(int id, String name, DatabasePrivilegeSet privileges) {
         this.id = id;
         this.name = name;
         this.privileges = privileges;
     }
-
-    public DatabasePrivilegeTemplate(int id, String name, DatabasePrivilegeSet privileges,
-                                     int tenantId) {
-        this.id = id;
-        this.name = name;
-        this.privileges = privileges;
-        this.tenantId = tenantId;
-    }
-
+    
     public DatabasePrivilegeTemplate() {}
 
     public String getName() {
@@ -58,14 +48,6 @@ public class DatabasePrivilegeTemplate {
 
     public void setPrivileges(DatabasePrivilegeSet privileges) {
         this.privileges = privileges;
-    }
-
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
     }
 
     public void setId(int id) {

@@ -18,13 +18,42 @@
  */
 package org.wso2.carbon.rssmanager.core.internal.dao;
 
+import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.RSSManagementRepository;
+import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
  * DAO factory class for creating RSS DAO objects.
  */
 public class RSSDAOFactory {
 
+    private static DataSource dataSource;
+
+    public static void init(RSSManagementRepository repository) {
+        RDBMSConfiguration config = repository.getDataSourceConfig();
+        dataSource = RSSManagerUtil.createDataSource(
+                RSSManagerUtil.loadDataSourceProperties(config), config.getDataSourceClassName());
+    }
+
 	public static RSSDAO getRSSDAO() {
 		return new RSSDAOImpl();
 	}
+
+    public static Connection getConnection() throws RSSManagerException {
+        if (dataSource == null) {
+            throw new RSSManagerException("RSSDAO data source is not initialized properly");
+        }
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while creating data source " +
+                    "connection : " + e.getMessage(), e);
+        }
+    }
 	
 }

@@ -192,19 +192,11 @@ public class RSSManagerHelper {
     }
 
     public static String processDomainName(String domainName) {
-        char[] chars = domainName.toCharArray();
-        StringBuilder sb = new StringBuilder();
-        if (domainName.contains(".")) {
-            for (char aChar : chars) {
-                if (".".equals(String.valueOf(aChar))) {
-                    //sb.append('[').append('d').append('o').append('t').append(']');
-                    sb.append("_");
-                } else {
-                    sb.append(aChar);
-                }
-            }
+        if (domainName == null || "".equals(domainName)) {
+            return domainName;
         }
-        return sb.toString();
+        
+        return domainName.replace(".", "_");
     }
 
     public static String constructConnectionUrl(String url) throws Exception {

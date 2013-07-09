@@ -16,6 +16,8 @@
 ~ under the License.
 -->
 
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext" %>
+<%@page import="org.apache.axis2.AxisFault" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.common.RSSManagerConstants" %>
@@ -24,7 +26,6 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="java.util.List" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -38,36 +39,79 @@
                        label="Databases"/>
     <%
         RSSManagerClient client = null;
+        RSSEnvironmentContext rssEnvContext;
+
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
                 getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+        String environmentName = request.getParameter("envName");
+        String[] environments = (String[]) session.getAttribute("environments");
+
         try {
             client = new RSSManagerClient(cookie, backendServerURL, configContext,
                     request.getLocale());
         } catch (Exception e) {
             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
         }
+        if (environments == null) {
+            if (client != null) {
+                try {
+                    environments = client.getRSSEnvironmentNames();
+                    session.setAttribute("environments", environments);
+                } catch (Exception e) {
+                    CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
+                            CarbonUIMessage.ERROR, request, e);
+                }
+            }
+        }
+        if (environmentName == null) {
+            environmentName = environments[0];
+        }
+        rssEnvContext = new RSSEnvironmentContext();
+        rssEnvContext.setEnvironmentName(environmentName);
     %>
 
     <div id="middle">
         <h2><fmt:message key="rss.manager.databases"/></h2>
 
         <div id="workArea">
+            <div>
+                <fmt:message key="rss.environment.name"/> <select id="envCombo" name="envCombo"
+                                                                  onchange="onComboChange(this)">
+                <%
+
+                    for (String env : environments) {
+                        if (environmentName != null && env.equals(environmentName.trim())) {
+                %>
+                <option id="<%=env%>" value="<%=env%>" selected="selected"><%=env%>
+                </option>
+                <%
+                } else {
+                %>
+                <option id="<%=env%>" value="<%=env%>"><%=env%>
+                </option>
+                <%
+                        }
+                    }
+                %>
+            </select><br><br>
+            </div>
             <form method="post" action="#" name="dataForm">
                 <div id="connectionStatusDiv" style="display: none;"></div>
+
                 <table class="styledLeft" id="database_table">
                     <%
                         if (client != null) {
                             try {
-                                List<DatabaseMetaData> databases = client.getDatabaseList();
-                                if (databases.size() > 0) {
+                                DatabaseMetaData[] databases = client.getDatabaseList(rssEnvContext);
+                                if (databases.length > 0) {
                     %>
                     <thead>
                     <tr>
                         <th><fmt:message key="rss.manager.db.name"/></th>
                         <th><fmt:message key="rss.manager.instance.name"/></th>
-                        <%--<th><fmt:message key="rss.manager.tenant.domain"/></th>--%>
+                            <%--<th><fmt:message key="rss.manager.tenant.domain"/></th>--%>
                         <th><fmt:message key="rss.manager.db.url"/></th>
                         <th><fmt:message key="rss.manager.actions"/></th>
                     </tr>
@@ -83,8 +127,8 @@
                         </td>
                         <td><%=database.getRssInstanceName()%>
                         </td>
-                        <%--<td><%=database.getRssTenantDomain()%>--%>
-                        <%--</td>--%>
+                            <%--<td><%=database.getRssTenantDomain()%>--%>
+                            <%--</td>--%>
                         <td><%=database.getUrl()%>
                         </td>
                         <%
@@ -104,6 +148,7 @@
 
                     <%
                     } else {
+
                     %>
                     <td>
                         <a class="icon-link"
@@ -112,7 +157,7 @@
                                 key="rss.manager.manage.database"/></a>
                         <a class="icon-link"
                            style="background-image:url(../admin/images/delete.gif);"
-                           onclick="dropDatabase('<%=database.getRssInstanceName()%>', '<%=database.getName()%>')"><fmt:message
+                           onclick="dropDatabase('<%=database.getRssInstanceName()%>', '<%=database.getName()%>', '<%=environmentName%>')"><fmt:message
                                 key="rss.manager.delete.database"/></a>
                     </td>
                     <%
@@ -138,13 +183,13 @@
                 </table>
                 <a class="icon-link"
                    style="background-image:url(../admin/images/add.gif);"
-                   href="createDatabase.jsp"><fmt:message
+                   onclick="createDBForm('<%=environmentName%>')"><fmt:message
                         key="rss.manager.add.new.database"/></a>
 
                 <div style="clear:both"></div>
             </form>
             <script type="text/javascript">
-                function submitManageForm(rssInstanceName, databaseName) {
+                function submitManageForm(rssInstanceName, databaseName, envName) {
                     document.getElementById('rssInstanceName').value = rssInstanceName;
                     document.getElementById('databaseName').value = databaseName;
                     document.getElementById('manageForm').submit();
@@ -154,15 +199,28 @@
                     document.getElementById('flag').value = 'drop';
                     document.getElementById('dropForm').submit();
                 }
+                function createDBForm(envName) {
+                    document.getElementById('createDBForm').submit();
+                }
+                function onComboChange(combo) {
+                    var opt = combo.options[combo.selectedIndex].value;
+                    window.location = 'databases.jsp?envName=' + opt;
+                }
             </script>
             <form action="attachedDatabaseUsers.jsp" method="post" id="manageForm">
                 <input type="hidden" id="rssInstanceName" name="rssInstanceName"/>
+                <input type="hidden" id="envName1" name="envName" value="<%=environmentName%>"/>
                 <input type="hidden" id="databaseName" name="databaseName"/>
+            </form>
+            <form action="createDatabase.jsp" method="post" id="createDBForm">
+                <input type="hidden" id="envName2" name="envName" value="<%=environmentName%>"/>
             </form>
             <form action="databaseOps_ajaxprocessor.jsp" method="post" id="dropForm">
                 <input type="hidden" id="rssInstanceName1" name="rssInstanceName"/>
+                <input type="hidden" id="envName3" name="envName" value="<%=environmentName%>"/>
                 <input type="hidden" id="flag" name="flag"/>
             </form>
         </div>
     </div>
+
 </fmt:bundle>

@@ -31,15 +31,11 @@ public class DatabaseUser {
 
     private String type;
 
-    private int tenantId;
-
-	public DatabaseUser(String username, String password, String rssInstanceName, String type,
-                        int tenantId) {
+	public DatabaseUser(String username, String password, String rssInstanceName, String type) {
 		this.username = username;
 		this.password = password;
 		this.rssInstanceName = rssInstanceName;
         this.type = type;
-        this.tenantId = tenantId;
 	}
 
     public DatabaseUser() {}
@@ -66,14 +62,6 @@ public class DatabaseUser {
 
     public void setRssInstanceName(String rssInstanceName) {
         this.rssInstanceName = rssInstanceName;
-    }
-
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
     }
 
     public String getType() {

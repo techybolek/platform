@@ -16,6 +16,7 @@
 ~ under the License.
 -->
 
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
@@ -35,9 +36,13 @@
     String templateName = request.getParameter("privilegeTemplateName");
     String rssInstanceName = request.getParameter("rssInstanceName");
     String databaseName = request.getParameter("databaseName");
+    String envName = request.getParameter("envName");
 
     session.setAttribute("rssInstanceName", rssInstanceName);
     session.setAttribute("databaseName", databaseName);
+    if (envName != null) {
+        session.setAttribute("envName", envName);
+    }
 
     //Database privileges
     String selectPriv = request.getParameter("select_priv");
@@ -84,6 +89,10 @@
     rssInstanceName = (rssInstanceName != null) ? rssInstanceName : "";
     databaseName = (databaseName != null) ? databaseName : "";
 
+    RSSEnvironmentContext rssEnvContext = new RSSEnvironmentContext();
+    rssEnvContext.setEnvironmentName(envName);
+    rssEnvContext.setRssInstanceName(rssInstanceName);
+
     String backendServerUrl = CarbonUIUtil.getServerURL(
             getServletConfig().getServletContext(), session);
     ConfigurationContext configContext = (ConfigurationContext) config.
@@ -91,6 +100,16 @@
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     client = new RSSManagerClient(cookie, backendServerUrl, configContext, request.getLocale());
     String msg;
+    String xml;
+
+    response.setContentType("text/xml; charset=UTF-8");
+    // Set standard HTTP/1.1 no-cache headers.
+    response.setHeader("Cache-Control",
+            "no-store, max-age=0, no-cache, must-revalidate");
+    // Set IE extended HTTP/1.1 no-cache headers.
+    response.addHeader("Cache-Control", "post-check=0, pre-check=0");
+    // Set standard HTTP/1.0 no-cache header.
+    response.setHeader("Pragma", "no-cache");
 
     if ("create".equals(flag)) {
         try {
@@ -105,48 +124,36 @@
             user.setPassword(password);
             user.setRssInstanceName(rssInstanceName);
 
-            client.createDatabaseUser(user);
-
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.createDatabaseUser(rssEnvContext, user);
 
             PrintWriter pw = response.getWriter();
             msg = "Database user '" + user.getUsername() + "' has been successfully created";
-            pw.write(msg);
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>";
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
     } else if ("drop".equals(flag)) {
         String username = request.getParameter("username");
         username = (username != null) ? username : "";
         try {
-            client.dropDatabaseUser(rssInstanceName, username);
-
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.dropDatabaseUser(rssEnvContext, username);
 
             PrintWriter pw = response.getWriter();
             msg = "Database user '" + username + "' has been successfully dropped";
-            pw.write(msg);
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
     } else if ("edit".equals(flag)) {
@@ -182,20 +189,13 @@
         privileges.setTriggerPriv(triggerPriv);
 
         try {
-            client.editUserPrivileges(privileges, user, databaseName);
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.editUserPrivileges(rssEnvContext, privileges, user, databaseName);
 
             PrintWriter pw = response.getWriter();
             msg = "Privileges assigned to the database user '" + user.getUsername() +
                     "' has been successfully edited";
-            pw.write(msg);
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
         }
@@ -209,24 +209,18 @@
             entry.setRssInstanceName(rssInstanceName);
             entry.setDatabaseName(databaseName);
             entry.setUsername(username);
-            client.createCarbonDataSource(entry);
-
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.createCarbonDataSource(rssEnvContext, entry);
 
             PrintWriter pw = response.getWriter();
             msg = "Datasource has been successfully created";
-            pw.write(msg);
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
     } else if ("attach".equals(flag)) {
@@ -234,50 +228,38 @@
         username = (username != null) ? username : "";
 
         try {
-            client.attachUserToDatabase(rssInstanceName, databaseName, username, templateName);
-
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.attachUserToDatabase(rssEnvContext, databaseName, username, templateName);
 
             PrintWriter pw = response.getWriter();
             msg = "Database user '" + username + "' has been successfully attached to the " +
-                    "database '"+ databaseName + "'";
-            pw.write(msg);
+                    "database '" + databaseName + "'";
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
     } else if ("detach".equals(flag)) {
         String username = request.getParameter("username");
         username = (username != null) ? username : "";
         try {
-            client.detachUserFromDatabase(rssInstanceName, databaseName, username);
-
-            response.setContentType("text/xml; charset=UTF-8");
-            // Set standard HTTP/1.1 no-cache headers.
-            response.setHeader("Cache-Control",
-                    "no-store, max-age=0, no-cache, must-revalidate");
-            // Set IE extended HTTP/1.1 no-cache headers.
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            // Set standard HTTP/1.0 no-cache header.
-            response.setHeader("Pragma", "no-cache");
+            client.detachUserFromDatabase(rssEnvContext, databaseName, username);
 
             PrintWriter pw = response.getWriter();
             msg = "Database user '" + username + "' has been successfully detached from the " +
-                    "database '"+ databaseName + "'";
-            pw.write(msg);
+                    "database '" + databaseName + "'";
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>";
+            pw.write(xml);
             pw.flush();
         } catch (Exception e) {
             PrintWriter pw = response.getWriter();
-            pw.write(e.getMessage());
+            msg = e.getMessage();
+            xml = "<Response><Message>" + msg + "</Message><Environment>" + envName + "</Environment></Response>" ;
+            pw.write(xml);
             pw.flush();
         }
 

@@ -24,16 +24,14 @@ import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
 import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
 
 public class OracleRSSManager extends RSSManager {
-
-    private static RSSManager rssManager = new OracleRSSManager();
-
-    public static synchronized RSSManager getRSSManager() {
-        return rssManager;
+    
+    public OracleRSSManager() {
+        super(null);
     }
 
     @Override
-    public void createDatabase(Database db) throws RSSManagerException {
-        
+    public Database createDatabase(Database db) throws RSSManagerException {
+        return null;
     }
 
     @Override
@@ -42,9 +40,9 @@ public class OracleRSSManager extends RSSManager {
     }
 
     @Override
-    public void createDatabaseUser(DatabaseUser databaseUser) throws
+    public DatabaseUser createDatabaseUser(DatabaseUser databaseUser) throws
             RSSManagerException {
-
+        return null;
     }
 
     @Override

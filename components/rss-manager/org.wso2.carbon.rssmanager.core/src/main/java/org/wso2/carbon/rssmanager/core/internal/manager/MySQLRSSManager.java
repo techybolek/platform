@@ -22,8 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSConfig;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
 
 import java.io.ByteArrayInputStream;
@@ -33,118 +33,137 @@ import java.sql.SQLException;
 
 public class MySQLRSSManager extends RSSManager {
 
-    private static RSSManager rssManager = new MySQLRSSManager();
     private static final Log log = LogFactory.getLog(MySQLRSSManager.class);
 
-    private MySQLRSSManager() {
-    }
-
-    public static synchronized RSSManager getMySQLRSSManager() {
-        return rssManager;
+    public MySQLRSSManager(RSSEnvironment rssEnvironment) {
+        super(rssEnvironment);
     }
 
     @Override
-    public void createDatabase(Database database) throws RSSManagerException {
+    public Database createDatabase(Database database) throws RSSManagerException {
         Connection conn = null;
-        RSSInstance rssIns = this.lookupRSSInstance(database.getRssInstanceName());
-        if (this.isInTransaction()) {
-            this.endTransaction();
+        PreparedStatement stmt = null;
+        boolean inTransaction = false;
+
+        String qualifiedDatabaseName =
+                RSSManagerUtil.getFullyQualifiedDatabaseName(database.getName());
+
+        boolean isExist =
+                this.isDatabaseExist(database.getRssInstanceName(), qualifiedDatabaseName);
+        if (isExist) {
+            throw new RSSManagerException("Database '" + qualifiedDatabaseName + "' " +
+                    "already exists");
         }
-        if (rssIns == null) {
+
+        RSSInstance rssInstance = this.lookupRSSInstance(database.getRssInstanceName());
+        if (rssInstance == null) {
             throw new RSSManagerException("RSS instance " + database.getRssInstanceName() +
                     " does not exist");
         }
-        String qualifiedDatabaseName =
-                    RSSManagerUtil.getFullyQualifiedDatabaseName(database.getName());
+
         try {
-            conn = rssIns.getDataSource().getConnection();
+            conn = getConnection(rssInstance);
             conn.setAutoCommit(false);
             String sql = "CREATE DATABASE " + qualifiedDatabaseName;
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.execute();
+            stmt = conn.prepareStatement(sql);
 
-            this.beginTransaction();
-            database.setName(qualifiedDatabaseName);
-            database.setRssInstanceName(rssIns.getName());
-            String databaseUrl = RSSManagerUtil.composeDatabaseUrl(rssIns, qualifiedDatabaseName);
-            database.setUrl(databaseUrl);
-            database.setType(this.inferEntityType(rssIns.getName()));
-            /* Sets the tenant id under which the database is created */
-            database.setTenantId(this.getCurrentTenantId());
-
-            /* creates a reference to the database inside the metadata repository */
-            this.getDAO().createDatabase(database);
-            this.getDAO().incrementSystemRSSDatabaseCount();
-            this.endTransaction();
-
-            /* committing the changes to RSS instance */
-            conn.commit();
-            stmt.close();
-        } catch (SQLException e) {
-            if (this.isInTransaction()) {
-                this.rollbackTransaction();
-            }
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error(e1);
+            if (!this.isInTransaction()) {
+                if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    this.beginTransaction();
+                    inTransaction = true;
                 }
             }
+            database.setName(qualifiedDatabaseName);
+            database.setRssInstanceName(rssInstance.getName());
+            String databaseUrl = RSSManagerUtil.composeDatabaseUrl(rssInstance, qualifiedDatabaseName);
+            database.setUrl(databaseUrl);
+            database.setType(this.inferEntityType(rssInstance.getName()));
+
+            int tenantId = RSSManagerUtil.getTenantId();
+            /* creates a reference to the database inside the metadata repository */
+            this.getDAO().createDatabase(getRSSEnvironmentName(), database, tenantId);
+            this.getDAO().incrementSystemRSSDatabaseCount(getRSSEnvironmentName());
+
+            /* Actual database creation is committed just before committing the meta info into RSS
+          * management repository. This is done as it is not possible to control CREATE, DROP,
+          * ALTER operations within a JTA transaction since those operations are committed
+          * implicitly */
+            stmt.execute();
+
+            if (inTransaction) {
+                this.endTransaction();
+            }
+            /* committing the changes to RSS instance */
+            conn.commit();
+
+            return database;
+        } catch (SQLException e) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
+
             throw new RSSManagerException("Error while creating the database '" +
-                     qualifiedDatabaseName + "' on RSS instance '" + rssIns.getName() + "' : " +
+                    qualifiedDatabaseName + "' on RSS instance '" + rssInstance.getName() + "' : " +
                     e.getMessage(), e);
         } catch (RSSManagerException e) {
-            if (this.isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             try {
                 conn.rollback();
-            } catch (SQLException e1) {
+            } catch (Exception e1) {
                 log.error(e1);
             }
             throw e;
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error(e);
-                }
-            }
+            this.cleanupResources(null, stmt, conn);
         }
     }
 
     @Override
-    public void dropDatabase(String rssInstanceName, String databaseName) throws
-            RSSManagerException {
+    public void dropDatabase(String rssInstanceName,
+                             String databaseName) throws RSSManagerException {
         Connection conn = null;
-        /* Initiating distributed transaction */
-        this.beginTransaction();
+        PreparedStatement stmt = null;
+        boolean inTransaction = false;
+        PreparedStatement delStmt = null;
+
         RSSInstance rssInstance =
-                this.getDAO().findRSSInstanceDatabaseBelongsTo(rssInstanceName, databaseName);
-        this.endTransaction();
+                this.getRSSInstanceDatabaseBelongTo(rssInstanceName, databaseName);
         if (rssInstance == null) {
             throw new RSSManagerException("RSS instance " + rssInstanceName + " does not exist");
         }
-        if (this.isInTransaction()) {
-            this.endTransaction();
-        }
         try {
-            conn = rssInstance.getDataSource().getConnection();
+            conn = getConnection(rssInstance);
             conn.setAutoCommit(false);
             String sql = "DROP DATABASE " + databaseName;
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareStatement(sql);
+            //delete from mysql.db
+            delStmt = deletePreparedStatement(conn, databaseName);
+
+            if (!this.isInTransaction()) {
+                if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    this.beginTransaction();
+                    inTransaction = true;
+                }
+            }
+            int tenantId = RSSManagerUtil.getTenantId();
+            this.getDAO().deleteUserDatabasePrivilegeEntriesByDatabase(rssInstance, databaseName, tenantId);
+            this.getDAO().removeUserDatabaseEntriesByDatabase(getRSSEnvironmentName(), rssInstance,
+                    databaseName, tenantId);
+            this.getDAO().dropDatabase(getRSSEnvironmentName(), rssInstance, databaseName, tenantId);
+
+            /* Actual database creation is committed just before committing the meta info into RSS
+          * management repository. This is done as it is not possible to control CREATE, DROP,
+          * ALTER operations within a JTA transaction since those operations are committed
+          * implicitly */
             stmt.execute();
+            delStmt.execute();
 
-            this.beginTransaction();
-            this.getDAO().removeUserDatabaseEntriesByDatabase(
-                    rssInstance, databaseName, this.getCurrentTenantId());
-            this.getDAO().dropDatabase(rssInstance, databaseName, this.getCurrentTenantId());
-            this.endTransaction();
-
+            if (inTransaction) {
+                this.endTransaction();
+            }
             conn.commit();
-            stmt.close();
         } catch (SQLException e) {
             if (this.isInTransaction()) {
                 this.rollbackTransaction();
@@ -160,7 +179,7 @@ public class MySQLRSSManager extends RSSManager {
                     "' on RSS " + "instance '" + rssInstance.getName() + "' : " +
                     e.getMessage(), e);
         } catch (RSSManagerException e) {
-            if (this.isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             try {
@@ -172,41 +191,76 @@ public class MySQLRSSManager extends RSSManager {
             }
             throw e;
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error(e);
-                }
+            this.cleanupResources(null, delStmt, null);
+            this.cleanupResources(null, stmt, conn);
+        }
+    }
+
+    private RSSInstance getRSSInstanceDatabaseBelongTo(String rssInstanceName,
+                                                       String databaseName) throws RSSManagerException {
+        RSSInstance rssInstance;
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
             }
+        }
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            rssInstance = this.getDAO().findRSSInstanceDatabaseBelongsTo(getRSSEnvironmentName(),
+                    rssInstanceName, databaseName, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
+            return rssInstance;
+        } catch (RSSManagerException e) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
+            throw e;
         }
     }
 
     @Override
-    public void createDatabaseUser(DatabaseUser user) throws
-            RSSManagerException {
+    public DatabaseUser createDatabaseUser(DatabaseUser user) throws RSSManagerException {
         Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean inTransaction = false;
         try {
             String qualifiedUsername = RSSManagerUtil.getFullyQualifiedUsername(user.getUsername());
 
+            boolean isExist =
+                    this.isDatabaseUserExist(user.getRssInstanceName(), qualifiedUsername);
+            if (isExist) {
+                throw new RSSManagerException("Database user '" + qualifiedUsername + "' " +
+                        "already exists");
+            }
+
             /* Sets the fully qualified username */
             user.setUsername(qualifiedUsername);
-            /* Sets the tenant id under which the database is created */
-            user.setTenantId(this.getCurrentTenantId());
             user.setRssInstanceName(user.getRssInstanceName());
             user.setType(this.inferUserType(user.getRssInstanceName()));
 
-            for (RSSInstance rssInstance : RSSConfig.getInstance().getRssManager().
-                    getRSSInstancePool().getAllSystemRSSInstances()) {
+            for (RSSInstanceDSWrapper wrapper :
+                    getDSWrapperRepository().getAllRSSInstanceDSWrappers()) {
                 try {
-                    if (this.isInTransaction()) {
-                        this.endTransaction();
-                    }
-                    conn = rssInstance.getDataSource().getConnection();
+                    RSSInstance rssInstance;
+//                    try {
+//                        PrivilegedCarbonContext.startTenantFlow();
+//                        PrivilegedCarbonContext.getCurrentContext().setTenantId(
+//                                MultitenantConstants.SUPER_TENANT_ID);
+
+                    rssInstance = getSystemRSSInstance(wrapper.getName());
+//                    } finally {
+//                        PrivilegedCarbonContext.endTenantFlow();
+//                    }
+
+                    conn = getConnection(rssInstance);
                     conn.setAutoCommit(false);
 
                     String sql = "INSERT INTO mysql.user (Host, User, Password, ssl_cipher, x509_issuer, x509_subject, authentication_string) VALUES (?, ?, PASSWORD(?), ?, ?, ?, ?)";
-                    PreparedStatement stmt = conn.prepareStatement(sql);
+                    stmt = conn.prepareStatement(sql);
                     stmt.setString(1, "%");
                     stmt.setString(2, qualifiedUsername);
                     stmt.setString(3, user.getPassword());
@@ -214,16 +268,29 @@ public class MySQLRSSManager extends RSSManager {
                     stmt.setBlob(5, new ByteArrayInputStream(new byte[0]));
                     stmt.setBlob(6, new ByteArrayInputStream(new byte[0]));
                     stmt.setString(7, "");
-                    stmt.execute();
 
                     /* Initiating the distributed transaction */
-                    this.beginTransaction();
+                    if (!this.isInTransaction()) {
+                        if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                            this.beginTransaction();
+                            inTransaction = true;
+                        }
+                    }
+                    int tenantId = RSSManagerUtil.getTenantId();
                     user.setRssInstanceName(rssInstance.getName());
-                    this.getDAO().createDatabaseUser(rssInstance, user);
-                    /* Committing distributed transaction */
-                    this.endTransaction();
+                    this.getDAO().createDatabaseUser(getRSSEnvironmentName(), rssInstance, user,
+                            tenantId);
 
-                    stmt.close();
+                    /* Actual database user creation is committed just before committing the meta
+              * info into RSS management repository. This is done as it is not possible to
+              * control CREATE, DROP, ALTER, etc operations within a JTA transaction since
+              * those operations are committed implicitly */
+                    stmt.execute();
+
+                    /* Committing distributed transaction */
+                    if (inTransaction) {
+                        this.endTransaction();
+                    }
                     conn.commit();
                 } catch (SQLException e) {
                     if (this.isInTransaction()) {
@@ -234,19 +301,31 @@ public class MySQLRSSManager extends RSSManager {
                     }
                     throw new RSSManagerException("Error occurred while creating the database " +
                             "user '" + qualifiedUsername + "' on RSS instance '" +
-                            rssInstance.getName() + "'", e);
-                } finally {
-                    if (conn != null) {
-                        conn.close();
+                            wrapper.getName() + "'", e);
+                } catch (RSSManagerException e) {
+                    if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                        this.rollbackTransaction();
                     }
+                    if (conn != null) {
+                        conn.rollback();
+                    }
+                    throw new RSSManagerException("Error occurred while creating the database " +
+                            "user '" + qualifiedUsername + "' on RSS instance '" +
+                            wrapper.getName() + "'", e);
+                } finally {
+                    this.cleanupResources(null, stmt, conn);
                 }
             }
-            for (RSSInstance rssInstance : RSSConfig.getInstance().getRssManager().
-                    getRSSInstancePool().getAllSystemRSSInstances()) {
-                this.flushPrivileges(rssInstance);
+            for (RSSInstanceDSWrapper wrapper :
+                    getDSWrapperRepository().getAllRSSInstanceDSWrappers()) {
+                this.flushPrivileges(wrapper.getRssInstance());
             }
+
+            return user;
         } catch (SQLException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             String msg = "Error while creating the database user '" +
                     user.getUsername() + "' on RSS instance '" + user.getRssInstanceName() +
                     "' : " + e.getMessage();
@@ -266,47 +345,65 @@ public class MySQLRSSManager extends RSSManager {
     public void dropDatabaseUser(String rssInstanceName, String username) throws
             RSSManagerException {
         Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean inTransaction = false;
         try {
-            for (RSSInstance rssInstance : RSSConfig.getInstance().getRssManager().
-                    getRSSInstancePool().getAllSystemRSSInstances()) {
+            for (RSSInstanceDSWrapper wrapper :
+                    getDSWrapperRepository().getAllRSSInstanceDSWrappers()) {
                 try {
-                    if (this.isInTransaction()) {
-                        this.endTransaction();
-                    }
-                    conn = rssInstance.getDataSource().getConnection();
+                    RSSInstance rssInstance = getSystemRSSInstance(wrapper.getName());
+                    conn = getConnection(wrapper.getRssInstance());
                     conn.setAutoCommit(false);
 
                     String sql = "DELETE FROM mysql.user WHERE User = ? AND Host = ?";
-                    PreparedStatement stmt = conn.prepareStatement(sql);
+                    stmt = conn.prepareStatement(sql);
                     stmt.setString(1, username);
                     stmt.setString(2, "%");
-                    stmt.execute();
-                    stmt.close();
 
                     /* Initiating the transaction */
-                    this.beginTransaction();
-                    this.getDAO().deleteUserDatabasePrivilegeEntriesByDatabaseUser(rssInstance,
-                            username, this.getCurrentTenantId());
-                    this.getDAO().removeUserDatabaseEntriesByDatabaseUser(rssInstance, username,
-                            this.getCurrentTenantId());
-                    this.getDAO().dropDatabaseUser(rssInstance, username,
-                            this.getCurrentTenantId());
-                    /* committing the distributed transaction */
-                    this.endTransaction();
-
-                    conn.commit();
-                } finally {
-                    if (conn != null) {
-                        conn.close();
+                    if (!this.isInTransaction()) {
+                        if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                            this.beginTransaction();
+                            inTransaction = true;
+                        }
                     }
+                    int tenantId = RSSManagerUtil.getTenantId();
+                    this.getDAO().deleteUserDatabasePrivilegeEntriesByDatabaseUser(
+                            getRSSEnvironmentName(), rssInstance, username, tenantId);
+                    this.getDAO().removeUserDatabaseEntriesByDatabaseUser(getRSSEnvironmentName(),
+                            rssInstance, username, tenantId);
+                    this.getDAO().dropDatabaseUser(getRSSEnvironmentName(), rssInstance, username,
+                            tenantId);
+
+                    /* Actual database creation is committed just before committing the meta info into RSS
+                  * management repository. This is done as it is not possible to control CREATE, DROP,
+                  * ALTER operations within a JTA transaction since those operations are committed
+                  * implicitly */
+                    stmt.execute();
+
+                    /* committing the distributed transaction */
+                    if (inTransaction) {
+                        this.endTransaction();
+                    }
+                    conn.commit();
+                } catch (RSSManagerException e) {
+                    if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                        this.rollbackTransaction();
+                    }
+                    if (conn != null) {
+                        conn.rollback();
+                    }
+                    throw e;
+                } finally {
+                    this.cleanupResources(null, stmt, conn);
                 }
             }
-            for (RSSInstance rssInstance : RSSConfig.getInstance().getRssManager().
-                    getRSSInstancePool().getAllSystemRSSInstances()) {
-                this.flushPrivileges(rssInstance);
+            for (RSSInstanceDSWrapper wrapper :
+                    getDSWrapperRepository().getAllRSSInstanceDSWrappers()) {
+                this.flushPrivileges(wrapper.getRssInstance());
             }
         } catch (SQLException e) {
-            if (this.isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -320,7 +417,7 @@ public class MySQLRSSManager extends RSSManager {
                     "' on RSS instances : " + e.getMessage();
             throw new RSSManagerException(msg, e);
         } catch (RSSManagerException e) {
-            if (isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -332,13 +429,7 @@ public class MySQLRSSManager extends RSSManager {
             }
             throw e;
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error(e);
-                }
-            }
+            this.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -346,18 +437,37 @@ public class MySQLRSSManager extends RSSManager {
     public void editDatabaseUserPrivileges(DatabasePrivilegeSet privileges,
                                            DatabaseUser user,
                                            String databaseName) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance rssInstance =
-                    this.getDAO().findRSSInstanceDatabaseBelongsTo(user.getRssInstanceName(),
-                            databaseName);
+                    this.getDAO().findRSSInstanceDatabaseUserBelongsTo(getRSSEnvironmentName(),
+                            user.getRssInstanceName(), user.getUsername(), tenantId);
+            if (rssInstance == null) {
+                if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    this.rollbackTransaction();
+                }
+                throw new RSSManagerException("Database '" + databaseName + "' does not exist " +
+                        "in RSS instance '" + user.getRssInstanceName() + "'");
+            }
             if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(user.getRssInstanceName())) {
                 user.setRssInstanceName(rssInstance.getName());
             }
-            this.getDAO().updateDatabaseUser(privileges, rssInstance, user, databaseName);
-            this.endTransaction();
+            this.getDAO().updateDatabaseUser(getRSSEnvironmentName(), privileges, rssInstance, user,
+                    databaseName);
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
@@ -368,47 +478,57 @@ public class MySQLRSSManager extends RSSManager {
                                      String username,
                                      String templateName) throws RSSManagerException {
         Connection conn = null;
-        /* Initiating distributed transaction */
-        this.beginTransaction();
-        RSSInstance rssInstance =
-                this.getDAO().findRSSInstanceDatabaseBelongsTo(rssInstanceName, databaseName);
+        PreparedStatement stmt = null;
+        boolean inTransaction = false;
+
+        RSSInstance rssInstance = this.getRSSInstanceDatabaseBelongTo(rssInstanceName, databaseName);
         if (rssInstance == null) {
             throw new RSSManagerException("RSS instance " + rssInstanceName + " does not exist");
         }
-        Database database = this.getDAO().getDatabase(rssInstance, databaseName);
+
+        Database database = this.getDatabase(rssInstanceName, databaseName);
         if (database == null) {
             throw new RSSManagerException("Database '" + databaseName + "' does not exist");
         }
-        DatabasePrivilegeTemplate template =
-                this.getDAO().getDatabasePrivilegesTemplate(templateName);
+
+        DatabasePrivilegeTemplate template = this.getDatabasePrivilegeTemplate(templateName);
         if (template == null) {
             throw new RSSManagerException("Database privilege template '" + templateName +
                     "' does not exist");
         }
-        this.endTransaction();
         try {
-            if (this.isInTransaction()) {
+            conn = getConnection(rssInstance);
+            conn.setAutoCommit(false);
+            stmt = this.composePreparedStatement(conn, databaseName, username, template);
+
+            if (!this.isInTransaction()) {
+                if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    this.beginTransaction();
+                    inTransaction = true;
+                }
+            }
+            int tenantId = RSSManagerUtil.getTenantId();
+            UserDatabaseEntry ude =
+                    this.getDAO().createUserDatabaseEntry(getRSSEnvironmentName(), rssInstance,
+                            database, username, tenantId);
+            this.getDAO().setUserDatabasePrivileges(getRSSEnvironmentName(), ude, template,
+                    tenantId);
+
+            /* Actual database user attachment is committed just before committing the meta info into RSS
+          * management repository. This is done as it is not possible to control CREATE, DROP,
+          * ALTER operations within a JTA transaction since those operations are committed
+          * implicitly */
+            stmt.execute();
+
+            /* ending distributed transaction */
+            if (inTransaction) {
                 this.endTransaction();
             }
-            conn = rssInstance.getDataSource().getConnection();
-            conn.setAutoCommit(false);
-            PreparedStatement stmt =
-                    this.composePreparedStatement(conn, databaseName, username, template);
-            stmt.execute();
-            stmt.close();
-
-            this.beginTransaction();
-            UserDatabaseEntry ude =
-                    this.getDAO().createUserDatabaseEntry(rssInstance, database, username);
-            this.getDAO().setUserDatabasePrivileges(ude, template);
-            /* ending distributed transaction */
-            this.endTransaction();
-
             conn.commit();
 
             this.flushPrivileges(rssInstance);
         } catch (SQLException e) {
-            if (this.isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -422,7 +542,7 @@ public class MySQLRSSManager extends RSSManager {
                     "the database '" + databaseName + "' : " + e.getMessage();
             throw new RSSManagerException(msg, e);
         } catch (RSSManagerException e) {
-            if (this.isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -434,57 +554,63 @@ public class MySQLRSSManager extends RSSManager {
             }
             throw e;
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error(e);
-                }
-            }
+            this.cleanupResources(null, stmt, conn);
         }
     }
 
     @Override
-    public void detachUserFromDatabase(String rssInstanceName,
-                                       String databaseName,
+    public void detachUserFromDatabase(String rssInstanceName, String databaseName,
                                        String username) throws RSSManagerException {
         Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean inTransaction = false;
         Database database = this.getDatabase(rssInstanceName, databaseName);
         if (database == null) {
             throw new RSSManagerException("Database '" + databaseName + "' does not exist");
         }
         /* Initiating the distributed transaction */
-        this.beginTransaction();
-        RSSInstance rssInstance = this.getDAO().findRSSInstanceDatabaseBelongsTo(rssInstanceName,
-                databaseName);
-        this.endTransaction();
+        RSSInstance rssInstance = this.getRSSInstanceDatabaseBelongTo(rssInstanceName, databaseName);
+        if (rssInstance == null) {
+            throw new RSSManagerException("RSS instance '" + rssInstanceName + "' does not exist");
+        }
 
         try {
-            if (this.isInTransaction()) {
-                this.endTransaction();
-            }
-            conn = rssInstance.getDataSource().getConnection();
+            conn = getConnection(rssInstance);
             conn.setAutoCommit(false);
             String sql = "DELETE FROM mysql.db WHERE host = ? AND user = ? AND db = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareStatement(sql);
             stmt.setString(1, "%");
             stmt.setString(2, username);
             stmt.setString(3, databaseName);
-            stmt.execute();
 
             /* Initiating the distributed transaction */
-            this.beginTransaction();
-            this.getDAO().deleteUserDatabasePrivileges(rssInstance, username);
-            this.getDAO().deleteUserDatabaseEntry(rssInstance, username);
-            /* Committing the transaction */
-            this.endTransaction();
+            if (!this.isInTransaction()) {
+                if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    this.beginTransaction();
+                    inTransaction = true;
+                }
+            }
+            int tenantId = RSSManagerUtil.getTenantId();
+            this.getDAO().deleteUserDatabasePrivileges(getRSSEnvironmentName(), rssInstance,
+                    username, tenantId);
+            this.getDAO().deleteUserDatabaseEntry(getRSSEnvironmentName(), rssInstance, username,
+                    tenantId);
 
-            stmt.close();
+            /* Actual database user detachment is committed just before committing the meta info
+          * into RSS management repository. This is done as it is not possible to control CREATE,
+          * DROP, ALTER operations within a JTA transaction since those operations are committed
+          * implicitly */
+            stmt.execute();
+
+            /* Committing the transaction */
+            if (isInTransaction()) {
+                this.endTransaction();
+            }
             conn.commit();
 
             this.flushPrivileges(rssInstance);
         } catch (SQLException e) {
-            if (isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -498,7 +624,7 @@ public class MySQLRSSManager extends RSSManager {
                     "the database '" + databaseName + "' : " + e.getMessage();
             throw new RSSManagerException(msg, e);
         } catch (RSSManagerException e) {
-            if (this.isInTransaction()) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -510,16 +636,10 @@ public class MySQLRSSManager extends RSSManager {
             }
             throw e;
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error(e);
-                }
-            }
+            this.cleanupResources(null, stmt, conn);
         }
     }
-
+    
     private PreparedStatement composePreparedStatement(Connection con,
                                                        String databaseName,
                                                        String username,
@@ -554,25 +674,28 @@ public class MySQLRSSManager extends RSSManager {
         return stmt;
     }
 
+    private PreparedStatement deletePreparedStatement(final Connection con,
+                                                      final String databaseName) throws SQLException {
+        String sql = " DELETE FROM mysql.db where Db=?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setString(1, databaseName);
+
+        return stmt;
+    }
+
     private void flushPrivileges(RSSInstance rssInstance) throws RSSManagerException {
         Connection conn = null;
+        PreparedStatement stmt = null;
         try {
-            conn = rssInstance.getDataSource().getConnection();
+            conn = getConnection(rssInstance);
             String sql = "FLUSH PRIVILEGES";
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareStatement(sql);
             stmt.execute();
-            stmt.close();
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while flushing privileges on RSS " +
                     "instance '" + rssInstance.getName() + "' : " + e.getMessage(), e);
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error(e);
-                }
-            }
+            this.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -582,8 +705,7 @@ public class MySQLRSSManager extends RSSManager {
     }
 
     private String inferEntityType(String rssInstanceName) throws RSSManagerException {
-        return (RSSConfig.getInstance().getRssManager().getRSSInstancePool().
-                isSystemRSSInstance(rssInstanceName)) ?
+        return (getDSWrapperRepository().getRSSInstanceDSWrapper(rssInstanceName) != null) ?
                 RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE :
                 RSSManagerConstants.USER_DEFINED_INSTANCE_TYPE;
     }
@@ -592,6 +714,14 @@ public class MySQLRSSManager extends RSSManager {
         return (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) ?
                 RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE :
                 RSSManagerConstants.USER_DEFINED_INSTANCE_TYPE;
+    }
+
+    private Connection getConnection(RSSInstance rssInstance) throws RSSManagerException {
+        RSSInstanceDSWrapper dsWrapper = getDSWrapperRepository().getRSSInstanceDSWrapper(rssInstance.getName());
+        if (dsWrapper == null) {
+            throw new RSSManagerException("Cannot fetch a connection. RSSInstanceDSWrapper associated with '" + rssInstance.getName() + "' RSS instance is null.");
+        }
+        return dsWrapper.getConnection();
     }
 
 }

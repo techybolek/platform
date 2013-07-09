@@ -15,6 +15,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
@@ -33,12 +34,16 @@
     <carbon:breadcrumb
             label="Database Privilege Templates"
             resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-            topPage="true"
+            topPage="false"
             request="<%=request%>"/>
     <%
         String templateName;
         RSSManagerClient client = null;
-        List<DatabasePrivilegeTemplate> templates;
+        RSSEnvironmentContext rssEnvContext;
+        String environmentName = request.getParameter("envName");
+        String[] environments = (String[]) session.getAttribute("environments");
+
+        DatabasePrivilegeTemplate[] templates;
         try {
             String backendServerUrl = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext =
@@ -47,21 +52,62 @@
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
             client = new RSSManagerClient(cookie, backendServerUrl, configContext, request.getLocale());
 
+
         } catch (Exception e) {
             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
         }
+        if (environments == null) {
+            if (client != null) {
+                try {
+                    environments = client.getRSSEnvironmentNames();
+                    session.setAttribute("environments", environments);
+                } catch (Exception e) {
+                    CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
+                            CarbonUIMessage.ERROR, request, e);
+                }
+            }
+        }
+        if (environments == null) {
+            environments = new String[0];
+        }
+        if (environmentName == null) {
+            environmentName = environments[0];
+        }
+        rssEnvContext = new RSSEnvironmentContext();
+        rssEnvContext.setEnvironmentName(environmentName);
     %>
     <div id="middle">
         <h2><fmt:message key="rss.manager.database.privilege.templates"/></h2>
 
         <div id="workArea">
+            <div>
+                <fmt:message key="rss.environment.name"/> <select id="envCombo" name="envCombo"
+                                                                  onchange="onComboChange(this)">
+                <%
+                    for (String env : environments) {
+                        if (env.equals(environmentName.trim())) {
+                %>
+                <option id="<%=env%>" value="<%=env%>" selected="selected"><%=env%>
+                </option>
+                <%
+                } else {
+                %>
+                <option id="<%=env%>" value="<%=env%>"><%=env%>
+                </option>
+                <%
+                        }
+                    }
+                %>
+            </select><br><br>
+            </div>
+
             <form method="post" action="#" name="dataForm">
                 <table class="styledLeft" id="privilegeTemplateTable">
                     <%
                         if (client != null) {
                             try {
-                                templates = client.getDatabasePrivilegesTemplates();
-                                if (templates.size() > 0) {
+                                templates = client.getDatabasePrivilegesTemplates(rssEnvContext);
+                                if (templates.length > 0) {
                     %>
                     <thead>
                     <tr>
@@ -82,12 +128,12 @@
                         <td>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/edit.gif);"
-                               href="javascript:dispatchEditDatabasePrivilegeTemplateRequest('<%=template.getName()%>')"><fmt:message
+                               href="javascript:dispatchEditDatabasePrivilegeTemplateRequest('<%=template.getName()%>', '<%=environmentName%>')"><fmt:message
                                     key="rss.manager.edit.instance"/></a>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/delete.gif);"
                                href="#"
-                               onclick="dispatchDropDatabasePrivilegeTemplateRequest('<%=template.getName()%>');"><fmt:message
+                               onclick="dispatchDropDatabasePrivilegeTemplateRequest('<%=template.getName()%>', '<%=environmentName%>');"><fmt:message
                                     key="rss.manager.drop.instance"/></a>
                         </td>
                     </tr>
@@ -121,9 +167,14 @@
                     document.getElementById('privilegeTemplateName').value = privilegeTemplateName;
                     document.getElementById('editForm').submit();
                 }
+                function onComboChange(envCombo) {
+                    var opt = envCombo.options[envCombo.selectedIndex].value;
+                    window.location = 'databasePrivilegeTemplates.jsp?envName=' + opt;
+                }
             </script>
             <form method="post" action="editDatabasePrivilegeTemplate.jsp" id="editForm">
                 <input type="hidden" name="privilegeTemplateName" id="privilegeTemplateName"/>
+                <input type="hidden" name="envName" id="envName" value="<%=environmentName%>"/>
             </form>
         </div>
     </div>

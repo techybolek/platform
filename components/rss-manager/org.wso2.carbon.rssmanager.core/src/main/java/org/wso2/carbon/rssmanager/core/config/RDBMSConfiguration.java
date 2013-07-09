@@ -1,12 +1,8 @@
-package org.wso2.carbon.rssmanager.core.entity.datasource;
+package org.wso2.carbon.rssmanager.core.config;
 
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.*;
-import java.util.List;/*
+import java.util.List;
+/*
  *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
@@ -26,7 +22,7 @@ import java.util.List;/*
  */
 
 @XmlRootElement(name = "datasource-config")
-public class RDBMSConfiguration implements DSXMLConfiguration {
+public class RDBMSConfiguration {
 
     private String url;
 
@@ -104,18 +100,8 @@ public class RDBMSConfiguration implements DSXMLConfiguration {
 
     private List<DataSourceProperty> dataSourceProps;
 
-    private static Marshaller rdbmsMarshaller;
+    public RDBMSConfiguration() {}
 
-    public RDBMSConfiguration() throws RSSManagerException {
-        JAXBContext ctx;
-        try {
-            ctx = JAXBContext.newInstance(RDBMSConfiguration.class);
-            rdbmsMarshaller = ctx.createMarshaller();
-        } catch (JAXBException e) {
-            throw new RSSManagerException("Error creating rdbms data source configuration " +
-                    "info marshaller: " + e.getMessage(), e);
-        }
-    }
 
     @XmlElement(name = "url", nillable = false)
     public String getUrl() {
@@ -452,12 +438,6 @@ public class RDBMSConfiguration implements DSXMLConfiguration {
         public void setValue(String value) {
             this.value = value;
         }
-    }
-
-    @Override
-    @XmlTransient
-    public Marshaller getDSMarshaller() {
-        return rdbmsMarshaller;
     }
 
 }

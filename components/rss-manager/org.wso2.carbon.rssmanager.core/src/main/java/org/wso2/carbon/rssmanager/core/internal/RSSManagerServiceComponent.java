@@ -20,20 +20,16 @@ package org.wso2.carbon.rssmanager.core.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.jdbc.pool.DataSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.coordination.core.services.CoordinationService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
+import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSConfig;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
 import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
+import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.transaction.manager.TransactionManagerDummyService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -42,9 +38,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.InitialContext;
 import javax.transaction.TransactionManager;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This class activates the RSS manager core bundle
@@ -62,18 +55,18 @@ import java.util.Map;
  * policy="dynamic"
  * bind="setDataSourceService"
  * unbind="unsetDataSourceService"
- * @scr.reference name="coordination.service"
- * interface="org.wso2.carbon.coordination.core.services.CoordinationService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setCoordinationService"
- * unbind="unsetCoordinationService"
  * @scr.reference name="transactionmanager"
  * interface="org.wso2.carbon.transaction.manager.TransactionManagerDummyService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setTransactionManagerDummyService"
  * unbind="unsetTransactionManagerDummyService"
+ * @scr.reference name="secret.callback.handler.service"
+ * interface="org.wso2.carbon.securevault.SecretCallbackHandlerService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setSecretCallbackHandlerService"
+ * unbind="unsetSecretCallbackHandlerService"
  */
 public class RSSManagerServiceComponent {
 
@@ -83,7 +76,7 @@ public class RSSManagerServiceComponent {
 
     private static RealmService realmService;
 
-    private static CoordinationService coordinationService;
+    private static SecretCallbackHandlerService secretCallbackHandlerService;
 
     /**
      * Activates the RSS Manager Core bundle.
@@ -96,6 +89,8 @@ public class RSSManagerServiceComponent {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
                 MultitenantConstants.SUPER_TENANT_ID);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         try {
             /* Loading tenant specific data */
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
@@ -109,10 +104,10 @@ public class RSSManagerServiceComponent {
             RSSManagerUtil.setTransactionManager(this.lookupTransactionManager());
             /* Initializes the RSS configuration */
             RSSConfig.init();
-            /* Initializing system RSS instances */
-            this.initSystemRSSInstances();
-            /* Initializing super tenant RSS instance repository */
-            this.initializeSuperTenantRSSInstanceRepository();
+            /* Initializing RSSDAO Factory */
+            RSSDAOFactory.init(RSSConfig.getInstance().getRSSManagementRepository());
+            /* Initializing RSS environments */
+            RSSConfig.getInstance().initRSSEnvironments();
         } catch (Throwable e) {
             String msg = "Error occurred while initializing RSS Manager core bundle";
             log.error(msg, e);
@@ -128,12 +123,7 @@ public class RSSManagerServiceComponent {
      * @param componentContext ComponentContext
      */
     protected void deactivate(ComponentContext componentContext) {
-        try {
-            ((DataSource) (RSSConfig.getInstance().getDataSource())).close();
-        } catch (RSSManagerException e) {
-            log.error("Error occurred while closing the database connection pool used by the " +
-                    "RSSConfig", e);
-        }
+        //intentionally left blank
     }
 
     protected void setDataSourceService(DataSourceService dataSourceService) {
@@ -195,28 +185,6 @@ public class RSSManagerServiceComponent {
         return getRealmService().getTenantManager();
     }
 
-    /**
-     * Sets Coordination service
-     *
-     * @param coordinationService associated coordination service
-     */
-    protected void setCoordinationService(CoordinationService coordinationService) {
-        RSSManagerServiceComponent.coordinationService = coordinationService;
-    }
-
-    /**
-     * Unsets Coordination service
-     *
-     * @param coordinationService associated coordination service
-     */
-    protected void unsetCoordinationService(CoordinationService coordinationService) {
-        RSSManagerServiceComponent.coordinationService = null;
-    }
-
-    public static CoordinationService getCoodrinationService() {
-        return coordinationService;
-    }
-
     private TransactionManager lookupTransactionManager() {
         TransactionManager transactionManager = null;
         try {
@@ -247,66 +215,6 @@ public class RSSManagerServiceComponent {
         return transactionManager;
     }
 
-    private void initializeSuperTenantRSSInstanceRepository() throws RSSManagerException {
-        RSSConfig config = RSSConfig.getInstance();
-        try {
-            int tid = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            TenantRSSInstanceRepository repository =
-                    config.getRssManager().getRSSInstancePool().
-                            getTenantRSSRepository(tid);
-            if (repository == null) {
-                repository = new TenantRSSInstanceRepository();
-            }
-            config.getRssManager().beginTransaction();
-            List<RSSInstance> systemRSSInstances =
-                    RSSDAOFactory.getRSSDAO().getAllSystemRSSInstances();
-            for (RSSInstance rssInstance : systemRSSInstances) {
-                repository.addRSSInstance(rssInstance);
-            }
-            config.getRssManager().getRSSInstancePool().
-                    setTenantRSSRepository(tid, repository);
-            config.getRssManager().endTransaction();
-        } catch (RSSManagerException e) {
-            if (config.getRssManager().isInTransaction()) {
-                config.getRssManager().rollbackTransaction();
-            }
-            throw e;
-        }
-    }
-
-    /**
-     * Initialises the RSS DAO database by reading from the "rss-config.xml".
-     *
-     * @throws org.wso2.carbon.rssmanager.core.RSSManagerException
-     *          rssDaoException
-     */
-    private void initSystemRSSInstances() throws RSSManagerException {
-        RSSConfig config = RSSConfig.getInstance();
-        try {
-            /* adds the rss instances listed in the configuration file,
-             * if any of them are already existing in the database, they will be skipped */
-            Map<String, RSSInstance> rssInstances = new HashMap<String, RSSInstance>();
-            for (RSSInstance tmpInst : config.getSystemRSSInstances()) {
-                rssInstances.put(tmpInst.getName(), tmpInst);
-            }
-            RSSDAO rssDAO = RSSDAOFactory.getRSSDAO();
-            config.getRssManager().beginTransaction();
-            for (RSSInstance tmpInst : rssDAO.getAllSystemRSSInstances()) {
-                rssInstances.remove(tmpInst.getName());
-            }
-            for (RSSInstance inst : rssInstances.values()) {
-                rssDAO.createRSSInstance(inst);
-            }
-            config.getRssManager().endTransaction();
-        } catch (RSSManagerException e) {
-            if (config.getRssManager().isInTransaction()) {
-                config.getRssManager().rollbackTransaction();
-            }
-            throw e;
-        }
-    }
-
-
     protected void setTransactionManagerDummyService(TransactionManagerDummyService dummyService) {
         //do nothing
     }
@@ -314,5 +222,25 @@ public class RSSManagerServiceComponent {
     protected void unsetTransactionManagerDummyService(TransactionManagerDummyService dummyService) {
         //do nothing
     }
+
+    protected void setSecretCallbackHandlerService(
+            SecretCallbackHandlerService secretCallbackHandlerService) {
+		if (log.isDebugEnabled()) {
+			log.debug("Setting SecretCallbackHandlerService");
+		}
+		RSSManagerServiceComponent.secretCallbackHandlerService = secretCallbackHandlerService;
+	}
+
+	protected void unsetSecretCallbackHandlerService(
+            SecretCallbackHandlerService secretCallbackHandlerService) {
+        if (log.isDebugEnabled()) {
+			log.debug("Unsetting SecretCallbackHandlerService");
+		}
+		RSSManagerServiceComponent.secretCallbackHandlerService = null;
+	}
+	
+	public static SecretCallbackHandlerService getSecretCallbackHandlerService(){
+		return secretCallbackHandlerService;
+	}
 
 }

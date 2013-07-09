@@ -16,6 +16,8 @@
 ~ under the License.
 -->
 
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabaseUserMetaData"%>
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext"%>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
@@ -32,7 +34,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
     <carbon:breadcrumb resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-                       topPage="true" request="<%=request%>" label="Attached Database Users"/>
+                       topPage="false" request="<%=request%>" label="Attached Database Users"/>
 
     <div id="middle">
         <h2><fmt:message key="rss.manager.attached.database.users"/></h2>
@@ -40,20 +42,26 @@
         <%
             RSSManagerClient client = null;
             DatabaseMetaData database = null;
-
+			String rssInstanceName = request.getParameter("rssInstanceName");
+            String databaseName = request.getParameter("databaseName");
+            String envName = request.getParameter("envName");
+            
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
                     getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
-            String rssInstanceName = request.getParameter("rssInstanceName");
-            String databaseName = request.getParameter("databaseName");
             rssInstanceName = (rssInstanceName != null) ? rssInstanceName : (String) session.getAttribute("rssInstanceName");
             databaseName = (databaseName != null) ? databaseName : (String) session.getAttribute("databaseName");
+            envName = (envName != null) ? envName : (String) session.getAttribute("envName");
+
+            RSSEnvironmentContext rssEnvContext = new RSSEnvironmentContext();
+            rssEnvContext.setEnvironmentName(envName);
+            rssEnvContext.setRssInstanceName(rssInstanceName);		
 
             try {
                 client = new RSSManagerClient(cookie, backendServerURL, configContext, request.getLocale());
-                database = client.getDatabase(rssInstanceName, databaseName);
+                database = client.getDatabase(rssEnvContext, databaseName);
             } catch (Exception e) {
                 CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
                         CarbonUIMessage.ERROR, request, e);
@@ -65,8 +73,8 @@
                     <%
                         if (client != null) {
                             try {
-                                String[] users =
-                                        client.getUsersAttachedToDatabase(rssInstanceName,
+                                DatabaseUserMetaData[] users =
+                                        client.getUsersAttachedToDatabase(rssEnvContext,
                                                 databaseName);
                                 if (users != null && users.length > 0) {
                     %>
@@ -78,11 +86,11 @@
                     </thead>
                     <tbody>
                     <%
-                        for (String username : users) {
-                            if (username != null) {
+                        for (DatabaseUserMetaData user : users) {
+                            if (user.getUsername() != null) {
                     %>
                     <tr>
-                        <td id="<%=username%>"><%=username%>
+                        <td id="<%=user.getUsername()%>"><%=user.getUsername()%>
                         </td>
                         <td>
                            <%--<% if(enableDbConsole = true){%>--%>
@@ -94,15 +102,15 @@
                             <%--<% }%>--%>
                             <a class="icon-link"
                                style="background-image:url(../rssmanager/images/data-sources-icon.gif);"
-                               onclick="createDataSource('<%=database.getRssInstanceName()%>','<%=databaseName%>', '<%=username%>')"
+                               onclick="createDataSource('<%=database.getRssInstanceName()%>','<%=databaseName%>', '<%=user.getUsername()%>', '<%=envName%>')"
                                href="#"><fmt:message key="rss.manager.create.datasource"/></a>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/edit.gif);"
-                               href="javascript:submitEditForm('<%=database.getRssInstanceName()%>','<%=database.getName()%>','<%=username%>')">
+                               href="javascript:submitEditForm('<%=database.getRssInstanceName()%>','<%=database.getName()%>','<%=user.getUsername()%>', '<%=envName%>')">
                                 <fmt:message key="rss.manager.edit.user"/></a>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/delete.gif);"
-                               onclick="detachDatabaseUser('<%=database.getRssInstanceName()%>', '<%=databaseName%>', '<%=username%>'); return false;"
+                               onclick="detachDatabaseUser('<%=database.getRssInstanceName()%>', '<%=databaseName%>', '<%=user.getUsername()%>', '<%=envName%>'); return false;"
                                href="#"><fmt:message
                                     key="rss.manager.detach.database.user"/></a>
                         </td>
@@ -144,12 +152,14 @@
             <form action="attachDatabaseUser.jsp" method="post" id="addForm">
                 <input type="hidden" id="rssInstanceName1" name="rssInstanceName"/>
                 <input type="hidden" id="databaseName" name="databaseName"/>
+                <input type="hidden" id="envName1" name="envName" value="<%=envName%>"/>
             </form>
             <script type="text/javascript">
-                function submitEditForm(rssInstanceName, databaseName, username) {
+                function submitEditForm(rssInstanceName, databaseName, username, envName) {
                     document.getElementById('rssInstanceName').value = rssInstanceName;
                     document.getElementById('databaseName1').value = databaseName;
                     document.getElementById('username').value = username;
+                    // document.getElementById('envName').value = envName;
                     document.getElementById('flag').value = 'edit';
                     document.getElementById('editForm').submit();
                 }
@@ -158,6 +168,7 @@
                 <input id="rssInstanceName" name="rssInstanceName" type="hidden"/>
                 <input id="databaseName1" name="databaseName" type="hidden"/>
                 <input id="username" name="username" type="hidden"/>
+                <input id="envName2" name="envName" type="hidden" value='<%=envName%>'/>
                 <input id="flag" name="flag" type="hidden"/>
             </form>
             <script type="text/javascript">
@@ -167,6 +178,7 @@
             </script>
             <form action="databases.jsp" method="post" id="cancelForm">
                 <input type="hidden" name="rssInstanceName" id="rssInstanceName2"/>
+                <input id="envName3" name="envName" type="hidden" value="<%=envName%>"/>
             </form>
             <script type="text/javascript">
                 function submitExploreForm(username, url, driver) {

@@ -16,6 +16,7 @@
 ~ under the License.
 -->
 
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext"%>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
@@ -31,7 +32,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
 <carbon:breadcrumb resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-                   topPage="true" request="<%=request%>" label="Edit Privilege Template"/>
+                   topPage="false" request="<%=request%>" label="Edit Privilege Template"/>
 
 <%
     String templateName = request.getParameter("privilegeTemplateName");
@@ -43,9 +44,14 @@
     ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
             getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+    
+    String envName = request.getParameter("envName");
+    RSSEnvironmentContext rssEnvContext = new RSSEnvironmentContext();
+    rssEnvContext.setEnvironmentName(envName);
+    
     try {
         client = new RSSManagerClient(cookie, backendServerURL, configContext, request.getLocale());
-        template = client.getDatabasePrivilegesTemplate(templateName);
+        template = client.getDatabasePrivilegesTemplate(rssEnvContext,templateName);
         if (template != null) {
             privileges = template.getPrivileges();
         }
@@ -252,13 +258,13 @@
         <td class="buttonRow" colspan="2">
             <input class="button" type="button"
                    value="<fmt:message key="rss.manager.save"/>"
-                    onclick="return createDatabasePrivilegeTemplate('edit'); return false;"/>
+                    onclick="return createDatabasePrivilegeTemplate('edit', '<%=envName%>'); return false;"/>
             <%--<input class="button" type="button"--%>
                    <%--value="<fmt:message key="rss.manager.save"/>"--%>
                     <%--onclick="return editDatabasePrivilegeTemplate('<%=templateName%>', 'edit')"/>--%>
             <input class="button" type="button"
                    value="<fmt:message key="rss.manager.cancel"/>"
-                   onclick="document.location.href='databasePrivilegeTemplates.jsp'"/>
+                   onclick="document.location.href='databasePrivilegeTemplates.jsp?region=region1&item=privilege_groups_submenu&ordinal=0&envName=<%=envName%>'"/>
 
         </td>
     </tr>

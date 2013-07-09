@@ -16,24 +16,24 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core;
 
-/**
- * Exception class for RSS DAO related operations.
- */
-public class RSSManagerException extends Exception {
+package org.wso2.carbon.rssmanager.core.config;
 
-    private String message;
-	private static final long serialVersionUID = 2021891706072918520L;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-	public RSSManagerException(String message) {
-		super(message);
-        this.message = message;
-	}
-	
-	public RSSManagerException(String message, Exception nestedEx) {
-		super(message, nestedEx);
-        this.message = message;
-	}
-    
+@XmlRootElement (name = "rss-mgt-repository")
+public class RSSManagementRepository {
+
+    private RDBMSConfiguration dataSourceConfig;
+
+    @XmlElement(name = "datasource-config", nillable = false)
+    public RDBMSConfiguration getDataSourceConfig() {
+        return dataSourceConfig;
+    }
+
+    public void setDataSourceConfig(RDBMSConfiguration dataSourceConfig) {
+        this.dataSourceConfig = dataSourceConfig;
+    }
+
 }

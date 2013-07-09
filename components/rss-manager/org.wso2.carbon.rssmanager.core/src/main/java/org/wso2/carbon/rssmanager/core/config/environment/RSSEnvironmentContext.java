@@ -16,11 +16,29 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.entity.datasource;
 
-import javax.xml.bind.annotation.XmlRootElement;
+package org.wso2.carbon.rssmanager.core.config.environment;
 
-@XmlRootElement(name = "datasource-config")
-public class RSSRDBMSConfiguration extends org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration {
+public class RSSEnvironmentContext {
 
+    private String environmentName;
+
+    private String rssInstanceName;
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
+
+    public String getRssInstanceName() {
+        return rssInstanceName;
+    }
+
+    public void setRssInstanceName(String rssInstanceName) {
+        this.rssInstanceName = rssInstanceName;
+    }
+    
 }

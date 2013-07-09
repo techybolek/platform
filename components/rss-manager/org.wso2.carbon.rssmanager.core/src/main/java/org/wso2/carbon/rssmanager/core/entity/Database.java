@@ -33,15 +33,12 @@ public class Database {
 
     private String type;
 
-    private int tenantId = -1;
-
-    public Database(int id, String name, String rssInstanceName, String url, String type, int tenantId) {
+    public Database(int id, String name, String rssInstanceName, String url, String type) {
         this.id = id;
         this.name = name;
         this.rssInstanceName = rssInstanceName;
         this.url = url;
         this.type = type;
-        this.tenantId = tenantId;
     }
 
     public Database() {
@@ -70,14 +67,6 @@ public class Database {
 
     public void setRssInstanceName(String rssInstanceName) {
         this.rssInstanceName = rssInstanceName;
-    }
-
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
     }
 
     public String getType() {

@@ -39,18 +39,10 @@ public class UserDatabaseEntry {
 
 	private DatabasePrivilegeSet privileges;
 
-    public UserDatabaseEntry(){
+    public UserDatabaseEntry(){}
 
-    }
-	
-	public UserDatabaseEntry(int id, String username, String databaseName, String rssInstanceName) {
-		this.username = username;
-		this.databaseName = databaseName;
-        this.rssInstanceName = rssInstanceName;
-	}
-
-    public UserDatabaseEntry(int id, int userId, String username, int databaseId, String databaseName,
-                             int rssInstanceId, String rssInstanceName) {
+    public UserDatabaseEntry(int id, int userId, String username, int databaseId,
+                             String databaseName, int rssInstanceId, String rssInstanceName) {
         this.id = id;
         this.userId = userId;
 		this.username = username;
@@ -60,12 +52,6 @@ public class UserDatabaseEntry {
         this.rssInstanceName = rssInstanceName;
 	}
 
-    public UserDatabaseEntry(String username, String databaseName, String rssInstanceName) {
-		this.username = username;
-		this.databaseName = databaseName;
-        this.rssInstanceName = rssInstanceName;
-	}
-    
     public String getUsername() {
         return username;
     }

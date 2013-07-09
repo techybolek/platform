@@ -85,9 +85,8 @@ public final class RSSManagerConstants {
     public static final String RSS_MANAGER_SYNC_GROUP_NAME = "_RSS_MANAGER_GROUP";
     public static final String RDBMS_DATA_SOURCE_TYPE = "RDBMS";
 
-    public static final class RSS_DS_PROPERTIES {
-
-        private RSS_DS_PROPERTIES() {
+    public static final class DataSourceProperties {
+        private DataSourceProperties() {
             throw new AssertionError();
         }
 
@@ -114,6 +113,15 @@ public final class RSSManagerConstants {
         public static final int DEFAULT_MIN_IDLE = 5;
         public static final int DEFAULT_MAX_IDLE = 6;
 
+    }
+
+    public static final class SecureValueProperties {
+        private SecureValueProperties() {
+            throw new AssertionError();
+        }
+
+        public static final String SECRET_ALIAS_ATTRIBUTE_NAME_WITH_NAMESPACE = "secretAlias";
+        public static final String SECURE_VAULT_NS = "http://org.wso2.securevault/configuration";
 
     }
 

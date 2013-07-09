@@ -19,6 +19,7 @@
 package org.wso2.carbon.rssmanager.core.internal.manager;
 
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 
 public class RSSManagerFactory {
 
@@ -26,13 +27,13 @@ public class RSSManagerFactory {
         MYSQL, ORACLE
     }
 
-    public static RSSManager getRSSManager(String type) throws RSSManagerException {
-        Types t = Types.valueOf(type.toUpperCase());
+    public static RSSManager getRSSManager(RSSEnvironment rssEnvironment) throws RSSManagerException {
+        Types t = Types.valueOf(rssEnvironment.getRSSProvider().toUpperCase());
         switch (t) {
             case MYSQL:
-                return MySQLRSSManager.getMySQLRSSManager();
+                return new MySQLRSSManager(rssEnvironment);
             case ORACLE:
-                return OracleRSSManager.getRSSManager();
+                return new OracleRSSManager();
             default:
                 throw new RSSManagerException("Unsupported database server type");
         }

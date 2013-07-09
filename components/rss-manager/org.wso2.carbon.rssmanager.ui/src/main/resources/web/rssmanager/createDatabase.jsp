@@ -15,6 +15,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
@@ -22,11 +23,9 @@
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.RSSInstanceMetaData" %>
 <%@ page import="org.wso2.carbon.rssmanager.common.RSSManagerConstants" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.common.RSSManagerHelper" %>
 
@@ -42,12 +41,16 @@
     <%
         RSSManagerClient client = null;
         int systemRSSInstanceCount = 0;
-        List<RSSInstanceMetaData> rssInstances = new ArrayList<RSSInstanceMetaData>();
+        RSSInstanceMetaData[] rssInstances = new RSSInstanceMetaData[0];
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
                 getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String tenantDomain = (String) session.getAttribute(MultitenantConstants.TENANT_DOMAIN);
+        String envName = request.getParameter("envName");
+        String[] environments = (String[]) session.getAttribute("environments");
+        RSSEnvironmentContext rssContext = null;
+
         try {
             client = new RSSManagerClient(cookie, backendServerURL, configContext,
                     request.getLocale());
@@ -55,10 +58,19 @@
             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
                     CarbonUIMessage.ERROR, request, e);
         }
+        if (envName == null) {
+            envName = environments[0];
+        }
+        rssContext = new RSSEnvironmentContext();
+        rssContext.setEnvironmentName(envName);
     %>
 
     <div id="middle">
         <h2><fmt:message key="rss.manager.new.database"/></h2>
+
+        <div>
+
+        </div>
 
         <div id="workArea">
             <form method="post" action="#" name="addDatabaseForm"
@@ -66,11 +78,12 @@
                 <%
                     if (client != null) {
                         try {
-                            systemRSSInstanceCount = client.getSystemRSSInstanceCount();
-                            rssInstances = client.getRSSInstanceList();
+                            systemRSSInstanceCount = client.getSystemRSSInstanceCount(rssContext);
+                            rssInstances = client.getRSSInstanceList(rssContext);
                         } catch (Exception e) {
                             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
                                     CarbonUIMessage.ERROR, request, e);
+                        }
                         }
                 %>
                 <table class="styledLeft">
@@ -83,22 +96,42 @@
                         <td>
                             <table class="normal">
                                 <tr>
+                                </tr>
+                                <tr>
+                                    <td class="leftCol-med">
+                                            <fmt:message key="rss.environment.name"/><font
+                                            color='red'>*</font>
+                                    <td>
+                                        <select id="envCombo" name="envCombo"
+                                                onchange="onComboChange(this)">
+                                            <%
+                                                for (String env : environments) {
+                                                    if (envName != null && env.equals(envName.trim())) {
+                                            %>
+                                            <option id="<%=env%>" value="<%=env%>"
+                                                    selected="selected"><%=env%>
+                                            </option>
+                                            <%
+                                            } else {
+                                            %>
+                                            <option id="<%=env%>" value="<%=env%>"><%=env%>
+                                            </option>
+                                            <%
+                                                    }
+                                                }
+                                            %>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td class="leftCol-med"><fmt:message
                                             key="rss.manager.instance.name"/><font
                                             color='red'>*</font></td>
                                     <td><select id="rssInstances"
                                                 name="rssInstances">
+                                       
                                         <%
-                                            if (systemRSSInstanceCount > 0) {
-                                                String rssInstanceType =
-                                                        RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE;
-                                        %>
-                                        <option id="<%=rssInstanceType%>"
-                                                value="<%=rssInstanceType%>">WSO2_RSS
-                                        </option>
-                                        <%
-                                            }
-                                            if (rssInstances.size() > 0 && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                                            if (rssInstances.length > 0) {
                                                 for (RSSInstanceMetaData rssIns : rssInstances) {
                                                     if (rssIns != null) {
                                         %>
@@ -109,8 +142,7 @@
                                                         }
                                                     }
                                                 }
-                                            }
-                                        %>
+                                       %>
                                     </select></td>
                                 </tr>
                                 <tr>
@@ -119,7 +151,8 @@
                                     <td><input value="" id="databaseName"
                                                name="databaseName"
                                                size="30" type="text"><font
-                                            color='black'><%=(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) ? "" : "_" + RSSManagerHelper.processDomainName(tenantDomain)%></font></td>
+                                            color='black'><%=(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) ? "" : "_" + RSSManagerHelper.processDomainName(tenantDomain)%>
+                                    </font></td>
                                 </tr>
 
                             </table>
@@ -130,7 +163,7 @@
                         <td class="buttonRow" colspan="2">
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.create"/>"
-                                   onclick="return createDatabase();return false;"/>
+                                   onclick="return createDatabase('<%=envName%>');return false;"/>
 
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.cancel"/>"
@@ -141,4 +174,10 @@
             </form>
         </div>
     </div>
+    <script type="text/javascript">
+        function onComboChange(combo) {
+            var opt = combo.options[combo.selectedIndex].value;
+            window.location = 'createDatabase.jsp?envName=' + opt;
+        }
+    </script>
 </fmt:bundle>

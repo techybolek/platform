@@ -15,6 +15,8 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabaseUserMetaData"%>
+<%@page import="org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
@@ -22,9 +24,7 @@
 <%@ page import="org.wso2.carbon.rssmanager.ui.RSSManagerClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-<%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabasePrivilegeTemplate" %>
 
 <script type=text/javascript src="js/uiValidator.js"></script>
@@ -40,13 +40,20 @@
         RSSManagerClient client = null;
         String rssInstanceName = request.getParameter("rssInstanceName");
         String databaseName = request.getParameter("databaseName");
+        String envName = request.getParameter("envName");
+               
         rssInstanceName = (rssInstanceName != null) ? rssInstanceName : "";
         databaseName = (databaseName != null) ? databaseName : "";
+	 
+        RSSEnvironmentContext rssEnvContext = new RSSEnvironmentContext();
+        rssEnvContext.setEnvironmentName(envName);
+        rssEnvContext.setRssInstanceName(rssInstanceName);
 
         session.setAttribute("rssInstanceName", rssInstanceName);
         session.setAttribute("databaseName", databaseName);
+        session.setAttribute("envName", envName);
 
-        String[] availableUsers = new String[0];
+        DatabaseUserMetaData[] availableUsers = new DatabaseUserMetaData[0];
 
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
@@ -71,7 +78,7 @@
                     if (client != null) {
                         try {
                             availableUsers =
-                                    client.getAvailableUsersToAttachToDatabase(rssInstanceName,
+                                    client.getAvailableUsersToAttachToDatabase(rssEnvContext,
                                             databaseName);
                         } catch (Exception e) {
                             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
@@ -87,6 +94,15 @@
                     <tr>
                         <td>
                             <table class="normal">
+                                <tr>
+                             		<td class="leftCol-med"><fmt:message
+                                        key="rss.environment.name"/><font
+                                            color='red'>*</font>
+                              		</td>
+                                    <td>
+                                    	<input type="text" id="envName" name="envName" readonly="readonly" value="<%=envName%>" />
+                                    </td>
+                            	</tr>
                                 <tr>
                                     <td align="left"><fmt:message
                                             key="rss.manager.instance.name"/><font
@@ -108,17 +124,14 @@
                                             color='red'>*</font></td>
                                     <td><select id="databaseUsers"
                                                 name="databaseUsers">
-                                        <option id="SELECT"
-                                                value="SELECT">-------SELECT-------
-                                        </option>
                                         <%
                                             if (availableUsers != null &&
                                                     availableUsers.length > 0) {
-                                                for (String user : availableUsers) {
+                                                for (DatabaseUserMetaData user : availableUsers) {
                                                     if (user != null) {
                                         %>
-                                        <option id="<%=user%>"
-                                                value="<%=user%>"><%=user%>
+                                        <option id="<%=user.getUsername()%>"
+                                                value="<%=user.getUsername()%>"><%=user.getUsername()%>
                                         </option>
                                         <%
                                                         }
@@ -133,14 +146,13 @@
                                             key="rss.manager.database.privileges.template"/></td>
                                     <td>
                                         <select id="privilegeTemplates" name="privilegeTemplates">
-                                            <option value="">-------SELECT-------</option>
                                             <%
                                                 if (client != null) {
                                                     try {
-                                                        List<DatabasePrivilegeTemplate> templates =
-                                                                client.getDatabasePrivilegesTemplates();
+                                                        DatabasePrivilegeTemplate[] templates =
+                                                                client.getDatabasePrivilegesTemplates(rssEnvContext);
 
-                                                        if (templates.size() > 0) {
+                                                        if (templates.length > 0) {
                                                             for (DatabasePrivilegeTemplate template : templates) {
                                             %>
                                             <option id="<%=template.getName()%>"
@@ -160,7 +172,6 @@
                                         </select>
                                     </td>
                                 </tr>
-                                `
                             </table>
                         </td>
                     </tr>
@@ -173,7 +184,7 @@
 
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.cancel"/>"
-                                   onclick="document.location.href = 'attachedDatabaseUsers.jsp'"/>
+                                   onclick="document.location.href = 'attachedDatabaseUsers.jsp?ordinal=1'"/>
                         </td>
                     </tr>
                 </table>

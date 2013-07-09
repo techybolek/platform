@@ -2,16 +2,16 @@ package org.wso2.carbon.rssmanager.core.internal.manager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
+import org.wso2.carbon.rssmanager.core.RSSInstanceDSWrapperRepository;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.RSSTransactionManager;
+import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.RSSInstancePool;
 import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.sql.XAConnection;
 import javax.transaction.RollbackException;
@@ -20,15 +20,37 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
 public abstract class RSSManager {
 
-    private RSSInstancePool rssInstancePool;
+    private RSSDAO rssDAO;
+
+    private String rssEnvironmentName;
+
+    private RSSEnvironment rssEnvironment;
+
     private RSSTransactionManager txManager;
-    private RSSDAO dao = RSSDAOFactory.getRSSDAO();
+
+    private RSSInstanceDSWrapperRepository repository;
+
     private static final Log log = LogFactory.getLog(RSSManager.class);
+
+    public RSSManager(RSSEnvironment rssEnvironment) {
+        this.rssEnvironment = rssEnvironment;
+        this.rssEnvironmentName = getRSSEnvironment().getName();
+        this.rssDAO = RSSDAOFactory.getRSSDAO();
+        this.repository = new RSSInstanceDSWrapperRepository(getRSSEnvironment().getRSSInstances());
+        try {
+            this.init();
+        } catch (RSSManagerException e) {
+            log.error("RSS manager associated with RSS environment '" +
+                    getRSSEnvironment().getName() + "' is not initialized properly and is null");
+        }
+    }
 
     /**
      * Thread local variable to track the status of active nested transactions
@@ -48,21 +70,12 @@ public abstract class RSSManager {
         }
     };
 
-    public RSSManager() {
-        this.init();
-        this.rssInstancePool = new RSSInstancePool();
-    }
-
-    public RSSInstancePool getRSSInstancePool() {
-        return rssInstancePool;
-    }
-
-    public abstract void createDatabase(Database database) throws RSSManagerException;
+    public abstract Database createDatabase(Database database) throws RSSManagerException;
 
     public abstract void dropDatabase(String rssInstanceName, String databaseName) throws
             RSSManagerException;
 
-    public abstract void createDatabaseUser(DatabaseUser databaseUser) throws RSSManagerException;
+    public abstract DatabaseUser createDatabaseUser(DatabaseUser databaseUser) throws RSSManagerException;
 
     public abstract void dropDatabaseUser(String rssInstanceName, String username) throws
             RSSManagerException;
@@ -78,98 +91,207 @@ public abstract class RSSManager {
     public abstract void detachUserFromDatabase(String rssInstanceName, String databaseName,
                                                 String username) throws RSSManagerException;
 
-    public void createRSSInstance(RSSInstance rssInstance) throws RSSManagerException {
+    public void createRSSEnvironment() throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-            rssInstance.setTenantId(this.getCurrentTenantId());
-            this.getDAO().createRSSInstance(rssInstance);
-            this.endTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
+            if (!getDAO().isEnvironmentExists(getRSSEnvironmentName(), tenantId)) {
+                getDAO().createRSSEnvironment(getRSSEnvironment(), tenantId);
+            }
+            Map<String, RSSInstance> rssInstances = new HashMap<String, RSSInstance>();
+            for (RSSInstance rssInstance : getRSSEnvironment().getRSSInstances()) {
+                rssInstances.put(rssInstance.getName(), rssInstance);
+            }
+            for (RSSInstance tmpInst : getDAO().getAllSystemRSSInstances(getRSSEnvironmentName())) {
+                RSSInstance reloadedRssInst = rssInstances.get(tmpInst.getName());
+                RSSInstance prevKey = rssInstances.remove(tmpInst.getName());
+                if (prevKey == null) {
+                    log.warn("Configuration corresponding to RSS instance named '" + tmpInst.getName() +
+                            "' is missing in the rss-config.xml");
+                    continue;
+                }
+                getDAO().updateRSSInstance(getRSSEnvironmentName(), reloadedRssInst, tenantId);
+            }
+            for (RSSInstance inst : rssInstances.values()) {
+                getDAO().createRSSInstance(getRSSEnvironmentName(), inst, tenantId);
+            }
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
+            throw e;
+        }
+    }
+
+    public RSSInstance createRSSInstance(RSSInstance rssInstance) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            this.getDAO().createRSSInstance(getRSSEnvironmentName(), rssInstance, tenantId);
+
+            if (inTransaction) {
+                this.endTransaction();
+            }
+            return rssInstance;
+        } catch (RSSManagerException e) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public void dropRSSInstance(String rssInstanceName) throws RSSManagerException {
-        try {
-            this.beginTransaction();
-
-            RSSInstance rssInstance = this.getDAO().getRSSInstance(rssInstanceName);
-            DataSource dataSource = (DataSource) rssInstance.getDataSource();
-            if (dataSource != null) {
-                dataSource.close();
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
             }
-            this.getDAO().dropRSSInstance(rssInstanceName, this.getCurrentTenantId());
+        }
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            RSSInstance rssInstance =
+                    this.getDAO().getRSSInstance(getRSSEnvironmentName(), rssInstanceName, tenantId);
+
+            this.getDAO().dropRSSInstance(getRSSEnvironmentName(), rssInstanceName,
+                    RSSManagerUtil.getTenantId());
             //TODO : Drop dependent databases etc.
-            this.endTransaction();
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public void editRSSInstanceConfiguration(RSSInstance rssInstance) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-            rssInstance.setTenantId(this.getCurrentTenantId());
-            this.getDAO().updateRSSInstance(rssInstance);
-            this.endTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
+            this.getDAO().updateRSSInstance(getRSSEnvironmentName(), rssInstance, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
-    public List<RSSInstanceMetaData> getRSSInstances(int tid) throws RSSManagerException {
+    public RSSInstanceMetaData[] getRSSInstances() throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-
-            List<RSSInstance> tmpList = this.getDAO().getAllRSSInstances(tid);
+            int tenantId = RSSManagerUtil.getTenantId();
+            RSSInstance[] tmpList =
+                    this.getDAO().getAllRSSInstances(getRSSEnvironmentName(), tenantId);
             List<RSSInstanceMetaData> rssInstances = new ArrayList<RSSInstanceMetaData>();
             for (RSSInstance tmpIns : tmpList) {
-                RSSInstanceMetaData rssIns = RSSManagerUtil.convertRSSInstanceToMetadata(tmpIns);
+                RSSInstanceMetaData rssIns =
+                        RSSManagerUtil.convertToRSSInstanceMetadata(tmpIns, tenantId);
                 rssInstances.add(rssIns);
             }
-            this.endTransaction();
-            return rssInstances;
+            if (inTransaction) {
+                this.endTransaction();
+            }
+            if (!(tenantId == MultitenantConstants.SUPER_TENANT_ID)) {
+                RSSInstance tmp = getRoundRobinAssignedDatabaseServer();
+                tmp.setName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                RSSInstanceMetaData rssInsST =
+                        RSSManagerUtil.convertToRSSInstanceMetadata(tmp, tenantId);
+                rssInstances.add(rssInsST);
+            }
+            return rssInstances.toArray(new RSSInstanceMetaData[rssInstances.size()]);
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
-    public List<DatabaseMetaData> getDatabases(int tid) throws RSSManagerException {
+    public DatabaseMetaData[] getDatabases() throws RSSManagerException {
         List<DatabaseMetaData> databases = new ArrayList<DatabaseMetaData>();
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-
-            List<Database> tmpList = this.getDAO().getAllDatabases(tid);
+            int tenantId = RSSManagerUtil.getTenantId();
+            Database[] tmpList = this.getDAO().getAllDatabases(getRSSEnvironmentName(), tenantId);
             for (Database database : tmpList) {
-                DatabaseMetaData metadata = RSSManagerUtil.convertDatabaseToMetadata(database);
+                DatabaseMetaData metadata =
+                        RSSManagerUtil.convertToDatabaseMetadata(database, tenantId);
                 databases.add(metadata);
             }
-            this.endTransaction();
-            return databases;
+            if (inTransaction) {
+                this.endTransaction();
+            }
+            return databases.toArray(new DatabaseMetaData[databases.size()]);
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
-    public List<DatabaseUserMetaData> getDatabaseUsers(int tid) throws RSSManagerException {
-        List<DatabaseUserMetaData> users = new ArrayList<DatabaseUserMetaData>();
-        try {
-            this.beginTransaction();
-
-            List<DatabaseUser> tmpList = this.getDAO().getAllDatabaseUsers(tid);
-            for (DatabaseUser tmpUser : tmpList) {
-                DatabaseUserMetaData user = RSSManagerUtil.convertToDatabaseUserMetadata(tmpUser);
-                users.add(user);
+    public DatabaseUserMetaData[] getDatabaseUsers() throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
             }
-            this.endTransaction();
+        }
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            DatabaseUserMetaData[] users =
+                    this.getDAO().getAllDatabaseUsers(getRSSEnvironmentName(), tenantId);
+
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return users;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
@@ -177,84 +299,153 @@ public abstract class RSSManager {
     public RSSInstance getRoundRobinAssignedDatabaseServer() throws
             RSSManagerException {
         RSSInstance rssIns = null;
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
+            RSSInstance[] rssInstances =
+                    this.getDAO().getAllSystemRSSInstances(getRSSEnvironmentName());
+            int count = this.getDAO().getSystemRSSDatabaseCount(getRSSEnvironmentName());
 
-            List<RSSInstance> rdsInstances = this.getDAO().getAllSystemRSSInstances();
-            int count = this.getDAO().getSystemRSSDatabaseCount();
-
-            for (int i = 0; i < rdsInstances.size(); i++) {
-                if (i == count % rdsInstances.size()) {
-                    rssIns = rdsInstances.get(i);
+            for (int i = 0; i < rssInstances.length; i++) {
+                if (i == count % rssInstances.length) {
+                    rssIns = rssInstances[i];
                     if (rssIns != null) {
                         return rssIns;
                     }
                 }
             }
-            this.endTransaction();
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return rssIns;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public void createDatabasePrivilegesTemplate(
             DatabasePrivilegeTemplate template) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-
             if (template == null) {
                 this.rollbackTransaction();
                 throw new RSSManagerException("Database privilege template information " +
                         "cannot be null");
             }
 
-            boolean isExist = this.getDAO().isDatabasePrivilegeTemplateExist(template.getName());
+            int tenantId = RSSManagerUtil.getTenantId();
+            boolean isExist =
+                    this.getDAO().isDatabasePrivilegeTemplateExist(getRSSEnvironmentName(),
+                            template.getName(), tenantId);
             if (isExist) {
                 this.rollbackTransaction();
-                throw new RSSManagerException("A database privilege template named '" +
-                        template.getName() + "' already exists");
+                throw new RSSManagerException("Database privilege template '" + template.getName() +
+                        "' already exists");
             }
 
-            template = this.getDAO().createDatabasePrivilegesTemplate(template);
-            this.getDAO().setDatabasePrivilegeTemplateProperties(template);
-            this.endTransaction();
+            template = this.getDAO().createDatabasePrivilegesTemplate(getRSSEnvironmentName(),
+                    template, tenantId);
+            this.getDAO().setDatabasePrivilegeTemplateProperties(getRSSEnvironmentName(), template,
+                    tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public void editDatabasePrivilegesTemplate(DatabasePrivilegeTemplate template) throws
             RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-
             if (template == null) {
                 this.rollbackTransaction();
                 throw new RSSManagerException("Database privilege template information " +
                         "cannot be null");
             }
 
-            template.setTenantId(this.getCurrentTenantId());
-            this.getDAO().editDatabasePrivilegesTemplate(template);
+            int tenantId = RSSManagerUtil.getTenantId();
+            this.getDAO().editDatabasePrivilegesTemplate(getRSSEnvironmentName(), template,
+                    tenantId);
 
-            this.endTransaction();
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public RSSInstance getRSSInstance(String rssInstanceName) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-            RSSInstance rssInstance = this.getDAO().getRSSInstance(rssInstanceName);
-            this.endTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
+            RSSInstance rssInstance = this.getDAO().getRSSInstance(getRSSEnvironmentName(),
+                    rssInstanceName, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return rssInstance;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
+            throw e;
+        }
+    }
+
+    public RSSInstance getSystemRSSInstance(String rssInstanceName) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
+        try {
+            RSSInstance rssInstance = this.getDAO().getSystemRSSInstance(getRSSEnvironmentName(),
+                    rssInstanceName);
+            if (inTransaction) {
+                this.endTransaction();
+            }
+            return rssInstance;
+        } catch (RSSManagerException e) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
@@ -262,27 +453,36 @@ public abstract class RSSManager {
     public Database getDatabase(String rssInstanceName,
                                 String databaseName) throws RSSManagerException {
         Database database;
-        try {
-            this.beginTransaction();
-
-            boolean isExist = this.getDAO().isDatabaseExist(rssInstanceName, databaseName);
-            if (isExist) {
-                this.rollbackTransaction();
-                throw new RSSManagerException("A database named '" + databaseName +
-                        "' already exists in RSS instance ' " + rssInstanceName + "'");
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
             }
+        }
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance rssInstance =
-                    this.getDAO().findRSSInstanceDatabaseBelongsTo(rssInstanceName, databaseName);
+                    this.getDAO().findRSSInstanceDatabaseBelongsTo(getRSSEnvironmentName(),
+                            rssInstanceName, databaseName,
+                            tenantId);
             if (rssInstance == null) {
-                this.rollbackTransaction();
+                if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    this.rollbackTransaction();
+                }
                 throw new RSSManagerException("Database '" + databaseName + "' does not exist " +
                         "in RSS instance '" + rssInstanceName + "'");
             }
-            database = this.getDAO().getDatabase(rssInstance, databaseName);
 
-            this.endTransaction();
+            database = this.getDAO().getDatabase(getRSSEnvironmentName(), rssInstance, databaseName,
+                    tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
         return database;
@@ -291,14 +491,25 @@ public abstract class RSSManager {
     public boolean isDatabaseExist(String rssInstanceName, String databaseName) throws
             RSSManagerException {
         boolean isExists;
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-            isExists = this.getDAO().isDatabaseExist(rssInstanceName, databaseName);
-            this.endTransaction();
-            
+            int tenantId = RSSManagerUtil.getTenantId();
+            isExists = this.getDAO().isDatabaseExist(getRSSEnvironmentName(), rssInstanceName,
+                    databaseName, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return isExists;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
@@ -306,14 +517,26 @@ public abstract class RSSManager {
     public boolean isDatabaseUserExist(String rssInstanceName, String databaseUsername) throws
             RSSManagerException {
         boolean isExists;
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-            isExists = this.getDAO().isDatabaseUserExist(rssInstanceName, databaseUsername);
-            this.endTransaction();
-
+            int tenantId = RSSManagerUtil.getTenantId();
+            isExists =
+                    this.getDAO().isDatabaseUserExist(getRSSEnvironmentName(), rssInstanceName,
+                            databaseUsername, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return isExists;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
@@ -321,13 +544,25 @@ public abstract class RSSManager {
     public boolean isDatabasePrivilegeTemplateExist(String templateName) throws
             RSSManagerException {
         boolean isExist;
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-            isExist = this.getDAO().isDatabasePrivilegeTemplateExist(templateName);
-            this.endTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
+            isExist = this.getDAO().isDatabasePrivilegeTemplateExist(getRSSEnvironmentName(),
+                    templateName, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return isExist;
-        } catch(RSSManagerException e) {
-            this.rollbackTransaction();
+        } catch (RSSManagerException e) {
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
@@ -335,149 +570,239 @@ public abstract class RSSManager {
     public DatabaseUser getDatabaseUser(String rssInstanceName,
                                         String username) throws RSSManagerException {
         DatabaseUser user;
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-
-            boolean isExist = this.getDAO().isDatabaseUserExist(rssInstanceName, username);
-            if (isExist) {
+            int tenantId = RSSManagerUtil.getTenantId();
+            boolean isExist = this.getDAO().isDatabaseUserExist(getRSSEnvironmentName(),
+                    rssInstanceName, username, tenantId);
+            if (!isExist) {
                 this.rollbackTransaction();
                 throw new RSSManagerException("Database user '" + username + "' already exists " +
                         "in the RSS instance '" + rssInstanceName + "'");
             }
 
             RSSInstance rssInstance =
-                    this.getDAO().findRSSInstanceDatabaseUserBelongsTo(rssInstanceName, username);
+                    this.getDAO().findRSSInstanceDatabaseUserBelongsTo(getRSSEnvironmentName(),
+                            rssInstanceName, username,
+                            tenantId);
             if (rssInstance == null) {
                 this.rollbackTransaction();
                 throw new RSSManagerException("Database user '" + username + "' does not exist " +
                         "in RSS instance '" + rssInstanceName + "'");
             }
-            user = this.getDAO().getDatabaseUser(rssInstance, username);
+            user = this.getDAO().getDatabaseUser(getRSSEnvironmentName(), rssInstance, username,
+                    tenantId);
 
-            this.endTransaction();
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return user;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public void dropDatabasePrivilegesTemplate(String templateName) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
+            this.getDAO().removeDatabasePrivilegesTemplateEntries(getRSSEnvironmentName(),
+                    templateName, tenantId);
+            this.getDAO().dropDatabasePrivilegesTemplate(getRSSEnvironmentName(), templateName,
+                    tenantId);
 
-            this.getDAO().removeDatabasePrivilegesTemplateEntries(templateName,
-                    this.getCurrentTenantId());
-            this.getDAO().dropDatabasePrivilegesTemplate(templateName);
-
-            this.endTransaction();
+            if (inTransaction) {
+                this.endTransaction();
+            }
         } catch (RSSManagerException e) {
             this.rollbackTransaction();
             throw e;
         }
     }
 
-    public List<DatabasePrivilegeTemplate> getDatabasePrivilegeTemplates() throws
+    public DatabasePrivilegeTemplate[] getDatabasePrivilegeTemplates() throws
             RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
+            DatabasePrivilegeTemplate[] templates =
+                    this.getDAO().getAllDatabasePrivilegesTemplates(getRSSEnvironmentName(),
+                            tenantId);
 
-            List<DatabasePrivilegeTemplate> templates =
-                    this.getDAO().getAllDatabasePrivilegesTemplates(this.getCurrentTenantId());
-
-            this.endTransaction();
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return templates;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public DatabasePrivilegeTemplate getDatabasePrivilegeTemplate(
             String templateName) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
+            int tenantId = RSSManagerUtil.getTenantId();
             DatabasePrivilegeTemplate template =
-                    this.getDAO().getDatabasePrivilegesTemplate(templateName);
-            this.endTransaction();
+                    this.getDAO().getDatabasePrivilegesTemplate(getRSSEnvironmentName(),
+                            templateName, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return template;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
     public int getSystemRSSInstanceCount() throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-            int count = this.getDAO().getAllSystemRSSInstances().size();
-            this.endTransaction();
+            int count = this.getDAO().getAllSystemRSSInstances(getRSSEnvironmentName()).length;
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return count;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
-    public List<String> getUsersAttachedToDatabase(
+    public DatabaseUserMetaData[] getUsersAttachedToDatabase(
             String rssInstanceName, String databaseName) throws RSSManagerException {
-        try {
-            this.beginTransaction();
-
-            RSSInstance rssInstance =
-                    this.getDAO().findRSSInstanceDatabaseBelongsTo(rssInstanceName, databaseName);
-            if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
-                return this.getDAO().getSystemUsersAssignedToDatabase(rssInstance, databaseName);
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
             }
-            List<String> existingUsers =
-                    this.getDAO().getUsersAssignedToDatabase(rssInstance, databaseName);
-
-            this.endTransaction();
+        }
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            RSSInstance rssInstance =
+                    this.getDAO().findRSSInstanceDatabaseBelongsTo(getRSSEnvironmentName(),
+                            rssInstanceName, databaseName, tenantId);
+            if (rssInstance == null) {
+                this.rollbackTransaction();
+                throw new RSSManagerException("Database '" + databaseName
+                        + "' does not exist " + "in RSS instance '"
+                        + rssInstanceName + "'");
+            }
+            DatabaseUserMetaData[] existingUsers;
+            if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
+                existingUsers =
+                        this.getDAO().getSystemUsersAssignedToDatabase(getRSSEnvironmentName(),
+                                rssInstance, databaseName);
+                return existingUsers;
+            }
+            existingUsers = this.getDAO().getUsersAssignedToDatabase(getRSSEnvironmentName(),
+                    rssInstance, databaseName, tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return existingUsers;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
-    public List<String> getAvailableUsersToAttachToDatabase(
+    public DatabaseUserMetaData[] getAvailableUsersToAttachToDatabase(
             String rssInstanceName, String databaseName) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-
+            int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance rssInstance =
-                    this.getDAO().findRSSInstanceDatabaseBelongsTo(rssInstanceName, databaseName);
-            List<String> availableUsers = new ArrayList<String>();
+                    this.getDAO().findRSSInstanceDatabaseBelongsTo(getRSSEnvironmentName(),
+                            rssInstanceName, databaseName, tenantId);
+            List<DatabaseUserMetaData> availableUsers = new ArrayList<DatabaseUserMetaData>();
 
-            List<String> existingUsers;
+            DatabaseUserMetaData[] existingUsers;
             if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
-                existingUsers = this.getDAO().getSystemUsersAssignedToDatabase(rssInstance, databaseName);
+                existingUsers =
+                        this.getDAO().getSystemUsersAssignedToDatabase(getRSSEnvironmentName(),
+                                rssInstance, databaseName);
             } else {
-                existingUsers = this.getDAO().getUsersAssignedToDatabase(rssInstance, databaseName);
+                existingUsers =
+                        this.getDAO().getUsersAssignedToDatabase(getRSSEnvironmentName(),
+                                rssInstance, databaseName,
+                                tenantId);
             }
-
-//            List<String> existingUsers =
-//                    this.getUsersAttachedToDatabase(rssInstanceName, databaseName);
             if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
-                for (DatabaseUser user : this.getDAO().getSystemCreatedDatabaseUsers()) {
-                    String username = user.getUsername();
-                    if (!existingUsers.contains(username)) {
-                        availableUsers.add(username);
+                for (DatabaseUser user : this.getDAO().getSystemCreatedDatabaseUsers(
+                        getRSSEnvironmentName())) {
+                    if (!isDatabaseUserExist(existingUsers, user)) {
+                        availableUsers.add(
+                                RSSManagerUtil.convertToDatabaseUserMetadata(user, tenantId));
                     }
                 }
             } else {
-                for (DatabaseUser user : this.getDAO().getUsersByRSSInstance(rssInstance)) {
-                    String username = user.getUsername();
-                    if (!existingUsers.contains(username)) {
-                        availableUsers.add(username);
+                for (DatabaseUser user : this.getDAO().getUsersByRSSInstance(getRSSEnvironmentName(),
+                        rssInstance, tenantId)) {
+                    if (!isDatabaseUserExist(existingUsers, user)) {
+                        availableUsers.add(
+                                RSSManagerUtil.convertToDatabaseUserMetadata(user, tenantId));
                     }
                 }
             }
-
-            this.endTransaction();
-            return availableUsers;
+            if (inTransaction) {
+                this.endTransaction();
+            }
+            return availableUsers.toArray(new DatabaseUserMetaData[availableUsers.size()]);
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
@@ -485,32 +810,46 @@ public abstract class RSSManager {
     public DatabasePrivilegeSet getUserDatabasePrivileges(String rssInstanceName,
                                                           String databaseName,
                                                           String username) throws RSSManagerException {
+        boolean inTransaction = false;
+        if (!this.isInTransaction()) {
+            if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.beginTransaction();
+                inTransaction = true;
+            }
+        }
         try {
-            this.beginTransaction();
-
+            int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance rssInstance =
-                    this.getDAO().findRSSInstanceDatabaseBelongsTo(rssInstanceName, databaseName);
+                    this.getDAO().findRSSInstanceDatabaseBelongsTo(getRSSEnvironmentName(),
+                            rssInstanceName, databaseName, tenantId);
             if (rssInstance == null) {
-                this.rollbackTransaction();
+                if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    this.rollbackTransaction();
+                }
                 throw new RSSManagerException("Database '" + databaseName + "' does not exist " +
                         "in RSS instance '" + rssInstanceName + "'");
             }
             if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
-                return this.getDAO().getSystemUserDatabasePrivileges(rssInstance,
-                        databaseName, username);
+                return this.getDAO().getSystemUserDatabasePrivileges(getRSSEnvironmentName(),
+                        rssInstance, databaseName, username);
             }
             DatabasePrivilegeSet privileges =
-                    this.getDAO().getUserDatabasePrivileges(rssInstance, databaseName, username);
-
-            this.endTransaction();
+                    this.getDAO().getUserDatabasePrivileges(getRSSEnvironmentName(), rssInstance,
+                            databaseName, username,
+                            tenantId);
+            if (inTransaction) {
+                this.endTransaction();
+            }
             return privileges;
         } catch (RSSManagerException e) {
-            this.rollbackTransaction();
+            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                this.rollbackTransaction();
+            }
             throw e;
         }
     }
 
-    private void init() {
+    private void init() throws RSSManagerException {
         TransactionManager txMgr = RSSManagerUtil.getTransactionManager();
         this.txManager = new RSSTransactionManager(txMgr);
     }
@@ -523,7 +862,7 @@ public abstract class RSSManager {
         return activeNestedTransactions.get() > 0;
     }
 
-    public void beginTransaction() throws RSSManagerException {
+    public synchronized void beginTransaction() throws RSSManagerException {
         if (log.isDebugEnabled()) {
             log.debug("beginTransaction()");
         }
@@ -533,7 +872,7 @@ public abstract class RSSManager {
         activeNestedTransactions.set(activeNestedTransactions.get() + 1);
     }
 
-    public void endTransaction() throws RSSManagerException {
+    public synchronized void endTransaction() throws RSSManagerException {
         if (log.isDebugEnabled()) {
             log.debug("endTransaction()");
         }
@@ -546,7 +885,7 @@ public abstract class RSSManager {
         }
     }
 
-    public void rollbackTransaction() throws RSSManagerException {
+    public synchronized void rollbackTransaction() throws RSSManagerException {
         if (log.isDebugEnabled()) {
             log.debug("rollbackTransaction()");
         }
@@ -557,7 +896,7 @@ public abstract class RSSManager {
         activeNestedTransactions.set(0);
     }
 
-    public Connection createConnection(javax.sql.DataSource dataSource) throws RSSManagerException {
+    public synchronized Connection createConnection(javax.sql.DataSource dataSource) throws RSSManagerException {
         Connection conn;
         try {
             conn = dataSource.getConnection();
@@ -572,11 +911,14 @@ public abstract class RSSManager {
             }
             return conn;
         } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while creating datasource connection", e);
+            throw new RSSManagerException("Error occurred while creating datasource connection : " +
+                    e.getMessage(), e);
         } catch (SystemException e) {
-            throw new RSSManagerException("Error occurred while creating datasource connection", e);
+            throw new RSSManagerException("Error occurred while creating datasource connection : " +
+                    e.getMessage(), e);
         } catch (RollbackException e) {
-            throw new RSSManagerException("Error occurred while creating datasource connection", e);
+            throw new RSSManagerException("Error occurred while creating datasource connection : " +
+                    e.getMessage(), e);
         }
     }
 
@@ -585,20 +927,65 @@ public abstract class RSSManager {
      *
      * @param resource XA resource associated with the connection
      */
-    private void addToEnlistedXADataSources(XAResource resource) {
+    private synchronized void addToEnlistedXADataSources(XAResource resource) {
         enlistedXADataSources.get().add(resource);
     }
 
-    private boolean isXAResourceEnlisted(XAResource resource) {
+    private synchronized boolean isXAResourceEnlisted(XAResource resource) {
         return enlistedXADataSources.get().contains(resource);
     }
 
-    protected int getCurrentTenantId() {
-        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+    private static boolean isDatabaseUserExist(DatabaseUserMetaData[] users,
+                                               DatabaseUser targetUser) {
+        for (DatabaseUserMetaData user : users) {
+            if (user.getUsername().equals(targetUser.getUsername())) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    protected RSSDAO getDAO() {
-        return dao;
+    public void cleanupResources(ResultSet rs, PreparedStatement stmt, Connection conn) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException ignore) {
+                //ignore
+            }
+        }
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException ignore) {
+                //ignore
+            }
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException ignore) {
+                //ignore
+            }
+        }
     }
+
+    public RSSEnvironment getRSSEnvironment() {
+        return rssEnvironment;
+    }
+
+
+    public RSSDAO getDAO() {
+        return rssDAO;
+    }
+
+    public RSSInstanceDSWrapperRepository getDSWrapperRepository() {
+        return repository;
+    }
+
+    public String getRSSEnvironmentName() {
+        return rssEnvironmentName;
+    }
+
+
 
 }
