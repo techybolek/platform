@@ -20,8 +20,8 @@ package org.wso2.siddhi.test.standard.table.rdbms;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.table.SiddhiDataSource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -35,16 +35,16 @@ public class RDBMSUpdataTestCase {
     static final Logger log = Logger.getLogger(RDBMSDeleteTestCase.class);
     SiddhiDataSource dataSource = new SiddhiDataSource() {
         @Override
-        public Connection getConnection(String database) throws ClassNotFoundException, SQLException {
-            Class.forName("com.mysql.jdbc.Driver");
+        public Connection getConnection() throws ClassNotFoundException, SQLException {
+            Class.forName(RDBMSTestConstants.MYSQL_DRIVER_CLASS);
             try {
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
             } catch (Exception ex) {
                 Connection connection = DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
                 Statement statement = connection.createStatement();
-                statement.executeUpdate("CREATE DATABASE " + database);
+                statement.executeUpdate("CREATE DATABASE cepdb");
                 statement.close();
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/cepdb", RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
             }
         }
 
@@ -71,10 +71,10 @@ public class RDBMSUpdataTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         siddhiManager.addQuery("from cseUpdateEventStream " +
-                               "update cseEventTable;");
+                "update cseEventTable;");
         InputHandler cseEventStream = siddhiManager.getInputHandler("cseEventStream");
         cseEventStream.send(new Object[]{"WSO2", 55.6f, 100l});
         cseEventStream.send(new Object[]{"IBM", 75.6f, 100l});
@@ -98,11 +98,11 @@ public class RDBMSUpdataTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         siddhiManager.addQuery("from cseUpdateEventStream " +
-                               "update cseEventTable" +
-                               "    on cseEventTable.symbol=='IBM';");
+                "update cseEventTable" +
+                "    on cseEventTable.symbol=='IBM';");
         InputHandler cseEventStream = siddhiManager.getInputHandler("cseEventStream");
         cseEventStream.send(new Object[]{"WSO2", 55.6f, 100l});
         cseEventStream.send(new Object[]{"IBM", 75.6f, 100l});
@@ -126,11 +126,11 @@ public class RDBMSUpdataTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         siddhiManager.addQuery("from cseUpdateEventStream " +
-                               "update cseEventTable" +
-                               "    on cseEventTable.symbol==symbol;");
+                "update cseEventTable" +
+                "    on cseEventTable.symbol==symbol;");
         InputHandler cseEventStream = siddhiManager.getInputHandler("cseEventStream");
         cseEventStream.send(new Object[]{"WSO2", 55.6f, 100l});
         cseEventStream.send(new Object[]{"IBM", 75.6f, 100l});

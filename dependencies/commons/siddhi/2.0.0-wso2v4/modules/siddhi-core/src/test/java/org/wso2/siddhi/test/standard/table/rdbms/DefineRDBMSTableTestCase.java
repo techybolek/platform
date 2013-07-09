@@ -35,16 +35,16 @@ public class DefineRDBMSTableTestCase {
 
     SiddhiDataSource dataSource = new SiddhiDataSource() {
         @Override
-        public Connection getConnection(String database) throws ClassNotFoundException, SQLException {
-            Class.forName("com.mysql.jdbc.Driver");
+        public Connection getConnection() throws ClassNotFoundException, SQLException {
+            Class.forName(RDBMSTestConstants.MYSQL_DRIVER_CLASS);
             try {
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
             } catch (Exception ex) {
                 Connection connection = DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
                 Statement statement = connection.createStatement();
-                statement.executeUpdate("CREATE DATABASE " + database);
+                statement.executeUpdate("CREATE DATABASE cepdb");
                 statement.close();
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + "cepdb", RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);
 
             }
         }
@@ -131,8 +131,8 @@ public class DefineRDBMSTableTestCase {
 
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "select * " +
-                                                       "insert into OutputStream ;");
+                "select * " +
+                "insert into OutputStream ;");
 
 
         siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable1");
@@ -146,8 +146,8 @@ public class DefineRDBMSTableTestCase {
         siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable2");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "select * " +
-                                                       "insert into OutputStream ;");
+                "select * " +
+                "insert into OutputStream ;");
 
     }
 
@@ -161,8 +161,8 @@ public class DefineRDBMSTableTestCase {
         siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable ");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume long, time long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "select * " +
-                                                       "insert into OutputStream ;");
+                "select * " +
+                "insert into OutputStream ;");
     }
 
     @Test(expected = QueryCreationException.class)
@@ -173,8 +173,8 @@ public class DefineRDBMSTableTestCase {
         siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable4 ");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, volume int) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "select * " +
-                                                       "insert into OutputStream ;");
+                "select * " +
+                "insert into OutputStream ;");
 
     }
 
@@ -186,8 +186,8 @@ public class DefineRDBMSTableTestCase {
         siddhiManager.defineTable("define table OutputStream (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepEventTable5 ");
         siddhiManager.defineStream("define stream cseEventStream (symbol string, price float, test long) ");
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "select * " +
-                                                       "insert into OutputStream ;");
+                "select * " +
+                "insert into OutputStream ;");
 
     }
 

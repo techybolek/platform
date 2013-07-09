@@ -31,7 +31,10 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.query.QueryEventSource;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -42,15 +45,22 @@ public class RDBMSEventTable implements EventTable {
 
     private TableDefinition tableDefinition;
     private QueryEventSource queryEventSource;
-    private PreparedStatement preparedStatement;
-    private Connection jdbcConnection;
-    private List<Attribute> attributeList = new ArrayList<Attribute>();
+    // attribute list used for accessing the table.
+    private List<Attribute> attributeList;
+
     private SiddhiDataSource dataSource;
+    private String databaseName;
+    private String tableName;
+    private String fullTableName;  // schema.tableName
+    private String tableColumnList;   // for insertion queries.
+
+    private boolean isInitialized;
 
     public RDBMSEventTable(TableDefinition tableDefinition, SiddhiContext siddhiContext) {
         this.tableDefinition = tableDefinition;
         this.queryEventSource = new QueryEventSource(tableDefinition.getExternalTable().getTableName(), tableDefinition.getTableId(), tableDefinition, null, null, null);
         this.dataSource = siddhiContext.getSiddhiDataSource(tableDefinition.getExternalTable().getTableType(), tableDefinition.getExternalTable().getDataSourceName());
+        this.attributeList = new ArrayList<Attribute>();
         try {
             initializeConnection();
         } catch (Exception e) {
@@ -58,71 +68,76 @@ public class RDBMSEventTable implements EventTable {
         }
     }
 
+
     private void initializeConnection() throws SQLException, ClassNotFoundException {
-        if (preparedStatement == null) {
-            jdbcConnection = dataSource.getConnection(tableDefinition.getExternalTable().getDatabaseName());
-            Statement statement = jdbcConnection.createStatement();
-            StringBuilder stringBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
-            stringBuilder.append(tableDefinition.getExternalTable().getTableName());
-            stringBuilder.append(" (");
-            boolean appendComma = false;
-            for (Attribute column : tableDefinition.getAttributeList()) {
-                if (appendComma) {
-                    stringBuilder.append(", ");
-                } else {
+        if (!isInitialized) {
+            Connection con = null;
+            Statement statement = null;
+            try {
+                databaseName = tableDefinition.getExternalTable().getDatabaseName();
+                tableName = tableDefinition.getExternalTable().getTableName();
+                fullTableName = databaseName + "." + tableName;
+
+                con = dataSource.getConnection();
+                statement = con.createStatement();
+
+                // database creation.
+                statement.execute("CREATE SCHEMA IF NOT EXISTS " + databaseName);
+
+                // table creation.
+                StringBuilder stringBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
+                stringBuilder.append(fullTableName);
+                stringBuilder.append(" (");
+                boolean appendComma = false;
+                for (Attribute column : tableDefinition.getAttributeList()) {
+                    if (appendComma) {
+                        stringBuilder.append(", ");
+                    } else {
+                        appendComma = true;
+                    }
+                    stringBuilder.append(column.getName());
+                    stringBuilder.append("  ");
+                    switch (column.getType()) {
+                        case INT:
+                            stringBuilder.append("INT");
+                            break;
+                        case LONG:
+                            stringBuilder.append("BIGINT");
+                            break;
+                        case FLOAT:
+                            stringBuilder.append("DECIMAL(30,10)");
+                            break;
+                        case DOUBLE:
+                            stringBuilder.append("DECIMAL(40,15)");
+                            break;
+                        case BOOL:
+                            stringBuilder.append("BOOL");
+                            break;
+                        default:
+                            stringBuilder.append("VARCHAR(255)");
+                            break;
+                    }
+                }
+                stringBuilder.append(");");
+                statement.execute(stringBuilder.toString());
+
+                StringBuilder builder = new StringBuilder("(");
+                appendComma = false;
+                for (Attribute att : tableDefinition.getAttributeList()) {
+                    attributeList.add(att);
+                    if (appendComma) {
+                        builder.append(",");
+                    }
+                    builder.append(att.getName());
                     appendComma = true;
                 }
-                stringBuilder.append(column.getName());
-                stringBuilder.append("  ");
-                switch (column.getType()) {
-                    case INT:
-                        stringBuilder.append("INT");
-                        break;
-                    case LONG:
-                        stringBuilder.append("BIGINT");
-                        break;
-                    case FLOAT:
-//                        stringBuilder.append("FLOAT");
-                        stringBuilder.append("DECIMAL(30,10)");
-                        break;
-                    case DOUBLE:
-                        stringBuilder.append("DECIMAL(40,15)");
-                        break;
-                    case BOOL:
-                        stringBuilder.append("BOOL");
-                        break;
-                    default:
-                        stringBuilder.append("VARCHAR(255)");
-                        break;
-                }
-            }
-            stringBuilder.append(");");
-            statement.execute(stringBuilder.toString());
-            statement.close();
+                builder.append(")");
+                tableColumnList = builder.toString();
 
-            // create prepared statement.
-//        todo    ResultSet rs = databaseMetaData.getColumns(null, null, tableDefinition.getExternalTable().getDatabaseName() + "." + tableDefinition.getExternalTable().getTableName(), null);
-            stringBuilder = new StringBuilder("INSERT INTO ");
-            StringBuilder values = new StringBuilder("");
-            stringBuilder.append(tableDefinition.getExternalTable().getTableName());
-            stringBuilder.append("(");
-            appendComma = false;
-            for (Attribute att : tableDefinition.getAttributeList()) {
-                attributeList.add(att);
-                if (appendComma) {
-                    stringBuilder.append(",");
-                    values.append(",");
-                } else {
-                    appendComma = true;
-                }
-                stringBuilder.append(att.getName());
-                values.append("?");
+                isInitialized = true;
+            } finally {
+                cleanUpConnections(statement, con);
             }
-
-            stringBuilder.append(") VALUES (");
-            stringBuilder.append(values);
-            stringBuilder.append(")");
-            preparedStatement = jdbcConnection.prepareStatement(stringBuilder.toString());
         }
     }
 
@@ -144,47 +159,58 @@ public class RDBMSEventTable implements EventTable {
                 }
             }
         } catch (Exception ex) {
-            log.error("Unable to insert the event "+ streamEvent.toString() + " to table: " + tableDefinition.getExternalTable().getTableName(), ex);
+            log.error("Unable to insert the event " + streamEvent.toString() + " to table: " + tableDefinition.getExternalTable().getTableName(), ex);
         }
     }
 
-    private synchronized void insertToTable(Event event) throws SQLException {
-        preparedStatement.clearParameters();
+    private void insertToTable(Event event) throws SQLException, ClassNotFoundException {
+        Connection con = null;
+        Statement statement = null;
 
-        for (int i = 0; i < attributeList.size(); i++) {
-            Attribute attribute = attributeList.get(i);
-            switch (attribute.getType()) {
-                case INT:
-                    preparedStatement.setInt(i + 1, (Integer) event.getData(i));
-                    break;
-                case LONG:
-                    // sometimes int values keep coming, so can't be casted directly to Long.
-                    preparedStatement.setLong(i + 1, ((Number) event.getData(i)).longValue());
-                    break;
-                case FLOAT:
-                    preparedStatement.setFloat(i + 1, (Float) event.getData(i));
-                    break;
-                case DOUBLE:
-                    preparedStatement.setDouble(i + 1, (Double) event.getData(i));
-                    break;
-                case BOOL:
-                    preparedStatement.setBoolean(i + 1, (Boolean) event.getData(i));
-                    break;
-                case STRING:
-                    preparedStatement.setString(i + 1, (String) event.getData(i));
-                    break;
+        try {
+            StringBuilder builder = new StringBuilder("INSERT INTO ");
+            builder.append(fullTableName);
+            builder.append(tableColumnList);
+
+            builder.append(" VALUES (");
+            for (int i = 0; i < attributeList.size(); i++) {
+                if (i > 0) {
+                    builder.append(", ");
+                }
+
+                switch (attributeList.get(i).getType()) {
+                    case STRING:
+                    case TYPE:
+                        builder.append("'");
+                        builder.append(event.getData(i).toString());
+                        builder.append("'");
+                        break;
+                    default:
+                        builder.append(event.getData(i).toString());
+                        break;
+
+                }
             }
+            builder.append(")");
+
+            con = dataSource.getConnection();
+            statement = con.createStatement();
+            statement.executeUpdate(builder.toString());
+        } finally {
+            cleanUpConnections(statement, con);
         }
-        preparedStatement.executeUpdate();
     }
 
     @Override
     public void delete(StreamEvent streamEvent, ConditionExecutor conditionExecutor) {
+        Statement statement = null;
+        Connection con = null;
         try {
             initializeConnection();
-            Statement statement = jdbcConnection.createStatement();
+            con = dataSource.getConnection();
+            statement = con.createStatement();
             StringBuilder statementBuilder = new StringBuilder("DELETE FROM ");
-            statementBuilder.append(tableDefinition.getExternalTable().getTableName());
+            statementBuilder.append(fullTableName);
             statementBuilder.append(" WHERE ");
             if (streamEvent instanceof AtomicEvent) {
                 statementBuilder.append(conditionExecutor.constructSQLPredicate((Event) streamEvent, tableDefinition));
@@ -199,19 +225,25 @@ public class RDBMSEventTable implements EventTable {
                 }
             }
             statement.execute(statementBuilder.toString());
-            statement.close();
         } catch (SQLException e) {
             log.error("Unable to execute deletion.", e);
         } catch (ClassNotFoundException e) {
             log.error("Unable to load the database driver.", e);
+        } finally {
+            cleanUpConnections(statement, con);
         }
+
     }
 
     @Override
     public void update(StreamEvent streamEvent, ConditionExecutor conditionExecutor, int[] attributeUpdateMappingPosition) {
+        Connection con = null;
+        Statement statement = null;
+
         try {
             initializeConnection();
-            Statement statement = jdbcConnection.createStatement();
+            con = dataSource.getConnection();
+            statement = con.createStatement();
 
             if (streamEvent instanceof AtomicEvent) {
                 statement.executeUpdate(createUpdateQuery((Event) streamEvent, conditionExecutor, attributeUpdateMappingPosition));
@@ -221,35 +253,42 @@ public class RDBMSEventTable implements EventTable {
                 }
                 statement.executeBatch();
             }
-            statement.close();
         } catch (SQLException e) {
             log.error("Unable to execute update on " + streamEvent, e);
         } catch (ClassNotFoundException e) {
             log.error("Unable to load the database driver for " + tableDefinition.getExternalTable().getTableName(), e);
+        } finally {
+            cleanUpConnections(statement, con);
         }
 
     }
 
     @Override
     public boolean contains(AtomicEvent atomicEvent, ConditionExecutor conditionExecutor) {
+        Connection con = null;
+        Statement statement = null;
         try {
             String predicate = conditionExecutor.constructSQLPredicate(atomicEvent, tableDefinition);
-            Statement statement = jdbcConnection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableDefinition.getExternalTable().getTableName() + " WHERE " + predicate + " LIMIT 0,1");
+            con = dataSource.getConnection();
+            statement = con.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + fullTableName + " WHERE " + predicate + " LIMIT 0,1");
             resultSet.setFetchSize(1);
             boolean contains = resultSet.next();
             resultSet.close();
-            statement.close();
             return contains;
         } catch (SQLException e) {
             log.error("Can't read the database table: " + tableDefinition.getExternalTable().getTableName(), e);
+        } catch (ClassNotFoundException e) {
+            log.error("Can't load the driver class", e);
+        } finally {
+            cleanUpConnections(statement, con);
         }
         return false;
     }
 
     private String createUpdateQuery(Event atomicEvent, ConditionExecutor conditionExecutor, int[] attributeMappingPositions) {
         StringBuilder statementBuilder = new StringBuilder("UPDATE ");
-        statementBuilder.append(tableDefinition.getExternalTable().getTableName());
+        statementBuilder.append(fullTableName);
         statementBuilder.append(" SET ");
 
         for (int i = 0; i < attributeList.size(); i++) {
@@ -292,9 +331,12 @@ public class RDBMSEventTable implements EventTable {
 
     @Override
     public Iterator<StreamEvent> iterator(String SQLPredicate) {
+        Connection con = null;
+        Statement statement = null;
         try {
-            Statement statement = jdbcConnection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableDefinition.getExternalTable().getTableName() +
+            con = dataSource.getConnection();
+            statement = con.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + fullTableName +
                     ((SQLPredicate == null) ? "" : (" WHERE " + SQLPredicate)));
             resultSet.setFetchSize(10000);
             ArrayList<StreamEvent> eventList = new ArrayList<StreamEvent>();
@@ -330,10 +372,13 @@ public class RDBMSEventTable implements EventTable {
                 eventList.add(event);
             }
             resultSet.close();
-            statement.close();
             return eventList.iterator();
         } catch (SQLException e) {
             log.error("Unable to read the table: " + tableDefinition.getExternalTable().getTableName(), e);
+        } catch (ClassNotFoundException e) {
+            log.error("Unable to load the database driver class", e);
+        } finally {
+            cleanUpConnections(statement, con);
         }
         return null;
     }
@@ -341,5 +386,23 @@ public class RDBMSEventTable implements EventTable {
     @Override
     public Iterator<StreamEvent> iterator() {
         return iterator(null);
+    }
+
+    private void cleanUpConnections(Statement stmt, Connection con) {
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException e) {
+                log.error("unable to release statement", e);
+            }
+        }
+
+        if (con != null) {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                log.error("unable to release connection", e);
+            }
+        }
     }
 }

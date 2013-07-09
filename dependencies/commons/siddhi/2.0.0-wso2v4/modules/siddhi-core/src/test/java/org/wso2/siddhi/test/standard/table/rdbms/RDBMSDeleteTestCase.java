@@ -20,8 +20,8 @@ package org.wso2.siddhi.test.standard.table.rdbms;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.query.api.QueryFactory;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -35,16 +35,16 @@ public class RDBMSDeleteTestCase {
     static final Logger log = Logger.getLogger(RDBMSDeleteTestCase.class);
     SiddhiDataSource dataSource = new SiddhiDataSource() {
         @Override
-        public Connection getConnection(String database) throws ClassNotFoundException, SQLException {
-            Class.forName("com.mysql.jdbc.Driver");
+        public Connection getConnection() throws ClassNotFoundException, SQLException {
+            Class.forName(RDBMSTestConstants.MYSQL_DRIVER_CLASS);
             try {
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
             } catch (Exception ex) {
                 Connection connection = DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
                 Statement statement = connection.createStatement();
-                statement.executeUpdate("CREATE DATABASE " + database);
+                statement.executeUpdate("CREATE DATABASE cepdb");
                 statement.close();
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/cepdb", RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
 
             }
         }
@@ -76,11 +76,11 @@ public class RDBMSDeleteTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         siddhiManager.addQuery("from cseDeleteEventStream " +
-                               "delete cseEventTable " +
-                               "    on cseEventTable.symbol==cseDeleteEventStream.symbol and cseEventTable.price != 75.6;");
+                "delete cseEventTable " +
+                "    on cseEventTable.symbol==cseDeleteEventStream.symbol and cseEventTable.price != 75.6;");
         InputHandler cseEventStream = siddhiManager.getInputHandler("cseEventStream");
         InputHandler cseDeleteEventStream = siddhiManager.getInputHandler("cseDeleteEventStream");
         cseEventStream.send(new Object[]{"WSO2", 55.6f, 100l});
@@ -107,11 +107,11 @@ public class RDBMSDeleteTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable");
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         siddhiManager.addQuery("from cseDeleteEventStream " +
-                               "delete cseEventTable " +
-                               "    on cseEventTable.symbol!='IBM';");
+                "delete cseEventTable " +
+                "    on cseEventTable.symbol!='IBM';");
 //                "    on cseEventTable.symbol!='IBM' or cseEventTable.price==10.0;");
         InputHandler cseEventStream = siddhiManager.getInputHandler("cseEventStream");
         InputHandler cseDeleteEventStream = siddhiManager.getInputHandler("cseDeleteEventStream");
@@ -139,11 +139,11 @@ public class RDBMSDeleteTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long)  from MYSQL.cepDataSource:cepdb.cepEventTable ");
 
         String queryReference = siddhiManager.addQuery("from cseEventStream " +
-                                                       "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         siddhiManager.addQuery("from cseDeleteEventStream " +
-                               "delete cseEventTable " +
-                               "    on cseEventTable.symbol==cseDeleteEventStream.symbol and cseEventTable.symbol != 'WSO2';");
+                "delete cseEventTable " +
+                "    on cseEventTable.symbol==cseDeleteEventStream.symbol and cseEventTable.symbol != 'WSO2';");
         InputHandler cseEventStream = siddhiManager.getInputHandler("cseEventStream");
         InputHandler cseDeleteEventStream = siddhiManager.getInputHandler("cseDeleteEventStream");
         cseEventStream.send(new Object[]{"WSO2", 55.6f, 100l});

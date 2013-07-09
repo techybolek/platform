@@ -23,9 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.sql.Connection;
@@ -40,16 +40,16 @@ public class RDBMSTableJoinTestCase {
 
     SiddhiDataSource dataSource = new SiddhiDataSource() {
         @Override
-        public Connection getConnection(String database) throws ClassNotFoundException, SQLException {
-            Class.forName("com.mysql.jdbc.Driver");
+        public Connection getConnection() throws ClassNotFoundException, SQLException {
+            Class.forName(RDBMSTestConstants.MYSQL_DRIVER_CLASS);
             try {
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
             } catch (Exception ex) {
                 Connection connection = DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
                 Statement statement = connection.createStatement();
-                statement.executeUpdate("CREATE DATABASE " + database);
+                statement.executeUpdate("CREATE DATABASE cepdb");
                 statement.close();
-                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/" + database, RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
+                return DriverManager.getConnection(RDBMSTestConstants.CONNECTION_URL + "/cepdb", RDBMSTestConstants.USERNAME, RDBMSTestConstants.PASSWORD);    // todo get the db correctly.
 
             }
         }
@@ -85,11 +85,11 @@ public class RDBMSTableJoinTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepJoinEventTable ");
 
         siddhiManager.addQuery("from cseEventStream " +
-                               "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         String queryReference = siddhiManager.addQuery("from cseEventCheckStream#window.length(1) join cseEventTable " +
-                                                       "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
-                                                       "insert into joinOutputStream;");
+                "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
+                "insert into joinOutputStream;");
 
         siddhiManager.addCallback(queryReference, new QueryCallback() {
             @Override
@@ -125,12 +125,12 @@ public class RDBMSTableJoinTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepJoinEventTable2 ");
 
         siddhiManager.addQuery("from cseEventStream " +
-                               "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         String queryReference = siddhiManager.addQuery("from cseEventCheckStream#window.length(1) join cseEventTable " +
-                                                       "on cseEventTable.symbol==cseEventCheckStream.symbol " +
-                                                       "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
-                                                       "insert into joinOutputStream;");
+                "on cseEventTable.symbol==cseEventCheckStream.symbol " +
+                "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
+                "insert into joinOutputStream;");
 
         siddhiManager.addCallback(queryReference, new QueryCallback() {
             @Override
@@ -166,12 +166,12 @@ public class RDBMSTableJoinTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepJoinEventTable3 ");
 
         siddhiManager.addQuery("from cseEventStream " +
-                               "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         String queryReference = siddhiManager.addQuery("from cseEventCheckStream#window.length(1) as checkStream join cseEventTable  " +
-                                                       "on checkStream.symbol != cseEventTable.symbol " +
-                                                       "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
-                                                       "insert into joinOutputStream;");
+                "on checkStream.symbol != cseEventTable.symbol " +
+                "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
+                "insert into joinOutputStream;");
 
         siddhiManager.addCallback(queryReference, new QueryCallback() {
             @Override
@@ -207,12 +207,12 @@ public class RDBMSTableJoinTestCase {
         siddhiManager.defineTable("define table cseEventTable (symbol string, price float, volume long) from MYSQL.cepDataSource:cepdb.cepJoinEventTable4 ");
 
         siddhiManager.addQuery("from cseEventStream " +
-                               "insert into cseEventTable;");
+                "insert into cseEventTable;");
 
         String queryReference = siddhiManager.addQuery("from cseEventCheckStream#window.time(1000) as checkStream join cseEventTable  " +
-                                                       "on checkStream.symbol != cseEventTable.symbol " +
-                                                       "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
-                                                       "insert into joinOutputStream for all-events;");
+                "on checkStream.symbol != cseEventTable.symbol " +
+                "select cseEventCheckStream.symbol as checkSymbol, cseEventTable.symbol as symbol, cseEventTable.volume as volume " +
+                "insert into joinOutputStream for all-events;");
 
         siddhiManager.addCallback(queryReference, new QueryCallback() {
             @Override

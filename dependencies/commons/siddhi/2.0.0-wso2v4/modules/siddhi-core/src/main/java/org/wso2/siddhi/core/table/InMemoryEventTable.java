@@ -19,11 +19,7 @@ package org.wso2.siddhi.core.table;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
-import org.wso2.siddhi.core.event.AtomicEvent;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.ListEvent;
-import org.wso2.siddhi.core.event.StateEvent;
-import org.wso2.siddhi.core.event.StreamEvent;
+import org.wso2.siddhi.core.event.*;
 import org.wso2.siddhi.core.event.in.InStateEvent;
 import org.wso2.siddhi.core.event.management.PersistenceManagementEvent;
 import org.wso2.siddhi.core.event.remove.RemoveEvent;

@@ -18,8 +18,11 @@
 package org.wso2.siddhi.test.standard.table.rdbms;
 
 public class RDBMSTestConstants {
-    // todo get the db correctly.
+
+    public static final String MYSQL_DRIVER_CLASS = "com.mysql.jdbc.Driver";
+    public static final String H2_DRIVER_CLASS = "org.h2.Driver";
     public static final String CONNECTION_URL = "jdbc:mysql://localhost:3306";
+    public static final String H2_CONNECTION_URL = "jdbc:h2:~";
     public static final String USERNAME = "root";
-    public static final String PASSWORD = "root";
+    public static final String PASSWORD = "admin";
 }

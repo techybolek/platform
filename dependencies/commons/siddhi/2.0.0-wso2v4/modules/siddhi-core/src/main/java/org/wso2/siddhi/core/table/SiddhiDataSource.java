@@ -22,8 +22,10 @@ import java.sql.SQLException;
 
 
 public interface SiddhiDataSource {
-    public Connection getConnection(String database) throws ClassNotFoundException, SQLException;
+    public Connection getConnection() throws ClassNotFoundException, SQLException;
+
     public String getType();
+
     public String getName();
 
 }
