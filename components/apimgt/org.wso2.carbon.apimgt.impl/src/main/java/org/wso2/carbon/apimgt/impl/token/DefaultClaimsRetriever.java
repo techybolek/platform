@@ -17,18 +17,19 @@
 */
 package org.wso2.carbon.apimgt.impl.token;
 
+
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCache;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
 import org.wso2.carbon.apimgt.impl.utils.UserClaims;
-import org.wso2.carbon.caching.core.CacheKey;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -40,6 +41,7 @@ import java.util.TreeMap;
  * api-manager.xml -> APIConsumerAuthentication -> ClaimsRetrieverImplClass
  */
 public class DefaultClaimsRetriever implements ClaimsRetriever {
+    //TODO refactor caching implementation
 
     private String dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
     private ClaimCache claimsLocalCache;
@@ -49,7 +51,6 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
      * APIConsumerAuthentication -> ConsumerDialectURI.
      * If not configured it uses http://wso2.org/claims as default
      */
-    @Override
     public void init() {
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(CONSUMER_DIALECT_URI);
@@ -59,14 +60,13 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
         }
     }
 
-    @Override
     public SortedMap<String, String> getClaims(String endUserName) throws APIManagementException {
         SortedMap<String, String> claimValues;
         try {
             int tenantId = JWTGenerator.getTenantId(endUserName);
             //check in local cache
             String key = endUserName + ":" + tenantId;
-            CacheKey cacheKey = new ClaimCacheKey(key);
+            ClaimCacheKey cacheKey = new ClaimCacheKey(key);
             Object result = claimsLocalCache.getValueFromCache(cacheKey);
             if (result != null) {
                 claimValues = ((UserClaims) result).getClaimValues();
@@ -93,7 +93,6 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     /**
      * Always returns the ConsumerDialectURI configured in api-manager.xml
      */
-    @Override
     public String getDialectURI(String endUserName) {
         return dialectURI;
     }
