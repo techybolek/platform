@@ -89,8 +89,8 @@
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
                             </bundles>
 			    <importFeatures>
-                                <importFeatureDef>org.apache.synapse.wso2.feature:${synapse.version}</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.mediation.initializer.feature:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.mediation.initializer:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
