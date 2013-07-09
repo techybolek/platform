@@ -18,6 +18,7 @@
 package org.wso2.carbon.integration.test.webapp.classloading;
 
 import org.apache.axiom.om.OMElement;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.automation.api.clients.webapp.mgt.WebAppAdminClient;
@@ -53,6 +54,15 @@ public abstract class WebApplicationClassloadingTestCase extends
 
 	}
 
+    @AfterClass(alwaysRun = true)
+    public void cleanupWebApps() throws Exception {
+        webAppAdminClient.deleteWebAppFile(webAppFileName);
+        assertTrue(WebApplicationDeploymentUtil.isWebApplicationUnDeployed(
+                asServer.getBackEndUrl(), asServer.getSessionCookie(),
+                webAppName), "Web Application unDeployment failed");
+
+    }
+
 	@Test(groups = "wso2.as", description = "Deploying web application")
 	public void webApplicationDeploymentTest() throws Exception {
 		webAppAdminClient
@@ -72,14 +82,6 @@ public abstract class WebApplicationClassloadingTestCase extends
 		assertEquals(PASS, results.get("Carbon"));
 		assertEquals(PASS, results.get("CXF"));
 		assertEquals(PASS, results.get("Spring"));
-	}
-
-	@Test(groups = "wso2.as", description = "UnDeploying web application", dependsOnMethods = "testInvokeWebApp")
-	public void testDeleteWebApplication() throws Exception {
-		webAppAdminClient.deleteWebAppFile(webAppFileName);
-		assertTrue(WebApplicationDeploymentUtil.isWebApplicationUnDeployed(
-				asServer.getBackEndUrl(), asServer.getSessionCookie(),
-				webAppName), "Web Application unDeployment failed");
 	}
 
 	protected OMElement runAndGetResultAsOMElement(String webAppURL)
