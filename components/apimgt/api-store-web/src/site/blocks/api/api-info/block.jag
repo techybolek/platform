@@ -85,7 +85,7 @@ jagg.block("api/api-info", {
                         ]
                     },
                     {
-                        "title":i18n.localize("tryit.title"),
+                        "title":i18n.localize("apiconsole.title"),
                         "body":[
                             {
                                 "name":"api/swagger",
