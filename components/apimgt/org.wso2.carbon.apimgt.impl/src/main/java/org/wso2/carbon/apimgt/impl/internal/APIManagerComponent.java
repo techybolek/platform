@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -84,11 +83,6 @@ import java.util.List;
  * @scr.reference name="listener.manager.service"
  * interface="org.apache.axis2.engine.ListenerManager" cardinality="0..1" policy="dynamic"
  * bind="setListenerManager" unbind="unsetListenerManager"
- * @scr.reference name="cache.invalidation.service"
- *                interface="org.wso2.carbon.caching.core.CacheInvalidator"
- *                cardinality="0..1" policy="dynamic"
- *                bind="setCacheInvalidator"
- *                unbind="removeCacheInvalidator"
  *@scr.reference name="tenant.registryloader"
  * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
  * cardinality="1..1" policy="dynamic"
@@ -97,11 +91,11 @@ import java.util.List;
 
  */
 public class APIManagerComponent {
+    //TODO refactor caching implementation
 
     private static final Log log = LogFactory.getLog(APIManagerComponent.class);
 
     private ServiceRegistration registration;
-    private static CacheInvalidator cacheInvalidator;
 
     private static TenantRegistryLoader tenantRegistryLoader;
 
@@ -368,17 +362,6 @@ public class APIManagerComponent {
         ServiceReferenceHolder.setContextService(null);
     }
 
-    protected void setCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = invalidator;
-    }
-
-    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
-        cacheInvalidator = null;
-    }
-
-    public static CacheInvalidator getCacheInvalidator() {
-        return cacheInvalidator;
-    }
 
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         this.tenantRegistryLoader = tenantRegistryLoader;
