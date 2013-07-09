@@ -1,9 +1,0 @@
-.classpath
-.project
-.settings
-.pydevproject
-.clover
-target
-maven-eclipse.xml
-*.log
-.checkstyle
