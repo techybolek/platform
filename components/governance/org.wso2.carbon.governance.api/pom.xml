@@ -41,13 +41,7 @@
         <artifactId>org.eclipse.equinox.registry</artifactId>
         <version>3.5.100.v20110502</version>
       </dependency>
-
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.caching.core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+      <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
             <scope>test</scope>
