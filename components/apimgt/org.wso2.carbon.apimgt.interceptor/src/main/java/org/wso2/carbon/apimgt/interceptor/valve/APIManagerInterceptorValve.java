@@ -50,7 +50,7 @@ public class APIManagerInterceptorValve implements CarbonTomcatValve {
         }
         if (manageAPIs.equals("true") && externalAPIManagerURL == null) {  //use internal api management
             log.info("API Manager Interceptor Valve Got invoked!!");
-            String bearerToken = request.getHeader(APIConstants.AuthParameter.AUTH_PARAM_NAME);
+            String bearerToken = request.getHeader(APIConstants. OperationParameter.AUTH_PARAM_NAME);
             String accessToken = null;
             if (bearerToken != null) {
                 String[] token = bearerToken.split("Bearer");

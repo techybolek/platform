@@ -101,7 +101,7 @@ public class APIMgtValve extends ValveBase {
 
                 //Use embedded API Management
                 log.info("API Manager Interceptor Valve Got invoked!!");
-                String bearerToken = request.getHeader(APIConstants.AuthParameter.AUTH_PARAM_NAME);
+                String bearerToken = request.getHeader(APIConstants.OperationParameter.AUTH_PARAM_NAME);
                 String accessToken = null;
                 if (bearerToken != null) {
                     String[] token = bearerToken.split("Bearer");
