@@ -143,6 +143,7 @@
                                     <!-- end reporting features -->
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.server.feature:${carbon.version}</featureArtifactDef>
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature:${carbon.version}</featureArtifactDef>
+                                    <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.version}</featureArtifactDef>
 
 				    				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.module.mgt.feature:${carbon.version}</featureArtifactDef>
 				    				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.throttle.feature:${carbon.version}</featureArtifactDef>
@@ -369,6 +370,10 @@
                                     </feature>
                                     <feature>
                                     	<id>org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group</id>
+                                    	<version>${carbon.version}</version>
+                                    </feature>
+                                    <feature>
+                                    	<id>org.wso2.carbon.user.mgt.feature.group</id>
                                     	<version>${carbon.version}</version>
                                     </feature>
                                     <feature>
