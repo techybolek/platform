@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.oauth.OAuthUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -325,19 +326,18 @@ public class APIMgtDAOTest extends TestCase {
         assertEquals(true, exist);
     }
 
-    public void testRefreshAccessToken() throws Exception {
-        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[0], null);
+    public void testUpdateRefreshedApplicationAccessToken() throws Exception {
+    	String tok = OAuthUtil.getRandomNumber();
+    	long validityTime = 1000; 
+        apiMgtDAO.updateRefreshedApplicationAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[0], null,tok,validityTime);
         String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
         assertNotNull(key1);
 
-        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[1], null);
+        apiMgtDAO.updateRefreshedApplicationAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[1], null,tok,validityTime);
         String key2 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
         assertNotNull(key1);
         assertTrue(!key1.equals(key2));
-    }
-
-
-
+    } 
 
 }
 
