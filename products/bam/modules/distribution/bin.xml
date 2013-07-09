@@ -501,13 +501,6 @@
             <fileMode>644</fileMode>
         </file>
 
-	 <file>
-            <source>conf/log4j.properties</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging</outputDirectory>
-            <filtered>true</filtered>
-            <fileMode>644</fileMode>
-        </file>
-
 	<!-- datasources -->
          <file>
             <source>bam-resources/datasources/master-datasources.xml</source>
