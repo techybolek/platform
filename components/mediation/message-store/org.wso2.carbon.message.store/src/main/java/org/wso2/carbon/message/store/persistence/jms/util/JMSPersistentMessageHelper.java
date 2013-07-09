@@ -74,11 +74,13 @@ public class JMSPersistentMessageHelper {
 
 
     public MessageContext createMessageContext(JMSPersistentMessage message) {
-
-        SynapseConfiguration configuration = synapseEnvironment.getSynapseConfiguration();
-
-        org.apache.axis2.context.MessageContext msgCtx = ((Axis2SynapseEnvironment)
-                synapseEnvironment).getAxis2ConfigurationContext().createMessageContext();
+        org.apache.axis2.context.MessageContext msgCtx;
+        SynapseConfiguration configuration;
+        synchronized (JMSPersistentMessageHelper.class) {
+            configuration = synapseEnvironment.getSynapseConfiguration();
+            msgCtx = ((Axis2SynapseEnvironment)
+                    synapseEnvironment).getAxis2ConfigurationContext().createMessageContext();
+        }
 
 
         AxisConfiguration axisConfiguration = msgCtx.getConfigurationContext().getAxisConfiguration();
@@ -179,9 +181,10 @@ public class JMSPersistentMessageHelper {
             }
             JMSPersistentSynapseMessage jmsSynpaseMessageContext
                     = message.getJmsPersistentSynapseMessage();
-
-            org.apache.synapse.MessageContext synCtx =
-                    new Axis2MessageContext(msgCtx, configuration, synapseEnvironment);
+            org.apache.synapse.MessageContext synCtx;
+            synchronized (JMSPersistentMessageHelper.class) {
+                synCtx = new Axis2MessageContext(msgCtx, configuration, synapseEnvironment);
+            }
             synCtx.setTracingState(jmsSynpaseMessageContext.getTracingState());
 
             Iterator<String> it = jmsSynpaseMessageContext.getProperties().keySet().iterator();

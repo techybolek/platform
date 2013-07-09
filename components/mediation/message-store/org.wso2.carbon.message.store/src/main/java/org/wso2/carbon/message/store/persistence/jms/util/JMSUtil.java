@@ -108,5 +108,37 @@ public class JMSUtil {
         }
     }
 
+    /**
+     * Creates a Client Acknowledged session.
+     * @param connection  JMS Connection to be used
+     * @param jmsSpec11 is JMS specification version 1.1? If this is false we will assume that it is
+     *                  version 1.0
+     * @return JMS Session created
+     * @throws JMSException
+     */
+    public static Session createClientAckSession(Connection connection , boolean jmsSpec11) throws JMSException {
+        if(jmsSpec11) {
+            return connection.createSession(false,Session.CLIENT_ACKNOWLEDGE);
+        } else {
+            return ((QueueConnection) connection).createQueueSession(false,Session.CLIENT_ACKNOWLEDGE);
+        }
+    }
+
+    /**
+     * Creates a transacted session
+     * @param connection  JMS Connection to be used
+     * @param jmsSpec11 is JMS specification version 1.1? If this is false we will assume that it is
+     *                  version 1.0
+     * @return JMS session created
+     * @throws JMSException
+     */
+    public static Session createTransactedSession(Connection connection , boolean jmsSpec11) throws JMSException {
+        if(jmsSpec11) {
+            return connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
+        } else {
+            return ((QueueConnection) connection).createQueueSession(true, Session.AUTO_ACKNOWLEDGE);
+        }
+    }
+
 
 }
