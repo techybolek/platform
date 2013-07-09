@@ -97,7 +97,8 @@ public class SSOManager {
 			requestMessage = buildAuthnRequestObject();
 
 		} else {
-			requestMessage = buildLogoutRequest((String) request.getSession().getAttribute("Subject"));
+            String IdPSession = (String) request.getSession().getAttribute(SSOConstants.IDP_SESSION);
+			requestMessage = buildLogoutRequest((String) request.getSession().getAttribute("Subject"), IdPSession);
 		}
         if(log.isDebugEnabled()){
             log.debug("SAML REQUEST IS BUILT. REQUEST : " +  requestMessage);
@@ -114,7 +115,7 @@ public class SSOManager {
 		return SSOConfigs.getIdpUrl() + "?SAMLRequest=" + encodedRequestMessage +"&RelayState=" + relayState;
 	}
 
-	private LogoutRequest buildLogoutRequest(String user) {
+	private LogoutRequest buildLogoutRequest(String user, String IdPSession) {
 
 		LogoutRequest logoutReq = new LogoutRequestBuilder().buildObject();
 
@@ -135,7 +136,7 @@ public class SSOManager {
 		logoutReq.setNameID(nameId);
 
 		SessionIndex sessionIndex = new SessionIndexBuilder().buildObject();
-		sessionIndex.setSessionIndex(UUID.randomUUID().toString());
+		sessionIndex.setSessionIndex(IdPSession);
 		logoutReq.getSessionIndexes().add(sessionIndex);
 
 		logoutReq.setReason("Single Logout");

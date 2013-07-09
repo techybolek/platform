@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.sso.saml.tomcat.agent;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class SSOSessionManager {
 	 * by invalidating the SP session mapped to IdP session ID
 	 */
 	private static Map<String, HttpSession> ssoSessions  = new Hashtable<String, HttpSession>();
-	
+
 	public static void invalidateSession(HttpSession session){
 		String idPSession = (String) session.getAttribute(SSOConstants.IDP_SESSION);
 		session.removeAttribute(SSOConstants.AUTHENTICATED);
@@ -48,5 +49,6 @@ public class SSOSessionManager {
 	public static void addAuthenticatedSession(String idPSessionId, HttpSession session){
 		ssoSessions.put(idPSessionId, session);
 		session.setAttribute(SSOConstants.AUTHENTICATED, Boolean.TRUE);
+		session.setAttribute(SSOConstants.IDP_SESSION, idPSessionId);
 	}
 }
