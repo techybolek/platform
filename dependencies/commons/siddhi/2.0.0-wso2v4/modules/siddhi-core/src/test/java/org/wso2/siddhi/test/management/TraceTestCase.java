@@ -77,7 +77,7 @@ public class TraceTestCase {
         InputHandler inputHandler = siddhiManager.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100l});
         inputHandler.send(new Object[]{"FB", 57.6f, 10l});
-        Thread.sleep(100);
+        Thread.sleep(500);
         Assert.assertEquals(1, count);
 
         Assert.assertTrue(eventTracer.getStatStartTime() < eventTracer.getLastUpdateTime());
@@ -96,7 +96,7 @@ public class TraceTestCase {
 
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100l});
         inputHandler.send(new Object[]{"FB", 57.6f, 10l});
-        Thread.sleep(100);
+        Thread.sleep(500);
         Assert.assertEquals(3, count);
 
         Assert.assertTrue(eventTracer.getStatStartTime() < eventTracer.getLastUpdateTime());
