@@ -444,7 +444,18 @@ public class AttributeMapper {
 								}
 							}
 						}
-                		
+						// check for attributes
+                		List<SCIMAttributeSchema> attributSchemas = ((SCIMAttributeSchema) attribSchema).getAttributes();
+                		if (attributSchemas != null && !attributSchemas.isEmpty()) {
+							for (SCIMAttributeSchema atttribSchema : attributSchemas) {
+								if (attributeName.equals(atttribSchema.getName())) {
+									if (parentAttributeName == null ||
+									    atttribSchema.getURI().contains(parentAttributeName)) {
+										return atttribSchema;
+									}
+								}
+							}
+						}
                 	}
                 	
                 }

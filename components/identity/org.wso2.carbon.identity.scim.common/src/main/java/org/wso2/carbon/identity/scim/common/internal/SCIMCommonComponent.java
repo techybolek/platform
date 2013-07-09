@@ -17,6 +17,7 @@ import org.wso2.charon.core.config.SCIMConfigConstants;
 import org.wso2.charon.core.config.SCIMConfigProcessor;
 import org.wso2.charon.core.config.SCIMConsumer;
 import org.wso2.charon.core.config.SCIMProvider;
+import org.wso2.charon.core.config.SCIMUserSchemaExtensionBuilder;
 import org.wso2.charon.core.exceptions.CharonException;
 
 import java.io.File;
@@ -55,6 +56,13 @@ public class SCIMCommonComponent {
                 //persist scim config in DB by a separate thread
                 executorService.submit(persister);
             }
+            // reading user schema extension
+			if (Boolean.parseBoolean(scimConfig.getAdditionalPropertyValue("user-schema-extension-enabled"))) {
+				String schemaFilePath =
+				                        CarbonUtils.getCarbonConfigDirPath() + File.separator +
+				                                SCIMConfigConstants.SCIM_SCHEMA_EXTENSION_CONFIG;
+				SCIMUserSchemaExtensionBuilder.getInstance().buildUserSchemaExtension(schemaFilePath);
+			}
 
             //register UserOperationEventListener implementation
             SCIMUserOperationListener scimUserOperationListener = new SCIMUserOperationListener();
