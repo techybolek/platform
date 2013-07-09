@@ -42,14 +42,13 @@ public class JUDDIEntityEventListener {
 
             for (BindingTemplate bindingTemplate : bindingTemplates) {
                 String url = bindingTemplate.getAccessPointUrl();
+//                         Skips the Apache JUDDI internal business service insertions
                 if (url != null && !url.contains("{juddi.server.baseurl}")) {
                     if(UDDIGovernanceUtil.isURLAlive(url)) {
                         UDDIGovernanceUtil.createWSDL(url);
                     } else {
                         UDDIGovernanceUtil.createService(bindingTemplate,url);
                     }
-                } else {
-                    log.error("########## No WSDL URL found ..!! ################");
                 }
 
             }
