@@ -204,7 +204,7 @@
         </file>
         <file>
             <source>src/main/conf/log4j.properties</source>
-            <outputDirectory>wso2elb-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging/</outputDirectory>
+            <outputDirectory>wso2elb-${pom.version}/repository/conf/</outputDirectory>
             <destName>log4j.properties</destName>
             <filtered>true</filtered>
         </file>
