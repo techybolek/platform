@@ -45,8 +45,9 @@ public class LifecycleLoader implements LoginListener {
             initializedTenants.add(loginEvent.getTenantId());
             PrivilegedCarbonContext.startTenantFlow();
             try {
-                PrivilegedCarbonContext.getCurrentContext().setTenantId(loginEvent.getTenantId());
-                PrivilegedCarbonContext.getCurrentContext().setUsername(loginEvent.getUsername());
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(loginEvent.getTenantDomain());
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(loginEvent.getTenantId());
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(loginEvent.getUsername());
                 CommonUtil.addDefaultLifecyclesIfNotAvailable(configRegistry,
                         CommonUtil.getRootSystemRegistry(loginEvent.getTenantId()));
             } finally {
