@@ -155,8 +155,8 @@ public class WebAppSampleTestCase extends ASIntegrationTest {
     //to carbon caching (in 4.2.0 release)
     // need to create anew test case for carbon caching demo
 
-    /*@Test(groups = {"wso2.as"}, description = "Add a cache",
-            dependsOnMethods = "testRegistryUsageDemo")
+    @Test(groups = {"wso2.as"}, description = "Add a cache",
+            dependsOnMethods = "testRegistryUsageDemo", enabled = false)
     public void testCarbonCachingDemo() throws Exception {
         log.info("Running carbon caching demo test case");
         String urlOne = asServer.getWebAppURL() + "/example/carbon" + "/caching/index.jsp?add=" +
@@ -192,8 +192,11 @@ public class WebAppSampleTestCase extends ASIntegrationTest {
     }
 
 
+
+    // disabled because depends on caching test case
+
     @Test(groups = {"wso2.as"}, description = "Basic authentication",
-            dependsOnMethods = "testCarbonCachingDemo")
+            dependsOnMethods = "testCarbonCachingDemo", enabled = false)
     public void testBasicAuth() throws Exception {
         log.info("Running Basic Authentication test case for example webapp ...");
         String userName = "admin";
@@ -230,7 +233,7 @@ public class WebAppSampleTestCase extends ASIntegrationTest {
         rc = getResponseCode(resourceURL, bc, 1000000, reqHeaders2,
                 respHeaders2);
         assertEquals(200, rc);
-    }*/
+    }
 
     private int getResponseCode(String path, ByteChunk out, int readTimeout,
                                 Map<String, List<String>> reqHead,
