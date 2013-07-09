@@ -4,7 +4,7 @@ var login = function (username, password,tenantMode) {
             log = new Log(),
             manager = jagg.module("manager"),
             store = manager.getAPIStoreObj();
-    if(tenantMode!='null' && tenantMode!=''){
+    if(tenantMode!='null' && tenantMode!='' && tenantMode!=null){
     var userDomain=username.split("@")[1];
     if(tenantMode!=userDomain){
     return {
