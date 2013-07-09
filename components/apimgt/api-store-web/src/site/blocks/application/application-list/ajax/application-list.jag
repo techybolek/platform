@@ -16,7 +16,7 @@ include("/jagg/jagg.jag");
             return;
         }
 
-        username = request.getParameter("username");
+        username = user.username;
         mod = jagg.module("application");
         result = mod.getApplications(username);
 
