@@ -19,11 +19,10 @@
 package org.wso2.carbon.hdfs.dataaccess;
 
 import org.apache.hadoop.fs.FileSystem;
+import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
-import org.wso2.carbon.hdfs.dataaccess.DataAccessComponentManager;
-import org.wso2.carbon.hdfs.dataaccess.DataAccessService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -53,6 +52,11 @@ public class HDFSUserOperationListener implements UserOperationEventListener {
     }
 
     @Override
+    public boolean doPostAddUser(String s, Object o, String[] strings, Map<String, String> stringStringMap, String s1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;
+    }
+
+    
     public boolean doPostAddUser(String s, UserStoreManager userStoreManager) throws UserStoreException {
 
 
@@ -86,6 +90,11 @@ public class HDFSUserOperationListener implements UserOperationEventListener {
     }
 
     @Override
+    public boolean doPostUpdateCredentialByAdmin(String s, Object o, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;
+    }
+
+
     public boolean doPostUpdateCredentialByAdmin(String s, UserStoreManager userStoreManager)
             throws UserStoreException {
         return false;
@@ -119,6 +128,11 @@ public class HDFSUserOperationListener implements UserOperationEventListener {
     }
 
     @Override
+    public boolean doPostSetUserClaimValues(String s, Map<String, String> stringStringMap, String s1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;
+    }
+
+
     public boolean doPostSetUserClaimValues(String s, UserStoreManager userStoreManager) throws UserStoreException {
         return false;
     }
@@ -143,5 +157,55 @@ public class HDFSUserOperationListener implements UserOperationEventListener {
     @Override
     public boolean doPostDeleteUserClaimValue(String s, UserStoreManager userStoreManager) throws UserStoreException {
         return false;
+    }
+
+    @Override
+    public boolean doPreAddRole(String s, String[] strings, Permission[] permissions, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPostAddRole(String s, String[] strings, Permission[] permissions, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPreDeleteRole(String s, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPostDeleteRole(String s, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPreUpdateRoleName(String s, String s1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPostUpdateRoleName(String s, String s1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPreUpdateUserListOfRole(String s, String[] strings, String[] strings1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPostUpdateUserListOfRole(String s, String[] strings, String[] strings1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPreUpdateRoleListOfUser(String s, String[] strings, String[] strings1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
+    }
+
+    @Override
+    public boolean doPostUpdateRoleListOfUser(String s, String[] strings, String[] strings1, UserStoreManager userStoreManager) throws UserStoreException {
+        return false;  
     }
 }
