@@ -102,6 +102,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setUsername("anonymous");
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
+            authContext.setConsumerKey(null);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return true;
         } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
@@ -129,6 +130,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationId(info.getApplicationId());
             authContext.setApplicationName(info.getApplicationName());
             authContext.setApplicationTier(info.getApplicationTier());
+            authContext.setConsumerKey(info.getConsumerKey());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return true;
         } else {

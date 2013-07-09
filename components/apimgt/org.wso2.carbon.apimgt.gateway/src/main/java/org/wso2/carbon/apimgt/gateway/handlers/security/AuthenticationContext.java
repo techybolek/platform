@@ -31,6 +31,7 @@ public class AuthenticationContext {
     private String callerToken;
     private String applicationId;
     private String applicationName;
+    private String consumerKey;
 
     public boolean isAuthenticated() {
         return authenticated;
@@ -102,5 +103,13 @@ public class AuthenticationContext {
 
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
     }
 }
