@@ -43,6 +43,7 @@
     </licenses>
 
     <modules>
+        <module>service-samples</module>
         <module>core</module>
         <module>tests</module>
          <!--<module>mediator-tests</module>-->
