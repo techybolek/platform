@@ -343,7 +343,9 @@ public class APIManagerComponent {
                     }
                     Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login",UserMgtConstants.EXECUTE_ACTION),
                             new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
-                    manager.addRole(role, null, subscriberPermissions);
+                    String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
+                    String[] userList = new String[]{superTenantName};
+                    manager.addRole(role, userList, subscriberPermissions);
                 }
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
