@@ -10,6 +10,7 @@ import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionExcep
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
+import java.io.File;
 import java.net.URL;
 import java.rmi.RemoteException;
 
@@ -57,8 +58,8 @@ public class PayloadFactoryWithDynamicKeyTestCase extends ESBIntegrationTest {
 
         resourceAdminServiceStub.addResource(
                 "/_system/config/payloadFactory/payload-in.xml", "application/xml", "payload format",
-                new DataHandler(new URL("file:///" + getClass().getResource(
-                        "/artifacts/ESB/mediatorconfig/payload/factory/payload-in.xml").getPath())));
+                new DataHandler(new URL("file://" + getESBResourceLocation() + File.separator +
+                        "mediatorconfig/payload/factory/payload-in.xml")));
 
 
     }

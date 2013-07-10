@@ -32,6 +32,7 @@ import org.wso2.carbon.automation.core.utils.httpserverutils.RequestInterceptor;
 import org.wso2.carbon.automation.core.utils.httpserverutils.SimpleHttpClient;
 import org.wso2.carbon.automation.core.utils.httpserverutils.SimpleHttpServer;
 import org.wso2.carbon.esb.ESBIntegrationTest;
+import org.wso2.carbon.esb.util.JMSEndpointManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,9 @@ import java.io.InputStream;
 
 import static org.testng.Assert.assertTrue;
 
+/**
+ * https://wso2.org/jira/browse/ESBJAVA-1153
+ */
 public class SpecialCharacterTestCase extends ESBIntegrationTest {
 
 
@@ -61,7 +65,10 @@ public class SpecialCharacterTestCase extends ESBIntegrationTest {
 
         super.init(5);
 
-        loadESBConfigurationFromClasspath(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator + "special_character.xml");
+        updateESBConfiguration(JMSEndpointManager.setConfigurations(
+                esbUtils.loadClasspathResource(File.separator + "artifacts" + File.separator + "ESB"
+                                               + File.separator + "synapseconfig" + File.separator
+                                               + "messageStore" + File.separator + "special_character.xml")));
 
     }
 
@@ -109,7 +116,7 @@ public class SpecialCharacterTestCase extends ESBIntegrationTest {
     public void destroy() throws Exception {
         try {
             super.cleanup();
-
+            Thread.sleep(10000);
         } finally {
 
             try {

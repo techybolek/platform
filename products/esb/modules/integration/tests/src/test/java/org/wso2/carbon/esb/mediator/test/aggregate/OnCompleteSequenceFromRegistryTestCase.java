@@ -46,7 +46,7 @@ public class OnCompleteSequenceFromRegistryTestCase extends ESBIntegrationTest {
         aggregatedRequestClient = new AggregatedRequestClient();
         aggregatedRequestClient.setProxyServiceUrl(getProxyServiceURL("aggregateMediatorTestProxy"));
         aggregatedRequestClient.setSymbol("IBM");
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
 
     }
 

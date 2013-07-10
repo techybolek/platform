@@ -17,41 +17,61 @@
 */
 package org.wso2.carbon.esb.mediator.test.throttle.utils;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.wso2.carbon.automation.utils.esb.StockQuoteClient;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.wso2.carbon.automation.utils.axis2client.AxisServiceClient;
+
+import javax.xml.stream.XMLStreamException;
 import java.util.List;
 
 
 public class ConcurrencyThrottleTestClient implements Runnable {
 
-    private StockQuoteClient axis2Client;
-    private String mainSequenceURL;
+    private AxisServiceClient axis2Client;
+    private String endpointUri;
     private List list;
     private ThrottleTestCounter counter;
 
 
-    public ConcurrencyThrottleTestClient(String MainSequenceURL,List list,ThrottleTestCounter counter) {
-        this.mainSequenceURL=MainSequenceURL;
-        this.list=list;
-        this.counter=counter;
-        axis2Client=new StockQuoteClient();
+    public ConcurrencyThrottleTestClient(String endpointUri, List list,
+                                         ThrottleTestCounter counter) {
+        this.endpointUri = endpointUri;
+        this.list = list;
+        this.counter = counter;
+        axis2Client = new AxisServiceClient();
     }
 
 
     @Override
     public void run() {
         try {
-            OMElement response = axis2Client.sendSimpleStockQuoteRequest(mainSequenceURL, null, "WSO2");
-            if(response.toString().contains("WSO2")){
-                list.add("Access Granted");
+            OMElement response = axis2Client.sendReceive(getSleepOperationRequest(), endpointUri, "sleepOperation");
+            if (response.toString().contains("Response from server")) {
+                addToList(list, "Access Granted");
             }
 
         } catch (Exception e) {
-           if(e.getMessage().contains("**Access Denied**")){
-                list.add("Access Denied");
-           }
+            if (e.getMessage().contains("**Access Denied**")) {
+                addToList(list, "Access Denied");
+            }
         }
         counter.increment();
-        axis2Client.destroy();
+    }
+
+    private static synchronized void addToList(List list, String message) {
+        list.add(message);
+    }
+
+    private OMElement getSleepOperationRequest() throws XMLStreamException {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMElement omeSleep = fac.createOMElement("sleepOperation", null);
+        OMElement omeLoad = fac.createOMElement("load", null);
+        omeLoad.setText("2000");
+        omeSleep.addChild(omeLoad);
+        return omeSleep;
+
     }
 }

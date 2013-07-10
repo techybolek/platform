@@ -32,7 +32,7 @@ public class AggregatedRequestClient {
     private String proxyServiceUrl, symbol;
     private int no_of_iterations = 1;
 
-    public void setNo_of_iterations(int iterations) {
+    public void setNoOfIterations(int iterations) {
         this.no_of_iterations = iterations;
     }
 
@@ -51,6 +51,20 @@ public class AggregatedRequestClient {
         try {
             response = operationClient.send(proxyServiceUrl, null,
                                             createMultipleQuoteRequestBody(symbol, no_of_iterations), "urn:getQuote");
+        } finally {
+            operationClient.destroy();
+        }
+        Assert.assertNotNull(response, "Response Message is null");
+        return response.toString();
+
+    }
+
+    public String getResponse(OMElement payload) throws IOException {
+        AxisOperationClient operationClient = new AxisOperationClient();
+        OMElement response = null;
+        try {
+            response = operationClient.send(proxyServiceUrl, null,
+                                            payload, "urn:getQuote");
         } finally {
             operationClient.destroy();
         }

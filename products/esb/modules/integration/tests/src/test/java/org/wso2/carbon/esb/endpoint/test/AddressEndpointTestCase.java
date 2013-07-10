@@ -60,7 +60,8 @@ public class AddressEndpointTestCase extends ESBIntegrationTest {
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
         super.init();
-        loadESBConfigurationFromClasspath(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "endpoint" + File.separator + "addressEndpointConfig" + File.separator + "synapse.xml");
+        loadESBConfigurationFromClasspath(File.separator + "artifacts" + File.separator + "ESB" +
+                                          File.separator + "endpoint" + File.separator + "addressEndpointConfig" + File.separator + "synapse.xml");
 
         endPointAdminClient = new EndPointAdminClient(esbServer.getBackEndUrl(), userInfo.getUserName(), userInfo.getPassword());
 

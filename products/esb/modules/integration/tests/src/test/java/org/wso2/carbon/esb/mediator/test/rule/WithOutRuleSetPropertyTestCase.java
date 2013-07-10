@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.esb.mediator.test.rule;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -42,12 +43,14 @@ public class WithOutRuleSetPropertyTestCase extends ESBIntegrationTest {
     @Test(groups = "wso2.esb",
           description = "scenario without rules")
     public void testSequenceWithOutRuleSet() throws Exception {
+        loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/config_without_rule/synapse.xml");
         try {
-            loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/config_without_rule/synapse.xml");
+
+            axis2Client.sendSimpleStockQuoteRequest(getMainSequenceURL(), null, "IBM");
             Assert.fail("This Configuration can not be saved successfully due to empty rule set");
         } catch (AxisFault expected) {
-            assertTrue((expected.getMessage().contains(ESBTestConstant.ERROR_ADDING_SEQUENCE) || expected.getMessage().contains(ESBTestConstant.UNABLE_TO_SAVE_SEQUENCE))
-                    , "Error Message Mismatched. actual:" + expected.getMessage() + " but expected: Error adding sequence or Unable to save the Sequence");
+            assertEquals(expected.getMessage(), ESBTestConstant.INCOMING_MESSAGE_IS_NULL,
+                         "Fault: value mismatched, should be 'The input stream for an incoming message is null.'");
         }
 
     }

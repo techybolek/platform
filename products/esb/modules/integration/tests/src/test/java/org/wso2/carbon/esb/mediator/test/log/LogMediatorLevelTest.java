@@ -62,6 +62,25 @@ public class LogMediatorLevelTest extends ESBIntegrationTest {
 
     }
 
+    @Test(groups = "wso2.esb", description = "Tests System Logs")
+    public void testSystemLogs() throws Exception {
+        int beforeCount = logViewer.getAllSystemLogs().length;
+        OMElement response = axis2Client.sendSimpleStockQuoteRequest(getMainSequenceURL(),
+                                                                     null, "WSO2");
+        Assert.assertTrue(response.toString().contains("WSO2"));
+        log.info(response);
+        Thread.sleep(2000);
+        boolean isLogFound = false;
+        LogEvent[] logs = logViewer.getAllSystemLogs();
+        for (int i = 0; i < (logs.length - beforeCount); i++) {
+            if (logs[i].getMessage().contains("*****TEST CUSTOM LOGGING MESSAGE TO SYSTEM LOGS TEST*****")) {
+                isLogFound = true;
+                break;
+            }
+        }
+        Assert.assertTrue(isLogFound, "System Log not found. LogViewer Admin service not working properly");
+    }
+
 
     @AfterClass(groups = "wso2.esb")
     public void close() throws Exception {

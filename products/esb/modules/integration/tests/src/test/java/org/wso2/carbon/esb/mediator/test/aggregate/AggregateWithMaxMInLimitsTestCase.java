@@ -53,7 +53,7 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 1;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -77,7 +77,7 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 2;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -101,7 +101,7 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 100;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -126,7 +126,7 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 4;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -151,7 +151,7 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 10;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -176,7 +176,7 @@ public class AggregateWithMaxMInLimitsTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 3;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);

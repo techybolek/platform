@@ -287,19 +287,25 @@ public class FailoverEndpointTestCase extends ESBIntegrationTest {
         String response = lbClient.sendLoadBalanceRequest(getProxyServiceURL("failoverEndPoint_Specific_Errors"),
                                                           null);
         Assert.assertNotNull(response);
-        Assert.assertTrue(response.toString().contains("Response from server: Server_1"), "Failover endpoint is working fine, reply is coming from endpoint one");
+        Assert.assertTrue(response.toString().contains("Response from server: Server_1"),
+                          "Failover endpoint is working fine, reply is coming from endpoint one");
 
         //Stop one server to generate a failure in one endpoint
         //But the suspend cant be triggered here. because suspend the endpoint happen only for Timeouts 101504,101508
         axis2Server1.stop();
+        //since retriesBeforeSuspension is 3
+        for (int i = 0; i < 4; i++) {
+            try {
+                lbClient.sendLoadBalanceRequest(getProxyServiceURL("failoverEndPoint_Specific_Errors"),
+                                                null, "5000");
+            } catch (AxisFault e) {
+                Assert.assertFalse(e.getMessage().equalsIgnoreCase(ESBTestConstant.READ_TIME_OUT),
+                                   "The client was timeout due to Failover Logic doesn't retry for connection refused");
+            }
 
-        try {
-            response = lbClient.sendLoadBalanceRequest(getProxyServiceURL("failoverEndPoint_Specific_Errors"),
-                                                       null, "5000");
-        } catch (AxisFault e) {
-            Assert.assertFalse(e.getMessage().equals(ESBTestConstant.READ_TIME_OUT) , "The client was timeout due to Failover Logic dosen't retry for connection refused");
         }
-
+        //3 attempt is over and 4th attempt made endpoint suspend
+        //now the end point 9001 Server is suspend.
         axis2Server1.start();
 
         int counter = 0;
@@ -313,13 +319,14 @@ public class FailoverEndpointTestCase extends ESBIntegrationTest {
         if (counter > 100) {
             throw new AssertionError("Axis2 Server didn't started with in expected time period.");
         } else {
-            //Checaxiaxis2Server1.start()s2Server1.stop()k that the endpoint one is not suspended.
+            //Checaxiaxis2Server1.start()s2Server1.stop()k that the endpoint one is suspended.
             //If reply comes that means not suspended.
             //Because suspend duration of the endpoint is 20 seconds. So reply cant come in this time.
             response = lbClient.sendLoadBalanceRequest(getProxyServiceURL("failoverEndPoint_Specific_Errors"),
                                                        null);
             Assert.assertNotNull(response);
-            Assert.assertFalse(response.toString().contains("Response from server: Server_1"), "Endpoint 1 is not suspended so reply coming from endpoint 1");
+            Assert.assertFalse(response.toString().contains("Response from server: Server_1"),
+                               "Endpoint 1 is not suspended so reply coming from endpoint 1");
 
             //Invoke a web service method which will invoke a time out and cause the endpoint to suspend.
             response = lbClient.sendSleepRequest(getProxyServiceURL("failoverEndPoint_Specific_Errors"), "3000", "1000000");
@@ -328,7 +335,8 @@ public class FailoverEndpointTestCase extends ESBIntegrationTest {
             response = lbClient.sendLoadBalanceRequest(getProxyServiceURL("failoverEndPoint_Specific_Errors"),
                                                        null);
             Assert.assertNotNull(response);
-            Assert.assertTrue(response.toString().contains("Response from server: Server_2"), "Endpoint 1 is suspended so reply coming from endpoint 2");
+            Assert.assertTrue(response.toString().contains("Response from server: Server_2"),
+                              "Endpoint 1 is suspended so reply coming from endpoint 2");
 
         }
     }

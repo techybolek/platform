@@ -84,7 +84,7 @@ public class ConcurrencyAndRequestThrottlingTestConcurrency extends ESBIntegrati
 
         assertEquals(grantedRequests, AS_POLICY_ACCESS_GRANTED, "Fault: Concurrent throttle policy failure");
         assertEquals(deniedRequests, AS_POLICY_ACCESS_DENIED, "Fault: Concurrent throttle policy failure");
-        assertTrue(grantedRequests == requestThrottledClients.getCount(), "Fault: Request throttle policy failure");
+        assertEquals(grantedRequests, requestThrottledClients.getCount(), "Fault: Request throttle policy failure");
 
     }
 
@@ -103,7 +103,7 @@ public class ConcurrencyAndRequestThrottlingTestConcurrency extends ESBIntegrati
     private void initClients() {
         for (int i = 0; i < CONCURRENT_CLIENTS; i++) {
             concurrencyAndRequestThrottleTestClients[i] = new ConcurrencyAndRequestThrottleTestClient(
-                    getProxyServiceURL("StockQuoteProxy"), list, clientsDone, requestThrottledClients, THROTTLE_MAX_MSG_COUNT);
+                    getMainSequenceURL(), list, clientsDone, requestThrottledClients, THROTTLE_MAX_MSG_COUNT);
         }
         for (int i = 0; i < CONCURRENT_CLIENTS; i++) {
             clients[i] = new Thread(concurrencyAndRequestThrottleTestClients[i]);

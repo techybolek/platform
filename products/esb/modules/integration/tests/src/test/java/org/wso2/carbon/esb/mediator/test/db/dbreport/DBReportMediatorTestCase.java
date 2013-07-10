@@ -81,7 +81,7 @@ public class DBReportMediatorTestCase extends ESBIntegrationTest {
     /*  before a request is sent to the db mediator the count of price rows greater than 1000 should
 be 3. After the request is gone through db mediator the count shoud be zero. price values
 greater than 1000 will remain with the count of one */
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "DBLookup/DBReport mediator should replace a" +
                                              " &lt;/&gt; with </>")
     public void DBMediatorReplaceLessThanAndGreaterThanSignTestCase() throws Exception {
@@ -111,7 +111,7 @@ greater than 1000 will remain with the count of one */
  * After the request is sent, the value 200.0 is replaced by the value given by xpath to response
  * message content. */
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "Insert or update DB table using message coontents."
     )
     public void DBReportUseMessageContentTestCase() throws Exception {

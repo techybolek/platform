@@ -17,14 +17,19 @@
 */
 package org.wso2.carbon.esb.mediator.test.script;
 
+import junit.framework.Assert;
 import org.apache.axiom.om.OMElement;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.automation.api.clients.logging.LogViewerClient;
+import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
 import org.wso2.carbon.automation.core.annotations.SetEnvironment;
 import org.wso2.carbon.automation.core.utils.serverutils.ServerConfigurationManager;
+import org.wso2.carbon.automation.utils.esb.JSONClient;
 import org.wso2.carbon.esb.ESBIntegrationTest;
+import org.wso2.carbon.logging.view.stub.types.carbon.LogEvent;
 
 import javax.xml.namespace.QName;
 import java.io.File;
@@ -34,18 +39,23 @@ import static org.testng.Assert.assertNotNull;
 
 public class GroovyScriptSupportTestCase extends ESBIntegrationTest {
     private final String GROOVY_JAR = "groovy-all-1.1-rc-1.jar";
-    private String GROOVY_JAR_LOCATION = File.separator + "artifacts" + File.separator + "ESB"
-                                         + File.separator + "jar" + File.separator + GROOVY_JAR;
+    private String GROOVY_JAR_LOCATION = File.separator + "jar" + File.separator + GROOVY_JAR;
     private ServerConfigurationManager serverManager;
     private final String proxyName = "groovyProxy";
+    private JSONClient jsonclient;
 
     @BeforeClass(alwaysRun = true)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     public void setEnvironment() throws Exception {
         super.init(1);
         serverManager = new ServerConfigurationManager(esbServer.getBackEndUrl());
-        serverManager.copyToComponentLib(new File(getClass().getResource(GROOVY_JAR_LOCATION).toURI()));
+        serverManager.copyToComponentLib(new File(getESBResourceLocation() + GROOVY_JAR_LOCATION));
         serverManager.restartGracefully();
+        serverManager.applyConfiguration(new File(ProductConstant.getResourceLocations(ProductConstant.ESB_SERVER_NAME)
+                + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator + "scriptMediator"
+                + File.separator + "axis2.xml"));
         super.init(1);
+        jsonclient = new JSONClient();
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
@@ -66,6 +76,7 @@ public class GroovyScriptSupportTestCase extends ESBIntegrationTest {
     @Test(groups = {"wso2.esb", "localOnly"}, description = "Script Mediator -Run a Groovy script with the mediator")
     public void testGroovyScriptMediation() throws Exception {
         loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/script_mediator/groovy_script_with_the_mediator.xml");
+
         OMElement response = axis2Client.sendSimpleStockQuoteRequest(getProxyServiceURL(proxyName), null, "IBM");
 
         String lastPrice = response.getFirstElement().getFirstChildWithName(new QName("http://services.samples/xsd", "last"))
@@ -77,7 +88,22 @@ public class GroovyScriptSupportTestCase extends ESBIntegrationTest {
         assertEquals(symbol, "IBM", "Fault: value 'symbol' mismatched");
     }
 
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @Test(groups = {"wso2.esb", "localOnly"}, description = "Script Mediator -Run a Groovy script with setPayloadJson")
+    public void testGroovySetPayloadJson() throws Exception {
+        loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/script_mediator/groovy_script_with_setPayloadJson.xml");
+
+        String query = "{\"key\":\"value\"}";
+        String addUrl = getProxyServiceSecuredURL("MyMockProxy");
+        String expectedResult = "{\"fileID\":\"89265\",\"mySiteID\":\"54571\"}";
+
+        String actualResult = jsonclient.sendUserDefineRequest(addUrl, query).toString();
+
+        assertEquals(actualResult, expectedResult, "Fault: value 'symbol' mismatched");
+    }
+
     @AfterClass(alwaysRun = true)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     public void destroy() throws Exception {
         try {
             super.cleanup();
@@ -86,6 +112,7 @@ public class GroovyScriptSupportTestCase extends ESBIntegrationTest {
 
             serverManager.removeFromComponentLib(GROOVY_JAR);
             serverManager.restartGracefully();
+            serverManager.restoreToLastConfiguration();
             serverManager = null;
         }
 

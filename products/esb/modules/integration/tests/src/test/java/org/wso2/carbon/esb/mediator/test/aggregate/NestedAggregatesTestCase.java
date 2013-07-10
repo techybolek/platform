@@ -17,13 +17,21 @@
  */
 package org.wso2.carbon.esb.mediator.test.aggregate;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axiom.soap.SOAPFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class NestedAggregatesTestCase extends ESBIntegrationTest {
 
@@ -37,33 +45,71 @@ public class NestedAggregatesTestCase extends ESBIntegrationTest {
         aggregatedRequestClient = new AggregatedRequestClient();
         aggregatedRequestClient.setProxyServiceUrl(getMainSequenceURL());
         aggregatedRequestClient.setSymbol("IBM");
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
 
 
     }
 
-    @Test(groups = {"wso2.esb"}, description = "replacing a property by using an enrich mediator")
-    public void test() throws IOException {
-        int companyCount = 0, responseCount = 0, SoapEnvCount = 0;
+    @Test(groups = {"wso2.esb"}, description = "Sending request for aggregation")
+    public void test() throws IOException, XMLStreamException {
+        int responseCount = 0;
 
-        String Response = aggregatedRequestClient.getResponse();
-        String[] response = getTagArray(Response);
+        OMElement response = AXIOMUtil.stringToOM(aggregatedRequestClient.getResponse());
+        OMElement soapBody = response.getFirstElement();
 
-        for (int i = 0; i < response.length; i++) {
-            if (response[i].contains("soapenv")) {
-                SoapEnvCount++;
-            } else if (response[i].contains("IBM Company")) {
-                companyCount++;
-            } else if (response[i].contains("getQuoteResponse")) {
-                responseCount++;
-            }
+        Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
+                                                                   "getQuoteResponse"));
+        while (iterator.hasNext()) {
+            responseCount++;
+            OMElement getQuote = (OMElement) iterator.next();
+            Assert.assertTrue(getQuote.toString().contains("IBM Company"));
         }
 
 
-        Assert.assertEquals(no_of_requests, SoapEnvCount);
-        Assert.assertEquals(2 * no_of_requests, responseCount);
-        Assert.assertEquals(no_of_requests, companyCount);
+        Assert.assertEquals(no_of_requests, responseCount, "Response Aggregation not as expected");
     }
+
+    @Test(groups = {"wso2.esb"}, description = "sending nested aggregate request")
+    public void testNestedAggregate() throws IOException, XMLStreamException {
+
+        String response = aggregatedRequestClient.getResponse(createNestedQuoteRequestBody("WSO2", no_of_requests));
+        OMElement response2 = AXIOMUtil.stringToOM(response);
+        OMElement soapBody = response2.getFirstElement();
+        Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
+                                                                   "getQuoteResponse"));
+
+        int responseCount = 0;
+        while (iterator.hasNext()) {
+            responseCount++;
+            OMElement getQuote = (OMElement) iterator.next();
+            Assert.assertTrue(getQuote.toString().contains("WSO2 Company"));
+        }
+
+
+        Assert.assertEquals(responseCount, no_of_requests * no_of_requests, "Response count Mismatched");
+    }
+
+    /*   https://wso2.org/jira/browse/ESBJAVA-2152   */
+    @Test(groups = {"wso2.esb"}, description = "sending nested aggregate request > request iterator count 2500")
+    public void testNestedAggregateWithLargeMessage() throws IOException, XMLStreamException {
+        int messageItr = 25;
+        String response = aggregatedRequestClient.getResponse(createNestedQuoteRequestBody("WSO2", messageItr));
+        OMElement response2 = AXIOMUtil.stringToOM(response);
+        OMElement soapBody = response2.getFirstElement();
+        Iterator iterator = soapBody.getChildrenWithName(new QName("http://services.samples",
+                                                                   "getQuoteResponse"));
+
+        int responseCount = 0;
+        while (iterator.hasNext()) {
+            responseCount++;
+            OMElement getQuote = (OMElement) iterator.next();
+            Assert.assertTrue(getQuote.toString().contains("WSO2 Company"));
+        }
+
+
+        Assert.assertEquals(responseCount, messageItr * messageItr, "Response count Mismatched");
+    }
+
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
@@ -71,8 +117,24 @@ public class NestedAggregatesTestCase extends ESBIntegrationTest {
         super.cleanup();
     }
 
-    public String[] getTagArray(String xml) {
-        return xml.split("<");
+    private OMElement createNestedQuoteRequestBody(String symbol, int noOfItr) {
+        SOAPFactory fac = OMAbstractFactory.getSOAP11Factory();
+        OMNamespace omNs = fac.createOMNamespace("http://services.samples", "ns");
+        OMElement method1 = fac.createOMElement("getQuotes", omNs);
+        for (int i = 0; i < noOfItr; i++) {
+            OMElement method2 = fac.createOMElement("getQuote", omNs);
+
+            for (int j = 0; j < noOfItr; j++) {
+                OMElement value1 = fac.createOMElement("request", omNs);
+                OMElement value2 = fac.createOMElement("symbol", omNs);
+                value2.addChild(fac.createOMText(value1, symbol));
+                value1.addChild(value2);
+                method2.addChild(value1);
+
+            }
+            method1.addChild(method2);
+        }
+        return method1;
     }
 
 

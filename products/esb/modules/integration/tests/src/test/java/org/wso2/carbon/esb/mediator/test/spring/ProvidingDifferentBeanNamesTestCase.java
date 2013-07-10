@@ -41,17 +41,16 @@ import static org.testng.Assert.fail;
 public class ProvidingDifferentBeanNamesTestCase extends ESBIntegrationTest {
 
     private static final String SIMPLE_BEAN_JAR = "org.wso2.carbon.test.simplebean.jar";
-    private static final String JAR_LOCATION = "/artifacts/ESB/jar";
+    private static final String JAR_LOCATION = "jar";
 
     private ServerConfigurationManager serverConfigurationManager;
 
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {
-
         init(ProductConstant.ADMIN_USER_ID);
         serverConfigurationManager = new ServerConfigurationManager(esbServer.getBackEndUrl());
         serverConfigurationManager.copyToComponentLib
-                (new File(getClass().getResource(JAR_LOCATION + File.separator + SIMPLE_BEAN_JAR).toURI()));
+                (new File(getESBResourceLocation() + File.separator + JAR_LOCATION + File.separator + SIMPLE_BEAN_JAR));
         serverConfigurationManager.restartGracefully();
 
         init(ProductConstant.ADMIN_USER_ID);
@@ -68,7 +67,7 @@ public class ProvidingDifferentBeanNamesTestCase extends ESBIntegrationTest {
         try {
             axis2Client.sendSimpleStockQuoteRequest
                     (getMainSequenceURL(), null, "IBM");
-            fail();
+            fail("This request must failed since it use non existing bean");
         } catch (AxisFault axisFault) {
             assertEquals(axisFault.getMessage(), "No bean named 'springtest' is defined", "Fault: Error message mismatched");
         }
@@ -78,10 +77,10 @@ public class ProvidingDifferentBeanNamesTestCase extends ESBIntegrationTest {
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
-        deleteSequence("main");
-        Thread.sleep(30000);//wait till the main sequence get deleted before restarting.
         clearUploadedResource();
         super.cleanup();
+        Thread.sleep(30000);//wait till the main sequence get deleted before restarting.
+
         serverConfigurationManager.removeFromComponentLib(SIMPLE_BEAN_JAR);
         serverConfigurationManager.restartGracefully();
 
@@ -100,8 +99,9 @@ public class ProvidingDifferentBeanNamesTestCase extends ESBIntegrationTest {
 
         resourceAdminServiceStub.addResource(
                 "/_system/config/spring/springbean.xml", "application/xml", "spring bean config files",
-                new DataHandler(new URL("file:///" + getClass().getResource(
-                        "/artifacts/ESB/mediatorconfig/spring/utils/different_bean_names.xml").getPath())));
+                new DataHandler(new URL("file:///" + getESBResourceLocation() + File.separator +
+                                        "mediatorconfig" + File.separator + "spring" + File.separator
+                                        + "utils" + File.separator + "different_bean_names.xml")));
 
 
     }

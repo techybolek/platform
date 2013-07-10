@@ -17,10 +17,11 @@ import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
 import org.wso2.carbon.automation.core.annotations.SetEnvironment;
 import org.wso2.carbon.automation.core.utils.httpserverutils.RequestInterceptor;
 import org.wso2.carbon.automation.core.utils.httpserverutils.SimpleHttpServer;
+import org.wso2.carbon.automation.core.utils.jmsbrokerutils.controller.JMSBrokerController;
+import org.wso2.carbon.automation.core.utils.jmsbrokerutils.controller.config.JMSBrokerConfiguration;
+import org.wso2.carbon.automation.core.utils.jmsbrokerutils.controller.config.JMSBrokerConfigurationProvider;
 import org.wso2.carbon.automation.core.utils.serverutils.ServerConfigurationManager;
 import org.wso2.carbon.esb.ESBIntegrationTest;
-import org.wso2.carbon.esb.util.controller.JMSBrokerController;
-import org.wso2.carbon.esb.util.controller.config.JMSBrokerConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,6 @@ import java.io.InputStream;
  * @author wso2
  */
 public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
-
 
     private TestRequestInterceptor interceptor = new TestRequestInterceptor();
     private JMSBrokerController jmsBrokerController;
@@ -57,21 +57,36 @@ public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
         interceptor = new TestRequestInterceptor();
         httpServer.getRequestHandler().setInterceptor(interceptor);
 
-
         super.init(5);
 
         serverConfigurationManager = new ServerConfigurationManager(esbServer.getBackEndUrl());
-        serverConfigurationManager.copyToComponentLib(new File(getClass().getResource(JAR_LOCATION + File.separator + ACTIVEMQ_CORE).toURI()));
-        serverConfigurationManager.copyToComponentLib(new File(getClass().getResource(JAR_LOCATION + File.separator + GERONIMO_J2EE_MANAGEMENT).toURI()));
-        serverConfigurationManager.copyToComponentLib(new File(getClass().getResource(JAR_LOCATION + File.separator + GERONIMO_JMS).toURI()));
-        serverConfigurationManager.applyConfiguration(new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator + "axis2.xml").getPath()));
+        serverConfigurationManager.copyToComponentLib(new File(getClass().
+                getResource(JAR_LOCATION + File.separator + ACTIVEMQ_CORE).toURI()));
+        serverConfigurationManager.copyToComponentLib(new File(getClass().
+                getResource(JAR_LOCATION + File.separator + GERONIMO_J2EE_MANAGEMENT).toURI()));
+        serverConfigurationManager.copyToComponentLib(new File(getClass().
+                getResource(JAR_LOCATION + File.separator + GERONIMO_JMS).toURI()));
+        serverConfigurationManager.applyConfiguration(new File(getClass().
+                getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator + "axis2.xml").getPath()));
 
         super.init(5);
 
-        File outfolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath() + "test" + File.separator + "out" + File.separator);
-        File infolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath() + "test" + File.separator + "in" + File.separator);
-        File originalfolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath() + "test" + File.separator + "done" + File.separator);
-        File failurelfolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator);
+        File outfolder = new File(getClass().
+                getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator
+                            + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath()
+                                  + "test" + File.separator + "out" + File.separator);
+        File infolder = new File(getClass().
+                getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator
+                            + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath()
+                                 + "test" + File.separator + "in" + File.separator);
+        File originalfolder = new File(getClass().
+                getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator
+                            + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath()
+                                       + "test" + File.separator + "done" + File.separator);
+        File failurelfolder = new File(getClass().
+                getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator
+                            + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath()
+                                       + "test" + File.separator + "failure" + File.separator);
         outfolder.mkdirs();
         infolder.mkdirs();
         originalfolder.mkdirs();
@@ -79,18 +94,27 @@ public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport to JMS endpoint and test whether its getting suspended")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport to JMS endpoint" +
+                                               " and test whether its getting suspended")
     public void testJMSEndpointSuspensionViaVFSTest()
             throws Exception {
 
         addVFSJMSProxy1();
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath() + "test" + File.separator + "done" + File.separator + "test.xml");
+        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator
+                                                       + "ESB" + File.separator + "synapseconfig" + File.separator
+                                                       + "messageStore" + File.separator).getPath() + "test"
+                                + File.separator + "done" + File.separator + "test.xml");
         if (outfile.exists()) {
             outfile.delete();
         }
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "messageStore" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator
+                                                     + "ESB" + File.separator + "synapseconfig" + File.separator
+                                                     + "messageStore" + File.separator + "test.xml").getPath());
+        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB"
+                                                     + File.separator + "synapseconfig" + File.separator
+                                                     + "messageStore" + File.separator).getPath() + "test"
+                              + File.separator + "in" + File.separator + "test.xml");
 
         sendFile(outfile, afile, bfile);
 
@@ -109,7 +133,6 @@ public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
         Assert.assertTrue(interceptor.getPayload().contains("Endpoint Down!"));
 
         deleteProxyService("VFSJMSProxy1");
-
     }
 
     private void sendFile(File outfile, File afile, File bfile)
@@ -143,14 +166,9 @@ public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
         jmsBrokerController.start();
     }
 
-
     private JMSBrokerConfiguration getJMSBrokerConfiguration() {
-        JMSBrokerConfiguration jmsBrokerConfiguration = new JMSBrokerConfiguration();
-        jmsBrokerConfiguration.setInitialNamingFactory("org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        jmsBrokerConfiguration.setProviderURL("tcp://localhost:61616");
-        return jmsBrokerConfiguration;
+        return JMSBrokerConfigurationProvider.getInstance().getBrokerConfiguration();
     }
-
 
     private static class TestRequestInterceptor implements RequestInterceptor {
 
@@ -166,7 +184,6 @@ public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }
 
@@ -199,7 +216,6 @@ public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
 
         serverConfigurationManager = null;
     }
-
 
     private void addVFSJMSProxy1()
             throws Exception {
@@ -252,5 +268,4 @@ public class JMSEndpointSuspensionViaVFSTest extends ESBIntegrationTest {
                                              "                </target>\n" +
                                              "        </proxy>"));
     }
-
 }

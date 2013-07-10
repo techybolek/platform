@@ -15,7 +15,7 @@
 *specific language governing permissions and limitations
 *under the License.
 */
-package org.wso2.carbon.esb.security.test;
+package org.wso2.carbon.esb.rest.test.security;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -45,8 +45,9 @@ public class Axis2ServerStartupTestCase {
         if (FrameworkFactory.getFrameworkProperties(ProductConstant.ESB_SERVER_NAME).getEnvironmentSettings().is_builderEnabled()) {
             axis2Server1 = new SampleAxis2Server("test_axis2_server_9009.xml");
             axis2Server1.start();
-            axis2Server1.deployService(ESBTestConstant.SIMPLE_AXIS2_SERVICE);
             axis2Server1.deployService(ESBTestConstant.STUDENT_REST_SERVICE);
+            axis2Server1.deployService(ESBTestConstant.SIMPLE_AXIS2_SERVICE);
+            axis2Server1.deployService(ESBTestConstant.SIMPLE_STOCK_QUOTE_SERVICE);
 
         } else {
             builder = new EnvironmentBuilder().as(ProductConstant.ADMIN_USER_ID);

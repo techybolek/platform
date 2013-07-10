@@ -32,8 +32,8 @@ import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariables;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkFactory;
 import org.wso2.carbon.automation.utils.esb.ESBTestCaseUtils;
+import org.wso2.carbon.automation.utils.esb.JSONClient;
 import org.wso2.carbon.automation.utils.esb.StockQuoteClient;
-import org.wso2.carbon.esb.util.ESBTestConstant;
 import org.wso2.carbon.esb.util.EndpointGenerator;
 import org.wso2.carbon.esb.util.ServiceDeploymentUtil;
 import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConfigExceptionException;
@@ -45,6 +45,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.RemoteException;
@@ -68,6 +69,7 @@ public abstract class ESBIntegrationTest {
     private List<String> sequenceTemplateList = null;
     private List<String> apiList = null;
     private List<String> priorityExecutorList = null;
+    private List<String[]> scheduledTaskList = null;
 
     protected void init() throws Exception {
         init(2);
@@ -123,6 +125,8 @@ public abstract class ESBIntegrationTest {
 
             deletePriorityExecutors();
 
+            deleteScheduledTasks();
+
         } finally {
             synapseConfiguration = null;
             proxyServicesList = null;
@@ -138,6 +142,7 @@ public abstract class ESBIntegrationTest {
             userInfo = null;
             esbServer = null;
             esbUtils = null;
+            scheduledTaskList = null;
 
         }
     }
@@ -359,6 +364,19 @@ public abstract class ESBIntegrationTest {
         priorityExecutorList.add(executorName);
     }
 
+    protected void addScheduledTask(OMElement task) throws Exception {
+        String taskName = task.getAttributeValue(new QName("name"));
+        String taskGroup = task.getAttributeValue(new QName("group"));
+        if (esbUtils.isScheduleTaskExist(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), taskName)) {
+            esbUtils.deleteScheduleTask(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), taskName, taskGroup);
+        }
+        esbUtils.addScheduleTask(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), task);
+
+        if (scheduledTaskList == null) {
+            scheduledTaskList = new ArrayList<String[]>();
+        }
+        scheduledTaskList.add(new String[]{taskName,taskGroup});
+    }
 
     protected void applySecurity(String serviceName, int policyId, String[] userGroups)
             throws SecurityAdminServiceSecurityConfigExceptionException, RemoteException,
@@ -546,6 +564,23 @@ public abstract class ESBIntegrationTest {
         }
     }
 
+    private void deleteScheduledTasks() {
+        if (scheduledTaskList != null) {
+            Iterator<String[]> itr = scheduledTaskList.iterator();
+            while (itr.hasNext()) {
+                String[] executor = itr.next();
+                try {
+                    if (esbUtils.isScheduleTaskExist(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), executor[0])) {
+                        esbUtils.deleteScheduleTask(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), executor[0],executor[1]);
+                    }
+                } catch (Exception e) {
+                    Assert.fail("while undeploying ScheduledTask Executor. " + e.getMessage());
+                }
+            }
+            scheduledTaskList.clear();
+        }
+    }
+
     protected boolean isRunningOnStratos() {
         return FrameworkFactory.getFrameworkProperties(ProductConstant.ESB_SERVER_NAME).getEnvironmentSettings().is_runningOnStratos();
     }
@@ -617,6 +652,16 @@ public abstract class ESBIntegrationTest {
         config = config.replace("http://127.0.0.1:9000/services/"
                 , service);
         return config;
+    }
+
+    protected OMElement replaceEndpoints(String relativePathToConfigFile, String serviceName,
+                                         String port)
+            throws XMLStreamException, FileNotFoundException {
+        String config = esbUtils.loadClasspathResource(relativePathToConfigFile).toString();
+        config = config.replace("http://localhost:" + port + "/services/" + serviceName,
+                                getBackEndServiceUrl(serviceName));
+
+        return AXIOMUtil.stringToOM(config);
     }
 
     private String readInputStreamAsString(InputStream in)

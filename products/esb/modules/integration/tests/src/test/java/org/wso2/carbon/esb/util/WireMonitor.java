@@ -21,19 +21,17 @@ package org.wso2.carbon.esb.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 class WireMonitor extends Thread {
     private Log log = LogFactory.getLog(WireMonitor.class);
-    private static final int TIMEOUT_VALUE = 60000;
+    private static final int TIMEOUT_VALUE = 30000;
     private int port;
     private ServerSocket providerSocket;
     private Socket connection = null;
-    public String message = "";
     private WireMonitorServer trigger;
 
     public void run() {
@@ -46,24 +44,23 @@ class WireMonitor extends Thread {
             connection = providerSocket.accept();
             log.info("Connection received from " +
                      connection.getInetAddress().getHostName());
-            InputStreamReader in = new InputStreamReader(connection.getInputStream());
-            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line = "";
+            InputStream in = connection.getInputStream();
+            int ch;
+            StringBuffer buffer = new StringBuffer();
             Long time = System.currentTimeMillis();
-            while ((line = rd.readLine()) != null) {
-                message = message + line;
+            while ((ch = in.read()) != 1) {
+               buffer.append((char) ch);
                 // In this case no need of reading more than timeout value
-                if (System.currentTimeMillis() > (time + TIMEOUT_VALUE)) {
+                if (System.currentTimeMillis() > (time + TIMEOUT_VALUE) || buffer.toString().contains("</soapenv:Envelope>")) {
                     break;
                 }
             }
 
             // Signaling Main thread to continue
-            trigger.response = message;
+            trigger.response = buffer.toString();
             trigger.isFinished = true;
 
             in.close();
-            rd.close();
 
         } catch (IOException ioException) {
 

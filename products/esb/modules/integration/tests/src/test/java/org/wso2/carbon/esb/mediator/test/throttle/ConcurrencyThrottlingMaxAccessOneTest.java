@@ -63,7 +63,7 @@ public class ConcurrencyThrottlingMaxAccessOneTest extends ESBIntegrationTest {
 
     @Test(groups = "wso2.esb",
           description = "Concurrency throttling - limit the number of concurrent requests to one",
-          timeOut = 1000 * 60 * 2)
+          timeOut = 1000 * 60 *2)
     public void testPolicyWithConcurrentAccessSetToOne() throws InterruptedException {
         startClients();
         while (clientsDone.getCount() < CONCURRENT_CLIENTS) {

@@ -64,7 +64,7 @@ public class DBMediatorUseTransaction extends ESBIntegrationTest {
         updateESBConfiguration(updatedSynapseContent);
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "Test UseTransaction option .Use in conjunction with Transaction mediator "
     )
     public void testDBmediatorSuccessCase() throws AxisFault, SQLException {
@@ -81,7 +81,7 @@ public class DBMediatorUseTransaction extends ESBIntegrationTest {
         assertEquals(IBMcountDB2, 1, "Fault, Record Not Inserted to Database2");
 
     }
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     /*JIRA issue: https://wso2.org/jira/browse/ESBJAVA-1553*/
     @Test(groups = "wso2.esb", enabled = false, description = "Test UseTransaction option ." +
                                                                             "Use in conjunction with Transaction mediator. Fail casse"

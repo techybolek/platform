@@ -63,8 +63,7 @@ public class RouterMediatorEndPointProtocolTestCase extends ESBIntegrationTest {
         OMElement proxy = AXIOMUtil.stringToOM("<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"StockQuoteProxy\" transports=\"https\">\n" +
                                                "        <target>\n" +
                                                "            <endpoint>\n" +
-                                               "                <address uri=\"http://localhost:9000/services/SimpleStockQuoteService\"\n" +
-                                               "                         format=\"pox\" />\n" +
+                                               "                <address uri=\"http://localhost:9000/services/SimpleStockQuoteService\" />\n" +
                                                "            </endpoint>\n" +
                                                "            <outSequence>\n" +
                                                "                <send />\n" +

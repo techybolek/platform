@@ -18,8 +18,6 @@
 package org.wso2.carbon.esb.mediator.test.aggregate;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.impl.llom.OMElementImpl;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -27,7 +25,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Iterator;
@@ -35,60 +32,55 @@ import java.util.Iterator;
 public class PropertyWithinSequenceTestCase extends ESBIntegrationTest {
 
     private AggregatedRequestClient aggregatedRequestClient;
-    private int no_of_requests=0;
-    private boolean complete=false;
+    private int no_of_requests = 0;
 
 
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {
         super.init();
         loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/propertyWithinIterateConfig/synapse.xml");
-        aggregatedRequestClient= new AggregatedRequestClient();
+        aggregatedRequestClient = new AggregatedRequestClient();
         aggregatedRequestClient.setProxyServiceUrl(getProxyServiceURL("aggregateMediatorTestProxy"));
         aggregatedRequestClient.setSymbol("IBM");
-        no_of_requests=15;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        no_of_requests = 15;
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
 
     }
 
 
+    @Test(groups = {"wso2.esb"}, description = "Defining a property within Iterator")
+    public void testPropertyWithinIteratorMediator() throws IOException, XMLStreamException {
+        int responseCount = 0;
+        for (int i = 0; i < 10; i++) {
+            String Response = aggregatedRequestClient.getResponse();
+            Assert.assertNotNull(Response);
+            OMElement Response2 = AXIOMUtil.stringToOM(Response);
+            OMElement soapBody = Response2.getFirstElement();
+            Iterator iterator = soapBody.getChildrenWithLocalName("getQuoteResponse");
 
-    @Test(groups = {"wso2.esb"}, description = "more number of messages than maximum count")
-    public void testMoreNumberThanMaximum() throws IOException, XMLStreamException {
-        int responseCount=0;
+            while (iterator.hasNext()) {
 
-        String Response= aggregatedRequestClient.getResponse();
-        Assert.assertNotNull(Response);
-        OMElement Response2= AXIOMUtil.stringToOM(Response);
-        OMElement soapBody = Response2.getFirstElement();
-        Iterator iterator =soapBody.getChildrenWithName(new QName("http://services.samples",
-                "getQuoteResponse"));
-        soapBody.getChildElements();
+                OMElement omeReturn = (OMElement) iterator.next();
+                responseCount++;
+                Iterator<OMElement> itr = omeReturn.getFirstElement().getChildrenWithLocalName("symbol");
+                boolean isSymbolFound = false;
+                while (itr.hasNext()) {
+                    OMElement symbol = itr.next();
+                    //to get the number attached by iterator mediator
+                    String[] values = symbol.getText().split(" ");
+                    Assert.assertEquals(values.length, 2, "Response does not contained the property value attached by Iterator mediator");
+                    double property = Double.parseDouble(values[1]);
+                    //value must be less tha to 16
+                    Assert.assertTrue(16 > property, "Value attached by Iterator mediator to response must be less than to 16");
 
-        while (iterator.hasNext()) {
-
-            OMNode omNode = ((OMElement)iterator.next()).getFirstElement().getFirstElement().getNextOMSibling();
-
-            while(true){
-                if(((OMElementImpl)omNode).getLocalName().toString().contains("name")){
-                    break;
+                    isSymbolFound = true;
                 }
-                if(omNode.getNextOMSibling()!=null){
-                    omNode=omNode.getNextOMSibling();
-                }  else{
-                    break;
-                }
-
+                Assert.assertTrue(isSymbolFound, "Symbol Element not found in the response message");
             }
-            if(((OMElementImpl) omNode).getText().contains(Float.toString(no_of_requests))){
-                complete=true;
-            }
-
-
+            Assert.assertEquals(responseCount, responseCount, "Response does not contains all getQuoteResponses as in the request");
         }
-
-        Assert.assertTrue(complete);
     }
+
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         aggregatedRequestClient = null;

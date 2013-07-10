@@ -257,17 +257,17 @@
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.api</artifactId>
-            <version>${clarity.version}</version>
+            <version>${test.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.core</artifactId>
-            <version>${clarity.version}</version>
+            <version>${test.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.utils</artifactId>
-            <version>${clarity.version}</version>
+            <version>${test.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>groovy</groupId>
@@ -315,9 +315,15 @@
             <artifactId>geronimo-jms_1.1_spec</artifactId>
             <version>1.1.1</version>
         </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.wso2</groupId>
+            <artifactId>hapi</artifactId>
+            <version>2.1.0.wso2v1</version>
+        </dependency>
     </dependencies>
 
     <properties>
-        <clarity.version>${carbon.platform.version}</clarity.version>
+        <test.framework.version>${carbon.platform.version}</test.framework.version>
+        <synapse.version>2.1.1-wso2v7</synapse.version>
     </properties>
 </project>

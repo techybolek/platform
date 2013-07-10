@@ -52,7 +52,7 @@ public class AggregationWithoutMaxValueTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 20;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -74,7 +74,7 @@ public class AggregationWithoutMaxValueTestCase extends ESBIntegrationTest {
     public void testEqualtoMinimum() throws IOException, XMLStreamException {
         int responseCount = 0;
         no_of_requests = 50;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -98,7 +98,7 @@ public class AggregationWithoutMaxValueTestCase extends ESBIntegrationTest {
 
 
         no_of_requests = 80;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);

@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.esb.mediator.test.spring;
 
+import junit.framework.Assert;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.testng.annotations.AfterClass;
@@ -29,7 +30,6 @@ import org.wso2.carbon.automation.core.annotations.SetEnvironment;
 import org.wso2.carbon.automation.core.utils.fileutils.FileManager;
 import org.wso2.carbon.automation.core.utils.serverutils.ServerConfigurationManager;
 import org.wso2.carbon.esb.ESBIntegrationTest;
-import org.wso2.carbon.esb.util.ESBTestConstant;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 
 import javax.activation.DataHandler;
@@ -41,7 +41,6 @@ import java.rmi.RemoteException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SpringMediationTestCase extends ESBIntegrationTest {
@@ -138,14 +137,15 @@ public class SpringMediationTestCase extends ESBIntegrationTest {
     @Test(groups = {"wso2.esb", "localOnly"}, description = "Spring Mediator " +
                                                             "-Added Simple bean into lib -referring to an invalid spring xml")
     public void uploadSequenceHavingInvalidSpringXMLTest() throws Exception {
+
+        loadESBConfigurationFromClasspath("/artifacts/ESB/mediatorconfig/spring/spring_mediation_invalid_spring_bean.xml");
         try {
-            loadESBConfigurationFromClasspath("/artifacts/ESB/mediatorconfig/spring/spring_mediation_invalid_spring_bean.xml");
-            fail("Synapse configuration can not be saved since sequence refers a invalid Spring bean xml");
+            axis2Client.sendSimpleStockQuoteRequest
+                    (getMainSequenceURL(), null, "WSO2");
+            Assert.fail("Request must failed since it refers invalid spring bean");
         } catch (Exception expected) {
-            assertTrue((expected.getMessage().contains(ESBTestConstant.ERROR_ADDING_SEQUENCE) || expected.getMessage().contains(ESBTestConstant.UNABLE_TO_SAVE_SEQUENCE))
-                    , "Error Message Mismatched. actual:" + expected.getMessage() + " but expected: Error adding sequence or Unable to save the Sequence");
-            assertTrue(expected.getMessage().contains("Cannot look up Spring configuration conf:/spring/invalidSpringbean.xml")
-                    , "Error Message Mismatched. not contain mesage: Cannot look up Spring configuration conf:/spring/invalidSpringbean.xml");
+            assertEquals(expected.getMessage(), "Cannot reference application context with key : conf:/spring/invalidSpringbean.xml"
+                    , "Error Message Mismatched when referring invalid springbean in sequence");
 
         }
     }
@@ -154,14 +154,16 @@ public class SpringMediationTestCase extends ESBIntegrationTest {
     @Test(groups = {"wso2.esb", "localOnly"}, description = "Spring Mediator " +
                                                             "- referring to an non existing spring xml")
     public void uploadSequenceHavingNonExistingSpringXMLResourceTest() throws Exception {
+
+        loadESBConfigurationFromClasspath("/artifacts/ESB/mediatorconfig/spring/spring_mediation_springBean_resource_not_exist.xml");
         try {
-            loadESBConfigurationFromClasspath("/artifacts/ESB/mediatorconfig/spring/spring_mediation_springBean_resource_not_exist.xml");
-            fail("Synapse configuration can not be saved since sequence refers a invalid Spring bean xml");
+            axis2Client.sendSimpleStockQuoteRequest
+                    (getMainSequenceURL(), null, "WSO2");
+            Assert.fail("Request must failed since it refers non existing spring bean");
         } catch (Exception expected) {
-            assertTrue((expected.getMessage().contains(ESBTestConstant.ERROR_ADDING_SEQUENCE) || expected.getMessage().contains(ESBTestConstant.UNABLE_TO_SAVE_SEQUENCE))
-                    , "Error Message Mismatched. actual:" + expected.getMessage() + " but expected: Error adding sequence or Unable to save the Sequence");
-            assertTrue(expected.getMessage().contains("Cannot look up Spring configuration conf:/spring/NonExistingSpringbean.xml")
-                    , "Error Message Mismatched. not contain mesage: Cannot look up Spring configuration conf:/spring/NonExistingSpringbean.xml");
+            assertEquals(expected.getMessage(), "Cannot reference application context with key : conf:/spring/NonExistingSpringbean.xml"
+                    , "Error Message Mismatched when referring non existing springbean in sequence");
+
         }
     }
 

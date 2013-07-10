@@ -53,7 +53,7 @@ public class AggregateWithHighMaxAndLowMinTestCase extends ESBIntegrationTest {
 
 
         no_of_requests=1;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response= aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2= AXIOMUtil.stringToOM(Response);
@@ -79,7 +79,7 @@ public class AggregateWithHighMaxAndLowMinTestCase extends ESBIntegrationTest {
 
 
         no_of_requests=2;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response= aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2= AXIOMUtil.stringToOM(Response);
@@ -97,13 +97,13 @@ public class AggregateWithHighMaxAndLowMinTestCase extends ESBIntegrationTest {
 
     }
 
-    @Test(groups = {"wso2.esb"}, description = "number of messages is equal to the maximum")
+    @Test(groups = {"wso2.esb"}, description = "number of messages is equal to the maximum", enabled = false)
     public void testEqualtoMaximum() throws IOException, XMLStreamException {
         int responseCount=0;
 
 
         no_of_requests=100;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response= aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2= AXIOMUtil.stringToOM(Response);
@@ -126,7 +126,7 @@ public class AggregateWithHighMaxAndLowMinTestCase extends ESBIntegrationTest {
 
 
         no_of_requests=10;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response= aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2= AXIOMUtil.stringToOM(Response);
@@ -152,7 +152,7 @@ public class AggregateWithHighMaxAndLowMinTestCase extends ESBIntegrationTest {
 
 
         no_of_requests=110;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response= aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2= AXIOMUtil.stringToOM(Response);
@@ -178,7 +178,7 @@ public class AggregateWithHighMaxAndLowMinTestCase extends ESBIntegrationTest {
 
 
         no_of_requests=60;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response= aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2= AXIOMUtil.stringToOM(Response);

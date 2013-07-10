@@ -75,7 +75,7 @@ public class DBlookupMediatorTestCase extends ESBIntegrationTest {
 
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "Test  with more than one result")
     public void dbLookupMediatorTestWithMultipleResults() throws Exception {
 
@@ -100,7 +100,7 @@ public class DBlookupMediatorTestCase extends ESBIntegrationTest {
 
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "Test with multiple SQL statements")
     public void dbLookupMediatorTestMultipleStatements() throws Exception {
         mySqlDatabaseManager.executeUpdate("INSERT INTO company VALUES(100.0,'IBM')");
@@ -117,7 +117,7 @@ public class DBlookupMediatorTestCase extends ESBIntegrationTest {
         Assert.assertTrue(response.toString().contains("WSO2"));
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "Select rows from DB table while mediating messages.")
     public void dbLookupTestSelectRows() throws Exception {
         mySqlDatabaseManager.executeUpdate("INSERT INTO company VALUES(100.0,'ABC')");
@@ -133,7 +133,7 @@ public class DBlookupMediatorTestCase extends ESBIntegrationTest {
         Assert.assertTrue(response.toString().contains("WSO2"));
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "Test  with stored finctions")
     public void dbLookupTestStoredFunctions() throws Exception {
         mySqlDatabaseManager.executeUpdate("INSERT INTO company VALUES(100.0,'ABC')");
@@ -153,7 +153,7 @@ public class DBlookupMediatorTestCase extends ESBIntegrationTest {
 
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.platform_all})
     @Test(groups = "wso2.esb", description = "Test  with stored procedures")
     public void dbLookupTestStoredProcedures() throws Exception {
         mySqlDatabaseManager.executeUpdate("INSERT INTO company VALUES(100.0,'ABC')");

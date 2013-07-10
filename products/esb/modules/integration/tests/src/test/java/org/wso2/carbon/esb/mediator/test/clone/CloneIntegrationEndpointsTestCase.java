@@ -32,7 +32,7 @@ import java.io.File;
 
 public class CloneIntegrationEndpointsTestCase extends ESBIntegrationTest {
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setEnvironmentHTTP() throws Exception {
         init();
     }

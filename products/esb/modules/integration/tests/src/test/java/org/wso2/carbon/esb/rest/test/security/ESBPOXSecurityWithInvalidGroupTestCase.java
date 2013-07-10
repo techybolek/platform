@@ -16,7 +16,7 @@
 *under the License.
 */
 
-package org.wso2.carbon.esb.security.test;
+package org.wso2.carbon.esb.rest.test.security;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -28,7 +28,7 @@ import org.wso2.carbon.automation.utils.httpclient.HttpsResponse;
 import org.wso2.carbon.automation.utils.httpclient.HttpsURLConnectionClient;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
 import org.wso2.carbon.esb.ESBIntegrationTest;
-import org.wso2.carbon.esb.security.test.util.RestEndpointSetter;
+import org.wso2.carbon.esb.rest.test.security.util.RestEndpointSetter;
 import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConfigExceptionException;
 
 import javax.xml.stream.XMLStreamException;
@@ -37,29 +37,30 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Check GET, PUT, DELETE and POST request by invalid user credentials
+ * Verifying GET, PUT, POST and DELETE http methods with pox security with invalid user group.
  */
-public class ESBPOXSecurityByInvalidUserTestCase extends ESBIntegrationTest {
-    private static String USER_GROUP = "everyone";
+public class ESBPOXSecurityWithInvalidGroupTestCase extends ESBIntegrationTest {
+    private static String USER_GROUP = "admin";
     private static final String SERVICE_NAME = "StudentServiceProxy";
     private static final String studentName = "automationStudent";
     private SecurityAdminServiceClient securityAdminServiceClient;
 
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
-        super.init(1);
+        super.init(2);//user 2 doesn't belong to admin group, so he doesn't have access permission for resources.
         updateESBConfiguration(RestEndpointSetter.setEndpoint(File.separator + "artifacts" + File.separator + "ESB" +
                                                               File.separator + "synapseconfig" + File.separator + "rest" +
                                                               File.separator + "student-service-synapse.xml"));
-        applySecurity("1", "StudentServiceProxy", null);
+        applySecurity("1", "StudentServiceProxy", USER_GROUP);
     }
 
 
-    @Test(groups = {"wso2.esb"}, description = "POST request by invalid user", expectedExceptions = IOException.class)
+    @Test(groups = {"wso2.esb"}, description = "POST request  by user belongs to unauthorized group")
     public void testAddNewStudent() throws IOException, EndpointAdminEndpointAdminException,
                                            LoginAuthenticationExceptionException,
                                            XMLStreamException {
@@ -78,30 +79,39 @@ public class ESBPOXSecurityByInvalidUserTestCase extends ESBIntegrationTest {
                                 "   </p:addStudent>";
 
 
-        String securedRestURL = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/students";
-        HttpsResponse response =
-                HttpsURLConnectionClient.postWithBasicAuth(securedRestURL, addStudentData, "application/xml",
-                                                           "InvalidUser", "InvalidPassword");
+        String securedRestURL = getProxyServiceSecuredURL(SERVICE_NAME) + "/students";
+        boolean status = false;
+        HttpsResponse response = null;
+        try {
+            response = HttpsURLConnectionClient.postWithBasicAuth(securedRestURL, addStudentData,
+                                                                  "application/xml", userInfo.getUserName(),
+                                                                  userInfo.getPassword());
+        } catch (IOException ignored) {
+            status = true; // invalid users cannot post to the resource
+        }
 
-        assertEquals(response.getResponseCode(), 202, "Expected response code doesn't found");
-        assertTrue(!response.getData().contains(studentName)
-                , "response doesn't contain the expected output");
+        assertTrue(status, "User belongs to invalid group was able to post to the resource");
+        assertNull(response, "Response should be null");
 
-        //check whether the student is added.
         String studentGetUri = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
-        HttpsResponse getResponse =
-                HttpsURLConnectionClient.getWithBasicAuth(studentGetUri, null, userInfo.getPassword(),
-                                                          userInfo.getPassword());
-        assertTrue(getResponse.getData().contains("<ns:getStudentResponse xmlns:ns=\"http://axis2.apache.org\"><ns:return>" +
-                                                  "<ns:age>100</ns:age>" +
-                                                  "<ns:name>" + studentName + "</ns:name>" +
-                                                  "<ns:subjects>testAutomation</ns:subjects>" +
-                                                  "</ns:return></ns:getStudentResponse>"));
+
+        boolean getStatus = false;
+        HttpsResponse getResponse = null;
+        try {
+            getResponse =
+                    HttpsURLConnectionClient.getWithBasicAuth(studentGetUri, null, userInfo.getPassword(),
+                                                              userInfo.getPassword());
+        } catch (IOException ignored) {
+            getStatus = true; // invalid users cannot read the resource
+        }
+        assertTrue(getStatus, "User belongs to invalid group was able to get the resource");
+        assertNull(getResponse, "Response cannot be null");
+
 
     }
 
-    @Test(groups = {"wso2.esb"}, description = "PUT request  by invalid user", dependsOnMethods = "testAddNewStudent"
-            , expectedExceptions = IOException.class)
+    @Test(groups = {"wso2.esb"}, description = "PUT request by user belongs to unauthorized group",
+          dependsOnMethods = "testAddNewStudent")
     public void testUpdateStudent() throws IOException, EndpointAdminEndpointAdminException,
                                            LoginAuthenticationExceptionException,
                                            XMLStreamException {
@@ -119,49 +129,61 @@ public class ESBPOXSecurityByInvalidUserTestCase extends ESBIntegrationTest {
                                    "      </ns:student>\n" +
                                    "</p:updateStudent>";
 
-        String securedRestURL = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/student/" + studentName;
-        HttpsResponse response =
-                HttpsURLConnectionClient.putWithBasicAuth(securedRestURL, updateStudentData,
-                                                          "application/xml", "invalidUser",
-                                                          "invalidPassword");
-        assertEquals(response.getResponseCode(), 202, "Expected response code doesn't found");
-        assertTrue(!response.getData().contains(studentName)
-                , "response doesn't contain the expected output");
+        String securedRestURL = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
 
-        //check whether the student is added.
+        boolean status = false;
+        HttpsResponse response = null;
+        try {
+            response = HttpsURLConnectionClient.putWithBasicAuth(securedRestURL, updateStudentData,
+                                                                 "application/xml", userInfo.getUserName(),
+                                                                 userInfo.getPassword());
+        } catch (IOException ignored) {
+            status = true; // invalid users cannot put to the resource
+        }
+
+        assertTrue(status, "User belongs to invalid group was able to update the resource");
+        assertNull(response, "Response should be null");
+
+
+        //check whether the student updated.
         String studentGetUri = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
-        HttpsResponse getResponse =
-                HttpsURLConnectionClient.getWithBasicAuth(studentGetUri, null, userInfo.getPassword(),
-                                                          userInfo.getPassword());
-        assertTrue(getResponse.getData().contains("<ns:getStudentResponse xmlns:ns=\"http://axis2.apache.org\"><ns:return>" +
-                                                  "<ns:age>999</ns:age>" +
-                                                  "<ns:name>" + studentName + "</ns:name>" +
-                                                  "<ns:subjects>testAutomationUpdated</ns:subjects>" +
-                                                  "</ns:return></ns:getStudentResponse>"));
+        boolean getStatus = false;
+        HttpsResponse getResponse = null;
+        try {
+            getResponse =
+                    HttpsURLConnectionClient.getWithBasicAuth(studentGetUri, null, userInfo.getPassword(),
+                                                              userInfo.getPassword());
+        } catch (IOException ignored) {
+            getStatus = true; // invalid users cannot get to the resource
+        }
+
+        assertTrue(getStatus, "User belongs to invalid group was able to get the resource");
+        assertNull(getResponse, "Response should be null");
+
     }
 
-    @Test(groups = {"wso2.esb"}, description = "DELETE request  by invalid user",
+    @Test(groups = {"wso2.esb"}, description = "DELETE request by user belongs to unauthorized group",
           dependsOnMethods = "testUpdateStudent")
     public void testDeleteStudent() throws IOException, EndpointAdminEndpointAdminException,
                                            LoginAuthenticationExceptionException,
                                            XMLStreamException {
+
+        String securedRestURL = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
         boolean status = false;
         HttpsResponse response = null;
-
-        String securedRestURL = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/student/" + studentName;
         try {
             response =
-                    HttpsURLConnectionClient.deleteWithBasicAuth(securedRestURL, null, "InvalidUser",
-                                                                 "InvalidPassword");
+                    HttpsURLConnectionClient.deleteWithBasicAuth(securedRestURL, null, userInfo.getUserName(),
+                                                                 userInfo.getPassword());
         } catch (IOException ignored) {
-            status = true; // invalid users cannot get the resource
+            status = true; // invalid users cannot delete to the resource
         }
-        assertTrue(status, "Invalid user was able to get the resource");
-        assertNull(response, "Response should be null");
 
+        assertTrue(status, "User belongs to invalid group was able to delete the resource");
+        assertNull(response, "Response should be null");
     }
 
-    @Test(groups = {"wso2.esb"}, description = "GET resource after delete  by invalid user",
+    @Test(groups = {"wso2.esb"}, description = "GET resource after delete by user belongs to unauthorized group",
           dependsOnMethods = "testDeleteStudent")
     public void testGetResourceAfterDelete()
             throws IOException, EndpointAdminEndpointAdminException,
@@ -169,7 +191,7 @@ public class ESBPOXSecurityByInvalidUserTestCase extends ESBIntegrationTest {
                    XMLStreamException {
 
         //check whether the student is deleted
-        String studentGetUri = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/student/" + studentName;
+        String studentGetUri = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
         boolean getStatus = false;
         HttpsResponse getResponse = null;
         try {
@@ -201,6 +223,7 @@ public class ESBPOXSecurityByInvalidUserTestCase extends ESBIntegrationTest {
         securityAdminServiceClient.applySecurity(serviceName, scenarioNumber, new String[]{USER_GROUP},
                                                  new String[]{KeyStoreName}, KeyStoreName);
         Thread.sleep(2000);
+
     }
 
     @AfterClass(alwaysRun = true)
@@ -208,4 +231,5 @@ public class ESBPOXSecurityByInvalidUserTestCase extends ESBIntegrationTest {
         securityAdminServiceClient.disableSecurity(SERVICE_NAME);
         super.cleanup();
     }
+
 }

@@ -9,10 +9,16 @@
         <listener class-name="org.wso2.carbon.automation.core.PlatformReportManager"/>
     </listeners>
 
-    <test name="Server Stratup" preserve-order="true" verbose="2">
+    <test name="Server-Stratup" preserve-order="true" verbose="2">
         <classes>
             <class name="org.wso2.carbon.esb.ServerStartupTestCase"/>
         </classes>
+    </test>
+
+    <test name="Throttle-mediator-Test" preserve-order="true" verbose="2">
+        <packages>
+            <package name="org.wso2.carbon.esb.mediator.test.throttle"/>
+        </packages>
     </test>
 
     <test name="ProxyService-Test" preserve-order="true" verbose="2">
@@ -46,9 +52,9 @@
         </packages>
     </test>
 
-    <test name="Rest-Service-Test" preserve-order="true" verbose="2">
+    <test name="Rest-API-Test" preserve-order="true" verbose="2">
         <packages>
-            <package name="org.wso2.carbon.esb.rest.test"/>
+            <package name="org.wso2.carbon.esb.rest.test.api"/>
         </packages>
     </test>
 
@@ -112,7 +118,7 @@
         </packages>
     </test>
 
-    <!-- <test name="dblookup-mediator-Test" preserve-order="true" verbose="2">
+<!--    <test name="dblookup-mediator-Test" preserve-order="true" verbose="2">
         <packages>
             <package name="org.wso2.carbon.esb.mediator.test.db.dblookup"/>
         </packages>
@@ -147,11 +153,11 @@
         </packages>
     </test>
 
-    <!-- <test name="Log-mediator-Test" preserve-order="true" verbose="2">
+    <test name="Log-mediator-Test" preserve-order="true" verbose="2">
         <packages>
             <package name="org.wso2.carbon.esb.mediator.test.log"/>
         </packages>
-    </test>-->
+    </test>
 
     <test name="Out-mediator-Test" preserve-order="true" verbose="2">
         <packages>
@@ -159,11 +165,17 @@
         </packages>
     </test>
 
-    <!-- <test name="dbreport-mediator-Test" preserve-order="true" verbose="2">
+<!--    <test name="dbreport-mediator-Test" preserve-order="true" verbose="2">
         <packages>
             <package name="org.wso2.carbon.esb.mediator.test.db.dbreport"/>
         </packages>
     </test>-->
+
+    <test name="JMS-transport-Test" preserve-order="true" verbose="2">
+        <packages>
+            <package name="org.wso2.carbon.esb.jms.transport.test.*"/>
+        </packages>
+    </test>
 
     <test name="Property-mediator-Test" preserve-order="true" verbose="2">
         <packages>
@@ -238,12 +250,6 @@
         </packages>
     </test>
 
-    <test name="Throttle-mediator-Test" preserve-order="true" verbose="2">
-        <packages>
-            <package name="org.wso2.carbon.esb.mediator.test.throttle"/>
-        </packages>
-    </test>
-
     <test name="Class-mediator-Test" preserve-order="true" verbose="2">
         <packages>
             <package name="org.wso2.carbon.esb.mediator.test.classMediator"/>
@@ -288,15 +294,28 @@
 
     <test name="POX-security-Test" preserve-order="true" verbose="2">
         <packages>
-            <package name="org.wso2.carbon.esb.security.test"/>
+            <package name="org.wso2.carbon.esb.rest.test.security"/>
         </packages>
     </test>
 
-    <test name="Rest Test" preserve-order="true" verbose="2">
+    <test name="Rest-JSON-Test" preserve-order="true" verbose="2">
         <packages>
             <package name="org.wso2.carbon.esb.json.test"/>
         </packages>
     </test>
+
+    <test name="CAR-Deployment" preserve-order="true" verbose="2">
+        <packages>
+            <package name="org.wso2.carbon.esb.car.deployment.test"/>
+        </packages>
+    </test>
+
+    <test name="ScheduleTask-Test" preserve-order="true" verbose="2">
+        <packages>
+            <package name="org.wso2.carbon.esb.scheduledtask.test"/>
+        </packages>
+    </test>
+
 
 </suite>
 

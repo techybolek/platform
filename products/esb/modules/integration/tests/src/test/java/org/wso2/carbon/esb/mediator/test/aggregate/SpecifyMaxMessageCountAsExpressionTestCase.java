@@ -51,7 +51,7 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
     public void testLessThanMinimum() throws IOException, XMLStreamException {
         int responseCount = 0;
         no_of_requests = 3;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -72,7 +72,7 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
     public void testEqualtoMinimum() throws IOException, XMLStreamException {
         int responseCount = 0;
         no_of_requests = minMessageCount;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -93,7 +93,7 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
     public void testEqualtoMaximum() throws IOException, XMLStreamException {
         int responseCount = 0;
         no_of_requests = maxMessageCount;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -114,7 +114,7 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
     public void testMoreNumberThanMinimum() throws IOException, XMLStreamException {
         int responseCount = 0;
         no_of_requests = 8;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);
@@ -135,7 +135,7 @@ public class SpecifyMaxMessageCountAsExpressionTestCase extends ESBIntegrationTe
     public void testMoreNumberThanMaximum() throws IOException, XMLStreamException {
         int responseCount = 0;
         no_of_requests = 15;
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
         String Response = aggregatedRequestClient.getResponse();
         Assert.assertNotNull(Response);
         OMElement Response2 = AXIOMUtil.stringToOM(Response);

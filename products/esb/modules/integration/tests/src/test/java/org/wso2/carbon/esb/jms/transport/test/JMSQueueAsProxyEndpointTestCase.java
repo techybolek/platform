@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.esb.jms.transport.test;
 
+import org.apache.axiom.om.OMElement;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -25,30 +26,34 @@ import org.wso2.carbon.automation.core.utils.jmsbrokerutils.client.JMSQueueMessa
 import org.wso2.carbon.automation.core.utils.jmsbrokerutils.controller.config.JMSBrokerConfigurationProvider;
 import org.wso2.carbon.automation.utils.axis2client.AxisServiceClient;
 import org.wso2.carbon.esb.ESBIntegrationTest;
+import org.wso2.carbon.esb.util.JMSEndpointManager;
 import org.wso2.carbon.esb.util.Utils;
-
-import java.util.List;
 
 public class JMSQueueAsProxyEndpointTestCase extends ESBIntegrationTest {
     @BeforeClass(alwaysRun = true)
     protected void init() throws Exception {
         super.init();
-        loadESBConfigurationFromClasspath("/artifacts/ESB/jms/transport/jms_endpoint_proxy_service.xml");
+        OMElement synapse = esbUtils.loadClasspathResource("/artifacts/ESB/jms/transport/jms_endpoint_proxy_service.xml");
+        updateESBConfiguration(JMSEndpointManager.setConfigurations(synapse));
+
     }
 
     @Test(groups = {"wso2.esb"}, description = "Test sending message to jms endpoint with pox format from proxy service")
     public void testJMSEndpointPox() throws Exception {
         AxisServiceClient client = new AxisServiceClient();
-        for (int i = 0; i < 5; i++) {
-            client.sendRobust(Utils.getStockQuoteRequest("JMS"), getProxyServiceURL("proxyWithJmsEndpointPox"), "getQuote");
-        }
 
         JMSQueueMessageConsumer consumer = new JMSQueueMessageConsumer(JMSBrokerConfigurationProvider.getInstance().getBrokerConfiguration());
         try {
             consumer.connect("TestQueuePox");
-            List<String> messageListInQueue = consumer.getMessages();
-            for (String message : messageListInQueue) {
-                Assert.assertNotNull(message);
+            //sending messages to proxy service
+            for (int i = 0; i < 5; i++) {
+                client.sendRobust(Utils.getStockQuoteRequest("JMS"), getProxyServiceURL("proxyWithJmsEndpointPox"), "getQuote");
+            }
+            //wait for messages to reach the destination queue
+            Thread.sleep(5000);
+            for (int i = 0; i < 5; i++) {
+                String message = consumer.popMessage();
+                Assert.assertNotNull(message, "Message not found. message sent by proxy service not reached to the destination Queue");
                 Assert.assertEquals(message, "<ns:getQuote xmlns:ns=\"http://services.samples\"><" +
                                              "ns:request><ns:symbol>JMS</ns:symbol></ns:request></ns:getQuote>"
                         , "Message Contains mismatched");
@@ -62,16 +67,20 @@ public class JMSQueueAsProxyEndpointTestCase extends ESBIntegrationTest {
     @Test(groups = {"wso2.esb"}, description = "Test sending message to jms endpoint with soap11 format from proxy service")
     public void testJMSEndpointSoap11() throws Exception {
         AxisServiceClient client = new AxisServiceClient();
-        for (int i = 0; i < 5; i++) {
-            client.sendRobust(Utils.getStockQuoteRequest("JMS"), getProxyServiceURL("proxyWithJmsEndpointSoap11"), "getQuote");
-        }
 
         JMSQueueMessageConsumer consumer = new JMSQueueMessageConsumer(JMSBrokerConfigurationProvider.getInstance().getBrokerConfiguration());
         try {
             consumer.connect("TestQueueSoap11");
-            List<String> messageListInQueue = consumer.getMessages();
-            for (String message : messageListInQueue) {
-                Assert.assertNotNull(message);
+            //sending messages to proxy service
+            for (int i = 0; i < 5; i++) {
+                client.sendRobust(Utils.getStockQuoteRequest("JMS"), getProxyServiceURL("proxyWithJmsEndpointSoap11"), "getQuote");
+            }
+            //wait for messages to reach the destination queue
+            Thread.sleep(5000);
+
+            for (int i = 0; i < 5; i++) {
+                String message = consumer.popMessage();
+                Assert.assertNotNull(message, "Message not found. message sent by proxy service not reached to the destination Queue");
                 Assert.assertEquals(message, "<?xml version='1.0' encoding='UTF-8'?>" +
                                              "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
                                              "<soapenv:Body><ns:getQuote xmlns:ns=\"http://services.samples\">" +
@@ -88,17 +97,20 @@ public class JMSQueueAsProxyEndpointTestCase extends ESBIntegrationTest {
     @Test(groups = {"wso2.esb"}, description = "Test sending message to jms endpoint with soap12 format from proxy service")
     public void testJMSEndpointSoap12() throws Exception {
         AxisServiceClient client = new AxisServiceClient();
-        for (int i = 0; i < 5; i++) {
-            client.sendRobust(Utils.getStockQuoteRequest("JMS"), getProxyServiceURL("proxyWithJmsEndpointSoap12"), "getQuote");
-        }
 
         JMSQueueMessageConsumer consumer = new JMSQueueMessageConsumer(JMSBrokerConfigurationProvider.getInstance().getBrokerConfiguration());
         try {
             consumer.connect("TestQueueSoap12");
-            List<String> messageListInQueue = consumer.getMessages();
-            for (String message : messageListInQueue) {
+            //sending messages to proxy service
+            for (int i = 0; i < 5; i++) {
+                client.sendRobust(Utils.getStockQuoteRequest("JMS"), getProxyServiceURL("proxyWithJmsEndpointSoap12"), "getQuote");
+            }
+            //wait for messages to reach the destination queue
+            Thread.sleep(5000);
 
-                Assert.assertNotNull(message);
+            for (int i = 0; i < 5; i++) {
+                String message = consumer.popMessage();
+                Assert.assertNotNull(message, "Message not found. message sent by proxy service not reached to the destination Queue");
                 Assert.assertEquals(message, "<?xml version='1.0' encoding='UTF-8'?>" +
                                              "<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\">" +
                                              "<soapenv:Body><ns:getQuote xmlns:ns=\"http://services.samples\">" +

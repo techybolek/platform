@@ -42,13 +42,13 @@ public class LargeAggregationWithoutTimeoutValueTestCase extends ESBIntegrationT
         aggregatedRequestClient = new AggregatedRequestClient();
         aggregatedRequestClient.setProxyServiceUrl(getProxyServiceURL("aggregateMediatorTestProxy"));
         aggregatedRequestClient.setSymbol("IBM");
-        aggregatedRequestClient.setNo_of_iterations(no_of_requests);
+        aggregatedRequestClient.setNoOfIterations(no_of_requests);
 
 
     }
 
-    @Test(groups = {"wso2.esb"}, description = "replacing a property by using an enrich mediator")
-    public void test() throws IOException, XMLStreamException {
+    @Test(groups = {"wso2.esb"}, description = "Sending large request for aggregation")
+    public void AggregateLargeMessage() throws IOException, XMLStreamException {
         int responseCount = 0;
 
         String Response = aggregatedRequestClient.getResponse();
@@ -62,7 +62,7 @@ public class LargeAggregationWithoutTimeoutValueTestCase extends ESBIntegrationT
         while (iterator.hasNext()) {
             responseCount++;
             OMElement getQuote = (OMElement) iterator.next();
-            Assert.assertTrue(getQuote.toString().contains("IBM"));
+            Assert.assertTrue(getQuote.toString().contains("IBM Company"));
         }
 
         Assert.assertEquals(responseCount, no_of_requests, "GetQuoteResponse Element count mismatched");

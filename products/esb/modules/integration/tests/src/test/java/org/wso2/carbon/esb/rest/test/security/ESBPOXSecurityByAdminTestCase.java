@@ -16,7 +16,7 @@
 *under the License.
 */
 
-package org.wso2.carbon.esb.security.test;
+package org.wso2.carbon.esb.rest.test.security;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -24,13 +24,12 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.api.clients.security.SecurityAdminServiceClient;
 import org.wso2.carbon.automation.core.ProductConstant;
-import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.utils.httpclient.HttpsResponse;
 import org.wso2.carbon.automation.utils.httpclient.HttpsURLConnectionClient;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
 import org.wso2.carbon.esb.ESBIntegrationTest;
-import org.wso2.carbon.esb.security.test.util.RestEndpointSetter;
+import org.wso2.carbon.esb.rest.test.security.util.RestEndpointSetter;
 import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConfigExceptionException;
 
 import javax.xml.stream.XMLStreamException;
@@ -40,11 +39,11 @@ import java.rmi.RemoteException;
 
 import static org.testng.Assert.assertTrue;
 
-
 /*
 check all GET, PUT, DELETE and POST HTTPS methods with pox security by admin user.
+fails - https://wso2.org/jira/browse/ESBJAVA-1715
  */
-public class ESBPOXSecurityByUserTestCase extends ESBIntegrationTest {
+public class ESBPOXSecurityByAdminTestCase extends ESBIntegrationTest {
     private static String USER_GROUP = "everyone";
     private static final String SERVICE_NAME = "StudentServiceProxy";
     private static final String studentName = "automationStudent";
@@ -52,16 +51,15 @@ public class ESBPOXSecurityByUserTestCase extends ESBIntegrationTest {
 
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
-        userInfo = UserListCsvReader.getUserInfo(2);
-        super.init(2);
+        super.init(1);
         updateESBConfiguration(RestEndpointSetter.setEndpoint(File.separator + "artifacts" + File.separator + "ESB" +
-                                                               File.separator + "synapseconfig" + File.separator + "rest" +
-                                                               File.separator + "student-service-synapse.xml"));
-        applySecurity("1", "StudentServiceProxy", ProductConstant.DEFAULT_PRODUCT_ROLE);
+                                          File.separator + "synapseconfig" + File.separator + "rest" +
+                                          File.separator + "student-service-synapse.xml"));
+        applySecurity("1", "StudentServiceProxy", ProductConstant.ADMIN_ROLE_NAME);
     }
 
 
-    @Test(groups = {"wso2.esb"}, description = "POST request by valid user")
+    @Test(groups = {"wso2.esb"}, description = "POST request by super admin")
     public void testAddNewStudent() throws IOException, EndpointAdminEndpointAdminException,
                                            LoginAuthenticationExceptionException,
                                            XMLStreamException {
@@ -80,15 +78,15 @@ public class ESBPOXSecurityByUserTestCase extends ESBIntegrationTest {
                                 "   </p:addStudent>";
 
 
-        String securedRestURL = getProxyServiceSecuredURL(SERVICE_NAME) + "/students";
-        HttpsResponse response = HttpsURLConnectionClient.postWithBasicAuth(securedRestURL, addStudentData,
-                                                                            "application/xml", userInfo.getUserName(),
-                                                                            userInfo.getPassword());
+        String securedRestURL = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/students";
+        HttpsResponse response =
+                HttpsURLConnectionClient.postWithBasicAuth(securedRestURL, addStudentData, "application/xml",
+                                                           userInfo.getUserName(), userInfo.getPassword());
         assertTrue(response.getData().contains(studentName)
                 , "response doesn't contain the expected output");
 
         //check whether the student is added.
-        String studentGetUri = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/student/" + studentName;
+        String studentGetUri = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
         HttpsResponse getResponse =
                 HttpsURLConnectionClient.getWithBasicAuth(studentGetUri, null, userInfo.getPassword(),
                                                           userInfo.getPassword());
@@ -100,7 +98,7 @@ public class ESBPOXSecurityByUserTestCase extends ESBIntegrationTest {
 
     }
 
-    @Test(groups = {"wso2.esb"}, description = "PUT request by valid user", dependsOnMethods = "testAddNewStudent")
+    @Test(groups = {"wso2.esb"}, description = "PUT request by super admin", dependsOnMethods = "testAddNewStudent")
     public void testUpdateStudent() throws IOException, EndpointAdminEndpointAdminException,
                                            LoginAuthenticationExceptionException,
                                            XMLStreamException {
@@ -118,7 +116,7 @@ public class ESBPOXSecurityByUserTestCase extends ESBIntegrationTest {
                                    "      </ns:student>\n" +
                                    "</p:updateStudent>";
 
-        String securedRestURL = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/student/" + studentName;
+        String securedRestURL = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
         HttpsResponse response = HttpsURLConnectionClient.putWithBasicAuth(securedRestURL, updateStudentData,
                                                                            "application/xml", userInfo.getUserName(),
                                                                            userInfo.getPassword());
@@ -137,35 +135,29 @@ public class ESBPOXSecurityByUserTestCase extends ESBIntegrationTest {
                                                   "</ns:return></ns:getStudentResponse>"));
     }
 
-    @Test(groups = {"wso2.esb"}, description = "DELETE request by valid user", dependsOnMethods = "testUpdateStudent")
+    @Test(groups = {"wso2.esb"}, description = "DELETE request by super admin",
+          dependsOnMethods = "testUpdateStudent")
     public void testDeleteStudent() throws IOException, EndpointAdminEndpointAdminException,
                                            LoginAuthenticationExceptionException,
                                            XMLStreamException {
 
 
-        String deleteStudentData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                                   "<p:deleteStudent xmlns:p=\"http://axis2.apache.org\">\n" +
-                                   "      <!--0 to 1 occurrence-->\n" +
-                                   "      <xs:name xmlns:xs=\"http://axis2.apache.org\">" + studentName + "</xs:name>\n" +
-                                   "</p:deleteStudent>";
-
-        String securedRestURL = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/student/" + studentName;
+        String securedRestURL = getProxyServiceSecuredURL(SERVICE_NAME )+ "/student/" + studentName;
         HttpsResponse response =
-                HttpsURLConnectionClient.deleteWithBasicAuth(securedRestURL, null, userInfo.getUserName(),
+                HttpsURLConnectionClient.deleteWithBasicAuth(securedRestURL, null, userInfo.getPassword(),
                                                              userInfo.getPassword());
         assertTrue(!response.getData().contains(studentName)
                 , "response doesn't contain the expected output");
     }
 
-    @Test(groups = {"wso2.esb"}, description = "GET resource after delete by valid user",
+    @Test(groups = {"wso2.esb"}, description = "GET resource after delete by admin",
           dependsOnMethods = "testDeleteStudent", expectedExceptions = IOException.class)
-    public void testGetResourceAfterDelete()
-            throws IOException, EndpointAdminEndpointAdminException,
-                   LoginAuthenticationExceptionException,
-                   XMLStreamException {
+    public void testGetResourceAfterDelete() throws IOException, EndpointAdminEndpointAdminException,
+                                           LoginAuthenticationExceptionException,
+                                           XMLStreamException {
 
         //check whether the student is deleted
-        String studentGetUri = (getProxyServiceSecuredURL(SERVICE_NAME)) + "/student/" + studentName;
+        String studentGetUri = getProxyServiceSecuredURL(SERVICE_NAME) + "/student/" + studentName;
         HttpsResponse getResponse =
                 HttpsURLConnectionClient.getWithBasicAuth(studentGetUri, null, userInfo.getPassword(),
                                                           userInfo.getPassword());

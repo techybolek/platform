@@ -150,6 +150,7 @@ public class SendIntegrationTestCase extends ESBIntegrationTest {
     public void testSendingAddressEndpoint() throws IOException {
         OMElement response = axis2Client.sendSimpleStockQuoteRequest(getProxyServiceURL("addressEndPoint"),
                                                                      null, "WSO2");
+
         Assert.assertNotNull(response);
         Assert.assertTrue(response.toString().contains("WSO2 Company"));
     }
