@@ -75,11 +75,13 @@
     String keyColumns = request.getParameter("keyColumns");
     String setReturnGeneratedKeys = request.getParameter("setReturnGeneratedKeys");
     String useColumnNumbers = request.getParameter("useColumnNumbers");
+    String escapeNonPrintableChar = request.getParameter("escapeNonPrintableChar");
 
     edit = (edit == null) ? "" : edit;
     outputType = (outputType == null) ? "xml" : outputType;
     returnGeneratedKeys = (returnGeneratedKeys == null) ? "false" : "true";
-    useColumnNumbers = (useColumnNumbers == null) ? "false" : "true";    
+    useColumnNumbers = (useColumnNumbers == null) ? "false" : "true";
+    escapeNonPrintableChar = (escapeNonPrintableChar == null) ? "false" : "true";
     xsltPath = (xsltPath == null) ? "":xsltPath;
     List<Query> queryList = dataService.getQueries();
     Query query;
@@ -293,6 +295,7 @@
                     result.setRowName(rowName);
                     result.setOutputType(outputType);
                     result.setUseColumnNumbers(useColumnNumbers);
+                    result.setEscapeNonPrintableChar(escapeNonPrintableChar);
                     result.setRdfBaseURI(rdfBaseURI);
 
                     
@@ -304,6 +307,7 @@
                         result.setRowName(rowName);
                         result.setOutputType(outputType);
                         result.setUseColumnNumbers(useColumnNumbers);
+                        result.setEscapeNonPrintableChar(escapeNonPrintableChar);
                         if (xsltPath != null && xsltPath.trim().length() > 0) {
                             result.setXsltPath(xsltPath);
                         }
@@ -313,6 +317,7 @@
                     	 result.setNamespace(rdfNameSpace);
                          result.setOutputType(outputType);
                          result.setUseColumnNumbers(useColumnNumbers);
+                         result.setEscapeNonPrintableChar(escapeNonPrintableChar);
                          result.setRdfBaseURI(rdfBaseURI);
                          if (rdfXsltPath != null && rdfXsltPath.trim().length() > 0) {
                              result.setXsltPath(rdfXsltPath);
@@ -445,6 +450,7 @@
                 result.setRowName(rowName);
                 result.setOutputType(outputType);
                 result.setUseColumnNumbers(useColumnNumbers);
+                result.setEscapeNonPrintableChar(escapeNonPrintableChar);
                 if (xsltPath != null && xsltPath.trim().length() > 0) {
                     result.setXsltPath(xsltPath);
                 }
@@ -454,6 +460,7 @@
             	 result.setNamespace(rdfNameSpace);
                  result.setOutputType(outputType);
                  result.setUseColumnNumbers(useColumnNumbers);
+                 result.setEscapeNonPrintableChar(escapeNonPrintableChar);
                  result.setRdfBaseURI(rdfBaseURI);
                  if (rdfXsltPath != null && rdfXsltPath.trim().length() > 0) {
                      result.setXsltPath(rdfXsltPath);
@@ -481,6 +488,7 @@
                       res.setResultWrapper("GeneratedKeys");
                       res.setRowName("Entry");
                       res.setUseColumnNumbers("true");
+                      result.setEscapeNonPrintableChar(escapeNonPrintableChar);
                       returnRowQuery.setResult(res);
                   }
                   Element newElement = new Element();
@@ -504,6 +512,7 @@
                             res.setResultWrapper("");
                             res.setRowName("");
                             res.setUseColumnNumbers("false");
+                            result.setEscapeNonPrintableChar(escapeNonPrintableChar);
                         }
                         returnRowQuery.setResult(res);
                     }

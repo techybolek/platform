@@ -91,6 +91,8 @@ public class StaticOutputElement extends OutputElement {
     /* If this element corresponds to a UDT then that UDT's metadata */
     private UDT udtInfo;
 
+    private static final String NON_PRINTABLE_CHARS = "[^\\x09\\x0A\\x0D\\x20-\\xD7FF\\xE000-\\xFFFD\\x10000-x10FFFF]";
+
     public StaticOutputElement(DataService dataService, String name,
                                String param, String originalParam, String paramType,
                                String elementType, String namespace, QName xsdType,
@@ -223,7 +225,7 @@ public class StaticOutputElement extends OutputElement {
 
     @Override
     public void executeElement(XMLStreamWriter xmlWriter, ExternalParamCollection params,
-                               int queryLevel) throws DataServiceFault {
+                               int queryLevel, boolean escapeNonPrintableChar) throws DataServiceFault {
         ParamValue paramValue;
         if (this.hasConstantValue()) {
             paramValue = new ParamValue(this.getParam());
@@ -233,6 +235,9 @@ public class StaticOutputElement extends OutputElement {
         /* if the result is null, this is an optional field then, do not write it out */
         if (paramValue == null) {
         	return;
+        }
+        if (escapeNonPrintableChar) {
+            paramValue.setScalarValue(paramValue.getScalarValue().replaceAll(NON_PRINTABLE_CHARS, "?"));
         }
         /* export it if told, and only if it's boxcarring */
         if (this.getExport() != null && DSSessionManager.isBoxcarring()) {

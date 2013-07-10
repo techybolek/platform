@@ -49,6 +49,8 @@ public class Result extends DataServiceConfigurationElement {
      */
     private String useColumnNumbers = "false";
 
+    private String escapeNonPrintableChar = "false";
+
 	private String namespace = "";
 
 	/*
@@ -162,6 +164,14 @@ public class Result extends DataServiceConfigurationElement {
 	public void setUseColumnNumbers(String useColumnNumbers) {
 		this.useColumnNumbers = useColumnNumbers;
 	}
+
+    public String getEscapeNonPrintableChar() {
+        return escapeNonPrintableChar;
+    }
+
+    public void setEscapeNonPrintableChar(String escapeNonPrintableChar) {
+        this.escapeNonPrintableChar = escapeNonPrintableChar;
+    }
 
 	public String getRdfBaseURI() {
 		return rdfBaseURI;
@@ -425,6 +435,7 @@ public class Result extends DataServiceConfigurationElement {
 		String rdfBaseURI = result.getAttributeValue(new QName("rdfBaseURI"));
 		String userRole = result.getAttributeValue(new QName("userRole"));
         String useColumnNumbers = result.getAttributeValue(new QName("useColumnNumbers"));
+        String escapeNonPrintableChar = result.getAttributeValue(new QName("escapeNonPrintableChar"));
 
 		/*
 		 * if wrapper element || row element is not set, set default values to
@@ -446,9 +457,14 @@ public class Result extends DataServiceConfigurationElement {
 			/* default value */
 			useColumnNumbers = "false";
 		}
+        if (escapeNonPrintableChar == null || escapeNonPrintableChar.trim().length() == 0) {
+            /* default value */
+            escapeNonPrintableChar = "false";
+        }
 
 		this.outputType = outputType;
         this.useColumnNumbers = useColumnNumbers;
+        this.escapeNonPrintableChar = escapeNonPrintableChar;
 		this.resultWrapper = wrapperElementName;
 		this.rdfBaseURI = rdfBaseURI;
 		this.rowName = rowElementName;
@@ -502,6 +518,9 @@ public class Result extends DataServiceConfigurationElement {
         if (this.getUseColumnNumbers() != null && (this.getUseColumnNumbers().equals("true"))) {
 			resEl.addAttribute("useColumnNumbers", this.getUseColumnNumbers(), null);
 		}
+        if (this.getEscapeNonPrintableChar() != null && (this.getEscapeNonPrintableChar().equals("true"))) {
+            resEl.addAttribute("escapeNonPrintableChar", this.getEscapeNonPrintableChar(), null);
+        }
 		for (Element element : this.getElements()) {
 			resEl.addChild(element.buildXML());
 		}

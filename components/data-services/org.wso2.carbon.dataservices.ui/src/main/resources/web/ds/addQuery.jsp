@@ -98,6 +98,7 @@
     List<SQLDialect> sqlDialects = null;
     String serviceName = dataService.getName();
     boolean useColumnNumbers = false;
+    boolean escapeNonPrintableChar = false;
     boolean isUseColomnNumbers;
 //    if (request.getParameter("useColumnNumbers") != null
 //            && request.getParameter("useColumnNumbers").trim().length() > 0) {
@@ -106,12 +107,16 @@
 //        useColumnNumbers = false;
 //    }
     String enableUseColumnNumbers = request.getParameter("useColumnNumbers");
+    String enableEscapeNonPrintableChar = request.getParameter("escapeNonPrintableChar");
     //String enableReturnGeneratedKeys = request.getParameter("returnGeneratedKeys");
 
     //useColNumbers=Boolean.parseBoolean(request.getParameter("useColumnNumbers"));
 
     if (enableUseColumnNumbers != null) {
         useColumnNumbers = Boolean.parseBoolean(enableUseColumnNumbers);
+    }
+    if (enableEscapeNonPrintableChar != null) {
+        escapeNonPrintableChar = Boolean.parseBoolean(enableEscapeNonPrintableChar);
     }
 //    if(enableReturnGeneratedKeys != null) {
 //        returnGeneratedKeys = Boolean.parseBoolean(enableReturnGeneratedKeys);
@@ -217,6 +222,7 @@
             }
             result = query.getResult();
             useColumnNumbers = Boolean.parseBoolean(result.getUseColumnNumbers());
+            escapeNonPrintableChar = Boolean.parseBoolean(result.getEscapeNonPrintableChar());
         }
         outputType = (outputType == null) ? "xml" : outputType;
         sql = (sql == null) ? "" : sql;
@@ -928,6 +934,13 @@
                     <%--<input type="checkbox" tabindex="3" id="useColumnNumbers"  name="useColumnNumbers"  <%=(useColumnNumbers) ? "checked=\"checked\"" : ""%>  value=<%=useColumnNumbers%>  ></td>--%>
                     <%--<td  align="left"><label for="useColumnNumbers"><fmt:message key="datasources.use.column.numbers"/></label></td>--%>
 
+            </tr>
+            <tr>
+                <td>
+                    <input type="checkbox" id = "escapeNonPrintableChar"  name="escapeNonPrintableChar"  <%=(escapeNonPrintableChar) ? "checked=\"checked\"" : ""%> value="<%=escapeNonPrintableChar%>" />
+                    <label for="escapeNonPrintableChar"><fmt:message
+                                                    key="datasources.escape.non.printable.char"/></label>
+                </td>
             </tr>
 
         </table>

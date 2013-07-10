@@ -63,7 +63,7 @@ public class Resource extends CallableRequest {
 	public void execute(XMLStreamWriter xmlWriter, 
 			ExternalParamCollection params) 
 			throws DataServiceFault {
-		this.getCallQueryGroup().execute(xmlWriter, params, 0);
+		this.getCallQueryGroup().execute(xmlWriter, params, 0, false);
 	}
 	
 	/**

@@ -170,7 +170,7 @@ public class CallQuery extends OutputElement {
 
     @Override
     protected void executeElement(XMLStreamWriter xmlWriter, ExternalParamCollection params,
-                                  int queryLevel) throws DataServiceFault {
+                                  int queryLevel, boolean escapeNonPrintableChar) throws DataServiceFault {
          /* handle default values */
         this.processDefaultValues(params);
 		/* convert/filter params according to the WithParams */

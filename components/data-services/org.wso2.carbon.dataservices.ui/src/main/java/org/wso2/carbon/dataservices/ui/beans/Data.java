@@ -79,6 +79,8 @@ public class Data extends DataServiceConfigurationElement{
 
     private boolean useColumnNumbers;
 
+    private boolean escapeNonPrintableChar;
+
     private String serviceHierarchy;
     
     private String status;
@@ -197,6 +199,14 @@ public class Data extends DataServiceConfigurationElement{
 
     public void setUseColumnNumbers(boolean useColumnNumbers) {
         this.useColumnNumbers = useColumnNumbers;
+    }
+
+    public boolean isEscapeNonPrintableChar() {
+        return escapeNonPrintableChar;
+    }
+
+    public void setEscapeNonPrintableChar(boolean escapeNonPrintableChar) {
+        this.escapeNonPrintableChar = escapeNonPrintableChar;
     }
 
     public ArrayList<Config> getConfigs() {
@@ -751,6 +761,7 @@ public class Data extends DataServiceConfigurationElement{
 		OMAttribute rdfBaseURIAttrib = resultEle.getAttribute(new QName("rdfBaseURI"));
         OMAttribute xsltPathAttrib = resultEle.getAttribute(new QName("xsltPath"));
         OMAttribute useColumnNoAttrib = resultEle.getAttribute(new QName("useColumnNumbers"));
+        OMAttribute escapeNonPrintableCharAttrib = resultEle.getAttribute(new QName("escapeNonPrintableChar"));
 		Result result = new Result();
 		if (outputTypeAttrib != null) {
 			result.setOutputType(outputTypeAttrib.getAttributeValue());
@@ -773,6 +784,9 @@ public class Data extends DataServiceConfigurationElement{
         if (useColumnNoAttrib != null) {
 			result.setUseColumnNumbers(useColumnNoAttrib.getAttributeValue());
 		}
+        if (escapeNonPrintableCharAttrib != null) {
+            result.setEscapeNonPrintableChar(escapeNonPrintableCharAttrib.getAttributeValue());
+        }
 		
 		/*
 		 * The result element can also be considered as complex element,
@@ -1372,5 +1386,5 @@ public class Data extends DataServiceConfigurationElement{
 		}
 		return dataEl;
 	}
-	
+
 }

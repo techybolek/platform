@@ -603,6 +603,13 @@ public class QueryFactory {
         	useColumnNumbers = Boolean.parseBoolean(useColumnNumbersStr);
         }
         result.setUseColumnNumbers(useColumnNumbers);
+
+        boolean escapeNonPrintableChar = false;
+        String escapeNonPrintableCharStr = resEl.getAttributeValue(new QName(DBSFields.ESCAPE_NON_PRINTABLE_CHAR));
+        if (!DBUtils.isEmptyString(escapeNonPrintableCharStr)) {
+            escapeNonPrintableChar = Boolean.parseBoolean(escapeNonPrintableCharStr);
+        }
+        result.setEscapeNonPrintableChar(escapeNonPrintableChar);
 		
 		/* create default wrapping output element group for the result */
 		OMElement groupEl = createElement(DBSFields.ELEMENT);

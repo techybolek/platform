@@ -83,10 +83,10 @@ public abstract class OutputElement extends XMLWriterHelper {
     /**
      * Executes and writes the contents of this element, given the parameters.
      */
-    public void execute(XMLStreamWriter xmlWriter, ExternalParamCollection params, int queryLevel)
+    public void execute(XMLStreamWriter xmlWriter, ExternalParamCollection params, int queryLevel, boolean escapeNonPrintableChar)
             throws DataServiceFault {
         if (this.getArrayName() == null) {
-            this.executeElement(xmlWriter, params, queryLevel);
+            this.executeElement(xmlWriter, params, queryLevel, escapeNonPrintableChar);
         } else {
             ExternalParam exParam = this.getExternalParam(params);
             if (exParam == null) {
@@ -105,14 +105,14 @@ public abstract class OutputElement extends XMLWriterHelper {
             for (ParamValue value : paramValue.getArrayValue()) {
                 tmpParams = new ExternalParamCollection();
                 tmpParams.addParam(new ExternalParam(name, value, type));
-                this.executeElement(xmlWriter, tmpParams, queryLevel);
+                this.executeElement(xmlWriter, tmpParams, queryLevel, escapeNonPrintableChar);
             }
         }
     }
 
     protected abstract void executeElement(XMLStreamWriter xmlWriter,
                                            ExternalParamCollection params,
-                                           int queryLevel) throws DataServiceFault;
+                                           int queryLevel, boolean escapeNonPrintableChar) throws DataServiceFault;
 
     /**
      * Returns the requires roles to view this element.

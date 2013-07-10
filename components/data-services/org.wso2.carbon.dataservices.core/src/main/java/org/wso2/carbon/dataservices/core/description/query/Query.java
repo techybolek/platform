@@ -339,7 +339,7 @@ public abstract class Query extends XMLWriterHelper {
 			}
 		}
 		/* write the result */
-		this.getResult().getDefaultElementGroup().execute(xmlWriter, params, queryLevel);
+		this.getResult().getDefaultElementGroup().execute(xmlWriter, params, queryLevel, this.getResult().isEscapeNonPrintableChar());
 		/* end result wrapper */
 		if (this.isWriteRow()) {
 			try {

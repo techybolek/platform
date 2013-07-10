@@ -97,7 +97,7 @@ public class CallQueryGroup extends OutputElement {
 	 */
     @Override
     protected void executeElement(XMLStreamWriter xmlWriter, ExternalParamCollection params,
-                                  int queryLevel) throws DataServiceFault {
+                                  int queryLevel, boolean escapeNonPrintableChar) throws DataServiceFault {
         try {
 			/* start write result wrapper */
 			if (this.isHasResult()) {
@@ -108,7 +108,7 @@ public class CallQueryGroup extends OutputElement {
 			/* write query results */
 			List<CallQuery> callQueries = this.getCallQueries();
 			for (CallQuery callQuery : callQueries) {
-				callQuery.executeElement(xmlWriter, params, queryLevel);
+				callQuery.executeElement(xmlWriter, params, queryLevel, escapeNonPrintableChar);
 			}
 
 			/* end write result wrapper */

@@ -47,6 +47,8 @@ public class Result {
     private boolean xsAny;
     
     private boolean useColumnNumbers;
+
+    private boolean escapeNonPrintableChar;
     
 	public Result(String elementName, String rowName, String namespace, String xsltPath, int resultType)
             throws DataServiceFault {
@@ -134,5 +136,12 @@ public class Result {
 	public String getRowName() {
 		return rowName;
 	}
-	
+
+    public boolean isEscapeNonPrintableChar() {
+        return escapeNonPrintableChar;
+    }
+
+    public void setEscapeNonPrintableChar(boolean escapeNonPrintableChar) {
+        this.escapeNonPrintableChar = escapeNonPrintableChar;
+    }
 }

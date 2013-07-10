@@ -83,7 +83,7 @@ public class OutputElementGroup extends OutputElement {
 
     @Override
     public void executeElement(XMLStreamWriter xmlWriter, ExternalParamCollection params,
-                                  int queryLevel) throws DataServiceFault {
+                                  int queryLevel, boolean escapeNonPrintableChar) throws DataServiceFault {
         try {
             /* increment query level */
             queryLevel++;
@@ -95,7 +95,7 @@ public class OutputElementGroup extends OutputElement {
             /* write attributes first */
             List<StaticOutputElement> attributes = this.getAttributeEntriesForCurrentRole();
             for (OutputElement oe : attributes) {
-                oe.execute(xmlWriter, params, queryLevel);
+                oe.execute(xmlWriter, params, queryLevel, this.getParentResult().isEscapeNonPrintableChar());
             }
             /* write elements / call queries / element groups */
             List<OutputElement> elements = this.getAllElementsForCurrentRole();
@@ -103,7 +103,7 @@ public class OutputElementGroup extends OutputElement {
                 if (oe instanceof OutputElementGroup) {
                     ((OutputElementGroup) oe).applyUserRoles(oe.getRequiredRoles());
                 }
-                oe.execute(xmlWriter, params, queryLevel);
+                oe.execute(xmlWriter, params, queryLevel, this.getParentResult().isEscapeNonPrintableChar());
             }
             /* end element-group element */
             if (this.getName() != null) {

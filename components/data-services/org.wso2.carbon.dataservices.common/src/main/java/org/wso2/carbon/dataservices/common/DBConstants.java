@@ -681,6 +681,7 @@ public final class DBConstants {
         public static final String ENABLE_DTP = "enableDTP";
         public static final String TRANSACTION_MANAGER_JNDI_NAME = "txManagerJNDIName";
         public static final String USE_COLUMN_NUMBERS = "useColumnNumbers";
+        public static final String ESCAPE_NON_PRINTABLE_CHAR = "escapeNonPrintableChar";
         public static final String STRUCT_TYPE = "structType";
 
     }
