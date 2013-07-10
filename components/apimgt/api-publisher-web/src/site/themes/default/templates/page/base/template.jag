@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <%
-var i18n = require("/i18n.js");
+var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 var tenantDomain=request.getParameter("tenant");
 var urlPrefix;
