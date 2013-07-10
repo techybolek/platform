@@ -232,6 +232,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
         }
 
         handleNotifications("Get Policy", policyId, policyDTO.getPolicy(), true, null);
+
         return policyDTO;
 	}
 
@@ -256,6 +257,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
         }
 
         handleNotifications("Get Policy", policyId, policyDTO.getPolicy(), true, null);
+
         return policyDTO;
     }
 
@@ -301,7 +303,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
         try{
             try{
                 oldPolicy = getPolicy(policyId);
-            } catch (IdentityException e){
+            } catch (Exception e){
                 // exception is ignore. as unwanted details are throws
             }
             if(oldPolicy == null){
@@ -599,7 +601,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
                                 throw new IdentityException(
                                         "An Entitlement Policy with the given Id already exists");
                             }
-                        } catch (IdentityException e) {
+                        } catch (Exception e) {
                             // exception is ignore. as unwanted details are throws
                         }
                     }

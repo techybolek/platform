@@ -33,7 +33,6 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.ServerConfigurationException;
-import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;

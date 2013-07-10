@@ -211,13 +211,13 @@ public class EntitlementConstants {
     public static final String ENTITLEMENT_POLICY_PUBLISHER = "/repository/identity/entitlement/publisher/";
 
     public static final String ENTITLEMENT_POLICY_PUBLISHER_VERIFICATION =
-                                        "/repository/identity/entitlement/publisher/verification";
+                                        "/repository/identity/entitlement/publisher/verification/";
 
     public static final String ENTITLEMENT_POLICY_VERSION =
-                                        "/repository/identity/entitlement/policy/version";
+                                        "/repository/identity/entitlement/policy/version/";
 
     public static final String ENTITLEMENT_POLICY_DATA =
-                                            "/repository/identity/entitlement/policy/data";
+                                            "/repository/identity/entitlement/policy/data/";
     // entitlement.properties file configurations
 
     public static final String ON_DEMAND_POLICY_LOADING = "PDP.OnDemangPolicyLoading.Enable";

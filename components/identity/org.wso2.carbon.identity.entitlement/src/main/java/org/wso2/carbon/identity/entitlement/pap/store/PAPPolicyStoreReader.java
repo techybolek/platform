@@ -137,7 +137,8 @@ public class PAPPolicyStoreReader {
         try {
             resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
             if (resource == null) {
-                return null;
+                log.error("Policy does not exist in the system with id " + policyId);
+                throw new IdentityException("Policy does not exist in the system with id " + policyId);
             }
             String userName = CarbonContext.getCurrentContext().getUsername();
             int tenantId = CarbonContext.getCurrentContext().getTenantId();
