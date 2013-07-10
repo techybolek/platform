@@ -58,7 +58,7 @@ to the API Store and obtain an API key. Launch a web browser and enter the URL h
 9. Login as the user "subscriber1" with password "subscriber1". Click on the "Applications" tab at
 the top of the page, and create a new application. Provide any name you prefer.
 
-10. Now click on the "APIs" tab at the top of the page, select the "TwitterSearch" API and subscribe to
+10. Now click on the "APIs" tab at the top of the page, select the "YoutubeFeeds" API and subscribe to
 it using the newly created application. Go to the "My Subscriptions" tab and select your application. Click
 on the "Generate" option in the box titled "Production" to obtain an Application key.
 
