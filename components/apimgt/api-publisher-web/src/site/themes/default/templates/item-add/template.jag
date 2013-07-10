@@ -78,10 +78,10 @@
 	            
 	            <div class="control-group" id="rolesDiv" style="display: none;">
 	                <label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">
-	                	<%=i18n.localize("roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
+	                	<%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
 	                </label>
 	                <div class="controls">
-	                    <input type="text" <% if (isSuperTenant) { %>class="input required"<%}else{%>class="input"<%}%>
+	                    <input type="text" class="input required"
 	                    id="roles" name="roles"/>
                         <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
 	                </div>
