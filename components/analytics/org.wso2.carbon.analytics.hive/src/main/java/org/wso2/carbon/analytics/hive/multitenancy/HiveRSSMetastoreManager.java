@@ -19,6 +19,7 @@ import org.wso2.carbon.rssmanager.ui.stub.RSSAdminRSSManagerExceptionException;
 import org.wso2.carbon.rssmanager.ui.stub.RSSAdminStub;
 import org.wso2.carbon.rssmanager.ui.stub.types.Database;
 import org.wso2.carbon.rssmanager.ui.stub.types.DatabaseMetaData;
+import org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 
@@ -243,7 +244,10 @@ public class HiveRSSMetastoreManager {
             db.setName(HiveConstants.HIVE_METASTORE_DB);
             db.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
 
-            rssAdminStub.createDatabaseForTenant(db, tenantDomain);
+            RSSEnvironmentContext envCtx = new RSSEnvironmentContext();
+            envCtx.setEnvironmentName("DEFAULT");
+            envCtx.setRssInstanceName(db.getRssInstanceName());
+            rssAdminStub.createDatabaseForTenant(envCtx, db, tenantDomain);
              if(log.isDebugEnabled())log.debug("*********** Created BAM DB succesfully **************");
              if(log.isDebugEnabled())log.debug("*********** Fetching DB list after creating the BAM DB **************");
             return getHiveMetaDatabase(tenantDomain);
@@ -255,7 +259,10 @@ public class HiveRSSMetastoreManager {
 
     private DatabaseMetaData getHiveMetaDatabase(String tenantDomain)
             throws RSSAdminRSSManagerExceptionException, RemoteException {
-        DatabaseMetaData[] databaseEntries = rssAdminStub.getDatabasesForTenant(tenantDomain);
+        RSSEnvironmentContext envCtx = new RSSEnvironmentContext();
+        envCtx.setEnvironmentName("DEFAULT");
+        envCtx.setRssInstanceName("WSO2_RSS");
+        DatabaseMetaData[] databaseEntries = rssAdminStub.getDatabasesForTenant(envCtx, tenantDomain);
         if (null != databaseEntries) {
             for (DatabaseMetaData databaseEntry : databaseEntries) {
                 if (databaseEntry.getName().contains(HiveConstants.HIVE_METASTORE_DB)) {
