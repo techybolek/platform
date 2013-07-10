@@ -82,6 +82,8 @@ public final class APIUtil {
 
     private static final Log log = LogFactory.getLog(APIUtil.class);
 
+    private static boolean isContextCacheInitialized = false;
+
     /**
      * This method used to get API from governance artifact
      *
@@ -1426,10 +1428,15 @@ public final class APIUtil {
     }
 
     public static Cache getAPIContextCache() {
-        CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+        CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
                 getCache(APIConstants.API_CONTEXT_CACHE).getCacheManager();
-        return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_MANAGER_CACHE_MANAGER).
-                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
-                        APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
+        if (!isContextCacheInitialized) {
+            isContextCacheInitialized = true;
+            return contextCacheManager.<String, Boolean>createCacheBuilder(APIConstants.API_CONTEXT_CACHE_MANAGER).
+                    setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.DAYS,
+                            APIConstants.API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS)).setStoreByValue(false).build();
+        } else {
+            return Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).getCache(APIConstants.API_CONTEXT_CACHE);
+        }
     }
 }
