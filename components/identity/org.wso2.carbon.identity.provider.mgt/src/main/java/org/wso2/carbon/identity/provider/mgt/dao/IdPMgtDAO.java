@@ -49,7 +49,7 @@ public class IdPMgtDAO {
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
             rs = prepStmt.executeQuery();
-            if(rs != null && rs.next()){
+            if(rs.next()){
                 trustedIdPDO = new TrustedIdPDO();
                 int idPId = rs.getInt(1);
                 trustedIdPDO.setIdPIssuerId(rs.getString(2));
@@ -76,24 +76,25 @@ public class IdPMgtDAO {
                     prepStmt = dbConnection.prepareStatement(sqlStmt);
                     prepStmt.setInt(1, id);
                     rs = prepStmt.executeQuery();
-                    while(rs != null && rs.next()){
+                    while(rs.next()){
                         String tenantRole = rs.getString(1);
                         roleMapping.put(idPRole, tenantRole);
                     }
                 }
                 trustedIdPDO.setRoleMappings(roleMapping);
             }
+            return trustedIdPDO;
         } catch (SQLException e){
+            String msg = "Error occurred while retrieving IdP information for tenant";
+            log.error(msg + " " + tenantDomain, e);
             DatabaseUtil.rollBack(dbConnection);
-            log.error("Error while retrieving IdP information for tenant domain " + tenantDomain, e);
-            throw new IdentityProviderMgtException("Error while retrieving IdP information for tenant domain " + tenantDomain);
+            throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection, prepStmt);
+            DatabaseUtil.closeAllConnections(dbConnection);
         }
-        return trustedIdPDO;
     }
 
-    public void addTenantIdP(TrustedIdPDO trustedIdP, int tenantId) throws IdentityProviderMgtException {
+    public void addTenantIdP(TrustedIdPDO trustedIdP, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
         Connection dbConnection = null;
         PreparedStatement prepStmt = null;
         try {
@@ -104,10 +105,11 @@ public class IdPMgtDAO {
             List<String> roles = trustedIdP.getRoles();
             Map<String,String> roleMappings = trustedIdP.getRoleMappings();
             doAddIdP(dbConnection, tenantId, issuerId, trustedIdPUrl, thumbPrint);
-            int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId);
+            int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(idPId <= 0){
-                log.error("Cannot find IdP for tenant");
-                throw new IdentityProviderMgtException("Cannot find IdP for tenant " + tenantId);
+                String msg = "Cannot find registered IdP for tenant";
+                log.error(msg + " " + tenantId);
+                throw new IdentityProviderMgtException(msg);
             }
             if(roles != null && roles.size() > 0){
                 doAddIdPRoles(dbConnection, idPId, roles);
@@ -117,15 +119,16 @@ public class IdPMgtDAO {
             }
             dbConnection.commit();
         } catch (SQLException e){
+            String msg = "Error occurred while adding IdP for tenant";
             DatabaseUtil.rollBack(dbConnection);
-            log.error("Error while adding IdP for tenant " + tenantId, e);
-            throw new IdentityProviderMgtException("Error while adding IdP for tenant");
+            log.error(msg + " " + tenantDomain, e);
+            throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection, prepStmt);
+            DatabaseUtil.closeAllConnections(dbConnection);
         }
     }
 
-    public void updateTenantIdP(TrustedIdPDO trustedIdPDO1, TrustedIdPDO trustedIdPDO2, int tenantId) throws IdentityProviderMgtException {
+    public void updateTenantIdP(TrustedIdPDO trustedIdPDO1, TrustedIdPDO trustedIdPDO2, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
         Connection dbConnection = null;
         PreparedStatement prepStmt = null;
@@ -142,9 +145,11 @@ public class IdPMgtDAO {
         List<String> roles2 = trustedIdPDO2.getRoles();
         Map<String,String> roleMappings2 = trustedIdPDO2.getRoleMappings();
 
-        if(roles1 != null && roles2 != null && roles2.size() < roles1.size()){
-            log.error("Input error: new set of roles cannot be smaller than old set of roles. " + roles2.size() + "<" + roles1.size());
-            throw new IdentityProviderMgtException("Input error: new set of roles cannot be smaller than old set of roles. " + roles2.size() + "<" + roles1.size());
+        if(roles2.size() < roles1.size()){
+            String msg = "Input error: new set of roles cannot be smaller than old set of roles. " + roles2.size() +
+                    " < " + roles1.size();
+            log.error(msg);
+            throw new IdentityProviderMgtException(msg);
         }
 
         Map<String,String> addedMappings = new HashMap<String, String>();
@@ -164,7 +169,7 @@ public class IdPMgtDAO {
         List<String> addedRoles = new ArrayList<String>();
         List<String> deletedRoles = new ArrayList<String>();
         for(int i = 0; i < roles1.size(); i++){
-            if(roles1.get(i) != null && roles2.get(i) == null){
+            if(roles2.get(i) == null){
                 deletedRoles.add(roles1.get(i));
             }
             if(roles2.get(i) != null && !roles2.get(i).equals(roles1.get(i))){
@@ -178,55 +183,59 @@ public class IdPMgtDAO {
 
         try {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
-            int idPId = isTenantIdPExisting(dbConnection, trustedIdPDO1, tenantId);
-            if(idPId > 0){
-                if(!issuerId1.equals(issuerId2) ||
-                        (trustedIdPUrl1 != null && trustedIdPUrl2 != null && !trustedIdPUrl1.equals(trustedIdPUrl2) ||
-                                trustedIdPUrl1!= null && trustedIdPUrl2 == null ||
-                                trustedIdPUrl1 == null && trustedIdPUrl2 != null) ||
-                        (thumbPrint1 != null && thumbPrint2 != null && !thumbPrint1.equals(thumbPrint2) ||
-                                thumbPrint1 != null && thumbPrint2 == null ||
-                                thumbPrint1 == null && thumbPrint2 != null)){
-                    doUpdateIdP(dbConnection, tenantId, issuerId1, issuerId2, trustedIdPUrl2, thumbPrint2);
-                }
-                if(!addedRoles.isEmpty() || !deletedRoles.isEmpty() || !renamedOldRoles.isEmpty()){
-                    doUpdateIdPRoles(dbConnection, idPId, addedRoles, deletedRoles, renamedOldRoles, renamedNewRoles);
-                }
-                if(!addedMappings.isEmpty() || !deletedMappings.isEmpty()){
-                    doUpdateRoleMappings(dbConnection, idPId, tenantId, renamedOldRoles, renamedNewRoles, addedMappings, deletedMappings);
-                }
-                dbConnection.commit();
-            } else {
-                log.error("Cannot find IdP for tenant");
-                throw new IdentityProviderMgtException("Cannot find IdP for tenant " + tenantId);
+            int idPId = isTenantIdPExisting(dbConnection, trustedIdPDO1, tenantId, tenantDomain);
+            if(idPId <= 0){
+                String msg = "Cannot find registered IdP for tenant";
+                log.error(msg + " " + tenantDomain);
+                throw new IdentityProviderMgtException(msg);
             }
+            if(!issuerId1.equals(issuerId2) ||
+                    (trustedIdPUrl1 != null && trustedIdPUrl2 != null && !trustedIdPUrl1.equals(trustedIdPUrl2) ||
+                            trustedIdPUrl1!= null && trustedIdPUrl2 == null ||
+                            trustedIdPUrl1 == null && trustedIdPUrl2 != null) ||
+                    (thumbPrint1 != null && thumbPrint2 != null && !thumbPrint1.equals(thumbPrint2) ||
+                            thumbPrint1 != null && thumbPrint2 == null ||
+                            thumbPrint1 == null && thumbPrint2 != null)){
+                doUpdateIdP(dbConnection, tenantId, issuerId1, issuerId2, trustedIdPUrl2, thumbPrint2);
+            }
+            if(!addedRoles.isEmpty() || !deletedRoles.isEmpty() || !renamedOldRoles.isEmpty()){
+                doUpdateIdPRoles(dbConnection, idPId, addedRoles, deletedRoles, renamedOldRoles, renamedNewRoles);
+            }
+            if(!addedMappings.isEmpty() || !deletedMappings.isEmpty()){
+                doUpdateRoleMappings(dbConnection, idPId, tenantId, renamedOldRoles, renamedNewRoles, addedMappings,
+                        deletedMappings, tenantDomain);
+            }
+            dbConnection.commit();
         } catch(SQLException e){
+            String msg = "Error occurred while updating IdP information  for tenant";
+            log.error(msg + " " + tenantDomain, e);
             DatabaseUtil.rollBack(dbConnection);
-            log.error("Error while updating IdP for tenant");
-            throw new IdentityProviderMgtException("Error while updating IdP for tenant " + tenantId);
+            throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection, prepStmt);
+            DatabaseUtil.closeAllConnections(dbConnection);
         }
     }
 
-    public void deleteTenantIdP(TrustedIdPDO trustedIdP, int tenantId) throws IdentityProviderMgtException{
+    public void deleteTenantIdP(TrustedIdPDO trustedIdP, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
         Connection dbConnection = null;
         PreparedStatement prepStmt = null;
         try {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
             String issuerId = trustedIdP.getIdPIssuerId();
-            if(isTenantIdPExisting(dbConnection, trustedIdP, tenantId) <= 0){
-                log.error("Cannot find IdP for tenant");
-                throw new IdentityProviderMgtException("Cannot find IdP for tenant " + tenantId);
+            if(isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain) <= 0){
+                String msg = "Cannot find registered IdP for tenant";
+                log.error(msg + " " + tenantDomain);
+                throw new IdentityProviderMgtException(msg);
             }
             doDeleteIdP(dbConnection, tenantId, issuerId);
             dbConnection.commit();
         } catch (SQLException e){
+            String msg = "Error occurred while deleting IdP of tenant";
+            log.error(msg + " " + tenantDomain, e);
             DatabaseUtil.rollBack(dbConnection);
-            log.error("Error while deleting IdP for tenant " + tenantId, e);
-            throw new IdentityProviderMgtException("Error while deleting IdP for tenant");
+            throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection, prepStmt);
+            DatabaseUtil.closeAllConnections(dbConnection);
         }
     }
 
@@ -252,7 +261,8 @@ public class IdPMgtDAO {
         }
     }
 
-    private void doAddIdPRoleMappings(Connection conn, int idPId, int tenantId, Map<String,String> roleMappings) throws SQLException, IdentityProviderMgtException {
+    private void doAddIdPRoleMappings(Connection conn, int idPId, int tenantId, Map<String,String> roleMappings)
+            throws SQLException, IdentityProviderMgtException {
         Map<String, Integer> roleIdMap = new HashMap<String, Integer>();
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -286,7 +296,8 @@ public class IdPMgtDAO {
         }
     }
     
-    private void doUpdateIdP(Connection conn, int tenantId, String issuerOld, String issuerNew, String idpUrl, String thumbPrint) throws SQLException {
+    private void doUpdateIdP(Connection conn, int tenantId, String issuerOld, String issuerNew, String idpUrl,
+                             String thumbPrint) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.UPDATE_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
@@ -298,7 +309,9 @@ public class IdPMgtDAO {
         prepStmt.executeUpdate();
     }
 
-    private void doUpdateIdPRoles(Connection conn, int idPId, List<String> addedRoles, List<String> deletedRoles, List<String> renamedOldRoles, List<String> renamedNewRoles) throws SQLException, IdentityProviderMgtException {
+    private void doUpdateIdPRoles(Connection conn, int idPId, List<String> addedRoles, List<String> deletedRoles,
+                                  List<String> renamedOldRoles, List<String> renamedNewRoles)
+            throws SQLException, IdentityProviderMgtException {
         PreparedStatement prepStmt = null;
         String sqlStmt = null;
         for(String addedRole:addedRoles){
@@ -315,7 +328,7 @@ public class IdPMgtDAO {
             prepStmt.setString(2, deletedRole);
             prepStmt.executeUpdate();
         }
-        for(int i=0; i<renamedOldRoles.size(); i++){
+        for(int i = 0; i < renamedOldRoles.size(); i++){
             sqlStmt = IdentityProviderMgtConstants.SQLQueries.UPDATE_TENANT_IDP_ROLES_SQL;
             prepStmt = conn.prepareStatement(sqlStmt);
             prepStmt.setString(1, renamedNewRoles.get(i));
@@ -325,7 +338,10 @@ public class IdPMgtDAO {
         }
     }
 
-    private void doUpdateRoleMappings(Connection conn, int idPId, int tenantId, List<String> renamedOldRoles, List<String> renamedNewRoles, Map<String,String> addedRoleMappings, Map<String,String> deletedRoleMappings) throws SQLException, IdentityProviderMgtException {
+    private void doUpdateRoleMappings(Connection conn, int idPId, int tenantId, List<String> renamedOldRoles,
+                                      List<String> renamedNewRoles, Map<String,String> addedRoleMappings,
+                                      Map<String,String> deletedRoleMappings, String tenantDomain)
+            throws SQLException, IdentityProviderMgtException {
         Map<String, Integer> roleIdMap = new HashMap<String, Integer>();
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -339,8 +355,9 @@ public class IdPMgtDAO {
             roleIdMap.put(role, id);
         }
         if(roleIdMap.isEmpty()){
-            log.error("No IdP roles defined for tenant " + tenantId);
-            throw new IdentityProviderMgtException("No IdP roles defined for tenant");
+            String msg = "No IdP roles defined for tenant";
+            log.error(msg + " " + tenantDomain);
+            throw new IdentityProviderMgtException(msg);
         }
         if(!addedRoleMappings.isEmpty()){
             for(Map.Entry<String,String> entry : addedRoleMappings.entrySet()){
@@ -354,8 +371,9 @@ public class IdPMgtDAO {
                     prepStmt.setString(3, localRole);
                     prepStmt.executeUpdate();
                 } else {
-                    log.error("Cannot find IdP role for tenant");
-                    throw new IdentityProviderMgtException("Cannot find IdP role for tenant " + tenantId);
+                    String msg = "Cannot find IdP role " + entry.getKey() + "for tenant";
+                    log.error(msg + " " + tenantDomain);
+                    throw new IdentityProviderMgtException(msg);
                 }
             }
         }
@@ -382,8 +400,9 @@ public class IdPMgtDAO {
                     prepStmt.setString(3, localRole);
                     prepStmt.executeUpdate();
                 } else {
-                    log.error("Cannot find IdP role for tenant");
-                    throw new IdentityProviderMgtException("Cannot find IdP role for tenant " + tenantId);
+                    String msg = "Cannot find IdP role " + entry.getKey() + " for tenant";
+                    log.error(msg + " " + tenantDomain);
+                    throw new IdentityProviderMgtException(msg);
                 }
             }
         }
@@ -398,7 +417,8 @@ public class IdPMgtDAO {
         prepStmt.executeUpdate();
     }
 
-    public int isTenantIdPExisting(Connection dbConnection, TrustedIdPDO trustedIdPDO, int tenantId) throws IdentityProviderMgtException {
+    public int isTenantIdPExisting(Connection dbConnection, TrustedIdPDO trustedIdPDO, int tenantId, String tenantDomain)
+            throws IdentityProviderMgtException {
         PreparedStatement prepStmt = null;
         try {
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.IS_EXISTING_TENANT_IDP_SQL;
@@ -406,12 +426,13 @@ public class IdPMgtDAO {
             prepStmt.setInt(1, tenantId);
             prepStmt.setString(2, trustedIdPDO.getIdPIssuerId());
             ResultSet rs = prepStmt.executeQuery();
-            if(rs != null && rs.next()){
+            if(rs.next()){
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            log.error("Error while looking up IdP record for tenant " + trustedIdPDO.getTenantDomain(), e);
-            throw new IdentityProviderMgtException("Error while looking up IdP record for tenant");
+            String msg = "Error occurred while retrieving IdP information for tenant";
+            log.error(msg + " " + tenantId, e);
+            throw new IdentityProviderMgtException(msg);
         }
         return 0;
     }
