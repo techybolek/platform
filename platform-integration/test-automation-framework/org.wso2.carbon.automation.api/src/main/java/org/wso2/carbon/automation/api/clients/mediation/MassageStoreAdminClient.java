@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
 import org.wso2.carbon.localentry.stub.types.LocalEntryAdminException;
 import org.wso2.carbon.message.store.stub.*;
-import org.wso2.carbon.message.store.stub.Exception;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;
@@ -56,7 +55,8 @@ public class MassageStoreAdminClient {
     }
 
     public void addMessageStore(DataHandler dh)
-            throws IOException, XMLStreamException, Exception {
+            throws IOException, LocalEntryAdminException, XMLStreamException,
+                   org.wso2.carbon.message.store.stub.Exception {
         messageStoreAdminServiceStub = this.setMessageStoreStubStub();
         XMLStreamReader parser =
                 XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());

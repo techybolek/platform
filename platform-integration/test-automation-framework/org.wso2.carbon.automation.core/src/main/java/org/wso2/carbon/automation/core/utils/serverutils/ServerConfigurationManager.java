@@ -120,6 +120,27 @@ public class ServerConfigurationManager {
     }
 
     /**
+     * apply configuration file and restart server to take effect the configuration
+     *
+     * @param newConfig
+     * @throws Exception
+     */
+    public void applyConfigurationWithoutRestart(File newConfig) throws Exception {
+        //to backup existing configuration
+        backupConfiguration(newConfig.getName());
+        FileReader in = new FileReader(newConfig);
+        FileWriter out = new FileWriter(originalConfig);
+        int c;
+
+        while ((c = in.read()) != -1) {
+            out.write(c);
+        }
+
+        in.close();
+        out.close();
+    }
+
+    /**
      * Methods to replace configuration files in products.
      *
      * @param sourceFile - configuration file to be copied for your local machine or carbon server it self.

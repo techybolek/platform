@@ -141,7 +141,6 @@ public class JMSQueueMessageConsumer {
     }
 
     /**
-     *
      * @param clzz
      * @param <T>
      * @return
@@ -174,22 +173,10 @@ public class JMSQueueMessageConsumer {
      * @throws Exception
      */
     public Message popRawMessage() throws Exception {
-        if (session == null) {
-            throw new Exception("No Connection with Queue. Please connect");
+        if (consumer == null) {
+            throw new Exception("No Consumer with Queue. Please connect");
         }
-        MessageConsumer consumer = null;
-        try {
-            consumer = session.createConsumer(destination);
-            return consumer.receive(10000);
-        } finally {
-            if (consumer != null) {
-                try {
-                    consumer.close();
-                } catch (JMSException e) {
-                    //ignore
-                }
-            }
-        }
+        return consumer.receive(10000);
     }
 
     /**

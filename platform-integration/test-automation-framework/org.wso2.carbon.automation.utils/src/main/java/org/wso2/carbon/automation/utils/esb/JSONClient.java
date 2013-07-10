@@ -34,33 +34,46 @@ public class JSONClient {
 
     /**
      * Send simple get quote request in json format
-     * @param addUrl
+     *
+     * @param trpUrl
      * @param symbol
      * @return
      * @throws IOException
      * @throws JSONException
      */
-    public JSONObject sendSimpleStockQuoteRequest(String addUrl,String symbol)
+    public JSONObject sendSimpleStockQuoteRequest(String trpUrl, String symbol)
             throws IOException, JSONException {
-        String query = "{\"getQuote\":{\"request\":{\"symbol\":\""+symbol+"\"}}}";
-        return sendRequest(addUrl,query);
+        String query = "{\"getQuote\":{\"request\":{\"symbol\":\"" + symbol + "\"}}}";
+        return sendRequest(trpUrl, query);
+    }
+
+    public JSONObject sendSimpleStockQuoteRequest(String trpUrl, String symbol, String operation)
+            throws IOException, JSONException {
+        String query = "{\"getQuote\":{\"request\":{\"symbol\":\"" + symbol + "\"}}}";
+        return sendRequest(trpUrl, query, operation);
+    }
+
+    public JSONObject sendRequest(String trpUrl, JSONObject payload, String operation)
+            throws IOException, JSONException {
+        return sendRequest(trpUrl, payload.toString(), operation);
     }
 
     /**
      * Send user define request to ESB in json format.User should specify the query in JSON format
+     *
      * @param addUrl
      * @param query
      * @return
      * @throws IOException
      * @throws JSONException
      */
-    public JSONObject sendUserDefineRequest(String addUrl,String query)
+    public JSONObject sendUserDefineRequest(String addUrl, String query)
             throws IOException, JSONException {
-        return sendRequest(addUrl,query);
+        return sendRequest(addUrl, query);
     }
 
 
-    private JSONObject sendRequest(String addUrl,String query)
+    private JSONObject sendRequest(String addUrl, String query)
             throws IOException, JSONException {
         String charset = "UTF-8";
         URLConnection connection = new URL(addUrl).openConnection();
@@ -93,7 +106,46 @@ public class JSONClient {
             out = sb.toString();
         }
 
-        JSONObject jsonObject=new JSONObject(out);
+        JSONObject jsonObject = new JSONObject(out);
+
+        return jsonObject;
+    }
+
+    private JSONObject sendRequest(String addUrl, String query, String action)
+            throws IOException, JSONException {
+        String charset = "UTF-8";
+        URLConnection connection = new URL(addUrl).openConnection();
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Accept-Charset", charset);
+        connection.setRequestProperty("SOAPAction", action);
+        connection.setRequestProperty("Content-Type",
+                                      "application/json;charset=" + charset);
+        OutputStream output = null;
+        try {
+            output = connection.getOutputStream();
+            output.write(query.getBytes(charset));
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException logOrIgnore) {
+                    log.error("Error while closing the connection");
+                }
+            }
+        }
+        InputStream response = connection.getInputStream();
+        String out = "[Fault] No Response.";
+        if (response != null) {
+            StringBuilder sb = new StringBuilder();
+            byte[] bytes = new byte[1024];
+            int len;
+            while ((len = response.read(bytes)) != -1) {
+                sb.append(new String(bytes, 0, len));
+            }
+            out = sb.toString();
+        }
+
+        JSONObject jsonObject = new JSONObject(out);
 
         return jsonObject;
     }

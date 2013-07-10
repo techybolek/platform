@@ -96,6 +96,7 @@ public class SampleAxis2Server implements BackendServer {
         log.info("Stopping sample Axis2 server");
         try {
             listenerManager.stop();
+            listenerManager.destroy();
             cfgCtx.cleanupContexts();
 
         } catch (AxisFault axisFault) {

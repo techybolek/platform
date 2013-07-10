@@ -22,6 +22,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
+import java.lang.Exception;
 import org.wso2.carbon.automation.api.clients.aar.services.AARServiceUploaderClient;
 import org.wso2.carbon.automation.api.clients.application.mgt.CarbonAppUploaderClient;
 import org.wso2.carbon.automation.api.clients.authenticators.AuthenticatorClient;
@@ -64,7 +65,6 @@ import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariabl
 import org.wso2.carbon.automation.core.utils.fileutils.FolderTraversar;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkProperties;
 import org.xml.sax.SAXException;
-import java.lang.Exception;
 
 import javax.activation.DataHandler;
 import javax.servlet.ServletException;

@@ -248,7 +248,6 @@ public class ServerUtils {
         ClientConnectionUtil.waitForLogin(Integer.parseInt(frameworkProperties.getProductVariables().getHttpsPort()),
                                           frameworkProperties.getProductVariables().getHostName(),
                                           frameworkProperties.getProductVariables().getBackendUrl());
-
     }
 
     private String expandServerStartupCommandList(Map<String, String> commandMap) {
@@ -265,7 +264,6 @@ public class ServerUtils {
             }
         }
         return keyValueArray.substring(0, keyValueArray.length() - 1);
-
     }
 
     private int getPortOffsetFromCommandMap(Map<String, String> commandMap) {

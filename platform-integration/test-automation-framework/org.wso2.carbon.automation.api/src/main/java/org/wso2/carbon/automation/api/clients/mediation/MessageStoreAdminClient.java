@@ -53,7 +53,8 @@ public class MessageStoreAdminClient {
         AuthenticateStub.authenticateStub(userName, password, messageStoreAdminServiceStub);
     }
 
-    public void addMessageStore(DataHandler dh) throws IOException, Exception, XMLStreamException {
+    public void addMessageStore(DataHandler dh)
+            throws IOException, XMLStreamException, org.wso2.carbon.message.store.stub.Exception {
         XMLStreamReader parser =
                 XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
         StAXOMBuilder builder = new StAXOMBuilder(parser);
@@ -61,13 +62,14 @@ public class MessageStoreAdminClient {
         messageStoreAdminServiceStub.addMessageStore(messageStore.toString());
     }
 
-    public void addMessageStore(OMElement messageStore) throws Exception, RemoteException {
+    public void addMessageStore(OMElement messageStore) throws RemoteException, Exception {
         messageStoreAdminServiceStub.addMessageStore(messageStore.toString());
     }
 
     public void updateMessageStore(OMElement messageStore) throws RemoteException {
         messageStoreAdminServiceStub.modifyMessageStore(messageStore.toString());
     }
+
 
     public void deleteMessageStore(String messageStoreName) throws RemoteException {
         messageStoreAdminServiceStub.deleteMessageStore(messageStoreName);
