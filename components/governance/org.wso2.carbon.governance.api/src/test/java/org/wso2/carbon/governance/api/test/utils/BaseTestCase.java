@@ -18,6 +18,7 @@ package org.wso2.carbon.governance.api.test.utils;
 import junit.framework.TestCase;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.cache.ArtifactCache;
 import org.wso2.carbon.governance.api.cache.ArtifactCacheFactory;
 import org.wso2.carbon.governance.api.cache.ArtifactCacheManager;
@@ -69,7 +70,8 @@ public class BaseTestCase extends TestCase {
          System.setProperty("javax.net.ssl.trustStoreType","JKS");
          registryService = new RemoteRegistryService("http://localhost:9763/registry", "admin", "admin");
          registry = registryService.getGovernanceUserRegistry("admin","admin");*/
-
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         registryService = new InMemoryEmbeddedRegistryService(is);
         registry = registryService.getGovernanceUserRegistry("admin", MultitenantConstants.SUPER_TENANT_ID);
         RegistryCoreServiceComponent component = new RegistryCoreServiceComponent() {
