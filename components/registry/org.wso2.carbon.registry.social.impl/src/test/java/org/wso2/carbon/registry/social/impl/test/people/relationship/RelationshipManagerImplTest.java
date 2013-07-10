@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.registry.social.impl.test.people.relationship;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
@@ -34,6 +35,8 @@ public class RelationshipManagerImplTest extends BaseTestCase {
 
     public void setUp() throws RegistryException {
         super.setUp();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("foo.com");
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
         if (registry == null) {
             super.setUp();
             EmbeddedRegistryService embeddedRegistry = ctx.getEmbeddedRegistryService();

@@ -18,6 +18,7 @@ package org.wso2.carbon.registry.extensions.test.jdbc;
 
 import junit.framework.Assert;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
 import org.wso2.carbon.registry.core.jdbc.EmbeddedRegistryService;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
@@ -41,6 +42,8 @@ public class DefaultLifecycleTest extends BaseTestCase {
 
     public void setUp() throws RegistryException {
         super.setUp();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("foo.com");
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
         ctx.addAspect(LIFECYCLE_NAME, new DefaultLifecycle(), MultitenantConstants.SUPER_TENANT_ID);
         EmbeddedRegistryService embeddedRegistry = ctx.getEmbeddedRegistryService();
         new RegistryCoreServiceComponent().registerBuiltInHandlers(embeddedRegistry);

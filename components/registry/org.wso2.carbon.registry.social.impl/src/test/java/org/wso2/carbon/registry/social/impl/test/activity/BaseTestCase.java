@@ -18,6 +18,7 @@ package org.wso2.carbon.registry.social.impl.test.activity;
 
 import junit.framework.TestCase;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.config.RegistryConfiguration;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
