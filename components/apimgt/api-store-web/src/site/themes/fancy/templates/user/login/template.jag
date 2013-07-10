@@ -1,5 +1,5 @@
 <% jagg.template("user/login", function(inputs, outputs, jagg) {
-var i18n = require("/i18n.js");
+var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 %>

@@ -1,7 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
-var i18n = require("/i18n.js");
+var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 include("header.jag");
