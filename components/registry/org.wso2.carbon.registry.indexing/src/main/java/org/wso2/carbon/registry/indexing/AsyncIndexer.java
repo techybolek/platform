@@ -20,6 +20,8 @@ package org.wso2.carbon.registry.indexing;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
@@ -116,6 +118,9 @@ public class AsyncIndexer implements Runnable {
 
     private boolean indexFile() {
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             if (queue.size() > 0) {
                 File2Index fileData = queue.take();
                 Indexer indexer = IndexingManager.getInstance().getIndexerForMediaType(
@@ -139,6 +144,8 @@ public class AsyncIndexer implements Runnable {
             } else {
                 log.error("Error while indexing.", e);
             }
+        }   finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
         return true;
     }
