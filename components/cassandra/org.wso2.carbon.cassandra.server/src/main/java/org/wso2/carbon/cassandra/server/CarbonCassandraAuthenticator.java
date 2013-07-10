@@ -25,12 +25,16 @@ import org.apache.cassandra.thrift.AuthenticationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.caching.core.CacheEntry;
-import org.wso2.carbon.caching.core.StringCacheEntry;
-import org.wso2.carbon.caching.core.StringCacheKey;
-import org.wso2.carbon.cassandra.server.cache.UserAccessKeyCache;
+//import org.wso2.carbon.caching.core.CacheEntry;
+//import org.wso2.carbon.caching.core.StringCacheEntry;
+//import org.wso2.carbon.caching.core.StringCacheKey;
+//    import org.wso2.carbon.caching.internal.CacheEntry;
+//    import org.wso2.carbon.cassandra.server.cache.UserAccessKeyCache;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
 
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import java.util.Collections;
 import java.util.Map;
 
@@ -46,8 +50,14 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
 
     public static final String USERNAME_KEY = "username";
     public static final String PASSWORD_KEY = "password";
+    private static final String CASSANDRA_ACCESS_KEY_CACHE = "CASSANDRA_ACCESS_KEY_CACHE";
+    private static final String CASSANDRA_ACCESS_CACHE_MANAGER = "CASSANDRA_ACCESS_CACHE_MANAGER";
     private AuthenticationService authenticationService;
-    private static final UserAccessKeyCache cache = UserAccessKeyCache.getInstance();
+
+    private static Cache<String, String> cache = Caching.getCacheManagerFactory()
+                                    .getCacheManager(CASSANDRA_ACCESS_CACHE_MANAGER).getCache(CASSANDRA_ACCESS_KEY_CACHE);
+    //private static final UserAccessKeyCache cache = UserAccessKeyCache.getInstance();
+
 
     /**
      * @return null as a user must call login().
@@ -56,10 +66,13 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
         return null; // A user must log-in to the Cassandra
     }
 
-	public static void addToCache(String username, String accessKey) {
- 		cache.addToCache(new StringCacheKey(username), new StringCacheEntry(accessKey));
+    //public static void addToCache(String username, String accessKey) {
+    public static void addToCache(String username, String accessKey) {
+        //cache.addToCache(new StringCacheKey(username), new StringCacheEntry(accessKey));
+        cache.put(username, accessKey);
 
-	}
+    }
+
     /**
      * Validate the user's credentials and Call the Authentication plugin for checking permission for log-in to the
      * Cassandra.
@@ -98,7 +111,7 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
         String password = pass.toString();
 
         if (isAuthenticated(userName, password)) {
-        	AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName,
+            AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName,
                     Collections.<String>emptySet(), domainName);
             return authenticatedUser;
         } else if (authenticationService.authenticate(userName, password)) {
@@ -114,32 +127,34 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
         return null;  //
     }
 
-    /**private void logAndAuthenticationException(String msg) throws AuthenticationException {
-        log.error(msg);
-        throw new AuthenticationException(msg);
-    }**/
-    
-	private boolean isAuthenticated(String username, String keyAccess) {
+    /**
+     * private void logAndAuthenticationException(String msg) throws AuthenticationException {
+     * log.error(msg);
+     * throw new AuthenticationException(msg);
+     * }*
+     */
 
-        CacheEntry cacheEntry = cache.getValueFromCache(new StringCacheKey(username));
-        String value=null;
-        if(cacheEntry != null){
-           value = ((StringCacheEntry)cacheEntry).getStringValue();
-        }else {
+    private boolean isAuthenticated(String username, String keyAccess) {
+
+        //CacheEntry cacheEntry = cache.getValueFromCache(new StringCacheKey(username));
+        String value = cache.get(username);
+        if (value == null) {
             if (log.isDebugEnabled()) {
                 log.debug("The key is not present in the cache...");
                 log.debug("Credentials for Username : " + username + " retrieved from cache");
             }
         }
-		if (keyAccess != null && keyAccess.equals(value)) {
-			return true;
-		}
-		return false;
-	}
+        if (keyAccess != null && keyAccess.equals(value)) {
+            return true;
+        }
+        return false;
+    }
 
     public void validateConfiguration() throws ConfigurationException {
         CassandraServerComponentManager manager = CassandraServerComponentManager.getInstance();
         authenticationService = manager.getAuthenticationService();
+
+
     }
 
     private void logAndAuthenticationException(String msg) throws AuthenticationException {
