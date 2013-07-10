@@ -10,6 +10,9 @@
             <log level="custom" category="TRACE">
                 <property name="trace_custom" value="*****IN-LOGGING AT TRACE LEVEL-CUSTOM LEVEL*****"/>
             </log>
+            <log level="custom" category="INFO">
+                <property name="trace_custom" value="*****TEST CUSTOM LOGGING MESSAGE TO SYSTEM LOGS TEST*****"/>
+            </log>
             <log level="full" category="TRACE">
                 <property name="trace_full" value="*****IN-LOGGING AT TRACE LEVEL-FULL LEVEL*****"/>
             </log>

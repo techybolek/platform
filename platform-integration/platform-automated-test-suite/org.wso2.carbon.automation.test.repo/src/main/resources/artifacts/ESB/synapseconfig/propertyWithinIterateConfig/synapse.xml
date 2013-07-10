@@ -72,12 +72,4 @@
         </log>
         <drop/>
     </sequence>
-    <sequence name="main">
-        <in>
-            <sequence key="IterateMediatorSequence"/>
-        </in>
-        <out>
-            <sequence key="IteratorAggregateSequence"/>
-        </out>
-    </sequence>
 </definitions>

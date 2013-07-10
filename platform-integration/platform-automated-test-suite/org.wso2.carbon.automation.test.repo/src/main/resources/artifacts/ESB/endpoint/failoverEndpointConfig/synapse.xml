@@ -215,7 +215,7 @@
     </proxy>
 
     <proxy name="failoverEndPoint_Specific_Errors" transports="http,https">
-        <target>
+        <target faultSequence="fault">
             <inSequence>
                 <send>
                     <endpoint>
@@ -255,6 +255,23 @@
             </outSequence>
         </target>
     </proxy>
+
+    <sequence name="fault">
+        <log level="full">
+            <property name="MESSAGE" value="Executing default &#34;fault&#34; sequence"/>
+            <property name="ERROR_CODE" expression="get-property('ERROR_CODE')"/>
+            <property name="ERROR_MESSAGE" expression="get-property('ERROR_MESSAGE')"/>
+        </log>
+        <makefault version="soap11">
+            <code xmlns:soap11Env="http://schemas.xmlsoap.org/soap/envelope/"
+                  expression="get-property('ERROR_CODE')"/>
+            <reason expression="get-property('ERROR_MESSAGE')"/>
+        </makefault>
+        <property name="RESPONSE" value="true"/>
+        <header name="To" action="remove"/>
+        <log level="full"/>
+        <send/>
+    </sequence>
 
 </definitions>
 

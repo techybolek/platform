@@ -21,26 +21,28 @@
         <parameter name="cachableDuration">15000</parameter>
     </registry>
     <sequence name="fault">
-      <log level="full">
-         <property name="MESSAGE" value="Executing default &#34;fault&#34; sequence"/>
-         <property xmlns:ns="http://org.apache.synapse/xsd"
-                   name="ERROR_CODE"
-                   expression="get-property('ERROR_CODE')"/>
-         <property xmlns:ns="http://org.apache.synapse/xsd"
-                   name="ERROR_MESSAGE"
-                   expression="get-property('ERROR_MESSAGE')"/>
-      </log>
-      <makefault version="soap11">
-         <code xmlns:soap11Env="http://schemas.xmlsoap.org/soap/envelope/"
-               value="soap11Env:VersionMismatch"/>
-         <reason expression="get-property('ERROR_MESSAGE')"/>
-         <role>error</role>
-      </makefault>
-      <send/>
-   </sequence>
+        <log level="full">
+            <property name="MESSAGE" value="Executing default &#34;fault&#34; sequence"/>
+            <property xmlns:ns="http://org.apache.synapse/xsd"
+                      name="ERROR_CODE"
+                      expression="get-property('ERROR_CODE')"/>
+            <property xmlns:ns="http://org.apache.synapse/xsd"
+                      name="ERROR_MESSAGE"
+                      expression="get-property('ERROR_MESSAGE')"/>
+        </log>
+        <makefault version="soap11">
+            <code xmlns:soap11Env="http://schemas.xmlsoap.org/soap/envelope/"
+                  value="soap11Env:VersionMismatch"/>
+            <reason expression="get-property('ERROR_MESSAGE')"/>
+        </makefault>
+        <property name="RESPONSE" value="true"/>
+        <header name="To" action="remove"/>
+        <send/>
+    </sequence>
     <sequence name="main">
         <in>
-            <spring:spring xmlns:spring="http://ws.apache.org/ns/synapse" bean="springtest" key="conf:/spring/invalidSpringbean.xml"/>
+            <spring:spring xmlns:spring="http://ws.apache.org/ns/synapse" bean="springtest"
+                           key="conf:/spring/invalidSpringbean.xml"/>
             <send/>
         </in>
         <out>
