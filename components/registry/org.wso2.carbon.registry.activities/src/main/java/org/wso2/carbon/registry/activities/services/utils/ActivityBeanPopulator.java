@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.registry.activities.services.utils;
 
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.registry.core.LogEntry;
@@ -25,6 +26,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.common.beans.ActivityBean;
 import org.wso2.carbon.registry.common.utils.CommonUtil;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 
@@ -129,6 +132,38 @@ public class ActivityBeanPopulator {
                 activityBean.setActivity(constructActivityStatementsfornormaluser(userRegistry,
                         logs, userRegistry.getUserName()));
             }
+            String[] paginatedResult;
+            MessageContext messageContext = MessageContext.getCurrentMessageContext();
+            if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
+
+                int rowCount = activityBean.getActivity().length;
+                try {
+                    PaginationUtils.setRowCount(messageContext, Integer.toString(rowCount));
+                    PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
+
+                    int start = paginationContext.getStart();
+                    int count = paginationContext.getCount();
+
+                    int startIndex;
+                    if (start == 1) {
+                        startIndex = 0;
+                    } else {
+                        startIndex = start;
+                    }
+                    if (rowCount < start + count) {
+                        paginatedResult = new String[rowCount - startIndex];
+                        System.arraycopy(activityBean.getActivity(), startIndex, paginatedResult, 0, (rowCount - startIndex));
+                    } else {
+                        paginatedResult = new String[count];
+                        System.arraycopy(activityBean.getActivity(), startIndex, paginatedResult, 0, count);
+                    }
+                    activityBean.setActivity(paginatedResult);
+                    return activityBean;
+
+                } finally {
+                    PaginationContext.destroy();
+                }
+            }
         } catch (RegistryException e) {
 
             String msg = "Failed to get activities for generating activity search results " +
@@ -136,7 +171,6 @@ public class ActivityBeanPopulator {
             log.error(msg, e);
             activityBean.setErrorMessage(msg);
         }
-
         return activityBean;
     }
 

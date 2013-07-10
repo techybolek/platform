@@ -30,6 +30,7 @@
 <%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 
 <fmt:bundle basename="org.wso2.carbon.registry.activities.ui.i18n.Resources">
 
@@ -38,20 +39,22 @@
         ActivityServiceClient client = new ActivityServiceClient(cookie, config, session);
         ActivityBean activityBean;
         String requestedPage = request.getParameter(UIConstants.REQUESTED_PAGE);
-        if (requestedPage != null && session.getAttribute("activityBean") != null) {
-            activityBean = (ActivityBean) session.getAttribute("activityBean");
+
+        int start;
+        int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+        if (requestedPage != null) {
+            start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
         } else {
-            activityBean = client.getActivities(request);
-            session.setAttribute("activityBean", activityBean);
+            start = 1;
         }
+        PaginationContext.init(start, count, "", "", 1500);
+        activityBean = client.getActivities(request);
         String[] allActivities = null;
-        String[] activities = null;
+        String[] activities;
         if (activityBean != null) {
             allActivities = activityBean.getActivity();
         }
         if (allActivities != null && allActivities.length != 0) {
-            int start;
-            int end;
             int itemsPerPage = (int)(RegistryConstants.ITEMS_PER_PAGE * 1.5);
 
             int pageNumber;
@@ -61,21 +64,14 @@
                 pageNumber = 1;
             }
 
-            int numberOfPages = 1;
-            if (allActivities.length % itemsPerPage == 0) {
-                numberOfPages = allActivities.length / itemsPerPage;
+            int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+            int numberOfPages;
+            if (rowCount % itemsPerPage == 0) {
+                numberOfPages = rowCount / itemsPerPage;
             } else {
-                numberOfPages = allActivities.length / itemsPerPage + 1;
+                numberOfPages = rowCount / itemsPerPage + 1;
             }
-
-            if (allActivities.length < itemsPerPage) {
-                start = 0;
-                end = allActivities.length;
-            } else {
-                start = (pageNumber - 1) * itemsPerPage;
-                end = (pageNumber - 1) * itemsPerPage + itemsPerPage;
-            }
-            activities = UIUtil.getChildren(start, itemsPerPage, allActivities);
+            activities = allActivities;
     %>
     <%
         if ( CarbonUIUtil.isContextRegistered(config, "/reporting/") && activities!=null && activities.length > 0) {

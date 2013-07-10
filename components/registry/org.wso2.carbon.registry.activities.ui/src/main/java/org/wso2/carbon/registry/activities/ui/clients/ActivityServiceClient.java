@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.registry.activities.stub.ActivityAdminServiceStub;
 import org.wso2.carbon.registry.common.IActivityService;
@@ -41,10 +43,10 @@ public class ActivityServiceClient implements IActivityService {
     private ActivityAdminServiceStub stub;
 
     private IActivityService proxy = null;
-    
+    private HttpSession session;
     public ActivityServiceClient(String cookie, ServletConfig config, HttpSession session)
             throws RegistryException {
-
+        this.session =session;
         if (proxy == null) {
 
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(),
@@ -126,9 +128,18 @@ public class ActivityServiceClient implements IActivityService {
         ActivityBean result = new ActivityBean();
 
         try {
-            org.wso2.carbon.registry.activities.stub.beans.xsd.ActivityBean bean =
-                    stub.getActivities(userName, resourcePath, fromDate, toDate, filter, pageStr,
-                            sessionId);
+            org.wso2.carbon.registry.activities.stub.beans.xsd.ActivityBean bean = null;
+            if (PaginationContext.getInstance() == null) {
+
+                bean = stub.getActivities(userName, resourcePath, fromDate, toDate, filter, pageStr,
+                        sessionId);
+            } else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                bean = stub.getActivities(userName, resourcePath, fromDate, toDate, filter, pageStr,
+                        sessionId);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+                session.setAttribute("row_count", Integer.toString(rowCount));
+            }
             if (bean.getActivity() == null) {
                 bean.setActivity(new String[0]);
             }
@@ -138,6 +149,8 @@ public class ActivityServiceClient implements IActivityService {
             String msg = e.getMessage();
             log.error(msg, e);
             throw new RegistryException(msg, e);
+        } finally {
+            PaginationContext.destroy();
         }
 
         return result;
