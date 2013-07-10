@@ -108,6 +108,6 @@
             <artifactId>org.wso2.carbon.statistics.stub</artifactId>
             <version>4.2.0-SNAPSHOT</version>
         </dependency>
-    </dependencies>
+     </dependencies>
 
 </project>

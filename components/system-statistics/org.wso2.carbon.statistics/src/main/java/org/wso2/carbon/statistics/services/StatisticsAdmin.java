@@ -22,10 +22,13 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.statistics.services.util.OperationStatistics;
 import org.wso2.carbon.statistics.services.util.ServiceStatistics;
 import org.wso2.carbon.statistics.services.util.SystemStatistics;
+import org.wso2.carbon.statistics.webapp.ComputeData;
+import org.wso2.carbon.statistics.webapp.data.StatisticData;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 
 import javax.xml.namespace.QName;
@@ -166,4 +169,22 @@ public class StatisticsAdmin extends AbstractAdmin implements StatisticsAdminMBe
                                            String operationName) {
         return getAxisService(serviceName).getOperation(new QName(operationName));
     }
+
+    /**
+     * Reading the web app statistics data
+     */
+
+    public StatisticData getWebappRelatedData(String webAppName) {
+        try {
+
+            int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+            StatisticData statisticData = ComputeData.map.get(tenantId).get(webAppName);
+            return statisticData;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
 }

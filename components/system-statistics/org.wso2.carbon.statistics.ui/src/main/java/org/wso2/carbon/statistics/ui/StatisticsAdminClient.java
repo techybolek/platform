@@ -25,6 +25,8 @@ import org.wso2.carbon.statistics.stub.StatisticsAdminStub;
 import org.wso2.carbon.statistics.stub.types.carbon.OperationStatistics;
 import org.wso2.carbon.statistics.stub.types.carbon.ServiceStatistics;
 import org.wso2.carbon.statistics.stub.types.carbon.SystemStatistics;
+import org.wso2.carbon.statistics.stub.webapp.StatisticData;
+
 
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
@@ -89,5 +91,24 @@ public class StatisticsAdminClient {
     private void handleException(String msg, Exception e) throws RemoteException {
         log.error(msg, e);
         throw new RemoteException(msg, e);
+    }
+
+    public StatisticData getWebappStatistics(String webApp){
+        StatisticData statisticData = null;
+        try{
+            statisticData =   stub.getWebappRelatedData(webApp);
+            if(statisticData==null){
+                statisticData = new StatisticData();
+                statisticData.setRequstCount(0);
+                statisticData.setResponseCount(0);
+                statisticData.setFaultCount(0);
+                statisticData.setMaximumResponseTime(0.0);
+                statisticData.setMinimumresponseTime(0.0);
+                statisticData.setAverageResponseTime(0.0);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return statisticData;
     }
 }
