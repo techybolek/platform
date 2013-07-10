@@ -245,6 +245,7 @@
 				<module>org.wso2.carbon.cassandra.cluster.proxy.stub</module>
 				<module>org.wso2.carbon.identity.user.store.configuration.stub</module>
 				<module>org.wso2.carbon.identity.authenticator.krb5.stub</module>
+				<module>org.wso2.carbon.hdfs.mgt.stub</module>
 			</modules>
 
     <build>
