@@ -30,8 +30,8 @@
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <%
-    String issuer = "";
-    String url = "";
+    String issuer = null;
+    String url = null;
     CertData certData = null;
     List<String> roles = null;
     Map<String,String> roleMappings = null;
@@ -42,6 +42,9 @@
         certData = bean.getCertData();
         roles = bean.getRoles();
         roleMappings = bean.getRoleMappings();
+    }
+    if(url == null){
+        url = "";
     }
 %>
 
@@ -71,8 +74,10 @@
         })
     })
     function idpMgtUpdate(){
-        jQuery('#finalRowId').val(rowId);
-        jQuery('#idp-mgt-form').submit();
+        if(doValidation()){
+            jQuery('#finalRowId').val(rowId);
+            jQuery('#idp-mgt-form').submit();
+        }
     }
     function idpMgtDelete(){
         var input = document.createElement('input');
@@ -85,11 +90,21 @@
 
     function doValidation() {
         var reason = "";
-        reason = validateEmpty("certFile");
+        reason = validateEmpty("issuer");
         if (reason != "") {
-            CARBON.showWarningDialog("<fmt:message key="upload.public.cert"/>");
+            CARBON.showWarningDialog("<fmt:message key="idp.issuer.warn"/>");
             return false;
         }
+        for(var i=0; i <= rowId; i++){
+            if(document.getElementsByName('rowname_'+i)[0] != null){
+                reason = validateEmpty('rowname_'+i);
+                if(reason != ""){
+                    CARBON.showWarningDialog("Role name strings cannot be zero length");
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 </script>
 

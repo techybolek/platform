@@ -29,6 +29,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.util.HashMap" %>
 
 <%
     String BUNDLE = "org.wso2.carbon.identity.provider.mgt.ui.i18n.Resources";
@@ -47,11 +48,17 @@
             if(trustedIdPDTO.getPublicCert() != null){
                 trustedIdPBean.setCertData(IdentityProviderMgtUIUtil.getCertData(trustedIdPDTO.getPublicCert()));
             }
-            if(trustedIdPDTO.getRoles() != null && trustedIdPDTO.getRoles().length > 0){
+            if(trustedIdPDTO.getRoles() != null){
                 trustedIdPBean.setRoles(new ArrayList<String>(Arrays.asList(trustedIdPDTO.getRoles())));
+            } else {
+                trustedIdPDTO.setRoles(new String[0]);
+                trustedIdPBean.setRoles(new ArrayList<String>());
             }
-            if(trustedIdPDTO.getRoleMappings() != null && trustedIdPDTO.getRoleMappings().length > 0){
+            if(trustedIdPDTO.getRoleMappings() != null){
                 trustedIdPBean.setRoleMappings(IdentityProviderMgtUIUtil.getRoleMappings(trustedIdPDTO.getRoleMappings()));
+            } else {
+                trustedIdPDTO.setRoleMappings(new String[0]);
+                trustedIdPBean.setRoleMappings(new HashMap<String, String>());
             }
             session.setAttribute("trustedIdPDTO", trustedIdPDTO);
             session.setAttribute("trustedIdPBean", trustedIdPBean);

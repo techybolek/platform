@@ -18,7 +18,6 @@ package org.wso2.carbon.identity.provider.mgt.ui.bean;
 import org.wso2.carbon.identity.provider.mgt.ui.util.IdentityProviderMgtUIUtil;
 
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 

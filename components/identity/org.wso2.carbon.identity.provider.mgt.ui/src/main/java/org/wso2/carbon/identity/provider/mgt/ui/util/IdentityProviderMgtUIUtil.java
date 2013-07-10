@@ -68,24 +68,13 @@ public class IdentityProviderMgtUIUtil {
         return roleMappingsMap;
     }
 
-    private static CertData fillCertData(X509Certificate cert, Format formatter) throws CertificateEncodingException {
-
-        CertData certData = new CertData();
-        certData.setSubjectDN(cert.getSubjectDN().getName());
-        certData.setIssuerDN(cert.getIssuerDN().getName());
-        certData.setSerialNumber(cert.getSerialNumber());
-        certData.setVersion(cert.getVersion());
-        certData.setNotAfter(formatter.format(cert.getNotAfter()));
-        certData.setNotBefore(formatter.format(cert.getNotBefore()));
-        certData.setPublicKey(Base64.encode(cert.getPublicKey().getEncoded()));
-        return certData;
-    }
-
     public static Object[] getFormData(HttpServletRequest request) throws FileUploadException, IdentityProviderMgtExceptionException {
         if (ServletFileUpload.isMultipartContent(request)) {
             Object[] objects = new Object[2];
             ServletRequestContext servletContext = new ServletRequestContext(request);
-            List items = parseRequest(servletContext);
+            FileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            List items =  upload.parseRequest(servletContext);
             String issuer = null;
             String url = null;
             String publicCert = null;
@@ -105,7 +94,7 @@ public class IdentityProviderMgtUIUtil {
             }
             if(oldRoles != null && !oldRoles.isEmpty()){
                 for(int i = 0; i < oldRoles.size(); i++){
-                    newRoles.add(null);
+                    newRoles.add("");
                 }
             }
             List<String> tempList = new ArrayList<String>();
@@ -154,13 +143,13 @@ public class IdentityProviderMgtUIUtil {
                 } else if(name.startsWith("rowname_")){
                     int rowId = Integer.parseInt(name.substring(name.indexOf("_")+1));
                     FileItem fileItem = (FileItem) diskFileItem;
-                    byte[] roleMappingsArray = fileItem.get();
+                    byte[] rolesArray = fileItem.get();
                     if(oldRoles != null && rowId < oldRoles.size()){
                         newRoles.remove(rowId);
-                        newRoles.add(rowId, new String(roleMappingsArray));
+                        newRoles.add(rowId, new String(rolesArray));
                     } else {
-                        if(roleMappingsArray != null && roleMappingsArray.length > 0){
-                            tempList.add(new String(roleMappingsArray));
+                        if(rolesArray != null && rolesArray.length > 0){
+                            tempList.add(new String(rolesArray));
                         }
                     }
                 } else if(name.equals("delete")){
@@ -181,9 +170,6 @@ public class IdentityProviderMgtUIUtil {
             trustedIdPDTO.setIdPIssuerId(issuer);
             trustedIdPDTO.setIdPUrl(url);
             trustedIdPDTO.setPublicCert(publicCert);
-            if(newRoles.size() > 0 && newRoles.get(0) == null){
-                newRoles.add(0,"SKIP");
-            }
             trustedIdPDTO.setRoles(newRoles.toArray(new String[newRoles.size()]));
             trustedIdPDTO.setRoleMappings(roleMappings);
             objects[0] = trustedIdPDTO;
@@ -194,9 +180,16 @@ public class IdentityProviderMgtUIUtil {
         }
     }
 
-    public static List parseRequest(ServletRequestContext requestContext) throws FileUploadException {
-        FileItemFactory factory = new DiskFileItemFactory();
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        return upload.parseRequest(requestContext);
+    private static CertData fillCertData(X509Certificate cert, Format formatter) throws CertificateEncodingException {
+
+        CertData certData = new CertData();
+        certData.setSubjectDN(cert.getSubjectDN().getName());
+        certData.setIssuerDN(cert.getIssuerDN().getName());
+        certData.setSerialNumber(cert.getSerialNumber());
+        certData.setVersion(cert.getVersion());
+        certData.setNotAfter(formatter.format(cert.getNotAfter()));
+        certData.setNotBefore(formatter.format(cert.getNotBefore()));
+        certData.setPublicKey(Base64.encode(cert.getPublicKey().getEncoded()));
+        return certData;
     }
 }
