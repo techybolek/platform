@@ -1212,6 +1212,7 @@ body ul#resources li.resource ul.endpoints li.endpoint ul.operations li.operatio
     padding-right:10px;
 }
 .tenant-position-setter{
+	color: #888;
     margin-top: 48px;
     text-align: right;
     position: absolute;
