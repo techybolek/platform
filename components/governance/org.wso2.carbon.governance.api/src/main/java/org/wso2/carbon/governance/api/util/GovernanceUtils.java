@@ -1566,9 +1566,13 @@ public class GovernanceUtils {
         for (Map.Entry<String, List<String>> e : criteria.entrySet()) {
             StringBuilder builder = new StringBuilder();
             for (String referenceValue : e.getValue()) {
-                builder.append(referenceValue).append(",");
+                if (referenceValue != null && !"".equals(referenceValue)) {
+                    builder.append(referenceValue).append(",");
+                }
             }
-            fields.put(e.getKey(), builder.substring(0, builder.length() - 1));
+            if (builder.length() > 0) {
+                fields.put(e.getKey(), builder.substring(0, builder.length() - 1));
+            }
         }
 
             try {
