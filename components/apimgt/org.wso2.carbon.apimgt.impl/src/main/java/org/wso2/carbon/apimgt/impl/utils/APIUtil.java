@@ -566,6 +566,18 @@ public final class APIUtil {
                 apiId.getVersion() + RegistryConstants.PATH_SEPARATOR +
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
+    
+    /**
+     * Utility method to get documentation content file path
+     *
+     * @param apiId APIIdentifier
+     * @param documentationName String
+     * @return Doc content path
+     */
+    public static String getAPIDocContentPath(APIIdentifier apiId, String documentationName) {
+        return getAPIDocPath(apiId) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR + 
+        		RegistryConstants.PATH_SEPARATOR + documentationName;
+    }
 
     /**
      * This utility method used to create documentation artifact content

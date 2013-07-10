@@ -403,7 +403,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 GenericArtifact docArtifact = artifactManager.getGenericArtifact(
                         docResource.getUUID());
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
-                doc.setLastUpdated(docResource.getLastModified());
+                String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                Date contentLastModifiedDate = registry.get(contentPath).getLastModified();
+                Date docLastModifiedDate = docResource.getLastModified();
+                doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ? 
+                		contentLastModifiedDate : docLastModifiedDate));
                 documentationList.add(doc);
             }
             /* Document for loading API definition Content - Swagger*/
@@ -457,7 +461,11 @@ public abstract class AbstractAPIManager implements APIManager {
                     GenericArtifact docArtifact = artifactManager.getGenericArtifact(
                             docResource.getUUID());
                     Documentation doc = APIUtil.getDocumentation(docArtifact, apiId.getProviderName());
-                    doc.setLastUpdated(docResource.getLastModified());
+                    String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                    Date contentLastModifiedDate = registry.get(contentPath).getLastModified();
+                    Date docLastModifiedDate = docResource.getLastModified();
+                    doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ? 
+                    		contentLastModifiedDate : docLastModifiedDate));
                     documentationList.add(doc);
                 }
             }
