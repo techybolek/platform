@@ -48,6 +48,7 @@ public class ExtensionsSymLinkHandler extends Handler {
 			Resource resource = requestContext.getRegistry().get(
 					requestContext.getResourcePath().getPath());
 			List<String> symlinkPaths = resource.getPropertyValues("registry.resource.symlink.path");
+            if (symlinkPaths != null && symlinkPaths.size() > 0) {
 			for (String symlinkPath : symlinkPaths) {
 				if (symlinkPath != null) {
 					if (requestContext.getRegistry()
@@ -56,6 +57,7 @@ public class ExtensionsSymLinkHandler extends Handler {
 					}
 				}
 			}
+        }
 
 		} finally {
 			CommonUtil.releaseUpdateLock();
