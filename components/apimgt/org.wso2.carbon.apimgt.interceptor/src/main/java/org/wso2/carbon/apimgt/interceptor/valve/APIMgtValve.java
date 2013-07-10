@@ -29,8 +29,6 @@ public class APIMgtValve extends ValveBase {
 
     private static final Log log = LogFactory.getLog(APIManagerInterceptorValve.class);
 
-    private static final String RESTAPI_CONTEXT = "/resource";
-
     private APIKeyValidationInfoDTO apiKeyValidationDTO;
 
     private boolean statsPublishingEnabled;
@@ -49,7 +47,7 @@ public class APIMgtValve extends ValveBase {
     
     Cache contextCache = null;
 
-    APITokenAuthenticator authenticator = new APITokenAuthenticator();
+    APITokenAuthenticator authenticator;
 
     public APIMgtValve(){
         super(true);
@@ -65,6 +63,7 @@ public class APIMgtValve extends ValveBase {
             externalAPIManagerURL = CarbonUtils.getServerConfiguration().getFirstProperty("APIGateway");
             manageAPIs = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
             contextCache = APIUtil.getAPIContextCache();
+            authenticator = new APITokenAuthenticator();
             initialized = true;
         }
 
@@ -73,11 +72,14 @@ public class APIMgtValve extends ValveBase {
         if (context == null || context.equals("")) {
             //Invoke next valve in pipe.
             getNext().invoke(request, response);
-            //return;
+            return;
         }
 
         boolean contextExist;
-        Boolean contextValueInCache = Boolean.parseBoolean(contextCache.get(context).toString()) ;
+        Boolean contextValueInCache = null;
+        if (contextCache.get(context) != null) {
+            contextValueInCache = Boolean.parseBoolean(contextCache.get(context).toString());
+        }
 
         if (contextValueInCache != null) {
             contextExist = contextValueInCache;
@@ -89,7 +91,7 @@ public class APIMgtValve extends ValveBase {
         if (!contextExist) {
             //Invoke next valve in pipe.
             getNext().invoke(request, response);
-            //return;
+            return;
         }
 
         long requestTime = System.currentTimeMillis();
@@ -100,7 +102,7 @@ public class APIMgtValve extends ValveBase {
             if (externalAPIManagerURL == null) {
 
                 //Use embedded API Management
-                log.info("API Manager Interceptor Valve Got invoked!!");
+                log.debug("API Manager Interceptor Valve Got invoked!!");
                 String bearerToken = request.getHeader(APIConstants.OperationParameter.AUTH_PARAM_NAME);
                 String accessToken = null;
                 if (bearerToken != null) {
@@ -125,6 +127,8 @@ public class APIMgtValve extends ValveBase {
                 if (!isAuthorized) {
                     try {
                         response.sendError(403, "Unauthorized");
+                        //Invoke next valve in pipe.
+                        getNext().invoke(request, response);
                         return;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -133,6 +137,9 @@ public class APIMgtValve extends ValveBase {
                 if (!doThrottle(request,accessToken)) {
                     try {
                         response.sendError(405, "Message Throttled Out You have exceeded your quota");
+                        //Invoke next valve in pipe.
+                        getNext().invoke(request, response);
+                        return;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
