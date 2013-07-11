@@ -139,7 +139,7 @@ $('#editStatus option').each(  //when refreshed page the default is not selected
                       $('#lifeCycleTable').append($('<tr>'+
                               '<td><i class="icon-info-sign"></i> <b>'+jagg.getDate(lastLcChange.date)+'</b> </td>'+
                               '<td>&nbsp;&nbsp;&nbsp; <i class="icon-user"></i>'+
-                                '<a href="/publisher/user?uname='+lastLcChange.username+'">'+lastLcChange.username+'</a> change the API status from \''+lastLcChange.oldStatus+' \' to \''+lastLcChange.newStatus+'\''+
+                                '<a href="/publisher/user?uname='+lastLcChange.username+'">'+lastLcChange.username+'</a> changed the API status from \''+lastLcChange.oldStatus+' \' to \''+lastLcChange.newStatus+'\''+
                               '</td>'+
                         '</tr>'));
                         $('#statusUpdateMsg').show();
