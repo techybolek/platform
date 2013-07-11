@@ -19,6 +19,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.util.buf.MessageBytes;
@@ -26,13 +27,12 @@ import org.apache.tomcat.util.http.mapper.MappingData;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
+import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.url.mapper.internal.exception.UrlMapperException;
 import org.wso2.carbon.url.mapper.internal.util.DataHolder;
 import org.wso2.carbon.url.mapper.internal.util.HostUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
 /**
@@ -48,10 +48,10 @@ public class UrlMapperValve extends CarbonTomcatValve {
      * @param request  HttpServletRequest
      * @param response HttpServletResponse
      */
-    public void invoke(HttpServletRequest request, HttpServletResponse response) {
+    public void invoke(Request request, Response response, CompositeValve compositeValve) {
         try {
             process(request, response);
-            getNext().invoke(request, response);
+            getNext().invoke(request, response, compositeValve);
         } catch (Exception e) {
             log.error("error in forwarding the url", e);
         }
@@ -63,7 +63,7 @@ public class UrlMapperValve extends CarbonTomcatValve {
      * @throws Exception
      * @throws UrlMapperException
      */
-    private void process(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    private void process(Request request, Response response) throws Exception {
         String serverName = request.getServerName();
         String requestedUri = request.getRequestURI();
         String uri = URLMappingHolder.getInstance().
@@ -92,7 +92,7 @@ public class UrlMapperValve extends CarbonTomcatValve {
                     AxisOperation axisOperation = axisService.getOperation(qname);
                     if(axisOperation != null) {
                         filterUri = filterUri + "/" + operation;
-                        requestRewriteForService((Request)request, filterUri);
+                        requestRewriteForService(request, filterUri);
                     }
                 } else {
                     axisService = DataHolder.getInstance().getServerConfigContext().
@@ -101,21 +101,20 @@ public class UrlMapperValve extends CarbonTomcatValve {
                     AxisOperation axisOperation = axisService.getOperation(qname);
                     if(axisOperation != null) {
                         filterUri = filterUri + "/" + operation;
-                        requestRewriteForService((Request)request, filterUri);
+                        requestRewriteForService(request, filterUri);
                     }
                 }
 
             } else if(requestedUri.equalsIgnoreCase("/")) {
-                requestRewriteForService((Request)request, filterUri);
+                requestRewriteForService(request, filterUri);
             }
         }
     }
 
     public void requestRewriteForService(Request request, String filterUri) throws Exception {
         //rewriting the request with actual service url in order to retrieve the resource
-        Request connectorReq = (Request) request;
-        MappingData mappingData = connectorReq.getMappingData();
-        org.apache.coyote.Request coyoteRequest = connectorReq.getCoyoteRequest();
+        MappingData mappingData = request.getMappingData();
+        org.apache.coyote.Request coyoteRequest = request.getCoyoteRequest();
 
         MessageBytes requestPath = MessageBytes.newInstance();
         requestPath.setString(filterUri);
@@ -131,16 +130,16 @@ public class UrlMapperValve extends CarbonTomcatValve {
         } else {
             coyoteRequest.unparsedURI().setString(filterUri);
         }
-        connectorReq.getConnector().
-                getMapper().map(connectorReq.getCoyoteRequest().serverName(),
-                connectorReq.getCoyoteRequest().decodedURI(), null,
+        request.getConnector().
+                getMapper().map(request.getCoyoteRequest().serverName(),
+                request.getCoyoteRequest().decodedURI(), null,
                 mappingData);
         //connectorReq.setHost((Host)DataHolder.getInstance().getCarbonTomcatService().getTomcat().getEngine().findChild("testapp.wso2.com"));
-        connectorReq.setCoyoteRequest(coyoteRequest);
+        request.setCoyoteRequest(coyoteRequest);
     }
     
     public boolean equals(Object valve){
-        return this.toString() == valve.toString();
+        return this.toString().equalsIgnoreCase(valve.toString());
     }
     
     public String toString() {

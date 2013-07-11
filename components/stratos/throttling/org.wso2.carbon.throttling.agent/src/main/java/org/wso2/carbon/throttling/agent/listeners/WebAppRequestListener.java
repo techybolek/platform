@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.throttling.agent.listeners;
 
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -26,10 +28,9 @@ import org.wso2.carbon.throttling.agent.ThrottlingAgent;
 import org.wso2.carbon.throttling.agent.cache.TenantThrottlingInfo;
 import org.wso2.carbon.throttling.agent.cache.ThrottlingActionInfo;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
+import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.user.api.UserStoreException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,7 +51,7 @@ public class WebAppRequestListener extends CarbonTomcatValve {
         this.throttlingAgent = throttlingAgent;
     }
 
-    public void invoke(HttpServletRequest request, HttpServletResponse response) {
+    public void invoke(Request request, Response response, CompositeValve compositeValve) {
         String requestURI = request.getRequestURI();
         String tenantDomainName = CarbonContext.getCurrentContext().
                                   getTenantDomain();
@@ -138,7 +139,7 @@ public class WebAppRequestListener extends CarbonTomcatValve {
                 log.error(msg, e);
             }
         }
-        getNext().invoke(request, response);
+        getNext().invoke(request, response, compositeValve);
     }
 
     /**

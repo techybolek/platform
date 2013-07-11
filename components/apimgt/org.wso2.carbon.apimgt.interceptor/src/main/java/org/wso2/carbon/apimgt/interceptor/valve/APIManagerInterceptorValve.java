@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.interceptor.valve;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -34,11 +36,11 @@ import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
+import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.cache.Cache;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class APIManagerInterceptorValve extends CarbonTomcatValve {
@@ -69,7 +71,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 
     }
 
-    public void invoke(HttpServletRequest request, HttpServletResponse response) {
+    public void invoke(Request request, Response response, CompositeValve compositeValve) {
 
         if (!initialized) {
             statsPublishingEnabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
@@ -85,7 +87,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
         String context = request.getContextPath();
         if (context == null || context.equals("")) {
             //Invoke next valve in pipe.
-            getNext().invoke(request, response);
+            getNext().invoke(request, response, compositeValve);
             return;
         }
 
@@ -104,7 +106,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 
         if (!contextExist) {
             //Invoke next valve in pipe.
-            getNext().invoke(request, response);
+            getNext().invoke(request, response, compositeValve);
             return;
         }
 
@@ -142,7 +144,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
                     try {
                         response.sendError(403, "Unauthorized");
                         //Invoke next valve in pipe.
-                        getNext().invoke(request, response);
+                        getNext().invoke(request, response, compositeValve);
                         return;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -152,7 +154,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
                     try {
                         response.sendError(405, "Message Throttled Out You have exceeded your quota");
                         //Invoke next valve in pipe.
-                        getNext().invoke(request, response);
+                        getNext().invoke(request, response, compositeValve);
                         return;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -168,7 +170,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
         }
 
         //Invoke next valve in pipe.
-        getNext().invoke(request, response);
+        getNext().invoke(request, response, compositeValve);
 
         //Handle Responses
         if ("true".equals(manageAPIs) && ApiMgtDAO.isContextExist(context) && statsPublishingEnabled) {

@@ -20,6 +20,8 @@ package org.wso2.carbon.webapp.mgt;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -27,14 +29,13 @@ import org.wso2.carbon.core.deployment.DeploymentSynchronizer;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
+import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.deployment.GhostDeployer;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.webapp.mgt.utils.GhostWebappDeployerUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 /**
@@ -47,8 +48,8 @@ public class GhostWebappDeployerValve extends CarbonTomcatValve {
     private boolean isGhostOn = GhostDeployerUtils.isGhostOn();
 
     @Override
-    public void invoke(HttpServletRequest request,
-                       HttpServletResponse response) {
+    public void invoke(Request request,
+                       Response response, CompositeValve compositeValve) {
         if (!isGhostOn) {
             return;
         }
@@ -58,7 +59,7 @@ public class GhostWebappDeployerValve extends CarbonTomcatValve {
                 contains(WebappsConstants.WEBAPP_INFO_JSP_PAGE)) ||
             requestURI.contains("favicon.ico") || requestURI.contains("/fileupload/") ||
             requestURI.startsWith("/services")) {
-            getNext().invoke(request, response);
+            getNext().invoke(request, response, compositeValve);
             return;
         }
         //getting actual uri when accessing a virtual host through url mapping from the Map
@@ -138,13 +139,13 @@ public class GhostWebappDeployerValve extends CarbonTomcatValve {
             }
         }
         if (!requestURI.contains(WebappsConstants.WEBAPP_INFO_JSP_PAGE)) {
-            getNext().invoke(request, response);
+            getNext().invoke(request, response, compositeValve);
             return;
         }
 
         String webappFileName = request.getParameter("webappFileName");
         handleWebapp(webappFileName, currentCtx);
-        getNext().invoke(request, response);
+        getNext().invoke(request, response, compositeValve);
     }
 
     private WebApplication getDeployedWebappFromThisURI(String requestURI,
