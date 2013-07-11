@@ -41,7 +41,7 @@
     if (propertyMediator.getAction() == org.apache.synapse.mediators.builtin.PropertyMediator.ACTION_SET) {
         String type = request.getParameter("type_select");
         if (type != null) {
-            String value = request.getParameter("mediator.property.val_ex");
+            String value = request.getParameter("mediator.property.val_ex").trim();
             if (request.getParameter("mediator.property.type").equals("expression")) {
                 XPathFactory xPathFactory = XPathFactory.getInstance();
                 propertyMediator.setExpression(xPathFactory.createSynapseXPath("mediator.property.val_ex", request, session));
