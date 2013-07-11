@@ -27,6 +27,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.CarbonSynapseController;
+import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
 import org.wso2.carbon.mediation.initializer.utils.ConfigurationHolder;
 import org.wso2.carbon.mediation.initializer.services.*;
 import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
@@ -38,12 +39,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.*;
 import org.apache.synapse.deployers.ExtensionDeployer;
+import org.apache.synapse.deployers.ImportDeployer;
+import org.apache.synapse.deployers.LibraryArtifactDeployer;
+import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.registry.Registry;
+import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.apache.synapse.config.xml.MultiXMLConfigurationSerializer;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.config.SynapseConfigurationBuilder;
+import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.task.*;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
@@ -334,7 +340,7 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
                 SynapseConstants.SYNAPSE_SERVICE_NAME);
         serviceGroup.addParameter("hiddenService", "true");
 
-        addDeployers(configurationContext);
+        addDeployers(configurationContext,contextInfo);
 
         return contextInfo;
     }
@@ -410,12 +416,11 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
         }
     }
 
-    private void addDeployers(ConfigurationContext configurationContext) {
+    private void addDeployers(ConfigurationContext configurationContext,ServerContextInformation contextInfo) {
         AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
         DeploymentEngine deploymentEngine = (DeploymentEngine) axisConfig.getConfigurator();
         String carbonRepoPath = configurationContext.getAxisConfiguration().getRepository().getFile();
-
-
+       
         String mediatorsPath = carbonRepoPath + File.separator + "mediators";
         String extensionsPath = carbonRepoPath + File.separator + "extensions";
         ExtensionDeployer deployer = new ExtensionDeployer();
@@ -423,7 +428,38 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
         deploymentEngine.addDeployer(deployer, extensionsPath, "xar");
         deploymentEngine.addDeployer(deployer, mediatorsPath, "jar");
         deploymentEngine.addDeployer(deployer, extensionsPath, "jar");
+        this.registerMediationLibraryDeployer(axisConfig, contextInfo.getSynapseEnvironment());
+     }
+    
+    
+    private void registerMediationLibraryDeployer(AxisConfiguration axisConfig, SynapseEnvironment synapseEnvironment) {
+
+        SynapseConfiguration synCfg = synapseEnvironment.getSynapseConfiguration();
+        DeploymentEngine deploymentEngine = (DeploymentEngine) axisConfig.getConfigurator();
+        SynapseArtifactDeploymentStore deploymentStore = synCfg.getArtifactDeploymentStore();
+
+        String synapseConfigPath = ServiceBusUtils.getSynapseConfigAbsPath(
+                synapseEnvironment.getServerContextInformation());
+        String synapseImportDir = synapseConfigPath
+                + File.separator + MultiXMLConfigurationBuilder.SYNAPSE_IMPORTS_DIR;
+
+        for (SynapseImport synImport : synCfg.getSynapseImports().values()) {
+            if (synImport.getFileName() != null) {
+                deploymentStore.addRestoredArtifact(
+                        synapseImportDir + File.separator + synImport.getFileName());
+            }
+        }
+        //register imports
+        deploymentEngine.addDeployer(new ImportDeployer(),
+                synapseImportDir, ServiceBusConstants.ARTIFACT_EXTENSION);
+
+        //register library deployer
+        String carbonRepoPath = axisConfig.getRepository().getPath();
+        String libsPath = carbonRepoPath + File.separator + "synapse-libs";
+        deploymentEngine.addDeployer(new LibraryArtifactDeployer(), libsPath, "zip");
+
     }
+    
 
     public static boolean isRunningSamplesMode() {
         return System.getProperty(ServiceBusConstants.ESB_SAMPLE_SYSTEM_PROPERTY) != null;
