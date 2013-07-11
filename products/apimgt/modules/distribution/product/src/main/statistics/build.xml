@@ -5,6 +5,7 @@
 	<property name="target-dir" value="target" />
 
 	<property name="API_Manager_Analytics_dir" value="API_Manager_Analytics" />
+	<property name="API_Manager_Analytics_oracle_dir" value="API_Manager_Analytics_Oracle" />
 
 	<target name="clean">
 		<delete dir="${target-dir}" />
@@ -19,7 +20,9 @@
 		<zip destfile="${target-dir}/${API_Manager_Analytics_dir}.tbox">
 		  	<zipfileset dir="${API_Manager_Analytics_dir}" prefix="${API_Manager_Analytics_dir}"/> 
 		</zip>
+                <zip destfile="${target-dir}/${API_Manager_Analytics_oracle_dir}.tbox">
+		  	<zipfileset dir="${API_Manager_Analytics_oracle_dir}" prefix="${API_Manager_Analytics_oracle_dir}"/> 
+		</zip>
 	</target>
 
 </project>
-
