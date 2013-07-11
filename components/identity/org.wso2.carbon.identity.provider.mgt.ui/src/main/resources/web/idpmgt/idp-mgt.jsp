@@ -43,6 +43,9 @@
         roles = bean.getRoles();
         roleMappings = bean.getRoleMappings();
     }
+    if(issuer == null){
+        issuer = "";
+    }
     if(url == null){
         url = "";
     }
