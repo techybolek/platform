@@ -372,7 +372,7 @@ public class SCIMUserManager implements UserManager {
                 }
                 group.setDisplayName(roleNameWithDomain);
                 //check if the group already exists
-                if (carbonUM.isExistingRole(group.getDisplayName())) {
+                if (carbonUM.isExistingRole(group.getDisplayName(), false)) {
                     String error = "Group with name: " + group.getDisplayName() +
                                    " already exists in the system.";
                     throw new DuplicateResourceException(error);
@@ -406,13 +406,13 @@ public class SCIMUserManager implements UserManager {
                     //add other scim attributes in the identity DB since user store doesn't support some attributes.
                     SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(carbonUM.getTenantId());
                     scimGroupHandler.createSCIMAttributes(group);
-                    carbonUM.addRole(group.getDisplayName(), members.toArray(new String[members.size()]), null);
+                    carbonUM.addRole(group.getDisplayName(), members.toArray(new String[members.size()]), null, false);
                     log.info("Group: " + group.getDisplayName() + " is created through SCIM.");
                 } else {
                     //add other scim attributes in the identity DB since user store doesn't support some attributes.
                     SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(carbonUM.getTenantId());
                     scimGroupHandler.createSCIMAttributes(group);
-                    carbonUM.addRole(group.getDisplayName(), null, null);
+                    carbonUM.addRole(group.getDisplayName(), null, null, false);
                     log.info("Group: " + group.getDisplayName() + " is created through SCIM.");
                 }
             } catch (UserStoreException e) {
@@ -489,7 +489,7 @@ public class SCIMUserManager implements UserManager {
         List<Group> filteredGroups = new ArrayList<Group>();
         Group group = null;
         try {
-            if (attributeValue != null && carbonUM.isExistingRole(attributeValue)) {
+            if (attributeValue != null && carbonUM.isExistingRole(attributeValue, false)) {
                 //skip internal roles
                 if ((CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(attributeValue)) ||
                     UserCoreUtil.isEveryoneRole(attributeValue, carbonUM.getRealmConfiguration()) ||
