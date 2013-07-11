@@ -8,6 +8,7 @@
 <%@ page import="org.apache.http.HttpStatus" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.humantask.ui.util.HumanTaskUIUtil" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <!--
 ~ Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 ~
@@ -49,7 +50,7 @@
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
 
-    String taskDefId = request.getParameter("taskDefId");
+    String taskDefId = CharacterEncoder.getSafeText(request.getParameter("taskDefId"));
 
     QName taskId = QName.valueOf(taskDefId);
     TaskInfoType taskInfoType = null;

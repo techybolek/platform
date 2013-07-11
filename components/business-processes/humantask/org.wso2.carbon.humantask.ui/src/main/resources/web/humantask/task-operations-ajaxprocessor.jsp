@@ -10,6 +10,7 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -29,10 +30,10 @@
             (ConfigurationContext) config.getServletContext().
                     getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 
-    String payLoad = request.getParameter("payLoad");
-    String taskId = request.getParameter("taskId");
-    String operation = request.getParameter("operation");
-    String taskClient = request.getParameter("taskClient");
+    String payLoad = CharacterEncoder.getSafeText(request.getParameter("payLoad"));
+    String taskId = CharacterEncoder.getSafeText(request.getParameter("taskId"));
+    String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
+    String taskClient = CharacterEncoder.getSafeText(request.getParameter("taskClient"));
 
     String cookie = null;
     if (taskClient != null && !"".equals(taskClient) && "gadget".equals(taskClient)) {

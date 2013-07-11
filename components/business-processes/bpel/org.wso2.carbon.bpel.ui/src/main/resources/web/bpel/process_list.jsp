@@ -8,6 +8,7 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <!--
  ~ Copyright (c) 2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
@@ -54,9 +55,9 @@
     int pageNumberInt = 0;
     int linkNum = 0;
 
-    String pageNumber = request.getParameter("pageNumber");
-    String operation = request.getParameter("operation");
-    String packageName = request.getParameter("packageName");
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
+    String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
+    String packageName = CharacterEncoder.getSafeText(request.getParameter("packageName"));
 
     boolean isAuthorizedToManagePackages =
                 CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/bpel/packages");
@@ -124,7 +125,7 @@
         }
 
     if (isAuthorizedToManageProcesses && operation != null && client != null) {
-        String pid = request.getParameter("processID");
+        String pid = CharacterEncoder.getSafeText(request.getParameter("processID"));
         if (operation.toLowerCase().trim().equals("retire")) {
             if (pid != null && pid.length() > 0) {
                 try {
@@ -166,12 +167,12 @@
         } catch (NumberFormatException ignored){
         }
 
-        processListFilter = request.getParameter("filter");
+        processListFilter = CharacterEncoder.getSafeText(request.getParameter("filter"));
         if(processListFilter == null || processListFilter.length() == 0){
             processListFilter = "name}}* namespace=*";
         }
 
-        processListOrderBy = request.getParameter("order");
+        processListOrderBy = CharacterEncoder.getSafeText(request.getParameter("order"));
         if(processListOrderBy == null || processListOrderBy.length() == 0) {
             processListOrderBy = "-deployed";
         }

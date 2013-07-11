@@ -27,6 +27,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="javax.xml.namespace.QName" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -44,8 +45,8 @@
     boolean isAuthorizedToMonitor =
             CarbonUIUtil.isUserAuthorized(request, "/permission/admin/monitor/bpel");
 
-    String processID = request.getParameter("Pid");
-    String operation = request.getParameter("operation");
+    String processID = CharacterEncoder.getSafeText(request.getParameter("Pid"));
+    String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
     ProcessManagementServiceClient processMgtClient;
     ProcessDeployDetailsList_type0 processDeployDetailsListType;
     ArrayList<String> scopeNames = new ArrayList<String>();

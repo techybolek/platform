@@ -17,9 +17,10 @@
 -->
 <!DOCTYPE HTML>
 
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 
 <%
-    String displayMessage = request.getParameter("displayMsg");
+    String displayMessage = CharacterEncoder.getSafeText(request.getParameter("displayMsg"));
 
 %>
 <html>

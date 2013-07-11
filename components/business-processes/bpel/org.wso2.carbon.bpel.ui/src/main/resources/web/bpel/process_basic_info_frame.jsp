@@ -1,5 +1,6 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.bpel.ui.BpelUIUtil" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <!--
  ~ Copyright (c) 2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
@@ -21,13 +22,13 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
     response.setHeader("Cache-Control", "no-cache");
-    String packageName = request.getParameter("packageName");
-    String processID = request.getParameter("processID");
-    String processVersion = request.getParameter("processVersion");
-    String processOlderVersion = request.getParameter("processOlderVersion");
-    String processStatus = request.getParameter("processStatus");
-    String processDeployedDate = request.getParameter("processDeployedDate");
-    String noOfInstances = request.getParameter("noOfInstances");
+    String packageName = CharacterEncoder.getSafeText(request.getParameter("packageName"));
+    String processID = CharacterEncoder.getSafeText(request.getParameter("processID"));
+    String processVersion = CharacterEncoder.getSafeText(request.getParameter("processVersion"));
+    String processOlderVersion = CharacterEncoder.getSafeText(request.getParameter("processOlderVersion"));
+    String processStatus = CharacterEncoder.getSafeText(request.getParameter("processStatus"));
+    String processDeployedDate = CharacterEncoder.getSafeText(request.getParameter("processDeployedDate"));
+    String noOfInstances = CharacterEncoder.getSafeText(request.getParameter("noOfInstances"));
 
     boolean isAuthorizedToManageProcesses =
                 CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/bpel/processes");

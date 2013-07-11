@@ -31,6 +31,7 @@
     <%@ page import="java.util.HashMap" %>
     <%@ page import="java.util.Map" %>
     <%@ page import="java.util.TreeMap" %>
+    <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
     <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
     <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -46,8 +47,8 @@
         boolean isAuthorizedToManageServices =
                     CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/modify/service");
 
-        String processID = request.getParameter("Pid");
-        String operation = request.getParameter("operation");
+        String processID = CharacterEncoder.getSafeText(request.getParameter("Pid"));
+        String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
         String packageName = null;
         String processDefPrettyPrinted = null;
         String processVersion = null;

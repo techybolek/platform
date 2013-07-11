@@ -28,6 +28,7 @@
 <%@ page import="org.wso2.carbon.bpel.ui.InstanceFilterUtil" %>
 <%@ page import="org.apache.commons.httpclient.HttpStatus" %>
 <%@ page import="org.wso2.carbon.bpel.ui.InstanceFilter" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="javax.xml.namespace.QName" %>
@@ -53,12 +54,12 @@
     PaginatedInstanceList instanceList = null;
     int numberOfPages = 0;
     String processIds[] = null;
-    String operation = request.getParameter("operation");
-    String deleteMex = request.getParameter("deleteMex");
-    String pageNumber = request.getParameter("pageNumber");
+    String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
+    String deleteMex = CharacterEncoder.getSafeText(request.getParameter("deleteMex"));
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
     int pageNumberInt = 0;
-    String instanceListFilter = request.getParameter("filter");
-    String instanceListOrderBy = request.getParameter("order");
+    String instanceListFilter = CharacterEncoder.getSafeText(request.getParameter("filter"));
+    String instanceListOrderBy = CharacterEncoder.getSafeText(request.getParameter("order"));
     String parameters = null;
 
     String resetFilterLink = "list_instances.jsp?pageNumber=0&operation=reset";
@@ -150,7 +151,7 @@
         }
 
         if(operation != null && isAuthenticatedForInstanceManagement) {
-            String iid = request.getParameter("iid");
+            String iid = CharacterEncoder.getSafeText(request.getParameter("iid"));
             if(iid != null && !operation.equals("reset")) {
                 Long instanceId = Long.parseLong(iid.trim());
                 if(operation.trim().equals("suspend")) {

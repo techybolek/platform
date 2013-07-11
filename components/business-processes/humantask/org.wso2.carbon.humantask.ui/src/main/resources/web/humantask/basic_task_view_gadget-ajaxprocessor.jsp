@@ -18,6 +18,7 @@
         import="org.wso2.carbon.humantask.stub.ui.task.client.api.types.TTaskAuthorisationParams" %>
 <%@ page import="org.wso2.carbon.humantask.stub.ui.task.client.api.types.TStatus" %>
 <%@ page import="org.wso2.carbon.humantask.ui.util.HumanTaskUIUtil" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <!--
 ~ Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 ~
@@ -58,8 +59,8 @@
         String cookieString = request.getHeader("Cookie");
         String cookie = HumanTaskUIUtil.getCookieSessionId(cookieString);
 
-        String taskId = request.getParameter("taskId");
-        String taskClient = request.getParameter("taskClient");
+        String taskId = CharacterEncoder.getSafeText(request.getParameter("taskId"));
+        String taskClient = CharacterEncoder.getSafeText(request.getParameter("taskClient"));
         TTaskAuthorisationParams authParams = null;
 
         HumanTaskClientAPIServiceClient taskAPIClient;

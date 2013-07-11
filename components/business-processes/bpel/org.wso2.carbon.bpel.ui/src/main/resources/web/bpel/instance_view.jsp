@@ -25,6 +25,7 @@
 <%@ page import="org.wso2.carbon.bpel.stub.mgt.types.*" %>
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.bpel.ui.BpelUIUtil" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -46,9 +47,9 @@
     ScopeInfoType scopeInfo;
     EventInfo[] infoArray = null;
     
-    String instanceId = request.getParameter("iid");
-    String operation = request.getParameter("operation");
-    String activityId = request.getParameter("aid");
+    String instanceId = CharacterEncoder.getSafeText(request.getParameter("iid"));
+    String operation = CharacterEncoder.getSafeText(request.getParameter("operation"));
+    String activityId = CharacterEncoder.getSafeText(request.getParameter("aid"));
 
     boolean isAuthenticatedForInstanceManagement =
             CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/bpel/instances");
