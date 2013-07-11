@@ -182,7 +182,9 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.mex.feature:${carbon.platform.version}
                                 </featureArtifactDef>
+
                                 <!--<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.eventing.feature:${carbon.platform.version}</featureArtifactDef>-->
+
                                 <!-- eventing -->
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.event.common.feature:${carbon.platform.version}
