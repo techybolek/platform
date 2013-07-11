@@ -1,8 +1,8 @@
 
 PRE-REQUESTIES
 ===============
-1)WSO2 Application Server 4.1.2
-2)WSO2 API Manager
+1)WSO2 Application Server 5.1.0 (Port Offset 2)
+2)WSO2 API Manager (Port Offset 0)
   Change default token expiration time in identity.xml to one year (3153600)
 
 INSTRUCTIONS
@@ -45,7 +45,7 @@ INSTRUCTIONS
 
 6) App Server should run with port offset 2 .
 
-7) Access the application @ http://localhost:9764/pizzashack
+7) Access the application @ http://localhost:9765/pizzashack
 
 8) Login using admin/admin (or any user account you used for subscription)
 
