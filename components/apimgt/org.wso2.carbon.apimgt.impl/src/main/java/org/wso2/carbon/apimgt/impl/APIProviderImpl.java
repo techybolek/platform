@@ -434,16 +434,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
                 boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
-                boolean isAPIPublished=isAPIPublished(api);
-                if (gatewayExists) {
-                    if (isAPIPublished) {
-                        API apiPublished=getAPI(api.getId());
-                        publishToGateway(apiPublished);
+                String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                boolean isAPIPublished = false;
+                // gatewayType check is required when API Management is deployed on other servers to avoid synapse
+                if (gatewayType.equalsIgnoreCase("Synapse")) {
+                    isAPIPublished = isAPIPublished(api);
+                    if (gatewayExists) {
+                        if (isAPIPublished) {
+                            API apiPublished = getAPI(api.getId());
+                            publishToGateway(apiPublished);
+                        }
+                    } else {
+                        log.debug("Gateway is not existed for the current API Provider");
                     }
-                } else {
-                    log.debug("Gateway is not existed for the current API Provider");
                 }
-
                
                 Boolean gatewayKeyCacheEnabled=false;
                 String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
@@ -1388,9 +1392,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
             boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
+            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             API api = new API(identifier);
-            if (gatewayExists) {
+            // gatewayType check is required when API Management is deployed on other servers to avoid synapse
+            if (gatewayExists && gatewayType.equals("Synapse")) {
                 if (isAPIPublished(api)) {
                     removeFromGateway(api);
                 }

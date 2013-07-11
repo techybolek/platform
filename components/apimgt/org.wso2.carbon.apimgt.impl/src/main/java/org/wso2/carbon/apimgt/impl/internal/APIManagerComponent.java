@@ -114,7 +114,7 @@ public class APIManagerComponent {
                     File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
-            String gatewayType = configuration.getFirstProperty("GatewayType");
+            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if (gatewayType.equalsIgnoreCase("Synapse")) {
                 //Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
