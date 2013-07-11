@@ -23,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.xni.parser.XMLInputSource;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -40,6 +41,7 @@ import org.wso2.carbon.registry.extensions.utils.CommonConstants;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 import org.wso2.carbon.registry.extensions.utils.WSDLValidationInfo;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.namespace.QName;
 import java.io.*;
@@ -727,13 +729,21 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
         }
 
         public void run() {
-            // File is already uploaded via wsdl or xsd imports those are skip
-            if (CommonUtil.isImportedArtifactExisting(new File(uri).toString())) {
-                failed = false;
-                result = "added from import";
-                return;
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setTenantDomain(MultitenantUtils.getTenantDomain(userId));
+                // File is already uploaded via wsdl or xsd imports those are skip
+                if (CommonUtil.isImportedArtifactExisting(new File(uri).toString())) {
+                    failed = false;
+                    result = "added from import";
+                    return;
+                }
+                doWork();
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
             }
-            doWork();
         }
 
         protected void retry() {
