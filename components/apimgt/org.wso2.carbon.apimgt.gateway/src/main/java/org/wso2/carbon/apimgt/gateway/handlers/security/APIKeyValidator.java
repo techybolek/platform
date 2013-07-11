@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-//import net.sf.jsr107cache.Cache;
+
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
