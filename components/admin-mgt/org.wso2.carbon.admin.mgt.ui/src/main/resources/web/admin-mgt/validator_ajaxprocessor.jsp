@@ -17,6 +17,7 @@
  -->
 <%@ page import="org.wso2.carbon.email.verification.ui.clients.EmailVerificationServiceClient" %>
 <%@ page import="org.wso2.carbon.email.verification.stub.beans.xsd.ConfirmationBean" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -25,7 +26,7 @@
         String redirect = null;
         try {
             EmailVerificationServiceClient client = new EmailVerificationServiceClient(config,session);
-            String confirm = request.getParameter("confirmation");
+            String confirm = CharacterEncoder.getSafeText(request.getParameter("confirmation"));
 
             ConfirmationBean confirmationBean = client.confirmUser(confirm);
             data = confirmationBean.getData();
