@@ -23,11 +23,12 @@
 <%@ page import="org.wso2.carbon.statistics.ui.StatisticsAdminClient" %>
 <%@ page import="org.wso2.carbon.statistics.stub.types.carbon.ServiceStatistics" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 
 <%
     response.setHeader("Cache-Control", "no-cache");
 
-    String serviceName = request.getParameter("serviceName");
+    String serviceName = CharacterEncoder.getSafeText(request.getParameter("serviceName"));
 
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
