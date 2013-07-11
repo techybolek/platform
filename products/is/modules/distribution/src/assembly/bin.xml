@@ -135,9 +135,9 @@
 		<!--copy jaxrs web app for SCIM feature-->
 		<fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/deployment/server/jaxwebapps
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/deployment/server/webapps
             </directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
             <includes>
                 <include>wso2.war</include>
             </includes>
@@ -146,9 +146,9 @@
         <!--copy jaxrs web app for OAuth feature-->
 		<fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/deployment/server/jaxwebapps
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/deployment/server/webapps
             </directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
             <includes>
                 <include>oauth2endpoints.war</include>
             </includes>
