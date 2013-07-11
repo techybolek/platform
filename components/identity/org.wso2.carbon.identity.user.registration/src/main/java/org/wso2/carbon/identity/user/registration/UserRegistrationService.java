@@ -202,11 +202,11 @@ public class UserRegistrationService {
             
             // if this is the first time a user signs up, needs to create role
             try {
-				if (!admin.isExistingRole(identityRoleName)) {
+				if (!admin.isExistingRole(identityRoleName, false)) {
 				    permission = new Permission("/permission/admin/login",
 				            UserMgtConstants.EXECUTE_ACTION);     
 				    admin.addRole(identityRoleName, new String[] { userName },
-				            new Permission[] { permission });
+				            new Permission[] { permission }, false);
 				} else {
 				    // if role already exists, just add user to role
 				    admin.updateUserListOfRole(identityRoleName,
