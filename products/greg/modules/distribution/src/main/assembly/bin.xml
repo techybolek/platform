@@ -636,10 +636,10 @@
             <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/database/WSO2AM_DB.h2.db</source>
             <outputDirectory>${pom.artifactId}-${build.version}/repository/database</outputDirectory>
         </file> 
-        <!--<file>
+        <file>
             <source>../cmis-war/cmis/target/cmis.war</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
-        </file>-->
+        </file>
 
     </files>
 </assembly>
