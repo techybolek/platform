@@ -53,13 +53,13 @@ public class IdentityProviderMgtServiceClient {
     }
 
     /**
-     * @param tenantDomain
+     * Returns IdP information of the logged in user's tenant
      * @return TrustedIdPDTO
      * @throws IdentityProviderMgtExceptionException
      */
-    public TrustedIdPDTO getTenantIdP(String tenantDomain) throws IdentityProviderMgtExceptionException{
+    public TrustedIdPDTO getTenantIdP() throws IdentityProviderMgtExceptionException{
         try {
-            return stub.getTenantIdP(tenantDomain);
+            return stub.getTenantIdP();
         } catch (RemoteException e) {
             log.error("Error invoking remote service", e);
             throw new IdentityProviderMgtExceptionException("Error invoking remote service");

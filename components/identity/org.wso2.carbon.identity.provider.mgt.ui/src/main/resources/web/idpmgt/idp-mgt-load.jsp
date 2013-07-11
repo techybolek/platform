@@ -40,7 +40,7 @@
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         IdentityProviderMgtServiceClient client = new IdentityProviderMgtServiceClient(cookie, backendServerURL, configContext);
-        TrustedIdPDTO trustedIdPDTO = client.getTenantIdP(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        TrustedIdPDTO trustedIdPDTO = client.getTenantIdP();
         if(trustedIdPDTO != null){
             TrustedIdPBean trustedIdPBean = new TrustedIdPBean();
             trustedIdPBean.setIdPIssuerId(trustedIdPDTO.getIdPIssuerId());
