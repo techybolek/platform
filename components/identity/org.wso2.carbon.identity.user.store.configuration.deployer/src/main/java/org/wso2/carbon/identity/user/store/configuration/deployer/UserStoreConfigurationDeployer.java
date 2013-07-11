@@ -17,8 +17,6 @@
 */
 package org.wso2.carbon.identity.user.store.configuration.deployer;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.AbstractDeployer;
 import org.apache.axis2.deployment.DeploymentException;
@@ -26,29 +24,28 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.user.store.configuration.deployer.internal.UserStoreConfigComponent;
 import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
-import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.user.core.config.UserStoreConfigXMLProcessor;
+import org.wso2.carbon.user.core.service.RealmService;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import java.io.*;
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * This is to deploy a new User Store Management Configuration file dropped or created at repository/conf/server/userstores.
- * Whenever a new file with .xml extension is added or a modification is done to an existing file, deployer will
- * automatically update the existing realm configuration org.wso2.carbon.identity.user.store.configuration according to the new file.
+ * This is to deploy a new User Store Management Configuration file dropped or created at repository/deployment/server/userstores
+ * or repository/tenant/<>tenantId</>/userstores. Whenever a new file with .xml extension is added/deleted or a modification is done to
+ * an existing file, deployer will automatically update the existing realm configuration org.wso2.carbon.identity.user.store.configuration
+ * according to the new file.
  */
 public class UserStoreConfigurationDeployer extends AbstractDeployer {
 
 
     private static Log log = LogFactory.getLog(UserStoreConfigurationDeployer.class);
-    private File userMgtConfigFile;
-    private RealmConfigXMLProcessor realmConfigXMLProcessor = new RealmConfigXMLProcessor();
+
+
     private AxisConfiguration axisConfig;
 
     public void init(ConfigurationContext configurationContext) {
@@ -66,18 +63,31 @@ public class UserStoreConfigurationDeployer extends AbstractDeployer {
      */
     public void deploy(DeploymentFileData deploymentFileData) throws DeploymentException {
         String path = deploymentFileData.getAbsolutePath();
-        OMElement realmElement;
+        UserStoreConfigXMLProcessor userStoreXMLProcessor = new UserStoreConfigXMLProcessor(path);
         RealmConfiguration realmConfiguration;
-        userMgtConfigFile = new File(path);
+        File userMgtConfigFile = new File(path);
+        String modifiedTenantId = null;
 
         try {
-            realmElement = getRealmElement();
-            realmConfiguration = realmConfigXMLProcessor.buildRealmConfiguration(realmElement);
+            realmConfiguration = userStoreXMLProcessor.buildUserStoreConfigurationFromFile();
+            RealmService realmService = UserStoreConfigComponent.getRealmService();
 
-            CarbonContext.getCurrentContext().getUserRealm().getRealmConfiguration().setSecondaryRealmConfig(realmConfiguration.getSecondaryRealmConfig());
-            if (log.isDebugEnabled()) {
-                log.debug("Realm configuration of tenant:" + CarbonContext.getCurrentContext().getTenantId() + "  modified with " + path);
+            //tenant modified secondary user store configuration
+            if (path.contains("tenants")) {
+                Pattern p = Pattern.compile("-?\\d+");
+                Matcher m = p.matcher(path);
+                while (m.find()) {
+                    modifiedTenantId = m.group();
+                }
+                int tenantId = Integer.parseInt(modifiedTenantId);
+                realmConfiguration.setTenantId(tenantId);
+                setSecondaryUserStore(realmService.getTenantUserRealm(tenantId).getRealmConfiguration(), realmConfiguration);
+
+            } else {
+                //super tenant modified secondary user store configuration
+                setSecondaryUserStore(realmService.getBootstrapRealmConfiguration(), realmConfiguration);
             }
+                log.info("Realm configuration of tenant:" + CarbonContext.getCurrentContext().getTenantId() + "  modified with " + path);
 
         } catch (Exception ex) {
             throw new DeploymentException("The deployment of " + userMgtConfigFile.getName() + " is not valid.", ex);
@@ -85,50 +95,78 @@ public class UserStoreConfigurationDeployer extends AbstractDeployer {
 
     }
 
+    /**
+     * Set secondary user store at the very end of chain
+     *
+     * @param parent : primary user store
+     * @param child : secondary user store
+     */
+    private void setSecondaryUserStore(RealmConfiguration parent, RealmConfiguration child) {
+
+        while (parent.getSecondaryRealmConfig() != null) {
+            parent = parent.getSecondaryRealmConfig();
+        }
+
+        parent.setSecondaryRealmConfig(child);
+    }
+
+    /**
+     * Trigger un-deploying of a deployed file. Removes the deleted user store from chain
+     *
+     * @param fileName: domain name --> file name
+     * @throws org.apache.axis2.deployment.DeploymentException
+     *          for any errors
+     */
+    public void undeploy(String fileName) throws DeploymentException {
+        String[] fileNames = fileName.split(File.separator);
+        String domainName = fileNames[fileNames.length - 1].replace(".xml", "").replace("_", ".");
+
+        int tenantId;
+        RealmConfiguration secondary;
+        try {
+            tenantId = CarbonContext.getCurrentContext().getTenantId();
+            RealmConfiguration realmConfig = UserStoreConfigComponent.getRealmService().getTenantUserRealm(tenantId).getRealmConfiguration();
+
+            while (realmConfig.getSecondaryRealmConfig() != null) {
+                secondary = realmConfig.getSecondaryRealmConfig();
+                if (secondary.getUserStoreProperty("DomainName").equalsIgnoreCase(domainName)) {
+                    realmConfig.setSecondaryRealmConfig(secondary.getSecondaryRealmConfig());
+                    log.info("User store: " + domainName + " of tenant:" + tenantId + " is removed.");
+                    return;
+                } else {
+                    realmConfig = realmConfig.getSecondaryRealmConfig();
+                }
+            }
+
+
+        } catch (Exception ex) {
+            throw new DeploymentException("Error occurred at undeploying " + domainName + " from tenant:" + CarbonContext.getCurrentContext().getTenantId(), ex);
+        }
+
+    }
+
+    /**
+     * Unset secondary user store
+     *
+     * @param parent : primary user store
+     * @param child : secondary user store
+     */
+    private void unSetSecondaryUserStore(RealmConfiguration parent, RealmConfiguration child) {
+
+        while (parent.getSecondaryRealmConfig() != null) {
+            parent = parent.getSecondaryRealmConfig();
+        }
+
+        parent.setSecondaryRealmConfig(child);
+    }
+
+
     public void setDirectory(String s) {
 
     }
 
     public void setExtension(String s) {
 
-    }
-
-
-    /**
-     * Create an OMElement from the user-mgt.xml file.
-     *
-     * @return
-     * @throws XMLStreamException
-     * @throws IOException
-     * @throws UserStoreException
-     */
-    private OMElement getRealmElement() throws XMLStreamException, IOException, UserStoreException {
-        StAXOMBuilder builder = null;
-        InputStream inStream;
-        try {
-
-            inStream = new FileInputStream(userMgtConfigFile);
-
-            if (inStream == null) {
-                String message = "Configuration file could not be read in.";
-                if (log.isDebugEnabled()) {
-                    log.debug(message);
-                }
-                throw new FileNotFoundException(message);
-            }
-            inStream = CarbonUtils.replaceSystemVariablesInXml(inStream);
-        } catch (CarbonException e) {
-            throw new UserStoreException(e.getMessage(), e);
-        }
-        builder = new StAXOMBuilder(inStream);
-        OMElement documentElement = builder.getDocumentElement();
-
-        realmConfigXMLProcessor.setSecretResolver(documentElement);
-
-        OMElement realmElement = documentElement.getFirstChildWithName(new QName(
-                UserCoreConstants.RealmConfig.LOCAL_NAME_REALM));
-
-        return realmElement;
     }
 
 }
