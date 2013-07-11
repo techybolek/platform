@@ -22,15 +22,22 @@ package org.apache.synapse.config.xml;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.config.XMLToObjectMapper;
 import org.apache.synapse.config.xml.eventing.EventPublisherMediatorFactory;
+import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
+import org.apache.synapse.libraries.imports.SynapseImport;
+import org.apache.synapse.libraries.model.Library;
+import org.apache.synapse.mediators.Value;
+import org.apache.synapse.mediators.template.InvokeMediator;
 import sun.misc.Service;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,6 +51,9 @@ import java.util.Properties;
  */
 
 public class MediatorFactoryFinder implements XMLToObjectMapper {
+
+    private Map<String, Library> synapseLibraryMap;
+    private Map<String, SynapseImport> synapseImportMap;
 
 	private static final Log log = LogFactory.getLog(MediatorFactoryFinder.class);
 
@@ -182,6 +192,22 @@ public class MediatorFactoryFinder implements XMLToObjectMapper {
         }
 
         if (cls == null) {
+            if (synapseLibraryMap != null
+                    && !synapseLibraryMap.isEmpty()) {
+                for (Map.Entry<String, Library> entry : synapseLibraryMap.entrySet()) {
+                    if (entry.getValue().getLibArtifactDetails().containsKey(localName)) {
+                        return getDynamicInvokeMediator(element, entry.getValue().getPackage());
+                    }
+                }
+            } else if (!synapseImportMap.isEmpty()) {
+                for (Map.Entry<String, SynapseImport> entry : synapseImportMap.entrySet()) {
+                    if (localName.startsWith(entry.getValue().getLibName())) {
+                        return getDynamicInvokeMediator(element, entry.getValue().getLibPackage());
+                    }
+                }
+            }
+
+
             String msg = "Unknown mediator referenced by configuration element : " + qName;
             log.error(msg);
             throw new SynapseException(msg);
@@ -231,4 +257,79 @@ public class MediatorFactoryFinder implements XMLToObjectMapper {
         throw new SynapseException(msg);
     }
 
+    public Map<String, Library> getSynapseLibraryMap() {
+        return synapseLibraryMap;
+    }
+
+    public void setSynapseLibraryMap(Map<String, Library> synapseLibraryMap) {
+        this.synapseLibraryMap = synapseLibraryMap;
+    }
+
+    public Map<String, SynapseImport> getSynapseImportMap() {
+        return synapseImportMap;
+    }
+
+    public void setSynapseImportMap(Map<String, SynapseImport> synapseImportMap) {
+        this.synapseImportMap = synapseImportMap;
+    }
+
+    public static void main(String[] args) throws Exception{
+        String connectorStr = "<sfdc.getContact xmlns=\"http://ws.apache.org/ns/synapse\">\n" +
+                "\t\t <parameter name=\"param1\" value=\"val1\"/>\n" +
+                "\t\t <parameter name=\"param2\" value=\"val2\"/>\n" +
+                "\t</sfdc.getContact>";
+
+        OMElement inConnectorElem = AXIOMUtil.stringToOM(connectorStr);
+        String libName = "synapse.lang.eip";
+
+        InvokeMediator invokeMediator = MediatorFactoryFinder.getInstance().getDynamicInvokeMediator(inConnectorElem, libName);
+        invokeMediator.getTargetTemplate();
+
+
+    }
+
+    public OMElement getCallTemplateFromConnector(OMElement connectorElem, String libraryName) {
+        String callTemplateConfig = "<call-template target=\"synapse.lang.eip.sfdc.getContact\">\n" +
+                "            <with-param name=\"p1\" value=\"abc\"/>\n" +
+                "            <with-param name=\"p2\" value=\"efg\"/>\n" +
+                "        </call-template>";
+        OMElement callTemplateElem = null;
+
+        try {
+            callTemplateElem = AXIOMUtil.stringToOM(callTemplateConfig);
+
+
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        }
+        return callTemplateElem;
+    }
+
+    public InvokeMediator getDynamicInvokeMediator(OMElement connectorElem, String libraryName) {
+        InvokeMediator invokeMediator = new InvokeMediator();
+        if (connectorElem.getLocalName() != null
+                && libraryName != null
+                && !libraryName.equals("")) {
+            invokeMediator.setTargetTemplate(libraryName + "." + connectorElem.getLocalName());
+        }
+
+        Iterator parameters = connectorElem.getChildrenWithLocalName("parameter");
+        while (parameters.hasNext()) {
+            OMNode paramNode = (OMNode) parameters.next();
+            if (paramNode instanceof OMElement) {
+                String paramName =  ((OMElement) paramNode).getAttributeValue(new QName("name"));
+                String paramValueStr = ((OMElement) paramNode).getAttributeValue(new QName("value"));
+                if (paramName != null && !paramName.equals("")
+                        && paramValueStr != null
+                        && !paramValueStr.equals("")) {
+                    Value paramValue = new ValueFactory().createValue("value", (OMElement) paramNode);
+                    invokeMediator.addExpressionForParamName(paramName, paramValue);
+                }
+            }
+        }
+
+        invokeMediator.setDynamicMediator(true);
+        return invokeMediator;
+
+    }
 }

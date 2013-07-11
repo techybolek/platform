@@ -21,6 +21,7 @@ package org.apache.synapse.libraries.model;
 import org.apache.synapse.SynapseArtifact;
 
 import javax.xml.namespace.QName;
+import java.util.Map;
 
 public interface Library extends SynapseArtifact {
 
@@ -50,6 +51,9 @@ public interface Library extends SynapseArtifact {
      * @return
      */
     public String getArtifactDescription(String  artifactName);
+
+
+    public Map<String, String> getLibArtifactDetails();
 
     /**
      * load all library artifacts on this library for each and every namespace

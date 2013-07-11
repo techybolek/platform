@@ -81,6 +81,10 @@ public class SynapseLibrary implements Library {
         return libArtifactDetails.get(artifactName);
     }
 
+    public Map<String, String> getLibArtifactDetails() {
+        return libArtifactDetails;
+    }
+
     public void removeComponent(String qualifiedName) {
         libComponentIndex.remove(qualifiedName);
     }
@@ -197,4 +201,6 @@ public class SynapseLibrary implements Library {
     public void setLibClassLoader(ClassLoader libClassLoader) {
         this.libClassLoader = libClassLoader;
     }
+
+
 }

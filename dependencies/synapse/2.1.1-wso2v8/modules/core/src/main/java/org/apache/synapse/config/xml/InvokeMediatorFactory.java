@@ -48,6 +48,9 @@ public class InvokeMediatorFactory extends AbstractMediatorFactory {
      */
     public static final QName WITH_PARAM_Q = new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, "with-param");
 
+    public static final QName WITH_PARAM_DYNAMIC_Q = new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, "parameter");
+
+    
     InvokeMediator invoker;
 
     @Override

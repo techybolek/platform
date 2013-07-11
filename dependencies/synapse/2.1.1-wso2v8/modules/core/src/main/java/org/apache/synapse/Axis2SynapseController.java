@@ -376,10 +376,11 @@ public class Axis2SynapseController implements SynapseController {
     public SynapseEnvironment createSynapseEnvironment() {
 
         try {
+        	deployMediatorExtensions();
             deploySynapseService();
             deployProxyServices();
             deployEventSources();
-            deployMediatorExtensions();
+            //deployMediatorExtensions();
         } catch (AxisFault axisFault) {
             log.fatal("Synapse startup failed...", axisFault);
             throw new SynapseException("Synapse startup failed", axisFault);

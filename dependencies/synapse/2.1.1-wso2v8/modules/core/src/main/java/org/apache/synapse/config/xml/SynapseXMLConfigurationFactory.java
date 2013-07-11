@@ -176,6 +176,7 @@ public class SynapseXMLConfigurationFactory implements ConfigurationFactory {
         String name = ele.getAttributeValue(new QName(XMLConfigConstants.NULL_NAMESPACE, "name"));
         if (name != null) {
             try {
+            	MediatorFactoryFinder.getInstance().setSynapseImportMap(config.getSynapseImports());
                 mediator = MediatorFactoryFinder.getInstance().getMediator(ele, properties);
                 if (mediator != null) {
                     config.addSequence(name, mediator);

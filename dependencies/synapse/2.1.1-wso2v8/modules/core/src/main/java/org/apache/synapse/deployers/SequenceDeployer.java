@@ -50,7 +50,8 @@ public class SequenceDeployer extends AbstractSynapseArtifactDeployer {
             log.debug("Sequence Deployment from file : " + fileName + " : Started");
         }
 
-        try {    
+        try {
+            MediatorFactoryFinder.getInstance().setSynapseLibraryMap(getSynapseConfiguration().getSynapseLibraries());
             Mediator m = MediatorFactoryFinder.getInstance().getMediator(
                     artifactConfig, properties);
             if (m instanceof SequenceMediator) {

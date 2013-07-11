@@ -49,6 +49,8 @@ public class InvokeMediator extends AbstractMediator {
      * this is a read only attribute of the mediator
      */
     private Map<String, Value> pName2ExpressionMap;
+    
+    private boolean dynamicMediator =false;
 
     public InvokeMediator() {
         //LinkedHashMap is used to preserve tag order
@@ -109,4 +111,14 @@ public class InvokeMediator extends AbstractMediator {
     public void addExpressionForParamName(String pName, Value expr) {
         pName2ExpressionMap.put(pName, expr);
     }
+
+	public boolean isDynamicMediator() {
+    	return dynamicMediator;
+    }
+
+	public void setDynamicMediator(boolean dynamicMediator) {
+    	this.dynamicMediator = dynamicMediator;
+    }
+    
+    
 }

@@ -26,6 +26,8 @@ import org.apache.synapse.mediators.template.InvokeMediator;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
+
 /**
  * Serialize a Invoke mediator to a configuration given below
  * <invoke target="">
@@ -36,8 +38,9 @@ import java.util.Map;
  * ..
  * </invoke>
  */
-public class InvokeMediatorSerializer extends AbstractMediatorSerializer {
+public class InvokeMediatorSerializer extends AbstractMediatorSerializer{
     public static final String INVOKE_N = "call-template";
+    public static final String DYNAMIC_CONNECTOR_PREFIX="org.wso2.carbon.connectors";
 
     @Override
     protected OMElement serializeSpecificMediator(Mediator m) {
@@ -45,11 +48,18 @@ public class InvokeMediatorSerializer extends AbstractMediatorSerializer {
             handleException("Unsupported mediator passed in for serialization : " + m.getType());
         }
         InvokeMediator mediator = (InvokeMediator) m;
-        OMElement invokeElem = fac.createOMElement(INVOKE_N, synNS);
+        OMElement invokeElem = null;
+        if(mediator.isDynamicMediator()){
+        	invokeElem=fac.createOMElement(mediator.getTargetTemplate().substring(DYNAMIC_CONNECTOR_PREFIX.length()+1,mediator.getTargetTemplate().length()), synNS);
+        }else{
+        	invokeElem=fac.createOMElement(INVOKE_N, synNS);
+        }
 
         if (mediator.getTargetTemplate() != null) {
+        	if(!mediator.isDynamicMediator()){
             invokeElem.addAttribute(fac.createOMAttribute(
                     "target", nullNS, mediator.getTargetTemplate()));
+        	}
 
             serializeParams(invokeElem, mediator);
             saveTracingState(invokeElem, mediator);
@@ -64,7 +74,8 @@ public class InvokeMediatorSerializer extends AbstractMediatorSerializer {
         while (paramIterator.hasNext()) {
             String paramName = paramIterator.next();
             if (!"".equals(paramName)) {
-                OMElement paramEl = fac.createOMElement(InvokeMediatorFactory.WITH_PARAM_Q.getLocalPart(),
+            	String prefix = mediator.isDynamicMediator()?InvokeMediatorFactory.WITH_PARAM_DYNAMIC_Q.getLocalPart():InvokeMediatorFactory.WITH_PARAM_Q.getLocalPart();
+                OMElement paramEl = fac.createOMElement(prefix,
                                                         synNS);
                 paramEl.addAttribute(fac.createOMAttribute("name", nullNS, paramName));
                 //serialize value attribute
@@ -79,4 +90,6 @@ public class InvokeMediatorSerializer extends AbstractMediatorSerializer {
     public String getMediatorClassName() {
         return InvokeMediator.class.getName();
     }
+    
+ 
 }

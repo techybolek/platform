@@ -123,6 +123,8 @@ public class MultiXMLConfigurationBuilder {
                     " will be neglected");
         }
 
+        createSynapseImports(synapseConfig, root, properties);
+
         createLocalEntries(synapseConfig, root, properties);
         createEndpoints(synapseConfig, root, properties);
         createSequences(synapseConfig, root, properties);
@@ -133,7 +135,7 @@ public class MultiXMLConfigurationBuilder {
         createExecutors(synapseConfig, root, properties);
         createMessageStores(synapseConfig, root, properties);
         createMessageProcessors(synapseConfig, root, properties);
-        createSynapseImports(synapseConfig, root, properties);
+
         createAPIs(synapseConfig, root, properties);
 
         return synapseConfig;
