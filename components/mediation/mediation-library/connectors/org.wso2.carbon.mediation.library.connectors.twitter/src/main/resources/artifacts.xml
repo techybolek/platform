@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <artifacts>
-    <artifact name="SynapseTwitterLib" package="org.apache.synapse.twitter" >
-        <dependency artifact="twitter_core" />
+    <artifact name="twitter" package="org.wso2.carbon.connectors" >
+        <dependency artifact="twitter" />
         <description>synapse library for twitter</description>
     </artifact>
 </artifacts>

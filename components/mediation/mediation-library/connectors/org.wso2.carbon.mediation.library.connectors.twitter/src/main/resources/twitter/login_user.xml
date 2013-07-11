@@ -1,4 +1,4 @@
-<template xmlns="http://ws.apache.org/ns/synapse" name="login_user">
+<template xmlns="http://ws.apache.org/ns/synapse" name="twitter.login_user">
 	<parameter name="oauth.consumerKey"/>
         <parameter name="oauth.consumerSecret"/>
         <parameter name="oauth.accessToken"/>

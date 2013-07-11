@@ -1,0 +1,15 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="twitter.retweet">
+	<parameter name="oauth.consumerKey" />
+	<parameter name="oauth.consumerSecret" />
+	<parameter name="oauth.accessToken" />
+	<parameter name="oauth.accessTokenSecret" />
+	<parameter name="id" />
+	<sequence>
+		<log level="full">
+			<property name="Twitter retweet status" expression="$func:id" />
+		</log>
+		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
+		<class
+			name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterRetweetStatusMediator" />
+	</sequence>
+</template>	

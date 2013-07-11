@@ -28,7 +28,7 @@ public class TwitterLoginUserMediator extends AbstractConnector {
             String accessToken = TwitterMediatorUtils.lookupFunctionParam(messageContext, ACCESS_TOKEN);
             String accessTokenSecret = TwitterMediatorUtils.lookupFunctionParam(messageContext, ACCESS_TOKEN_SECRET);
             TwitterMediatorUtils.storeLoginUser(messageContext, consumerKey, consumerSecret, accessToken, accessTokenSecret);
-            log.info("User registered");
+            log.info("User registered  saman@wso2.com ##################################");
         } catch (Exception e) {
             log.error("Failed to login user: " + e.getMessage(), e);
             TwitterMediatorUtils.storeErrorResponseStatus(messageContext, e);

@@ -30,12 +30,12 @@ public class TwitterClientLoader {
         if (messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_KEY) != null && messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_SECRET) != null &&
                 messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN) != null && messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN_SECRET) != null) {
             ConfigurationBuilder build = new ConfigurationBuilder();
+            build.setJSONStoreEnabled(true);
             build.setOAuthAccessToken(messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN).toString());
             build.setOAuthAccessTokenSecret(messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN_SECRET).toString());
             build.setOAuthConsumerKey(messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_KEY).toString());
             build.setOAuthConsumerSecret(messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_SECRET).toString());
-            OAuthAuthorization auth = new OAuthAuthorization(build.build());
-            twitter = new TwitterFactory().getInstance(auth);
+            twitter = new TwitterFactory(build.build()).getInstance();
             twitter.verifyCredentials();
         } else {
             twitter = new TwitterFactory().getInstance();
