@@ -16,21 +16,21 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.authorization.core;
+package org.wso2.carbon.identity.authorization.core.dto;
 
 /**
  * 
+ * @author venura
+ * @date May 15, 2013
  */
-public class AuthorizationConstants {
+public class UserPermission extends PermissionAssignment {
+	private String userName;
 
-	public static final String DEFAULT_ACTION = "read";
+	public String getUserName() {
+		return userName;
+	}
 
-	public static final int DEFAULT_ITEMS_PER_PAGE = 50;
-
-	public static final String SEPARATOR = "/";
-
-	public static final byte ADD_PERMISSION = 1;
-	public static final byte UPDATE_PERMISSION = 2;
-	public static final byte REMOVE_PERMISSION = 3;
-
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 }
