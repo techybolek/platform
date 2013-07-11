@@ -80,8 +80,9 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
     //Method can be replaced with GREG. Returns GregDocument
     public GregDocument getGregNode(Resource node) throws RegistryException {
         String version = node.getPath();
-        if(repository.getVersions(node.getPath()) !=null){
-            String[] versions = repository.getVersions(node.getPath());
+        String[] versions = repository.getVersions(node.getPath());
+
+        if(versions !=null && versions.length != 0){
             version = versions[0];
         }
     	return new GregVersion(repository, node, version, typeManager, pathManager);

@@ -17,21 +17,28 @@
 package org.wso2.carbon.registry.cmis;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContextFactory;
+
 import org.apache.chemistry.opencmis.commons.exceptions.CmisRuntimeException;
 import org.apache.chemistry.opencmis.commons.impl.server.AbstractServiceFactory;
 import org.apache.chemistry.opencmis.commons.server.CallContext;
 import org.apache.chemistry.opencmis.commons.server.CmisService;
 import org.apache.chemistry.opencmis.commons.server.CmisServiceFactory;
 import org.apache.chemistry.opencmis.server.support.CmisServiceWrapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
+
 import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
 import org.wso2.carbon.registry.cmis.impl.FolderTypeHandler;
 import org.wso2.carbon.registry.cmis.impl.UnversionedDocumentTypeHandler;
+
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -131,29 +138,25 @@ public class GregServiceFactory extends AbstractServiceFactory {
      */
     protected Registry acquireGregRepository(Map<String, String> gregConfig, CallContext context) throws RegistryException, AxisFault {
 
-        //These two variables can be read via gregConfig
-       // System.setProperty("carbon.home", gregConfig.get(CARBON_HOME));
-        String trustStore = gregConfig.get(TRUST_STORE);
-
-        System.setProperty("javax.net.ssl.trustStore", trustStore);
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-        System.setProperty("carbon.repo.write.mode","true");
-
-        /*The following variables can be in the repositories.properties file.
-         *They could be accessed by gregConfig */
-        String axis2Repo = gregConfig.get(AXIS2_REPO);
-        String axis2Conf = gregConfig.get(AXIS2_CONF);
-        String serverUrl = gregConfig.get(SERVER_URL);
 
         String username = context.getUsername();
         String password = context.getPassword();
 
-        log.debug("Trying inside aquireGregRepository");
-        org.apache.axis2.context.ConfigurationContext configurationContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2Repo, axis2Conf);
-        Registry registry = new WSRegistryServiceClient(serverUrl, username, password, configurationContext);
-        log.debug("Got registry instance!!");
-        return registry;
+        //log.debug("Trying inside aquireGregRepository");
+
+        //log.debug("Got registry instance!!");
+        UserRegistry userRegistry = null;
+        try{
+
+             RegistryService registryService =
+                                      (RegistryService) PrivilegedCarbonContext.getCurrentContext().getOSGiService(RegistryService.class);
+             userRegistry = registryService.getRegistry(username, password);
+
+           }  catch (RegistryException e) {
+             log.error("unable to create registry instance for the respective enduser", e);
+           }
+
+           return userRegistry;
     }
 
     /**
