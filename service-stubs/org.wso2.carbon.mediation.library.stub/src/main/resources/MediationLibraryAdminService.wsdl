@@ -123,6 +123,26 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+ 
+       <!-- Get libary information  -->
+        <xs:element name="getLibraryInfo">
+            <xs:complexType>
+               <xs:sequence>
+
+                  <xs:element minOccurs="0" name="libName" nillable="true" type="xs:string" />
+                  <xs:element minOccurs="0" name="packageName" nillable="true" type="xs:string" />
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+
+        <xs:element name="getLibraryInfoResponse">
+            <xs:complexType>
+               <xs:sequence>
+ 		   <xs:element name="return" nillable="true" type="ax2299:LibraryInfo" />
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+
       </xs:schema>
    </wsdl:types>
    <wsdl:message name="addImportRequest">
@@ -172,6 +192,16 @@
    <wsdl:message name="getImportResponse">
       <wsdl:part name="parameters" element="ns:getImportResponse" />
    </wsdl:message>
+
+   <!-- Get libaray information -->
+   <wsdl:message name="getLibraryInfoRequest">
+      <wsdl:part name="parameters" element="ns:getLibraryInfo" />
+   </wsdl:message>
+   <wsdl:message name="getLibraryInfoResponse">
+      <wsdl:part name="parameters" element="ns:getLibraryInfoResponse" />
+   </wsdl:message>
+   <!-- End get libary information -->
+    
    <wsdl:portType name="MediationLibraryAdminServicePortType">
       <wsdl:operation name="addImport">
          <wsdl:input message="tns:addImportRequest" wsaw:Action="urn:addImport" />
@@ -206,6 +236,12 @@
       <wsdl:operation name="getImport">
          <wsdl:input message="tns:getImportRequest" wsaw:Action="urn:getImport" />
          <wsdl:output message="tns:getImportResponse" wsaw:Action="urn:getImportResponse" />
+      </wsdl:operation>
+
+     <!-- Get Library information -->
+      <wsdl:operation name="getLibraryInfo">
+         <wsdl:input message="tns:getLibraryInfoRequest" wsaw:Action="urn:getLibraryInfo" />
+         <wsdl:output message="tns:getLibraryInfoResponse" wsaw:Action="urn:getLibraryInfoResponse" />
       </wsdl:operation>
 
    </wsdl:portType>
@@ -280,6 +316,17 @@
 
       <wsdl:operation name="getAllLibraryInfo">
          <soap:operation soapAction="urn:getAllLibraryInfo" style="document" />
+         <wsdl:input>
+            <soap:body use="literal" />
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal" />
+         </wsdl:output>
+      </wsdl:operation>
+
+       <!-- Get library information -->
+        <wsdl:operation name="getLibraryInfo">
+         <soap:operation soapAction="urn:getLibraryInfo" style="document" />
          <wsdl:input>
             <soap:body use="literal" />
          </wsdl:input>
@@ -368,6 +415,17 @@
          </wsdl:output>
       </wsdl:operation>
 
+        <!-- Get library information -->
+        <wsdl:operation name="getLibraryInfo">
+         <soap:operation soapAction="urn:getLibraryInfo" style="document" />
+         <wsdl:input>
+            <soap12:body use="literal" />
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal" />
+         </wsdl:output>
+      </wsdl:operation>
+
    </wsdl:binding>
    <wsdl:binding name="MediationLibraryAdminServiceHttpBinding" type="tns:MediationLibraryAdminServicePortType">
       <http:binding verb="POST" />
@@ -441,6 +499,18 @@
             <mime:content type="text/xml" part="parameters" />
          </wsdl:output>
       </wsdl:operation>
+
+      <!-- Get library information -->
+        <wsdl:operation name="getLibraryInfo">
+         <soap:operation soapAction="urn:getLibraryInfo" style="document" />
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters" />
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters" />
+         </wsdl:output>
+      </wsdl:operation>
+
    </wsdl:binding>
    <wsdl:service name="MediationLibraryAdminService">
       <wsdl:port name="MediationLibraryAdminServiceHttpsSoap11Endpoint" binding="tns:MediationLibraryAdminServiceSoap11Binding">
