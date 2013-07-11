@@ -220,14 +220,21 @@
                 <include>**/multitenancy-packages.xml</include>
                 <include>**/usage-throttling-agent-config.xml</include>
             </includes>
-        </fileSet>
-
+        </fileSet>       
+        
 	<fileSet>
              <directory>../../p2-profile/product/target/WSO2-CARBON-PATCH-4.1.0-0001</directory>
              <outputDirectory>wso2am-${pom.version}/repository/components/patches/</outputDirectory>
              <includes>
                   <include>**/patch0001/*.*</include>
              </includes>
+        </fileSet>
+        
+        <!--Below directory should contain the landing page of APIM,when it is added to SLive.For the moment this directory keeps as empty and this is for APIMANAGER-1340 -->  
+        <fileSet>
+        <directory>src/main/resources/STRATOS_ROOT</directory>
+        <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps/STRATOS_ROOT</outputDirectory>
+        <fileMode>755</fileMode>
         </fileSet>
 
         <!--End of  API Manager related -->
