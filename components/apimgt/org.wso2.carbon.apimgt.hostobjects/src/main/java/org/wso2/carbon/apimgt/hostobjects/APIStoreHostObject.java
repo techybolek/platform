@@ -289,9 +289,11 @@ public class APIStoreHostObject extends ScriptableObject {
                     true, userAdminStub._getServiceClient());
             //If multiple user stores are in use, and if the user hasn't specified the domain to which
             //he needs to login to
-            if (userAdminStub.hasMultipleUserStores() && !username.contains("/")) {
+            /* Below condition is commented out as per new multiple users-store implementation,users from
+            different user-stores not needed to input domain names when tried to login, APIMANAGER-1392*/
+            /*if (userAdminStub.hasMultipleUserStores() && !username.contains("/")) {
                 handleException("Domain not specified. Please provide your username as domain/username");
-            }
+            } */
         } catch (APIManagementException e) {
             row.put("error", row, true);
             row.put("detail", row, e.getMessage());
