@@ -1,3 +1,5 @@
+<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
+<%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page session="true" %>
@@ -13,7 +15,6 @@
 <%@ page import="org.wso2.carbon.user.mgt.ui.PaginatedNamesBean" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.Util" %>
 <%@ page import="java.util.*" %>
-<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
@@ -293,7 +294,7 @@
                                             }
                             %>
                                 <input type="checkbox" name="userRoles"
-                                       value="<%=name.getItemName()%>" <%=doCheck%> <%=doEdit%> /><%=CharacterEncoder.getSafeText(name.getItemName())%>
+                                       value="<%=name.getItemName() + UserCoreConstants.DN_COMBINER + name.getDn()%>" <%=doCheck%> <%=doEdit%> /><%=CharacterEncoder.getSafeText(name.getItemName())%>
                                 <input type="hidden" name="shownUsers" value="<%=CharacterEncoder.getSafeText(name.getItemName())%>"/><br/>
                             <%
                                             }

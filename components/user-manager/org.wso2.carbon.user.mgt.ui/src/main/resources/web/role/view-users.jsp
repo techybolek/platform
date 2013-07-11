@@ -15,6 +15,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page session="true" %>
@@ -95,7 +96,7 @@
         }
     </script>
 <%
-    // search filter
+	// search filter
     String filter = request.getParameter(UserAdminUIConstants.ROLE_LIST_VIEW_USER_FILTER);
     if (filter == null || filter.trim().length() == 0) {
         filter = (java.lang.String) session.getAttribute(UserAdminUIConstants.ROLE_LIST_VIEW_USER_FILTER);
@@ -110,83 +111,109 @@
     session.setAttribute(UserAdminUIConstants.ROLE_LIST_VIEW_USER_FILTER, filter);
 
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
+	String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
+	String roleNameWithDn = roleName;
+	if (rIndex != null) {
+		int roleIndex = Integer.parseInt(rIndex);
 
-    String readOnlyRoleString  = request.getParameter(UserAdminUIConstants.ROLE_READ_ONLY);
-    if(readOnlyRoleString == null){
-        readOnlyRoleString = (String) session.getAttribute(UserAdminUIConstants.ROLE_READ_ONLY);
-    }
-    if("true".equals(readOnlyRoleString)){
-        readOnlyRole = true;
-    }
+		FlaggedName[] datas =
+		                      (FlaggedName[]) session.getAttribute(UserAdminUIConstants.ROLE_LIST);
+		roleNameWithDn = roleName + UserCoreConstants.DN_COMBINER;
+		if (datas != null && roleIndex < datas.length) {
+			roleNameWithDn += datas[roleIndex].getDn();
+		}
+	} 
+	
+	String roleWithoutDn = roleNameWithDn.split(UserCoreConstants.DN_COMBINER)[0];
+	
+	String readOnlyRoleString = request.getParameter(UserAdminUIConstants.ROLE_READ_ONLY);
+	if (readOnlyRoleString == null) {
+		readOnlyRoleString =
+		                     (String) session.getAttribute(UserAdminUIConstants.ROLE_READ_ONLY);
+	}
+	if ("true".equals(readOnlyRoleString)) {
+		readOnlyRole = true;
+	}
 
-    exceededDomains = (FlaggedName) session.getAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE_EXCEEDED);
+	exceededDomains =
+	                  (FlaggedName) session.getAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE_EXCEEDED);
 
-    // check page number
-    String pageNumberStr = request.getParameter("pageNumber");
-    if (pageNumberStr == null) {
-        pageNumberStr = "0";
-    }
+	// check page number
+	String pageNumberStr = request.getParameter("pageNumber");
+	if (pageNumberStr == null) {
+		pageNumberStr = "0";
+	}
 
-    try {
-        pageNumber = Integer.parseInt(pageNumberStr);
-    } catch (NumberFormatException ignored) {
-        // page number format exception
-    }
+	try {
+		pageNumber = Integer.parseInt(pageNumberStr);
+	} catch (NumberFormatException ignored) {
+		// page number format exception
+	}
 
-    flaggedNameMap  = (Map<Integer, PaginatedNamesBean>) session.
-                        getAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE);
-    if(flaggedNameMap != null){
-        PaginatedNamesBean bean = flaggedNameMap.get(pageNumber);
-        if(bean != null){
-            users = bean.getNames();
-            if(users != null && users.length > 0){
-                numberOfPages = bean.getNumberOfPages();
-                doUserList = false;
-            }
-        }
-    }
-    
-    if(doUserList || newFilter){
-        try {
-            String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-            String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
-            ConfigurationContext configContext =
-                    (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-            UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
-            if (filter.length() > 0) {
-                FlaggedName[] data = client.getUsersOfRole(roleName, filter, 0);
-                dataList = new ArrayList<FlaggedName>(Arrays.asList(data));
-                exceededDomains = dataList.remove(dataList.size() - 1);
-                session.setAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE_EXCEEDED, exceededDomains);
-                if(dataList != null && dataList.size() > 0){
-                    flaggedNameMap = new HashMap<Integer, PaginatedNamesBean>();
-                    int max = pageNumber + cachePages;
-                    for(int i = (pageNumber - cachePages); i < max ; i++){
-                        if(i < 0){
-                            max++;
-                            continue;
-                        }
-                        PaginatedNamesBean bean  =  Util.
-                            retrievePaginatedFlaggedName(i,dataList);
-                        flaggedNameMap.put(i, bean);
-                        if(bean.getNumberOfPages() == i + 1){
-                            break;
-                        }
-                    }
-                    users = flaggedNameMap.get(pageNumber).getNames();
-                    numberOfPages = flaggedNameMap.get(pageNumber).getNumberOfPages();
-                    session.setAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE, flaggedNameMap);
-                } else {
-                    session.removeAttribute(UserAdminUIConstants.ROLE_LIST_VIEW_USER_FILTER);                    
-                    showFilterMessage = true;
-                }
-            }
-        } catch (Exception e) {
-//            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-//            session.setAttribute(CarbonUIMessage.ID, uiMsg);
-//            return;
-            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
-    %>
+	flaggedNameMap =
+	                 (Map<Integer, PaginatedNamesBean>) session.getAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE);
+	if (flaggedNameMap != null) {
+		PaginatedNamesBean bean = flaggedNameMap.get(pageNumber);
+		if (bean != null) {
+			users = bean.getNames();
+			if (users != null && users.length > 0) {
+				numberOfPages = bean.getNumberOfPages();
+				doUserList = false;
+			}
+		}
+	}
+
+	if (doUserList || newFilter) {
+		try {
+			String cookie =
+			                (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+			String backendServerURL =
+			                          CarbonUIUtil.getServerURL(config.getServletContext(),
+			                                                    session);
+			ConfigurationContext configContext =
+			                                     (ConfigurationContext) config.getServletContext()
+			                                                                  .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+			UserAdminClient client =
+			                         new UserAdminClient(cookie, backendServerURL,
+			                                             configContext);
+			if (filter.length() > 0) {
+				FlaggedName[] data = client.getUsersOfRole(roleNameWithDn, filter, 0);
+				dataList = new ArrayList<FlaggedName>(Arrays.asList(data));
+				exceededDomains = dataList.remove(dataList.size() - 1);
+				session.setAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE_EXCEEDED,
+				                     exceededDomains);
+				if (dataList != null && dataList.size() > 0) {
+					flaggedNameMap = new HashMap<Integer, PaginatedNamesBean>();
+					int max = pageNumber + cachePages;
+					for (int i = (pageNumber - cachePages); i < max; i++) {
+						if (i < 0) {
+							max++;
+							continue;
+						}
+						PaginatedNamesBean bean =
+						                          Util.retrievePaginatedFlaggedName(i,
+						                                                            dataList);
+						flaggedNameMap.put(i, bean);
+						if (bean.getNumberOfPages() == i + 1) {
+							break;
+						}
+					}
+					users = flaggedNameMap.get(pageNumber).getNames();
+					numberOfPages = flaggedNameMap.get(pageNumber).getNumberOfPages();
+					session.setAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE,
+					                     flaggedNameMap);
+				} else {
+					session.removeAttribute(UserAdminUIConstants.ROLE_LIST_VIEW_USER_FILTER);
+					showFilterMessage = true;
+				}
+			}
+		} catch (Exception e) {
+			//            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+			//            session.setAttribute(CarbonUIMessage.ID, uiMsg);
+			//            return;
+			CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
+			                                    request);
+%>
             <script type="text/javascript">
                 doCancel();
             </script>
@@ -285,7 +312,7 @@
 
 
 <div id="middle">
-    <h2><fmt:message key="users.list.in.role"/> <%=roleName%>
+    <h2><fmt:message key="users.list.in.role"/> <%=roleWithoutDn%>
     </h2>
 
     <script type="text/javascript">
@@ -296,7 +323,9 @@
 
     </script>
     <div id="workArea">
-        <form name="filterForm" method="post" action="view-users.jsp?roleName=<%=roleName%>">
+        <form name="filterForm" method="post" action="view-users.jsp">
+        	<input type="hidden" name="roleName" value="<%=roleName %>" />
+        	<input type="hidden" name="i" value="<%=rIndex %>"/>
             <table class="normal">
                 <tr>
                     <td><fmt:message key="list.users"/></td>
@@ -321,9 +350,10 @@
                           parameters="<%="roleName="+roleName%>"/>
         <form method="post" action="edit-users-finish.jsp?viewUsers=true" onsubmit="return doValidation();"
               name="edit_users" id="edit_users">
-            <input type="hidden" id="roleName" name="roleName" value="<%=roleName%>"/>
+            <input type="hidden" id="roleName" name="roleName" value="<%=roleNameWithDn%>"/>
             <input type="hidden" id="logout" name="logout" value="false"/>
             <input type="hidden" id="finish" name="finish" value="false"/>
+            <input type="hidden" name="i" value="<%=rIndex %>"/>
 
             <table class="styledLeft" id="table_users_list_of_role">
 

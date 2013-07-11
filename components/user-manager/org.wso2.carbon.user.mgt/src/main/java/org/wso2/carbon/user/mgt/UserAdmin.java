@@ -209,7 +209,7 @@ public class UserAdmin {
      * @see org.wso2.carbon.user.mgt.TestClass#addRole(java.lang.String,
      * java.lang.String[], java.util.Map)
      */
-    public void addRole(String roleName, String[] userList, String[] permissions)
+    public void addRole(String roleName, String[] userList, String[] permissions, boolean isSharedRole)
             throws UserAdminException {
 		String result = null;
 
@@ -218,7 +218,7 @@ public class UserAdmin {
 			if (!isAllowedRoleName(roleName, realm)) {
 				throw new UserAdminException("Role name is reserved by the system");
 			}
-			getUserAdminProxy().addRole(roleName, userList, permissions);
+			getUserAdminProxy().addRole(roleName, userList, permissions, isSharedRole);
 			result = "Success";
 		} catch (UserAdminException e) {
 			result = "Failed";

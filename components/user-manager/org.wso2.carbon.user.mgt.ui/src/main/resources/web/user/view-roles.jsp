@@ -15,6 +15,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page session="true" %>
@@ -372,7 +373,7 @@
                                 <tr>
                                     <td>
                                         <label>
-                                            <input type="checkbox" name="selectedRoles" value="<%=name.getItemName()%>" <%=doCheck%> <%=doEdit%> />
+                                            <input type="checkbox" name="selectedRoles" value="<%=name.getItemName() + UserCoreConstants.DN_COMBINER + name.getDn()%>" <%=doCheck%> <%=doEdit%> />
                                                 <%=CharacterEncoder.getSafeText(name.getItemName())%>
                                                 <%if (!name.getEditable()) { %> <%="(Read-Only)"%> <% } %>
                                             <input type="hidden" name="shownRoles" value="<%=CharacterEncoder.getSafeText(name.getItemName())%>"/>
@@ -383,7 +384,7 @@
                                             <a style="background-image:url(images/edit.gif);" class="icon-link" href="../role/edit-permissions.jsp?roleName=<%=name.getItemName()%>&prevPage=view&prevUser=<%=userName%>&prevPageNumber=<%=pageNumber%>"><fmt:message key="edit.permissions"/></a>
                                         <%} %>
                                         <% if(!userRealmInfo.getEveryOneRole().equals(name.getItemName())) {%>
-                                            <a style="background-image:url(images/view.gif);" class="icon-link" href="../role/view-users.jsp?roleName=<%=name.getItemName()%>&prevPage=view&prevUser=<%=userName%>&prevPageNumber=<%=pageNumber%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%if (!name.getEditable()) { %>true<% }else{ %>false<% } %>"><fmt:message key="view.users"/></a>
+                                            <a style="background-image:url(images/view.gif);" class="icon-link" href="../role/view-users.jsp?roleName=<%=name.getItemName() + UserCoreConstants.DN_COMBINER + name.getDn()%>&prevPage=view&prevUser=<%=userName%>&prevPageNumber=<%=pageNumber%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%if (!name.getEditable()) { %>true<% }else{ %>false<% } %>"><fmt:message key="view.users"/></a>
                                         <% } %>
                                     </td>
                                     <% } %>

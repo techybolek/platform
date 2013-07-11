@@ -27,6 +27,13 @@ import javax.mail.util.ByteArrayDataSource;
 import java.util.*;
 
 public class Util {
+	
+	public static String getDN(String roleName, int index, FlaggedName[] names){
+		if(names != null && names.length > index ){
+			return names[index].getDn();
+		}
+		return null;
+	}
 
     public static UserStoreInfo getUserStoreInfo(String domainName, UserRealmInfo realmInfo) {
 

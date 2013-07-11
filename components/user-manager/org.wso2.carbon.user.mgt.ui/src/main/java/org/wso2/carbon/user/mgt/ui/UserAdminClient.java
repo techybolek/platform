@@ -68,13 +68,14 @@ public class UserAdminClient  {
         }
     }
 
-    public void addRole(String roleName, String[] userList, String[] permissions) throws AxisFault {
-        try {
-            stub.addRole(roleName, userList, permissions);
-        } catch (Exception e) {
-            handleException(e);
-        }
-    }
+	public void addRole(String roleName, String[] userList, String[] permissions,
+	                    boolean isSharedRole) throws AxisFault {
+		try {
+			stub.addRole(roleName, userList, permissions, isSharedRole);
+		} catch (Exception e) {
+			handleException(e);
+		}
+	}
 
     public void addInternalRole(String roleName, String[] userList, String[] permissions)
                                                                         throws AxisFault {

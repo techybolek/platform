@@ -78,6 +78,7 @@ public class UserAdminUIConstants {
     public static final String USER_LIST_ADD_USER_ROLE_CACHE_EXCEEDED = "user.list.add.user.cache.exceeded.domains";
 
     public static final String ROLE_LIST_CACHE = "role.list.cache";
+    public static final String ROLE_LIST = "role.list";
     public static final String ROLE_LIST_CACHE_EXCEEDED = "role.list.cache.exceeded.domains";
 
     public static final String ROLE_LIST_UNASSIGNED_USER_CACHE = "role.list.unassigned.user.cache";

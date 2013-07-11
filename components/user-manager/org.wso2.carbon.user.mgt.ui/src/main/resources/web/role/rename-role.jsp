@@ -15,6 +15,8 @@
  ~ specific langauage governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
+<%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
@@ -32,6 +34,16 @@
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
     String modifiedRole = roleName;
     UserStoreInfo[] allUserStoreInfo = null;
+    
+    String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
+    int roleIndex = Integer.parseInt(rIndex);
+    
+    FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
+    String roleNameWithDn = roleName + UserCoreConstants.DN_COMBINER;
+    if(datas != null && roleIndex < datas.length){
+    	roleNameWithDn += datas[roleIndex].getDn();
+    }
+
     
     if(modifiedRole.contains(UserAdminUIConstants.DOMAIN_SEPARATOR)){
         modifiedRole = modifiedRole. substring(modifiedRole.indexOf(UserAdminUIConstants.DOMAIN_SEPARATOR) + 1);
@@ -111,7 +123,7 @@
 
         function doRename() {
 		    if(doValidation()){
-                var oldRoleName = "<%=roleName%>";
+                var oldRoleName = "<%=roleNameWithDn%>";
                 var newRoleName = document.getElementById("roleName").value;
                 
                 if (newRoleName.indexOf("/") !=-1) {
@@ -130,7 +142,8 @@
                      }                	                 	 
                 } 
                 
-                location.href = 'rename-role-finish.jsp?oldRoleName='+oldRoleName+'&newRoleName='+newRoleName;
+                //location.href = 'rename-role-finish.jsp?oldRoleName='+oldRoleName+'&newRoleName='+newRoleName;
+                $("#renameRoleForm").submit();
             }
         }
 
@@ -140,9 +153,10 @@
     <div id="middle">
         <h2><fmt:message key="rename.user.role"/></h2>
         <div id="workArea">
-            <form>
+            <form action="rename-role-finish.jsp" method="post" id="renameRoleForm">
             
-                 <input type="hidden"  id="role_regex" name="role_regex" value=<%=regEx%>>                              
+                 <input type="hidden"  id="role_regex" name="role_regex" value=<%=regEx%>>
+                 <input type="hidden"  id="oldRoleName" name="oldRoleName" value=<%=roleNameWithDn%>>                              
                  
                 <table class="styledLeft">
                     <thead>
@@ -156,7 +170,7 @@
                                 <tr>
                                     <td><fmt:message key="role.rename"/><font color="red">*</font>
                                     </td>
-                                    <td><input type="text" value="<%=modifiedRole%>" id="roleName"/></td>
+                                    <td><input type="text" name="newRoleName" value="<%=modifiedRole%>" id="roleName"/></td>
                                 </tr>
                             </table>
                             <!-- normal table -->

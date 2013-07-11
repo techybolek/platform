@@ -15,6 +15,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@page import="org.apache.axis2.context.ConfigurationContext"%>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIMessage"%>
@@ -48,7 +49,9 @@
         viewUsers = Boolean.parseBoolean(request.getParameter("viewUsers"));
     }
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
+    String roleNameWithoutDn = roleName.split(UserCoreConstants.DN_COMBINER)[0];
 
+    String roleIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
     try {
 
         String cookie = (String)session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -88,7 +91,7 @@
             session.removeAttribute(UserAdminUIConstants.ROLE_LIST_UNASSIGNED_USER_CACHE_EXCEEDED);
         }
 
-        String message = MessageFormat.format(resourceBundle.getString("role.update"), roleName);
+        String message = MessageFormat.format(resourceBundle.getString("role.update"), roleNameWithoutDn);
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
 
         if(logout){
@@ -96,21 +99,21 @@
         } else if(finish) {          
         	forwardTo = "role-mgt.jsp";
         } else if (viewUsers){
-            forwardTo = "view-users.jsp?roleName=" + roleName +"&pageNumber=" + pageNumber;            
+            forwardTo = "view-users.jsp?roleName=" + roleNameWithoutDn +"&pageNumber=" + pageNumber + "&i=" + roleIndex;            
         } else {
-            forwardTo = "edit-users.jsp?roleName=" + roleName +"&pageNumber=" + pageNumber;
+            forwardTo = "edit-users.jsp?roleName=" + roleNameWithoutDn +"&pageNumber=" + pageNumber + "&i=" + roleIndex;
         }
 
     } catch(InstantiationException e){
         CarbonUIMessage.sendCarbonUIMessage("Your session has timed out. Please try again.", CarbonUIMessage.ERROR, request);
         forwardTo = "role-mgt.jsp?ordinal=1";
     } catch (Exception e) {
-	    String message = MessageFormat.format(resourceBundle.getString("role.cannot.update"), roleName, e.getMessage());
+	    String message = MessageFormat.format(resourceBundle.getString("role.cannot.update"), roleNameWithoutDn, e.getMessage());
 	    CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         if (viewUsers){
-	        forwardTo = "view-users.jsp?roleName=" + roleName;
+	        forwardTo = "view-users.jsp?roleName=" + roleNameWithoutDn + "&i=" + roleIndex;
         } else {
-            forwardTo = "edit-users.jsp?roleName=" + roleName;
+            forwardTo = "edit-users.jsp?roleName=" + roleNameWithoutDn + "&i=" + roleIndex;
         }
     }
 %>

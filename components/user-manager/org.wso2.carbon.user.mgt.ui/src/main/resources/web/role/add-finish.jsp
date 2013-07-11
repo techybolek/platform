@@ -39,6 +39,7 @@
     try {
         roleName = CharacterEncoder.getSafeText(roleBean.getRoleName());
         roleType = roleBean.getRoleType();
+        boolean isSharedRole = roleBean.getSharedRole() != null && !roleBean.getSharedRole().isEmpty(); 
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.getServletContext().
@@ -51,7 +52,7 @@
             client.addInternalRole(roleName, roleBean.getRoleUsers(),
                                                                 roleBean.getSelectedPermissions());
         } else {
-            client.addRole(roleName, roleBean.getRoleUsers(), roleBean.getSelectedPermissions());
+            client.addRole(roleName, roleBean.getRoleUsers(), roleBean.getSelectedPermissions(), isSharedRole);
         }
 
         session.removeAttribute(UserAdminUIConstants.ROLE_LIST_CACHE);

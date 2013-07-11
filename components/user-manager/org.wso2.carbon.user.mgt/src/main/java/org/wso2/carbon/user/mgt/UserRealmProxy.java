@@ -227,10 +227,10 @@ public class UserRealmProxy {
             Map<String,Integer> userCount = new HashMap<String,Integer>();
 
             for(String externalRole : externalRoles){
-
-                FlaggedName fName = new FlaggedName();
-                fName.setItemName(externalRole);
+				FlaggedName fName = new FlaggedName();
+				mapEntityName(externalRole, fName);
                 fName.setRoleType(UserMgtConstants.EXTERNAL_ROLE);
+                
                 // setting read only or writable
                 int index = externalRole != null ? externalRole.indexOf("/") : -1;
                 boolean domainProvided = index > 0;
@@ -619,8 +619,8 @@ public class UserRealmProxy {
         }
     }
 
-    public void addRole(String roleName, String[] userList, String[] permissions)
-            throws UserAdminException {
+	public void addRole(String roleName, String[] userList, String[] permissions,
+	                    boolean isSharedRole)            throws UserAdminException {
         try {
 
             String loggedInUserName = getLoggedInUser();
@@ -654,7 +654,10 @@ public class UserRealmProxy {
             if(!secManager.isReadOnly()
                     && ! "false".equals(secManager.getRealmConfiguration().
                     getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED))){
-                usAdmin.addRole(roleName, userList, ManagementPermissionUtil.getRoleUIPermissions(roleName, permissions));
+				usAdmin.addRole(roleName,
+				                userList,
+				                ManagementPermissionUtil.getRoleUIPermissions(roleName, permissions),
+				                isSharedRole);
             } else {
                 throw new UserAdminException("Read only user store or Role creation is disabled");    
             }
@@ -687,7 +690,7 @@ public class UserRealmProxy {
 			UserStoreManager usAdmin = realm.getUserStoreManager();
 			if (usAdmin instanceof AbstractUserStoreManager) {
 				((AbstractUserStoreManager) usAdmin).addRole(UserCoreConstants.INTERNAL_DOMAIN
-						+ UserCoreConstants.DOMAIN_SEPARATOR + roleName, userList, null);
+						+ UserCoreConstants.DOMAIN_SEPARATOR + roleName, userList, null, false);
 			} else {
 				throw new UserStoreException("Internal role can not be created");
 			}
@@ -709,13 +712,15 @@ public class UserRealmProxy {
             
             String loggedInUserName = getLoggedInUser();
             boolean isRoleHasAdminPermission;
+            
+            String roleWithoutDN = roleName.split(UserCoreConstants.DN_COMBINER)[0];
 
             // check whether this role had admin permission
             isRoleHasAdminPermission = realm.getAuthorizationManager().
-                    isRoleAuthorized(roleName, "/permission", UserMgtConstants.EXECUTE_ACTION);
+                    isRoleAuthorized(roleWithoutDN, "/permission", UserMgtConstants.EXECUTE_ACTION);
             if(!isRoleHasAdminPermission){
                 isRoleHasAdminPermission = realm.getAuthorizationManager().
-                    isRoleAuthorized(roleName, "/permission/admin", UserMgtConstants.EXECUTE_ACTION);
+                    isRoleAuthorized(roleWithoutDN, "/permission/admin", UserMgtConstants.EXECUTE_ACTION);
             } 
             
             if(isRoleHasAdminPermission &&
@@ -1029,7 +1034,7 @@ public class UserRealmProxy {
                     }
 
                     FlaggedName fName = new FlaggedName();
-                    fName.setItemName(role);
+                    mapEntityName(role, fName);
                     fName.setSelected(true);
                     if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
                         if ((admin.getSecondaryUserStoreManager(domain).isReadOnly() ||
@@ -1143,11 +1148,11 @@ public class UserRealmProxy {
             List<FlaggedName> flaggedNames = new ArrayList<FlaggedName>();
 
             Arrays.sort(userRoles);
-
             if(externalRoles != null){
                 for (String externalRole : externalRoles) {
                     FlaggedName fname = new FlaggedName();
-                    fname.setItemName(externalRole);
+                    
+    				mapEntityName(externalRole, fname);
                     fname.setDomainName(domain);
                     if (Arrays.binarySearch(userRoles, externalRole) > -1) {
                         fname.setSelected(true);
@@ -1444,26 +1449,27 @@ public class UserRealmProxy {
         try {
 
             String loggedInUserName = getLoggedInUser();
+            String roleWihtoutDn = roleName.split(UserCoreConstants.DN_COMBINER)[0];
 
-            if (CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleName)) {
+            if (CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleWihtoutDn)) {
                 log.error("Security Alert! Carbon anonymous role is being manipulated by user " + loggedInUserName);
                 throw new UserStoreException("Invalid data");
             }
 
-            if (realm.getRealmConfiguration().getEveryOneRoleName().equals(roleName)) {
+            if (realm.getRealmConfiguration().getEveryOneRoleName().equals(roleWihtoutDn)) {
                 log.error("Security Alert! Carbon Everyone role is being manipulated by user " + loggedInUserName);
                 throw new UserStoreException("Invalid data");
             }
 
             boolean isRoleHasAdminPermission = realm.getAuthorizationManager().
-                    isRoleAuthorized(roleName, "/permission/", UserMgtConstants.EXECUTE_ACTION);
+                    isRoleAuthorized(roleWihtoutDn, "/permission/", UserMgtConstants.EXECUTE_ACTION);
             if(!isRoleHasAdminPermission){
                 isRoleHasAdminPermission = realm.getAuthorizationManager().
-                        isRoleAuthorized(roleName, "/permission/admin/", UserMgtConstants.EXECUTE_ACTION);
+                        isRoleAuthorized(roleWihtoutDn, "/permission/admin/", UserMgtConstants.EXECUTE_ACTION);
             }
 
             RealmConfiguration realmConfig = realm.getRealmConfiguration();
-            if ((realmConfig.getAdminRoleName().equals(roleName) || isRoleHasAdminPermission) &&
+            if ((realmConfig.getAdminRoleName().equals(roleWihtoutDn) || isRoleHasAdminPermission) &&
                                     !realmConfig.getAdminUserName().equals(loggedInUserName)) {
                 log.warn("An attempt to add or remove users from Admin role by user : "
                                                                                 + loggedInUserName);
@@ -1473,7 +1479,7 @@ public class UserRealmProxy {
 
             if(deleteUsers != null){
                 Arrays.sort(deleteUsers);
-                if(realmConfig.getAdminRoleName().equals(roleName) &&
+                if(realmConfig.getAdminRoleName().equals(roleWihtoutDn) &&
                         Arrays.binarySearch(deleteUsers, realmConfig.getAdminUserName()) > -1){
                     log.warn("An attempt to remove Admin user from Admin role by user : "
                                                                                     + loggedInUserName);
@@ -1918,5 +1924,16 @@ public class UserRealmProxy {
             }
         }
         return null;
+    }
+    
+    private void mapEntityName(String entityName, FlaggedName fName){
+		if (entityName.contains(UserCoreConstants.DN_COMBINER)) {
+			String[] nameAndDn = entityName.split(UserCoreConstants.DN_COMBINER);
+			fName.setItemName(nameAndDn[0]);
+			fName.setDn(nameAndDn[1]);
+		} else {
+			fName.setItemName(entityName);
+		}
+
     }
 }

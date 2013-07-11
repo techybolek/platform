@@ -238,7 +238,7 @@ try{
                                 %>
                                 <tr>
                                     <td><fmt:message key="select.domain"/></td>
-                                    <td><select id="domain" name="domain">
+                                    <td colspan="2"><select id="domain" name="domain">
                                         <%
                                             for(String domainName : domainNames) {
                                                 if( selectedDomain.equals(domainName)) {
@@ -262,6 +262,7 @@ try{
                                     <td><fmt:message key="role.name"/><font color="red">*</font>
                                     </td>
                                     <td><input type="text" name="roleName" value=""/></td>
+                                    <td><input type="checkbox" value="true" name="sharedRole" id="sharedRoleBox" /><label for="sharedRoleBox">&nbsp;<fmt:message key="shared.role" /></label></td>
                                     <td><input type="hidden" name="roleType" value="<%=roleType%>"/></td>
                                 </tr>
                             </table>
