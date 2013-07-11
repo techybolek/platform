@@ -51,7 +51,8 @@ public class EntitlementPolicyServiceClient {
     private EntitlementPolicyAdminServiceStub entitlementPolicyAdminServiceStub;
     private String endPoint;
 
-    public EntitlementPolicyServiceClient(String backEndUrl, String sessionCookie) throws AxisFault {
+    public EntitlementPolicyServiceClient(String backEndUrl, String sessionCookie)
+            throws AxisFault {
         this.endPoint = backEndUrl + serviceName;
         entitlementPolicyAdminServiceStub = new EntitlementPolicyAdminServiceStub(endPoint);
         AuthenticateStub.authenticateStub(sessionCookie, entitlementPolicyAdminServiceStub);
@@ -62,16 +63,15 @@ public class EntitlementPolicyServiceClient {
         this.endPoint = backEndUrl + serviceName;
         entitlementPolicyAdminServiceStub = new EntitlementPolicyAdminServiceStub(endPoint);
         AuthenticateStub.authenticateStub(userName, password, entitlementPolicyAdminServiceStub);
-
     }
 
-
-    public void addPolicies(File policyFile) throws IOException, EntitlementPolicyAdminServiceIdentityException, ParserConfigurationException, TransformerException, SAXException {
+    public void addPolicies(File policyFile)
+            throws IOException, EntitlementPolicyAdminServiceIdentityException,
+                   ParserConfigurationException, TransformerException, SAXException {
 
         DataHandler policydh =
                 new DataHandler(new FileDataSource(policyFile));
         String policy = convertXMLFileToString(policyFile);
-
 
         PolicyDTO policySetDTO = new PolicyDTO();
         policySetDTO.setPolicy(policy);
@@ -79,18 +79,13 @@ public class EntitlementPolicyServiceClient {
         entitlementPolicyAdminServiceStub.addPolicy(policySetDTO);
     }
 
-    public void removePolicy(File policyFile) throws IOException, EntitlementPolicyAdminServiceIdentityException, ParserConfigurationException, TransformerException, SAXException {
-
-        DataHandler policydh =
-                new DataHandler(new FileDataSource(policyFile));
-        String policy = convertXMLFileToString(policyFile);
-        PolicyDTO policySetDTO = new PolicyDTO();
-        policySetDTO.setPolicy(policy);
-        entitlementPolicyAdminServiceStub.removePolicy(policySetDTO);
+    public void removePolicy(String policyId)
+            throws IOException, EntitlementPolicyAdminServiceIdentityException {
+        entitlementPolicyAdminServiceStub.removePolicy(policyId);
     }
 
-
-    private String convertXMLFileToString(File fileName) throws IOException, ParserConfigurationException, SAXException, TransformerException {
+    private String convertXMLFileToString(File fileName)
+            throws IOException, ParserConfigurationException, SAXException, TransformerException {
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         InputStream inputStream = new FileInputStream(fileName);

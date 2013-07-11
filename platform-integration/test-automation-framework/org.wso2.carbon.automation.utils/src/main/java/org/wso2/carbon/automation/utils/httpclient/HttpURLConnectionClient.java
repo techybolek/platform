@@ -106,7 +106,7 @@ public class HttpURLConnectionClient {
             urlConnection.setDoInput(true);
             urlConnection.setUseCaches(false);
             urlConnection.setAllowUserInteraction(false);
-            urlConnection.setRequestProperty("Content-type", "text/xml; charset=" + "UTF-8");
+            urlConnection.setRequestProperty("Content-type", "text/xfrom:gillian@wso2.comml; charset=" + "UTF-8");
             OutputStream out = urlConnection.getOutputStream();
             try {
                 Writer writer = new OutputStreamWriter(out, "UTF-8");

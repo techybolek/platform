@@ -38,13 +38,13 @@ import org.wso2.carbon.rssmanager.ui.stub.types.DatabaseMetaData;
 import org.wso2.carbon.rssmanager.ui.stub.types.DatabasePrivilegeTemplate;
 import org.wso2.carbon.rssmanager.ui.stub.types.DatabaseUserMetaData;
 import org.wso2.carbon.rssmanager.ui.stub.types.RSSInstanceMetaData;
+import org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
@@ -57,17 +57,15 @@ public class SqlDataSourceUtil {
     private FrameworkProperties frameworkProperties;
     private UserInfo userInfo;
     private RSSManagerAdminServiceClient rssAdminClient;
+    private String rssEnvironment;
 
     private String rssInstanceName;
-    private DatabasePrivilegeTemplate userPrivilegeGroup;
     private String jdbcUrl = null;
     private String jdbcDriver = null;
-    private int databaseUserId = -1;
     private String databaseName;
     private String databaseUser;
     private String databasePassword;
     private final String userPrivilegeGroupName = "automation";
-
 
     public SqlDataSourceUtil(String sessionCookie, String backEndUrl,
                              FrameworkProperties frameworkProperties, int userId) {
@@ -75,7 +73,6 @@ public class SqlDataSourceUtil {
         this.dssBackEndUrl = backEndUrl;
         this.frameworkProperties = frameworkProperties;
         this.userInfo = UserListCsvReader.getUserInfo(userId);
-
     }
 
     public String getDatabaseName() {
@@ -91,7 +88,7 @@ public class SqlDataSourceUtil {
     }
 
     public int getDatabaseUserId() {
-        return this.databaseUserId;
+        return -1;
     }
 
     public String getJdbcUrl() {
@@ -102,12 +99,6 @@ public class SqlDataSourceUtil {
         return this.jdbcDriver;
     }
 
-    /**
-     * @param dbsFilePath
-     * @return
-     * @throws XMLStreamException
-     * @throws IOException
-     */
     public DataHandler createArtifact(String dbsFilePath) throws XMLStreamException, IOException {
         Assert.assertNotNull(jdbcUrl, "Initialize jdbcUrl");
         try {
@@ -119,13 +110,10 @@ public class SqlDataSourceUtil {
                 String value = property.getAttributeValue(new QName("name"));
                 if ("org.wso2.ws.dataservice.protocol".equals(value)) {
                     property.setText(jdbcUrl);
-
                 } else if ("org.wso2.ws.dataservice.driver".equals(value)) {
                     property.setText(jdbcDriver);
-
                 } else if ("org.wso2.ws.dataservice.user".equals(value)) {
                     property.setText(databaseUser);
-
                 } else if ("org.wso2.ws.dataservice.password".equals(value)) {
                     property.setText(databasePassword);
                 }
@@ -133,7 +121,6 @@ public class SqlDataSourceUtil {
             log.debug(dbsFile);
             ByteArrayDataSource dbs = new ByteArrayDataSource(dbsFile.toString().getBytes());
             return new DataHandler(dbs);
-
         } catch (XMLStreamException e) {
             log.error("XMLStreamException when Reading Service File", e);
             throw new XMLStreamException("XMLStreamException when Reading Service File", e);
@@ -141,17 +128,10 @@ public class SqlDataSourceUtil {
             log.error("IOException when Reading Service File", e);
             throw new IOException("IOException  when Reading Service File", e);
         }
-
     }
 
-    /**
-     * @param sqlFileList
-     * @throws IOException
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     */
-    public void createDataSource(List<File> sqlFileList) throws IOException, ClassNotFoundException,
-            SQLException {
+
+    public void createDataSource(List<File> sqlFileList) throws Exception {
         databaseName = frameworkProperties.getDataSource().getDbName();
         databaseUser = frameworkProperties.getDataSource().getDbUser();
         databasePassword = frameworkProperties.getDataSource().getDbPassword();
@@ -160,8 +140,6 @@ public class SqlDataSourceUtil {
         databaseUser = frameworkProperties.getDataSource().getDbUser();
         databasePassword = frameworkProperties.getDataSource().getDbPassword();
         EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
-        String executionMode = environmentBuilder.getFrameworkSettings().getEnvironmentSettings()
-                .executionMode().toString();
         String environment = environmentBuilder.getFrameworkSettings().getEnvironmentSettings()
                 .executionEnvironment();
         if (environment.equals(ExecutionEnvironment.stratos.name())) {
@@ -170,7 +148,10 @@ public class SqlDataSourceUtil {
 //            databaseUser = frameworkProperties.getDataSource().getRssDbUser();
 //            databasePassword = frameworkProperties.getDataSource().getRssDbPassword();
 
-            DatabaseMetaData rssInstance = rssAdminClient.getDatabaseInstance(databaseName + "_" + userInfo.getDomain().replace(".", "_"));
+            RSSEnvironmentContext envCtx = setRssEnvironment();
+
+            DatabaseMetaData rssInstance =
+                    rssAdminClient.getDatabaseInstance(envCtx, databaseName + "_" + userInfo.getDomain().replace(".", "_"));
             if (rssInstance != null) {
                 setPriConditions();
                 createDataBase();
@@ -196,7 +177,6 @@ public class SqlDataSourceUtil {
                         h2.disconnect();
                     }
                 }
-
             } else {
                 createDataBase(jdbcDriver, jdbcUrl, databaseUser, databasePassword);
             }
@@ -204,8 +184,22 @@ public class SqlDataSourceUtil {
         executeUpdate(sqlFileList);
     }
 
-    public void createNonRandomDataSource(List<File> sqlFileList) throws IOException, ClassNotFoundException,
-            SQLException {
+    private RSSEnvironmentContext setRssEnvironment() throws Exception {
+        String[] environmentNames = rssAdminClient.getRSSEnvironmentNames();
+        for (String environmentName : environmentNames) {
+            if (environmentName.equals("DEFAULT")) {
+                rssEnvironment = environmentName;
+            } else {
+                throw new Exception("Default rss environment not found");
+            }
+        }
+        RSSEnvironmentContext envCtx = new RSSEnvironmentContext();
+        envCtx.setEnvironmentName("DEFAULT");
+        envCtx.setRssInstanceName(rssEnvironment);
+        return envCtx;
+    }
+
+    public void createNonRandomDataSource(List<File> sqlFileList) throws Exception {
         databaseName = frameworkProperties.getDataSource().getDbName();
         databaseUser = frameworkProperties.getDataSource().getDbUser();
         databasePassword = frameworkProperties.getDataSource().getDbPassword();
@@ -214,13 +208,14 @@ public class SqlDataSourceUtil {
         databaseUser = frameworkProperties.getDataSource().getDbUser();
         databasePassword = frameworkProperties.getDataSource().getDbPassword();
         EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
-        String executionMode = environmentBuilder.getFrameworkSettings().getEnvironmentSettings()
-                .executionMode().toString();
+
         String environment = environmentBuilder.getFrameworkSettings().getEnvironmentSettings()
                 .executionEnvironment();
         if (environment.equals(ExecutionEnvironment.stratos.name())) {
             rssAdminClient = new RSSManagerAdminServiceClient(dssBackEndUrl, sessionCookie);
-            DatabaseMetaData rssInstance = rssAdminClient.getDatabaseInstance(databaseName + "_" + userInfo.getDomain().replace(".", "_"));
+            RSSEnvironmentContext envCtx = setRssEnvironment();
+            DatabaseMetaData rssInstance =
+                    rssAdminClient.getDatabaseInstance(envCtx, databaseName + "_" + userInfo.getDomain().replace(".", "_"));
             if (rssInstance != null) {
                 setPriConditions();
                 createDataBase();
@@ -244,7 +239,6 @@ public class SqlDataSourceUtil {
                         h2.disconnect();
                     }
                 }
-
             } else {
                 createDataBase(jdbcDriver, jdbcUrl, databaseUser, databasePassword);
             }
@@ -263,8 +257,7 @@ public class SqlDataSourceUtil {
      */
 
     public void createDataSource(String dbName, String dbUser, String dbPassword,
-                                 List<File> sqlFileList)
-            throws IOException, ClassNotFoundException, SQLException {
+                                 List<File> sqlFileList) throws Exception {
         databaseName = dbName;
 
         if (frameworkProperties.getEnvironmentSettings().is_runningOnStratos()) {
@@ -295,16 +288,14 @@ public class SqlDataSourceUtil {
                         h2.disconnect();
                     }
                 }
-
             } else {
                 createDataBase(jdbcDriver, jdbcUrl, databaseUser, databasePassword);
             }
-
         }
         executeUpdate(sqlFileList);
     }
 
-    private void createDataBase() throws RemoteException {
+    private void createDataBase() throws Exception {
         RSSInstanceMetaData rssInstance = null;
 
         rssInstanceName = "WSO2_RSS";
@@ -313,13 +304,14 @@ public class SqlDataSourceUtil {
         Database database = new Database();
 
         //creating database
-        rssAdminClient.createDatabase(database);
+        RSSEnvironmentContext envCtx = setRssEnvironment();
+        rssAdminClient.createDatabase(envCtx, database);
         log.info("Database created");
         //set database full name
         databaseName = databaseName + "_" + userInfo.getDomain().replace(".", "_");
         log.info("Database name : " + databaseName);
 
-        DatabaseMetaData db = rssAdminClient.getDatabase(rssInstanceName, databaseName);
+        DatabaseMetaData db = rssAdminClient.getDatabase(envCtx, databaseName);
         log.info("JDBC URL : " + db.getUrl());
     }
 
@@ -339,63 +331,64 @@ public class SqlDataSourceUtil {
             log.error("SQLException When executing SQL: ", e);
             throw new SQLException("SQLException When executing SQL: ", e);
         }
-
     }
 
-    private void createPrivilegeGroup() throws RemoteException {
-        rssAdminClient.createPrivilegeGroup(userPrivilegeGroupName);
-        userPrivilegeGroup = rssAdminClient.getPrivilegeGroup(userPrivilegeGroupName);
+    private void createPrivilegeGroup() throws Exception {
+        RSSEnvironmentContext envCtx = setRssEnvironment();
+        rssAdminClient.createPrivilegeGroup(envCtx, userPrivilegeGroupName);
+        DatabasePrivilegeTemplate userPrivilegeGroup = rssAdminClient.getPrivilegeGroup(envCtx, userPrivilegeGroupName);
         log.info("privilege Group Created");
         log.debug("Privilege Group Name :" + userPrivilegeGroupName);
         Assert.assertNotSame(-1, userPrivilegeGroupName, "Privilege Group Not Found");
     }
 
-    private void createUser() throws RemoteException {
+    private void createUser() throws Exception {
+        RSSEnvironmentContext envCtx = setRssEnvironment();
         DatabaseUserMetaData dbUser;
-        rssAdminClient.createDatabaseUser(databaseUser, databasePassword, rssInstanceName);
+        rssAdminClient.createDatabaseUser(envCtx, databaseUser, databasePassword, rssInstanceName);
         log.info("Database User Created");
 
-        dbUser = rssAdminClient.getDatabaseUser(rssInstanceName, databaseUser);
+        dbUser = rssAdminClient.getDatabaseUser(envCtx, databaseUser);
         log.debug("Database Username :" + databaseUser);
 
         databaseUser = rssAdminClient.getFullyQualifiedUsername(databaseUser, userInfo.getDomain());
         log.info("Database User Name :" + databaseUser);
         Assert.assertEquals(dbUser.getUsername(), databaseUser, "Database UserName mismatched");
-
     }
 
-    private void setPriConditions() throws RemoteException {
+    private void setPriConditions() throws Exception {
         DatabaseMetaData dbInstance;
         DatabaseUserMetaData userEntry;
         DatabasePrivilegeTemplate privGroup;
-
+        RSSEnvironmentContext envCtx = setRssEnvironment();
         log.info("Setting pre conditions");
 
-        dbInstance = rssAdminClient.getDatabaseInstance(databaseName + "_" + userInfo.getDomain().replace(".", "_"));
+        dbInstance =
+                rssAdminClient.getDatabaseInstance(envCtx, databaseName + "_" +
+                                                           userInfo.getDomain().replace(".", "_"));
         if (dbInstance != null) {
             log.info("Database name already in server");
             userEntry =
-                    rssAdminClient.getDatabaseUser(rssInstanceName,
+                    rssAdminClient.getDatabaseUser(envCtx,
                                                    rssAdminClient.getFullyQualifiedUsername(databaseUser, userInfo.getDomain()));
             if (userEntry != null) {
 
                 log.info("User already in Database. deleting user");
-                rssAdminClient.dropDatabaseUser(rssInstanceName, userInfo.getUserName());
+                rssAdminClient.dropDatabaseUser(envCtx, userInfo.getUserName());
                 log.info("User Deleted");
             }
             log.info("Dropping database");
-            rssAdminClient.dropDatabase(rssInstanceName, databaseName);
+            rssAdminClient.dropDatabase(envCtx, databaseName);
             log.info("database Dropped");
         }
 
-        privGroup = rssAdminClient.getPrivilegeGroup(userPrivilegeGroupName);
+        privGroup = rssAdminClient.getPrivilegeGroup(envCtx, userPrivilegeGroupName);
         if (privGroup != null) {
             log.info("Privilege Group name already in server");
-            rssAdminClient.dropPrivilegeGroup(privGroup.getName());
+            rssAdminClient.dropPrivilegeGroup(envCtx, privGroup.getName());
             log.info("Privilege Group Deleted");
         }
         log.info("pre conditions created");
-
     }
 
     private void executeUpdate(List<File> sqlFileList)
@@ -406,7 +399,6 @@ public class SqlDataSourceUtil {
             for (File sql : sqlFileList) {
                 dbm.executeUpdate(sql);
             }
-
         } catch (IOException e) {
             log.error("IOException When reading SQL files: ", e);
             throw new IOException("IOException When reading SQL files: ", e);

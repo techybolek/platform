@@ -29,6 +29,7 @@ import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
 import org.wso2.carbon.rssmanager.ui.stub.RSSAdminRSSManagerExceptionException;
 import org.wso2.carbon.rssmanager.ui.stub.RSSAdminStub;
 import org.wso2.carbon.rssmanager.ui.stub.types.*;
+import org.wso2.carbon.rssmanager.ui.stub.types.config.environment.RSSEnvironmentContext;
 
 import java.rmi.RemoteException;
 
@@ -38,10 +39,16 @@ public class RSSManagerAdminServiceClient {
     private final String serviceName = "RSSManagerAdminService";
     private RSSAdminStub rssAdminStub;
 
-    private static final String ADMIN_CONSOLE_EXTENSION_NS = "http://www.wso2.org/products/wso2commons/adminconsole";
-    private static final OMNamespace ADMIN_CONSOLE_OM_NAMESPACE = OMAbstractFactory.getOMFactory().createOMNamespace(ADMIN_CONSOLE_EXTENSION_NS, "instance");
+    private static final String ADMIN_CONSOLE_EXTENSION_NS =
+            "http://www.wso2.org/products/wso2commons/adminconsole";
+
+    private static final OMNamespace ADMIN_CONSOLE_OM_NAMESPACE =
+            OMAbstractFactory.getOMFactory().createOMNamespace(ADMIN_CONSOLE_EXTENSION_NS, "instance");
+
     private static final OMFactory omFactory = OMAbstractFactory.getOMFactory();
+
     private static final String NULL_NAMESPACE = "";
+
     private static final OMNamespace NULL_OMNS = omFactory.createOMNamespace(NULL_NAMESPACE, "");
 
     public RSSManagerAdminServiceClient(String backEndUrl, String sessionCookie) throws AxisFault {
@@ -57,7 +64,7 @@ public class RSSManagerAdminServiceClient {
         AuthenticateStub.authenticateStub(userName, password, rssAdminStub);
     }
 
-    public void createDatabase(Database database)
+    public void createDatabase(RSSEnvironmentContext ctx, Database database)
             throws RemoteException {
 
         if (log.isDebugEnabled()) {
@@ -65,7 +72,7 @@ public class RSSManagerAdminServiceClient {
             log.debug("RSSInstance Name :" + database.getRssInstanceName());
         }
         try {
-            rssAdminStub.createDatabase(database);
+            rssAdminStub.createDatabase(ctx, database);
             log.info("Database Created");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while creating database '" + database.getName() + "'";
@@ -74,18 +81,20 @@ public class RSSManagerAdminServiceClient {
         }
     }
 
-    public void createCarbonDataSource(UserDatabaseEntry userDatabaseEntry)
+    public void createCarbonDataSource(RSSEnvironmentContext ctx,
+                                       UserDatabaseEntry userDatabaseEntry)
             throws RemoteException, RSSAdminRSSManagerExceptionException {
 
-        rssAdminStub.createCarbonDataSource(userDatabaseEntry);
+        rssAdminStub.createCarbonDataSource(ctx, userDatabaseEntry);
     }
 
-    public void dropDatabase(String rssInstanceName, String databaseName) throws RemoteException {
+    public void dropDatabase(RSSEnvironmentContext ctx, String databaseName)
+            throws RemoteException {
         if (log.isDebugEnabled()) {
             log.debug("DatabaseName :" + databaseName);
         }
         try {
-            rssAdminStub.dropDatabase(rssInstanceName, databaseName);
+            rssAdminStub.dropDatabase(ctx, databaseName);
             log.info("Database Dropped");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while dropping the database '" + databaseName + "'";
@@ -94,20 +103,31 @@ public class RSSManagerAdminServiceClient {
         }
     }
 
-    public DatabaseMetaData[] getDatabaseInstanceList()
+    public DatabaseMetaData[] getDatabaseInstanceList(RSSEnvironmentContext ctx)
             throws RemoteException {
         DatabaseMetaData[] databaseList = new DatabaseMetaData[0];
         try {
-            databaseList = rssAdminStub.getDatabases();
+            databaseList = rssAdminStub.getDatabases(ctx);
         } catch (RSSAdminRSSManagerExceptionException e) {
             log.error("Error occurred while retrieving database list", e);
         }
         return databaseList;
     }
 
-    public DatabaseMetaData getDatabaseInstance(String databaseName)
+    public String[] getRSSEnvironmentNames()
             throws RemoteException {
-        DatabaseMetaData[] databaseList = getDatabaseInstanceList();
+        String[] rssEnvironment = new String[0];
+        try {
+            rssEnvironment = rssAdminStub.getRSSEnvironmentNames();
+        } catch (RSSAdminRSSManagerExceptionException e) {
+            log.error("Error occurred while rss environment names", e);
+        }
+        return rssEnvironment;
+    }
+
+    public DatabaseMetaData getDatabaseInstance(RSSEnvironmentContext ctx, String databaseName)
+            throws RemoteException {
+        DatabaseMetaData[] databaseList = getDatabaseInstanceList(ctx);
         DatabaseMetaData dbInstance = null;
         if (databaseList == null) {
             return null;
@@ -119,31 +139,31 @@ public class RSSManagerAdminServiceClient {
             }
         }
         return dbInstance;
-
     }
 
-    public void createPrivilegeGroup(String privilegeGroupName)
+    public void createPrivilegeGroup(RSSEnvironmentContext ctx, String privilegeGroupName)
             throws RemoteException {
-        DatabasePrivilegeTemplate privilegeGroup = new DatabasePrivilegeTemplate();
+        DatabasePrivilegeTemplate privilegeGroupTemplate = new DatabasePrivilegeTemplate();
 
-        privilegeGroup.setName(privilegeGroupName);
-        privilegeGroup.setPrivileges(getAllDatabasePermission());
+        privilegeGroupTemplate.setName(privilegeGroupName);
+        privilegeGroupTemplate.setPrivileges(getAllDatabasePermission());
 
         if (log.isDebugEnabled()) {
             log.debug("Privilege Group Name: " + privilegeGroupName);
         }
 
         try {
-            rssAdminStub.createDatabasePrivilegesTemplate(privilegeGroup);
+            rssAdminStub.createDatabasePrivilegesTemplate(ctx, privilegeGroupTemplate);
             log.info("Privilege Group Added");
         } catch (RSSAdminRSSManagerExceptionException e) {
             throw new RemoteException("");
         }
     }
 
-    public DatabasePrivilegeTemplate getPrivilegeGroup(String privilegeGroupName)
+    public DatabasePrivilegeTemplate getPrivilegeGroup(RSSEnvironmentContext ctx,
+                                                       String privilegeGroupName)
             throws RemoteException {
-        DatabasePrivilegeTemplate[] privilegeGroups = getUserPrivilegeGroups();
+        DatabasePrivilegeTemplate[] privilegeGroups = getUserPrivilegeGroups(ctx);
         DatabasePrivilegeTemplate userPrivilegeGroup = null;
         if (privilegeGroups == null) {
             return null;
@@ -160,16 +180,15 @@ public class RSSManagerAdminServiceClient {
         }
 
         return userPrivilegeGroup;
-
     }
 
-    public void dropPrivilegeGroup(String templateName)
+    public void dropPrivilegeGroup(RSSEnvironmentContext ctx, String templateName)
             throws RemoteException {
         if (log.isDebugEnabled()) {
             log.debug("privilege group id :" + templateName);
         }
         try {
-            rssAdminStub.dropDatabasePrivilegesTemplate(templateName);
+            rssAdminStub.dropDatabasePrivilegesTemplate(ctx, templateName);
             log.info("privilege group removed");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred dropping the database privilege template '" +
@@ -179,11 +198,11 @@ public class RSSManagerAdminServiceClient {
         }
     }
 
-    public DatabasePrivilegeTemplate[] getUserPrivilegeGroups()
+    public DatabasePrivilegeTemplate[] getUserPrivilegeGroups(RSSEnvironmentContext ctx)
             throws RemoteException {
         DatabasePrivilegeTemplate[] template;
         try {
-            template = rssAdminStub.getDatabasePrivilegesTemplates();
+            template = rssAdminStub.getDatabasePrivilegesTemplates(ctx);
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while retrieving database privilege template list";
             log.error(msg, e);
@@ -192,12 +211,11 @@ public class RSSManagerAdminServiceClient {
         return template;
     }
 
-
-    public DatabaseUserMetaData getDatabaseUser(String rssInstanceName, String username)
+    public DatabaseUserMetaData getDatabaseUser(RSSEnvironmentContext ctx, String username)
             throws RemoteException {
         DatabaseUserMetaData user;
         try {
-            user = rssAdminStub.getDatabaseUser(rssInstanceName, username);
+            user = rssAdminStub.getDatabaseUser(ctx, username);
             log.info("Database user data received");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while retrieving information related to the database " +
@@ -208,11 +226,11 @@ public class RSSManagerAdminServiceClient {
         return user;
     }
 
-    public DatabaseMetaData getDatabase(String rssInstanceName, String databaseName)
+    public DatabaseMetaData getDatabase(RSSEnvironmentContext ctx, String databaseName)
             throws RemoteException {
         DatabaseMetaData database;
         try {
-            database = rssAdminStub.getDatabase(rssInstanceName, databaseName);
+            database = rssAdminStub.getDatabase(ctx, databaseName);
             log.info("Database configuration received");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while retrieving the configuration of the database '" +
@@ -223,11 +241,11 @@ public class RSSManagerAdminServiceClient {
         return database;
     }
 
-    public RSSInstanceMetaData[] getRSSInstanceList()
+    public RSSInstanceMetaData[] getRSSInstanceList(RSSEnvironmentContext ctx)
             throws RemoteException {
         RSSInstanceMetaData[] rssInstance = new RSSInstanceMetaData[0];
         try {
-            rssInstance = rssAdminStub.getRSSInstances();
+            rssInstance = rssAdminStub.getRSSInstances(ctx);
             log.info("RSS instance list retrieved");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while retrieving the RSS instance list";
@@ -238,22 +256,23 @@ public class RSSManagerAdminServiceClient {
         return rssInstance;
     }
 
-    public RSSInstanceMetaData getRSSInstance(String rssInstanceName)
+    public RSSInstanceMetaData getRSSInstance(RSSEnvironmentContext ctx)
             throws RemoteException {
         RSSInstanceMetaData rssInstance;
         try {
-            rssInstance = rssAdminStub.getRSSInstance(rssInstanceName);
+            rssInstance = rssAdminStub.getRSSInstance(ctx);
             log.info("RSS instance configuration retrieved");
         } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while retrieving the configuration of RSS instance '" +
-                         rssInstanceName + "'";
+            String msg = "Error occurred while retrieving the configuration of RSS instance '";
+
             log.error(msg, e);
             throw new RemoteException(msg, e);
         }
         return rssInstance;
     }
 
-    public void createDatabaseUser(String userName, String password, String rssInstanceName)
+    public void createDatabaseUser(RSSEnvironmentContext ctx, String userName, String password,
+                                   String rssInstanceName)
             throws RemoteException {
         DatabaseUser user = new DatabaseUser();
         user.setUsername(userName);
@@ -263,7 +282,7 @@ public class RSSManagerAdminServiceClient {
             log.debug("rssInstanceName : " + rssInstanceName);
         }
         try {
-            rssAdminStub.createDatabaseUser(user);
+            rssAdminStub.createDatabaseUser(ctx, user);
             log.info("Database user " + userName + " created");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while creating database user '" + userName + "'";
@@ -272,12 +291,13 @@ public class RSSManagerAdminServiceClient {
         }
     }
 
-    public void dropDatabaseUser(String rssInstanceName, String username) throws RemoteException {
+    public void dropDatabaseUser(RSSEnvironmentContext ctx, String username)
+            throws RemoteException {
         if (log.isDebugEnabled()) {
             log.debug("Username : " + username);
         }
         try {
-            rssAdminStub.dropDatabaseUser(rssInstanceName, username);
+            rssAdminStub.dropDatabaseUser(ctx, username);
             log.info("User Deleted");
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while dropping the database user '" + username + "'";
@@ -286,19 +306,20 @@ public class RSSManagerAdminServiceClient {
         }
     }
 
-    public String[] getUsersAttachedToDatabase(
-            String rssInstanceName, String databaseName) throws RemoteException {
-        String[] userList = new String[0];
+    public DatabaseUserMetaData[] getUsersAttachedToDatabase(RSSEnvironmentContext ctx,
+                                                             String databaseName)
+            throws RemoteException {
+        DatabaseUserMetaData[] userList = new DatabaseUserMetaData[0];
         if (log.isDebugEnabled()) {
-            log.debug("RSS Instance Name : " + rssInstanceName);
+            log.debug("RSS Instance Name : " + ctx.getRssInstanceName());
             log.debug("Database Name : " + databaseName);
         }
 
         try {
-            userList = rssAdminStub.getUsersAttachedToDatabase(rssInstanceName, databaseName);
+            userList = rssAdminStub.getUsersAttachedToDatabase(ctx, databaseName);
         } catch (RSSAdminRSSManagerExceptionException e) {
             String msg = "Error occurred while retrieving the database users attached to the " +
-                         "database '" + databaseName + "' on RSS instance '" + rssInstanceName + "'";
+                         "database '" + databaseName + "' on RSS instance '" + databaseName + "'";
         }
 
         return userList;
@@ -347,7 +368,6 @@ public class RSSManagerAdminServiceClient {
         privileges.setIndexPriv("Y");
 
         return privileges;
-
     }
 
     public String getFullyQualifiedUsername(String username, String tenantDomain) {

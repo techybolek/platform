@@ -100,7 +100,7 @@ public class DataServiceBaseTest {
     }
 
     public DataHandler createArtifact(String path, List<File> sqlFile)
-            throws XMLStreamException, IOException, ClassNotFoundException, SQLException {
+            throws Exception, IOException, ClassNotFoundException, SQLException {
         SqlDataSourceUtil dataSource = new SqlDataSourceUtil(dssServer.getSessionCookie(), dssServer.getBackEndUrl(),
                                                              FrameworkFactory.getFrameworkProperties(ProductConstant.DSS_SERVER_NAME),
                                                              Integer.parseInt(userInfo.getUserId()));

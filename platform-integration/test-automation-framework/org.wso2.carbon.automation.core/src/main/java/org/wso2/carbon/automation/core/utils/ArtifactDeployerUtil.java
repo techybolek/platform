@@ -237,7 +237,7 @@ public class ArtifactDeployerUtil {
 
     public void dbsFileUploader(String sessionCookie, String backEndUrl, Artifact artifact,
                                 String artifactLocation, FrameworkProperties frameworkProperties)
-            throws IOException,
+            throws Exception,
                    org.wso2.carbon.dataservices.ui.fileupload.stub.ExceptionException,
                    ClassNotFoundException, SQLException, XMLStreamException,
                    ResourceAdminServiceExceptionException {
