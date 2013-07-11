@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
-//import net.sf.jsr107cache.Cache;
+
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
