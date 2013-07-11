@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.core.gateway;
 
-//import net.sf.jsr107cache.Cache;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
