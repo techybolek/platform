@@ -26,7 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.identity.provider.mgt.IdentityProviderMgtService;
+import org.wso2.carbon.identity.provider.mgt.IdPMetadataService;
 
 public class IdentityProviderMgtServiceComponent {
 
@@ -35,10 +35,10 @@ public class IdentityProviderMgtServiceComponent {
     protected void activate(ComponentContext ctxt) {
         try {
             BundleContext bundleCtx = ctxt.getBundleContext();
-            bundleCtx.registerService(IdentityProviderMgtService.class.getName(),new IdentityProviderMgtService(),null);
+            bundleCtx.registerService(IdPMetadataService.class.getName(),new IdPMetadataService(),null);
             log.debug("Identity Provider Mgt bundle is activated");
         } catch (Throwable e){
-            log.error("Error while activating Identity Provider Mgt bundle is activated", e);
+            log.error("Error while activating Identity Provider Mgt bundle", e);
         }
     }
 

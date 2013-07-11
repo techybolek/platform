@@ -215,7 +215,8 @@ public class IdentityProviderMgtUtil {
                 String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
-                keyStoreName = tenantDomain + ".jks";
+                String ksName = tenantDomain.trim().replace(".", "-");
+                keyStoreName = ksName + ".jks";
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
@@ -243,7 +244,8 @@ public class IdentityProviderMgtUtil {
                 String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
-                keyStoreName = tenantDomain + ".jks";
+                String ksName = tenantDomain.trim().replace(".", "-");
+                keyStoreName = ksName + ".jks";
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
@@ -279,7 +281,8 @@ public class IdentityProviderMgtUtil {
                 String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
-                keyStoreName = tenantDomain + ".jks";
+                String ksName = tenantDomain.trim().replace(".", "-");
+                keyStoreName = ksName + ".jks";
 
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
@@ -313,7 +316,6 @@ public class IdentityProviderMgtUtil {
     public static void deleteCertFromStore(int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
         try {
-
             KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
             String keyStoreName = null;
             if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
@@ -321,7 +323,8 @@ public class IdentityProviderMgtUtil {
                 String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
                 keyStoreName  = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
-                keyStoreName = tenantDomain + ".jks";
+                String ksName = tenantDomain.trim().replace(".", "-");
+                keyStoreName = ksName + ".jks";
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
@@ -332,7 +335,6 @@ public class IdentityProviderMgtUtil {
                 ks.deleteEntry(alias);
             }
             keyMan.updateKeyStore(keyStoreName, ks);
-
         } catch (Exception e) {
             String msg = "Error occurred while deleting IdP public certificate for tenant";
             log.error(msg + " " + tenantDomain, e);

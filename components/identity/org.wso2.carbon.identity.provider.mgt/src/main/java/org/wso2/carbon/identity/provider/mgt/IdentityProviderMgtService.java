@@ -36,10 +36,10 @@ public class IdentityProviderMgtService {
     /**
      * Retrieves trusted IdP information about a given tenant
      *
-     * @param tenantDomain Tenant domain whose information is requested
      * @throws IdentityProviderMgtException
      */
-    public TrustedIdPDTO getTenantIdP(String tenantDomain) throws IdentityProviderMgtException{
+    public TrustedIdPDTO getTenantIdP() throws IdentityProviderMgtException {
+        String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
         TrustedIdPDO trustedIdPDO = dao.getTenantIdP(tenantId, tenantDomain);
         TrustedIdPDTO trustedIdPDTO = null;

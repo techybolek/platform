@@ -21,11 +21,21 @@
         <transports>
             <transport>https</transport>
         </transports>
-        <parameter name="ServiceClass" locked="false">
+        <parameter name="ServiceClass" locked="true">
             org.wso2.carbon.identity.provider.mgt.IdentityProviderMgtService
         </parameter>
-        <parameter name="AuthorizationAction" locked="false">/permission/admin/configure/security</parameter>
+        <parameter name="hiddenService" locked="true">true</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+    </service>
+    <service name="IdPMetadataService" scope="transportsession">
+        <transports>
+            <transport>https</transport>
+        </transports>
+        <parameter name="ServiceClass" locked="true">
+            org.wso2.carbon.identity.provider.mgt.IdPMetadataService
+        </parameter>
+        <parameter name="hiddenService" locked="true">false</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/configure/security</parameter>
     </service>
     <parameter name="adminService" locked="true">true</parameter>
-    <parameter name="hiddenService" locked="true">true</parameter>
 </serviceGroup>
