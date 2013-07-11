@@ -119,7 +119,7 @@
         <!--
             Endpoint URLs for the APIs hosted in this API gateway.
         -->
-        <APIEndpointURL>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</APIEndpointURL>
+        <APIEndpointURL>http://${carbon.local.ip}:${mgt.transport.http.port},https://${carbon.local.ip}:${mgt.transport.https.port}</APIEndpointURL>
         <!--
             Enable/Disable caching at gateway node.
         -->
