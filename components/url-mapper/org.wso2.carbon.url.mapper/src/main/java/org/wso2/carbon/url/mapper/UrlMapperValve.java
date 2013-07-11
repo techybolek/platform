@@ -39,7 +39,7 @@ import javax.xml.namespace.QName;
  * This is a CarbonTomcatValve which hadles the request for services when a tenant specifies service
  * specific id in the url.
  */
-public class UrlMapperValve implements CarbonTomcatValve {
+public class UrlMapperValve extends CarbonTomcatValve {
     private static final Log log = LogFactory.getLog(UrlMapperValve.class);
 
     /**
@@ -51,6 +51,7 @@ public class UrlMapperValve implements CarbonTomcatValve {
     public void invoke(HttpServletRequest request, HttpServletResponse response) {
         try {
             process(request, response);
+            getNext().invoke(request, response);
         } catch (Exception e) {
             log.error("error in forwarding the url", e);
         }

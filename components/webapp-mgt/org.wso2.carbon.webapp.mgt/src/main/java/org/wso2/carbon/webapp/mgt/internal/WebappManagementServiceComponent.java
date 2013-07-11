@@ -83,7 +83,7 @@ public class WebappManagementServiceComponent {
             }
             //adding TenantLazyLoaderValve first in the TomcatContainer if Url mapping available
             if (DataHolder.getHotUpdateService() != null &&
-                TomcatValveContainer.isValveExits(new UrlMapperValve())) {
+                TomcatValveContainer.isValveExists(new UrlMapperValve())) {
                 TomcatValveContainer.addValves(WebappsConstants.VALVE_INDEX, valves);
             } else {
                 TomcatValveContainer.addValves(valves);

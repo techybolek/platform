@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class APIManagerInterceptorValve implements CarbonTomcatValve {
+public class APIManagerInterceptorValve extends CarbonTomcatValve {
 	
 	private static final Log log = LogFactory.getLog(APIManagerInterceptorValve.class);
 	
@@ -46,7 +46,8 @@ public class APIManagerInterceptorValve implements CarbonTomcatValve {
         String manageAPIs = APIManagerInterceptorComponent.getAPIManagementEnabled();
 
         if (manageAPIs.equals("true") && !ApiMgtDAO.isContextExist(context)) {
-                return;
+            getNext().invoke(request, response);
+            return;
         }
         if (manageAPIs.equals("true") && externalAPIManagerURL == null) {  //use internal api management
             log.info("API Manager Interceptor Valve Got invoked!!");
@@ -94,6 +95,7 @@ public class APIManagerInterceptorValve implements CarbonTomcatValve {
                 APIManagerInterceptorComponent.getExternalAPIManagerURL() != null) { //user external api-manager for api management
             //TODO
         }
+        getNext().invoke(request, response);
     }
 
 	private boolean doAuthenticate(String context, String version, String accessToken, String requiredAuthenticationLevel, String clientDomain)

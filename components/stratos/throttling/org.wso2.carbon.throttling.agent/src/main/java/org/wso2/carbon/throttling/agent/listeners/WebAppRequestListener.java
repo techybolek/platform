@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WebAppRequestListener implements CarbonTomcatValve {
+public class WebAppRequestListener extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebAppRequestListener.class);
 
@@ -102,7 +102,6 @@ public class WebAppRequestListener implements CarbonTomcatValve {
                                 String msg = "Error in sending throttling rule violation message." +
                                              " Tenant Domain: " + tenantDomainName;
                                 log.error(msg, ex);
-                                return;
                             }
                         } else if (CONTEXT_SERVICES.equals(urlContext)) {
                             try {
@@ -138,8 +137,8 @@ public class WebAppRequestListener implements CarbonTomcatValve {
                              "Tenant Domain: " + tenantDomainName;
                 log.error(msg, e);
             }
-
         }
+        getNext().invoke(request, response);
     }
 
     /**

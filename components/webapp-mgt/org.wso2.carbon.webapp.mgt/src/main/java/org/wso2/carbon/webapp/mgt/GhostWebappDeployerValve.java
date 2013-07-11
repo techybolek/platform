@@ -41,7 +41,7 @@ import java.io.File;
  * Handles management of webapps when ghost deployer is enabled. This includes deployment of
  * actual webapp from ghost form, dispatching requests to correct webapps, etc.
  */
-public class GhostWebappDeployerValve implements CarbonTomcatValve {
+public class GhostWebappDeployerValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(GhostWebappDeployerValve.class);
     private boolean isGhostOn = GhostDeployerUtils.isGhostOn();
@@ -56,19 +56,20 @@ public class GhostWebappDeployerValve implements CarbonTomcatValve {
 
         if ((requestURI.contains("/carbon/") && !requestURI.
                 contains(WebappsConstants.WEBAPP_INFO_JSP_PAGE)) ||
-                requestURI.contains("favicon.ico") || requestURI.contains("/fileupload/") ||
-                requestURI.startsWith("/services")) {
+            requestURI.contains("favicon.ico") || requestURI.contains("/fileupload/") ||
+            requestURI.startsWith("/services")) {
+            getNext().invoke(request, response);
             return;
         }
         //getting actual uri when accessing a virtual host through url mapping from the Map
         String requestedHostName = request.getServerName();
         String uriOfVirtualHost = URLMappingHolder.getInstance().getApplicationFromUrlMapping(requestedHostName);
         //getting the host name of first request from registry if & only if the request contains url-mapper suffix
-        if(TomcatUtil.isVirtualHostRequest(requestedHostName) && uriOfVirtualHost == null) {
+        if (TomcatUtil.isVirtualHostRequest(requestedHostName) && uriOfVirtualHost == null) {
             uriOfVirtualHost = DataHolder.getHotUpdateService().
                     getApplicationContextForHost(requestedHostName);
         }
-        if(uriOfVirtualHost != null) {
+        if (uriOfVirtualHost != null) {
             requestURI = uriOfVirtualHost;
         }
 
@@ -137,11 +138,13 @@ public class GhostWebappDeployerValve implements CarbonTomcatValve {
             }
         }
         if (!requestURI.contains(WebappsConstants.WEBAPP_INFO_JSP_PAGE)) {
+            getNext().invoke(request, response);
             return;
         }
 
         String webappFileName = request.getParameter("webappFileName");
         handleWebapp(webappFileName, currentCtx);
+        getNext().invoke(request, response);
     }
 
     private WebApplication getDeployedWebappFromThisURI(String requestURI,
@@ -192,8 +195,8 @@ public class GhostWebappDeployerValve implements CarbonTomcatValve {
 
 
     private synchronized void handleDepSynchUpdate(ConfigurationContext configurationContext,
-                                      WebApplication webApplication,
-                                      WebApplicationsHolder webappsHolder) {
+                                                   WebApplication webApplication,
+                                                   WebApplicationsHolder webappsHolder) {
         String webappType = (String) webApplication.getProperty(WebappsConstants.WEBAPP_FILTER);
         String deploymentDir = WebappsConstants.WEBAPP_DEPLOYMENT_FOLDER;
 
@@ -230,7 +233,7 @@ public class GhostWebappDeployerValve implements CarbonTomcatValve {
                                     File deployedWebappFile = new File(webApplication.
                                             getWebappFile().getName());
                                     if (webappsHolder.getStartedWebapps().
-                                                containsKey(deployedWebappFile.getName())) {
+                                            containsKey(deployedWebappFile.getName())) {
                                         // remove the existing webapp
                                         webappsHolder.getStartedWebapps().
                                                 remove(deployedWebappFile.getName());

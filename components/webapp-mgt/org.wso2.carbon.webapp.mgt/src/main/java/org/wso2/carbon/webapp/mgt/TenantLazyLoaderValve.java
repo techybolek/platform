@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Handles lazily loading tenant artifacts if a tenant webapp request comes in
  */
-public class TenantLazyLoaderValve implements CarbonTomcatValve {
+public class TenantLazyLoaderValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(TenantLazyLoaderValve.class);
 
@@ -54,11 +54,13 @@ public class TenantLazyLoaderValve implements CarbonTomcatValve {
 
         String domain = MultitenantUtils.getTenantDomainFromRequestURL(requestURI);
         if (domain == null || domain.trim().length() == 0) {
+            getNext().invoke(request, response);
             return;
         }
         if (!(requestURI.contains("/" + WebappsConstants.WEBAPP_PREFIX + "/") ||
                 requestURI.contains("/" + WebappsConstants.JAGGERY_APPS_PREFIX + "/") ||
                 requestURI.contains("/" + WebappsConstants.JAX_WEBAPPS_PREFIX + "/"))) {
+            getNext().invoke(request, response);
             return;
         }
         //check whether the tenant exists. If not, return. This will end up
@@ -70,10 +72,12 @@ public class TenantLazyLoaderValve implements CarbonTomcatValve {
                 if (log.isDebugEnabled()) {
                     log.debug("Tenant does not exist: " + domain);
                 }
+                getNext().invoke(request, response);
                 return;
             }
         } catch (Exception e) {
             log.error("Error occurred while checking tenant existence", e);
+            getNext().invoke(request, response);
             return;
         }
 
@@ -97,6 +101,7 @@ public class TenantLazyLoaderValve implements CarbonTomcatValve {
             }
         }
         setTenantAccessed(domain, serverConfigCtx);
+        getNext().invoke(request, response);
     }
 
 
