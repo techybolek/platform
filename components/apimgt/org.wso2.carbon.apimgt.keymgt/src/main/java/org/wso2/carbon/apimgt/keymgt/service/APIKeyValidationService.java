@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
-//import net.sf.jsr107cache.Cache;
+
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
