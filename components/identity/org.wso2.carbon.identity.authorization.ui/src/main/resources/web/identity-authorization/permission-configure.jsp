@@ -25,8 +25,8 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.identity.authorization.core.dto.xsd.PermissionModuleDTO" %>
 
-<jsp:useBean id="authorizationBean" type="org.wso2.carbon.identity.authorization.ui.AuthorizationBean"
-             class="org.wso2.carbon.identity.authorization.ui.AuthorizationBean" scope="session"/>
+<jsp:useBean id="authorizationBean" type="org.wso2.carbon.identity.authorization.ui.ErrorStatusBean"
+             class="org.wso2.carbon.identity.authorization.ui.ErrorStatusBean" scope="session"/>
 <jsp:setProperty name="authorizationBean" property="*" />
 <%
 

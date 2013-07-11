@@ -18,8 +18,8 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
 	prefix="carbon"%>
-<jsp:useBean id="authorizationBean" type="org.wso2.carbon.identity.authorization.ui.AuthorizationBean"
-             class="org.wso2.carbon.identity.authorization.ui.AuthorizationBean" scope="session"/>
+<jsp:useBean id="authorizationBean" type="org.wso2.carbon.identity.authorization.ui.ErrorStatusBean"
+             class="org.wso2.carbon.identity.authorization.ui.ErrorStatusBean" scope="session"/>
 <jsp:setProperty name="authorizationBean" property="*" />
 
 <%
