@@ -707,8 +707,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 APIStatusObserverList observerList = APIStatusObserverList.getInstance();
                 observerList.notifyObservers(currentStatus, status, api);
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-                if (updateGatewayConfig) {
+                if (gatewayType.equalsIgnoreCase("Synapse") && updateGatewayConfig) {
                     if (status.equals(APIStatus.PUBLISHED) || status.equals(APIStatus.DEPRECATED) ||
                         status.equals(APIStatus.BLOCKED)) {
                         publishToGateway(api);
