@@ -374,8 +374,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             createAPI(api);
             apiMgtDAO.addAPI(api);
             if (APIUtil.isAPIManagementEnabled()) {
-                Boolean apiContext = Boolean.parseBoolean(contextCache.get(api.getContext()).toString());
-                if (apiContext == null) {
+            	Boolean apiContext = null;
+            	if (contextCache.get(api.getContext()) != null) {
+            		apiContext = Boolean.parseBoolean(contextCache.get(api.getContext()).toString());
+            	} else {
                     contextCache.put(api.getContext(), true);
                 }
             }
