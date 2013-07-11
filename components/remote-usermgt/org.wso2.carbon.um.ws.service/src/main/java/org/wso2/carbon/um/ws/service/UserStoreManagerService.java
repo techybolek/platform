@@ -59,7 +59,7 @@ public class UserStoreManagerService extends AbstractAdmin {
     public void addRole(String roleName, String[] userList, PermissionDTO[] permissions)
             throws UserStoreException {
         try {
-            getUserStoreManager().addRole(roleName, userList, convertDTOToPermission(permissions));
+            getUserStoreManager().addRole(roleName, userList, convertDTOToPermission(permissions), false);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw (UserStoreException) e;
         }
@@ -176,7 +176,7 @@ public class UserStoreManagerService extends AbstractAdmin {
     }
 
     public boolean isExistingRole(String roleName) throws UserStoreException {
-        return getUserStoreManager().isExistingRole(roleName);
+        return getUserStoreManager().isExistingRole(roleName, false);
     }
 
     public boolean isExistingUser(String userName) throws UserStoreException {

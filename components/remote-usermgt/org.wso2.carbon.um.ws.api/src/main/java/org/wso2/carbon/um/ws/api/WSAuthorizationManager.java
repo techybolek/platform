@@ -238,6 +238,12 @@ public class WSAuthorizationManager implements AuthorizationManager{
         log.error(e.getMessage(), e);
         throw new UserStoreException(msg, e);
     }
+
+
+	@Override
+    public String[] normalizeRoles(String[] roles) {
+	    return roles;
+    }
     
 
 }

@@ -295,7 +295,7 @@ public class WSUserStoreManager implements UserStoreManager {
         return null;
     }
 
-    public boolean isExistingRole(String roleName) throws UserStoreException {
+    public boolean isExistingRole(String roleName, boolean isSharedRole) throws UserStoreException {
 
         try {
             return stub.isExistingRole(roleName);
@@ -443,7 +443,7 @@ public class WSUserStoreManager implements UserStoreManager {
     }
 
     public void addRole(String roleName, String[] userList,
-            org.wso2.carbon.user.api.Permission[] permissions)
+                        org.wso2.carbon.user.api.Permission[] permissions, boolean isSharedRole)
             throws org.wso2.carbon.user.core.UserStoreException {
         addRole(roleName, userList, Permission[].class.cast(permissions));
 
@@ -514,6 +514,5 @@ public class WSUserStoreManager implements UserStoreManager {
     public Properties getDefaultUserStoreProperties() {
 	    return null;
     }
-
 
 }
