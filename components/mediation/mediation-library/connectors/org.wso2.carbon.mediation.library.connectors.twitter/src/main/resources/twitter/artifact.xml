@@ -22,6 +22,12 @@
     		<file>search_string.xml</file>
     		<description>search tweeter</description>
 	</artifact>
+	
+	<artifact name="tweet.search_places" >
+    		<file>search_places.xml</file>
+    		<description>search tweeter</description>
+	</artifact>
+	
     </subArtifacts>
     
 </artifact>

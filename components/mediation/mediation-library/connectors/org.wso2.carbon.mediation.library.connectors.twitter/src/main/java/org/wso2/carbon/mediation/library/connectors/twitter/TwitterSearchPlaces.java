@@ -13,28 +13,33 @@ import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.json.JSONException;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
-import twitter4j.Query;
-import twitter4j.QueryResult;
-import twitter4j.Status;
+import twitter4j.GeoLocation;
+import twitter4j.GeoQuery;
+import twitter4j.Place;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
-public class TwitterSearch extends AbstractTwitterConnector {
+public class TwitterSearchPlaces extends AbstractTwitterConnector{
 
-	public static final String SEARCH_STRING = "search";
+	public static final String SEARCH_BY_LATITUDE = "latitude";
 	
-	/* (non-Javadoc)
-	 * @see org.wso2.carbon.mediation.library.connectors.core.AbstractConnector#connect()
-	 */
+	public static final String SEARCH_LONGITUDE = "longitude";
+	
+	public static final String SEARCH_IP = "ip";
+	
+	
 	@Override
 	public void connect() throws ConnectException {
 		// TODO Auto-generated method stub
 		MessageContext messageContext = getMessageContext();
 		try {
-			Query query = new Query(TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_STRING));
+			String latitude = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_BY_LATITUDE);
+			String longitude = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_LONGITUDE);
+			String ip = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_IP);
+			GeoQuery query = new GeoQuery(new GeoLocation(Double.parseDouble(latitude), Double.parseDouble(longitude)));
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
 			SOAPBody soapBody = messageContext.getEnvelope().getBody();
@@ -56,7 +61,7 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	}
 
 	/**
-	 * Performing the searching operation for the given search criteria.
+	 * Performing the searching operation for the given Geo Query criteria.
 	 * 
 	 * @param twitter
 	 * @param query
@@ -66,22 +71,27 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	private OMElement performSearch(Twitter twitter, Query query) throws XMLStreamException, TwitterException, JSONException, IOException {
+	private OMElement performSearch(Twitter twitter, GeoQuery query) throws XMLStreamException, TwitterException, JSONException, IOException {
 		OMElement resultElement = AXIOMUtil.stringToOM("<XMLPayload/>");
-		QueryResult result;
-		result = twitter.search(query);
-		List<Status> results = result.getTweets();
-		for (Status tweet : results) {
-			String json = DataObjectFactory.getRawJSON(tweet);
-			OMElement element =super.parseJsonToXml(json);
+		List<Place> results = twitter.searchPlaces(query);
+		
+		for (Place place : results) {
+		    StringBuilder stringBuilder = new StringBuilder();
+		    stringBuilder.append("{ \"Place\" : ");
+			String json = DataObjectFactory.getRawJSON(place);
+			stringBuilder.append(json);
+			stringBuilder.append("} ");
+			//System.out.println(stringBuilder.toString());
+			OMElement element =super.parseJsonToXml(stringBuilder.toString());
 			resultElement.addChild(element);
 		}
 		return resultElement;
 
 	}
-
+	
+	
 	public static void main(String ar[]) {
-		TwitterSearch search = new TwitterSearch();
+		TwitterSearchPlaces search = new TwitterSearchPlaces();
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setOAuthAccessToken("1114764380-JNGKRkrUFUDCHC0WdmjDurZ3wwi9BV6ysbDRYca");
 		cb.setOAuthAccessTokenSecret("vkpELc3OWK0TM0BjYcPLCn22Wm3HRliNUyx1QSxg4JI");
@@ -96,7 +106,8 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	        e1.printStackTrace();
         }
 		
-		Query query = new Query("#IPL");
+        GeoQuery query = new GeoQuery(new GeoLocation(40.71435, -74.00597));
+		
 		try {
 			OMElement element =search.performSearch(twitter, query);
 			System.out.println("e"+element.toString());
@@ -115,5 +126,5 @@ public class TwitterSearch extends AbstractTwitterConnector {
 		}
 
 	}
-
+	
 }

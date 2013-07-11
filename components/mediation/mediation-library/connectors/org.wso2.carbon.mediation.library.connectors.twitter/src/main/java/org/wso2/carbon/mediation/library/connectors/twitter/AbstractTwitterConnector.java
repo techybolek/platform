@@ -13,9 +13,11 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.codehaus.jettison.AbstractXMLStreamReader;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.mapped.MappedXMLStreamReader;
+import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
 
-public class JSONUtil {
-	
+public abstract class AbstractTwitterConnector extends AbstractConnector  {
+
+		
 	/**
 	 * Util method which converts the the json to xml string format
 	 * 
@@ -25,7 +27,7 @@ public class JSONUtil {
 	 * @throws XMLStreamException
 	 * @throws IOException
 	 */
-	public static OMElement parseJsonToXml(String sb) throws JSONException, XMLStreamException, IOException {
+	public OMElement parseJsonToXml(String sb) throws JSONException, XMLStreamException, IOException {
 		StringWriter sw = new StringWriter(5120);
 		org.codehaus.jettison.json.JSONObject jsonObject = new org.codehaus.jettison.json.JSONObject(sb);
 		AbstractXMLStreamReader reader = new MappedXMLStreamReader(jsonObject);
@@ -94,4 +96,5 @@ public class JSONUtil {
 		 */
 		return element;
 	}
+
 }
