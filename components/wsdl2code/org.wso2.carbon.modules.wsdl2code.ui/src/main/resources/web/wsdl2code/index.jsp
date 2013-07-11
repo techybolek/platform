@@ -566,7 +566,7 @@ function codeGenFileUploadeHelper(codegenParentTextId, executor) {
                             }
                         %>
                         
-                        <% if(generateType ==null){ %>
+                        <% if (generateType == null && endPointsStr != null) { %>
                             <tr>
                             <td>-pn</td>
                             <td>Port name. Choose a specific port when there are multiple ports in the wsdl </td>
