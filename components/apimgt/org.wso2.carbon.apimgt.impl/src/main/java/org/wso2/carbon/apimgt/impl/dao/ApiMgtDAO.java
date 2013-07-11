@@ -181,7 +181,7 @@ public class ApiMgtDAO {
         }
 
         //get the tenant id for the corresponding domain
-        String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
+        //String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
         int tenantId = IdentityUtil.getTenantIdOFUser(loginUserName);
 
         Connection conn = null;
