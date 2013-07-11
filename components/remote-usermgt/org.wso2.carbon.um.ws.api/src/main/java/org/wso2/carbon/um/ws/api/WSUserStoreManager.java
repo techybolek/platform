@@ -33,9 +33,6 @@
 
 package org.wso2.carbon.um.ws.api;
 
-import java.util.Date;
-import java.util.Map;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -46,13 +43,16 @@ import org.wso2.carbon.um.ws.api.stub.ClaimValue;
 import org.wso2.carbon.um.ws.api.stub.PermissionDTO;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
 import org.wso2.carbon.user.api.ClaimManager;
-import org.wso2.carbon.user.api.Property;
+import org.wso2.carbon.user.api.Properties;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.tenant.Tenant;
+
+import java.util.Date;
+import java.util.Map;
 
 public class WSUserStoreManager implements UserStoreManager {
 
@@ -511,8 +511,7 @@ public class WSUserStoreManager implements UserStoreManager {
         return null;
     }
 
-	@Override
-    public Property[] getDefaultUserStoreProperties() {
+    public Properties getDefaultUserStoreProperties() {
 	    return null;
     }
 
