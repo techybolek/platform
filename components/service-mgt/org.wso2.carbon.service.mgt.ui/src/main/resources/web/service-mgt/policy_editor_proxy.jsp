@@ -24,6 +24,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.service.mgt.stub.types.carbon.ServiceMetaData" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <fmt:bundle basename="org.wso2.carbon.service.mgt.ui.i18n.Resources">
 <carbon:breadcrumb label="policy.editor.select.a.policy.to.edit"
 		resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
@@ -64,14 +65,14 @@
 </script>
 
 <%
-    String serviceName = request.getParameter("serviceName");
-    String moduleName = request.getParameter("moduleName");
-    String moduleVersion = request.getParameter("moduleVersion");
-    String action = request.getParameter("action");
-    String operationName = request.getParameter("operationName");
-    String bindingName = request.getParameter("bindingName");
-    String messageType = request.getParameter("messageType");
-    String policyType = request.getParameter("policyType");
+    String serviceName = CharacterEncoder.getSafeText(request.getParameter("serviceName"));
+    String moduleName = CharacterEncoder.getSafeText(request.getParameter("moduleName"));
+    String moduleVersion = CharacterEncoder.getSafeText(request.getParameter("moduleVersion"));
+    String action = CharacterEncoder.getSafeText(request.getParameter("action"));
+    String operationName = CharacterEncoder.getSafeText(request.getParameter("operationName"));
+    String bindingName = CharacterEncoder.getSafeText(request.getParameter("bindingName"));
+    String messageType = CharacterEncoder.getSafeText(request.getParameter("messageType"));
+    String policyType = CharacterEncoder.getSafeText(request.getParameter("policyType"));
 
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =

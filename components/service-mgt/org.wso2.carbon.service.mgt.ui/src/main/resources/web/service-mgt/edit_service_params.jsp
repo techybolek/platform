@@ -27,6 +27,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.ResourceBundle" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <script type="text/javascript" src="js/services.js"></script>
@@ -39,7 +40,7 @@
         topPage="false"
         request="<%=request%>"/>
 <%
-    String serviceName = request.getParameter("serviceName");
+    String serviceName = CharacterEncoder.getSafeText(request.getParameter("serviceName"));
     if (serviceName == null) {
         serviceName = (String) session.getAttribute("serviceName");
         session.removeAttribute("serviceName");

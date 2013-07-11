@@ -26,6 +26,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonSecuredHttpContext" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <!-- This page is included to display messages which are set to request scope or session scope -->
@@ -45,7 +46,7 @@
 
     ServiceGroupMetaData[] mdata;
     int numberOfPages;
-    String pageNumber = request.getParameter("pageNumber");
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
     if (pageNumber == null) {
         pageNumber = "0";
     }
@@ -56,11 +57,11 @@
     }
     ServiceGroupMetaDataWrapper serviceGroupInfo;
 
-    String serviceTypeFilter = request.getParameter("serviceTypeFilter");
+    String serviceTypeFilter = CharacterEncoder.getSafeText(request.getParameter("serviceTypeFilter"));
     if (serviceTypeFilter == null) {
         serviceTypeFilter = "ALL";
     }
-    String serviceGroupSearchString = request.getParameter("serviceGroupSearchString");
+    String serviceGroupSearchString = CharacterEncoder.getSafeText(request.getParameter("serviceGroupSearchString"));
     if (serviceGroupSearchString == null) {
         serviceGroupSearchString = "";
     }

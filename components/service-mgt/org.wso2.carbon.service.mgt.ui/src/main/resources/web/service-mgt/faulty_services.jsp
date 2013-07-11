@@ -25,11 +25,12 @@
 <%@ page import="org.wso2.carbon.service.mgt.stub.types.carbon.FaultyService" %>
 <%@ page import="org.wso2.carbon.service.mgt.stub.types.carbon.FaultyServicesWrapper" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <%
 
-    String pageNumber = request.getParameter("pageNumber");
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
     if (pageNumber == null) {
         pageNumber = "0";
     }

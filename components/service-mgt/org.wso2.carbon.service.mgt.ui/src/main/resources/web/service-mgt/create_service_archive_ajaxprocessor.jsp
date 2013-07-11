@@ -21,8 +21,9 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.service.mgt.ui.ServiceGroupAdminClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%
-    String serviceGroupName = request.getParameter("serviceGroupName");
+    String serviceGroupName = CharacterEncoder.getSafeText(request.getParameter("serviceGroupName"));
     String responseTextValue;
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =

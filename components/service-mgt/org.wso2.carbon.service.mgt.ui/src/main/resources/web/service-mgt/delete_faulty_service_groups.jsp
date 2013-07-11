@@ -21,10 +21,11 @@
 <%@ page import="org.wso2.carbon.service.mgt.ui.ServiceAdminClient" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%
     String[] serviceGroups = request.getParameterValues("serviceGroups");
-    String pageNumber = request.getParameter("pageNumber");
-    String deleteAllServiceGroups = request.getParameter("deleteAllServiceGroups");
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
+    String deleteAllServiceGroups = CharacterEncoder.getSafeText(request.getParameter("deleteAllServiceGroups"));
     int pageNumberInt = 0;
     if (pageNumber != null) {
         pageNumberInt = Integer.parseInt(pageNumber);
