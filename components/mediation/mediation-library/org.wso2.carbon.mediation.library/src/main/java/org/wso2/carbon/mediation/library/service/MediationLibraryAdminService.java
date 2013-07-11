@@ -17,6 +17,17 @@
 */
 package org.wso2.carbon.mediation.library.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
@@ -35,15 +46,6 @@ import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
 import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
 import org.wso2.carbon.mediation.library.util.ConfigHolder;
-
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.xml.stream.XMLStreamException;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class MediationLibraryAdminService extends AbstractServiceBusAdmin {
@@ -109,6 +111,61 @@ public class MediationLibraryAdminService extends AbstractServiceBusAdmin {
                                 + libName + " packageName : " + packageName , null);
         }
     }
+    
+    
+    /**
+     * Method loads the Library artifact information
+     * 
+     * @param libName
+     * @param packageName
+     * @return
+     * @throws AxisFault
+     */
+    public LibraryInfo getLibraryInfo(String libName, String packageName) throws AxisFault {
+        SynapseImport synImport = new SynapseImport();
+        synImport.setLibName(libName);
+        synImport.setLibPackage(packageName);
+        OMElement impEl = SynapseImportSerializer.serializeImport(synImport);
+        if(impEl != null){
+        	try {
+                OMElement imprtElem = createElement(impEl.toString());
+                SynapseImport synapseImport =
+                         SynapseImportFactory.createImport(imprtElem, null);
+                if (synapseImport != null && synapseImport.getName() != null) {
+                    //SynapseConfiguration synapseConfiguration = getSynapseConfiguration();
+                    String fileName = ServiceBusUtils.generateFileName(synapseImport.getName());
+                    synapseImport.setFileName(fileName);
+                   
+                    String synImportQualfiedName = LibDeployerUtils.getQualifiedName(synapseImport);
+                    Library synLib = getSynapseConfiguration().getSynapseLibraries()
+                            .get(synImportQualfiedName);
+                    if (synLib != null) {
+                       LibraryInfo info = new LibraryInfo();
+                       info.setLibName(libName);
+                       info.setPackageName(packageName);
+                       String [] artifacts = new String[synLib.getLibArtifactDetails().size()];
+                       int i = 0;
+                       for(Map.Entry<String, String> entry : synLib.getLibArtifactDetails().entrySet()){
+                    	   if(entry.getValue() != null && entry.getKey() !=null){
+                    		   artifacts[i] = entry.getKey();
+                    		   i++;
+                    	   }
+                       }
+                       info.setArtifacts(artifacts);
+                       return info;
+                    }
+                    
+                   
+                    
+                }
+
+            } catch (XMLStreamException e) {
+                String message = "Unable to create a Synapse Import for :  " ;
+                handleException(log, message, e);
+            }
+        }
+        return null;
+    }
 
     /**
      * Get the Synapse configuration for a Message processor
@@ -172,31 +229,30 @@ public class MediationLibraryAdminService extends AbstractServiceBusAdmin {
 
         // CarbonApplication instance to delete
         Library currentMediationLib = null;
+     
+        SynapseConfiguration synConfigForTenant = getSynapseConfiguration();
+		if (synConfigForTenant != null) {
+			Collection<Library> appList = synConfigForTenant.getSynapseLibraries().values();
+			for (Library mediationLib : appList) {
+				if (libQualifiedName.equals(mediationLib.getQName().toString())) {
+					currentMediationLib = mediationLib;
+				}
+			}
 
-        // Iterate all applications for this tenant and find the application to delete
-        int tenantId = getTenantId(getAxisConfig());
-        SynapseConfiguration synConfigForTenant = ConfigHolder.getInstance().
-                getSynapseEnvironmentService(tenantId).getSynapseEnvironment().getSynapseConfiguration();
-        Collection<Library> appList = synConfigForTenant.getSynapseLibraries().values();
-        for (Library mediationLib : appList) {
-            if (libQualifiedName.equals(mediationLib.getQName().toString())) {
-                currentMediationLib = mediationLib;
-            }
-        }
+			// If requested application not found, throw an exception
+			if (currentMediationLib == null) {
+				handleException(log, "No Mediation Library found of the name : " + libQualifiedName, null);
+				return;
+			}
 
-        // If requested application not found, throw an exception
-        if (currentMediationLib == null) {
-            handleException(log, "No Mediation Library found of the name : " + libQualifiedName, null);
-            return;
-        }
-
-        // Remove the app artifact file from repository, cApp hot undeployer will do the rest
-        String libFilePath = currentMediationLib.getFileName();
-        File file = new File(libFilePath);
-        if (file.exists() && !file.delete()) {
-            log.error("Artifact file couldn't be deleted for Mediation Library : "
-                      + currentMediationLib.getQName().toString());
-        }
+			// Remove the app artifact file from repository, cApp hot undeployer
+			// will do the rest
+			String libFilePath = currentMediationLib.getFileName();
+			File file = new File(libFilePath);
+			if (file.exists() && !file.delete()) {
+				log.error("Artifact file couldn't be deleted for Mediation Library : " + currentMediationLib.getQName().toString());
+			}
+		}
     }
 
 
@@ -303,9 +359,7 @@ public class MediationLibraryAdminService extends AbstractServiceBusAdmin {
         // CarbonApplication instance to delete
         Library currentMediationLib = null;
         // Iterate all applications for this tenant and find the application to delete
-        int tenantId = getTenantId(getAxisConfig());
-        SynapseConfiguration synConfigForTenant = ConfigHolder.getInstance().
-                getSynapseEnvironmentService(tenantId).getSynapseEnvironment().getSynapseConfiguration();
+        SynapseConfiguration synConfigForTenant = getSynapseConfiguration();
         Collection<Library> appList = synConfigForTenant.getSynapseLibraries().values();
         for (Library mediationLib : appList) {
             if (fileName.equals(mediationLib.getQName().getLocalPart().toString())) {

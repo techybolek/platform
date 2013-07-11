@@ -17,16 +17,15 @@
 */
 package org.wso2.carbon.mediation.library.service;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class LibraryInfo {
 
     private String libName ;
     private String packageName ;
     private String description ;
-
-    private List<String> artifacts = new ArrayList<String>();
+    private String [] artifacts;
+    
+    
     private String qName;
 
     public String getLibName() {
@@ -60,4 +59,15 @@ public class LibraryInfo {
     public String getQName() {
         return this.qName;
     }
+
+	public String[] getArtifacts() {
+    	return artifacts;
+    }
+
+	public void setArtifacts(String[] artifacts) {
+    	this.artifacts = artifacts;
+    }
+
+	
+    
 }
