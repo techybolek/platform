@@ -95,6 +95,9 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
 
                 // Create group ou
                 addGroupStoreToPartition(partition.getSuffix());
+                
+                //Creates the shared groups ou
+                addSharedGroupToPartition(partition.getSuffix());
 
                 /*do not create admin user and admin group because it is anyway checked and created
                  *in user core.*/
@@ -390,6 +393,32 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
             throwDirectoryServerException(msg, e);
         } catch (Exception e) {
             String msg = "Could not add group store to partition admin session. - " +
+                         partitionSuffixDn;
+            throwDirectoryServerException(msg, e);
+        }
+
+    }
+    
+    private void addSharedGroupToPartition(String partitionSuffixDn) throws DirectoryServerException{
+        ServerEntry groupsEntry;
+        try {
+
+            DN groupsDN = new DN("ou=SharedGroups," + partitionSuffixDn);
+
+            groupsEntry = this.directoryService.newEntry(groupsDN);
+            groupsEntry.add("objectClass", "organizationalUnit", "top");
+            groupsEntry.add("ou", "SharedGroups");
+
+            this.directoryService.getAdminSession().add(groupsEntry);
+        } catch (NamingException e) {
+            String msg = "Could not add shared group store to partition - " + partitionSuffixDn +
+                         ". Cause - partition domain name is not valid.";
+            throwDirectoryServerException(msg, e);
+        } catch (LdapException e) {
+            String msg = "Could not add shared group store to partition - " + partitionSuffixDn;
+            throwDirectoryServerException(msg, e);
+        } catch (Exception e) {
+            String msg = "Could not add shared group store to partition admin session. - " +
                          partitionSuffixDn;
             throwDirectoryServerException(msg, e);
         }
