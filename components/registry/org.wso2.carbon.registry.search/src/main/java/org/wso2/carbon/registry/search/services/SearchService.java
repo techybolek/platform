@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.registry.search.services;
 
+import org.apache.axis2.context.MessageContext;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.admin.api.search.ISearchService;
 import org.wso2.carbon.registry.common.ResourceData;
@@ -24,6 +25,8 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.ContentSearchService;
 import org.wso2.carbon.registry.search.Utils;
@@ -148,7 +151,7 @@ public class SearchService extends RegistryAbstractAdmin implements ISearchServi
                 } catch (RegistryException e) {
                     metaDataSearchResultsBean = new AdvancedSearchResultsBean();
                     metaDataSearchResultsBean.setErrorMessage(e.getMessage());
-                    return metaDataSearchResultsBean;
+                    return getPaginatedResult(metaDataSearchResultsBean);
                 }
 
 //                If there are no resource paths returned from content, then there is no point of searching for more
@@ -193,16 +196,55 @@ public class SearchService extends RegistryAbstractAdmin implements ISearchServi
 
                     metaDataSearchResultsBean = new AdvancedSearchResultsBean();
                     metaDataSearchResultsBean.setResourceDataList(sortedList.toArray(new ResourceData[sortedList.size()]));
-                    return metaDataSearchResultsBean;
+                    return getPaginatedResult(metaDataSearchResultsBean);
                 }else {
                     metaDataSearchResultsBean = new AdvancedSearchResultsBean();
                     metaDataSearchResultsBean.setResourceDataList(contentSearchResourceData);
-                    return metaDataSearchResultsBean;
+                    return getPaginatedResult(metaDataSearchResultsBean);
                 }
             }
         }
-        return AdvancedSearchResultsBeanPopulator.populate(configSystemRegistry, registry, parameters);
+        return getPaginatedResult(
+                AdvancedSearchResultsBeanPopulator.populate(configSystemRegistry, registry, parameters));
     }
+
+    private AdvancedSearchResultsBean getPaginatedResult( AdvancedSearchResultsBean advancedSearchResultsBean){
+        ResourceData[] paginatedResult;
+        MessageContext messageContext = MessageContext.getCurrentMessageContext();
+        if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
+
+            int rowCount = advancedSearchResultsBean.getResourceDataList().length;
+            try {
+                PaginationUtils.setRowCount(messageContext, Integer.toString(rowCount));
+                PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
+
+                int start = paginationContext.getStart();
+                int count = paginationContext.getCount();
+
+                int startIndex;
+                if (start == 1) {
+                    startIndex = 0;
+                } else {
+                    startIndex = start;
+                }
+                if (rowCount < start + count) {
+                    paginatedResult = new ResourceData[rowCount - startIndex];
+                    System.arraycopy(advancedSearchResultsBean.getResourceDataList(), startIndex, paginatedResult, 0, (rowCount - startIndex));
+                } else {
+                    paginatedResult = new ResourceData[count];
+                    System.arraycopy(advancedSearchResultsBean.getResourceDataList(), startIndex, paginatedResult, 0, count);
+                }
+                advancedSearchResultsBean.setResourceDataList(paginatedResult);
+                return advancedSearchResultsBean;
+
+            } finally {
+                PaginationContext.destroy();
+            }
+        }else {
+            return advancedSearchResultsBean;
+        }
+    }
+
     /* (non-Javadoc)
 	 * @see org.wso2.carbon.registry.search.services.ISearchService#getMediaTypeSearch(java.lang.String)
 	 */

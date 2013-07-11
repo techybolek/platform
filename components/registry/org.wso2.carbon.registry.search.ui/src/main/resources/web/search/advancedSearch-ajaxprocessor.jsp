@@ -21,17 +21,17 @@
 
 <%@ page import="org.wso2.carbon.registry.common.ui.UIConstants" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 <%@ page import="org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient" %>
 <%@ page import="org.wso2.carbon.registry.search.stub.beans.xsd.AdvancedSearchResultsBean" %>
 <%@ page import="org.wso2.carbon.registry.search.stub.common.xsd.ResourceData" %>
-<%@ page import="org.wso2.carbon.registry.search.ui.Utils" %>
 <%@ page import="org.wso2.carbon.registry.search.ui.clients.SearchServiceClient" %>
+<%@ page import="org.wso2.carbon.registry.search.ui.report.beans.MetaDataReportBean" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.registry.search.ui.report.beans.MetaDataReportBean" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
 
 
 <%
@@ -39,13 +39,18 @@
         AdvancedSearchResultsBean advancedSearchBean;
         String requestedPage = request.getParameter(UIConstants.REQUESTED_PAGE);
         try {
-            SearchServiceClient client = new SearchServiceClient(cookie, config, session);
-            if (requestedPage != null && session.getAttribute("advancedSearchBean") != null) {
-                advancedSearchBean = (AdvancedSearchResultsBean) session.getAttribute("advancedSearchBean");
+
+            int start;
+            int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+            if (requestedPage != null) {
+                start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
             } else {
-                advancedSearchBean = client.getAdvancedSearchResults(request);
-                session.setAttribute("advancedSearchBean", advancedSearchBean);
+                start = 1;
             }
+            PaginationContext.init(start, count, "", "", 1500);
+            SearchServiceClient client = new SearchServiceClient(cookie, config, session);
+            advancedSearchBean = client.getAdvancedSearchResults(request);
+
         } catch (Exception e) {
             response.setStatus(500);
 %>
@@ -55,34 +60,23 @@
 <%
             return;
         }
-        ResourceData[] fullResourceDataList = advancedSearchBean.getResourceDataList();
-        ResourceData[] resourceDataList = null;
-        if (advancedSearchBean != null) {
-            fullResourceDataList = advancedSearchBean.getResourceDataList();
+    ResourceData[] resourceDataList;
+    resourceDataList = advancedSearchBean.getResourceDataList();
+    int itemsPerPage = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+    int pageNumber = 1;
+    int numberOfPages;
+
+        if (requestedPage != null && requestedPage.length() > 0) {
+            pageNumber = new Integer(requestedPage);
         }
-        int start = 0;
-        int itemsPerPage = (int)(RegistryConstants.ITEMS_PER_PAGE * 1.5);
-        int pageNumber = 1;
-        int numberOfPages = 1;
 
-        if (fullResourceDataList != null && fullResourceDataList.length != 0) {
-
-            if (requestedPage != null && requestedPage.length() > 0) {
-                pageNumber = new Integer(requestedPage);
-            }
-
-
-            if (fullResourceDataList.length % itemsPerPage == 0) {
-                numberOfPages = fullResourceDataList.length / itemsPerPage;
-            } else {
-                numberOfPages = fullResourceDataList.length / itemsPerPage + 1;
-            }
-
-            if (fullResourceDataList.length >= itemsPerPage) {
-                start = (pageNumber - 1) * itemsPerPage;
-            }
-            resourceDataList = Utils.getChildren(start, itemsPerPage, fullResourceDataList);
+        int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+        if (rowCount % itemsPerPage == 0) {
+            numberOfPages = rowCount / itemsPerPage;
+        } else {
+            numberOfPages = rowCount / itemsPerPage + 1;
         }
+
 
 
     boolean resourceExists = false;
@@ -121,7 +115,7 @@
     %>
 <%
         
-        if (resourceDataList != null && resourceDataList.length != 0) {
+        if (resourceDataList != null && resourceDataList.length >0) {
     %>
     
     <h3 style="margin-top:20px;margin-bottom:20px;"> <fmt:message key="search.results"/> </h3>
@@ -137,54 +131,57 @@
         </thead>
         <tbody>
         <%
-            for (int i = 0; i < resourceDataList.length; i++) {
-                ResourceData resourceData = resourceDataList[i];
-
+            for (ResourceData resourceData : resourceDataList) {
                 if (resourceData == null) {
                     continue;
                 }
                 String tempPath = resourceData.getResourcePath();
                 try {
                     tempPath = URLEncoder.encode(tempPath, "UTF-8");
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
         %>
         <tr id="1">
-             <% if (resourceData.getResourceType().equals("collection")) { %>
+            <% if (resourceData.getResourceType().equals("collection")) { %>
             <td style="padding-left:5px;padding-top:3px;text-align:left;"><img
                     src="images/icon-folder-small.gif" style="margin-right:5px;" align="top"/>
-                    <% if (CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse")) {%>
-                    <a onclick="directToResource('../resources/resource.jsp?region=region3&item=resource_browser_menu&viewType=std&path=<%=tempPath%>')"
-                    href="#"><%=resourceData.getResourcePath()%></a>
-                    <% } else { %>
-                    <%=resourceData.getResourcePath()%>
-                    <% } %>
+                <% if (CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse")) {%>
+                <a onclick="directToResource('../resources/resource.jsp?region=region3&item=resource_browser_menu&viewType=std&path=<%=tempPath%>')"
+                   href="#"><%=resourceData.getResourcePath()%>
+                </a>
+                <% } else { %>
+                <%=resourceData.getResourcePath()%>
+                <% } %>
             </td>
             <% } %>
             <% if (resourceData.getResourceType().equals("resource")) { %>
             <td style="padding-left:5px;padding-top:3px;text-align:left;"><img
                     src="images/resource.gif" style="margin-right:5px;" align="top"/>
-                    <% if (CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse")) {%>
-                    <a onclick="directToResource('../resources/resource.jsp?region=region3&item=resource_browser_menu&viewType=std&path=<%=tempPath%>')"
-                    href="#"><%=resourceData.getResourcePath()%></a>
-                    <% } else { %>
-                    <%=resourceData.getResourcePath()%>
-                    <% } %>
+                <% if (CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse")) {%>
+                <a onclick="directToResource('../resources/resource.jsp?region=region3&item=resource_browser_menu&viewType=std&path=<%=tempPath%>')"
+                   href="#"><%=resourceData.getResourcePath()%>
+                </a>
+                <% } else { %>
+                <%=resourceData.getResourcePath()%>
+                <% } %>
             </td>
             <% } %>
 
-            <td style="padding-left:5px;padding-top:3px;text-align:left;"><nobr><%=resourceData.getFormattedCreatedOn()%></nobr>
+            <td style="padding-left:5px;padding-top:3px;text-align:left;">
+                <nobr><%=resourceData.getFormattedCreatedOn()%>
+                </nobr>
             </td>
             <td style="padding-left:5px;padding-top:3px;text-align:left;"><%=resourceData.getAuthorUserName()%>
             </td>
             <td style="padding-left:5px;padding-top:3px;text-align:left;">
-            <div style="width:140px;">
-                <img src="images/r<%=resourceData.getAverageStars()[0]%>.gif"/>
-                <img src="images/r<%=resourceData.getAverageStars()[1]%>.gif"/>
-                <img src="images/r<%=resourceData.getAverageStars()[2]%>.gif"/>
-                <img src="images/r<%=resourceData.getAverageStars()[3]%>.gif"/>
-                <img src="images/r<%=resourceData.getAverageStars()[4]%>.gif"/>
-                (<%=resourceData.getAverageRating()%>)
-            </div>
+                <div style="width:140px;">
+                    <img src="images/r<%=resourceData.getAverageStars()[0]%>.gif"/>
+                    <img src="images/r<%=resourceData.getAverageStars()[1]%>.gif"/>
+                    <img src="images/r<%=resourceData.getAverageStars()[2]%>.gif"/>
+                    <img src="images/r<%=resourceData.getAverageStars()[3]%>.gif"/>
+                    <img src="images/r<%=resourceData.getAverageStars()[4]%>.gif"/>
+                    (<%=resourceData.getAverageRating()%>)
+                </div>
             </td>
         </tr>
 
@@ -194,20 +191,19 @@
             List<MetaDataReportBean> searchReportBeanList = new ArrayList<MetaDataReportBean>();
 
 
-                for(int i=0;i<fullResourceDataList.length;i++){
-                   ResourceData resourceDataFull = fullResourceDataList[i];
-                   if (resourceDataFull == null) {
-                       continue;
-                   }
-                   MetaDataReportBean metaDataSearchReportBean = new MetaDataReportBean();
-
-                   metaDataSearchReportBean.setAuthorName(resourceDataFull.getAuthorUserName());
-                   metaDataSearchReportBean.setResourcePath(resourceDataFull.getResourcePath());
-                   metaDataSearchReportBean.setCreatedDate(resourceDataFull.getFormattedCreatedOn());
-                   metaDataSearchReportBean.setAverageRating(Float.toString(resourceDataFull.getAverageRating()));
-
-                   searchReportBeanList.add(metaDataSearchReportBean);
+            for (ResourceData resourceDataFull : resourceDataList) {
+                if (resourceDataFull == null) {
+                    continue;
                 }
+                MetaDataReportBean metaDataSearchReportBean = new MetaDataReportBean();
+
+                metaDataSearchReportBean.setAuthorName(resourceDataFull.getAuthorUserName());
+                metaDataSearchReportBean.setResourcePath(resourceDataFull.getResourcePath());
+                metaDataSearchReportBean.setCreatedDate(resourceDataFull.getFormattedCreatedOn());
+                metaDataSearchReportBean.setAverageRating(Float.toString(resourceDataFull.getAverageRating()));
+
+                searchReportBeanList.add(metaDataSearchReportBean);
+            }
             request.getSession().setAttribute("metaDataSearchReport", searchReportBeanList);
 
         %>

@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.search.ui.Utils;
 import org.wso2.carbon.registry.search.stub.SearchAdminServiceStub;
 import org.wso2.carbon.registry.search.stub.beans.xsd.*;
@@ -43,10 +45,11 @@ public class SearchServiceClient {
 
     private SearchAdminServiceStub stub;
     private String epr;
+    private HttpSession session;
 
     public SearchServiceClient(String cookie, ServletConfig config, HttpSession session)
             throws RegistryException {
-
+        this.session =session;
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.
                 getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
@@ -105,7 +108,15 @@ public class SearchServiceClient {
 
 
         try {
-            bean = stub.getAdvancedSearchResults(paramterBean);
+            if(PaginationContext.getInstance() == null){
+
+                bean = stub.getAdvancedSearchResults(paramterBean);
+            }       else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                bean = stub.getAdvancedSearchResults(paramterBean);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+                session.setAttribute("row_count", Integer.toString(rowCount));
+            }
 //            bean = stub.getAdvancedSearchResults(resourceName, authorName, updaterName, createdAfter,
 //                                                 createdBefore, updatedAfter, updatedBefore, tags, commentWords, propertyName,
 //                                                 propertyValue, content);
