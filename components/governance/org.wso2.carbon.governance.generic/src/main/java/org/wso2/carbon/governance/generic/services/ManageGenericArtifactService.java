@@ -286,7 +286,10 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
         GovernanceArtifactConfiguration configuration =
                 GovernanceUtils.findGovernanceArtifactConfigurationByMediaType(mediaType, getRootRegistry());
-
+        //Configuration will be null for uploading gar/zip file, because media type is application/vnd.wso2.governance-archive
+        if (configuration == null) {
+            return null;
+        }
         GenericArtifactManager manager = new GenericArtifactManager(registry,
                 configuration.getMediaType(), configuration.getArtifactNameAttribute(),
                 configuration.getArtifactNamespaceAttribute(),
