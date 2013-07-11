@@ -210,7 +210,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, tenantAwareUserId);
+            ps.setString(1, loginUserName);
             ps.setInt(2, tenantId);
             ps.setString(3, applicationName);
             ps.setString(4, keyType);
