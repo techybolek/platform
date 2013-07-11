@@ -178,7 +178,7 @@ if(tabs!=null && tabs.equals("0")) {
                              String libQName = libraryInfo.getQName();
                     %>
                     <tr>
-                        <td><a href="./application_info.jsp?appName=<%= libName%>"><%= libName%></a></td>
+                        <td><a href="./application_info.jsp?libName=<%= libName%>&pkgName=<%= pkgName%>"><%= libName%></a></td>
                         <%
                             if (pkgName != null) {
                         %>

@@ -74,6 +74,15 @@ public class LibraryAdminClient {
         }
         return null;
     }
+    
+    public LibraryInfo getLibraryInfo(String libraryName,String _package) throws AxisFault {
+        try {
+            return stub.getLibraryInfo(libraryName, _package);
+        } catch (java.lang.Exception e) {
+            handleException(bundle.getString("cannot.get.service.data"), e);
+        }
+        return null;
+    }
 
     public void deleteImport(String importQualifiedName) throws AxisFault {
         try {
