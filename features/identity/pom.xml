@@ -31,7 +31,6 @@
             <modules>
                 <module>identity-core</module>
                 <module>identity-provider</module>
-		<module>identity-provider</module>
 		<module>identity-mgt</module>
 		<module>identity-authorization</module>
                 <module>relying-party</module>
