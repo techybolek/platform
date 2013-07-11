@@ -6,43 +6,55 @@
 ~ in compliance with the License.
 ~ You may obtain a copy of the License at
 ~
-~    http://www.apache.org/licenses/LICENSE-2.0
+~ http://www.apache.org/licenses/LICENSE-2.0
 ~
 ~ Unless required by applicable law or agreed to in writing,
 ~ software distributed under the License is distributed on an
 ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-~ KIND, either express or implied.  See the License for the
+~ KIND, either express or implied. See the License for the
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<%@ page import="org.apache.axis2.context.ConfigurationContext"%>
-<%@ page import="org.wso2.carbon.CarbonConstants"%>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
-<%@ page import="org.wso2.carbon.ui.CarbonUIUtil"%>
-<%@ page import="org.wso2.carbon.utils.ServerConstants"%>
+<%@ page import="org.apache.axis2.context.ConfigurationContext" %>
+<%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.client.UserStoreConfigAdminServiceClient" %>
 
-<%@page import="java.util.ResourceBundle"%>
-<%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.utils.UserStoreMgtDataKeeper" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.util.ResourceBundle" %>
 <%
     String forwardTo = null;
     String action = request.getParameter("action");
-    int order = Integer.parseInt(request.getParameter("order"));
+    String domain = request.getParameter("domain");
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+    UserStoreConfigAdminServiceClient userStoreConfigAdminServiceClient = null;
+    if (session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE) != null) {
+        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+        String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+        ConfigurationContext configContext =
+                (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+        userStoreConfigAdminServiceClient = new UserStoreConfigAdminServiceClient(cookie, backendServerURL, configContext);
 
-    if ((request.getParameter("order") != null)) {
+    } else {
+        String message = resourceBundle.getString("try.again");
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+        forwardTo = "../admin/index.jsp";
+    }
+    if ((request.getParameter("domain") != null)) {
 
         try {
-            if(action.equals("enable")){
-                UserStoreMgtDataKeeper.getUserStoreManager(order).put("Disabled", String.valueOf(false));
+            if (action.equals("enable")) {
+                userStoreConfigAdminServiceClient.updateUserStore(domain, "false");
             }
-            if(action.equals("disable")){
-                UserStoreMgtDataKeeper.getUserStoreManager(order).put("Disabled", String.valueOf(true));
+            if (action.equals("disable")) {
+                userStoreConfigAdminServiceClient.updateUserStore(domain, "true");
             }
             forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
         } catch (Exception e) {
             String message = resourceBundle.getString("invalid.user.store.not.updated");
-            CarbonUIMessage.sendCarbonUIMessage(message,	CarbonUIMessage.ERROR, request);
+            CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
             forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
         }
     } else {
@@ -50,8 +62,7 @@
     }
 %>
 
-<script
-        type="text/javascript">
+<script type="text/javascript">
     function forward() {
         location.href = "<%=forwardTo%>";
     }

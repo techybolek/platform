@@ -17,8 +17,8 @@
 */
 package org.wso2.carbon.identity.user.store.configuration.ui;
 
-public final class UserStoreConfigConstantsKeeper {
-    private UserStoreConfigConstantsKeeper() {
+public final class UserStoreUIConstants {
+    private UserStoreUIConstants() {
     }
 
     public static final String RWLDAP_USERSTORE_MANAGER = "org.wso2.carbon.user.core.ldap.ReadWriteLDAPUserStoreManager";
@@ -27,6 +27,11 @@ public final class UserStoreConfigConstantsKeeper {
     public static final String JDABC_USERSTORE_MANAGER = "org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager";
     public static final String CASSANDRA_USERSTORE_MANAGER = "org.wso2.carbon.user.cassandra.CassandraUserStoreManager";
     public static final String PRIMARY = "PRIMARY";
+    public static final String CLASS = "Class";
+    public static final String DESCRIPTION = "Description";
+    public static final String DISABLED = "Disabled";
+    public static final String DOMAIN = "DomainName";
+
 
 
 

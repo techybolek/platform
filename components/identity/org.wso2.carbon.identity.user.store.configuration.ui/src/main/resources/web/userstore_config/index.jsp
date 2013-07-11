@@ -21,19 +21,13 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <jsp:include page="../dialog/display_messages.jsp"/>
-<%--<%@ page import="org.wso2.carbon.identity.user.store.configuration.stub.config.UserStoreDTO" %>--%>
-<%@ page import="org.wso2.carbon.identity.user.store.configuration.stub.config.UserStoreDTO" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.stub.dto.UserStoreDTO" %>
 <%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.client.UserStoreConfigAdminServiceClient" %>
 <%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.utils.UserStoreMgtDataKeeper" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
-<%@ page import="org.wso2.carbon.user.core.UserStoreConfigConstants" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.ResourceBundle" %>
-<%@ page import="java.util.List" %>
+<%@ page import="java.util.*" %>
 
 <fmt:bundle basename="org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources">
 <carbon:breadcrumb
@@ -41,201 +35,130 @@
         resourceBundle="org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources"
         topPage="true"
         request="<%=request%>"/>
-<%--<%!private Boolean isDisabled = false;%>--%>
 <%
-    String forwardTo = "index.jsp";
+    String forwardTo;
     String BUNDLE = "org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
-    ArrayList orderList = null;
 
-
-    UserStoreDTO[] userStoreDTOs;
+    UserStoreDTO[] userStoreDTOs = null;
     if (session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE) != null) {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         UserStoreConfigAdminServiceClient userStoreConfigAdminServiceClient = new UserStoreConfigAdminServiceClient(cookie, backendServerURL, configContext);
-        if (!UserStoreMgtDataKeeper.getEdited()) {
-            userStoreDTOs = userStoreConfigAdminServiceClient.getActiveDomains();
-            int order;
-            String description;
-            String className;
-            String isDisabled;
-            Map<String, String> userStoreProperties;
+        userStoreDTOs = userStoreConfigAdminServiceClient.getActiveDomains();
+        if (userStoreDTOs[0] != null) {
             for (UserStoreDTO userStoreDTO : userStoreDTOs) {
-                order = userStoreDTO.getOrder();
-                description = userStoreDTO.getDescription();
-                className = userStoreDTO.getClassName();
-                isDisabled = String.valueOf(userStoreDTO.getDisabled());
-                userStoreProperties = userStoreConfigAdminServiceClient.getActiveUserStoreProperties(order);
-                userStoreProperties.put("Description", description);
-                userStoreProperties.put("Class", className);
-                userStoreProperties.put("Disabled", isDisabled);
-                UserStoreMgtDataKeeper.addUserStoreManagers(userStoreProperties, order);
+                UserStoreMgtDataKeeper.addUserStoreManager(userStoreDTO.getProperties(), userStoreDTO.getDomainId());
+
             }
-
         } else {
-            userStoreDTOs = UserStoreMgtDataKeeper.getUserStoreManagersBasics();
         }
-
-
-        UserStoreMgtDataKeeper.setConfigProperties(userStoreConfigAdminServiceClient.getConfigProperties());
-        UserStoreMgtDataKeeper.setAuthzProperties(userStoreConfigAdminServiceClient.getAuthzProperties());
-
     } else {
-        userStoreDTOs = new UserStoreDTO[0];                                         //to avoid initialization issue
-        CarbonUIMessage.sendCarbonUIMessage("Your session has timed out. Please try again.", CarbonUIMessage.ERROR, request);
+        userStoreDTOs = new UserStoreDTO[0];
+        String message = resourceBundle.getString("try.again");
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "../admin/index.jsp";
     }
 %>
-
-<%--<%! private Boolean isEdited=UserStoreMgtDataKeeper.getEdited();--%>
-
-
-<%--%>--%>
-<%--<%! private void setEdited(Boolean edited) { isEdited=edited;} %>--%>
 
 
 <script type="text/javascript">
 
 
-        var allUserStoresSelected = false;
+    var allUserStoresSelected = false;
 
-        function updownthis(thislink, updown) {
-            var sampleTable = document.getElementById('dataTable');
-            var clickedRow = thislink.parentNode.parentNode;
-            var addition = -1;
-            if (updown == "down") {
-                addition = 1;
-            }
-            var otherRow = sampleTable.rows[clickedRow.rowIndex + addition];
-            var numrows = jQuery("#dataTable tbody tr").length;
-            if (numrows <= 1) {
-                return;
-            }
-            if (clickedRow.rowIndex == 1 && updown == "up") {
-                return;
-            } else if (clickedRow.rowIndex == numrows + 1 && updown == "down") {
-                return;
-            }
-            var rowdata_clicked = new Array();
-            for (var i = 0; i < clickedRow.cells.length; i++) {
-                rowdata_clicked.push(clickedRow.cells[i].innerHTML);
-                clickedRow.cells[i].innerHTML = otherRow.cells[i].innerHTML;
-            }
-            for (i = 0; i < otherRow.cells.length; i++) {
-                otherRow.cells[i].innerHTML = rowdata_clicked[i];
-            }
-        }
-
-
-        function selectAllInThisPage(isSelected) {
-            allUserStoresSelected = false;
-            if (document.userStoreForm.userStores != null &&
-                    document.userStoreForm.userStores[0] != null) { // there is more than 1 service
-                if (isSelected) {
-                    for (var j = 0; j < document.userStoreForm.userStores.length; j++) {
-                        document.userStoreForm.userStores[j].checked = true;
-                    }
-                } else {
-                    for (j = 0; j < document.userStoreForm.userStores.length; j++) {
-                        document.userStoreForm.userStores[j].checked = false;
-                    }
-                }
-            } else if (document.userStoreForm.userStores != null) { // only 1 service
-                document.userStoreForm.userStores.checked = isSelected;
-            }
-            return false;
-        }
-
-        function resetVars() {
-            allUserStoresSelected = false;
-
-            var isSelected = false;
-            if (document.userStoreForm.userStores != null) { // there is more than 1 service
+    function selectAllInThisPage(isSelected) {
+        allUserStoresSelected = false;
+        if (document.userStoreForm.userStores != null &&
+                document.userStoreForm.userStores[0] != null) { // there is more than 1 service
+            if (isSelected) {
                 for (var j = 0; j < document.userStoreForm.userStores.length; j++) {
-                    if (document.userStoreForm.userStores[j].checked) {
-                        isSelected = true;
-                    }
+                    document.userStoreForm.userStores[j].checked = true;
                 }
-            } else if (document.userStoreForm.userStores != null) { // only 1 service
-                if (document.userStoreForm.userStores.checked) {
+            } else {
+                for (j = 0; j < document.userStoreForm.userStores.length; j++) {
+                    document.userStoreForm.userStores[j].checked = false;
+                }
+            }
+        } else if (document.userStoreForm.userStores != null) { // only 1 service
+            document.userStoreForm.userStores.checked = isSelected;
+        }
+        return false;
+    }
+
+    function resetVars() {
+        allUserStoresSelected = false;
+
+        var isSelected = false;
+        if (document.userStoreForm.userStores != null) { // there is more than 1 service
+            for (var j = 0; j < document.userStoreForm.userStores.length; j++) {
+                if (document.userStoreForm.userStores[j].checked) {
                     isSelected = true;
                 }
             }
-            return false;
-        }
-
-
-        function deleteUserStores() {
-            var selected = false;
-            if (document.userStoreForm.userStores[0] != null) { // there is more than 1 user store
-                for (var j = 0; j < document.userStoreForm.userStores.length; j++) {
-                    selected = document.userStoreForm.userStores[j].checked;
-                    if (selected) break;
-                }
-            } else if (document.userStoreForm.userStores != null) { // only 1 user store
-                selected = document.userStoreForm.userStores.checked;
-            }
-            if (!selected) {
-                CARBON.showInfoDialog('<fmt:message key="select.user.stores.to.be.deleted"/>');
-                return;
-            }
-            if (allUserStoresSelected) {
-                CARBON.showConfirmationDialog("<fmt:message key="delete.all.user.stores.prompt"/>", function () {
-
-                });
-            } else {
-                CARBON.showConfirmationDialog("<fmt:message key="delete.user.stores.on.page.prompt"/>", function () {
-                    var checkedList = new Array();
-                    jQuery("input:checked").each(function () {
-                        checkedList.push($(this).val());
-                    });
-
-                    var orderList = new Array();
-                    jQuery('.valueCell a').each(function () {
-                        orderList.push($(this).html().trim());
-                    });
-                    document.userStoreForm.action = "remove-userstore.jsp?checkedList=" + checkedList + "&orderList=" + orderList;
-                    document.userStoreForm.submit();
-                });
+        } else if (document.userStoreForm.userStores != null) { // only 1 service
+            if (document.userStoreForm.userStores.checked) {
+                isSelected = true;
             }
         }
+        return false;
+    }
 
-        function doUpdate() {
-            var orderList = new Array();
-            jQuery('.valueCell a').each(function () {
-                orderList.push($(this).html().trim());
+
+    function deleteUserStores() {
+        var selected = false;
+        if (document.userStoreForm.userStores[0] != null) { // there is more than 1 user store
+            for (var j = 0; j < document.userStoreForm.userStores.length; j++) {
+                selected = document.userStoreForm.userStores[j].checked;
+                if (selected) break;
+            }
+        } else if (document.userStoreForm.userStores != null) { // only 1 user store
+            selected = document.userStoreForm.userStores.checked;
+        }
+        if (!selected) {
+            CARBON.showInfoDialog('<fmt:message key="select.user.stores.to.be.deleted"/>');
+            return;
+        }
+        if (allUserStoresSelected) {
+            CARBON.showConfirmationDialog("<fmt:message key="delete.all.user.stores.prompt"/>", function () {
+
             });
-            document.userStoreForm.action = "index-update.jsp?orderList=" + orderList;
-            document.userStoreForm.submit();
+        } else {
+            CARBON.showConfirmationDialog("<fmt:message key="delete.user.stores.on.page.prompt"/>", function () {
+                var checkedList = new Array();
+                jQuery("input:checked").each(function () {
+                    checkedList.push($(this).val());
+                });
 
+//                var orderList = new Array();
+//                jQuery('.valueCell a').each(function () {
+//                    orderList.push($(this).html().trim());
+//                });
+                document.userStoreForm.action = "remove-userstore.jsp?checkedList=" + checkedList;
+                document.userStoreForm.submit();
+            });
         }
+    }
 
-        function doCancel() {
-            document.userStoreForm.action = "cancel.jsp";
-            document.userStoreForm.submit();
-        }
 
-        function edit(order, className) {
-//        UserStoreMgtDataKeeper.setEdited(true);
-            <%UserStoreMgtDataKeeper.setEdited(true);%>
-            document.userStoreForm.action = "userstore-config.jsp?order= " + order + "&className= " + className;
-            document.userStoreForm.submit();
+    function edit(domain, className) {
+        document.userStoreForm.action = "userstore-config.jsp?domain= " + domain + "&className= " + className;
+        document.userStoreForm.submit();
 
-        }
+    }
 
-        function enable(order) {
-            location.href = "enable-disable-userstores.jsp?order=" + order + "&action=enable";
+    function enable(domain) {
+        location.href = "enable-disable-userstores.jsp?domain=" + domain + "&action=enable";
 
-        }
+    }
 
-        function disable(order) {
-            location.href = "enable-disable-userstores.jsp?order=" + order + "&action=disable";
+    function disable(domain) {
+        location.href = "enable-disable-userstores.jsp?domain=" + domain + "&action=disable";
 
-        }
+    }
 
     //    function getOrder() {
     //        var orderList = new Array();
@@ -284,58 +207,33 @@
             <table style="width: 100%" id="dataTable" class="styledLeft">
                 <thead>
                 <tr>
-
-                    <th style="width:6%" style="text-align:left;"><fmt:message key='organize'/></th>
-                    <th style="width:6%" style="text-align:left;"><fmt:message key='select'/></th>
-                    <th style="width:15%" style="text-align:left;"><fmt:message key='domain.name'/></th>
-                    <th style="width:25%" style="text-align:left;"><fmt:message key='class.description'/></th>
-                    <th style="width:25%" style="text-align:left;"><fmt:message key='class.name'/></th>
-                    <th style="width:6%" hidden="true" style="text-align:left;"><fmt:message key='order'/></th>
-                    <th style="width:17%" style="text-align:left;"><fmt:message key='action'/></th>
-
+                    <th colspan="5"><fmt:message key='available.secondary.user.stores'/></th>
                 </tr>
                 </thead>
                 <tbody>
-                <% for (UserStoreDTO userstoreDTO : userStoreDTOs) {
-                    String className = userstoreDTO.getClassName();
-                    int order = userstoreDTO.getOrder();
-                    String description = userstoreDTO.getDescription();
-                    String domainId = userstoreDTO.getDomainId();
-                    Boolean isDisabled = userstoreDTO.getDisabled();
+                <% if (userStoreDTOs[0] != null) {
+                    for (UserStoreDTO userstoreDTO : userStoreDTOs) {
+                        String className = userstoreDTO.getClassName();
+                        String description = userstoreDTO.getDescription();
+                        String domainId = userstoreDTO.getDomainId();
+                        Boolean isDisabled = userstoreDTO.getDisabled();
+                        if (className == null) {
+                            className = "";
+                        }
+                        if (description == null) {
+                            description = "";
+                        }
+                        if (domainId == null) {
+                            domainId = "";
+                        }
 
-                    if (className == null) {
-                        className = " ";
-                    }
-
-                    if (description == null) {
-                        description = " ";
-                    }
-
-                    if (domainId == null) {
-                        domainId = UserStoreConfigConstants.PRIMARY;
-                    }
                 %>
                 <tr id=<%=domainId%>>
-                    <%if (UserStoreMgtDataKeeper.getChangedUserStores().contains(domainId)) {
-
-                    %>
-                    <script>
-                        $this.css("background-color", "green")
-                    </script>
-                    <%
-                            }   %>
-                    <td style="width:5%;">
-                        <a class="icon-link" onclick="updownthis(this,'up')"
-                           style="background-image:url(images/up.gif)"></a>
-                        <a class="icon-link" onclick="updownthis(this,'down')"
-                           style="background-image:url(images/down.gif)"></a>
-                        <input type="hidden" value="<%=CharacterEncoder.getSafeText(className)%>"/>
-                    </td>
                     <td width="5%" style="text-align:center; !important">
                         <input type="checkbox" name="userStores"
-                               value="<%=userstoreDTO.getOrder()%>"
+                               value="<%=domainId%>"
                                onclick="resetVars()"
-                               class="chkBox"/> <%--jQuery("input:checked").each(function(){console.info($(this).val());});--%>
+                               class="chkBox"/>
                     </td>
                     <td style="width:6%" style="text-align:left;">
                         <a><%=domainId%>
@@ -349,44 +247,35 @@
                         <a><%=className%>
                         </a>
                     </td>
-                    <td hidden="true" width="5%" style="text-align:center; !important" class="valueCell">
-                        <a><%=order%>
-                        </a>
-                    </td>
                     <td width="29%" style="text-align:center; !important">
                         <a title="<fmt:message key='edit.userstore'/>"
-                           onclick="edit('<%=order%>','<%=className%>');"
+                           onclick="edit('<%=domainId%>','<%=className%>');"
                            href="#" style="background-image: url(images/edit.gif);" class="icon-link">
                             <fmt:message key='edit.userstore'/></a>
                         <% if (!isDisabled) { %>
                         <a title="<fmt:message key='disable.userstore'/>"
-                           onclick="disable('<%=order%>');return false;"
+                           onclick="disable('<%=domainId%>');return false;"
                            href="#" style="background-image: url(images/disable.gif);" class="icon-link">
                             <fmt:message key='disable.userstore'/></a>
                         <% } else { %>
                         <a title="<fmt:message key='enable.userstore'/>"
-                           onclick="enable('<%=order%>');return false;"
+                           onclick="enable('<%=domainId%>');return false;"
                            href="#" style="background-image: url(images/enable.gif);" class="icon-link">
                             <fmt:message key='enable.userstore'/></a>
                         <%
                             }
 
-                    %>
+                        %>
                     </td>
                 </tr>
-                <% }%>
+                <% }
+                } else { %>
+                <tr>
+                    <td colspan="2"><fmt:message key='no.secondary.user.stores.defined'/></td>
+                </tr>
+                <%}%>
                 </tbody>
             </table>
-            <div id="buttonRow">
-                <tr>
-                    <td style="border:0; !important">
-                        <input type="button" onclick="doUpdate();" value="<fmt:message key="update"/>"
-                               class="button"/>
-                        <input type="button" onclick="doCancel();" value="<fmt:message key="cancel" />"
-                               class="button"/>
-                    </td>
-                </tr>
-            </div>
         </form>
     </div>
 </div>

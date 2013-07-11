@@ -18,30 +18,44 @@
 
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.stub.api.Properties" %>
 <%@ page import="org.wso2.carbon.identity.user.store.configuration.stub.api.Property" %>
-<%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.UserStoreConfigConstantsKeeper" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.UserStoreUIConstants" %>
 <%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.client.UserStoreConfigAdminServiceClient" %>
 <%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.utils.UserStoreMgtDataKeeper" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.utils.UserStoreUIUtils" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="com.sun.jmx.remote.util.OrderClassLoaders" %>
+<%@ page import="java.util.ResourceBundle" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
-
+<jsp:include page="../dialog/display_messages.jsp"/>
+<fmt:bundle basename="org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources">
+<carbon:breadcrumb
+        label="add.userstore"
+        resourceBundle="org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources"
+        topPage="true"
+        request="<%=request%>"/>
+<%
+    String BUNDLE = "org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+%>
 
 <%!
     private String propertyValue;
     private String propertyName;
-    private ArrayList<Property> properties;
+    private Properties properties;
+    private Property[] mandatories;
+    private Property[] optionals;
     private String forwardTo;
-    private String order;
+    private String domain;
     private String className;
     private Boolean isEditing;
-    private ArrayList mandatory=new ArrayList();
+    private int isBoolean;
+    private int i;
 
     private int isBoolean(String value) {
         int i = -123;
@@ -54,16 +68,15 @@
     }
 
 %><%
-    if(request.getParameter("order")!=null){
-    order = CharacterEncoder.getSafeText(request.getParameter("order"));
+    if (request.getParameter("domain") != null) {
+        domain = CharacterEncoder.getSafeText(request.getParameter("domain"));
     }
 
-    if(request.getParameter("className")!=null) {
-    className = CharacterEncoder.getSafeText(request.getParameter("className"));
+    if (request.getParameter("className") != null) {
+        className = CharacterEncoder.getSafeText(request.getParameter("className"));
     }
     String selectedClassApplied = null;
     String description = null;
-    String domainId = null;
     int rank;
     String[] classApplies = new String[0];
 
@@ -77,14 +90,7 @@
 
 
     if (selectedClassApplied == null || selectedClassApplied.trim().length() == 0) {
-        selectedClassApplied = UserStoreConfigConstantsKeeper.RWLDAP_USERSTORE_MANAGER;
-    } else {
-
-    }
-
-    if (session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE) == null) {
-        CarbonUIMessage.sendCarbonUIMessage("Your session has timed out. Please try again.", CarbonUIMessage.ERROR, request);
-        forwardTo = "../admin/index.jsp";
+        selectedClassApplied = UserStoreUIConstants.RWLDAP_USERSTORE_MANAGER;
     } else {
 
     }
@@ -96,47 +102,41 @@
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         UserStoreConfigAdminServiceClient userStoreConfigAdminServiceClient = new UserStoreConfigAdminServiceClient(cookie, backendServerURL, configContext);
         classApplies = userStoreConfigAdminServiceClient.getAvailableUserStoreClasses();
-        if (!order.equals("0")) {
-
-            rank = Integer.parseInt(order);
+        if (!domain.equals("0")) {
 
             //Get the defined properties of user store manager
-            Map<String, String> tempProperties = UserStoreMgtDataKeeper.getUserStoreManager(rank);
-            className = tempProperties.get("Class");
-            description = tempProperties.get("Description");
-            domainId = tempProperties.get("DomainName");
+            Map<String, String> tempProperties = UserStoreMgtDataKeeper.getUserStoreManager(domain);
+            className = tempProperties.get(UserStoreUIConstants.CLASS);
+            description = tempProperties.get(UserStoreUIConstants.DESCRIPTION);
+
             String forwardTo = "index.jsp";
-
-            //Get the default user store properties
-            properties = userStoreConfigAdminServiceClient.getUserStoreProperties(className);
-            Property property;
-            for (int i = 0; i < properties.size(); i++) {
-                property = properties.get(i);
-                if (tempProperties.get(property.getName()) != null) {
-                    properties.get(i).setValue(tempProperties.get(property.getName()));
-                }
-            }
-
+            properties = UserStoreUIUtils.mergePropertyValues(userStoreConfigAdminServiceClient.getUserStoreProperties(className), tempProperties);
+            mandatories = properties.getMandatoryProperties();
+            optionals = properties.getOptionalProperties();
 
         } else {
+            if ((session.getAttribute(UserStoreUIConstants.DOMAIN)) != null) {
+                domain = (String) session.getAttribute(UserStoreUIConstants.DOMAIN);
+            }
+
+            if ((session.getAttribute(UserStoreUIConstants.DESCRIPTION)) != null) {
+                description = (String) session.getAttribute(UserStoreUIConstants.DESCRIPTION);
+            }
+
             properties = userStoreConfigAdminServiceClient.getUserStoreProperties(selectedClassApplied);
+            mandatories = properties.getMandatoryProperties();
+            optionals = properties.getOptionalProperties();
         }
 
     } else {
-        CarbonUIMessage.sendCarbonUIMessage("Your session has timed out. Please try again.", CarbonUIMessage.ERROR, request);
+        String message = resourceBundle.getString("try.again");
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "../admin/index.jsp";
     }
 
 
 %>
 
-
-<fmt:bundle basename="org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources">
-<carbon:breadcrumb
-        label="user.store.manager"
-        resourceBundle="org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources"
-        topPage="false"
-        request="<%=request%>"/>
 <script type="text/javascript" src="../carbon/admin/js/breadcrumbs.js"></script>
 <script type="text/javascript" src="../carbon/admin/js/cookies.js"></script>
 <script type="text/javascript" src="resources/js/main.js"></script>
@@ -148,7 +148,7 @@
 
 <script type="text/javascript">
     jQuery(document).ready(function () {
-        jQuery('#domainId').keyup(function(){
+        jQuery('#domainId').keyup(function () {
                     $('#userStoreTypeSub strong').html(
                             $(this).val()
                     );
@@ -157,39 +157,16 @@
     });
 
 
-
-
     var allPropertiesSelected = false;
     function doSubmit() {
-        if (doValidationDomainNameOnly()) {
-//            if(doValidationMandatoryProperties()){
+    if (doValidationDomainNameOnly()) {
+    //            if(doValidationMandatoryProperties()){
+    document.dataForm.action = "userstore-config-finish.jsp?domain= " +<%=domain%>;
+    document.dataForm.submit();
 
-            preSubmit();
-            if (<%=Integer.parseInt(order)!=0%>) {
-                document.dataForm.action = "userstore-config-finish.jsp?order= " +<%=order%>;
-                document.dataForm.submit();
-            } else {
-                document.dataForm.action = "userstore-config-finish.jsp?order=0";
-                document.dataForm.submit();
-            }
-            }
-
-//        }
     }
 
-    function preSubmit() {
-
-        var propertiesTable = "";
-
-
-        if (document.getElementById('propertiesTable') != null) {
-            propertiesTable = jQuery(document.getElementById('propertiesTable').rows[document.
-                    getElementById('propertiesTable').rows.length - 1]).attr('data-value');
-        }
-
-
-        jQuery('#mainTable > tbody:last').append('<tr><td><input type="hidden" name="exProperty" id="exProperty" value="' + propertiesTable + '"/></td></tr>');
-
+    //        }
     }
 
     function selectAllInThisPage(isSelected) {
@@ -287,10 +264,10 @@
 
 
     function getCategoryType() {
-        document.dataForm.submit();
-    }
-
-    function getDomainId() {
+        <%
+        session.setAttribute(UserStoreUIConstants.DESCRIPTION,request.getParameter(UserStoreUIConstants.DESCRIPTION));
+        session.setAttribute(UserStoreUIConstants.DOMAIN,request.getParameter(UserStoreUIConstants.DOMAIN));
+        %>
         document.dataForm.submit();
     }
 
@@ -319,10 +296,9 @@
         <tr>
             <td class="leftCol-med"><fmt:message key="domain.name"/><span class="required">*</span></td>
             <%
-                if (domainId != null && domainId.trim().length() > 0) {
+                if (domain != null && domain.trim().length() > 0 && !domain.equals("0")) {
             %>
-            <td><input type="text" name="domainId" id="domainId" width="" value="<%=domainId%>"
-                       onchange="getDomainId();"/></td>
+            <td><input type="text" name="domainId" id="domainId" width="" value="<%=domain%>"/></td>
             <%
             } else {
             %>
@@ -356,7 +332,7 @@
                 <select id="classApplied" name="classApplied" onchange="getCategoryType();">
                     <%
                         for (String classApply : classApplies) {
-                            if (selectedClassApplied != null && classApply.equals(selectedClassApplied)) {     //${}
+                            if (selectedClassApplied != null && classApply.equals(selectedClassApplied)) {
                     %>
                     <option value="<%=classApply%>" selected="selected"><%=classApply%>
                     </option>
@@ -389,10 +365,12 @@
 <div class="sectionSeperator" id="userStoreTypeSub"><%="Define Properties For "%><strong></strong></div>
 <div class="sectionSub">
         <%--MandatoryProperties--%>
+    <%if(mandatories[0]!=null){%>
     <table id="mandatoryPropertiesTable">
         <tr data-value="0">
             <td>
                 <table class="oneline-listing" style="width: 100%;margin-top:10px;">
+
                     <thead>
                     <tr>
                         <th style="width:20%" style="text-align:left;"><fmt:message
@@ -407,31 +385,22 @@
                     <tbody>
                     <tr></tr>
                     <%
-                        int i = 1;
-                        int length = properties.size();
-                        int isBoolean = -123;
+                        i = 1;
 
-                        for (int j = 0; j < length; j++) {
-                            propertyName = properties.get(j).getName();
-                            propertyValue = properties.get(j).getValue();
-                            if(properties.get(j).getDescription()!=null){
-                                description = properties.get(j).getDescription();
+                        isBoolean = -123;
+                        for (int j = 0; j < mandatories.length; j++) {
+                            propertyName = mandatories[j].getName();
+                            propertyValue = mandatories[j].getValue();
+                            if (mandatories[j].getDescription() != null) {
+                                description = mandatories[j].getDescription();
                             }
 
-                            Boolean isMandatory = properties.get(j).getMandatory();
-
-                            if (!isMandatory) {
-
-                                continue;
-                            }
-
-                            if(propertyValue!=null){
+                            if (propertyValue != null) {
                                 isBoolean = isBoolean(propertyValue);
                             }
 
                             String name = "propertyName_" + i;
                             String value = "propertyValue_" + i;
-                            mandatory.add(value);
                     %>
                     <tr>
                         <%
@@ -440,7 +409,7 @@
                         %>
                         <td class="leftCol-med" width="50%" style="text-align:left;"><%=propertyName%><span
                                 class="required">*</span></td>
-                        <input type="hidden" name=<%=name%> id=<%=name%> value="<%=propertyName%>" />
+                        <input type="hidden" name=<%=name%> id=<%=name%> value="<%=propertyName%>"/>
 
                         <%
                         } else {
@@ -452,7 +421,7 @@
 
                         <td style="width:30%" style="text-align:left;">
                             <%
-                                if (propertyValue!=null) {
+                                if (propertyValue != null) {
 
                                     if (isBoolean == 1) { %>
                             <input type="checkbox" name=<%=value%> id=<%=value%>
@@ -462,13 +431,13 @@
                             <input type="checkbox" name=<%=value%> id=<%=value%>
                                    class="checkbox"/>
                             <%
-                            } else if (propertyName.endsWith("password")||propertyName.endsWith("Password")) { %>
+                            } else if (propertyName.endsWith("password") || propertyName.endsWith("Password")) { %>
                             <input type="password" name=<%=value%> id=<%=value%> style="width:95%"
                                    value="<%=propertyValue%>"/>
                             <%
                             } else {
                             %>
-                            <input type="text" name=<%=value%> id=<%=value%>  style="width:95%"
+                            <input type="text" name=<%=value%> id=<%=value%> style="width:95%"
                                    value="<%=propertyValue%>"/>
                             <%
                                 }
@@ -497,14 +466,20 @@
             </td>
         </tr>
     </table>
+    <%
+        }else{
+
+        }
+    %>
 </div>
 
 
-<%--Define optional properties--%>
+    <%--Define optional properties--%>
 
 <div class="sectionSeperator"><fmt:message key='optional'/></div>
 <div class="sectionSub">
         <%--Optional properties--%>
+    <%if(optionals[0]!=null){%>
     <table id="propertiesTable">
         <tr data-value="0">
             <td>
@@ -524,24 +499,17 @@
 
                         isBoolean = -123;
 
-                        for (int x = 0; x < length; x++) {
-                            propertyName = properties.get(x).getName();
-                            propertyValue = properties.get(x).getValue();
-                            Boolean isMandatory = properties.get(x).getMandatory();
+                        for (int x = 0; x < optionals.length; x++) {
+                            propertyName = optionals[x].getName();
+                            propertyValue = optionals[x].getValue();
 
-
-                            if (isMandatory) {
-                                continue;
+                            if (optionals[x].getDescription() != null) {
+                                description = optionals[x].getDescription();
                             }
 
-                            if(properties.get(x).getDescription()!=null){
-                            description = properties.get(x).getDescription();
+                            if (propertyValue != null) {
+                                isBoolean = isBoolean(propertyValue);
                             }
-
-                            if(propertyValue!=null){
-                            isBoolean = isBoolean(propertyValue);
-                            }
-//                            System.out.println("Name"+propertyName+propertyValue+isMandatory);
                             String name = "propertyName_" + i;
                             String value = "propertyValue_" + i;
                     %>
@@ -551,8 +519,9 @@
                             if (propertyName != null && propertyName.trim().length() > 0) {
 
                         %>
-                        <td class="leftCol-med" width="50%" style="text-align:left;" id="<%=name%>"><%=propertyName%></td>
-                        <input type="hidden" name=<%=name%> id=<%=name%> value="<%=propertyName%>" />
+                        <td class="leftCol-med" width="50%" style="text-align:left;" id="<%=name%>"><%=propertyName%>
+                        </td>
+                        <input type="hidden" name=<%=name%> id=<%=name%> value="<%=propertyName%>"/>
                         <%
                         } else {
                         %>
@@ -564,7 +533,7 @@
                         </td>
                         <td style="width:30%" style="text-align:left;">
                             <%
-                                if (propertyValue!=null) {
+                                if (propertyValue != null) {
                                     if (isBoolean == 1) { %>
                             <input type="checkbox" name=<%=value%> id=<%=value%>
                                    class="checkbox" checked/>
@@ -603,13 +572,18 @@
 
                     <tbody>
 
-                    <%--<tr></tr>--%>
+                        <%--<tr></tr>--%>
                     </tbody>
                 </table>
-                <input type="hidden" name="defaultProperties"  id="defaultProperties" value=<%=i%> />
+                <input type="hidden" name="defaultProperties" id="defaultProperties" value=<%=i%>/>
             </td>
         </tr>
     </table>
+    <%
+        }else{
+
+        }
+    %>
 
 
 </div>

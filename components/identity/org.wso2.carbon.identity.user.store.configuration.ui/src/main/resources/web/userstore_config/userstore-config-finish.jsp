@@ -1,4 +1,4 @@
-<!--
+        <!--
 /*
 * Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -15,52 +15,54 @@
 * limitations under the License.
 */
 -->
-<%@ page import="org.w3c.dom.Attr" %>
-<%@ page import="org.w3c.dom.Element" %>
-<%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.utils.UserStoreMgtDataKeeper" %>
+<%@ page import="org.apache.axis2.context.ConfigurationContext" %>
+<%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.stub.dto.PropertyDTO" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.stub.dto.UserStoreDTO" %>
+<%@ page import="org.wso2.carbon.identity.user.store.configuration.ui.client.UserStoreConfigAdminServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
-<%@ page import="javax.xml.parsers.ParserConfigurationException" %>
-<%@ page import="javax.xml.transform.Transformer" %>
-<%@ page import="javax.xml.transform.TransformerException" %>
-<%@ page import="javax.xml.transform.TransformerFactory" %>
-<%@ page import="javax.xml.transform.dom.DOMSource" %>
-<%@ page import="javax.xml.transform.stream.StreamResult" %>
-<%@ page import="java.io.File" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="java.util.ResourceBundle" %>
-<%@ page import="java.util.Set" %>
+        <%@ page import="java.util.ResourceBundle" %>
+        <%@ page import="java.util.ArrayList" %>
 
-<%
-    String editingOrder = CharacterEncoder.getSafeText(request.getParameter("order")).trim();
-
-    int order = 0;
-
+        <%
     Map<String, String> properties = new HashMap<String, String>();
     String forwardTo = "index.jsp";
     String BUNDLE = "org.wso2.carbon.identity.user.store.configuration.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     String className = request.getParameterValues("classApplied")[0];
-
+    String domain = request.getParameterValues("domainId")[0];
     String description = request.getParameterValues("description")[0];
-    String domainId = request.getParameterValues("domainId")[0];
     int defaultProperties = Integer.parseInt(CharacterEncoder.getSafeText(request.getParameter("defaultProperties")).replaceAll("[\\D]", ""));    //number of default properties
-    if (!editingOrder.equals("0")) {
-        order = Integer.parseInt(editingOrder);
+
+    UserStoreConfigAdminServiceClient userStoreConfigAdminServiceClient = null;
+    try{if (session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE) != null) {
+        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+        String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+        ConfigurationContext configContext =
+                (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+        userStoreConfigAdminServiceClient = new UserStoreConfigAdminServiceClient(cookie, backendServerURL, configContext);
+
+
     } else {
-        order = UserStoreMgtDataKeeper.getNextRank();
+        String message = resourceBundle.getString("try.again");
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+        forwardTo = "../admin/index.jsp";
     }
 
+//    Set map = request.getParameterMap().keySet();
 
-    Set map=request.getParameterMap().keySet();
-
-    String property;
+    UserStoreDTO userStoreDTO = new UserStoreDTO();
+    ArrayList<PropertyDTO> propertyList = new ArrayList<PropertyDTO>();
     String value = null;
     for (int i = 0; i < defaultProperties; i++) {
+        PropertyDTO propertyDTO = new PropertyDTO();
 
-
-        if (request.getParameter("propertyName_" + i)!= null) {
+        if (request.getParameter("propertyName_" + i) != null) {
 
             if (CharacterEncoder.getSafeText(request.getParameter("propertyValue_" + i)) == null) {
                 value = "false";
@@ -74,25 +76,31 @@
 
                 }
             }
-
-            property = CharacterEncoder.getSafeText(request.getParameter("propertyName_" + i));
-            properties.put(property, value);
+            propertyDTO.setName(CharacterEncoder.getSafeText(request.getParameter("propertyName_" + i)));
+            propertyDTO.setValue(value);
+            propertyList.add(propertyDTO);
         } else {
 
         }
 
     }
-    properties.put("Class", className);
-    properties.put("DomainName", domainId);
-    properties.put("Description", description);
-    properties.put("Disabled","true") ;                //by default newly added user store is disabled
-
-    UserStoreMgtDataKeeper.addUserStoreManagers(properties, order);
+            userStoreDTO.setDomainId(domain);
+            userStoreDTO.setDescription(description);
+            userStoreDTO.setClassName(className);
+            userStoreDTO.setDisabled(true);
+            userStoreDTO.setProperties(propertyList.toArray(new PropertyDTO[propertyList.size()]));
+            userStoreConfigAdminServiceClient.saveConfigurationToFile(userStoreDTO);
+        String message = resourceBundle.getString("successful.update");
+        CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
+    } catch (Exception e) {
+        String message = resourceBundle.getString("error.update");
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+        forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
+    }
 
 %>
 
 <script type="text/javascript">
-    <%UserStoreMgtDataKeeper.addChangedUserStore(domainId);%>
     function forward() {
         location.href = "<%=forwardTo%>";
     }

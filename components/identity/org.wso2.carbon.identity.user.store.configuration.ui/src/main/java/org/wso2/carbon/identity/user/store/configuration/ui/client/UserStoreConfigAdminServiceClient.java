@@ -21,17 +21,11 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.wso2.carbon.identity.user.store.configuration.stub.IdentityUserStoreMgtException;
 import org.wso2.carbon.identity.user.store.configuration.stub.UserStoreConfigAdminServiceStub;
-import org.wso2.carbon.identity.user.store.configuration.stub.UserStoreException;
-import org.wso2.carbon.identity.user.store.configuration.stub.api.Property;
-import org.wso2.carbon.identity.user.store.configuration.stub.config.UserStoreDTO;
+import org.wso2.carbon.identity.user.store.configuration.stub.dto.UserStoreDTO;
+import org.wso2.carbon.identity.user.store.configuration.stub.api.Properties;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class UserStoreConfigAdminServiceClient {
     private UserStoreConfigAdminServiceStub stub;
@@ -56,42 +50,18 @@ public class UserStoreConfigAdminServiceClient {
     /**
      * Get all the configured domains
      *
-     * @return
+     * @return: active domains
      * @throws Exception
      */
-    public UserStoreDTO[] getActiveDomains() throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
+    public UserStoreDTO[] getActiveDomains() throws Exception {
 
-        return stub.getActiveDomains();
-    }
-
-    /**
-     * Get the defined properties for a given active user store
-     *
-     * @param order
-     * @return
-     * @throws Exception
-     */
-    public Map<String, String> getActiveUserStoreProperties(int order) throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
-
-        Map<String, String> propertyMap = new HashMap<String, String>();
-        String[] properties;
-
-
-        properties = stub.getActiveUserStoreProperties(order);
-        for (int i = 0; i < properties.length; i++) {
-            String[] property = properties[i].split("#");
-            if (property.length > 1) {
-                propertyMap.put(property[0], property[1]);
-            }
-        }
-
-        return propertyMap;
+        return stub.getSecondaryRealmConfigurations();
     }
 
     /**
      * Get available user store implementations
      *
-     * @return
+     * @return : available user store managers
      * @throws java.rmi.RemoteException
      */
     public String[] getAvailableUserStoreClasses() throws RemoteException {
@@ -102,58 +72,38 @@ public class UserStoreConfigAdminServiceClient {
     /**
      * Get properties required for the given user store
      *
-     * @param className
-     * @return
+     *
+     * @param className : list of properties required by each user store manager
+     * @return : list of properties(mandatory+optional)
      * @throws java.rmi.RemoteException
      */
-    public ArrayList<Property> getUserStoreProperties(String className) throws RemoteException {
-        Property[] properties = stub.getUserStoreManagerProperties(className);
-        ArrayList<Property> propertyList = new ArrayList<Property>(Arrays.asList(properties));
+    public Properties getUserStoreProperties(String className) throws RemoteException {
+        return stub.getUserStoreManagerProperties(className);
 
-
-        return propertyList;
     }
 
 
     /**
-     * Get the configuration properties for user manager
+     * Save configuration to file system
      *
-     * @return
-     * @throws java.rmi.RemoteException
+     * @param userStoreDTO : representation of new user store to be persisted
+     * @throws Exception
      */
-    public Map<String, String> getConfigProperties() throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
-        return convertArrayToMap(stub.getConfigProperties());
-
+    public void saveConfigurationToFile(UserStoreDTO userStoreDTO) throws Exception {
+         stub.saveConfigurationToFile(userStoreDTO);
     }
 
     /**
-     * Get the authorization manager properties for user manager
+     * Deletes a given list of user stores
      *
-     * @return
-     * @throws java.rmi.RemoteException
+     * @param userStores : domain names of user stores to deleted
+     * @throws RemoteException
      */
-    public Map<String, String> getAuthzProperties() throws RemoteException, UserStoreException, IdentityUserStoreMgtException {
-        return convertArrayToMap(stub.getAuthzProperties());
-
+    public void deleteUserStores(String[] userStores) throws RemoteException {
+         stub.deleteUserStores(userStores);
     }
 
-    /**
-     * Convert a given String[] propertyName#propertyValue to a Map<String,String>
-     *
-     * @param properties
-     * @return
-     */
-    private Map<String, String> convertArrayToMap(String[] properties) {
-        Map<String, String> propertyMap = new HashMap<String, String>();
-        for (int i = 0; i < properties.length; i++) {
-            if (properties[i] != null) {
-                String[] property = properties[i].split("#");
-                propertyMap.put(property[0], property[1]);
-            }
-        }
-
-        return propertyMap;
-
+    public void updateUserStore(String domain,String disabled) throws Exception {
+         stub.updateDomain(domain,disabled);
     }
-
 }
