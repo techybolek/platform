@@ -255,11 +255,11 @@ public class RelyingPartyService extends AbstractAdmin {
                 }
                 String password = UUIDGenerator.getUUID();
                 UserStoreManager userStore = userRealm.getUserStoreManager();
-                if (!userStore.isExistingRole(IdentityConstants.IDENTITY_DEFAULT_ROLE)) {
+                if (!userStore.isExistingRole(IdentityConstants.IDENTITY_DEFAULT_ROLE, false)) {
                     Permission permission = new Permission("/permission/admin/login",
                             UserMgtConstants.EXECUTE_ACTION);
                     userStore.addRole(IdentityConstants.IDENTITY_DEFAULT_ROLE, null,
-                            new Permission[] { permission });
+                            new Permission[] { permission }, false);
                 }
                 userStore.addUser(username, password,
                         new String[] { IdentityConstants.IDENTITY_DEFAULT_ROLE }, null, null);
