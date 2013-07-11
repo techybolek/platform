@@ -22,6 +22,7 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.application.mgt.synapse.ui.SynapseAppAdminClient" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 
 <%
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -33,9 +34,9 @@
     String BUNDLE = "org.wso2.carbon.application.mgt.synapse.ui.i18n.Resources";
     ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
-    String artifactName = request.getParameter("artifactName");
-    String artifactType = request.getParameter("artifactType");
-    String appName = request.getParameter("appName");
+    String artifactName = CharacterEncoder.getSafeText(request.getParameter("artifactName"));
+    String artifactType = CharacterEncoder.getSafeText(request.getParameter("artifactType"));
+    String appName = CharacterEncoder.getSafeText(request.getParameter("appName"));
 
     try {
         SynapseAppAdminClient client = new SynapseAppAdminClient(cookie,

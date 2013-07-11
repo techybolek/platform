@@ -22,6 +22,7 @@
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.wso2.carbon.application.mgt.ui.ApplicationAdminClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 
 <%
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -33,7 +34,7 @@
     String BUNDLE = "org.wso2.carbon.application.mgt.ui.i18n.Resources";
     ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
-    String appName = request.getParameter("appName");
+    String appName = CharacterEncoder.getSafeText(request.getParameter("appName"));
 
     try {
         ApplicationAdminClient client = new ApplicationAdminClient(cookie,

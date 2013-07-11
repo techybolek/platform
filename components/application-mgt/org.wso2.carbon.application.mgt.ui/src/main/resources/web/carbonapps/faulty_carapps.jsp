@@ -23,10 +23,11 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <%
-    String pageNumber = request.getParameter("pageNumber");
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
     if (pageNumber == null) {
         pageNumber = "0";
     }

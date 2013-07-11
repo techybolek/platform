@@ -26,11 +26,12 @@
 <%@ page import="org.wso2.carbon.application.mgt.stub.types.carbon.ServiceGroupMetadata" %>
 <%@ page import="org.wso2.carbon.application.mgt.stub.types.carbon.RegistryMetadata" %>
 <%@ page import="org.wso2.carbon.application.mgt.stub.types.carbon.Association" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <%
-    String appName = request.getParameter("appName");
+    String appName = CharacterEncoder.getSafeText(request.getParameter("appName"));
     request.setAttribute("appName", appName);
 
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);

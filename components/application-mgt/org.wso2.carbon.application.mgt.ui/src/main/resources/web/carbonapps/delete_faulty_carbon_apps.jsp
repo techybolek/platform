@@ -21,14 +21,15 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%
-    String pageNumber = request.getParameter("pageNumber");
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
     int pageNumberInt = 0;
     if (pageNumber != null) {
         pageNumberInt = Integer.parseInt(pageNumber);
     }
     String[] faultyCarbonAppFileNames = request.getParameterValues("carbonAppFileName");
-    String deleteAllServiceGroups = request.getParameter("deleteAllCarbonApps");
+    String deleteAllServiceGroups = CharacterEncoder.getSafeText(request.getParameter("deleteAllCarbonApps"));
 %>
 
 <%

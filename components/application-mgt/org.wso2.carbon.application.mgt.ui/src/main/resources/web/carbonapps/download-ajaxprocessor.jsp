@@ -21,6 +21,7 @@
 <%@ page import="org.wso2.carbon.application.mgt.ui.ApplicationAdminClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 
 <%
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -35,7 +36,7 @@
     ApplicationAdminClient client =
             new ApplicationAdminClient(cookie, backendServerURL, configContext, request.getLocale());
 
-    String cappName = request.getParameter("cappName");
+    String cappName = CharacterEncoder.getSafeText(request.getParameter("cappName"));
 
     out.clear();
     out = pageContext.pushBody();
