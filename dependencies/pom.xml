@@ -72,6 +72,9 @@
                 <module>orbit/httpclient</module>
 		<module>orbit/cassandra</module>
 		<module>orbit/jgit/2.3.1.wso2v2</module>
+
+                <!-- AS extensions-->
+               <module>commons/carbon-cxf/1.0.0</module>
 	     </modules>
    <dependencyManagement>
 	<dependencies>
