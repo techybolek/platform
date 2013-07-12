@@ -30,6 +30,9 @@
 <%@ page import="org.wso2.carbon.registry.resource.stub.beans.xsd.ResourceTreeEntryBean" %>
 <%@ page import="org.wso2.carbon.context.CarbonContext" %>
 <%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
+<%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
+<%@ page import="org.wso2.carbon.registry.common.ui.UIConstants" %>
 
 <carbon:jsi18n resourceBundle="org.wso2.carbon.registry.info.ui.i18n.JSResources"
 		request="<%=request%>" namespace="org.wso2.carbon.registry.info.ui"/>
@@ -57,7 +60,7 @@
     boolean isSuperTenant = false;
     resourceServiceClient = new ResourceServiceClient(config, session);
     String path = request.getParameter("path");
-
+    String requestedPage = request.getParameter("page");
     if ((resourceTreeEntryBean = resourceServiceClient.getResourceTreeEntry(path)) != null) {
         isCollection = resourceTreeEntryBean.getCollection();
     }
@@ -86,6 +89,14 @@
              url = client.getRemoteURL(request);
         }
         if (url == null) {
+            int start;
+            int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+            if (requestedPage != null) {
+                start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
+            } else {
+                start = 1;
+            }
+            PaginationContext.init(start, count, "", "", 1500);
             SubscriptionBean subscriptionBean = client.getSubscriptions(request);
             if (!subscriptionBean.getLoggedIn() || subscriptionBean.getVersionView()) {
                 canAdd = false;
@@ -377,16 +388,35 @@
 <%
         } else {
 %>
-<div id="subscriptionsSummary" class="summeryStyle"><fmt:message key="no.of.subscriptions"><fmt:param><%=subscriptions.length%></fmt:param></fmt:message></div>
+<div id="subscriptionsSummary" class="summeryStyle"><fmt:message key="no.of.subscriptions"><fmt:param><%=Integer.parseInt(session.getAttribute("row_count").toString())%></fmt:param></fmt:message></div>
 <%
         }
 %>
+<div id="subscriptionsList">
     <table cellpadding="0" cellspacing=0 border="0" width="100%" class="styledLeft" id="subscriptionsTable">
         <tr>
             <td valign="top" style="text-align:left;width:65%;"><fmt:message key="subscriptions"/></td>
             <td valign="top" style="text-align:left;width:35%;"><fmt:message key="actions"/></td>
         </tr>
 <%
+    if (subscriptions != null && subscriptions.length > 0) {
+
+        int itemsPerPage = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+        int pageNumber;
+        if (requestedPage != null && requestedPage.length() > 0) {
+            pageNumber = new Integer(requestedPage);
+        } else {
+            pageNumber = 1;
+        }
+
+        int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+        int numberOfPages;
+        if (rowCount % itemsPerPage == 0) {
+            numberOfPages = rowCount / itemsPerPage;
+        } else {
+            numberOfPages = rowCount / itemsPerPage + 1;
+        }
+
         for (SubscriptionInstance subscription : subscriptions) {
             if (subscription == null) {
                 continue;
@@ -448,8 +478,18 @@
 <%
             }
         }
-%>
+ %>
+        <carbon:resourcePaginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
+                                  resourceBundle="org.wso2.carbon.registry.info.ui.i18n.Resources"
+                                  nextKey="next" prevKey="prev"
+                                  paginationFunction="<%="loadSubscriptionDiv('" + request.getParameter("path").replaceAll("&","%26") + "', {0})"%>" />
     </table>
+</div>
+
+<%
+    }
+%>
+
     <script type="text/javascript">
         alternateTableRows('subscriptionsTable', 'tableEvenRow', 'tableOddRow');
     </script>

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.registry.info.services.utils;
 
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -23,6 +24,7 @@ import org.wso2.carbon.event.core.exception.EventBrokerException;
 import org.wso2.carbon.event.core.subscription.Subscription;
 import org.wso2.carbon.event.ws.internal.builders.exceptions.InvalidMessageException;
 import org.wso2.carbon.event.ws.internal.builders.utils.BuilderUtils;
+import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.beans.SubscriptionBean;
 import org.wso2.carbon.registry.common.beans.utils.SubscriptionInstance;
 import org.wso2.carbon.registry.common.eventing.RegistryEvent;
@@ -32,6 +34,8 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourcePath;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.AccessControlConstants;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.eventing.RegistryEventingConstants;
 import org.wso2.carbon.registry.info.Utils;
 import org.wso2.carbon.user.core.UserRealm;
@@ -270,9 +274,47 @@ public class SubscriptionBeanPopulator {
                     resourcePath + ".", e);
             subscriptionBean.setErrorMessage(msg);
         }
-        return subscriptionBean;
+        return getPaginatedResult(subscriptionBean);
     }
 
+    private  static SubscriptionBean getPaginatedResult( SubscriptionBean subscriptionBean) {
+        SubscriptionInstance[] paginatedResult;
+        MessageContext messageContext = MessageContext.getCurrentMessageContext();
+        if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
+
+            int rowCount = subscriptionBean.getSubscriptionInstances().length;
+            try {
+                PaginationUtils.setRowCount(messageContext, Integer.toString(rowCount));
+                PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
+
+                int start = paginationContext.getStart();
+                int count = paginationContext.getCount();
+
+                int startIndex;
+                if (start == 1) {
+                    startIndex = 0;
+                } else {
+                    startIndex = start;
+                }
+                if (rowCount < start + count) {
+                    paginatedResult = new SubscriptionInstance[rowCount - startIndex];
+                    System.arraycopy(subscriptionBean.getSubscriptionInstances(), startIndex, paginatedResult, 0,
+                            (rowCount - startIndex));
+                } else {
+                    paginatedResult = new SubscriptionInstance[count];
+                    System.arraycopy(subscriptionBean.getSubscriptionInstances(), startIndex, paginatedResult, 0,
+                            count);
+                }
+                subscriptionBean.setSubscriptionInstances(paginatedResult);
+                return subscriptionBean;
+
+            } finally {
+                PaginationContext.destroy();
+            }
+        }else {
+            return subscriptionBean;
+        }
+    }
     public static SubscriptionBean subscribeAndPopulate(UserRegistry userRegistry, String path, String endpoint, String eventName) {
         return subscribeAndPopulate(userRegistry, path, endpoint, eventName, false);
     }

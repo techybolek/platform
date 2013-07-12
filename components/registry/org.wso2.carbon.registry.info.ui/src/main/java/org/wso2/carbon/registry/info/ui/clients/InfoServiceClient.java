@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.registry.info.stub.InfoAdminServiceStub;
 import org.wso2.carbon.registry.info.ui.Utils;
@@ -42,10 +44,11 @@ public class InfoServiceClient implements IInfoService {
 
     private InfoAdminServiceStub stub;
     private IInfoService proxy;
+    private HttpSession session;
 
     public InfoServiceClient(String cookie, ServletConfig config, HttpSession session)
             throws RegistryException {
-
+        this.session =session;
         if (proxy == null) {
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(),
                     session);
@@ -220,16 +223,24 @@ public class InfoServiceClient implements IInfoService {
 
     public SubscriptionBean getSubscriptions(HttpServletRequest request) throws Exception {
         String sessionId = UUIDGenerator.generateUUID();
-
+        SubscriptionBean subscriptionBean;
         String path = (String) Utils.getParameter(request, "path");
 
         try {
-            return proxy.getSubscriptions(path, sessionId);
+            if (PaginationContext.getInstance() == null) {
+                subscriptionBean = proxy.getSubscriptions(path, sessionId);
+            } else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                subscriptionBean = proxy.getSubscriptions(path, sessionId);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+                session.setAttribute("row_count", Integer.toString(rowCount));
+            }
         } catch (Exception e) {
             String msg = "Failed to get Subscriptions.";
             log.error(msg, e);
             throw new Exception(msg);
         }
+        return subscriptionBean;
     }
 
     public SubscriptionBean subscribe(HttpServletRequest request) throws Exception {

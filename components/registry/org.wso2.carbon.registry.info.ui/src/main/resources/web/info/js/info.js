@@ -1,3 +1,32 @@
+function loadSubscriptionDiv(resourcePath, page) {
+    var fillingDiv = "subscriptionDiv";
+    if ($('updateFix')) {
+        $('updateFix').parentNode.removeChild($('updateFix'));
+    }
+    var tempSpan = document.createElement('span');
+    tempSpan.id = "updateFix";
+    sessionAwareFunction(function () {
+        new Ajax.Request('../info/subscription-ajaxprocessor.jsp', {
+            method: 'post',
+            parameters: {path: resourcePath, page: page},
+            onSuccess: function (transport) {
+                $(fillingDiv).innerHTML = transport.responseText;
+                $(fillingDiv).style.display = "";
+                $('subscriptionIconExpanded').style.display = "";
+                $('subscriptionIconMinimized').style.display = "none";
+
+                YAHOO.util.Event.onAvailable('updateFix', function () {
+                    $('subscriptionsList').style.display = "";
+
+                });
+                alternateTableRows('subscriptionsTable', 'tableEvenRow', 'tableOddRow');
+            },
+            onFailure: function (transport) {
+                showRegistryError(transport.responseText);
+            }
+        });
+    }, org_wso2_carbon_registry_info_ui_jsi18n["session.timed.out"]);
+}
 
 function addComment(path) {
     var reason="";
