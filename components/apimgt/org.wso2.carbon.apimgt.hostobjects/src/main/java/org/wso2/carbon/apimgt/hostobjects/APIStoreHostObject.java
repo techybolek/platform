@@ -306,7 +306,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
-                handleException("Authentication failed. Invalid username or password.");
+                handleException("Login failed! Please recheck the username and password and try again.");
             }
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
@@ -332,7 +332,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("isSuperTenant", row, isSuperTenant);
                 row.put("error", row, false);
             } else {
-                handleException("Insufficient privileges");
+                handleException("Login failed! Please recheck the username and password and try again.");
             }
         } catch (Exception e) {
             row.put("error", row, true);
