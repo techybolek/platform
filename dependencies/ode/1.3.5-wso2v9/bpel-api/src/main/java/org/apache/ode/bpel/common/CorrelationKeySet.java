@@ -212,7 +212,13 @@ public class CorrelationKeySet implements Serializable {
             }
             explicitKeySet.add(ckey);
         }
-        if( opaqueKey != null && containsNonOpaque ) {
+        /**
+         * CorrelationKeySet consist of the sessionId ( implicit correlation, tenant id => wso2 modification ) by default
+         * Hence when we filter out the opaquekey in case there is a genuine correlationSet defined in the processs, we need to
+         * check the number of elements. If there is a correlation set with at least one property, then the correlationKeys
+         * size should be 3
+         */
+        if( opaqueKey != null && containsNonOpaque && correlationKeys.size() != 2) {
             explicitKeySet.correlationKeys.remove(opaqueKey);
         }
 
