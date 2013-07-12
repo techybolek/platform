@@ -260,7 +260,9 @@
                 <tr>
                     <th><fmt:message key="messageStore.name"/></th>
                     <th><fmt:message key="type"/></th>
-                    <th><fmt:message key="size"/></th>
+                    <%if (!client.getClassName(messageStoreName).trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                        <th><fmt:message key="size"/></th>
+                    <%}%>
                 </tr>
                 </thead>
                 <tbody>
@@ -281,8 +283,10 @@
                     </td>
                     <td><%= type%>
                     </td>
+                    <%if (!client.getClassName(messageStoreName).trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
                     <td><%= size%>
                     </td>
+                    <%}%>
                 </tr>
                 </tbody>
             </table>
@@ -344,21 +348,16 @@
                     }
 
                 %>
+                <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
                 <tr>
                     <td>
-                        <%if (type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
-                        <a href="#" onclick="<%=(messageInfos == null || messageInfos.length == 0)?"return false":"deleteFirstRow();"%>"
-                           id="delete_first_link" class="<%=(messageInfos == null || messageInfos.length == 0)?"icon-link-disabled":"icon-link"%>"
-                           style="background-image:url(../admin/images/delete.gif);"><fmt:message
-                                key="delete.first.message"/></a>
-                        <%}%>
                         <a onclick="<%=(messageInfos == null || messageInfos.length == 0)?"return false":"deleteAll();"%>"
                            href="#" id="delete_all_link" class="<%=(messageInfos == null || messageInfos.length == 0)?"icon-link-disabled":"icon-link"%>"
                            style="background-image:url(../admin/images/delete.gif);"><fmt:message
                                 key="deleteAll"/></a>
                     </td>
                 </tr>
-
+                <%}%>
                 </tbody>
             </table>
             <br/>
