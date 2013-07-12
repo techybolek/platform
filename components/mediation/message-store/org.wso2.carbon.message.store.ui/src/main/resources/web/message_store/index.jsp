@@ -226,8 +226,12 @@
                         </td>
                         <td><%= type%>
                         </td>
+                        <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
                         <td><%= size%>
                         </td>
+                        <%} else {%>
+                        <td>Not Applicable</td>
+                        <%}%>
 
                         <td>
                             <a onclick="<%=("org.apache.synapse.message.store.InMemoryMessageStore".equals(type.trim()))?"return false":"editRow(this.parentNode.parentNode.rowIndex,"+"'" + type + "');"%>"
