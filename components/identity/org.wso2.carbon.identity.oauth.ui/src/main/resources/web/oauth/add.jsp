@@ -69,6 +69,16 @@
                     }
                     document.addAppform.submit();
                 }
+                jQuery(document).ready(function(){
+                    jQuery('#oauthVersion10a').click(function(){
+                        $(jQuery('#grant_row')).toggle();
+                    })
+                })
+                jQuery(document).ready(function(){
+                    jQuery('#oauthVersion20').click(function(){
+                        $(jQuery('#grant_row')).toggle();
+                    })
+                })
             </script>
 
             <form method="post" name="addAppform" action="add-finish.jsp"
@@ -85,8 +95,8 @@
 				<table class="normal" >
                             <tr>
                                 <td class="leftCol-small"><fmt:message key='oauth.version'/><span class="required">*</span> </td>
-                                <td><input name="oauthVersion" type="radio" value="<%=OAuthConstants.OAuthVersions.VERSION_1A%>" />1.0a
-                                    <input name="oauthVersion" type="radio" value="<%=OAuthConstants.OAuthVersions.VERSION_2%>" CHECKED />2.0</td>
+                                <td><input id="oauthVersion10a" name="oauthVersion" type="radio" value="<%=OAuthConstants.OAuthVersions.VERSION_1A%>" onclick="doToggleGrant(this)"/>1.0a
+                                    <input id="oauthVersion20" name="oauthVersion" type="radio" value="<%=OAuthConstants.OAuthVersions.VERSION_2%>" CHECKED onclick="doToggleGrant(this)"/>2.0</td>
                             </tr>
 		                    <tr>
 		                        <td class="leftCol-small"><fmt:message key='application.name'/><span class="required">*</span></td>
@@ -94,11 +104,11 @@
 		                                   type="text" /></td>
 		                    </tr>
 		                    <tr>
-		                        <td class="leftCol-small"><fmt:message key='callback'/><span class="required">*</span></td>
+		                        <td class="leftCol-small"><fmt:message key='callback'/></td>
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" /></td>
 		                    </tr>
-		                     <tr>
+		                     <tr id="grant_row" name="grant_row">
 		                        <td class="leftCol-small"><fmt:message key='grantTypes'/></td>
 		                        <td>
 		                        <table>

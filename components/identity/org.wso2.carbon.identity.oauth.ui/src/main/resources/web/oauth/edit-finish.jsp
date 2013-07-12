@@ -28,6 +28,7 @@
 <%@page import="org.wso2.carbon.utils.ServerConstants"%>
 
 <%@page import="java.util.ResourceBundle"%>
+<%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
@@ -88,7 +89,9 @@
         app.setCallbackUrl(callback);
         app.setApplicationName(applicationName);
         app.setOAuthVersion(oauthVersion);
-		app.setGrantTypes(grants);
+        if(OAuthConstants.OAuthVersions.VERSION_2.equals(oauthVersion)){
+            app.setGrantTypes(grants);
+        }
         client.updateOAuthApplicationData(app);
         String message = resourceBundle.getString("app.updated.successfully");
         CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);

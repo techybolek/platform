@@ -33,6 +33,7 @@
 
 <jsp:include page="../dialog/display_messages.jsp" />
 <%@ page import="java.util.ResourceBundle"%>
+<%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
 
 <%
 	String applicationName = CharacterEncoder.getSafeText(request.getParameter("application"));
@@ -83,7 +84,9 @@
 		app.setApplicationName(applicationName);
 		app.setCallbackUrl(callback);
 		app.setOAuthVersion(oauthVersion);
-		app.setGrantTypes(grants);
+        if(OAuthConstants.OAuthVersions.VERSION_2.equals(oauthVersion)){
+            app.setGrantTypes(grants);
+        }
 		client.registerOAuthApplicationData(app);
 		String message = resourceBundle.getString("app.added.successfully");
 		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);

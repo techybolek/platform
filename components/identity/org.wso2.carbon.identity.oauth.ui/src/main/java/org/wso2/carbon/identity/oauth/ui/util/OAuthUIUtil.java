@@ -56,10 +56,7 @@ public class OAuthUIUtil {
         String endpointURL = adminConsoleURL.substring(0, adminConsoleURL.indexOf("/carbon"));
 
         // get the servlet context from the OAuth version.
-        String oauthServletContext = "/oauth2";
-        if ("/token".equals(endpointType)) {
-        	oauthServletContext = "/oauth2endpoints";
-        }
+        String oauthServletContext = "/oauth2endpoints";
         if(oauthVersion.equals(OAuthConstants.OAuthVersions.VERSION_1A)){
             oauthServletContext = "/oauth";
         }
