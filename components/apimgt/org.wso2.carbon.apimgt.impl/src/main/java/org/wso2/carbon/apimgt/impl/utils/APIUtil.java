@@ -1439,4 +1439,32 @@ public final class APIUtil {
             return Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).getCache(APIConstants.API_CONTEXT_CACHE);
         }
     }
+
+    /**
+     * Retrieves the role list of system
+
+     * @throws APIManagementException If an error occurs
+     */
+    public static String[] getRoleNames(String username) throws APIManagementException {
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        try {
+            if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                UserStoreManager manager = ServiceReferenceHolder.getInstance().
+                        getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
+
+                return manager.getRoleNames();
+            } else {
+                RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+                return authorizationManager.getRoleNames();
+            }
+        } catch (UserStoreException e) {
+            log.error("Error while getting all the roles", e);
+            return null;
+
+        }
+
+    }
+
 }

@@ -137,4 +137,32 @@ class RemoteAuthorizationManagerClient {
                     "user role list", e);
         }
     }
+
+
+    /**
+     * Query the remote user manager and retrieve the list of role names in users-store
+     *
+     *
+
+     * @return the list of roles
+     * @throws APIManagementException If and error occurs while accessing the admin service
+     */
+    public String[] getRoleNames() throws APIManagementException {
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
+                                                  true, userStoreManager._getServiceClient());
+        if (cookie != null) {
+            userStoreManager._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+        }
+
+        try {
+            String[] roles = userStoreManager.getRoleNames();
+            ServiceContext serviceContext = userStoreManager.
+                    _getServiceClient().getLastOperationContext().getServiceContext();
+            cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            return roles;
+        } catch (Exception e) {
+            throw new APIManagementException("Error while accessing backend services for " +
+                                             "getting list of all the roles.", e);
+        }
+    }
 }

@@ -94,4 +94,23 @@ public class RemoteAuthorizationManager {
         }
     }
 
+    public String[] getRoleNames() throws APIManagementException {
+        RemoteAuthorizationManagerClient client = null;
+        try {
+            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            return client.getRoleNames();
+
+        } catch (Exception e) {
+            throw new APIManagementException("Error while retrieving the roles list of the system.", e);
+        } finally {
+            try {
+                if (client != null) {
+                    clientPool.returnObject(client);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+
 }
