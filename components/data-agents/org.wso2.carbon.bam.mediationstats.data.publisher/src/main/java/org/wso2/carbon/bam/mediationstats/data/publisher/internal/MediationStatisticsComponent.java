@@ -113,7 +113,7 @@ public class MediationStatisticsComponent {
                 log.debug("BAM Mediation statistics data publisher bundle is activated");
             }
         }else{
-            log.warn("Can't register an observer for mediationStatisticsStore. " +
+            log.info("Can't register an observer for mediationStatisticsStore. " +
                                     "If you have disabled StatisticsReporter, please enable it in the Carbon.xml");
         }
     }
