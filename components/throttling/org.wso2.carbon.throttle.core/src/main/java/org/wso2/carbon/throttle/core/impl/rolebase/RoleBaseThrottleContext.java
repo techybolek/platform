@@ -17,9 +17,9 @@
 */
 package org.wso2.throttle.impl.rolebase;
 
-import org.wso2.throttle.ThrottleConfiguration;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.ThrottleContext;
+import org.wso2.carbon.throttle.core.ThrottleConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleContext;
 
 import java.util.Map;
 

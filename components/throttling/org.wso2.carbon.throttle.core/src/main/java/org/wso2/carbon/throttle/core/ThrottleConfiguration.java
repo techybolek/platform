@@ -16,7 +16,7 @@
 *
 */
 
-package org.wso2.throttle;
+package org.wso2.carbon.throttle.core;
 
 /**
  * The abstraction to holds all the controlling policy parameter

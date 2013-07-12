@@ -15,9 +15,9 @@
 */
 package org.wso2.throttle.factory;
 
-import org.wso2.throttle.CallerContext;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.ThrottleException;
+import org.wso2.carbon.throttle.core.CallerContext;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleException;
 import org.wso2.throttle.impl.domainbase.DomainBaseCallerContext;
 import org.wso2.throttle.impl.ipbase.IPBaseCallerContext;
 import org.wso2.throttle.impl.rolebase.RoleBaseCallerContext;

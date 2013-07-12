@@ -17,10 +17,9 @@
 */
 package org.wso2.throttle.impl.rolebase;
 
-import org.wso2.throttle.CallerConfiguration;
-import org.wso2.throttle.ThrottleConfiguration;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.impl.ipbase.IPBaseCallerConfiguration;
+import org.wso2.carbon.throttle.core.CallerConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 import java.util.HashMap;
 import java.util.List;

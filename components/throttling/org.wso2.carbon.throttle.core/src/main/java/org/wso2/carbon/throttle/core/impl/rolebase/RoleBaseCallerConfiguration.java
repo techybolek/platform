@@ -17,8 +17,8 @@
 */
 package org.wso2.throttle.impl.rolebase;
 
-import org.wso2.throttle.CallerConfiguration;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.CallerConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 import java.util.ArrayList;
 import java.util.List;

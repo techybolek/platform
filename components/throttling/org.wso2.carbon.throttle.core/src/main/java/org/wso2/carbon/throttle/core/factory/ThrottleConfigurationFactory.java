@@ -15,9 +15,9 @@
 */
 package org.wso2.throttle.factory;
 
-import org.wso2.throttle.ThrottleConfiguration;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.ThrottleException;
+import org.wso2.carbon.throttle.core.ThrottleConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleException;
 import org.wso2.throttle.impl.domainbase.DomainBaseThrottleConfiguration;
 import org.wso2.throttle.impl.ipbase.IPBaseThrottleConfiguration;
 import org.wso2.throttle.impl.rolebase.RoleBaseThrottleConfiguration;

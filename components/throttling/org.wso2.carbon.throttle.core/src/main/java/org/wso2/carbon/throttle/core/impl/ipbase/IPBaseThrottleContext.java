@@ -18,9 +18,9 @@
 
 package org.wso2.throttle.impl.ipbase;
 
-import org.wso2.throttle.ThrottleConfiguration;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.ThrottleContext;
+import org.wso2.carbon.throttle.core.ThrottleConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleContext;
 
 /**
  * Holds all the run time data for all IP based  remote callers

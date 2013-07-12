@@ -20,9 +20,9 @@ package org.wso2.throttle.impl.ipbase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.throttle.CallerConfiguration;
-import org.wso2.throttle.ThrottleConfiguration;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.CallerConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 import java.util.HashMap;
 import java.util.Iterator;

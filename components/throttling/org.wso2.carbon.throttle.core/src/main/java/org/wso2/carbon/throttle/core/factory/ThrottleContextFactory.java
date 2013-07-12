@@ -15,10 +15,10 @@
 */
 package org.wso2.throttle.factory;
 
-import org.wso2.throttle.ThrottleConfiguration;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.ThrottleContext;
-import org.wso2.throttle.ThrottleException;
+import org.wso2.carbon.throttle.core.ThrottleConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleContext;
+import org.wso2.carbon.throttle.core.ThrottleException;
 import org.wso2.throttle.impl.domainbase.DomainBaseThrottleContext;
 import org.wso2.throttle.impl.ipbase.IPBaseThrottleContext;
 import org.wso2.throttle.impl.rolebase.RoleBaseThrottleContext;

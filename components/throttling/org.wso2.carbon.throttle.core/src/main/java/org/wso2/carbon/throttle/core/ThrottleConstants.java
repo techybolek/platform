@@ -15,7 +15,7 @@
 *
 *
 */
-package org.wso2.throttle;
+package org.wso2.carbon.throttle.core;
 
 import javax.xml.namespace.QName;
 

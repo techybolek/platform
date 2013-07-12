@@ -15,13 +15,12 @@
 */
 package org.wso2.throttle.factory;
 
-import org.wso2.throttle.CallerConfiguration;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.ThrottleException;
+import org.wso2.carbon.throttle.core.CallerConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleException;
 import org.wso2.throttle.impl.domainbase.DomainBaseCallerConfiguration;
 import org.wso2.throttle.impl.ipbase.IPBaseCallerConfiguration;
 import org.wso2.throttle.impl.rolebase.RoleBaseCallerConfiguration;
-import org.wso2.throttle.impl.rolebase.RoleBaseThrottleConfiguration;
 
 /**
  * Factory for creating a CallerConfiguration

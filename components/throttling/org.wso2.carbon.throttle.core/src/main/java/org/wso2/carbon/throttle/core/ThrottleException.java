@@ -16,7 +16,7 @@
 *
 */
 
-package org.wso2.throttle;
+package org.wso2.carbon.throttle.core;
 
 /**
  * Exception for throttle

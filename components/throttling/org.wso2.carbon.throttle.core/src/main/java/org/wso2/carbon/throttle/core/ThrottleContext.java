@@ -16,7 +16,7 @@
 *
 */
 
-package org.wso2.throttle;
+package org.wso2.carbon.throttle.core;
 
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.Replicator;

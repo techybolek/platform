@@ -16,7 +16,7 @@
 *
 */
 
-package org.wso2.throttle;
+package org.wso2.carbon.throttle.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,9 +28,9 @@ import org.wso2.throttle.factory.CallerContextFactory;
  * This implementation is thread safe.
  */
 
-public class RoleBasedAccessRateController {
+public class AccessRateController {
 
-    private static Log log = LogFactory.getLog(RoleBasedAccessRateController.class.getName());
+    private static Log log = LogFactory.getLog(AccessRateController.class.getName());
 
     private static final String ACCESS_DENIED_TEMPORALLY =
             "You cannot access this service since you have exceeded the allocated quota.";
@@ -43,7 +43,7 @@ public class RoleBasedAccessRateController {
 
     private boolean debugOn = false;  //is debug enable
 
-    public RoleBasedAccessRateController() {
+    public AccessRateController() {
         debugOn = log.isDebugEnabled();
     }
 
@@ -51,14 +51,15 @@ public class RoleBasedAccessRateController {
      * To check whether caller can access not not base on the controlling  policy
      *
      * @param throttleContext - current states of throttle - RunTime Data
-     * @param roleID        - Identifier for remote caller - ex: ip or domainname
+     * @param callerID        - Identifier for remote caller - ex: ip or domainname
+     * @param callerType      - the type of the caller
      * @return  access information
-     * @throws org.wso2.throttle.ThrottleException
+     * @throws ThrottleException
      */
     public AccessInformation canAccess(ThrottleContext throttleContext,
-                                       String consumerKey, String roleID) throws ThrottleException {
+                                       String callerID, int callerType) throws ThrottleException {
 
-        String type = "role";
+        String type = ThrottleConstants.IP_BASE == callerType ? "IP address" : "domain";
 
         ThrottleConfiguration throttleConfigurationBean =
                 throttleContext.getThrottleConfiguration();
@@ -66,14 +67,14 @@ public class RoleBasedAccessRateController {
 
         if (throttleConfigurationBean == null) {
             if (debugOn) {
-                log.debug("Couldn't find Throttle Configuration!! - Throttling will not occur");
+                log.debug("Throttle Configuration couldn't find - Throttling will not occur");
             }
             accessInformation.setAccessAllowed(true);
             return accessInformation;
         }
 
-        if (roleID == null) {
-            String msg = "Couldn't find consumer role!! - Access will be denied ";
+        if (callerID == null) {
+            String msg = "Caller host or ip  couldn't find !! - Access will be denied ";
             if (debugOn) {
                 log.debug(msg);
             }
@@ -83,11 +84,11 @@ public class RoleBasedAccessRateController {
         }
 
         CallerConfiguration configuration =
-                throttleConfigurationBean.getCallerConfiguration(roleID);
+                throttleConfigurationBean.getCallerConfiguration(callerID);
         if (configuration == null) {
             if (debugOn) {
                 log.debug("Caller configuration couldn't find for " + type
-                        + " and for caller " + roleID);
+                        + " and for caller " + callerID);
             }
             accessInformation.setAccessAllowed(true);
             return accessInformation;
@@ -102,11 +103,11 @@ public class RoleBasedAccessRateController {
             return accessInformation;
         } else if (configuration.getAccessState() == ThrottleConstants.ACCESS_CONTROLLED) {
             synchronized (lock) {
-                CallerContext caller = throttleContext.getCallerContext(consumerKey);
+                CallerContext caller = throttleContext.getCallerContext(callerID);
                 if (caller == null) {
                     //if caller has not already registered ,then create new caller description and
                     //set it in throttle
-                    caller = CallerContextFactory.createCaller(ThrottleConstants.ROLE_BASE, consumerKey);
+                    caller = CallerContextFactory.createCaller(callerType, callerID);
                 }
                 if (caller != null) {
                     long currentTime = System.currentTimeMillis();
@@ -120,14 +121,14 @@ public class RoleBasedAccessRateController {
                         return accessInformation;
                     } else {
                         if (debugOn) {
-                            log.debug("Access  from " + type + " " + roleID + " is successful.");
+                            log.debug("Access  from " + type + " " + callerID + " is successful.");
                         }
                         accessInformation.setAccessAllowed(true);
                         return accessInformation;
                     }
                 } else {
                     if (debugOn) {
-                        log.debug("Caller " + type + " not found! " + roleID);
+                        log.debug("Caller " + type + " not found! " + callerID);
                     }
                     accessInformation.setAccessAllowed(true);
                     return accessInformation;

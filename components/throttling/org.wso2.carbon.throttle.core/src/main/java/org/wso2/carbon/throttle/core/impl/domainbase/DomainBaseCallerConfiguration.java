@@ -18,8 +18,8 @@
 */
 package org.wso2.throttle.impl.domainbase;
 
-import org.wso2.throttle.CallerConfiguration;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.CallerConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 /**
  * Caller Configuration implementation for domain name based throttle

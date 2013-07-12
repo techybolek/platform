@@ -18,8 +18,8 @@
 */
 package org.wso2.throttle.impl.domainbase;
 
-import org.wso2.throttle.CallerContext;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.CallerContext;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 import java.io.Serializable;
 

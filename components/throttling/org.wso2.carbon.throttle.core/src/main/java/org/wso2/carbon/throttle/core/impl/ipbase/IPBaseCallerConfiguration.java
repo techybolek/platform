@@ -19,8 +19,8 @@
 package org.wso2.throttle.impl.ipbase;
 
 
-import org.wso2.throttle.CallerConfiguration;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.CallerConfiguration;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 /**
  * Metadata for controls a caller(IP based) - static data -The data have built form processing policy
