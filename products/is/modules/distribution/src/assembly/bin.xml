@@ -480,6 +480,12 @@
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
         </file>
+        <file>
+            <source>
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/scim-schema-extension.config
+            </source>
+            <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
+        </file>
 	<!--copy url-mapping-config.xml-->
 	<!--file>
             <source>
