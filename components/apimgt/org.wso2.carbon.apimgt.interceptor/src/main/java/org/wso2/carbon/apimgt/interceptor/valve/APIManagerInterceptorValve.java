@@ -69,10 +69,6 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 
     public APIManagerInterceptorValve () {
 
-    }
-
-    public void invoke(Request request, Response response, CompositeValve compositeValve) {
-
         if (!initialized) {
             statsPublishingEnabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
             statsPublisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
@@ -84,6 +80,10 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
             initialized = true;
         }
 
+    }
+
+    public void invoke(Request request, Response response, CompositeValve compositeValve) {
+        
         String context = request.getContextPath();
         if (context == null || context.equals("")) {
             //Invoke next valve in pipe.
