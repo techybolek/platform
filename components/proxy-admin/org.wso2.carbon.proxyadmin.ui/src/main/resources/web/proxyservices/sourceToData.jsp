@@ -132,7 +132,10 @@
         // forward to design page and this does not require validation
         forwardTo = param + "?header=" + header + "&ordinal=1";
     } else {
+        session.setAttribute("proxyXML", source);
         forwardTo = "source.jsp?header=" + header;
+        CarbonUIMessage.sendCarbonUIMessage(bundle.getString("invalid.name"),
+                        CarbonUIMessage.ERROR, request);
     }
 %>
 
