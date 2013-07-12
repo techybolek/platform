@@ -28,6 +28,7 @@ import org.wso2.carbon.analytics.hive.dto.ScriptResult;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.exception.RegistryAccessException;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
+import org.wso2.carbon.analytics.hive.extension.annotation.AbstractHiveAnnotation;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveMultitenantUtil;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
@@ -39,10 +40,8 @@ import java.io.*;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -343,8 +342,94 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                         continue;
                     }
 
-                    if (!(trimmedCmdLine.startsWith("class") ||
-                        trimmedCmdLine.startsWith("CLASS"))) { // Normal hive query
+                    if (trimmedCmdLine.startsWith("class") ||
+                            trimmedCmdLine.startsWith("CLASS")) { // Class analyzer for executing custom logic
+                        String[] tokens = trimmedCmdLine.split("\\s+");
+                        if (tokens != null && tokens.length >= 2) {
+                            String className = tokens[1];
+
+                            Class clazz = null;
+                            try {
+                                clazz = Class.forName(className, true,
+                                        this.getClass().getClassLoader());
+                            } catch (ClassNotFoundException e) {
+                                log.error("Unable to find custom analyzer class..", e);
+                            }
+
+                            if (clazz != null) {
+                                Object analyzer = null;
+                                try {
+                                    analyzer = clazz.newInstance();
+                                } catch (InstantiationException e) {
+                                    log.error("Unable to instantiate custom analyzer class..", e);
+                                } catch (IllegalAccessException e) {
+                                    log.error("Unable to instantiate custom analyzer class..", e);
+                                }
+
+                                if (analyzer instanceof AbstractHiveAnalyzer) {
+                                    AbstractHiveAnalyzer hiveAnalyzer =
+                                            (AbstractHiveAnalyzer) analyzer;
+                                    hiveAnalyzer.execute();
+                                } else {
+                                    log.error("Custom analyzers should extend AbstractHiveAnalyzer..");
+                                }
+                            }
+                        }
+                    } else if (trimmedCmdLine.startsWith("@script.") ||
+                            trimmedCmdLine.startsWith("@SCRIPT.")) {
+                        HashMap<String, String> annotations = new HashMap<String, String>(); // annotation execution
+                        String[] contentSet = trimmedCmdLine.split("@script.");
+                        String txt = contentSet[1];
+
+                        String re1 = ".*?";    // Non-greedy match on filler
+                        String re2 = "(\\(.*\\))";    // Round Braces 1
+
+                        Pattern p = Pattern.compile(re1 + re2, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+                        Matcher m = p.matcher(txt);
+                        if (m.find()) {
+                            String rbraces1 = m.group(1);
+                            int temp = rbraces1.trim().length();
+
+                            String s = rbraces1.substring(1, temp - 1);
+
+                            String[] variables = s.split(";");
+
+                            for (String g : variables) {
+                                String[] values = g.split("=");
+                                String key = values[0];
+                                String value = values[1].substring(1, values[1].length() - 1);
+                                annotations.put(key, value);
+                            }
+                        }
+                        String className = "org.wso2.carbon.analytics.hive.extension.annotation.testAnnotation";
+
+                        Class clazz = null;
+                        try {
+                            clazz = Class.forName(className, true,
+                                    this.getClass().getClassLoader());
+                        } catch (ClassNotFoundException e) {
+                            log.error("Unable to find custom annotation class..", e);
+                        }
+
+                        if (clazz != null) {
+                            Object annotation = null;
+                            try {
+                                annotation = clazz.newInstance();
+                            } catch (InstantiationException e) {
+                                log.error("Unable to instantiate custom annotation class..", e);
+                            } catch (IllegalAccessException e) {
+                                log.error("Unable to instantiate custom annotation class..", e);
+                            }
+
+                            if (annotation instanceof AbstractHiveAnnotation) {
+                                AbstractHiveAnnotation hiveAnnotation =
+                                        (AbstractHiveAnnotation) annotation;
+                                hiveAnnotation.init();
+                            } else {
+                                log.error("Custom annotations should extend AbstractHiveAnnotation..");
+                            }
+                        }
+                    } else { // Normal hive query
                         QueryResult queryResult = new QueryResult();
 
                         queryResult.setQuery(trimmedCmdLine);
@@ -403,38 +488,6 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                         queryResult.setResultRows(results.toArray(new QueryResultRow[]{}));
                         result.addQueryResult(queryResult);
-                    } else { // Class analyzer for executing custom logic
-                        String[] tokens = trimmedCmdLine.split("\\s+");
-                        if (tokens != null && tokens.length >= 2) {
-                            String className = tokens[1];
-
-                            Class clazz = null;
-                            try {
-                                clazz = Class.forName(className, true,
-                                        this.getClass().getClassLoader());
-                            } catch (ClassNotFoundException e) {
-                                log.error("Unable to find custom analyzer class..", e);
-                            }
-
-                            if (clazz != null) {
-                                Object analyzer = null;
-                                try {
-                                    analyzer = clazz.newInstance();
-                                } catch (InstantiationException e) {
-                                    log.error("Unable to instantiate custom analyzer class..", e);
-                                } catch (IllegalAccessException e) {
-                                    log.error("Unable to instantiate custom analyzer class..", e);
-                                }
-
-                                if (analyzer instanceof AbstractHiveAnalyzer) {
-                                    AbstractHiveAnalyzer hiveAnalyzer =
-                                            (AbstractHiveAnalyzer) analyzer;
-                                    hiveAnalyzer.execute();
-                                } else {
-                                    log.error("Custom analyzers should extend AbstractHiveAnalyzer..");
-                                }
-                            }
-                        }
                     }
 
                 }
