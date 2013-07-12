@@ -2371,7 +2371,10 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean valid=false;
         String inputRolesSet = (String)args[0];
         String username=  (String) args[1];
-        String[] inputRoles=inputRolesSet.split(",");
+        String[] inputRoles=null;
+        if (inputRolesSet != null) {
+            inputRoles = inputRolesSet.split(",");
+        }
 
         try {
             String[] roles=APIUtil.getRoleNames(username);
