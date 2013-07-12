@@ -234,6 +234,11 @@
             <artifactId>spring-web</artifactId>
             <version>3.0.7.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.webapp.ext</groupId>
+            <artifactId>carbon-cxf</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

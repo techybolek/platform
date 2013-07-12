@@ -467,6 +467,7 @@
 		<include>org.springframework:spring-core:jar</include>
 		<include>org.springframework:spring-expression:jar</include>
 		<include>org.springframework:spring-web:jar</include>
+		<include>org.wso2.carbon.webapp.ext:carbon-cxf:jar</include>
             </includes>
         </dependencySet>
     </dependencySets>
