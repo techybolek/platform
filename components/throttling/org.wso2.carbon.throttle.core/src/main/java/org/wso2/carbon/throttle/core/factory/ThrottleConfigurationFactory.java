@@ -13,14 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.throttle.factory;
+package org.wso2.carbon.throttle.core.factory;
 
 import org.wso2.carbon.throttle.core.ThrottleConfiguration;
 import org.wso2.carbon.throttle.core.ThrottleConstants;
 import org.wso2.carbon.throttle.core.ThrottleException;
-import org.wso2.throttle.impl.domainbase.DomainBaseThrottleConfiguration;
-import org.wso2.throttle.impl.ipbase.IPBaseThrottleConfiguration;
-import org.wso2.throttle.impl.rolebase.RoleBaseThrottleConfiguration;
+import org.wso2.carbon.throttle.core.impl.domainbase.DomainBaseThrottleConfiguration;
+import org.wso2.carbon.throttle.core.impl.ipbase.IPBaseThrottleConfiguration;
+import org.wso2.carbon.throttle.core.impl.rolebase.RoleBaseThrottleConfiguration;
 
 /**
  * Factory for creating a ThrottleConfiguration - holds all callers controle parameters

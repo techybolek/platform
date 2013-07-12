@@ -20,7 +20,7 @@ package org.wso2.carbon.throttle.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.throttle.factory.CallerContextFactory;
+import org.wso2.carbon.throttle.core.factory.CallerContextFactory;
 
 /**
  * Controls the access of remote callers according to the controlling  policy .

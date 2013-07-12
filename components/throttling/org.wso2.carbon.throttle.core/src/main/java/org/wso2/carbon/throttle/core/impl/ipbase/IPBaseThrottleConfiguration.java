@@ -16,7 +16,7 @@
 *
 */
 
-package org.wso2.throttle.impl.ipbase;
+package org.wso2.carbon.throttle.core.impl.ipbase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

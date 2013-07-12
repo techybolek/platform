@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.throttle.impl.rolebase;
+package org.wso2.carbon.throttle.core.impl.rolebase;
 
 import org.wso2.carbon.throttle.core.CallerConfiguration;
 import org.wso2.carbon.throttle.core.ThrottleConstants;

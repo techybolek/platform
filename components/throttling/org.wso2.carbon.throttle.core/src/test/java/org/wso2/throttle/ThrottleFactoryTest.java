@@ -23,6 +23,9 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.wso2.carbon.throttle.core.Throttle;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleFactory;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;

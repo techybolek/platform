@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.xml.XmlPrimtiveAssertion;
-import org.wso2.throttle.factory.CallerConfigurationFactory;
-import org.wso2.throttle.factory.ThrottleConfigurationFactory;
-import org.wso2.throttle.factory.ThrottleContextFactory;
+import org.wso2.carbon.throttle.core.factory.CallerConfigurationFactory;
+import org.wso2.carbon.throttle.core.factory.ThrottleConfigurationFactory;
+import org.wso2.carbon.throttle.core.factory.ThrottleContextFactory;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;

@@ -16,7 +16,7 @@
 *
 */
 
-package org.wso2.throttle.impl.ipbase;
+package org.wso2.carbon.throttle.core.impl.ipbase;
 
 import org.wso2.carbon.throttle.core.ThrottleConfiguration;
 import org.wso2.carbon.throttle.core.ThrottleConstants;

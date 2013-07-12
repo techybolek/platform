@@ -34,7 +34,7 @@
                         <Private-Package>
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.throttle.*,
+                            org.wso2.carbon.throttle.core.*,
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.registry.core.service; version=1.0.1,

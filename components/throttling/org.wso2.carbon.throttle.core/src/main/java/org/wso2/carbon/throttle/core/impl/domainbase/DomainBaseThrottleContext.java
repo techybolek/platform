@@ -16,7 +16,7 @@
 *  specific language governing permissions and limitations
 *  under the License.
 */
-package org.wso2.throttle.impl.domainbase;
+package org.wso2.carbon.throttle.core.impl.domainbase;
 
 import org.wso2.carbon.throttle.core.ThrottleConfiguration;
 import org.wso2.carbon.throttle.core.ThrottleConstants;

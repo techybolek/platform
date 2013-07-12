@@ -13,15 +13,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.throttle.factory;
+package org.wso2.carbon.throttle.core.factory;
 
 import org.wso2.carbon.throttle.core.ThrottleConfiguration;
 import org.wso2.carbon.throttle.core.ThrottleConstants;
 import org.wso2.carbon.throttle.core.ThrottleContext;
 import org.wso2.carbon.throttle.core.ThrottleException;
-import org.wso2.throttle.impl.domainbase.DomainBaseThrottleContext;
-import org.wso2.throttle.impl.ipbase.IPBaseThrottleContext;
-import org.wso2.throttle.impl.rolebase.RoleBaseThrottleContext;
+import org.wso2.carbon.throttle.core.impl.domainbase.DomainBaseThrottleContext;
+import org.wso2.carbon.throttle.core.impl.ipbase.IPBaseThrottleContext;
+import org.wso2.carbon.throttle.core.impl.rolebase.RoleBaseThrottleContext;
 
 /**
  * Factory for creating a ThrottleContext - holds all callers runtime data - the current state
