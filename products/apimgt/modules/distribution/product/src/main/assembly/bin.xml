@@ -183,6 +183,8 @@
              </includes>
             <excludes>
                 <exclude>**/PizzaShack/**</exclude>
+                <exclude>**/TwitterSearch/**</exclude>
+                <exclude>**/YahooPlaceFinder/**</exclude>
             </excludes>
         </fileSet>
 	<fileSet>
