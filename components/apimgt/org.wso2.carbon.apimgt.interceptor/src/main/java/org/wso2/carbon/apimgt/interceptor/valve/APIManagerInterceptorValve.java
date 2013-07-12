@@ -129,13 +129,9 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
                 }
                 boolean isAuthorized = false;
                 try {
-                    /*
-                       TODO:
-                       API Version is hardcoded as 1.0.0 since this need to be test with GReg rest API and currently it don't have the version support.
-                       we can change this to get the version as  getAPIVersion(request) later.
-                    */
-                    isAuthorized = doAuthenticate(context, "1.0.0", accessToken,
-                            authenticator.getResourceAuthenticationScheme(context, "1.0.0", request.getRequestURI(), request.getMethod()),
+                    String apiVersion = getAPIVersion(request);
+                    isAuthorized = doAuthenticate(context, apiVersion, accessToken,
+                            authenticator.getResourceAuthenticationScheme(context, apiVersion, request.getRequestURI(), request.getMethod()),
                             request.getHeader(APITokenValidator.getAPIManagerClientDomainHeader()));
                 } catch (APIManagementException e) {
                     //ignore
@@ -173,7 +169,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
         getNext().invoke(request, response, compositeValve);
 
         //Handle Responses
-        if ("true".equals(manageAPIs) && ApiMgtDAO.isContextExist(context) && statsPublishingEnabled) {
+        if ("true".equals(manageAPIs) && contextExist && statsPublishingEnabled) {
             publishResponseStatistics(request, requestTime);
         }
     }
@@ -261,12 +257,12 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
     }
 
     private String getAPIVersion(HttpServletRequest request) {
-        int contextStartsIndex = (request.getRequestURI()).indexOf(request.getContextPath());
+        int contextStartsIndex = (request.getRequestURI()).indexOf(request.getContextPath()) + 1;
         int length = request.getContextPath().length();
         String afterContext = (request.getRequestURI()).substring(contextStartsIndex + length);
         int SlashIndex = afterContext.indexOf(("/"));
 
-        return afterContext.substring(SlashIndex + 1);
+        return afterContext.substring(0, SlashIndex);
     }
 	
 }
