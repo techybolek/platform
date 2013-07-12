@@ -101,7 +101,7 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.core.runtime.feature:${carbon.kernel.version}
                                 </featureArtifactDef>
-                                <featureArtifactDef>
+				<featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
@@ -734,7 +734,15 @@
                             <features>
 
 				<feature>
-                                    <id>org.wso2.carbon.core.feature.group</id>
+                                    <id>org.wso2.carbon.core.common.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>  
+				<feature>
+                                    <id>org.wso2.carbon.core.server.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                    <id>org.wso2.carbon.core.runtime.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>                                
                                 <feature>
@@ -925,6 +933,14 @@
 
                                 <feature>
                                     <id>org.wso2.carbon.deployment.synchronizer.server.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                    <id>org.wso2.carbon.deployment.synchronizer.subversion.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                    <id>org.wso2.carbon.deployment.synchronizer.git.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
