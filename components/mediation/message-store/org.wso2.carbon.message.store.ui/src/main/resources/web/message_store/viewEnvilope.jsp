@@ -235,7 +235,9 @@
                 <tr>
                     <th><fmt:message key="messageStore.name"/></th>
                     <th><fmt:message key="type"/></th>
-                    <th><fmt:message key="size"/></th>
+                    <%if (!client.getClassName(msName).trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) {%>
+                        <th><fmt:message key="size"/></th>
+                    <%}%>
                 </tr>
                 </thead>
                 <tbody>
@@ -256,8 +258,10 @@
                     </td>
                     <td><%= type%>
                     </td>
-                    <td><%= size%>
-                    </td>
+                    <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) {%>
+                        <td><%= size%>
+                        </td>
+                    <%}%>
                 </tr>
                 </tbody>
             </table>
@@ -298,9 +302,9 @@
                         </tr>
                         <tr>
                             <td>
-                                <%if (!(!messageIndex.trim().equals("1")&&type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore"))) {%>
+                                <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) {%>
                                 <input type="button" value="<fmt:message key="delete"/>"
-                                       onclick="<%=type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")?"deleteFirstMsg();":"deleteMsg();"%>"
+                                       onclick="<%="deleteMsg();"%>"
                                        class="button"/>
                                 <%}%>
                                 <input type="button" value="<fmt:message key="cancel"/>"
