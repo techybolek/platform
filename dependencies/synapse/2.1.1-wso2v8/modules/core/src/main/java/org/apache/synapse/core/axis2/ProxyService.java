@@ -1062,9 +1062,15 @@ public class ProxyService implements AspectConfigurable, SynapseArtifact {
     public boolean isModuleEngaged() {
         return moduleEngaged;
     }
+    
 
     public boolean isWsdlPublished() {
         return wsdlPublished;
+    }
+    
+    
+    public void setModuleEngaged(boolean moduleEngaged) {
+        this.moduleEngaged = moduleEngaged;
     }
 
     @Override
