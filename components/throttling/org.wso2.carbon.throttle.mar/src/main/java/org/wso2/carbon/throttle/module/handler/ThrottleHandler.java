@@ -16,7 +16,7 @@
 *
 */
 
-package org.wso2.throttle.module.handler;
+package org.wso2.carbon.throttle.module.handler;
 
 
 import org.apache.axis2.AxisFault;
@@ -31,10 +31,10 @@ import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.throttle.module.utils.StatCollector;
+import org.wso2.carbon.throttle.module.utils.impl.DummyAuthenticator;
+import org.wso2.carbon.throttle.module.utils.impl.DummyHandler;
 import org.wso2.throttle.*;
-import org.wso2.throttle.module.utils.StatCollector;
-import org.wso2.throttle.module.utils.impl.DummyAuthenticator;
-import org.wso2.throttle.module.utils.impl.DummyHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;

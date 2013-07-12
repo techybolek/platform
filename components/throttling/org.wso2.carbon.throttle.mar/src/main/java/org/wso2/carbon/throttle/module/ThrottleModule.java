@@ -15,7 +15,7 @@
 *
 *
 */
-package org.wso2.throttle.module;
+package org.wso2.carbon.throttle.module;
 
 
 import org.apache.axis2.AxisFault;
@@ -29,10 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.apache.neethi.builders.xml.XmlPrimtiveAssertion;
 import org.wso2.throttle.*;
 
-import javax.xml.namespace.QName;
 import java.io.InputStream;
 import java.util.*;
 

@@ -1,4 +1,4 @@
-package org.wso2.throttle.module;
+package org.wso2.carbon.throttle.module;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;

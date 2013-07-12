@@ -15,16 +15,17 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.throttle.module.utils.impl;
+package org.wso2.carbon.throttle.module.utils.impl;
 
-import org.wso2.throttle.module.utils.AuthenticationFuture;
-import org.wso2.throttle.module.utils.Utils;
+
+import org.wso2.carbon.throttle.module.utils.AuthenticationFuture;
+import org.wso2.carbon.throttle.module.utils.Utils;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DummyAuthenticator implements AuthenticationFuture{
+public class DummyAuthenticator implements AuthenticationFuture {
     private String consumerKey;
     private boolean isAuthenticated;
     private List userRoles;

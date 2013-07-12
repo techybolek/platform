@@ -15,17 +15,18 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.throttle.module.utils.impl;
+package org.wso2.carbon.throttle.module.utils.impl;
 
-import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
-import org.wso2.throttle.module.utils.AuthenticationFuture;
-import org.wso2.throttle.module.utils.UserPriviligesHandler;
+
+import org.wso2.carbon.throttle.module.utils.AuthenticationFuture;
+import org.wso2.carbon.throttle.module.utils.UserPriviligesHandler;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class DummyHandler implements UserPriviligesHandler{
+public class DummyHandler implements UserPriviligesHandler {
     private static String[] TIERS = {"bronze","silver","platinum"};
     public static Map apiKey2roleMap = new ConcurrentHashMap();
 

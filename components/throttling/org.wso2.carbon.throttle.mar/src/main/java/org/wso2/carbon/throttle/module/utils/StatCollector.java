@@ -15,11 +15,11 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.throttle.module.utils;
+package org.wso2.carbon.throttle.module.utils;
 
+import org.wso2.carbon.throttle.module.utils.impl.DummyHandler;
 import org.wso2.throttle.AccessInformation;
 import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.module.utils.impl.DummyHandler;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

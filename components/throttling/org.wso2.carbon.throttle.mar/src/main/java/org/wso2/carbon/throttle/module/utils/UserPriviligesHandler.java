@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.throttle.module.utils;
+package org.wso2.carbon.throttle.module.utils;
 
 public interface UserPriviligesHandler {
 
