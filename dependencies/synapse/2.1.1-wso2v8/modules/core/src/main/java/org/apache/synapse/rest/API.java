@@ -360,11 +360,11 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
 
     public void init(SynapseEnvironment se) {
         if (resources.isEmpty()) {
-            handleException("The API: " + name + " has been configured without " +
+            handleException("The API: " + getName() + " has been configured without " +
                     "any resource definitions");
         }
 
-        log.info("Initializing API: " + name);
+        log.info("Initializing API: " + getName());
         for (Resource resource : resources.values()) {
             resource.init(se);
         }
@@ -377,7 +377,7 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
     }
 
     public void destroy() {
-        log.info("Destroying API: " + name);
+        log.info("Destroying API: " + getName());
         for (Resource resource : resources.values()) {
             resource.destroy();
         }
