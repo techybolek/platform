@@ -294,10 +294,6 @@ public class APIStoreHostObject extends ScriptableObject {
             /*if (userAdminStub.hasMultipleUserStores() && !username.contains("/")) {
                 handleException("Domain not specified. Please provide your username as domain/username");
             } */
-        } catch (APIManagementException e) {
-            row.put("error", row, true);
-            row.put("detail", row, e.getMessage());
-            return row;
         } catch (Exception e) {
             log.error("Error occurred while checking for multiple user stores");
         }
