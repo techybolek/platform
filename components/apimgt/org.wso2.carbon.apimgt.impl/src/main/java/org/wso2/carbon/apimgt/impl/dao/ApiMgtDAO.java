@@ -2237,7 +2237,7 @@ public class ApiMgtDAO {
             }
             connection.commit();
         } catch (SQLException e) {
-            log.error(e.getMessage(), e);
+            handleException("Error while generating the application access token for the application :"+applicationName, e);
             if (connection != null) {
                 try {
                     connection.rollback();
