@@ -17,6 +17,7 @@
 package org.apache.synapse.transport.passthru;
 
 import org.apache.axiom.om.OMOutputFormat;
+import org.apache.axiom.util.blob.OverflowBlob;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
@@ -343,8 +344,9 @@ public class PassThroughHttpSender extends AbstractHandler implements TransportS
 					OMOutputFormat format = PassThroughTransportUtils.getOMOutputFormat(msgContext);
 					formatter.writeTo(msgContext, format, _out, false);
 					try {
-	                    IOUtils.write(_out.toByteArray(),out);
-	                    msgContext.setProperty(PassThroughConstants.PASSTROUGH_MESSAGE_LENGTH,new Long(_out.toByteArray().length));
+	                    long messageSize =setStreamAsTempData(formatter,msgContext,format);
+	                    msgContext.setProperty(PassThroughConstants.PASSTROUGH_MESSAGE_LENGTH,messageSize);
+	                    formatter.writeTo(msgContext, format, out, false);
                     } catch (IOException e) {
 	                    // TODO Auto-generated catch block
                     	 handleException("IO while building message", e);
@@ -379,6 +381,25 @@ public class PassThroughHttpSender extends AbstractHandler implements TransportS
 			}
 		}
 	}
+	
+	
+	/**
+     * Write the stream to a temporary storage and calculate the content length
+     *
+     * @param entity HTTPEntity
+     * @throws IOException if an exception occurred while writing data
+     */
+    private long setStreamAsTempData(MessageFormatter messageFormatter,MessageContext msgContext,OMOutputFormat format) throws IOException {
+        OverflowBlob serialized = new OverflowBlob(256, 4096, "http-nio_", ".dat");
+        OutputStream out = serialized.getOutputStream();
+        try {
+            messageFormatter.writeTo(msgContext, format, out, true);
+        } finally {
+            out.close();
+        }
+       // msgContext.setProperty(NhttpConstants.SERIALIZED_BYTES, serialized);
+       return serialized.getLength();
+    }
 
     public void submitResponse(MessageContext msgContext)
             throws IOException, HttpException {
