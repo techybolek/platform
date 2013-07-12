@@ -637,7 +637,7 @@
             <outputDirectory>${pom.artifactId}-${build.version}/repository/database</outputDirectory>
         </file> 
         <file>
-            <source>../cmis-war/cmis/target/cmis.war</source>
+            <source>../cmis/cmis-war/target/cmis.war</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
         </file>
 
