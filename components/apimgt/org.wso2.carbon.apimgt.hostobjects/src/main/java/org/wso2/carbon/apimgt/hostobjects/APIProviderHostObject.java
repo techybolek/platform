@@ -2361,6 +2361,43 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static boolean jsFunction_validateRoles(Context cx,
+                                                   Scriptable thisObj, Object[] args,
+                                                   Function funObj) {
+        if (args == null || args.length==0) {
+            return false;
+        }
+
+        boolean valid=false;
+        String inputRolesSet = (String)args[0];
+        String username=  (String) args[1];
+        String[] inputRoles=inputRolesSet.split(",");
+
+        try {
+            String[] roles=APIUtil.getRoleNames(username);
+
+            if (roles != null && inputRoles != null) {
+                for (String inputRole : inputRoles) {
+                    for (String role : roles) {
+                        valid= (inputRole.equals(role));
+                        if(valid){ //If we found a match for the input role,then no need to process the for loop further
+                            break;
+                        }
+                    }
+                    //If the input role doesn't match with any of the role existing in the system
+                    if(!valid){
+                        return valid;
+                    }
+
+                }
+                return valid;
+            }
+        }catch (Exception e) {
+            log.error("Error while validating the input roles.",e);
+        }
+
+        return valid;
+    }
 
 
 }
