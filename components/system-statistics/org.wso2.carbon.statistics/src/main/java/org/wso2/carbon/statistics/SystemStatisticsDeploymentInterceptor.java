@@ -27,6 +27,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEvent;
 import org.apache.axis2.engine.AxisObserver;
+import org.apache.axis2.util.JavaUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -88,33 +90,18 @@ public class SystemStatisticsDeploymentInterceptor implements AxisObserver {
         if (axisEvent.getEventType() == AxisEvent.SERVICE_DEPLOY) {
             for (Iterator iter = axisService.getOperations(); iter.hasNext();) {
                 AxisOperation op = (AxisOperation) iter.next();
+                setCountersAndProcessors(op) ;
+            }
 
-                // IN operation counter
-                Parameter inOpCounter = new Parameter();
-                inOpCounter.setName(StatisticsConstants.IN_OPERATION_COUNTER);
-                inOpCounter.setValue(new AtomicInteger(0));
-                try {
-                    op.addParameter(inOpCounter);
-                } catch (AxisFault ignored) { // will not occur
-                }
+            // set counters for default operation in case of JAX-WS backends
+            // see
 
-                // OUT operation counter
-                Parameter outOpCounter = new Parameter();
-                outOpCounter.setName(StatisticsConstants.OUT_OPERATION_COUNTER);
-                outOpCounter.setValue(new AtomicInteger(0));
-                try {
-                    op.addParameter(outOpCounter);
-                } catch (AxisFault ignored) { // will not occur
-                }
-
-                // Operation response time processor
-                Parameter responseTimeProcessor = new Parameter();
-                responseTimeProcessor.setName(StatisticsConstants.OPERATION_RESPONSE_TIME_PROCESSOR);
-                responseTimeProcessor.setValue(new ResponseTimeProcessor());
-                try {
-                    op.addParameter(responseTimeProcessor);
-                } catch (AxisFault axisFault) { // will not occur
-                }
+            // see ESBJAVA-2327
+            if (JavaUtils.isTrueExplicitly(axisService.getParameterValue("disableOperationValidation"))){
+                  AxisOperation defaultOp = (AxisOperation) axisService.getParameterValue("_default_mediate_operation_");
+                  if(defaultOp != null ){
+                       setCountersAndProcessors(defaultOp);
+                   }
             }
 
             // Service response time processor
@@ -126,6 +113,36 @@ public class SystemStatisticsDeploymentInterceptor implements AxisObserver {
             } catch (AxisFault axisFault) { // will not occur
             }
         }
+    }
+
+    private void setCountersAndProcessors(AxisOperation op){
+        // IN operation counter
+        Parameter inOpCounter = new Parameter();
+        inOpCounter.setName(StatisticsConstants.IN_OPERATION_COUNTER);
+        inOpCounter.setValue(new AtomicInteger(0));
+        try {
+            op.addParameter(inOpCounter);
+        } catch (AxisFault ignored) { // will not occur
+        }
+
+        // OUT operation counter
+        Parameter outOpCounter = new Parameter();
+        outOpCounter.setName(StatisticsConstants.OUT_OPERATION_COUNTER);
+        outOpCounter.setValue(new AtomicInteger(0));
+        try {
+            op.addParameter(outOpCounter);
+        } catch (AxisFault ignored) { // will not occur
+        }
+
+        // Operation response time processor
+        Parameter responseTimeProcessor = new Parameter();
+        responseTimeProcessor.setName(StatisticsConstants.OPERATION_RESPONSE_TIME_PROCESSOR);
+        responseTimeProcessor.setValue(new ResponseTimeProcessor());
+        try {
+            op.addParameter(responseTimeProcessor);
+        } catch (AxisFault axisFault) { // will not occur
+        }
+
     }
 
     public void serviceGroupUpdate(AxisEvent axisEvent, AxisServiceGroup axisServiceGroup) {

@@ -50,6 +50,22 @@ public class SynapseDispatcher extends AbstractDispatcher {
     }
 
     public AxisOperation findOperation(AxisService svc, MessageContext mc) throws AxisFault {
-        return svc.getOperation(SynapseConstants.SYNAPSE_OPERATION_NAME);
+    	AxisOperation operation =  svc.getOperation(SynapseConstants.SYNAPSE_OPERATION_NAME);
+    	if(operation == null && mc.getAxisService() != null){
+    		operation = processOperationValidation(svc);
+    	}
+    	return operation;
     }
+    
+	private AxisOperation processOperationValidation(AxisService svc) {
+		Object operationObj = svc
+				.getParameterValue("_default_mediate_operation_");
+		if (operationObj != null) {
+			return (AxisOperation) operationObj;
+		}
+		return null;
+	}
+    
+    
+   
 }

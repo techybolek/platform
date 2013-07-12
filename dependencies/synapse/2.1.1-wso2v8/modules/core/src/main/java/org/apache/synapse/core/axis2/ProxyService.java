@@ -489,6 +489,15 @@ public class ProxyService implements AspectConfigurable, SynapseArtifact {
             proxyService.setCustomSchemaNamePrefix("");
         }
 
+        if (JavaUtils.isTrueExplicitly(proxyService.getParameterValue("disableOperationValidation"))){
+            try {
+                AxisOperation defaultOp = processOperationValidation(proxyService);
+                //proxyServiceGroup.setParent(axisCfg);
+            } catch (AxisFault axisFault) {
+                // ignore
+            }
+        }
+
         if (!policies.isEmpty()) {
 
             for (PolicyInfo pi : policies) {
@@ -1062,15 +1071,31 @@ public class ProxyService implements AspectConfigurable, SynapseArtifact {
     public boolean isModuleEngaged() {
         return moduleEngaged;
     }
-    
+       
 
-    public boolean isWsdlPublished() {
+    public void setModuleEngaged(boolean moduleEngaged) {
+    	this.moduleEngaged = moduleEngaged;
+    }
+
+	public boolean isWsdlPublished() {
         return wsdlPublished;
     }
-    
-    
-    public void setModuleEngaged(boolean moduleEngaged) {
-        this.moduleEngaged = moduleEngaged;
+
+    private AxisOperation processOperationValidation(AxisService proxyService) throws AxisFault {
+    	  AxisOperation mediateOperation = new InOutAxisOperation(
+                  SynapseConstants.SYNAPSE_OPERATION_NAME);
+          // Set the names of the two messages so that Axis2 is able to produce a WSDL (see SYNAPSE-366):
+          mediateOperation.getMessage(WSDLConstants.MESSAGE_LABEL_IN_VALUE).setName("in");
+          mediateOperation.getMessage(WSDLConstants.MESSAGE_LABEL_OUT_VALUE).setName("out");
+       // create a custom message receiver for this proxy service 
+          ProxyServiceMessageReceiver msgRcvr = new ProxyServiceMessageReceiver();
+          msgRcvr.setName(name);
+          msgRcvr.setProxy(this);
+          mediateOperation.setMessageReceiver(msgRcvr);
+          mediateOperation.setParent(proxyService);
+          proxyService.addParameter("_default_mediate_operation_", mediateOperation);
+          return mediateOperation;
+		
     }
 
     @Override
