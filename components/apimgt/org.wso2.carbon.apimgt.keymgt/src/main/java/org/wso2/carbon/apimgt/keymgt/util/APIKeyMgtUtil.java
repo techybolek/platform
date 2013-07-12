@@ -120,7 +120,9 @@ public class APIKeyMgtUtil {
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
                 accessTokenDO.setValidationStatus(
                         APIConstants.KeyValidationStatus.API_AUTH_ACCESS_TOKEN_EXPIRED);
-                log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
+                if (accessTokenDO.getEndUserToken() != null) {
+                	log.info("Token " + accessTokenDO.getEndUserToken() + " expired.");
+                }
                 return true;
             }
         }
