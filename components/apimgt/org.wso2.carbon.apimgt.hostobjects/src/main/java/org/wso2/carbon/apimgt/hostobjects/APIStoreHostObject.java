@@ -255,7 +255,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("accessallowdomains", row, authorizedDomains);
                 return row;
             } catch (Exception e) {
-                String msg = "Error while obtaining application access tokens";
+                String msg = "Error while obtaining the application access token for the application:"+ args[1];
                 log.error(msg, e);
                 throw new ScriptException(msg, e);
             }
