@@ -524,16 +524,20 @@ public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
             assert configuration != null;
             if (configuration.getMessageProcessors().containsKey(processorName)) {
                 MessageProcessor processor =
-                        configuration.getMessageProcessors().get(processorName);
-
+                        configuration.getMessageProcessors().get(processorName);            
+                
                 if (processor instanceof ScheduledMessageForwardingProcessor) {
                     MessageForwardingProcessorView view =
                             ((ScheduledMessageForwardingProcessor) processor).getView();
-                    active = view.isActive();
+                    if(view != null){
+                    	active = view.isActive();
+                    }
                 } else if (processor instanceof SamplingProcessor) {
                     SamplingProcessorView view =
                             ((SamplingProcessor) processor).getView();
-                    active = view.isActive();
+                    if(view != null){
+                    	active = view.isActive();
+                    }
                 }
 
             }
