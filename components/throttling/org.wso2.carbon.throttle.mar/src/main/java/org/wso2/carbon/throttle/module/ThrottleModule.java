@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.wso2.throttle.*;
+import org.wso2.carbon.throttle.core.*;
 
 import java.io.InputStream;
 import java.util.*;

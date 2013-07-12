@@ -21,7 +21,7 @@ package org.wso2.carbon.throttle.module.handler;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.wso2.carbon.throttle.module.ThrottleEnguageUtils;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 
 public class GlobalThrottleHandler extends ThrottleHandler {

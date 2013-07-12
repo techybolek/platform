@@ -18,8 +18,8 @@
 package org.wso2.carbon.throttle.module.utils;
 
 import org.wso2.carbon.throttle.module.utils.impl.DummyHandler;
-import org.wso2.throttle.AccessInformation;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.AccessInformation;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

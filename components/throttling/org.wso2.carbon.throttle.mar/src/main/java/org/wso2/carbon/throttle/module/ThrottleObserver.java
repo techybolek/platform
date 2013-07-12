@@ -13,8 +13,8 @@ import org.apache.axis2.engine.AxisEvent;
 import org.apache.axis2.engine.AxisObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.throttle.Throttle;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.Throttle;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 import java.util.ArrayList;
 

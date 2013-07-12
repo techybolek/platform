@@ -19,6 +19,9 @@ package org.wso2.throttle;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.wso2.carbon.throttle.core.Throttle;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleException;
 import org.wso2.throttle.module.utils.StatCollector;
 
 import java.util.concurrent.Executors;
