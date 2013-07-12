@@ -32,7 +32,7 @@
     <artifactId>org.eclipse.jgit</artifactId>
     <packaging>bundle</packaging>
     <name>jgit.wso2</name>
-    <version>2.3.1-wso2v2</version>
+    <version>2.3.1.wso2v2</version>
     <description>
         org.wso2.carbon.jgit. This bundle will represent jgit
     </description>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>2.3.1-wso2v2</version>
+            <version>2.3.1.wso2v2</version>
             <optional>true</optional>
         </dependency>
     </dependencies>
