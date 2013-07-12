@@ -16,6 +16,8 @@
 package org.wso2.carbon.webapp.mgt.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
@@ -25,8 +27,9 @@ import org.wso2.carbon.core.ArtifactUnloader;
 import org.wso2.carbon.core.deployment.DeploymentSynchronizer;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
+import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.tomcat.ext.valves.TomcatValveContainer;
-import org.wso2.carbon.url.mapper.UrlMapperValve;
+//import org.wso2.carbon.url.mapper.UrlMapperValve;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -41,7 +44,6 @@ import org.wso2.carbon.webapp.mgt.WebContextParameter;
 import org.wso2.carbon.webapp.mgt.WebappsConstants;
 import org.wso2.carbon.webapp.mgt.multitenancy.GhostWebappMetaArtifactsLoader;
 import org.wso2.carbon.webapp.mgt.multitenancy.WebappUnloader;
-import org.wso2.carbon.webapp.mgt.utils.GhostWebappDeployerUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,8 +84,9 @@ public class WebappManagementServiceComponent {
                 setServerURLParam(DataHolder.getServerConfigContext());
             }
             //adding TenantLazyLoaderValve first in the TomcatContainer if Url mapping available
-            if (DataHolder.getHotUpdateService() != null &&
-                TomcatValveContainer.isValveExists(new UrlMapperValve())) {
+            if (DataHolder.getHotUpdateService() != null
+//                && TomcatValveContainer.isValveExists(new UrlMapperValve //TODO: Fix this once URLMapper component becomes available
+                    ) {
                 TomcatValveContainer.addValves(WebappsConstants.VALVE_INDEX, valves);
             } else {
                 TomcatValveContainer.addValves(valves);
