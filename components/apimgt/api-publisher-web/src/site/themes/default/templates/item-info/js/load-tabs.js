@@ -363,7 +363,7 @@ function pushDataForTabs(clickedTab){
                                       require(["dojo/_base/array"], function(array){
                                           chartData= array.map(data, function(d){
                                               color++;
-                                              return {y: d[1], tooltip: "<b>"+d[0]+"</b><br /><i>"+d[1]+" user(s)</i>",fill:chartColorScheme1[color]};
+                                              return {y: d[1], tooltip: "<b>"+d[0]+"</b><br /><i>"+d[1]+" call(s)</i>",fill:chartColorScheme1[color]};
 
                                           });
                                       });
@@ -457,7 +457,7 @@ function pushDataForTabs(clickedTab){
                                       require(["dojo/_base/array"], function(array){
                                           chartData= array.map(data, function(d){
                                               color++;
-                                              return {y: d[1], tooltip: "<b>"+d[0]+"</b><br /><i>"+d[1]+" user(s)</i>",fill:chartColorScheme1[color]};
+                                              return {y: d[1], tooltip: "<b>"+d[0]+"</b><br /><i>"+d[1]+" call(s)</i>",fill:chartColorScheme1[color]};
 
                                           });
                                       });
