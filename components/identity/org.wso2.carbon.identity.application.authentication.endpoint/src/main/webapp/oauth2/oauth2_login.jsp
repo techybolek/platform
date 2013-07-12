@@ -47,18 +47,18 @@
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/localstyles.css" rel="stylesheet">
+    <link href="oauth2/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="oauth2/css/localstyles.css" rel="stylesheet">
     <!--[if lt IE 8]>
-    <link href="css/localstyles-ie7.css" rel="stylesheet">
+    <link href="oauth2/css/localstyles-ie7.css" rel="stylesheet">
     <![endif]-->
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-    <script src="assets/js/html5.js"></script>
+    <script src="oauth2/assets/js/html5.js"></script>
     <![endif]-->
-    <script src="assets/js/jquery-1.7.1.min.js"></script>
-    <script src="js/scripts.js"></script>
+    <script src="oauth2/assets/js/jquery-1.7.1.min.js"></script>
+    <script src="oauth2/js/scripts.js"></script>
 
 
 </head>
