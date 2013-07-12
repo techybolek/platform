@@ -54,7 +54,10 @@ jagg.module("api", {
     },
     hasPublishPermission:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").hasPublishPermission.apply(this, arguments);
-    }   
+    },
+    validateRoles:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").validateRoles.apply(this, arguments);
+    }
  
 
 });

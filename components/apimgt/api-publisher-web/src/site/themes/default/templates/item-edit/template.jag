@@ -99,7 +99,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <%=i18n.localize("roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
                 </label>
                 <div class="controls">
-                    <input type="text" <% if (isSuperTenant) { %>class="input required"<%}else{%>class="input"<%}%> 
+                    <input type="text" <% if (isSuperTenant) { %>class="input required validateRoles"<%}else{%>class="input"<%}%>
                     id="roles" name="roles"  value="<%=api.roles%>"/>
                 </div>
             </div>

@@ -27,5 +27,17 @@ $(document).ready(function() {
         return !/\s/g.test(value);
     },'Name contains white spaces.');
 
+    $.validator.addMethod('validateRoles', function(value, element) {
+        var valid = false;
+        var oldContext=$('#spanContext').text();
+        jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"validateRoles", roles:value },
+                      function (result) {
+                          if (!result.error) {
+                              valid = result.response;
+                          }
+                      });
+        return this.optional(element) || valid == true;
+    }, 'Invalid role name[s]');
+
 
 });

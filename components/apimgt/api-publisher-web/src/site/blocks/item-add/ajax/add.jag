@@ -103,7 +103,28 @@ include("/jagg/jagg.jag");
 
             print(obj);
 
-        }else if (action === "isURLValid") {
+        }else if (action === "validateRoles") {
+            mod = jagg.module("api");
+            var user=jagg.getUser().username;
+            var roles = request.getParameter("roles");
+            result = mod.validateRoles(roles,user);
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    response:result.valid
+                }
+            }
+
+            print(obj);
+
+        }
+
+        else if (action === "isURLValid") {
             mod = jagg.module("api");
             var type = request.getParameter("type");
             var url = request.getParameter("url");

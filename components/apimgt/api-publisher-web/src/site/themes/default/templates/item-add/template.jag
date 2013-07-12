@@ -81,7 +81,7 @@
 	                	<%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
 	                </label>
 	                <div class="controls">
-	                    <input type="text" class="input required"
+	                    <input type="text" class="input required validateRoles"
 	                    id="roles" name="roles"/>
                         <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
 	                </div>
