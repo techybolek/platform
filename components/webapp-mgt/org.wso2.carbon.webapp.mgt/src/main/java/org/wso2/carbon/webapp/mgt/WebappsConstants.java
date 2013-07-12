@@ -45,6 +45,9 @@ public final class WebappsConstants {
      */
     public static final String WEBAPP_FILTER = "webappFilter";
 
+    public static final String FWD_SLASH_REPLACEMENT = "#";
+    public static final String VERSION_MARKER = "##";
+
     public static final class WebappState {
         public static final String STARTED = "started";
         public static final String STOPPED = "stopped";

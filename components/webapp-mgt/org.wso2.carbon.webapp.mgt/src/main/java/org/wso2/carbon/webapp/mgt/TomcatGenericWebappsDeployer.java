@@ -161,7 +161,10 @@ public class TomcatGenericWebappsDeployer {
         if (!warContext.equals("/") && webContextPrefix.length() == 0) {
             webContextPrefix = "/";
         }
-        handleWebappDeployment(webappWAR, webContextPrefix + warContext,
+
+        String contextPath = handleAppVersion(webContextPrefix + warContext);
+
+        handleWebappDeployment(webappWAR, contextPath,
                 webContextParams, applicationEventListeners);
     }
 
@@ -197,7 +200,10 @@ public class TomcatGenericWebappsDeployer {
         if (!warContext.equals("/") && webContextPrefix.length() == 0) {
             webContextPrefix = "/";
         }
-        handleWebappDeployment(webappDir, webContextPrefix + warContext,
+
+        String contextPath = handleAppVersion(webContextPrefix + warContext);
+
+        handleWebappDeployment(webappDir, contextPath,
                 webContextParams, applicationEventListeners);
     }
 
@@ -375,5 +381,32 @@ public class TomcatGenericWebappsDeployer {
                 TomcatUtil.getApplicationNameFromContext(context.getBaseName()));
         webappsHolder.undeployWebapp(webapp);
         log.info("Undeployed webapp: " + webapp);
+    }
+
+
+    protected String handleAppVersion(String warContext) {
+
+        String path = warContext;
+
+        int versionIndex = path.indexOf(WebappsConstants.VERSION_MARKER);
+        // Don't confuse with AS versioning with Tomcat versioning
+        // Here we  look for Tomcat versioning
+        String version = null;
+        if (versionIndex > -1) {
+            version = path.substring(versionIndex + 2);
+            path = path.substring(0, versionIndex);
+        }
+
+        // Now here we handle AS versioning
+        if (path.contains(WebappsConstants.FWD_SLASH_REPLACEMENT)) {
+            path = path.replaceAll("#", "/");
+        }
+
+        //Add Tomcat versioning value back to the context
+        if (version != null) {
+            return path + WebappsConstants.VERSION_MARKER + version;
+        }
+
+        return path;
     }
 }
