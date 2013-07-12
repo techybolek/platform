@@ -172,8 +172,14 @@ public class SequenceAdminClient implements EditorUIClient {
             handleException("Error in adding the sequence with the configuration '" + sequenceElem + "' : Please make" +
                     " sure to click the update button after configuring a mediator.", e);
         } catch (Exception e) {
-            handleException("Error in adding the sequence with the configuration '"
-                    + sequenceElem + "'. " + e.getMessage(), e);
+            if (e.getMessage().toString().toLowerCase().contains("this name already exists".toLowerCase())) {
+                //Error Related to name already exits
+                handleException(e.getMessage(), e);
+
+            } else {
+                handleException("Error in adding the sequence with the configuration '"
+                        + sequenceElem + "'. " + e.getMessage(), e);
+            }
         }
     }
 
