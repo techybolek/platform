@@ -170,14 +170,16 @@ public class OAuthAdminService extends AbstractAdmin {
                 } else {   // by default, assume OAuth 2.0, if it is not set.
                     app.setOauthVersion(OAuthConstants.OAuthVersions.VERSION_2);
                 }
-                List<String> allowedGrants = new ArrayList<String>(Arrays.asList(getAllowedGrantTypes()));
-                String[] requestGrants = application.getGrantTypes().split("\\s");
-                for(String requestedGrant:requestGrants){
-                    if(!allowedGrants.contains(requestedGrant)){
-                        throw new Exception(requestedGrant + " not allowed");
+                if(OAuthConstants.OAuthVersions.VERSION_2.equals(application.getOAuthVersion())){
+                    List<String> allowedGrants = new ArrayList<String>(Arrays.asList(getAllowedGrantTypes()));
+                    String[] requestGrants = application.getGrantTypes().split("\\s");
+                    for(String requestedGrant:requestGrants){
+                        if(!allowedGrants.contains(requestedGrant)){
+                            throw new Exception(requestedGrant + " not allowed");
+                        }
                     }
+                    app.setGrantTypes(application.getGrantTypes());
                 }
-                app.setGrantTypes(application.getGrantTypes());
                 dao.addOAuthApplication(app);
             }
         }
@@ -201,14 +203,16 @@ public class OAuthAdminService extends AbstractAdmin {
         oauthappdo.setOauthConsumerSecret(consumerAppDTO.getOauthConsumerSecret());
         oauthappdo.setCallbackUrl(consumerAppDTO.getCallbackUrl());
         oauthappdo.setApplicationName(consumerAppDTO.getApplicationName());
-        List<String> allowedGrants = new ArrayList<String>(Arrays.asList(getAllowedGrantTypes()));
-        String[] requestGrants = consumerAppDTO.getGrantTypes().split("\\s");
-        for(String requestedGrant:requestGrants){
-            if(!allowedGrants.contains(requestedGrant)){
-                throw new Exception(requestedGrant + " not allowed");
+        if(OAuthConstants.OAuthVersions.VERSION_2.equals(consumerAppDTO.getOAuthVersion())){
+            List<String> allowedGrants = new ArrayList<String>(Arrays.asList(getAllowedGrantTypes()));
+            String[] requestGrants = consumerAppDTO.getGrantTypes().split("\\s");
+            for(String requestedGrant:requestGrants){
+                if(!allowedGrants.contains(requestedGrant)){
+                    throw new Exception(requestedGrant + " not allowed");
+                }
             }
+            oauthappdo.setGrantTypes(consumerAppDTO.getGrantTypes());
         }
-        oauthappdo.setGrantTypes(consumerAppDTO.getGrantTypes());
         dao.updateConsumerApplication(oauthappdo);
     }
 
