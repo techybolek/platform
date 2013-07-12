@@ -557,9 +557,9 @@
 <%
             if(instanceFilter != null) {
 %>
-                                                    <input type="radio" name="asdec" value="Ascending" <%=instanceFilter.isOrderByAscendingSelected()%>>
-                                                    <fmt:message key="ascending"/>
                                                     <input type="radio" name="asdec" value="Descending" <%=instanceFilter.isOrderByDescendingSelected()%>>
+                                                    <fmt:message key="ascending"/>
+                                                    <input type="radio" name="asdec" value="Ascending" <%=instanceFilter.isOrderByAscendingSelected()%>>
                                                     <fmt:message key="descending"/>
                                                     <select name="orderby">
                                                          <option value="pid" <%=instanceFilter.isOrderByPidSelected()%>>
