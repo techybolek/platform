@@ -23,8 +23,8 @@ import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
-import org.wso2.carbon.rssmanager.core.internal.manager.RSSManager;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+import org.wso2.carbon.rssmanager.core.manager.RSSManager;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.bind.JAXBContext;

@@ -16,14 +16,14 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.internal.dao;
+package org.wso2.carbon.rssmanager.core.dao;
 
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.sql.*;

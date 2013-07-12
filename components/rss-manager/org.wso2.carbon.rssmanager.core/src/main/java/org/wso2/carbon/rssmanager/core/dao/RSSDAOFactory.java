@@ -16,12 +16,12 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.internal.dao;
+package org.wso2.carbon.rssmanager.core.dao;
 
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.RDBMSConfiguration;
 import org.wso2.carbon.rssmanager.core.config.RSSManagementRepository;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

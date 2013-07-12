@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.internal.manager;
+package org.wso2.carbon.rssmanager.core.manager;
 
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.entity.Database;

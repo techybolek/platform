@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.internal.util;
+package org.wso2.carbon.rssmanager.core.util;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.Base64;

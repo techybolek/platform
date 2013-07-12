@@ -27,8 +27,8 @@ import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
-import org.wso2.carbon.rssmanager.core.internal.manager.RSSManager;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+import org.wso2.carbon.rssmanager.core.manager.RSSManager;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 
 
 public class RSSManagerService {

@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.internal.manager;
+package org.wso2.carbon.rssmanager.core.manager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +24,7 @@ import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;

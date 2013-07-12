@@ -1,4 +1,4 @@
-package org.wso2.carbon.rssmanager.core.internal.manager;
+package org.wso2.carbon.rssmanager.core.manager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,9 +8,9 @@ import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.RSSTransactionManager;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
-import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
+import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
+import org.wso2.carbon.rssmanager.core.dao.RSSDAOFactory;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.sql.XAConnection;
