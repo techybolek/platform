@@ -24,7 +24,7 @@ var login = function (username, password,tenantMode) {
         return {
             error:result.error,
             cookie:null,
-            message:result.detail
+            message:result.detail.split('!')[1]
         };
     }
     var subscriber = store.getSubscriber(username);
