@@ -28,7 +28,7 @@
         <module>modules/checkin-client</module>
         <module>modules/juddi/juddi-listener</module>
         <module>modules/juddi/juddiv3-war</module>
-	<!--<module>modules/cmis-war/cmis</module>-->
+	<module>modules/cmis/cmis-war</module>
         <module>modules/samples</module>
         <module>modules/features</module>
         <module>modules/p2-profile-gen</module>
