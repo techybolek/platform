@@ -25,6 +25,7 @@ import org.wso2.carbon.automation.api.clients.governance.LifeCycleAdminServiceCl
 import org.wso2.carbon.automation.api.clients.governance.LifeCycleManagementClient;
 import org.wso2.carbon.automation.api.clients.registry.ActivityAdminServiceClient;
 import org.wso2.carbon.automation.api.clients.user.mgt.UserManagementClient;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.beans.xsd.LifecycleBean;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.services.ArrayOfString;
@@ -39,6 +40,7 @@ import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.lifecycle.test.utils.Utils;
 import org.wso2.carbon.registry.search.metadata.test.utils.GregTestUtils;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
@@ -79,6 +81,7 @@ public class CustomLifeCycleDemoteForWSDLTestCase {
         userManger = new UserManagementClient(SERVER_URL, sessionCookie);
         registry = GregTestUtils.getRegistry();
         Registry governance = GregTestUtils.getGovernanceRegistry(registry);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
         deleteRolesIfExist();
 

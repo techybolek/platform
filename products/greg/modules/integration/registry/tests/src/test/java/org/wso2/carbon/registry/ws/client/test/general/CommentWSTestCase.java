@@ -66,7 +66,7 @@ public class CommentWSTestCase extends TestSetup {
                 commentFound = true;
                 //System.out.println(comment.getPath());
                 assertEquals(comment.getText(), comment1);
-                assertEquals(comment.getUser(), "PRIMARY/admin");
+                assertEquals(comment.getUser(), "admin");
                 assertEquals(comment.getResourcePath(), path);
                 //System.out.println(comment.getPath());
                 //break;
@@ -75,7 +75,7 @@ public class CommentWSTestCase extends TestSetup {
             if (comment.getText().equals(comment2)) {
                 commentFound = true;
                 assertEquals(comment.getText(), comment2);
-                assertEquals(comment.getUser(), "PRIMARY/admin");
+                assertEquals(comment.getUser(), "admin");
                 assertEquals(comment.getResourcePath(), path);
                 //break;
             }
@@ -83,7 +83,7 @@ public class CommentWSTestCase extends TestSetup {
             if (comment.getText().equals("This is default comment")) {
                 commentFound = true;
                 assertEquals(comment.getText(), "This is default comment");
-                assertEquals(comment.getUser(), "PRIMARY/admin");
+                assertEquals(comment.getUser(), "admin");
                 //break;
             }
         }

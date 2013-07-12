@@ -35,7 +35,7 @@ public class TestSetup {
 
     protected static Registry registry = null;
     static boolean isInitialized = false;
-    protected String userName ="PRIMARY/admin";
+    protected String userName ="admin";
     protected String password ="admin";
 
     private static final Log log = LogFactory.getLog(TestSetup.class);

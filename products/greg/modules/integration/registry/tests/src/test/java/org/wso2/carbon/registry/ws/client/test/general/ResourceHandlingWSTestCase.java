@@ -230,19 +230,19 @@ public class ResourceHandlingWSTestCase extends TestSetup {
 
         Resource r3 = registry.newResource();
 
-//        assertEquals("Author names are not Equal", "PRIMARY/admin", r3.getAuthorUserName());
+//        assertEquals("Author names are not Equal", "admin", r3.getAuthorUserName());
 
         r3 = registry.get(path);
 
-        assertEquals(r3.getAuthorUserName(), "PRIMARY/admin", "Author User names are not Equal");
+        assertEquals(r3.getAuthorUserName(), "admin", "Author User names are not Equal");
         assertNotNull(r3.getCreatedTime(), "Created time is null");
-        assertEquals(r3.getAuthorUserName(), "PRIMARY/admin", "Author User names are not Equal");
+        assertEquals(r3.getAuthorUserName(), "admin", "Author User names are not Equal");
         assertEquals(r3.getDescription(), "this is test desc this is test desc this is test desc this is test" +
                 " desc this is test desc this is test desc this is test desc this is test desc this is test descthis is " +
                 "test desc ", "Description is not Equal");
         assertNotNull(r3.getId(), "Get Id is null");
         assertNotNull(r3.getLastModified(), "LastModifiedDate is null");
-        assertEquals(r3.getLastUpdaterUserName(), "PRIMARY/admin", "Last Updated names are not Equal");
+        assertEquals(r3.getLastUpdaterUserName(), "admin", "Last Updated names are not Equal");
         //System.out.println(r3.getMediaType());
         assertEquals(r3.getMediaType(), "plain/text", "Media Type is not equal");
         assertEquals(r3.getParentPath(), "/testk/testa", "parent Path is not equal");
@@ -275,7 +275,7 @@ public class ResourceHandlingWSTestCase extends TestSetup {
         //assertEquals("Description is not Equal", "this is test desc", r3.getDescription());
         assertNotNull(r3.getId(), "Get Id is null");
         assertNotNull(r3.getLastModified(), "LastModifiedDate is null");
-        assertEquals(r3.getLastUpdaterUserName(), "PRIMARY/admin", "Last Updated names are not Equal");
+        assertEquals(r3.getLastUpdaterUserName(), "admin", "Last Updated names are not Equal");
         //System.out.println("Media Type:" + r3.getMediaType());
         //assertEquals("Media Type is not equal","unknown",r3.getMediaType());
         assertEquals(r3.getParentPath(), "/testk2/testa", "parent Path is not equal");

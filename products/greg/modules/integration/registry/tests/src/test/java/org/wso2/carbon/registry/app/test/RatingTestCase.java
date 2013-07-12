@@ -52,7 +52,7 @@ public class RatingTestCase {
         assertEquals(rating, (float) 5.0, (float) 0.01,
                 "Rating of the resource /d16/d17/r1 should be 5.");
 
-        int ratingVal = registry.getRating("/d16/d17/r1", "PRIMARY/admin");
+        int ratingVal = registry.getRating("/d16/d17/r1", "admin");
 
         assertEquals(ratingVal, 5, "Rating of the resource /d16/d17/r1 should be 5.");
     }
@@ -70,7 +70,7 @@ public class RatingTestCase {
         assertEquals(rating, (float) 4.0, (float) 0.01,
                 "Rating of the resource /d16/d18 should be 4.");
 
-        int ratingVal = registry.getRating("/d16/d18", "PRIMARY/admin");
+        int ratingVal = registry.getRating("/d16/d18", "admin");
 
         assertEquals(ratingVal, 4, "Rating of the resource /d16/d18 should be 4.");
     }
@@ -121,7 +121,7 @@ public class RatingTestCase {
 
         assertEquals(ratingPaths.length, 0, "No ratings should be returned.");
 
-        ratings = registry.get("/c1/r5;ratings:PRIMARY/admin");
+        ratings = registry.get("/c1/r5;ratings:admin");
         ratingPaths = (String[]) ratings.getContent();
 
         assertEquals(ratingPaths.length, 1, "1 rating should be returned.");
