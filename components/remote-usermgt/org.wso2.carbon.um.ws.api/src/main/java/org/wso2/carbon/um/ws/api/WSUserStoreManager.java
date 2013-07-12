@@ -515,4 +515,16 @@ public class WSUserStoreManager implements UserStoreManager {
 	    return null;
     }
 
+	@Override
+    public void addRole(String roleName, String[] userList,
+                        org.wso2.carbon.user.api.Permission[] permissions)
+                                                                          throws org.wso2.carbon.user.api.UserStoreException {
+		addRole(roleName, userList, permissions, false);
+    }
+
+	@Override
+    public boolean isExistingRole(String roleName) throws UserStoreException {
+	    return isExistingRole(roleName, false);
+    }
+
 }
