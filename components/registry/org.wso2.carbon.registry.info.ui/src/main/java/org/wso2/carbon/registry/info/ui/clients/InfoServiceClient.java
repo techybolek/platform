@@ -239,6 +239,8 @@ public class InfoServiceClient implements IInfoService {
             String msg = "Failed to get Subscriptions.";
             log.error(msg, e);
             throw new Exception(msg);
+        } finally {
+            PaginationContext.destroy();
         }
         return subscriptionBean;
     }
