@@ -610,7 +610,6 @@ public class GovernanceArtifactManager {
     public GovernanceArtifact[] findGovernanceArtifacts(Map<String, List<String>> criteria)
             throws GovernanceException {
         List<GovernanceArtifact> artifacts;
-        PaginationContext context = PaginationContext.getInstance();
         artifacts = GovernanceUtils.findGovernanceArtifacts(criteria != null ? criteria :
                 Collections.<String, List<String>>emptyMap(), registry, mediaType);
         if (artifacts != null) {
