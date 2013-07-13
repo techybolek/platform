@@ -37,8 +37,7 @@
             </modules>
 
     <properties>
-        <wso2carbon.version.identity.oauth>${wso2carbon.version.identity}
-        </wso2carbon.version.identity.oauth>
+        <wso2carbon.version.identity.oauth>${wso2carbon.version.identity}</wso2carbon.version.identity.oauth>
     </properties>
 
 </project>
