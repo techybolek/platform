@@ -128,6 +128,8 @@ public class SearchServiceClient {
                          e.getMessage();
             log.error(msg, e);
             throw new Exception(msg);
+        } finally {
+            PaginationContext.destroy();
         }
 
         return bean;
