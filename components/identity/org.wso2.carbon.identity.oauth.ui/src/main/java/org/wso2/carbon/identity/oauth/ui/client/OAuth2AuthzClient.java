@@ -108,35 +108,7 @@ public class OAuth2AuthzClient {
 
 	private String handleOpenIDConnectParams(HttpServletRequest request, String redirectUrl,
 	                                         OAuth2Parameters oauth2Params) {
-
-		if ("true".equals(request.getSession()
-		                         .getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_REQUEST))) {
-			// store the logged in user in session to support prompt = none
-			String loggedInUser = request.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_NAME);
-			if (loggedInUser != null) {
-				request.getSession()
-				       .setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER,
-				                     loggedInUser);
-			} else {
-				loggedInUser =
-				               (String) request.getSession()
-				                               .getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
-			}
-			// load the users approved applications
-			String appName = oauth2Params.getApplicationName();
-			boolean isRpInStore =
-			                      OAuthUIServiceComponentHolder.getInstance()
-			                                                   .getOauth2UserAppsStore()
-			                                                   .isUserRPInStore(loggedInUser,
-			                                                                    appName);
-			
-			if(isRpInStore && oauth2Params.getPrompt() != null && oauth2Params.getPrompt().contains("none")) {
-				return redirectUrl; // should not prompt for consent
-			}
-			redirectUrl = OAuthUIUtil.getUserConsentURL(request, null, oauth2Params, loggedInUser, redirectUrl);
-			// store the response and forward for user consent
-			request.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE, redirectUrl);
-		}
+		
 		return redirectUrl;
 	}
 
@@ -159,9 +131,6 @@ public class OAuth2AuthzClient {
             authzReqDTO.setScopes(oauth2Params.getScopes().toArray(
                     new String[oauth2Params.getScopes().size()]));
             String username = req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_NAME);
-            if (username == null) {
-                username = (String) req.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
-            }
             authzReqDTO.setUsername(username);
             authzReqDTO.setPassword(req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_PASSWORD));
             return oauth2ServiceClient.authorize(authzReqDTO);

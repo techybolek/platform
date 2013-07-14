@@ -137,8 +137,6 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
 				params.setLoginHint(oauthRequest.getParam(OIDC.AuthZRequest.LOGIN_HINT));
 				String prompt = oauthRequest.getParam(OIDC.AuthZRequest.PROMPT);
 				params.setPrompt(prompt);
-				req.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_REQUEST, "true");
-				req.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RP, params.getApplicationName());
 				if(prompt != null) { // processing prompt
 					// prompt can be four values {none, login, consent, select_profile}
 					String[] prompts = prompt.trim().split(" ");
@@ -148,7 +146,7 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
 						OAuthUIUtil.getErrorPageURL(req, clientDTO, OAuth2ErrorCodes.INVALID_REQUEST,
 						                            "Invalid prompt combination. The valune none cannot be used with others");
 					}
-					Object logedInUser = req.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
+					Object logedInUser = null;
 					if (contains_none && logedInUser == null) {
 						log.error("User not authenticated. " + prompt);
 						OAuthUIUtil.getErrorPageURL(req, clientDTO, OAuthConstants.OAUTH_ERROR_CODE,

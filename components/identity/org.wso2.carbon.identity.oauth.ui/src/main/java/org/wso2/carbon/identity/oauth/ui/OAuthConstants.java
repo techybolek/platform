@@ -79,13 +79,4 @@ public final class OAuthConstants {
     public static final int DEFAULT_ITEMS_PER_PAGE = 10;
     public static final String OAUTH_ADMIN_CLIENT = "OAuthAdminClient";
     public static final String OAUTH_DATA_PAGE_COUNT = "OAuthDataPageCount";
-    
-	// OpenID connect
-	public class OIDCSessionConstant {
-		public static final String OIDC_REQUEST = "oidcRequest";
-		public static final String OIDC_RESPONSE = "oidcRespose";
-		public static final String OIDC_RP = "oidcApp";
-		public static final String OIDC_LOGGED_IN_USER = "loggedInUser";
-	}
-
 }
