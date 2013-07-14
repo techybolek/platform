@@ -45,7 +45,9 @@ public class DataPublisherUtil {
         }
         hostAddress =   ServerConfiguration.getInstance().getFirstProperty(HOST_NAME);
         if(null == hostAddress){
-            hostAddress = getLocalAddress().getHostName();
+        	if (getLocalAddress() != null) {
+        		hostAddress = getLocalAddress().getHostName();
+        	}
             if (hostAddress == null) {
                 hostAddress = UNKNOWN_HOST;
             }
