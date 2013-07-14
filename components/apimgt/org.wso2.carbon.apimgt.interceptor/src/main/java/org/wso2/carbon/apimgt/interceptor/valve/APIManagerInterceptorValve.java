@@ -18,12 +18,17 @@
 
 package org.wso2.carbon.apimgt.interceptor.valve;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.core.APIManagerErrorConstants;
 import org.wso2.carbon.apimgt.core.authenticate.APITokenValidator;
 import org.wso2.carbon.apimgt.core.gateway.APITokenAuthenticator;
 import org.wso2.carbon.apimgt.core.usage.APIStatsPublisher;
@@ -43,6 +48,11 @@ import javax.cache.Cache;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+/**
+ * APIManagerInterceptorValve is exposed as a CarbonTomatValve and it filters 
+ * all the requests to published APIs and perform API Management for those APIs.
+ *
+ */
 public class APIManagerInterceptorValve extends CarbonTomcatValve {
 	
 	private static final Log log = LogFactory.getLog(APIManagerInterceptorValve.class);
@@ -127,36 +137,34 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
                         accessToken = token[1].trim();
                     }
                 }
-                boolean isAuthorized = false;
+                /* Authenticate*/
                 try {
                     String apiVersion = getAPIVersion(request);
-                    isAuthorized = doAuthenticate(context, apiVersion, accessToken,
+                    doAuthenticate(context, apiVersion, accessToken,
                             authenticator.getResourceAuthenticationScheme(context, apiVersion, request.getRequestURI(), request.getMethod()),
                             request.getHeader(APITokenValidator.getAPIManagerClientDomainHeader()));
                 } catch (APIManagementException e) {
                     //ignore
-                }
-                if (!isAuthorized) {
-                    try {
-                        response.sendError(403, "Unauthorized");
-                        //Invoke next valve in pipe.
-                        getNext().invoke(request, response, compositeValve);
-                        return;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (!doThrottle(request, accessToken)) {
-                    try {
-                        response.sendError(405, "Message Throttled Out You have exceeded your quota");
-                        //Invoke next valve in pipe.
-                        getNext().invoke(request, response, compositeValve);
-                        return;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
+                } catch (APIFaultException e) {/* If !isAuthorized APIFaultException is thrown*/
+                	String faultPayload = getFaultPayload(e, APIManagerErrorConstants.API_SECURITY_NS, 
+                			APIManagerErrorConstants.API_SECURITY_NS_PREFIX).toString();
+					handleFailure(response, faultPayload);
+					//Invoke next valve in pipe.
+                    getNext().invoke(request, response, compositeValve);
+                    return;
+				}
+                /* Throttle*/
+                try {
+					doThrottle(request, accessToken);
+				} catch (APIFaultException e) {/* If Throttled Out, APIFaultException is thrown*/
+					String faultPayload = getFaultPayload(e, APIManagerErrorConstants.API_THROTTLE_NS, 
+                			APIManagerErrorConstants.API_THROTTLE_NS_PREFIX).toString();
+					handleFailure(response, faultPayload);
+					//Invoke next valve in pipe.
+                    getNext().invoke(request, response, compositeValve);
+                    return;
+				}
+                /* Publish Statistic if enabled*/
                 if (statsPublishingEnabled) {
                     publishRequestStatistics(request, requestTime);
                 }
@@ -175,14 +183,20 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
     }
 
 	private boolean doAuthenticate(String context, String version, String accessToken, String requiredAuthenticationLevel, String clientDomain)
-            throws APIManagementException {
+            throws APIManagementException, APIFaultException {
             APITokenValidator tokenValidator = new APITokenValidator();
             apiKeyValidationDTO = tokenValidator.validateKey(context, version,accessToken, APIConstants.AUTH_APPLICATION_LEVEL_TOKEN,
                     clientDomain);
-            return apiKeyValidationDTO.isAuthorized();
-	}
+            if (apiKeyValidationDTO.isAuthorized()) {
+            	return true;
+            } else {
+            	throw new APIFaultException(apiKeyValidationDTO.getValidationStatus(), 
+            			 "Access failure for API: " + context + ", version: " + version +
+                         " with key: " + accessToken);
+            }
+    }
 	
-	private boolean doThrottle(HttpServletRequest request, String accessToken) {
+	private boolean doThrottle(Request request, String accessToken) throws APIFaultException {
 				
 		String apiName = request.getContextPath();
 		String apiVersion = getAPIVersion(request);
@@ -198,8 +212,13 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 		} else {
 			throttleHandler = (APIThrottleHandler) cc.getProperty(apiIdentifier);
 		}
-		return throttleHandler.doThrottle(request, apiKeyValidationDTO, accessToken);
 		
+		if (throttleHandler.doThrottle(request, apiKeyValidationDTO, accessToken)) {
+			return true;
+		} else {
+			throw new APIFaultException(APIManagerErrorConstants.API_THROTTLE_OUT, 
+       			 "You have exceeded your quota");
+		}
 	}
 
     private boolean publishRequestStatistics(HttpServletRequest request, long currentTime) {
@@ -263,6 +282,49 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
         int SlashIndex = afterContext.indexOf(("/"));
 
         return afterContext.substring(0, SlashIndex);
+    }
+    
+    
+    /**
+     * Send an Error Response in application/xml content type
+     * @param response
+     * @param payload
+     */
+    private void handleFailure(Response response, String payload) {
+    	response.setStatus(403);
+		response.setContentType("application/xml");
+		response.setCharacterEncoding("UTF-8");
+		try {
+			response.getWriter().write(payload);
+		} catch (IOException e) {
+			log.error("Error in sending fault response", e);
+		}
+    }
+    
+    /**
+     * Generate the Error Payload
+     * @param e APIFaultException
+     * @param FaultNS
+     * @param FaultNSPrefix
+     * @return
+     */
+    private OMElement getFaultPayload(APIFaultException e, String FaultNS, String FaultNSPrefix) {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMNamespace ns = fac.createOMNamespace(FaultNS,
+        		FaultNSPrefix);
+        OMElement payload = fac.createOMElement("fault", ns);
+
+        OMElement errorCode = fac.createOMElement("code", ns);
+        errorCode.setText(String.valueOf(e.getErrorCode()));
+        OMElement errorMessage = fac.createOMElement("message", ns);
+        errorMessage.setText(APIManagerErrorConstants.getFailureMessage(e.getErrorCode()));
+        OMElement errorDetail = fac.createOMElement("description", ns);
+        errorDetail.setText(e.getMessage());
+
+        payload.addChild(errorCode);
+        payload.addChild(errorMessage);
+        payload.addChild(errorDetail);
+        return payload;
     }
 	
 }
