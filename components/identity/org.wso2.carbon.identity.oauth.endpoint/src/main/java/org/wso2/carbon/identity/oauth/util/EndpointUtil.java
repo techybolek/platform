@@ -173,11 +173,11 @@ public class EndpointUtil {
 
 
 		try {
-			consentPage += "?" + OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER + "=" +
+			consentPage += "?" + OpenIDConnectConstant.Session.OIDC_LOGGED_IN_USER + "=" +
                     URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
-			        OAuthConstants.OIDCSessionConstant.OIDC_RP + "=" +
+                    OpenIDConnectConstant.Session.OIDC_RP + "=" +
 			        URLEncoder.encode(params.getApplicationName(), "UTF-8") + "&" +
-			        OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE + "=" +
+			        OpenIDConnectConstant.Session.OIDC_RESPONSE + "=" +
 			        URLEncoder.encode(redirectUrl, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// ignore
