@@ -19,11 +19,11 @@ package org.wso2.carbon.identity.provider.mgt.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.provider.mgt.IdentityProviderMgtException;
 import org.wso2.carbon.identity.provider.mgt.model.TrustedIdPDO;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtConstants;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtUtil;
-import org.wso2.carbon.user.core.util.DatabaseUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -87,10 +87,10 @@ public class IdPMgtDAO {
         } catch (SQLException e){
             String msg = "Error occurred while retrieving IdP information for tenant";
             log.error(msg + " " + tenantDomain, e);
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityDatabaseUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection);
+            IdentityDatabaseUtil.closeConnection(dbConnection);
         }
     }
 
@@ -120,11 +120,11 @@ public class IdPMgtDAO {
             dbConnection.commit();
         } catch (SQLException e){
             String msg = "Error occurred while adding IdP for tenant";
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityDatabaseUtil.rollBack(dbConnection);
             log.error(msg + " " + tenantDomain, e);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection);
+            IdentityDatabaseUtil.closeConnection(dbConnection);
         }
     }
 
@@ -209,10 +209,10 @@ public class IdPMgtDAO {
         } catch(SQLException e){
             String msg = "Error occurred while updating IdP information  for tenant";
             log.error(msg + " " + tenantDomain, e);
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityDatabaseUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection);
+            IdentityDatabaseUtil.closeConnection(dbConnection);
         }
     }
 
@@ -232,10 +232,10 @@ public class IdPMgtDAO {
         } catch (SQLException e){
             String msg = "Error occurred while deleting IdP of tenant";
             log.error(msg + " " + tenantDomain, e);
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityDatabaseUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeAllConnections(dbConnection);
+            IdentityDatabaseUtil.closeConnection(dbConnection);
         }
     }
 
