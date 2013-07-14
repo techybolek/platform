@@ -31,6 +31,8 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.utils.MediaTypesUtils;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceCallbackHandler;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceStub;
 import org.wso2.carbon.registry.resource.stub.beans.xsd.*;
@@ -48,7 +50,7 @@ public class
         ResourceServiceClient {
 
     private static final Log log = LogFactory.getLog(ResourceServiceClient.class);
-
+    private HttpSession session;
     private ResourceAdminServiceStub stub;
     private String epr;
     private static final String ADDRESSING_MODULE = "addressing";
@@ -145,7 +147,7 @@ public class
 
     public ResourceServiceClient(String cookie, ServletConfig config, HttpSession session)
             throws RegistryException {
-
+        this.session = session;
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.
                 getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
@@ -168,7 +170,7 @@ public class
 
     public ResourceServiceClient(ServletConfig config, HttpSession session)
             throws RegistryException {
-
+        this.session =session;
         String cookie = (String)session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.
@@ -289,15 +291,22 @@ public class
         String path = RegistryUtil.getPath(request);
         CollectionContentBean bean = null;
         try {
-            bean = stub.getCollectionContent(path);
-            
+            if(PaginationContext.getInstance() ==null){
+                bean = stub.getCollectionContent(path);
+            }else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                bean = stub.getCollectionContent(path);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+                session.setAttribute("row_count", Integer.toString(rowCount));
+            }
         } catch (Exception e) {
             String msg = "Failed to get collection content from the resource service. " +
                     e.getMessage();
             log.error(msg, e);
             throw e;
+        } finally {
+            PaginationContext.destroy();
         }
-
         return bean;
     }
 

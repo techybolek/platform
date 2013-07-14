@@ -31,6 +31,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.LinkedList" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 <script type="text/javascript" src="../registry_common/js/registry_validation.js"></script>
 
 <%
@@ -44,8 +45,17 @@
     ResourceServiceClient client;
     String mimeMappings = null;
     String colMimeMappings = null;
+
+    int start;
+    int count = (int) (RegistryConstants.ITEMS_PER_PAGE);
+    if (requestedPage != null) {
+        start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE));
+    } else {
+        start = 1;
+    }
     try {
         client = new ResourceServiceClient(cookie, config, session);
+        PaginationContext.init(start, count, "", "", 1500);
         ccb = client.getCollectionContent(request);
         mimeMappings = client.getCustomUIMediatypeDefinitions();
         colMimeMappings = client.getCollectionMediatypeDefinitions();
@@ -557,10 +567,9 @@ if (CarbonUIUtil.isSuperTenant(request)) {
     if (ccb.getChildCount() != 0) {
 %>
 <%
-    int totalCount = ccb.getChildCount();
+    int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+    int totalCount = rowCount;
 
-    int start;
-    int end;
     int itemsPerPage = RegistryConstants.ITEMS_PER_PAGE;
 
     int pageNumber;
@@ -570,19 +579,11 @@ if (CarbonUIUtil.isSuperTenant(request)) {
         pageNumber = 1;
     }
 
-    int numberOfPages = 1;
-    if (totalCount % itemsPerPage == 0) {
-        numberOfPages = totalCount / itemsPerPage;
+    int numberOfPages;
+    if (rowCount % itemsPerPage == 0) {
+        numberOfPages = rowCount / itemsPerPage;
     } else {
-        numberOfPages = totalCount / itemsPerPage + 1;
-    }
-
-    if (totalCount < itemsPerPage) {
-        start = 0;
-        end = totalCount;
-    } else {
-        start = (pageNumber - 1) * itemsPerPage;
-        end = (pageNumber - 1) * itemsPerPage + itemsPerPage;
+        numberOfPages = rowCount / itemsPerPage + 1;
     }
 
     String[] nodes = Utils.getSortedChildNodes(ccb);
@@ -597,7 +598,7 @@ if (CarbonUIUtil.isSuperTenant(request)) {
     String[] allChildNodes = availableNodes.toArray(new String[availableNodes.size()]);
     ResourceData[] resourceDataSet;
     try {
-        resourceDataSet = client.getResourceData(UIUtil.getChildren(start, itemsPerPage, allChildNodes));
+        resourceDataSet = client.getResourceData(allChildNodes);
     } catch(Exception e) {
         %>
 <jsp:include page="../admin/error.jsp"/>

@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.om.xpath.AXIOMXPath;
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -33,6 +34,8 @@ import org.wso2.carbon.registry.core.config.RemoteConfiguration;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.resource.beans.CollectionContentBean;
 import org.wso2.carbon.registry.resource.beans.ContentBean;
 import org.wso2.carbon.registry.resource.beans.ContentDownloadBean;
@@ -73,6 +76,36 @@ public class ContentUtil {
 
             Collection collection = (Collection) resource;
             String[] childPaths = collection.getChildren();
+            MessageContext messageContext = MessageContext.getCurrentMessageContext();
+            String[] paginatedResult;
+            if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
+
+                int rowCount = childPaths.length;
+                try {
+                    PaginationUtils.setRowCount(messageContext, Integer.toString(rowCount));
+                    PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
+
+                    int start = paginationContext.getStart();
+                    int count = paginationContext.getCount();
+
+                    int startIndex;
+                    if (start == 1) {
+                        startIndex = 0;
+                    } else {
+                        startIndex = start;
+                    }
+                    if (rowCount < start + count) {
+                        paginatedResult = new String[rowCount - startIndex];
+                        System.arraycopy(childPaths, startIndex, paginatedResult, 0, (rowCount - startIndex));
+                    } else {
+                        paginatedResult = new String[count];
+                        System.arraycopy(childPaths, startIndex, paginatedResult, 0,count);
+                    }
+                } finally {
+                    PaginationContext.destroy();
+                }
+                childPaths = paginatedResult;
+            }
             CollectionContentBean bean = new CollectionContentBean();
             bean.setChildPaths(childPaths);
             bean.setChildCount(childPaths.length);
