@@ -1,16 +1,3 @@
-package org.wso2.carbon.apimgt.usage.publisher;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-
 /*
 *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -28,6 +15,18 @@ import java.util.Enumeration;
 * specific language governing permissions and limitations
 * under the License.
 */
+
+package org.wso2.carbon.apimgt.usage.publisher;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.ServerConfiguration;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+
 public class DataPublisherUtil {
 
     private static final Log log = LogFactory
