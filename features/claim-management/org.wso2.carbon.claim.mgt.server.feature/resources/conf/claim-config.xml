@@ -551,7 +551,7 @@
 				<SupportedByDefault />
 			</Claim>
             <Claim>
-				<ClaimURI>urn:scim:schemas:core:1.0:name.formattedName</ClaimURI>
+				<ClaimURI>urn:scim:schemas:core:1.0:name.formatted</ClaimURI>
 				<DisplayName>Name - Formatted Name</DisplayName>
 				<AttributeID>formattedName</AttributeID>
 				<Description>Formatted Name</Description>
