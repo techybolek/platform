@@ -75,7 +75,7 @@ public class PropertiesBeanPopulator {
         for (int i=0; i<keys.length; i++) {
             Property prop = new Property();
             prop.setKey((String) keys[i]);
-            values = (List) properties.get((String)keys[i]);
+            values = (List) properties.get(keys[i]);
             prop.setValue((String) values.get(0));
             propArray[i] = prop;
 
@@ -92,48 +92,26 @@ public class PropertiesBeanPopulator {
         if(viewProps.equalsIgnoreCase("yes")) {
             viewSysProps = true;
         }
-
-        Iterator iTmpProps = resource.getProperties().keySet().iterator();
-
         List<String> sysProperties = new ArrayList<String>();
         List <String> validationProperties = new ArrayList <String> ();
         List <String> lifecycleProperties = new ArrayList <String> ();
 
-        while (iTmpProps.hasNext()) {
-            String name = (String) iTmpProps.next();
-
-            if ((viewSysProps != null && viewSysProps) || !name.startsWith("registry.")) {
+        for(Object key : keySet){
+            String name = (String) key;
+            if ((viewSysProps) || !name.startsWith("registry.")) {
                 sysProperties.add(name);
             }
-
             if (name.startsWith("registry.wsdl") || name.startsWith("registry.wsi")) {
                 validationProperties.add(name);
-
             } else if (name.startsWith("registry.lifecycle.") ||
                     name.equals(Aspect.AVAILABLE_ASPECTS)) {
-
                 lifecycleProperties.add(name);
-
             }
         }
-
         Collections.sort(sysProperties);
-
-        String [] sysProps = new String [sysProperties.size()];
-        for(int i=0; i<sysProperties.size(); i++) {
-            sysProps[i] = sysProperties.get(i);
-        }
-        propertiesBean.setSysProperties(sysProps);
-        String [] validationProps = new String [validationProperties.size()];
-        for(int i=0; i<validationProperties.size(); i++) {
-            validationProps[i] = validationProperties.get(i);
-        }
-        propertiesBean.setValidationProperties(validationProps);
-        String [] lifecycleProps = new String [lifecycleProperties.size()];
-        for(int i=0; i<lifecycleProperties.size(); i++) {
-            lifecycleProps[i] = lifecycleProperties.get(i);
-        }
-        propertiesBean.setLifecycleProperties(lifecycleProps);
+        propertiesBean.setSysProperties(sysProperties.toArray(new String[sysProperties.size()]));
+        propertiesBean.setValidationProperties(validationProperties.toArray(new String[validationProperties.size()]));
+        propertiesBean.setLifecycleProperties(lifecycleProperties.toArray(new String[lifecycleProperties.size()]));
 
         propertiesBean.setVersionView(!resourcePath.isCurrentVersion());
         propertiesBean.setPathWithVersion(resourcePath.getPathWithVersion());
@@ -142,7 +120,6 @@ public class PropertiesBeanPopulator {
         }
         propertiesBean.setPutAllowed(isPutAllowed);
         propertiesBean.setLoggedIn(!RegistryConstants.ANONYMOUS_USER.equals(registry.getUserName()));
-
         return propertiesBean;
     }
 }
