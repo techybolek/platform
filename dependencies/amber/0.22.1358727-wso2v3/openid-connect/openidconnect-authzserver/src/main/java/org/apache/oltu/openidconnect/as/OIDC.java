@@ -22,5 +22,17 @@ public class OIDC {
 	public static class Response {
 		public static final String ID_TOKEN = "id_token";
 	}
+	
+	public static class Error {
+		public static final String LOGIN_REQUIRED = "login_required";
+		public static final String CONSENT_REQUIRED = "consent_required";
+	}
+	
+	public static class Prompt {
+		public static final String NONE = "none";
+		public static final String LOGIN = "login";
+		public static final String CONSENT = "consent";
+		public static final String SELECT_PROFILE = "select_profile";
+	}
 
 }
