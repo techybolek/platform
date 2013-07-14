@@ -86,6 +86,14 @@ public class IdentityDatabaseUtil {
 
     }
 
-
+    public static void rollBack(Connection dbConnection) {
+        try {
+            if (dbConnection != null) {
+                dbConnection.rollback();
+            }
+        } catch (SQLException e1) {
+            log.error("An error occurred while rolling back transactions. ", e1);
+        }
+    }
 
 }
