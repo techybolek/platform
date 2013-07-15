@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.caching;
+package org.wso2.caching.core;
 
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.StateClusteringCommand;

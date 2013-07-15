@@ -1,4 +1,4 @@
-package org.wso2.caching.util;
+package org.wso2.caching.core.util;
 
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAP11Constants;

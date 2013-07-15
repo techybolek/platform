@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.digest;
+package org.wso2.caching.core.digest;
 
 import org.apache.axiom.om.*;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.caching.CachingException;
+import org.wso2.caching.core.CachingException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -35,7 +35,6 @@ import java.util.*;
  * <a href="http://www.ietf.org/rfc/rfc2803.txt">DOMHASH algorithm</a> over an XML node
  * to implement retrieving a unique key for the normalized xml node.
  *
- * @see org.wso2.caching.digest.DigestGenerator
  */
 public class DOMHASHGenerator implements DigestGenerator {
 
@@ -61,8 +60,7 @@ public class DOMHASHGenerator implements DigestGenerator {
      * @return Object representing the DOMHASH value of the normalized XML node
      * @throws CachingException if there is an error in generating the digest key
      *
-     * @see org.wso2.caching.digest.DigestGenerator
-     *          #getDigest(org.apache.axis2.context.MessageContext) 
+     *          #getDigest(org.apache.axis2.context.MessageContext)
      */
     public String getDigest(MessageContext msgContext) throws CachingException {
         

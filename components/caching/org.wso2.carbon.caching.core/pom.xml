@@ -116,21 +116,19 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>org.wso2.caching</Bundle-SymbolicName>
-                        <Bundle-Name>org.wso2.caching</Bundle-Name>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Description>
                             ${pom.description}
                         </Bundle-Description>
-                        <Bundle-Version>1.6.2</Bundle-Version>
                         <Export-Package>
-                            org.wso2.caching.*,
+                            org.wso2.caching.core.*,
                         </Export-Package>
                         <Import-Package>
-                            !org.wso2.caching.*,
+                            !org.wso2.caching.core.*,
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

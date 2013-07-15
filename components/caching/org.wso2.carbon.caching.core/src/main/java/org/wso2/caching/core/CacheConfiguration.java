@@ -1,6 +1,7 @@
-package org.wso2.caching;
+package org.wso2.caching.core;
 
-import org.wso2.caching.digest.DigestGenerator;
+
+import org.wso2.caching.core.digest.DigestGenerator;
 
 /**
  * 

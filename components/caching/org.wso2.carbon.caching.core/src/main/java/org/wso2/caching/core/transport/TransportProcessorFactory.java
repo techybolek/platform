@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.transport;
+package org.wso2.caching.core.transport;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.caching.CachingException;
+import org.wso2.caching.core.CachingException;
 
 public class TransportProcessorFactory {
 

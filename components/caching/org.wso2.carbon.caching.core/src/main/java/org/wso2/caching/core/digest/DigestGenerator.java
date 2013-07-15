@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.digest;
+package org.wso2.caching.core.digest;
 
 import org.apache.axis2.context.MessageContext;
-import org.wso2.caching.CachingException;
+import org.wso2.caching.core.CachingException;
 
 import java.io.Serializable;
 

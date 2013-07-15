@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.policy;
+package org.wso2.caching.core.policy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,10 +24,10 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.xml.XmlPrimtiveAssertion;
 import org.apache.axis2.description.PolicySubject;
-import org.wso2.caching.CacheConfiguration;
-import org.wso2.caching.CachingConstants;
-import org.wso2.caching.CachingException;
-import org.wso2.caching.digest.DigestGenerator;
+import org.wso2.caching.core.CacheConfiguration;
+import org.wso2.caching.core.CachingConstants;
+import org.wso2.caching.core.CachingException;
+import org.wso2.caching.core.digest.DigestGenerator;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;

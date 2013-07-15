@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching;
+package org.wso2.caching.core;
 
 import java.io.Serializable;
 
