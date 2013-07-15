@@ -29,22 +29,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CacheManager {
 
-    private Map<ServiceName, Map<RequestHash, CachableResponse>> cache;
+    /*private Map<ServiceName, Map<RequestHash, CachableResponse>> cache;
 
-    /**
+    *//**
      * This default constructor instantiates the CacheManager with defafult parameters
-     */
+     *//*
     public CacheManager() {
         cache = new ConcurrentHashMap<ServiceName, Map<RequestHash, CachableResponse>>();
     }
 
-    /**
+    *//**
      * This method will remove the expired cached responses from the provided context and
      * remove the keys from the reference list in the CacheManager
      *
      * @param serviceName Name of the serviceName
      * @param cacheReplicationCommand The StateReplicationCommand used for replicating the cache changes
-     */
+     *//*
     public synchronized void removeExpiredResponses(ServiceName serviceName,
                                                     CacheReplicationCommand cacheReplicationCommand) {
         Map<RequestHash, CachableResponse> responseMap = cache.get(serviceName);
@@ -70,14 +70,14 @@ public class CacheManager {
         }
     }
 
-    /**
+    *//**
      * This will return the response associated with the given requestHash if there is a cached
      * response or null otherwise
      *
      * @param serviceName - Name of the service
      * @param requestHash - Object representing the requestHash to be searched
      * @return cached response associated with the given requestHash
-     */
+     *//*
     public CachableResponse getCachedResponse(ServiceName serviceName, RequestHash requestHash) {
         Map<RequestHash, CachableResponse> responseMap = cache.get(serviceName);
         if (responseMap != null) {
@@ -94,13 +94,13 @@ public class CacheManager {
         return 0;
     }
 
-    /**
+    *//**
      * This will be used to add a response to the cache associated with the given requestHash
      *
      * @param serviceName - Name of the service
      * @param requestHash - String representing the requestHash to be associated with the response
      * @param response    - CachableResponse representing the response cache
-     */
+     *//*
     public void cacheResponse(ServiceName serviceName,
                               RequestHash requestHash,
                               CachableResponse response) {
@@ -112,19 +112,19 @@ public class CacheManager {
         responseMap.put(requestHash, response);
     }
 
-    /**
+    *//**
      * This will be used to add a response to the cache associated with the given requestHash
      *
      * @param serviceName - Name of the service
      * @param requestHash - String representing the requestHash to be associated with the response
      * @param response    - CachableResponse representing the response cache
      * @param cacheReplicationCommand The StateReplicationCommand used for replicating the cache changes
-     */
+     *//*
     public void cacheResponse(ServiceName serviceName,
                               RequestHash requestHash,
                               CachableResponse response,
                               CacheReplicationCommand cacheReplicationCommand) {
         cacheResponse(serviceName, requestHash, response);
         cacheReplicationCommand.addCachedReponse(serviceName, requestHash, response);
-    }
+    }*/
 }

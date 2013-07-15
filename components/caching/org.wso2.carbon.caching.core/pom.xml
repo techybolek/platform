@@ -15,6 +15,10 @@
     <name>WSO2 Caching Module - Core</name>
 
     <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+        </dependency>
         <!-- Axis2 Jars -->
         <dependency>
             <groupId>org.apache.axis2</groupId>

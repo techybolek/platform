@@ -24,7 +24,7 @@ import java.io.Serializable;
  */
 public class RequestHash implements Serializable {
 
-    public String requestHash;
+    /*public String requestHash;
 
     public RequestHash(String requestHash) {
         this.requestHash = requestHash;
@@ -49,5 +49,5 @@ public class RequestHash implements Serializable {
     @Override
     public int hashCode() {
         return requestHash.hashCode();
-    }
+    }*/
 }

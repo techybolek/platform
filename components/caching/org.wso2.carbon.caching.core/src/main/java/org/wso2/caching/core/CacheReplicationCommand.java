@@ -29,9 +29,9 @@ import java.util.List;
  * Handles replication of the Cache. Handles both addition of new entries as well
  * as removal of entries
  */
-public class CacheReplicationCommand extends StateClusteringCommand {
+public abstract class CacheReplicationCommand extends StateClusteringCommand {
 
-    private List<AddedCachedResponse>   addedItems   = new ArrayList<AddedCachedResponse>();
+    /*private List<AddedCachedResponse>   addedItems   = new ArrayList<AddedCachedResponse>();
     private List<RemovedCachedResponse> removedItems = new ArrayList<RemovedCachedResponse>();
 
     public void addCachedReponse(ServiceName serviceName, RequestHash requestHash,
@@ -105,5 +105,5 @@ public class CacheReplicationCommand extends StateClusteringCommand {
     @Override
     public String toString() {
         return "CacheReplicationCommand";
-    }
+    }*/
 }

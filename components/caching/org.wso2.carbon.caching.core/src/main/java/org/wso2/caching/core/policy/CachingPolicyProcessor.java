@@ -47,7 +47,7 @@ public class CachingPolicyProcessor {
      *
      * @param policySubject- Policy object from the EffectivePolicy
      * @return CacheManager object initialized and returned
-     * @throws org.wso2.caching.CachingException
+     * @throws org.wso2.caching.core.CachingException
      *          - If an error occured in processing the policy
      *          or if there is a problem in loading the DigestGenerator
      */

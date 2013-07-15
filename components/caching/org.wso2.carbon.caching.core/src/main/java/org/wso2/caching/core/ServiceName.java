@@ -23,7 +23,7 @@ import java.io.Serializable;
  * Represents an Axis2 Service name
  */
 public class ServiceName implements Serializable {
-    private String serviceName;
+    /*private String serviceName;
 
     public ServiceName(String serviceName) {
         this.serviceName = serviceName;
@@ -48,5 +48,5 @@ public class ServiceName implements Serializable {
     @Override
     public int hashCode() {
         return serviceName.hashCode();
-    }
+    }*/
 }
