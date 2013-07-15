@@ -23,21 +23,10 @@
 <%@ page import="java.net.URLEncoder" %>
 <%
 
-    String scopeString = "";
-    if (request.getParameter("scope") != null) {
-        scopeString = request.getParameter("scope");
-    } else {
-        response.sendRedirect("../../carbon/oauth/oauth-error.jsp?" +
-                "oauthErrorCode" + "=" +
-                URLEncoder.encode("invalid_request", "UTF-8") + "&" +
-                "oauthErrorMsg" + "=" +
-                URLEncoder.encode("OAuth Authorization Request is invalid!.", "UTF-8"));
-        return;
-    }
+    String scopeString = request.getParameter("scope");
 
     String authStatus = getSafeText(request.getParameter("auth_status"));
 %>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
