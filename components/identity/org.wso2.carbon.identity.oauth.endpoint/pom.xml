@@ -93,6 +93,11 @@
             <version>2.6.1.wso2v2</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.thetransactioncompany.wso2</groupId>
+            <artifactId>cors-filter</artifactId>
+            <version>1.7.0-wso2v1</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -22,7 +22,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
-import org.wso2.carbon.identity.oauth.ui.client.OAuth2ServiceClient;
 import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
 import org.wso2.carbon.identity.oauth.util.EndpointUtil;
 import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationRequestDTO;
@@ -54,12 +53,13 @@ public class OAuthRevocationClient {
 
         revokeReqDTO.setConsumerKey(oauthRequest.getConsumerKey());
         revokeReqDTO.setConsumerSecret(oauthRequest.getConsumerSecret());
-        revokeReqDTO.setTokens(oauthRequest.getTokens());
+        revokeReqDTO.setToken(oauthRequest.getToken());
+        revokeReqDTO.setToken_type(oauthRequest.getToken_type());
 
         try {
 //            OAuth2ServiceClient oauthServiceClient = new OAuth2ServiceClient(backendServerURL, configContext);
 //            return oauthServiceClient.revokeTokensByOAuthClient(revokeReqDTO);
-            return EndpointUtil.getOAuth2Service().revokeTokensByOAuthClient(revokeReqDTO);
+            return EndpointUtil.getOAuth2Service().revokeTokenByOAuthClient(revokeReqDTO);
         } catch (Exception e){
             String errorMsg = "Error when invoking the OAuthService to revoke an access token.";
             log.error(errorMsg, e);

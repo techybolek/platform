@@ -16,8 +16,6 @@
  */
 package org.wso2.carbon.identity.oauth.endpoint.user.impl;
 
-import java.util.Map;
-
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.jwt.JWTBuilder;
 import org.apache.oltu.oauth2.jwt.JWTException;
@@ -25,6 +23,8 @@ import org.wso2.carbon.identity.oauth.endpoint.user.UserInfoClaimRetriever;
 import org.wso2.carbon.identity.oauth.endpoint.user.UserInfoEndpointException;
 import org.wso2.carbon.identity.oauth.endpoint.user.UserInfoResponseBuilder;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+
+import java.util.Map;
 
 public class UserInfoJWTResponse implements UserInfoResponseBuilder {
 

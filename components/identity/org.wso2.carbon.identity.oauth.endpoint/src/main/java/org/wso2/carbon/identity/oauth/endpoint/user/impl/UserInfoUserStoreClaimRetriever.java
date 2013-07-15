@@ -16,9 +16,6 @@
  */
 package org.wso2.carbon.identity.oauth.endpoint.user.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.endpoint.user.UserInfoClaimRetriever;
@@ -26,6 +23,9 @@ import org.wso2.carbon.identity.oauth.util.EndpointUtil;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Retrieving claims from the user store for the given claims dialect

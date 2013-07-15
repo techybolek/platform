@@ -19,7 +19,6 @@ package org.wso2.carbon.identity.oauth.endpoint.user.impl;
 /**
  * 
  */
-import java.util.Map;
 
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.utils.JSONUtils;
@@ -30,6 +29,8 @@ import org.wso2.carbon.identity.oauth.endpoint.user.UserInfoClaimRetriever;
 import org.wso2.carbon.identity.oauth.endpoint.user.UserInfoEndpointException;
 import org.wso2.carbon.identity.oauth.endpoint.user.UserInfoResponseBuilder;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+
+import java.util.Map;
 
 /**
  * 

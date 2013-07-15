@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -53,7 +52,6 @@ public class OAuthRevocationEndpoint {
     @POST
     @Path("/")
     @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
     public Response revokeAccessToken(@Context HttpServletRequest request,
                                      MultivaluedMap<String, String> paramMap)
             throws OAuthSystemException {
@@ -62,6 +60,24 @@ public class OAuthRevocationEndpoint {
 
         if (log.isDebugEnabled()) {
             logAccessTokenRevocationRequest(httpRequest);
+        }
+        String token = httpRequest.getParameter("token");
+        if(token == null || token.equals("")){
+            if(paramMap.get("token") != null && !paramMap.isEmpty()){
+                token = paramMap.get("token").get(0);
+            }
+        }
+        String token_type = httpRequest.getParameter("token_type_hint");
+        if(token_type == null || token_type.equals("")){
+            if(paramMap.get("token_type_hint") != null && !paramMap.get("token_type_hint").isEmpty()){
+                token_type = paramMap.get("token_type_hint").get(0);
+            }
+        }
+        String callback = httpRequest.getParameter("callback");
+        if(callback == null || callback.equals("")){
+            if(paramMap.get("callback") != null && !paramMap.get("callback").isEmpty()) {
+                callback = paramMap.get("callback").get(0);
+            }
         }
 
         // extract the basic auth credentials if present in the request and use for authentication.
@@ -75,7 +91,7 @@ public class OAuthRevocationEndpoint {
                 // not permitted as per the specification. sending invalid_client error back.
                 if(paramMap.containsKey(OAuth.OAUTH_CLIENT_ID) &&
                         paramMap.containsKey(OAuth.OAUTH_CLIENT_SECRET)){
-                    return handleBasicAuthFailure();
+                    return handleBasicAuthFailure(callback);
                 }
 
                 // add the credentials available in Authorization to the parameter map
@@ -90,7 +106,7 @@ public class OAuthRevocationEndpoint {
 
             } catch (OAuthClientException e) {
                 // malformed credential string is considered as an auth failure.
-                return handleBasicAuthFailure();
+                return handleBasicAuthFailure(callback);
             }
         }
 
@@ -98,34 +114,36 @@ public class OAuthRevocationEndpoint {
             OAuthRevocationRequestDTO revokeRequest = new OAuthRevocationRequestDTO();
             revokeRequest.setConsumerKey(paramMap.get(OAuth.OAUTH_CLIENT_ID).get(0));
             revokeRequest.setConsumerSecret(paramMap.get(OAuth.OAUTH_CLIENT_SECRET).get(0));
-            revokeRequest.setTokens(new String[]{httpRequest.getParameter("token")});
+            if(token != null && !token.equals("")){
+                revokeRequest.setToken(token);
+            } else {
+                handleClientFailure(callback);
+            }
+            if(token_type != null && !token_type.equals("")){
+                revokeRequest.setToken_type(token_type);
+            }
             OAuthRevocationClient revokeClient = new OAuthRevocationClient();
             OAuthRevocationResponseDTO oauthRevokeResp = revokeClient.revokeTokens(revokeRequest);
             // if there BE has returned an error
             if(oauthRevokeResp.getErrorMsg()!= null){
+
                 // if the client has used Basic Auth and if there is an auth failure, HTTP 401 Status
                 // Code should be sent back to the client.
-                if(basicAuthUsed && OAuth2ErrorCodes.INVALID_CLIENT.equals(
-                        oauthRevokeResp.getErrorCode())){
-                    return handleBasicAuthFailure();
-                }else if(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT.equals(
-                        oauthRevokeResp.getErrorCode())){
-                    OAuthResponse response = OAuthASResponse.errorResponse(
-                            HttpServletResponse.SC_UNAUTHORIZED).setError(
-                            oauthRevokeResp.getErrorCode()).setErrorDescription(
-                            oauthRevokeResp.getErrorMsg()).buildJSONMessage();
-                    return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+                if(basicAuthUsed && OAuth2ErrorCodes.INVALID_CLIENT.equals(oauthRevokeResp.getErrorCode())){
+                    return handleBasicAuthFailure(callback);
+                } else if(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT.equals(oauthRevokeResp.getErrorCode())){
+                    return handleAuthorizationFailure(callback);
                 }
                 // Otherwise send back HTTP 400 Status Code
-                OAuthResponse response = OAuthASResponse.errorResponse(
-                        HttpServletResponse.SC_BAD_REQUEST).setError(
-                        oauthRevokeResp.getErrorCode()).setErrorDescription(
-                        oauthRevokeResp.getErrorMsg()).buildJSONMessage();
-                return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-            }
-
-            else {
-                OAuthResponse response = CarbonOAuthASResponse.revokeResponse(HttpServletResponse.SC_OK).buildJSONMessage();
+                return handleClientFailure(callback, oauthRevokeResp);
+            } else {
+                OAuthResponse response;
+                if(callback != null && !callback.equals("")) {
+                    response = CarbonOAuthASResponse.revokeResponse(HttpServletResponse.SC_OK).buildBodyMessage();
+                    response.setBody(callback+"();");
+                } else {
+                    response = CarbonOAuthASResponse.revokeResponse(HttpServletResponse.SC_OK).buildBodyMessage();
+                }
 
                 ResponseBuilder respBuilder = Response
                         .status(response.getResponseStatus())
@@ -134,25 +152,113 @@ public class OAuthRevocationEndpoint {
                         .header(OAuthConstants.HTTP_RESP_HEADER_PRAGMA,
                                 OAuthConstants.HTTP_RESP_HEADER_VAL_PRAGMA_NO_CACHE);
 
+                if(callback != null && !callback.equals("")){
+                    respBuilder.header("Content-Type", "application/javascript");
+                } else {
+                    respBuilder.header("Content-Type", "text/html");
+                }
+
                 return respBuilder.entity(response.getBody()).build();
             }
 
         } catch (OAuthClientException e) {
-            OAuthResponse response = OAuthASResponse.errorResponse(
-                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR).setError(
-                    OAuth2ErrorCodes.SERVER_ERROR).setErrorDescription(e.getMessage()).buildJSONMessage();
-            return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+            return handleServerFailure(callback, e);
         }
 
     }
 
-    private Response handleBasicAuthFailure() throws OAuthSystemException {
-        OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                .setError(OAuth2ErrorCodes.INVALID_CLIENT)
-                .setErrorDescription("Client Authentication was failed.").buildJSONMessage();
-        return Response.status(response.getResponseStatus())
-                .header(OAuthConstants.HTTP_RESP_HEADER_AUTHENTICATE, OAuthUIUtil.getRealmInfo())
-                .entity(response.getBody()).build();
+    private Response handleBasicAuthFailure(String callback)
+            throws OAuthSystemException {
+        if(callback == null && callback.equals("")){
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
+                    .setError(OAuth2ErrorCodes.INVALID_CLIENT)
+                    .setErrorDescription("Client Authentication failed.").buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header(OAuthConstants.HTTP_RESP_HEADER_AUTHENTICATE, OAuthUIUtil.getRealmInfo())
+                    .header("Content-Type", "text/html")
+                    .entity(response.getBody()).build();
+        } else {
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
+                    .setError(OAuth2ErrorCodes.INVALID_CLIENT).buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header(OAuthConstants.HTTP_RESP_HEADER_AUTHENTICATE, OAuthUIUtil.getRealmInfo())
+                    .header("Content-Type", "application/javascript")
+                    .entity(callback+"(" + response.getBody() + ");").build();
+        }
+    }
+
+    private Response handleAuthorizationFailure(String callback)
+            throws OAuthSystemException {
+        if(callback == null && callback.equals("")){
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
+                    .setError(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT)
+                    .setErrorDescription("Client Authentication failed.").buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header(OAuthConstants.HTTP_RESP_HEADER_AUTHENTICATE, OAuthUIUtil.getRealmInfo())
+                    .header("Content-Type", "text/html")
+                    .entity(response.getBody()).build();
+        } else {
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
+                    .setError(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT).buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header(OAuthConstants.HTTP_RESP_HEADER_AUTHENTICATE, OAuthUIUtil.getRealmInfo())
+                    .header("Content-Type", "application/javascript")
+                    .entity(callback+"(" + response.getBody() + ");").build();
+        }
+    }
+
+    private Response handleServerFailure(String callback, Exception e)
+            throws OAuthSystemException {
+        if(callback == null && callback.equals("")){
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .setError(OAuth2ErrorCodes.SERVER_ERROR)
+                    .setErrorDescription(e.getMessage()).buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header("Content-Type", "text/html")
+                    .entity(response.getBody()).build();
+        } else {
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .setError(OAuth2ErrorCodes.SERVER_ERROR).buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header("Content-Type", "application/javascript")
+                    .entity(callback+"(" + response.getBody() + ");").build();
+        }
+    }
+
+    private Response handleClientFailure(String callback)
+            throws OAuthSystemException {
+        if(callback == null && callback.equals("")){
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
+                    .setError(OAuth2ErrorCodes.INVALID_REQUEST)
+                    .setErrorDescription("Invalid revocation request").buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header("Content-Type", "text/html")
+                    .entity(response.getBody()).build();
+        } else {
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
+                    .setError(OAuth2ErrorCodes.INVALID_REQUEST).buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header("Content-Type", "application/javascript")
+                    .entity(callback+"(" + response.getBody() + ");").build();
+        }
+    }
+
+    private Response handleClientFailure(String callback, OAuthRevocationResponseDTO dto)
+            throws OAuthSystemException {
+        if(callback == null && callback.equals("")){
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
+                    .setError(dto.getErrorCode())
+                    .setErrorDescription(dto.getErrorMsg()).buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header("Content-Type", "text/html")
+                    .entity(response.getBody()).build();
+        } else {
+            OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
+                    .setError(dto.getErrorCode()).buildJSONMessage();
+            return Response.status(response.getResponseStatus())
+                    .header("Content-Type", "application/javascript")
+                    .entity(callback+"(" + response.getBody() + ");").build();
+        }
     }
 
     private void logAccessTokenRevocationRequest(HttpServletRequest request) {

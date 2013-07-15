@@ -16,10 +16,10 @@
  */
 package org.wso2.carbon.identity.oauth.endpoint.user;
 
-import java.util.Map;
-
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+
+import java.util.Map;
 
 public interface UserInfoClaimRetriever {
 
