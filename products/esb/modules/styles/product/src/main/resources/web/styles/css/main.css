@@ -1,7 +1,11 @@
 /* ---------------- template styles ------------------------- */
 
 table#main-table td#header {
-	background-image: url( ../images/esb-header-region-bg.gif);
+	background-color:#3B003D;
+	background-image:url(../images/back-repeat.png);
+	background-repeat:repeat-x;
+	height:70px;
+	border-bottom:solid 1px #000000;
 }
 
 table#main-table td#menu-panel {
@@ -14,43 +18,48 @@ table#main-table td#menu-panel {
 
 /* ---------------- header styles ------------------ */
 div#header-div {
-    background-image: url( ../images/esb-header-bg.gif);
+    background-image: url( ../images/esb-header-bg.png);
+	height:70px;
 }
 
 div#header-div div.left-logo {
-	background-image: url( ../images/esb-header-logo.gif );
-	margin-left:45px;
-	margin-top:35px;
+	background-image: url( ../images/esb-header-logo.png );
+	margin-left:25px;
+	margin-top:22px;
+	position:absolute;
 }
 
 div#header-div div.right-logo {
 	/*background-image:url("../images/right-logo-bg.gif");
 	background-position:right top;
 	background-repeat:no-repeat;*/
-	color:#542988;
+	color:#ffffff;
 	height:32px;
 	margin-right:20px;
 	line-height: 30px;
-	margin-top:20px;
+	margin-top:10px;
 	padding-right:0px;
-	padding-top:5px;
+	padding-top:0px;
 }
 div#header-div div.header-links {
 	margin-top:0px;
 }
 div#header-div div.header-links div.right-links {
 	margin-right: 0px;
-	height: 35px;
+	height: 27px;
 	padding-top: 0px;
+	color:#ffffff;
 }
+
+div#header-div div.header-links div.right-links a { color:#54BBE2; }
 div#header-div div.header-links div.right-links ul {
-	background-image:url("../images/right-links-bg.gif");
+	background-image:none;
 	background-position:left top;
 	background-repeat:repeat-x;
 	padding-left: 25px;
 	padding-right: 15px;
-	padding-top: 9px;
-	padding-bottom: 7px;
+	padding-top: 4px;
+	padding-bottom: 4px;
 }
 /* ------------- menu styles ---------------------- */
 div#menu {
@@ -206,8 +215,15 @@ table#main-table td#middle-content {
 background-image: url(../images/menu-margin.gif);
 background-position: left top;
 background-repeat: repeat-y;
-background-color:#f5efff;
+background-color:#ffffff;
 }
 div#middle{
-background-color:#f5efff;   
+background-color:#ffffff;   
 }
+
+/* new theme 01-07-2013 */
+table#main-table td.vertical-menu-container { background-color:#444; padding-left: 5px; border-top:0px;}
+div.menu-panel-buttons { border-top-left-radius: 7px; border-bottom-left-radius: 7px;  border-top-right-radius: 0px; border-bottom-right-radius: 0px; padding: 15px 3px;}
+div.selected span { font-weight:bold; color:#ffffff; background-color:#555555; }
+div.menu-panel-buttons span {  }
+div.selected { border:0px; background-color:#555555; box-shadow:none; }

@@ -61,7 +61,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <!--<Fragment-Host>org.wso2.carbon.ui</Fragment-Host>-->
+                        <Fragment-Host>org.wso2.carbon.ui</Fragment-Host>
                         <Carbon-Component>UIBundle</Carbon-Component>
                         <Private-Package>*</Private-Package>
                     </instructions>
