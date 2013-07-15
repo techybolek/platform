@@ -16,11 +16,9 @@
 ~ under the License.
 -->
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
 	String loggedInUser = request.getParameter("loggedInUser");
 	String app =   request.getParameter("oidcApp");
-	String scope = request.getParameter("scope");
 %>
 
 <!DOCTYPE html>
@@ -28,25 +26,23 @@
 <head>
     <meta charset="utf-8">
     <title>OAuth2 Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/localstyles.css" rel="stylesheet">
+    <link href="oauth2/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="oauth2/css/localstyles.css" rel="stylesheet">
     <!--[if lt IE 8]>
-    <link href="css/localstyles-ie7.css" rel="stylesheet">
+    <link href="oauth2/css/localstyles-ie7.css" rel="stylesheet">
     <![endif]-->
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-    <script src="assets/js/html5.js"></script>
+    <script src="oauth2/assets/js/html5.js"></script>
     <![endif]-->
-    <script src="assets/js/jquery-1.7.1.min.js"></script>
-    <script src="js/scripts.js"></script>
-
-
+    <script src="oauth2/assets/js/jquery-1.7.1.min.js"></script>
+    <script src="oauth2/js/scripts.js"></script>
 </head>
 
 <body>
@@ -71,9 +67,14 @@
         <div class="span5 offset3 content-section">
             <script type="text/javascript">
                 function approved() {
-                	 location.href = "../oauth2endpoints/authorize";
+                	 location.href = "../oauth2endpoints/authorize?consent=approve";
                 }
-                            
+                function approvedAlways() {
+               	 location.href = "../oauth2endpoints/authorize?consent=approveAlways";
+                }  
+                function deny() {
+                  	 location.href = "../oauth2endpoints/authorize?consent=deny";
+                }
             </script>
 
             <form action="../../openidserver" id="profile" name="profile">
@@ -84,9 +85,11 @@
                         	<input type="button" class="btn btn-primary btn-large" id="approve" name="approve"
                                              onclick="javascript: approved(); return false;"
                                              value="Approve"/>
-                       		
-                       		<input class="btn btn-large" type="reset" value="Cancel"
-                               onclick="javascript:document.location.href='../admin/login.jsp'"/>
+                       		<input type="button" class="btn btn-primary btn-large" id="approveAlways" name="approveAlways"
+                                             onclick="javascript: approvedAlways(); return false;"
+                                             value="Approve Always"/>
+                       		<input class="btn btn-large" type="reset" value="Deny"
+                               onclick="javascript: deny(); return false;"/>
                        </td>
                     </tr>
                     </tbody>

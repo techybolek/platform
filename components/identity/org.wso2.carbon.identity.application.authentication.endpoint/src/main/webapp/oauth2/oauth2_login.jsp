@@ -83,13 +83,27 @@
 <div class="container">
     <div class="row">
         <div class="span5 offset3 content-section">
+        <%
+    if(!"true".equals(request.getParameter("oidcRequest"))) {
+		%>
             <p class="download-info">
                 <a class="btn btn-primary btn-large" id="authorizeLink"><i
                         class="icon-ok icon-white"></i> Authorize</a>
                 <a class="btn btn-large" id="denyLink"><i class=" icon-exclamation-sign"></i>
                     Deny</a>
             </p>
-
+    <%
+	} else {
+ 	%> 
+ 		<p class="download-info">
+                <a class="btn btn-primary btn-large" id="authorizeLink"><i
+                        class="icon-ok icon-white"></i> Continue</a>
+                <a class="btn btn-large" id="denyLink"><i class=" icon-exclamation-sign"></i>
+                    Cancel</a>
+            </p>
+ 	<%
+	}
+ 	%>
             <form class="well form-horizontal" id="loginForm"
                   <% if(!("failed".equals(authStatus))) { %>style="display:none"<% } %>
                   action="../oauth2endpoints/authorize">

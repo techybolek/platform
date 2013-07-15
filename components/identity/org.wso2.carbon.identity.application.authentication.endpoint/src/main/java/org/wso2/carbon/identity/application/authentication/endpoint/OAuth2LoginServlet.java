@@ -39,6 +39,9 @@ public class OAuth2LoginServlet extends HttpServlet {
 
 		} else if (request.getParameter("oauthErrorCode") != null) {
 			request.getRequestDispatcher("oauth2/oauth2_error.jsp").forward(request, response);
+			
+		} else if (request.getParameter("loggedInUser") != null) {
+			request.getRequestDispatcher("oauth2/oauth2_consent.jsp").forward(request, response);
 
 		} else {
 			System.out.println("Error");
