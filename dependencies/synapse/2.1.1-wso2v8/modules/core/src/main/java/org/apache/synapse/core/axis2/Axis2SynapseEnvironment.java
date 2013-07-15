@@ -276,7 +276,7 @@ public class Axis2SynapseEnvironment implements SynapseEnvironment {
             if (endpoint != null) {
                 boolean buildMessage = false;
                 if (endpoint.getAddress() != null) {
-                    buildMessage = (!endpoint.getAddress().startsWith("http") && !endpoint.getAddress().startsWith("https"));
+                    buildMessage = (!endpoint.getAddress().startsWith("http"));
                 } else {
                     String address = synCtx.getTo().getAddress();
                     if (address == null) {
@@ -330,7 +330,7 @@ public class Axis2SynapseEnvironment implements SynapseEnvironment {
                     log.error("Could not find an endpoint address, MessageID:" + synCtx.getMessageID());
                     address = "";
                 }
-                buildMessage = (!address.startsWith("http") &&  !address.startsWith("https"));
+                buildMessage = (!address.startsWith("http"));
             }
             if (buildMessage) {
                 try {
