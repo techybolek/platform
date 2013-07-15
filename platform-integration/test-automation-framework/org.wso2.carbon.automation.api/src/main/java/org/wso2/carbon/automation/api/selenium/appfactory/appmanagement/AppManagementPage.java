@@ -186,9 +186,23 @@ public class AppManagementPage {
         return false;
     }
 
+    public void signOut() {
+        log.info("Ready to sign out from the system");
+        driver.findElement(By.cssSelector(uiElementMapper.getElement
+                ("app.factory.sign.out.email"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement
+                ("app.factory.sing.out.text"))).click();
+
+        log.info("log out from the app factory");
+    }
+
+
     //this method is used to check the build details of the versions of desired application at the
     //overview Page
-    public boolean isBuildDetailsAccurate(String buildVersion) {
+    public boolean isBuildDetailsAccurate(String buildVersion) throws InterruptedException {
+        //this thread waits until deployment details loads to the overview Page
+        Thread.sleep(30000);
+        log.info("Verifying the Build Details of the application");
         String version = driver.findElement(By.xpath(uiElementMapper.getElement("app.trunk.overview.xpath")))
                 .getText();
         if (buildVersion.equals(version))
@@ -220,8 +234,8 @@ public class AppManagementPage {
 
                     if (buildVersion.equals(versionName)) {
 
-                        String buildStatusXpath = "/html/body/div/div/article/section[3]/div/ul[";
-                        String buildStatusXpath2 = "]/li[2]/p/span/strong";
+                        String buildStatusXpath = "/html/body/div/div[2]/article/section[3]/div/ul[";
+                        String buildStatusXpath2 = "]/li[4]/p/span/strong";
                         String xpathConstructForBuild = buildStatusXpath + i + buildStatusXpath2;
                         String buildStatus = driver.findElement(By.xpath(xpathConstructForBuild)).getText();
                         if (buildStatus.equals("SUCCESSFUL")) {

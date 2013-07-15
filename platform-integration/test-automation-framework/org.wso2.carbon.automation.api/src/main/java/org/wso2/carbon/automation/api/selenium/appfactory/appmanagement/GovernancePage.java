@@ -48,13 +48,22 @@ public class GovernancePage {
         }
     }
 
+    public void signOut() {
+        log.info("Ready to sign out from the system");
+        driver.findElement(By.cssSelector(uiElementMapper.getElement
+                ("app.factory.sign.out.email"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement
+                ("app.factory.sing.out.text"))).click();
+
+        log.info("log out from the app factory");
+    }
     //this method is use to promote the life cycle
     public void promoteVersion(String version, String lifeCycleStage) throws InterruptedException {
         log.info("waiting to load list of versions");
         //wait until list of versions get load
         Thread.sleep(10000);
         if (lifeCycleStage.equals("Development")) {
-            String resourceXpath = "/html/body/div/div[2]/article/section/div[2]/ul/li[";
+            String resourceXpath = "/html/body/div/div[3]/article/section/div[2]/ul/li[";
             String resourceXpath2 = "]/ul/li/div/strong";
             for (int i = 2; i < 10; i++) {
                 String versionXpath = resourceXpath + i + resourceXpath2;
@@ -73,15 +82,19 @@ public class GovernancePage {
                         String formattedDate = dateFormat.format(date);
                         driver.findElement(By.id((dateId))).sendKeys(formattedDate);
                         //save button xpath generator
-                        String saveButtonXpath = "(//button[@type='submit'])[";
+                        String saveButtonXpath = "(//input[@value='Save'])[";
                         String saveButtonXpath2 = "]";
-                        String saveButtonXpathGenerator = saveButtonXpath + i + saveButtonXpath2;
-                        driver.findElement(By.xpath((saveButtonXpathGenerator))).click();
+                        if (i == 2) {
+                            driver.findElement(By.xpath(("(//input[@value='Save'])"))).click();
+                        } else {
+                            String saveButtonXpathGenerator = saveButtonXpath + i + saveButtonXpath2;
+                            driver.findElement(By.xpath((saveButtonXpathGenerator))).click();
+                        }
                         //this thread sleep is for the date save
                         Thread.sleep(5000);
                         //promote arrow Key Xpath Generator
                         String arrow = "//div[@id='whereItAllGoes']/ul/li[";
-                        String arrow2 = "]/ul/li[3]/div/ul/li[2]/a/span";
+                        String arrow2 = "]/ul/li[4]/div/ul/li/button";
                         String arrowXpath = arrow + i + arrow2;
                         driver.findElement(By.xpath((arrowXpath))).click();
                         //this thread sleep is to until loading the code status
@@ -117,27 +130,26 @@ public class GovernancePage {
                 }
             }
         } else if (lifeCycleStage.equals("testing")) {
-            //------------------------Testing Phase------------------------------------//
-            //checking the first element at the testing table//
-            String elementName = driver.findElement(By.xpath(uiElementMapper.getElement
-                    ("app.testing.first.element.xpath"))).getText();
+            //checking the first element of the testing stage
+            String versionName = driver.findElement(By.xpath
+                    ("/html/body/div/div[3]/article/section/div[2]/ul[2]/li/ul/li/div/strong")).getText();
+            if (version.equals(versionName)) {
 
-            if (version.equals(elementName)) {
-                String tempDateId = elementName.replace('.', '_');
+                String tempDateId = versionName.replace('.', '_');
                 String dateId = "etaTo_" + tempDateId;
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 //get current date time with Date()
                 Date date = new Date();
                 String formattedDate = dateFormat.format(date);
                 driver.findElement(By.id((dateId))).sendKeys(formattedDate);
-                driver.findElement(By.xpath(uiElementMapper.getElement("app.testing.date.save.xpath"))).click();
-                //this wait is untill date is saved to the system.
+                //save button xpath generator
                 Thread.sleep(5000);
-                //first element arrow Xpath
-                driver.findElement(By.xpath(uiElementMapper.getElement("app.testing.first.element.arrow.xpath"))).click();
-                //this thread is to wait until code status elements appear
+                driver.findElement(By.xpath(("(//input[@value='Save'])[4]"))).click();
+                Thread.sleep(10000);
+                driver.findElement(By.xpath(("//div[@id='whereItAllGoes']/ul[2]/li/ul/li[4]/div/ul/" +
+                        "li/button"))).click();
                 Thread.sleep(5000);
-                //checking the code status
+
                 if (!driver.findElement(By.xpath(uiElementMapper.getElement("code.completed.status")))
                         .isSelected()) {
                     driver.findElement(By.xpath(uiElementMapper.getElement("code.completed.status")))
@@ -148,7 +160,6 @@ public class GovernancePage {
                     driver.findElement(By.xpath(uiElementMapper.getElement("code.review.status")))
                             .click();
                 }
-
                 //promoting the code
                 String promote = "//button[@onclick=\"doGovernanceAction(this, 'Promote','Testing', '";
                 String promote2 = version + "')\"]";
@@ -156,19 +167,19 @@ public class GovernancePage {
                 driver.findElement(By.xpath((promoteXpath))).click();
                 //this thread is to wait until application's promotion.
                 Thread.sleep(30000);
-                log.info("application deployment successful");
             } else {
-                String testingResourceXpath = "/html/body/div/div[2]/article/section/div[2]/ul[2]/li[";
-                String testingResourceXpath2 = "]/ul/li/div/strong";
+
+                String resourceXpath = "/html/body/div/div[3]/article/section/div[2]/ul[2]/li[";
+                String resourceXpath2 = "]/ul/li/div/strong";
                 for (int i = 2; i < 10; i++) {
-                    String versionXpath = testingResourceXpath + i + testingResourceXpath2;
-                    String versionName = driver.findElement(By.xpath(versionXpath)).getText();
+                    String versionXpath = resourceXpath + i + resourceXpath2;
+                    String versionName2 = driver.findElement(By.xpath(versionXpath)).getText();
                     log.info("val on app is -------> " + versionName);
                     log.info("Correct is    -------> " + version);
 
                     try {
 
-                        if (version.equals(versionName)) {
+                        if (version.equals(versionName2)) {
                             String tempDateId = versionName.replace('.', '_');
                             String dateId = "etaTo_" + tempDateId;
                             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -177,15 +188,19 @@ public class GovernancePage {
                             String formattedDate = dateFormat.format(date);
                             driver.findElement(By.id((dateId))).sendKeys(formattedDate);
                             //save button xpath generator
-                            String saveButtonXpath = "/html/body/div/div[2]/article/section/div[2]/ul[2]/li[";
-                            String saveButtonXpath2 = "]/ul/li[2]/div/form/div/button";
-                            String saveButtonXpathGenerator = saveButtonXpath + i + saveButtonXpath2;
-                            driver.findElement(By.xpath((saveButtonXpathGenerator))).click();
+                            String saveButtonXpath = "(//input[@value='Save'])[";
+                            String saveButtonXpath2 = "]";
+                            if (i == 2) {
+                                driver.findElement(By.xpath(("(//input[@value='Save'])"))).click();
+                            } else {
+                                String saveButtonXpathGenerator = saveButtonXpath + i + saveButtonXpath2;
+                                driver.findElement(By.xpath((saveButtonXpathGenerator))).click();
+                            }
                             //this thread sleep is for the date save
                             Thread.sleep(5000);
                             //promote arrow Key Xpath Generator
-                            String arrow = "//div[@id='whereItAllGoes']/ul[2]/li[";
-                            String arrow2 = "]/ul/li[3]/div/ul/li[2]/a/span";
+                            String arrow = "//div[@id='whereItAllGoes']/ul/li[";
+                            String arrow2 = "]/ul/li[4]/div/ul/li/button";
                             String arrowXpath = arrow + i + arrow2;
                             driver.findElement(By.xpath((arrowXpath))).click();
                             //this thread sleep is to until loading the code status
@@ -218,5 +233,4 @@ public class GovernancePage {
         }
     }
 }
-
 

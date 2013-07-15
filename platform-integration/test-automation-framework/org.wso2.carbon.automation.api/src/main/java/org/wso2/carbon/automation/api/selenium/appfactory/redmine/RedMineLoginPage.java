@@ -36,7 +36,7 @@ public class RedMineLoginPage {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
-        if (!(driver.getCurrentUrl().contains("redmine.appfactorypreview.wso2.com"))) {
+        if (!(driver.getCurrentUrl().contains("redmine"))) {
             throw new IllegalStateException("This is not the Red mine  page");
         }
     }

@@ -34,7 +34,7 @@ public class NewDatabaseTemplatePage {
         // Check that we're on the right page.
 
         if (!(driver.getCurrentUrl().contains("createdbtemplate.jag"))) {
-            throw new IllegalStateException("This is not the Resources Overview page");
+            throw new IllegalStateException("This is not the New Database Template page");
         }
     }
 

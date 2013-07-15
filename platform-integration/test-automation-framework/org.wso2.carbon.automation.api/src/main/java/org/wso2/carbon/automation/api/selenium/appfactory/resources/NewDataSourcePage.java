@@ -18,36 +18,37 @@
 
 package org.wso2.carbon.automation.api.selenium.appfactory.resources;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
 import java.io.IOException;
 
-public class DeleteDbUserPage {
-    private static final Log log = LogFactory.getLog(ResourceOverviewPage.class);
+public class NewDataSourcePage {
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
 
-    public DeleteDbUserPage(WebDriver driver) throws IOException {
+    public NewDataSourcePage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
-        if (!(driver.getCurrentUrl().contains("createdbuser.jag"))) {
-            throw new IllegalStateException("This is not the new db user Deletion Page");
+         if (!(driver.getCurrentUrl().contains("dbadministration.jag"))) {
+            throw new IllegalStateException("This is not the Data Source page");
         }
     }
 
-    public DatabaseConfigurationPage deleteDbUser() throws InterruptedException, IOException {
-        log.info("@ the delete db user Page");
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.delete.user"))).click();
-        //this thread waits for the alert box appear
-        Thread.sleep(5000);
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.delete.Ok"))).click();
-        //This thread waits until the delete process completion
+
+    public DataSourcePage CreateNewDataSource(String dataSourceName, String description,
+                                              String passWord) throws IOException, InterruptedException {
+        driver.findElement(By.id(uiElementMapper.getElement("app.data.source.name")))
+                .sendKeys(dataSourceName);
+        driver.findElement(By.id(uiElementMapper.getElement("app.data.source.description")))
+                .sendKeys(description);
+        driver.findElement(By.id(uiElementMapper.getElement("app.data.source.password")))
+                .sendKeys(passWord);
+        driver.findElement(By.name(uiElementMapper.getElement("app.data.source.add.button"))).click();
+        //this thread waits until data source creation
         Thread.sleep(15000);
-        return new DatabaseConfigurationPage(driver);
+        return new DataSourcePage(driver);
     }
 }

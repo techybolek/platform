@@ -16,15 +16,15 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.api.selenium.api;
+package org.wso2.carbon.automation.api.selenium.apimanager.subscription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.wso2.carbon.automation.api.selenium.metadata.ApiPage;
 import org.wso2.carbon.automation.api.selenium.login.LoginPage;
+import org.wso2.carbon.automation.api.selenium.metadata.ApiPage;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
 import java.io.IOException;
@@ -51,17 +51,15 @@ public class ConfigureApiPage {
     }
 
     public ApiPage configureApi(String newApiConfiguration)
-          throws InterruptedException, IOException {
+            throws InterruptedException, IOException {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("SaveConfiguration()");
         Thread.sleep(5000);
         return new ApiPage(driver);
-
     }
 
     public LoginPage logout() throws IOException {
         driver.findElement(By.linkText(uiElementMapper.getElement("home.greg.sign.out.xpath"))).click();
         return new LoginPage(driver);
     }
-
 }

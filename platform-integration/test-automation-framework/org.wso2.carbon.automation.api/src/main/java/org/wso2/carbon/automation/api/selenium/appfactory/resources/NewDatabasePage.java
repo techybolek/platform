@@ -36,9 +36,8 @@ public class NewDatabasePage {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
-
-        if (!(driver.getCurrentUrl().contains("newdatabase.jag"))) {
-            throw new IllegalStateException("This is not the Resources Overview page");
+           if (!(driver.getCurrentUrl().contains("newdatabase.jag"))) {
+            throw new IllegalStateException("This is not the New Database page");
         }
     }
 
@@ -46,6 +45,7 @@ public class NewDatabasePage {
         log.info("loading the Create Database Page");
         driver.findElement(By.id(uiElementMapper.getElement("app.factory.database.name.id"))).sendKeys(databaseName);
         driver.findElement(By.id(uiElementMapper.getElement("app.factory.database.password"))).sendKeys(passWord);
+        driver.findElement(By.id(uiElementMapper.getElement("app.factory.database.confirm.password"))).sendKeys(passWord);
         driver.findElement(By.cssSelector(uiElementMapper.getElement("app.factory.database.submit.button"))).click();
         Thread.sleep(15000);
         return new DatabaseConfigurationPage(driver);

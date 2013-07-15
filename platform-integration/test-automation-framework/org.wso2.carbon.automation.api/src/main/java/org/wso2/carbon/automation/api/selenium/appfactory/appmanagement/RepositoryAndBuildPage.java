@@ -38,7 +38,7 @@ public class RepositoryAndBuildPage {
         // Check that we're on the right page.
 
         if (!(driver.getCurrentUrl().contains("reposBuilds.jag"))) {
-           throw new IllegalStateException("This is not the Repository and Build page");
+            throw new IllegalStateException("This is not the Repository and Build page");
         }
     }
 
@@ -68,5 +68,15 @@ public class RepositoryAndBuildPage {
         Thread.sleep(15000);
         driver.navigate().refresh();
         log.info("Branch is created from the 1st branch");
+    }
+
+    public void signOut() {
+        log.info("Ready to sign out from the system");
+        driver.findElement(By.cssSelector(uiElementMapper.getElement
+                ("app.factory.sign.out.email"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement
+                ("app.factory.sing.out.text"))).click();
+
+        log.info("log out from the app factory");
     }
 }

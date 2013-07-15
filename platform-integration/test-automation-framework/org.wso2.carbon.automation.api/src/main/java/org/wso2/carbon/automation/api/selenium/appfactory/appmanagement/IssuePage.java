@@ -65,15 +65,15 @@ public class IssuePage {
         //checking the total bug count is equal to 1 
         driver.navigate().refresh();
         Thread.sleep(30000);
-        String itemHeader = driver.findElement(By.xpath(uiElementMapper.getElement
-                ("app.factory.issue.item.header.xpath"))).getText();
+        String itemHeader = driver.findElement(By.id(uiElementMapper.getElement
+                ("app.factory.issue.item.header.id"))).getText();
         String bugCount = driver.findElement(By.xpath(uiElementMapper.getElement
                 ("app.factory.issue.total.count.xpath"))).getText();
         log.info("----------------------------------------------------------");
         log.info(itemHeader);
         log.info(bugCount);
         log.info("----------------------------------------------------------");
-        if (bugCount.contains("1.0.3 STAGING Open 1 0 0")) {
+        if (bugCount.contains("1.0.3 Staging 1 0 0")) {
             log.info("no of issues matches");
             return true;
         }

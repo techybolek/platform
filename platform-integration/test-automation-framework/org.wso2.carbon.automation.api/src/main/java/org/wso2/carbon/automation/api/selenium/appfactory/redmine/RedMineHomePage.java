@@ -39,12 +39,12 @@ public class RedMineHomePage {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
-        if (!(driver.getCurrentUrl().contains("redmine.appfactorypreview.wso2.com"))) {
+        if (!(driver.getCurrentUrl().contains("redmine"))) {
             throw new IllegalStateException("This is not the Red Mine Home page");
         }
     }
 
-    public void createIssueForProject(String subject, String description,String version) throws InterruptedException {
+    public void createIssueForProject(String subject, String description, String version) throws InterruptedException {
         log.info("creating the issue ");
         driver.findElement(By.linkText(uiElementMapper.getElement("app.redMine.issue.button"))).click();
         driver.findElement(By.id(uiElementMapper.getElement("app.redMine.issue.subject"))).sendKeys(subject);

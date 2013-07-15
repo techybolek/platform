@@ -41,7 +41,7 @@ public class DeleteDBPage {
         }
     }
 
-    public DatabaseConfigurationPage deleteDatabase(String databaseName) throws InterruptedException, IOException {
+    public ResourceOverviewPage deleteDatabase() throws InterruptedException, IOException {
         log.info("@ the delete db user Page");
         driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.delete.db"))).click();
         //waits until alert box appears
@@ -49,6 +49,6 @@ public class DeleteDBPage {
         driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.delete.Ok"))).click();
         //waits until the delete Process completion
         Thread.sleep(15000);
-        return new DatabaseConfigurationPage(driver);
+        return new ResourceOverviewPage(driver);
     }
 }

@@ -20,6 +20,7 @@ package org.wso2.carbon.automation.api.selenium.appfactory.resources;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
@@ -38,5 +39,17 @@ public class DataSourcePage {
         if (!(driver.getCurrentUrl().contains("listDatasources.jag"))) {
             throw new IllegalStateException("This is not the Resources Overview page");
         }
+    }
+
+    public NewDataSourcePage gotoNewDataSourcePage() throws IOException {
+        driver.findElement(By.xpath(uiElementMapper.getElement("app.factory.new.data.source.page.button"))).click();
+        return new NewDataSourcePage(driver);
+    }
+
+    public ResourceOverviewPage gotoResourceOverviewPage() throws IOException, InterruptedException {
+        driver.findElement(By.xpath(uiElementMapper.getElement("app.overview.link.css"))).click();
+        Thread.sleep(5000);
+        log.info("loaidng the resource overview page");
+        return new ResourceOverviewPage(driver);
     }
 }

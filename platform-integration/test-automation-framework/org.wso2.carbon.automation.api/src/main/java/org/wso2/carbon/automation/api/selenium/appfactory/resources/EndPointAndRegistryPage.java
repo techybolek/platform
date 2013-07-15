@@ -18,36 +18,27 @@
 
 package org.wso2.carbon.automation.api.selenium.appfactory.resources;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
 import java.io.IOException;
 
-public class DeleteDbUserPage {
-    private static final Log log = LogFactory.getLog(ResourceOverviewPage.class);
+public class EndPointAndRegistryPage {
     private WebDriver driver;
     private UIElementMapper uiElementMapper;
 
-    public DeleteDbUserPage(WebDriver driver) throws IOException {
+    public EndPointAndRegistryPage(WebDriver driver) throws IOException {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
-        if (!(driver.getCurrentUrl().contains("createdbuser.jag"))) {
-            throw new IllegalStateException("This is not the new db user Deletion Page");
+
+        if (!(driver.getCurrentUrl().contains("resources.jag"))) {
+            throw new IllegalStateException("This is not the End Point And Registry page");
         }
     }
 
-    public DatabaseConfigurationPage deleteDbUser() throws InterruptedException, IOException {
-        log.info("@ the delete db user Page");
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.delete.user"))).click();
-        //this thread waits for the alert box appear
-        Thread.sleep(5000);
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.delete.Ok"))).click();
-        //This thread waits until the delete process completion
-        Thread.sleep(15000);
-        return new DatabaseConfigurationPage(driver);
+    public NewPropertyPage gotoNewProperty() throws IOException {
+
+        return new NewPropertyPage(driver);
     }
 }

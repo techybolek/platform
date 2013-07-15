@@ -1,4 +1,4 @@
-package org.wso2.carbon.automation.api.selenium.apilist;
+package org.wso2.carbon.automation.api.selenium.apimanager.apilist;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -204,19 +204,6 @@ public class ApiListPage {
         }
         return false;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     public LoginPage logout() throws IOException {
         driver.findElement(By.linkText(uiElementMapper.getElement("home.greg.sign.out.xpath"))).click();

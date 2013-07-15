@@ -66,6 +66,8 @@ public class AppHomePage {
         driver.navigate().refresh();
         //this pause is set until created applications Deployment
         Thread.sleep(20000);
+        driver.findElement(By.cssSelector(uiElementMapper
+                .getElement("app.factory.list.view"))).click();
         log.info("application is processing");
         driver.findElement(By.id(uiElementMapper.getElement("app.homepage.search.textBox")))
                 .sendKeys(applicationName);
@@ -83,8 +85,13 @@ public class AppHomePage {
     public AppManagementPage gotoApplicationManagementPage(String applicationName)
             throws IOException, InterruptedException {
         //this pause is set until created applications loaded to the home page
+        Thread.sleep(5000);
+        driver.findElement(By.cssSelector(uiElementMapper
+                .getElement("app.factory.list.view"))).getText();
         Thread.sleep(15000);
         driver.navigate().refresh();
+        driver.findElement(By.cssSelector(uiElementMapper
+                .getElement("app.factory.list.view"))).click();
         //this pause is set until created applications Deployment
         Thread.sleep(20000);
         driver.findElement(By.linkText((applicationName))).click();

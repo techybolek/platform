@@ -43,19 +43,29 @@ public class DatabaseConfigurationPage {
         }
     }
 
-    public NewDatabasePage gotoNewDatabasePage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.new.database.link"))).click();
-        return new NewDatabasePage(driver);
+    //checking database configuration panes to check whether resources has deleted successfully
+    public boolean isDatabaseDetailsDeleted() {
+        String databaseName = driver.findElement(By.id(uiElementMapper.getElement
+                ("app.db.details.id"))).getText().toUpperCase();
+        String dataBaseUser = driver.findElement(By.id(uiElementMapper.getElement
+                ("app.db.user.id"))).getText().toUpperCase();
+        String dataBaseTemplate = driver.findElement(By.id(uiElementMapper.getElement
+                ("app.db.template.id"))).getText().toUpperCase();
+
+        log.info("------------------------------------------");
+        log.info(databaseName);
+        log.info(dataBaseUser);
+        log.info(dataBaseTemplate);
+        log.info("------------------------------------------");
+        if (!databaseName.equals("Databases have not been created yet.".toUpperCase()) && dataBaseUser.
+                equals("DB users have not been created yet.".toUpperCase()) && dataBaseTemplate.
+                equals("DB Templates have not been created yet.".toUpperCase())) {
+            log.info("Database resources deleted Successfully");
+            return true;
+        }
+        return false;
     }
 
-    public NewDatabaseUserPage gotoNewDatabaseUserPage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.db.dbUser.link"))).click();
-        return new NewDatabaseUserPage(driver);
-    }
-    public NewDatabaseTemplatePage gotoNewDatabaseTemplatePage() throws IOException {
-        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.db.template.link"))).click();
-        return new NewDatabaseTemplatePage(driver);
-    }
 
     public boolean isDatabaseDetailsAvailable(String database, String user, String template) {
         String databaseName = driver.findElement(By.partialLinkText(uiElementMapper.getElement
@@ -75,6 +85,20 @@ public class DatabaseConfigurationPage {
         }
         return false;
     }
+    public NewDatabasePage gotoNewDatabasePage() throws IOException {
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.new.database.link"))).click();
+        return new NewDatabasePage(driver);
+    }
+
+    public NewDatabaseUserPage gotoNewDatabaseUserPage() throws IOException {
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.db.dbUser.link"))).click();
+        return new NewDatabaseUserPage(driver);
+    }
+    public NewDatabaseTemplatePage gotoNewDatabaseTemplatePage() throws IOException {
+        driver.findElement(By.linkText(uiElementMapper.getElement("app.factory.db.template.link"))).click();
+        return new NewDatabaseTemplatePage(driver);
+    }
+
 
     public DeleteDBPage gotoDeleteDbPage(String resource) throws IOException {
         log.info(resource);
@@ -92,5 +116,15 @@ public class DatabaseConfigurationPage {
         log.info(resource);
         driver.findElement(By.partialLinkText((resource))).click();
         return new DeleteTemplatePage(driver);
+    }
+
+    public void signOut() {
+        log.info("Ready to sign out from the system");
+        driver.findElement(By.cssSelector(uiElementMapper.getElement
+                ("app.factory.sign.out.email"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement
+                ("app.factory.sing.out.text"))).click();
+
+        log.info("log out from the app factory");
     }
 }
