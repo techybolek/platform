@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * 
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.identity.oauth.endpoint.authz;
 
 import java.net.URI;
@@ -53,24 +70,19 @@ public class OAuth2AuthzEndpoint {
 		try {
 			if (clientId != null) { // request from the client
 				String redirectURL = CharacterEncoder.getSafeText(request.getParameter("redirect_uri"));
-				OAuthResponse response = null;
 				try {
-					redirectURL = handleOAuthAuthorizationRequest(request);
+					redirectURL = handleOAuthAuthorizationRequest(request, clientId, redirectURL);
 				} catch (OAuthProblemException e) {
 					log.debug(e.getError(), e.getCause());
-					response = OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND).error(e)
-					                          .location(redirectURL).buildQueryMessage();
+					redirectURL =
+					              OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND).error(e)
+					                             .location(redirectURL).buildQueryMessage().getLocationUri();
 				}
-				return Response.status(HttpServletResponse.SC_FOUND)
-				               .location(new URI(response.getLocationUri())).build();
+				return Response.status(HttpServletResponse.SC_FOUND).location(new URI(redirectURL)).build();
 
 			} else if (oauth2Params != null) { // request from the login page
-				
 				String redirectURL = handleOAuthRequestParams(request);
-				OAuthResponse response = OAuthASResponse.authorizationResponse(request, HttpServletResponse.SC_FOUND)
-				                                        .location(redirectURL).buildQueryMessage();
-				return Response.status(response.getResponseStatus())
-				               .location(new URI(response.getLocationUri())).build();
+				return Response.status(HttpServletResponse.SC_FOUND).location(new URI(redirectURL)).build();
 
 			} else if (consent != null) {
 				String returnUrl = handleUserConsent(consent, request, oauth2Params);
@@ -147,15 +159,15 @@ public class OAuth2AuthzEndpoint {
 	 * "application/x-www-form-urlencoded" format
 	 * 
 	 * @param req
+	 * @param clientId 
+	 * @param callbackURL 
 	 * @return
 	 * @throws OAuthSystemException
 	 * @throws OAuthProblemException
 	 */
-	private String handleOAuthAuthorizationRequest(HttpServletRequest req) throws OAuthSystemException,
+	private String handleOAuthAuthorizationRequest(HttpServletRequest req, String clientId, String callbackURL) throws OAuthSystemException,
 	                                                                      OAuthProblemException {
 		OAuth2ClientValidationResponseDTO clientDTO = null;
-		String clientId = CharacterEncoder.getSafeText(req.getParameter("client_id"));
-		String callbackURL = CharacterEncoder.getSafeText(req.getParameter("redirect_uri"));
 		if (clientId != null) {
 			clientDTO = validateClient(req, clientId, callbackURL);
 		} else {
@@ -367,9 +379,9 @@ public class OAuth2AuthzEndpoint {
 			}
 			if (oauth2Params.getPrompt() == null || oauth2Params.getPrompt().contains(OIDC.Prompt.CONSENT)) {
 				request.getSession().setAttribute(OpenIDConnectConstant.Session.OIDC_RESPONSE, redirectUrl);
-				return EndpointUtil.getUserConsentURL(request, null, oauth2Params, loggedInUser, redirectUrl);
-			} else if (oauth2Params.getPrompt().contains(OIDC.Prompt.NONE)) {
+				return EndpointUtil.getUserConsentURL(oauth2Params, loggedInUser);
 				
+			} else if (oauth2Params.getPrompt().contains(OIDC.Prompt.NONE)) {
 				// load the users approved applications
 				String appName = oauth2Params.getApplicationName();
 				boolean hasUserApproved = OpenIDConnectUserRPStore.getInstance()

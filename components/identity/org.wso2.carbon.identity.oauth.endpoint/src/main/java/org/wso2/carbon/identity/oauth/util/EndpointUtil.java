@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.ui.CarbonUIUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -152,38 +153,39 @@ public class EndpointUtil {
         } catch (UnsupportedEncodingException e) {
             // ignore
         }
+        req.getSession().setAttribute("loginPage", loginPage);
         return loginPage;
     }
 
-    /**
-     * Returns the consent page URL. If no custom page is defined, then the
-     * default will be returned.
-     *
-     * @param req
-     * @param params
-     * @param clientDTO
-     * @param redirectUrl
-     * @param loggedInUser
-     * @return
-     */
-    public static String getUserConsentURL(HttpServletRequest req, org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO clientDTO,
-                                           OAuth2Parameters params, String loggedInUser, String redirectUrl) {
-
-        String consentPage = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_login.do";
-
-
+	/**
+	 * Returns the consent page URL. If no custom page is defined, then the
+	 * default will be returned.
+	 * 
+	 * @param params
+	 * @param loggedInUser
+	 * @return
+	 */
+	public static String getUserConsentURL(OAuth2Parameters params, String loggedInUser) {
+		String consentPage =
+		                     CarbonUIUtil.getAdminConsoleURL("/") +
+		                             "../authenticationendpoint/oauth2_login.do";
+		StringBuffer scopes = new StringBuffer();
+		for(String scope : params.getScopes()) {
+			scopes.append(scope);
+		}
 		try {
-			consentPage += "?" + OpenIDConnectConstant.Session.OIDC_LOGGED_IN_USER + "=" +
-                    URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
-                    OpenIDConnectConstant.Session.OIDC_RP + "=" +
-			        URLEncoder.encode(params.getApplicationName(), "UTF-8") + "&" +
-			        OpenIDConnectConstant.Session.OIDC_RESPONSE + "=" +
-			        URLEncoder.encode(redirectUrl, "UTF-8");
+			consentPage +=
+			               "?" + OpenIDConnectConstant.Session.OIDC_LOGGED_IN_USER + "=" +
+			                       URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
+			                       OpenIDConnectConstant.Session.OIDC_RP + "=" +
+			                       URLEncoder.encode(params.getApplicationName(), "UTF-8")  + "&" +
+			                       OpenIDConnectConstant.Parameter.SCOPE + "=" +
+			                       URLEncoder.encode(scopes.toString(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// ignore
 		}
-        return consentPage;
-    }
+		return consentPage;
+	}
 
     private static String getScope(OAuth2Parameters params) {
         StringBuffer scopes = new StringBuffer();

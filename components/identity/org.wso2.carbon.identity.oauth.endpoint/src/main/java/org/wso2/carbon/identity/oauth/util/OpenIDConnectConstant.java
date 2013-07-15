@@ -26,6 +26,10 @@ public class OpenIDConnectConstant {
 		public static final String OIDC_LOGGED_IN_USER = "loggedInUser";
 	}
 	
+	public class Parameter {
+		public static final String SCOPE = "scope";
+	}
+	
 	public class Consent {
 		public static final String DENY = "deny";
 		public static final String APPROVE = "approve";
