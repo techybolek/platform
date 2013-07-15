@@ -18,16 +18,15 @@
 
 package org.wso2.carbon.identity.oauth.ui.endpoints.authz;
 
-import java.io.IOException;
+import org.apache.amber.oauth2.common.exception.OAuthSystemException;
+import org.wso2.carbon.identity.oauth.ui.client.OAuth2AuthzClient;
+import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.amber.oauth2.common.exception.OAuthSystemException;
-import org.wso2.carbon.identity.oauth.ui.client.OAuth2AuthzClient;
-import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
+import java.io.IOException;
 
 /**
  * This servlet handles the authentication endpoint 

@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.identity.oauth.ui.endpoints.token;
 
-import org.apache.amber.oauth2.as.request.OAuthTokenRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.OAuth;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;

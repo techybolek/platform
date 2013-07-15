@@ -103,10 +103,10 @@
 </script>
 
 
-<%@page import="java.util.ResourceBundle" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.ArrayList" %>
+<%@page import="java.util.ArrayList" %>
 <%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ResourceBundle" %>
 <fmt:bundle basename="org.wso2.carbon.identity.oauth.ui.i18n.Resources">
     <carbon:breadcrumb label="app.settings"
                        resourceBundle="org.wso2.carbon.identity.oauth.ui.i18n.Resources"

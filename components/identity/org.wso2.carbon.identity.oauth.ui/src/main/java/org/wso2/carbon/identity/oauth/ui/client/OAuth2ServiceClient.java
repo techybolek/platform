@@ -25,13 +25,7 @@ import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.identity.oauth2.ResponseHeader;
 import org.wso2.carbon.identity.oauth2.stub.OAuth2ServiceStub;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenReqDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenRespDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeReqDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeRespDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationRequestDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationResponseDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.*;
 import org.wso2.carbon.user.api.Claim;
 
 import java.rmi.RemoteException;
@@ -181,7 +175,7 @@ public class OAuth2ServiceClient {
     public OAuthRevocationResponseDTO revokeTokensByOAuthClient(OAuthRevocationRequestDTO reqDTO)
             throws RemoteException {
         if (wsMode) {
-            return stub.revokeTokensByOAuthClient(reqDTO);
+            return stub.revokeTokenByOAuthClient(reqDTO);
         }
         return _revokeTokensByOAuthClient(reqDTO);
     }
@@ -192,9 +186,9 @@ public class OAuth2ServiceClient {
 
         areqDTO.setConsumerKey(reqDTO.getConsumerKey());
         areqDTO.setConsumerSecret(reqDTO.getConsumerSecret());
-        areqDTO.setTokens(reqDTO.getTokens());
+        areqDTO.setToken(reqDTO.getToken());
 
-        org.wso2.carbon.identity.oauth2.dto.OAuthRevocationResponseDTO resp = oauth2Service.revokeTokensByOAuthClient(areqDTO);
+        org.wso2.carbon.identity.oauth2.dto.OAuthRevocationResponseDTO resp = oauth2Service.revokeTokenByOAuthClient(areqDTO);
 
         OAuthRevocationResponseDTO respDTO = new OAuthRevocationResponseDTO();
         respDTO.setError(resp.isError());

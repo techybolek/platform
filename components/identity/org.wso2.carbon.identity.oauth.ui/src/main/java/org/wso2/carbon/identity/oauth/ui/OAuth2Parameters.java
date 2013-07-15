@@ -18,10 +18,10 @@
 
 package org.wso2.carbon.identity.oauth.ui;
 
+import org.wso2.carbon.ui.util.CharacterEncoder;
+
 import java.io.Serializable;
 import java.util.Set;
-
-import org.wso2.carbon.ui.util.CharacterEncoder;
 
 /**
  * A Bean class which is used to store the OAuth parameters available in a OAuth request in the http

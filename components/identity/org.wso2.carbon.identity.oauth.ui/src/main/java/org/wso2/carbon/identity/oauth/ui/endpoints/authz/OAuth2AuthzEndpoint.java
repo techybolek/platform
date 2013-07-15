@@ -18,15 +18,6 @@
 
 package org.wso2.carbon.identity.oauth.ui.endpoints.authz;
 
-import java.io.IOException;
-import java.rmi.RemoteException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.amber.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
@@ -45,6 +36,14 @@ import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.util.CharacterEncoder;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.rmi.RemoteException;
 
 /**
  * This servlet handles the authorization endpoint and token endpoint.

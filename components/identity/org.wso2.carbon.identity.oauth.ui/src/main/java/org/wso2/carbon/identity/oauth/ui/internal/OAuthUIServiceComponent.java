@@ -26,7 +26,6 @@ import org.osgi.service.http.HttpService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.identity.oauth.ui.OAuthServlet;
 import org.wso2.carbon.identity.oauth.ui.endpoints.authz.OAuth2AuthnEndpoint;
-import org.wso2.carbon.identity.oauth.ui.endpoints.authz.OAuth2AuthzEndpoint;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.utils.ConfigurationContextService;
 

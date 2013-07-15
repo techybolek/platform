@@ -15,10 +15,9 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<%@page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil"%>
-<%@ page import="org.apache.amber.oauth2.common.exception.OAuthSystemException" %>
-<%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
+<%@page import="org.apache.amber.oauth2.common.exception.OAuthSystemException"%>
 <%@ page import="org.wso2.carbon.identity.oauth.ui.client.OAuth2AuthzClient" %>
+<%@ page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil" %>
 <%
 	OAuth2AuthzClient authzClient = new OAuth2AuthzClient();
     String redirectUrl;

@@ -23,12 +23,12 @@
 <%@page import="org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO" %>
 <%@page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
 <%@page import="org.wso2.carbon.identity.oauth.ui.client.OAuthAdminClient" %>
-<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil" %>
 
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.util.ResourceBundle" %>
-<%@ page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil" %>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>

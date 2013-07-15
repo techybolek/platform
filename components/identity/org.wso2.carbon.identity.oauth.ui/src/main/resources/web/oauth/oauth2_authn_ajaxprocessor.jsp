@@ -18,7 +18,6 @@
 <%@page import="org.wso2.carbon.identity.oauth.ui.OAuth2Parameters"%>
 <%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
-<%@ page import="java.util.Set" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
