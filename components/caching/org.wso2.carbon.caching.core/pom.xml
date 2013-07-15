@@ -14,6 +14,47 @@
     <packaging>bundle</packaging>
     <name>WSO2 Caching Module - Core</name>
 
+    <dependencies>
+        <!-- Axis2 Jars -->
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-kernel</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-saaj</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-clustering</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <!-- AXIOM Dependencies -->
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-impl</artifactId>
+            <version>${axiom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-api</artifactId>
+            <version>${axiom.version}</version>
+        </dependency>
+        <!-- Neethi jar for the policy processor -->
+        <dependency>
+            <groupId>org.apache.neethi.wso2</groupId>
+            <artifactId>neethi</artifactId>
+            <version>${orbit.version.neethi}</version>
+        </dependency>
+        <!-- Thrid party dependencies -->
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>${version.xmlunit}</version>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
            <plugin>
@@ -35,8 +76,8 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <copy file="target/${project.artifactId}-${wso2caching.version}.jar"
-                                      tofile="target/wso2caching-${wso2caching.version}.mar"/>
+                                <copy file="target/${project.artifactId}-${project.version}.jar"
+                                      tofile="target/wso2caching-${project.version}.mar"/>
 				<!--<copy file="target/${project.artifactId}-${wso2caching.version}.jar"-->
                                       <!--tofile="target/wso2caching.mar"/>-->
                             </tasks>
