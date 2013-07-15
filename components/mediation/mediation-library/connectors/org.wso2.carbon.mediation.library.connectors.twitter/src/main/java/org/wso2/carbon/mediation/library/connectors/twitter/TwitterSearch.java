@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import java.io.IOException;
@@ -18,16 +36,18 @@ import twitter4j.QueryResult;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
 public class TwitterSearch extends AbstractTwitterConnector {
 
 	public static final String SEARCH_STRING = "search";
-	
-	/* (non-Javadoc)
-	 * @see org.wso2.carbon.mediation.library.connectors.core.AbstractConnector#connect()
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.wso2.carbon.mediation.library.connectors.core.AbstractConnector#connect
+	 * ()
 	 */
 	@Override
 	public void connect() throws ConnectException {
@@ -73,47 +93,10 @@ public class TwitterSearch extends AbstractTwitterConnector {
 		List<Status> results = result.getTweets();
 		for (Status tweet : results) {
 			String json = DataObjectFactory.getRawJSON(tweet);
-			OMElement element =super.parseJsonToXml(json);
+			OMElement element = super.parseJsonToXml(json);
 			resultElement.addChild(element);
 		}
 		return resultElement;
 
 	}
-
-	public static void main(String ar[]) {
-		TwitterSearch search = new TwitterSearch();
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setOAuthAccessToken("1114764380-JNGKRkrUFUDCHC0WdmjDurZ3wwi9BV6ysbDRYca");
-		cb.setOAuthAccessTokenSecret("vkpELc3OWK0TM0BjYcPLCn22Wm3HRliNUyx1QSxg4JI");
-		cb.setOAuthConsumerKey("6U5CNaHKh7hVSGpk1CXo6A");
-		cb.setOAuthConsumerSecret("EvTEzc3jj9Z1Kx58ylNfkpnuXYuCeGgKhkVkziYNMs");
-		cb.setJSONStoreEnabled(true);
-		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-		try {
-	        twitter.verifyCredentials();
-        } catch (TwitterException e1) {
-	        // TODO Auto-generated catch block
-	        e1.printStackTrace();
-        }
-		
-		Query query = new Query("#IPL");
-		try {
-			OMElement element =search.performSearch(twitter, query);
-			System.out.println("e"+element.toString());
-		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
 }

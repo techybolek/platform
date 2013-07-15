@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<artifact name="twitter" type="synapse/template" >
+<artifact name="twitter" type="synapse/template">
 
-    <subArtifacts> 
-	<artifact name="tweet.update_status" >
-    		<file>update_status.xml</file>
-    		<description>tweet upates</description>
-	</artifact>
-	<artifact name="tweet.show_status" >
-    		<file>show_status.xml</file>
-    		<description>show status of the tweeter</description>
-	</artifact>
-	<artifact name="tweet.retweet" >
-    		<file>retweet_status.xml</file>
-    		<description>retweeting</description>
-	</artifact>
-    <artifact name="tweet.login_user" >
-    		<file>login_user.xml</file>
-    		<description>login tweeter user</description>
-	</artifact>
-	<artifact name="tweet.search" >
-    		<file>search_string.xml</file>
-    		<description>search tweeter</description>
-	</artifact>
-	
-	<artifact name="tweet.search_places" >
-    		<file>search_places.xml</file>
-    		<description>search tweeter</description>
-	</artifact>
-	
-    </subArtifacts>
-    
+	<subArtifacts>
+		<artifact name="tweet.update_status">
+			<file>update_status.xml</file>
+			<description>tweet upates</description>
+		</artifact>
+		<artifact name="tweet.show_status">
+			<file>show_status.xml</file>
+			<description>show status of the tweeter</description>
+		</artifact>
+		<artifact name="tweet.retweet">
+			<file>retweet_status.xml</file>
+			<description>retweeting</description>
+		</artifact>
+		<artifact name="tweet.login_user">
+			<file>login_user.xml</file>
+			<description>login tweeter user</description>
+		</artifact>
+		<artifact name="tweet.search">
+			<file>search_string.xml</file>
+			<description>search tweeter</description>
+		</artifact>
+
+		<artifact name="tweet.search_places">
+			<file>search_places.xml</file>
+			<description>search tweeter</description>
+		</artifact>
+
+		<artifact name="twitter.get_user_timeline">
+			<file>get_user_timeline.xml</file>
+			<description>get user timeline</description>
+		</artifact>
+
+	</subArtifacts>
+
 </artifact>

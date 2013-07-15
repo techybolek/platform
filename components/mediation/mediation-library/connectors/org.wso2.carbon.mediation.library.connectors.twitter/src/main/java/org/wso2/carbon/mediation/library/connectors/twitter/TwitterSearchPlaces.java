@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import java.io.IOException;
@@ -18,8 +36,6 @@ import twitter4j.GeoQuery;
 import twitter4j.Place;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
 public class TwitterSearchPlaces extends AbstractTwitterConnector{
@@ -34,6 +50,9 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector{
 	@Override
 	public void connect() throws ConnectException {
 		// TODO Auto-generated method stub
+		if(log.isDebugEnabled()){
+			log.info("executing twitter search places");
+		}
 		MessageContext messageContext = getMessageContext();
 		try {
 			String latitude = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_BY_LATITUDE);
@@ -43,6 +62,9 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector{
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
 			SOAPBody soapBody = messageContext.getEnvelope().getBody();
+			if(log.isDebugEnabled()){
+				log.info("executing prparing soap envolope"+element.toString());
+			}
 			for (Iterator itr = soapBody.getChildElements(); itr.hasNext();) {
 				OMElement child = (OMElement) itr.next();
 				child.detach();
@@ -74,7 +96,9 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector{
 	private OMElement performSearch(Twitter twitter, GeoQuery query) throws XMLStreamException, TwitterException, JSONException, IOException {
 		OMElement resultElement = AXIOMUtil.stringToOM("<XMLPayload/>");
 		List<Place> results = twitter.searchPlaces(query);
-		
+		if(log.isDebugEnabled()){
+			log.info("executing executing search"+query);
+		}
 		for (Place place : results) {
 		    StringBuilder stringBuilder = new StringBuilder();
 		    stringBuilder.append("{ \"Place\" : ");
@@ -89,42 +113,5 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector{
 
 	}
 	
-	
-	public static void main(String ar[]) {
-		TwitterSearchPlaces search = new TwitterSearchPlaces();
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setOAuthAccessToken("1114764380-JNGKRkrUFUDCHC0WdmjDurZ3wwi9BV6ysbDRYca");
-		cb.setOAuthAccessTokenSecret("vkpELc3OWK0TM0BjYcPLCn22Wm3HRliNUyx1QSxg4JI");
-		cb.setOAuthConsumerKey("6U5CNaHKh7hVSGpk1CXo6A");
-		cb.setOAuthConsumerSecret("EvTEzc3jj9Z1Kx58ylNfkpnuXYuCeGgKhkVkziYNMs");
-		cb.setJSONStoreEnabled(true);
-		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-		try {
-	        twitter.verifyCredentials();
-        } catch (TwitterException e1) {
-	        // TODO Auto-generated catch block
-	        e1.printStackTrace();
-        }
 		
-        GeoQuery query = new GeoQuery(new GeoLocation(40.71435, -74.00597));
-		
-		try {
-			OMElement element =search.performSearch(twitter, query);
-			System.out.println("e"+element.toString());
-		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-	
 }
