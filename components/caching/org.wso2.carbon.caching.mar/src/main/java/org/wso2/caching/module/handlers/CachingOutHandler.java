@@ -18,14 +18,13 @@ package org.wso2.caching.module.handlers;
 
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.clustering.ClusteringFault;
-import org.apache.axis2.clustering.state.Replicator;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisModule;
 import org.wso2.caching.core.CachableResponse;
-import org.wso2.caching.core.CacheReplicationCommand;
 import org.wso2.caching.core.CachingConstants;
+import org.wso2.caching.core.RequestHash;
+import org.wso2.caching.core.util.CachingUtils;
 import org.wso2.caching.core.util.SOAPMessageHelper;
 
 import javax.xml.stream.XMLStreamException;
@@ -85,17 +84,8 @@ public class CachingOutHandler extends CachingHandler {
             }
         }
 
-        // Finally, we may need to replicate the changes in the cache
-        CacheReplicationCommand cacheReplicationCommand
-                = (CacheReplicationCommand) opCtx.getPropertyNonReplicable(CachingConstants.STATE_REPLICATION_OBJECT);
-        if (cacheReplicationCommand != null) {
-            try {
-                Replicator.replicateState(cacheReplicationCommand,
-                                          opCtx.getRootContext().getAxisConfiguration());
-            } catch (ClusteringFault clusteringFault) {
-                log.error("Cannot replicate cache changes");
-            }
-        }
+        CachingUtils.getCacheForService(msgContext.getAxisService().getName()).put(
+                response.getRequestHash(), response);
         return InvocationResponse.CONTINUE;
     }
 }

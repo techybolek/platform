@@ -25,6 +25,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.wso2.caching.core.*;
 import org.wso2.caching.core.digest.DigestGenerator;
+import org.wso2.caching.core.util.CachingUtils;
 import org.wso2.caching.core.util.FixedByteArrayOutputStream;
 
 import javax.xml.stream.XMLStreamException;
@@ -91,17 +92,11 @@ public class CachingInHandler extends CachingHandler {
         }
 
         String requestHash = getRequestHash(msgContext, cacheCfg);
-
-        CacheManager cacheManager =
-                (CacheManager) cfgCtx.getPropertyNonReplicable(CachingConstants.CACHE_MANAGER);
         String serviceName = msgContext.getAxisService().getName();
 
         opCtx.setNonReplicableProperty(CachingConstants.REQUEST_HASH, requestHash);
-        ServiceName service = new ServiceName(serviceName);
-        RequestHash hash = new RequestHash(requestHash);
-        CachableResponse cachedResponse =
-                cacheManager.getCachedResponse(service, hash);
-        CacheReplicationCommand cacheReplicationCommand = new CacheReplicationCommand();
+        CachableResponse cachedResponse = CachingUtils.getCacheForService(serviceName).get(requestHash);
+
         if (cachedResponse != null) { // Response is available in the cache
             if (!cachedResponse.isExpired()) { // Cache hit & fresh. No state replication needed
                 if (log.isDebugEnabled()) {
@@ -131,10 +126,7 @@ public class CachingInHandler extends CachingHandler {
                 if (log.isDebugEnabled()) {
                     log.debug("Existing cached response has expired. Reset cache element");
                 }
-                cacheManager.cacheResponse(service, hash, cachedResponse, cacheReplicationCommand);
                 opCtx.setNonReplicableProperty(CachingConstants.CACHED_OBJECT, cachedResponse);
-                opCtx.setNonReplicableProperty(CachingConstants.STATE_REPLICATION_OBJECT,
-                                               cacheReplicationCommand);
                 // Request needs to continue to reach the service since the response envelope
                 // needs to be recreated by the service
                 return InvocationResponse.CONTINUE;
@@ -143,21 +135,7 @@ public class CachingInHandler extends CachingHandler {
             if (log.isDebugEnabled()) {
                 log.debug("There is no cached response for the request. Trying to cache...");
             }
-
-            if (cacheManager.getCacheSize(service) >= cacheCfg.getMaxCacheSize()) { // If cache is full
-                cacheManager.removeExpiredResponses(service, cacheReplicationCommand); // try to remove expired responses
-                if (cacheManager.getCacheSize(service) >= cacheCfg.getMaxCacheSize()) { // recheck if there is space
-                    if (log.isDebugEnabled()) {
-                        log.debug("In-memory cache is full. Unable to cache");
-                    }
-                } else { // if we managed to free up some space in the cache. Need state replication
-                    cacheNewResponse(msgContext, service, hash, cacheManager, cacheCfg,
-                                     cacheReplicationCommand);
-                }
-            } else { // if there is more space in the cache. Need state replication
-                cacheNewResponse(msgContext, service, hash, cacheManager, cacheCfg,
-                                 cacheReplicationCommand);
-            }
+            cacheNewResponse(msgContext,serviceName,requestHash,cacheCfg);
             return InvocationResponse.CONTINUE;
         }
     }
@@ -180,16 +158,13 @@ public class CachingInHandler extends CachingHandler {
     }
 
     private void cacheNewResponse(MessageContext msgContext,
-                                  ServiceName serviceName, RequestHash requestHash,
-                                  CacheManager cacheManager, CacheConfiguration chCfg,
-                                  CacheReplicationCommand cacheReplicationCommand) {
+                                  String serviceName, String requestHash,
+                                  CacheConfiguration chCfg) {
         CachableResponse response = new CachableResponse();
-        response.setRequestHash(requestHash.getRequestHash());
+        response.setRequestHash(requestHash);
         response.setTimeout(chCfg.getTimeout());
-        cacheManager.cacheResponse(serviceName, requestHash, response, cacheReplicationCommand);
         OperationContext opCtx = msgContext.getOperationContext();
         opCtx.setNonReplicableProperty(CachingConstants.CACHED_OBJECT, response);
-        opCtx.setNonReplicableProperty(CachingConstants.STATE_REPLICATION_OBJECT,
-                                       cacheReplicationCommand);
+
     }
 }
