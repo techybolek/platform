@@ -1,12 +1,12 @@
 package org.wso2.carbon.identity.oauth.cache;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.io.Serializable;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 /*
  * Copyright 2004,2005 The Apache Software Foundation.
  * 

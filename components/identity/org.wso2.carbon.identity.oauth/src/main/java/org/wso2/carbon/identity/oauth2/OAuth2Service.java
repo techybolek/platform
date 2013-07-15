@@ -18,36 +18,20 @@
 
 package org.wso2.carbon.identity.oauth2;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.util.ArrayUtil;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
-import org.wso2.carbon.identity.oauth.common.exception.UnauthorizedRevocationException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth2.authz.AuthorizationHandlerManager;
 import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationRequestDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationResponseDTO;
+import org.wso2.carbon.identity.oauth2.dto.*;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.model.RefreshTokenValidationDataDO;
 import org.wso2.carbon.identity.oauth2.token.AccessTokenIssuer;
@@ -56,6 +40,11 @@ import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * OAuth2 Service which is used to issue authorization codes or access tokens upon authorizing by the
@@ -205,54 +194,67 @@ public class OAuth2Service extends AbstractAdmin {
      * @param revokeRequestDTO DTO representing consumerKey, consumerSecret and tokens[]
      * @return revokeRespDTO DTO representing success or failure message
      */
-    public OAuthRevocationResponseDTO revokeTokensByOAuthClient(OAuthRevocationRequestDTO revokeRequestDTO) {
+    public OAuthRevocationResponseDTO revokeTokenByOAuthClient(OAuthRevocationRequestDTO revokeRequestDTO) {
 
         TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
         try{
-            if (revokeRequestDTO.getConsumerKey()!=null && revokeRequestDTO.getConsumerSecret()!=null
-                    && revokeRequestDTO.getTokens() != null) {
+            if (revokeRequestDTO.getConsumerKey() != null && !revokeRequestDTO.getConsumerKey().equals("") &&
+                    revokeRequestDTO.getConsumerSecret() != null && !revokeRequestDTO.getConsumerSecret().equals("") &&
+                    revokeRequestDTO.getToken() != null && !revokeRequestDTO.getToken().equals("")) {
                 if(!OAuth2Util.authenticateClient(revokeRequestDTO.getConsumerKey(), revokeRequestDTO.getConsumerSecret())){
                     OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
                     revokeRespDTO.setError(true);
                     revokeRespDTO.setErrorCode(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
-                    revokeRespDTO.setErrorMsg("ConsumerKey: " + revokeRequestDTO.getConsumerKey() +
-                            " not authorized to revoke: " + revokeRequestDTO.getTokens()[0]);
+                    revokeRespDTO.setErrorMsg("Unauthorized Client");
                     return revokeRespDTO;
                 }
-                for (String token : revokeRequestDTO.getTokens()) {
-                    AccessTokenDO accessTokenDO = tokenMgtDAO.validateBearerToken(token);
+                boolean refreshTokenFirst = false;
+                if(revokeRequestDTO.getToken_type() != null && revokeRequestDTO.equals("refresh_token")){
+                    refreshTokenFirst = true;
+                }
+                if(refreshTokenFirst){
+                    RefreshTokenValidationDataDO refreshTokenDO = tokenMgtDAO.validateRefreshToken(revokeRequestDTO.getConsumerKey(), revokeRequestDTO.getToken());
+                    if(refreshTokenDO != null && refreshTokenDO.getRefreshTokenState() != null &&
+                            (refreshTokenDO.getRefreshTokenState().equals(OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE) ||
+                                    refreshTokenDO.getRefreshTokenState().equals(OAuth2Constants.TokenStates.TOKEN_STATE_EXPIRED))){
+                        org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(revokeRequestDTO.getConsumerKey(),refreshTokenDO.getAuthorizedUser());
+                        tokenMgtDAO.revokeTokensByClient(refreshTokenDO.getAccessToken(), revokeRequestDTO.getConsumerKey());
+                    } else {
+                        AccessTokenDO accessTokenDO = tokenMgtDAO.validateBearerToken(revokeRequestDTO.getToken());
+                        if(accessTokenDO != null){
+                            org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(revokeRequestDTO.getConsumerKey(),accessTokenDO.getAuthzUser());
+                            tokenMgtDAO.revokeTokensByClient(revokeRequestDTO.getToken(), revokeRequestDTO.getConsumerKey());
+                        }
+                    }
+                } else {
+                    AccessTokenDO accessTokenDO = tokenMgtDAO.validateBearerToken(revokeRequestDTO.getToken());
                     if(accessTokenDO != null){
                         org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(revokeRequestDTO.getConsumerKey(),accessTokenDO.getAuthzUser());
-                        tokenMgtDAO.revokeAccessTokensByClient(token, revokeRequestDTO.getConsumerKey());
-                    }else{
-                        RefreshTokenValidationDataDO refreshTokenDO = tokenMgtDAO.validateRefreshToken(revokeRequestDTO.getConsumerKey(), token);
+                        tokenMgtDAO.revokeTokensByClient(revokeRequestDTO.getToken(), revokeRequestDTO.getConsumerKey());
+                    } else {
+                        RefreshTokenValidationDataDO refreshTokenDO = tokenMgtDAO.validateRefreshToken(revokeRequestDTO.getConsumerKey(), revokeRequestDTO.getToken());
                         if(refreshTokenDO != null && refreshTokenDO.getRefreshTokenState() != null &&
                                 (refreshTokenDO.getRefreshTokenState().equals(OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE) ||
                                         refreshTokenDO.getRefreshTokenState().equals(OAuth2Constants.TokenStates.TOKEN_STATE_EXPIRED))){
                             org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(revokeRequestDTO.getConsumerKey(),refreshTokenDO.getAuthorizedUser());
-                            tokenMgtDAO.revokeAccessTokensByClient(refreshTokenDO.getAccessToken(), revokeRequestDTO.getConsumerKey());
+                            tokenMgtDAO.revokeTokensByClient(refreshTokenDO.getAccessToken(), revokeRequestDTO.getConsumerKey());
                         }
                     }
                 }
             } else {
                 OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
                 revokeRespDTO.setError(true);
-                revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
+                revokeRespDTO.setErrorCode(OAuth2ErrorCodes.INVALID_REQUEST);
                 revokeRespDTO.setErrorMsg("Invalid revocation request");
                 return revokeRespDTO;
             }
             return new OAuthRevocationResponseDTO();
-        }catch(UnauthorizedRevocationException e){
-            OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
-            revokeRespDTO.setError(true);
-            revokeRespDTO.setErrorCode(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
-            revokeRespDTO.setErrorMsg(e.getMessage());
-            return revokeRespDTO;
         } catch (IdentityException e) {
+            log.error(e.getMessage(), e);
             OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
             revokeRespDTO.setError(true);
             revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
-            revokeRespDTO.setErrorMsg("Error when processing the revocation request");
+            revokeRespDTO.setErrorMsg("Error occurred while revoking authorization grant for applications");
             return revokeRespDTO;
         }
     }

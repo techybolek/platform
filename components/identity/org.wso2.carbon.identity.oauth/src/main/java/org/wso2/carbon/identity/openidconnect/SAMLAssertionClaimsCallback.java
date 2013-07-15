@@ -17,9 +17,6 @@
  */
 package org.wso2.carbon.identity.openidconnect;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +25,9 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.AttributeStatement;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Returns the claims of the SAML assertion 

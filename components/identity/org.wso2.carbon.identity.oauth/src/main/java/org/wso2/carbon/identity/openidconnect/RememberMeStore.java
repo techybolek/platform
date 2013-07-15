@@ -17,12 +17,12 @@
  */
 package org.wso2.carbon.identity.openidconnect;
 
-import java.util.Calendar;
-import java.util.Map;
-
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.Calendar;
+import java.util.Map;
 
 public class RememberMeStore {
 	

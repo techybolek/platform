@@ -73,8 +73,8 @@ public class RefreshGrantTypeHandler extends AbstractAuthorizationGrantHandler {
         if (validationDataDO.getRefreshTokenState() != null
                 && (!validationDataDO.getRefreshTokenState().equals( "ACTIVE") &&
                 !validationDataDO.getRefreshTokenState().equals("EXPIRED"))) {
-            log.debug("Refresh Token is not in 'ACTIVE' state for Client with " +
-                    "Client Id : " + tokenReqDTO.getClientId() +
+            log.debug("Refresh Token is not in 'ACTIVE' or 'EXPIRED' state for Client with " +
+                    "Client Id : " + tokenReqDTO.getClientId() + " " +
                     "Refresh Token: " + tokenReqDTO.getRefreshToken());
             return false;
         }

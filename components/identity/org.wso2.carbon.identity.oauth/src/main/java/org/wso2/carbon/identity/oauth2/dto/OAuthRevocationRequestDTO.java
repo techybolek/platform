@@ -20,9 +20,7 @@ package org.wso2.carbon.identity.oauth2.dto;
 
 public class OAuthRevocationRequestDTO {
 
-    private String[] tokens;
-
-    private String[] apps;
+    private String token;
 
     private String consumerKey;
 
@@ -30,12 +28,14 @@ public class OAuthRevocationRequestDTO {
 
     private String authzUser;
 
-    public String[] getTokens() {
-        return tokens;
+    private String token_type;
+
+    public String getToken() {
+        return token;
     }
 
-    public void setTokens(String[] tokens) {
-        this.tokens = tokens;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getConsumerKey() {
@@ -62,12 +62,12 @@ public class OAuthRevocationRequestDTO {
         this.authzUser = authzUser;
     }
 
-    public String[] getApps() {
-        return apps;
+    public String getToken_type() {
+        return token_type;
     }
 
-    public void setApps(String[] apps) {
-        this.apps = apps;
+    public void setToken_type(String token_type) {
+        this.token_type = token_type;
     }
 
 }

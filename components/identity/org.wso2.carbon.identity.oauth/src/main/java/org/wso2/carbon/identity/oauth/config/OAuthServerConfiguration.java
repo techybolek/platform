@@ -18,17 +18,6 @@
 
 package org.wso2.carbon.identity.oauth.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
 import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
 import org.apache.axiom.om.OMElement;
@@ -47,6 +36,8 @@ import org.wso2.carbon.identity.openidconnect.CustomClaimsCallbackHandler;
 import org.wso2.carbon.identity.openidconnect.IDTokenBuilder;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import javax.xml.namespace.QName;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 /**
  * Runtime representation of the OAuth Configuration as configured through

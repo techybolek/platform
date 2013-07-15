@@ -11,7 +11,10 @@ import org.wso2.carbon.identity.oauth2.util.X509CredentialImpl;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class CarbonKeyStoreCredentialResolver extends KeyStoreCredentialResolver{
 

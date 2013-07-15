@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.identity.oauth;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -45,7 +42,10 @@ import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OAuthAdminService extends AbstractAdmin {
 
@@ -282,46 +282,37 @@ public class OAuthAdminService extends AbstractAdmin {
     public OAuthRevocationResponseDTO revokeAuthzForAppsByResoureOwner(OAuthRevocationRequestDTO revokeRequestDTO) {
 
         TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
-        OAuthAppDAO appDAO = new OAuthAppDAO();
         try{
-            if(revokeRequestDTO.getAuthzUser() != null && revokeRequestDTO.getApps() != null) {
+            if(revokeRequestDTO.getAuthzUser() != null && !revokeRequestDTO.getAuthzUser().equals("")
+                    && revokeRequestDTO.getApps() != null && revokeRequestDTO.getApps().length > 0) {
                 String loggedInUser = PrivilegedCarbonContext.getCurrentContext().getUsername();
                 if(!revokeRequestDTO.getAuthzUser().equals(loggedInUser)){
                     throw new IdentityOAuth2Exception(loggedInUser +
                             " not authorized to revoke tokens of " + revokeRequestDTO.getAuthzUser());
                 }
                 String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(revokeRequestDTO.getAuthzUser());
-                OAuthAppDO[] oauthAppDOs =  tokenMgtDAO.getAppsAuthorizedByUser(tenantAwareUsername);
-                for (String app : revokeRequestDTO.getApps()) {
-                    for(OAuthAppDO appDO:oauthAppDOs){
-                        appDO =  appDAO.getAppInformation(appDO.getOauthConsumerKey());
-                        if(appDO.getApplicationName().equals(app)){
-                            tokenMgtDAO.revokeAccessTokensByResourceOwner(appDO.getOauthConsumerKey(), tenantAwareUsername);
-                            org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(appDO.getOauthConsumerKey(),tenantAwareUsername);
-                        }
-                    }
-                }
+                tokenMgtDAO.revokeTokensByResourceOwner(revokeRequestDTO.getApps(), tenantAwareUsername);
             } else {
                 OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
                 revokeRespDTO.setError(true);
-                revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
+                revokeRespDTO.setErrorCode(OAuth2ErrorCodes.INVALID_REQUEST);
                 revokeRespDTO.setErrorMsg("Invalid revocation request");
                 return revokeRespDTO;
             }
             return new OAuthRevocationResponseDTO();
         } catch (IdentityException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
             revokeRespDTO.setError(true);
             revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
-            revokeRespDTO.setErrorMsg("Error when processing the revocation request");
+            revokeRespDTO.setErrorMsg("Error occurred while revoking authorization grant for applications");
             return revokeRespDTO;
         } catch (InvalidOAuthClientException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
             revokeRespDTO.setError(true);
             revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
-            revokeRespDTO.setErrorMsg("Error when processing the revocation request");
+            revokeRespDTO.setErrorMsg("Error occurred while revoking authorization grant for applications");
             return revokeRespDTO;
         }
     }

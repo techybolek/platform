@@ -18,12 +18,6 @@
 
 package org.wso2.carbon.identity.oauth2.token;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.commons.logging.Log;
@@ -45,11 +39,7 @@ import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
 import org.wso2.carbon.identity.oauth2.token.handlers.clientauth.BasicAuthClientAuthentcationHandler;
 import org.wso2.carbon.identity.oauth2.token.handlers.clientauth.ClientAuthenticationHandler;
 import org.wso2.carbon.identity.oauth2.token.handlers.clientauth.SAM2BearerClientAuthenticationHandler;
-import org.wso2.carbon.identity.oauth2.token.handlers.grant.AuthorizationCodeHandler;
-import org.wso2.carbon.identity.oauth2.token.handlers.grant.AuthorizationGrantHandler;
-import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
-import org.wso2.carbon.identity.oauth2.token.handlers.grant.PasswordGrantHandler;
-import org.wso2.carbon.identity.oauth2.token.handlers.grant.RefreshGrantTypeHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.*;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.saml.SAML2BearerGrantTypeHandler;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
@@ -61,6 +51,8 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.config.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import java.util.*;
 
 public class AccessTokenIssuer {
 

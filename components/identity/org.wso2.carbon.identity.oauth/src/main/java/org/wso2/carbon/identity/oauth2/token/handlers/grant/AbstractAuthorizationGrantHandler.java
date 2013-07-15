@@ -27,7 +27,6 @@ import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.oauth.cache.CacheKey;
-import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.callback.OAuthCallback;
@@ -149,15 +148,16 @@ public abstract class AbstractAuthorizationGrantHandler implements Authorization
                         log.debug("Marking old token as expired for client Id : "
                                 + consumerKey + " AuthorizedUser : " + authorizedUser);
                     }
-                    //Token is expired. Mark it as expired on database
                     //TODO : Read token state from a constant
                     //TODO : This should move to validation check of getValidAccessTokenIfExist() method
                     String tokenState = tokenMgtDAO.getAccessTokenState(consumerKey, authorizedUser, OAuth2Util.USER_TYPE_FOR_USER_TOKEN);
-                    if (tokenState.equals("REVOKED")) {
-                        tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser, "REVOKED", UUID.randomUUID().toString(), OAuth2Util.USER_TYPE_FOR_USER_TOKEN, userStoreDomain);
-                    } else {//Token is expired. Mark it as expired on database
-                        tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser, "EXPIRED",
+                    if (tokenState != null){
+                        if(tokenState.equals("REVOKED")) {
+                            tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser, "REVOKED", UUID.randomUUID().toString(), OAuth2Util.USER_TYPE_FOR_USER_TOKEN, userStoreDomain);
+                        } else { // Token is expired. Mark it as expired on database
+                            tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser, "EXPIRED",
                                                         UUID.randomUUID().toString(), OAuth2Util.USER_TYPE_FOR_USER_TOKEN, userStoreDomain);
+                        }
                     }
                 }
             } catch (Exception e) {
