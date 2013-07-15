@@ -33,7 +33,7 @@ public class OpenIDConnectConstant {
 	public class Consent {
 		public static final String DENY = "deny";
 		public static final String APPROVE = "approve";
-		public static final String APPROVE_ALWAYS = "approve_always";
+		public static final String APPROVE_ALWAYS = "approveAlways";
 	}
 
 }

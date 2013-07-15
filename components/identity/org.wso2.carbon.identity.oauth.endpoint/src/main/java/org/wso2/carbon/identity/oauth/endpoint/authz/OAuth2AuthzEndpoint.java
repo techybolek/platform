@@ -80,13 +80,13 @@ public class OAuth2AuthzEndpoint {
 				}
 				return Response.status(HttpServletResponse.SC_FOUND).location(new URI(redirectURL)).build();
 
-			} else if (oauth2Params != null) { // request from the login page
-				String redirectURL = handleOAuthRequestParams(request);
-				return Response.status(HttpServletResponse.SC_FOUND).location(new URI(redirectURL)).build();
-
-			} else if (consent != null) {
+			} else if (consent != null) { // request from the consent page
 				String returnUrl = handleUserConsent(consent, request, oauth2Params);
 				return Response.status(HttpServletResponse.SC_FOUND).location(new URI(returnUrl)).build();
+				
+			} else if (oauth2Params != null) { // request from the login page
+					String redirectURL = handleOAuthRequestParams(request);
+					return Response.status(HttpServletResponse.SC_FOUND).location(new URI(redirectURL)).build();
 
 			} else {
 				log.error("Invalid Authorization Request");
@@ -123,7 +123,6 @@ public class OAuth2AuthzEndpoint {
 
 		request.getSession().removeAttribute(OpenIDConnectConstant.Session.OIDC_RESPONSE);
 		request.getSession().removeAttribute(OpenIDConnectConstant.Session.OIDC_RP);
-		request.getSession().removeAttribute(OpenIDConnectConstant.Session.OIDC_LOGGED_IN_USER);
 		request.getSession().removeAttribute(OAuthConstants.OAUTH2_PARAMS);
 
 		if (OpenIDConnectConstant.Consent.DENY.equals(consent)) {

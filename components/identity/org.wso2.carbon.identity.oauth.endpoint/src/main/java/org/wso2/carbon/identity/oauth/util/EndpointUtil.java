@@ -144,12 +144,16 @@ public class EndpointUtil {
      */
     public static String getLoginPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clientDTO,
                                          OAuth2Parameters params) {
+    	String oidcRequest = (String) req.getSession().getAttribute(OpenIDConnectConstant.Session.OIDC_REQUEST);
         String loginPage = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_login.do";
         try {
             loginPage =
                 loginPage + "?" + OAuthConstants.SCOPE + "=" +
                         URLEncoder.encode(getScope(params), "UTF-8") + "&" + "application" + "=" +
                         URLEncoder.encode(params.getApplicationName(), "UTF-8");
+            if("true".equals(oidcRequest)) {
+            	loginPage = loginPage + "&oidcRequest=true";
+            }
         } catch (UnsupportedEncodingException e) {
             // ignore
         }
@@ -178,9 +182,7 @@ public class EndpointUtil {
 			               "?" + OpenIDConnectConstant.Session.OIDC_LOGGED_IN_USER + "=" +
 			                       URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
 			                       OpenIDConnectConstant.Session.OIDC_RP + "=" +
-			                       URLEncoder.encode(params.getApplicationName(), "UTF-8")  + "&" +
-			                       OpenIDConnectConstant.Parameter.SCOPE + "=" +
-			                       URLEncoder.encode(scopes.toString(), "UTF-8");
+			                       URLEncoder.encode(params.getApplicationName(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// ignore
 		}
