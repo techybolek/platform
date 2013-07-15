@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.receivers;
+package org.wso2.caching.module.receivers;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
@@ -28,9 +28,9 @@ import org.apache.axis2.saaj.util.IDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axiom.soap.SOAPFactory;
-import org.wso2.caching.CachableResponse;
-import org.wso2.caching.CachingConstants;
-import org.wso2.caching.CachingException;
+import org.wso2.caching.core.CachableResponse;
+import org.wso2.caching.core.CachingConstants;
+import org.wso2.caching.core.CachingException;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;

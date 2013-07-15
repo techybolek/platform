@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.handlers;
+package org.wso2.caching.module.handlers;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
-import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
-import org.wso2.caching.*;
-import org.wso2.caching.digest.DigestGenerator;
-import org.wso2.caching.util.FixedByteArrayOutputStream;
+import org.wso2.caching.core.*;
+import org.wso2.caching.core.digest.DigestGenerator;
+import org.wso2.caching.core.util.FixedByteArrayOutputStream;
 
 import javax.xml.stream.XMLStreamException;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching;
+package org.wso2.caching.module;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -27,7 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
-import org.wso2.caching.policy.CachingPolicyProcessor;
+import org.wso2.caching.core.CacheConfiguration;
+import org.wso2.caching.core.CacheManager;
+import org.wso2.caching.core.CachingConstants;
+import org.wso2.caching.core.CachingException;
+import org.wso2.caching.core.policy.CachingPolicyProcessor;
 
 public class CachingModule implements Module {
 
