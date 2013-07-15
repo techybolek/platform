@@ -23,10 +23,14 @@ import org.wso2.carbon.analytics.core.AnalyticsConstants;
 import org.wso2.carbon.analytics.core.exception.AnalyticsConfigurationException;
 import org.wso2.carbon.utils.ServerConstants;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  *Build annotations from annotation-config.xml
@@ -34,7 +38,9 @@ import java.io.*;
 public class AnnotationFactory {
     private static final Log log = LogFactory.getLog(AnnotationFactory.class);
 
-    public static OMElement loadConfigXML() throws AnalyticsConfigurationException {
+
+
+    public OMElement loadConfigXML() throws AnalyticsConfigurationException {
 
         String carbonHome = System.getProperty(ServerConstants.CARBON_CONFIG_DIR_PATH);
         String path = carbonHome + File.separator + AnalyticsConstants.ANALYTICS_DIR + File.separator + AnalyticsConstants.ANNOTATION_CONFIG_XML;
@@ -69,4 +75,30 @@ public class AnnotationFactory {
             }
         }
     }
+
+
+    public Map populateAnnotations(OMElement config
+    ) {
+
+        Map<String, String> annotations = new HashMap<String, String>();
+
+        OMElement annotationElems = config.getFirstChildWithName(
+                new QName(AnalyticsConstants.ANALYTICS_NAMESPACE,
+                        AnalyticsConstants.ANNOTATIONS__ELEMENT));
+
+        if (annotationElems != null) {
+            for (Iterator annotationIterator = annotationElems.getChildElements();
+                 annotationIterator.hasNext(); ) {
+                OMElement annotation = (OMElement) annotationIterator.next();
+                OMElement nameElem = annotation.getFirstChildWithName(new QName(AnalyticsConstants.ANNOTATION_NAME__ELEMENT));
+                OMElement classElem = annotation.getFirstChildWithName(new QName(AnalyticsConstants.ANNOTATION_CLASS_ELEMENT));
+
+                annotations.put(nameElem.getText(), classElem.getText());
+            }
+        }
+
+        return annotations;
+    }
+
+
 }

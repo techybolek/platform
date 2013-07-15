@@ -24,6 +24,14 @@ public final class AnalyticsConstants {
     private AnalyticsConstants() {
     }
 
-    public static final String ANNOTATION_CONFIG_XML = "annotation-config.xml";
+    public static final String ANNOTATION_CONFIG_XML = "analytics-config.xml";
+    public static final String ANALYTICS_NAMESPACE = "http://wso2.org/carbon/analytics";
+    public static final String ANNOTATIONS__ELEMENT = "annotations";
+    public static final String ANNOTATION__ELEMENT = "annotation";
+    public static final String ANNOTATION_NAME__ELEMENT = "name";
+    public static final String ANNOTATION_CLASS_ELEMENT = "class";
+
+
+
 
 }
