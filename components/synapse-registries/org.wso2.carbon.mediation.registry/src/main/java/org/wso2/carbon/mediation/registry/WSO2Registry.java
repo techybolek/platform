@@ -31,6 +31,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.llom.OMDocumentImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
@@ -70,6 +71,9 @@ public class WSO2Registry extends AbstractRegistry {
 
     private List<RegistryExtension> extensions = new ArrayList<RegistryExtension>();
 
+    private String domain;
+    private int tenantId;
+
     public WSO2Registry() {
         RegistryService registryService = RegistryServiceHolder.getInstance().getRegistryService();
         try {
@@ -86,6 +90,12 @@ public class WSO2Registry extends AbstractRegistry {
     @Override
     public void init(Properties properties) {
         super.init(properties);
+
+        //Saving tenant information as instance variables to use later when registry lookup calls comes via non-carbon
+        //thread pools
+        CarbonContext cc = CarbonContext.getThreadLocalCarbonContext();
+        domain = cc.getTenantDomain();
+        tenantId = cc.getTenantId();
 
         String root = properties.getProperty(ROOT);
         if (root == null || "".equals(root)) {
@@ -115,6 +125,12 @@ public class WSO2Registry extends AbstractRegistry {
     }
 
     public OMNode lookup(String key) {
+
+        //Carbon Kernel mandates to set Threadlocal before calling anything in kernel
+        PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        cc.setTenantDomain(domain);
+        cc.setTenantId(tenantId);
+
         if (key == null) {
             handleException("Resource cannot be found.");
         }
