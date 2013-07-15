@@ -16,15 +16,15 @@
 
 package org.wso2.carbon.registry.properties.utils;
 
+import org.apache.axis2.context.MessageContext;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.common.CommonConstants;
+import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.ResourcePath;
-import org.wso2.carbon.registry.core.Aspect;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.common.utils.UserUtil;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.properties.beans.PropertiesBean;
 
 import java.util.*;
@@ -109,7 +109,9 @@ public class PropertiesBeanPopulator {
             }
         }
         Collections.sort(sysProperties);
-        propertiesBean.setSysProperties(sysProperties.toArray(new String[sysProperties.size()]));
+        //Only System properties are paginated.
+        propertiesBean.setSysProperties(getPaginatedSystemProperties(
+                sysProperties.toArray(new String[sysProperties.size()])));
         propertiesBean.setValidationProperties(validationProperties.toArray(new String[validationProperties.size()]));
         propertiesBean.setLifecycleProperties(lifecycleProperties.toArray(new String[lifecycleProperties.size()]));
 
@@ -121,5 +123,42 @@ public class PropertiesBeanPopulator {
         propertiesBean.setPutAllowed(isPutAllowed);
         propertiesBean.setLoggedIn(!RegistryConstants.ANONYMOUS_USER.equals(registry.getUserName()));
         return propertiesBean;
+    }
+
+    private static String[] getPaginatedSystemProperties(String[] sysProperties) {
+        String[] paginatedResult;
+        MessageContext messageContext = MessageContext.getCurrentMessageContext();
+        if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
+
+            int rowCount = sysProperties.length;
+            try {
+                PaginationUtils.setRowCount(messageContext, Integer.toString(rowCount));
+                PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
+
+                int start = paginationContext.getStart();
+                int count = paginationContext.getCount();
+
+                int startIndex;
+                if (start == 1) {
+                    startIndex = 0;
+                } else {
+                    startIndex = start;
+                }
+                if (rowCount < start + count) {
+                    paginatedResult = new String[rowCount - startIndex];
+                    System.arraycopy(sysProperties, startIndex, paginatedResult, 0, (rowCount - startIndex));
+                } else {
+                    paginatedResult = new String[count];
+                    System.arraycopy(sysProperties, startIndex, paginatedResult, 0, count);
+                }
+
+                return paginatedResult;
+
+            } finally {
+                PaginationContext.destroy();
+            }
+        } else {
+            return sysProperties;
+        }
     }
 }

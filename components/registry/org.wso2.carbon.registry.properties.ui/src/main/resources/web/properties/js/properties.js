@@ -4,6 +4,34 @@ String.prototype.startsWith = function(prefix) {
      return this.indexOf(prefix) == 0;
 }
 
+function loadPropertiesDiv(resourcePath, page) {
+    var fillingDiv = "resourceProperties";
+    if ($('updateFix')) {
+        $('updateFix').parentNode.removeChild($('updateFix'));
+    }
+    var tempSpan = document.createElement('span');
+    tempSpan.id = "updateFix";
+    sessionAwareFunction(function () {
+        new Ajax.Request('../properties/properties-ajaxprocessor.jsp', {
+            method: 'post',
+            parameters: {path: resourcePath, page: page},
+            onSuccess: function (transport) {
+                $(fillingDiv).innerHTML = transport.responseText;
+                $('propertiesList').style.display = "";
+                $('propertiesIconExpanded').style.display = "";
+                $('propertiesIconMinimized').style.display = "none";
+
+                YAHOO.util.Event.onAvailable('updateFix', function () {
+                    $('propertiesList').style.display = "";
+                });
+            },
+            onFailure: function (transport) {
+                showRegistryError(transport.responseText);
+            }
+        });
+    }, org_wso2_carbon_registry_properties_ui_jsi18n["session.timed.out"]);
+}
+
 function setProperty() {
     if (propertyOperationStarted) {
         CARBON.showWarningDialog(org_wso2_carbon_registry_properties_ui_jsi18n["property.operation.in.progress"]);

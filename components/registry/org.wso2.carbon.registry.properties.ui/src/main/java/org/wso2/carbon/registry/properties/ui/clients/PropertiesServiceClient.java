@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.registry.common.ui.UIConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.properties.stub.PropertiesAdminServiceStub;
 import org.wso2.carbon.registry.properties.stub.beans.xsd.PropertiesBean;
 import org.wso2.carbon.registry.properties.stub.beans.xsd.RetentionBean;
@@ -43,10 +45,11 @@ public class PropertiesServiceClient {
 
     private PropertiesAdminServiceStub stub;
     private String epr;
+    private HttpSession session;
 
     public PropertiesServiceClient(ServletConfig config, HttpSession session)
             throws RegistryException {
-
+        this.session =session;
         String cookie = (String)session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.
@@ -68,7 +71,7 @@ public class PropertiesServiceClient {
         }
     }
 
-    public PropertiesBean getProperties(HttpServletRequest request) {
+    public PropertiesBean getProperties(HttpServletRequest request) throws Exception {
 
         String path = (String) Utils.getParameter(request, "path");
         Boolean view = (Boolean)request.getSession().getAttribute(UIConstants.SHOW_SYSPROPS_ATTR);
@@ -84,7 +87,20 @@ public class PropertiesServiceClient {
         }
         PropertiesBean bean = null;
         try {
-            bean = stub.getProperties(path, viewProps);
+            if(PaginationContext.getInstance() == null){
+                bean = stub.getProperties(path, viewProps);
+            }  else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                bean = stub.getProperties(path, viewProps);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+                session.setAttribute("row_count", Integer.toString(rowCount));
+            }
+        } catch (Exception e) {
+            String msg = "Failed to get properties. " +
+                    e.getMessage();
+            log.error(msg, e);
+            throw new Exception(e);
+        }
             if (bean == null) {
                 return null;
             }
@@ -100,12 +116,7 @@ public class PropertiesServiceClient {
             if (bean.getProperties() == null) {
                 bean.setProperties(new Property[0]);
             }
-        } catch (Exception e) {
-            String msg = "Failed to get properties. " +
-                    e.getMessage();
-            log.error(msg, e);
-            e.printStackTrace();
-        }
+
         return bean;
     }
 

@@ -23,6 +23,8 @@
 <%@ page import="org.wso2.carbon.registry.properties.ui.clients.PropertiesServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="java.util.HashMap" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
+<%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
 
 
 <%
@@ -44,6 +46,15 @@
 <%
         return;
     }
+    String requestedPage = request.getParameter("page");
+    int start;
+    int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+    if (requestedPage != null) {
+        start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
+    } else {
+        start = 1;
+    }
+    PaginationContext.init(start, count, "", "", 1500);
     PropertiesBean propertiesBean_ = client_.getProperties(request);
     if (propertiesBean_ == null) {
         return;
@@ -71,7 +82,7 @@
         <%
         } else {
         %>
-        <%=propertiesBean_.getSysProperties().length%> <fmt:message key="properties"/>
+        <%=Integer.parseInt(session.getAttribute("row_count").toString())%> <fmt:message key="properties"/>
         <%
             }
         %>
@@ -79,12 +90,12 @@
 
     <div id="propertiesList">
         <%
+            HashMap properties = new HashMap();
             if (!(propertiesBean_.getSysProperties() == null ||
                     propertiesBean_.getSysProperties().length == 0)) {
                 Property[] propArray = propertiesBean_.getProperties();
-                HashMap properties = new HashMap();
-                for (int i = 0; i < propArray.length; i++) {
-                    properties.put(propArray[i].getKey(), propArray[i].getValue());
+                for (Property aPropArray : propArray) {
+                    properties.put(aPropArray.getKey(), aPropArray.getValue());
                 }
         %>
         <table cellpadding="0" cellspacing="0" border="0" class="styledLeft">
@@ -96,7 +107,24 @@
             </tr>
             </thead>
             <%
-                String[] sysProperties = propertiesBean_.getSysProperties();
+                    String[] sysProperties = propertiesBean_.getSysProperties();
+                    int itemsPerPage = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+
+                    int pageNumber;
+                    if (requestedPage != null && requestedPage.length() > 0) {
+                        pageNumber = new Integer(requestedPage);
+                    } else {
+                        pageNumber = 1;
+                    }
+
+                    int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+                    int numberOfPages;
+                    if (rowCount % itemsPerPage == 0) {
+                        numberOfPages = rowCount / itemsPerPage;
+                    } else {
+                        numberOfPages = rowCount / itemsPerPage + 1;
+                    }
+
                 for (int i = 0; i < sysProperties.length; i++) {
                     String name = sysProperties[i];
                     String value = "";
@@ -106,7 +134,6 @@
 
             %>
 
-            <tbody>
             <tr id="propEditPanel_<%=i%>" style="display:none;">
                 <td><input id="propRPath_<%=i%>" type="hidden"
                            value="<%=propertiesBean_.getPathWithVersion()%>"/><input
@@ -177,19 +204,24 @@
                 <% } %>
 
             </tr>
-            </tbody>
 
             <%
                 }
             %>
         </table>
+            <carbon:resourcePaginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
+                                      resourceBundle="org.wso2.carbon.registry.properties.ui.i18n.Resources"
+                                      nextKey="next" prevKey="prev"
+                                      paginationFunction="<%="loadPropertiesDiv('" + request.getParameter("path").replaceAll("&","%26") + "', {0})"%>" />
+        <%
+            }
+        %>
         <%
                 if (properties.get("registry.absent") != null &&
                     properties.get("registry.absent").equals("true")){
         %>
-        <script type="text/javascript">CARBON.showWarningDialog(<fmt:message key="could.not.create.symlink"/>);</script>
+        <script type="text/javascript">CARBON.showWarningDialog("<fmt:message key="could.not.create.symlink"/>")</script>
         <%
-                }
             }
         %>
     </div>
