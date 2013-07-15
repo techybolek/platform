@@ -19,7 +19,6 @@
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
@@ -65,14 +64,7 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector{
 			if(log.isDebugEnabled()){
 				log.info("executing prparing soap envolope"+element.toString());
 			}
-			for (Iterator itr = soapBody.getChildElements(); itr.hasNext();) {
-				OMElement child = (OMElement) itr.next();
-				child.detach();
-			}
-			for (Iterator itr = element.getChildElements(); itr.hasNext();) {
-				OMElement child = (OMElement) itr.next();
-				soapBody.addChild(child);
-			}
+			super.preparePayload(messageContext, element);
 		} catch (TwitterException te) {
 			log.error("Failed to search twitter : " + te.getMessage(), te);
 			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, te);

@@ -20,6 +20,7 @@ package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Iterator;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -28,8 +29,10 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axiom.soap.SOAPBody;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.AbstractXMLStreamReader;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.mapped.MappedXMLStreamReader;
@@ -117,5 +120,18 @@ public abstract class AbstractTwitterConnector extends AbstractConnector  {
 		 */
 		return element;
 	}
+	
+	protected void preparePayload(MessageContext messageContext, OMElement element) {
+	    SOAPBody soapBody = messageContext.getEnvelope().getBody();
+	    for (Iterator itr = soapBody.getChildElements(); itr.hasNext();) {
+	    	OMElement child = (OMElement) itr.next();
+	    	child.detach();
+	    }
+	    for (Iterator itr = element.getChildElements(); itr.hasNext();) {
+	    	OMElement child = (OMElement) itr.next();
+	    	soapBody.addChild(child);
+	    }
+    }
+	
 
 }

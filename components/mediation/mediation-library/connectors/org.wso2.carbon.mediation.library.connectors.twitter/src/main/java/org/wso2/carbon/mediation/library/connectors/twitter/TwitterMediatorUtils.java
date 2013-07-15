@@ -19,11 +19,9 @@ package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.mediators.template.TemplateContext;
 import org.wso2.carbon.mediation.library.connectors.core.util.ConnectorUtils;
-import twitter4j.Status;
 
-import java.util.Stack;
+import twitter4j.Status;
 
 public class TwitterMediatorUtils {
 

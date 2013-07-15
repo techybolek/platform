@@ -57,15 +57,7 @@ public class TwitterSearch extends AbstractTwitterConnector {
 			Query query = new Query(TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_STRING));
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
-			SOAPBody soapBody = messageContext.getEnvelope().getBody();
-			for (Iterator itr = soapBody.getChildElements(); itr.hasNext();) {
-				OMElement child = (OMElement) itr.next();
-				child.detach();
-			}
-			for (Iterator itr = element.getChildElements(); itr.hasNext();) {
-				OMElement child = (OMElement) itr.next();
-				soapBody.addChild(child);
-			}
+			super.preparePayload(messageContext, element);
 		} catch (TwitterException te) {
 			log.error("Failed to search twitter : " + te.getMessage(), te);
 			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, te);

@@ -32,6 +32,16 @@
 			<file>get_user_timeline.xml</file>
 			<description>get user timeline</description>
 		</artifact>
+		
+		<artifact name="twitter.get_available_trends">
+			<file>get_available_trends.xml</file>
+			<description>get available trends</description>
+		</artifact>
+		
+		<artifact name="twitter.send_direct_message">
+			<file>send_direct_message.xml</file>
+			<description>send direct messages to user</description>
+		</artifact>
 
 	</subArtifacts>
 

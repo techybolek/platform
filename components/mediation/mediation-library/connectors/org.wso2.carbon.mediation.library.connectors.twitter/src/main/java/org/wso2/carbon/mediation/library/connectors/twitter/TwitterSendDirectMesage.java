@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import org.apache.commons.logging.Log;
@@ -23,27 +24,30 @@ import org.apache.synapse.MessageContext;
 import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
-import twitter4j.Status;
 import twitter4j.Twitter;
-import twitter4j.TwitterException;
 
-public class TwitterShowStatusMediator extends AbstractConnector {
+public class TwitterSendDirectMesage extends AbstractConnector {
 
-	private static Log log = LogFactory.getLog(TwitterShowStatusMediator.class);
-	public static final String ID = "id";
+	public static final String USER_ID = "userID";
+	public static final String MESSAGE = "message";
 
+	private static Log log = LogFactory.getLog(TwitterSendDirectMesage.class);
+
+	@Override
 	public void connect() throws ConnectException {
 		MessageContext messageContext = getMessageContext();
 		try {
-			String id = TwitterMediatorUtils.lookupFunctionParam(messageContext, ID);
+			String userID = TwitterMediatorUtils.lookupFunctionParam(messageContext, USER_ID);
+			String message = TwitterMediatorUtils.lookupFunctionParam(messageContext, MESSAGE);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
-			Status status = twitter.showStatus(Long.parseLong(id));
-			TwitterMediatorUtils.storeResponseStatus(messageContext, status);
-			log.info("@" + status.getUser().getScreenName() + " - " + status.getText());
-		} catch (TwitterException te) {
-			log.error("Failed to show status: " + te.getMessage(), te);
-			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, te);
+			twitter.sendDirectMessage(Long.parseLong(userID), message);
+
+			if (log.isDebugEnabled()) {
+				log.info("sending direct message to user completed!");
+			}
+		} catch (Exception e) {
+			log.error("Failed to login user: " + e.getMessage(), e);
+			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, e);
 		}
 	}
-
 }

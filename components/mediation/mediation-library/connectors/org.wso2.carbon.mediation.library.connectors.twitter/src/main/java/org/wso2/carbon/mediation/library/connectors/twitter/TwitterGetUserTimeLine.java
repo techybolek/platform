@@ -19,14 +19,12 @@
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axiom.soap.SOAPBody;
 import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.json.JSONException;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
@@ -44,6 +42,8 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 	public static final String USER_ID = "userID";
 
 	public static final String PAGE = "page";
+	
+	public static final String SCREEN_NAME = "screenName";
 
 	@Override
 	public void connect() throws ConnectException {
@@ -55,12 +55,12 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 		try {
 			String userID = TwitterMediatorUtils.lookupFunctionParam(messageContext, USER_ID);
 			String page = TwitterMediatorUtils.lookupFunctionParam(messageContext, PAGE);
+					
 
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 
 			List<Status> results = null;
-			results = twitter.getUserTimeline();
-			if(userID != null && page != null && !userID.isEmpty() && !page.isEmpty()){
+		    if(userID != null && page != null && !userID.isEmpty() && !page.isEmpty()){
 				 results = twitter.getUserTimeline(Long.parseLong(userID),new Paging(Long.parseLong(page)));
 			}else if(userID != null && !userID.isEmpty()){
 				results = twitter.getUserTimeline(Long.parseLong(userID));
@@ -71,15 +71,7 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 			}
 			OMElement element =this.performSearch(results);
 			
-			SOAPBody soapBody = messageContext.getEnvelope().getBody();
-			for (Iterator itr = soapBody.getChildElements(); itr.hasNext();) {
-				OMElement child = (OMElement) itr.next();
-				child.detach();
-			}
-			for (Iterator itr = element.getChildElements(); itr.hasNext();) {
-				OMElement child = (OMElement) itr.next();
-				soapBody.addChild(child);
-			}
+			super.preparePayload(messageContext, element);
 			
 	
 		} catch (TwitterException te) {
@@ -90,6 +82,8 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, te);
 		}
 	}
+
+
 	
 	
 	/**
