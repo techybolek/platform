@@ -49,14 +49,14 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="revokeTokensByOAuthClient">
+            <xs:element name="revokeTokenByOAuthClient">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="revokeRequestDTO" nillable="true" type="ax2285:OAuthRevocationRequestDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="revokeTokensByOAuthClientResponse">
+            <xs:element name="revokeTokenByOAuthClientResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" nillable="true" type="ax2285:OAuthRevocationResponseDTO"/>
@@ -152,11 +152,11 @@
             </xs:complexType>
             <xs:complexType name="OAuthRevocationRequestDTO">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="apps" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="authzUser" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="consumerSecret" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="tokens" nillable="true" type="xs:string"/>
+		    <xs:element minOccurs="0" name="token" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="token_type" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="OAuthRevocationResponseDTO">
@@ -203,11 +203,11 @@
     <wsdl:message name="authorizeResponse">
         <wsdl:part name="parameters" element="ns1:authorizeResponse"/>
     </wsdl:message>
-    <wsdl:message name="revokeTokensByOAuthClientRequest">
-        <wsdl:part name="parameters" element="ns1:revokeTokensByOAuthClient"/>
+    <wsdl:message name="revokeTokenByOAuthClientRequest">
+        <wsdl:part name="parameters" element="ns1:revokeTokenByOAuthClient"/>
     </wsdl:message>
-    <wsdl:message name="revokeTokensByOAuthClientResponse">
-        <wsdl:part name="parameters" element="ns1:revokeTokensByOAuthClientResponse"/>
+    <wsdl:message name="revokeTokenByOAuthClientResponse">
+        <wsdl:part name="parameters" element="ns1:revokeTokenByOAuthClientResponse"/>
     </wsdl:message>
     <wsdl:message name="validateClientInfoRequest">
         <wsdl:part name="parameters" element="ns1:validateClientInfo"/>
@@ -228,9 +228,9 @@
             <wsdl:input message="tns:authorizeRequest" wsaw:Action="urn:authorize"/>
             <wsdl:output message="tns:authorizeResponse" wsaw:Action="urn:authorizeResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="revokeTokensByOAuthClient">
-            <wsdl:input message="tns:revokeTokensByOAuthClientRequest" wsaw:Action="urn:revokeTokensByOAuthClient"/>
-            <wsdl:output message="tns:revokeTokensByOAuthClientResponse" wsaw:Action="urn:revokeTokensByOAuthClientResponse"/>
+        <wsdl:operation name="revokeTokenByOAuthClient">
+            <wsdl:input message="tns:revokeTokenByOAuthClientRequest" wsaw:Action="urn:revokeTokenByOAuthClient"/>
+            <wsdl:output message="tns:revokeTokenByOAuthClientResponse" wsaw:Action="urn:revokeTokenByOAuthClientResponse"/>
         </wsdl:operation>
         <wsdl:operation name="validateClientInfo">
             <wsdl:input message="tns:validateClientInfoRequest" wsaw:Action="urn:validateClientInfo"/>
@@ -266,8 +266,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="revokeTokensByOAuthClient">
-            <soap:operation soapAction="urn:revokeTokensByOAuthClient" style="document"/>
+        <wsdl:operation name="revokeTokenByOAuthClient">
+            <soap:operation soapAction="urn:revokeTokenByOAuthClient" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -314,8 +314,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="revokeTokensByOAuthClient">
-            <soap12:operation soapAction="urn:revokeTokensByOAuthClient" style="document"/>
+        <wsdl:operation name="revokeTokenByOAuthClient">
+            <soap12:operation soapAction="urn:revokeTokenByOAuthClient" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -362,8 +362,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="revokeTokensByOAuthClient">
-            <http:operation location="revokeTokensByOAuthClient"/>
+        <wsdl:operation name="revokeTokenByOAuthClient">
+            <http:operation location="revokeTokenByOAuthClient"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>

@@ -156,7 +156,6 @@
                     <xs:element minOccurs="0" name="authzUser" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="consumerSecret" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="tokens" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="OAuthRevocationResponseDTO">
