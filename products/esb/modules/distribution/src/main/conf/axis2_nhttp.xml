@@ -687,6 +687,8 @@
             </handler-->
             <handler name="RelaySecuirtyMessageBuilderDispatchandler"
                      class="org.apache.synapse.transport.passthru.util.RelaySecuirtyMessageBuilderDispatchandler"/>
+	    <handler name="CarbonContentConfigurator"
+                     class="org.wso2.carbon.mediation.initializer.multitenancy.handler.CarbonContextConfigurator"/>
 
         </phase>
         <phase name="Addressing">
