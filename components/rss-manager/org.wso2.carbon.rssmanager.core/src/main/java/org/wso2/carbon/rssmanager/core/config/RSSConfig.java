@@ -39,7 +39,7 @@ import java.io.File;
  * Represents a WSO2 RSS configuration.
  */
 @XmlRootElement(name = "rss-configuration")
-public class RSSConfig {
+public final class RSSConfig {
 
     private RSSEnvironment[] rssEnvironments;
 
