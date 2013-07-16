@@ -25,6 +25,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
@@ -52,7 +53,9 @@ public class RSSEnvironment {
     private static final Log log = LogFactory.getLog(RSSEnvironment.class);
 
     public void init() throws RSSManagerException {
-        this.rssManager = RSSManagerFactory.getRSSManager(this);
+        RSSManagerFactory factory =
+                AbstractRSSManagerFactory.getRSSManagerFactory(getRSSProvider());
+        this.rssManager = factory.getSystemRSSManager();
         this.initRSSEnvironment();
         //this.initSystemRSSInstances();
     }

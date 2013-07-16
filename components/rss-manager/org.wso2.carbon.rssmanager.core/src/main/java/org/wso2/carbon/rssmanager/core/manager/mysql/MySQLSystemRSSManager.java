@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.manager;
+package org.wso2.carbon.rssmanager.core.manager.mysql;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +28,7 @@ import org.wso2.carbon.rssmanager.core.exception.EntityNotFoundException;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.*;
+import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -36,11 +37,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class MySQLRSSManager extends SystemRSSManager {
+public class MySQLSystemRSSManager extends SystemRSSManager {
 
-    private static final Log log = LogFactory.getLog(MySQLRSSManager.class);
+    private static final Log log = LogFactory.getLog(MySQLSystemRSSManager.class);
 
-    public MySQLRSSManager(RSSEnvironment rssEnvironment) {
+    public MySQLSystemRSSManager(RSSEnvironment rssEnvironment) {
         //super(rssEnvironment);
         super(null);
     }

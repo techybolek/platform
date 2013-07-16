@@ -16,17 +16,18 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.rssmanager.core.manager;
+package org.wso2.carbon.rssmanager.core.manager.oracle;
 
 import org.wso2.carbon.rssmanager.core.entity.UserDatabaseEntry;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
 import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
+import org.wso2.carbon.rssmanager.core.manager.SystemRSSManager;
 
-public class OracleRSSManager extends SystemRSSManager {
+public class OracleSystemRSSManager extends SystemRSSManager {
     
-    public OracleRSSManager() {
+    public OracleSystemRSSManager() {
         super(null);
     }
 

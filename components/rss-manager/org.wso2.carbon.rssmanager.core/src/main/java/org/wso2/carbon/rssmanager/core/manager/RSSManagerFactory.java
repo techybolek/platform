@@ -19,24 +19,11 @@
 package org.wso2.carbon.rssmanager.core.manager;
 
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 
-public class RSSManagerFactory {
+public interface RSSManagerFactory {
 
-    public enum Types {
-        MYSQL, ORACLE
-    }
+    SystemRSSManager getSystemRSSManager() throws RSSManagerException;
 
-    public static RSSManager getRSSManager(RSSEnvironment rssEnvironment) throws RSSManagerException {
-        Types t = Types.valueOf(rssEnvironment.getRSSProvider().toUpperCase());
-        switch (t) {
-            case MYSQL:
-                return new MySQLRSSManager(rssEnvironment);
-            case ORACLE:
-                return new OracleRSSManager();
-            default:
-                throw new RSSManagerException("Unsupported database server type");
-        }
-    }
+    UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException;
 
 }
