@@ -31,13 +31,12 @@ import org.wso2.carbon.registry.cmis.PathManager;
  */
 public class UnversionedDocumentTypeHandler extends DocumentTypeHandler {
 
+    public static final String DOCUMENT_UNVERSIONED_TYPE_ID = "cmis:unversioned-document";
+
     public UnversionedDocumentTypeHandler(Registry repository,
 			PathManager pathManager, GregTypeManager typeManager) {
 		super(repository, pathManager, typeManager);
-		// TODO Auto-generated constructor stub
 	}
-
-	public static final String DOCUMENT_UNVERSIONED_TYPE_ID = "cmis:unversioned-document";
 
     @Override
     public String getTypeId() {
@@ -67,17 +66,6 @@ public class UnversionedDocumentTypeHandler extends DocumentTypeHandler {
         return unversionedDocument;
     }
 
-    /*@Override
-    public IdentifierMap getIdentifierMap() {
-        //return new DefaultDocumentIdentifierMap(false);
-    }*/
-
-    /*
-    @Override
-    public boolean canHandle(Node node) throws RepositoryException {
-        return node.isNodeType(NodeType.NT_FILE) && !node.isNodeType(NodeType.MIX_SIMPLE_VERSIONABLE);
-    }
-	*/
     
     @Override
     public GregDocument getGregNode(Resource node) {

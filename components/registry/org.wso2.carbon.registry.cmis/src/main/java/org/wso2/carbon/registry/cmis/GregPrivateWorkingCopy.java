@@ -56,9 +56,6 @@ public class GregPrivateWorkingCopy extends GregVersionBase {
                                                    || ( checkedOut != null && checkedOut.equals("true") )){
                 return true;
             }
-            else{
-                return false;
-            }
         } catch (RegistryException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -77,11 +74,9 @@ public class GregPrivateWorkingCopy extends GregVersionBase {
         } catch (RegistryException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        boolean createdAsPwc = property != null && property.equals("true");
+        boolean createdAsPwc = (property != null && property.equals("true"));
         return objectId.endsWith('_' + PWC_NAME) || createdAsPwc;
     }
-
-    //------------------------------------------< protected >---
 
     @Override
     protected Resource getContextNode() {
@@ -98,8 +93,7 @@ public class GregPrivateWorkingCopy extends GregVersionBase {
         String property = getNode().getProperty(GregProperty.GREG_CREATED_AS_PWC);
         if(property != null && property.equals("true")){
             return getVersionSeriesId();
-        }
-        else{
+        } else{
             return getVersionSeriesId() + '_' + PWC_NAME;
         }
     }

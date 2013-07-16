@@ -117,9 +117,8 @@ public class GregTypeManager implements TypeManager {
         if(typeDef.getId().equals(UnversionedDocumentTypeHandler.DOCUMENT_UNVERSIONED_TYPE_ID)){
             return false;
         }
-        else {
-            return true;
-        }
+
+        return true;
     }
 
     public static TypeDefinition copyTypeDefinition(TypeDefinition type) {
@@ -155,8 +154,7 @@ public class GregTypeManager implements TypeManager {
 
             result.setHasMoreItems(result.getList().size() + skip < 2);
             result.setNumItems(BigInteger.valueOf(2));
-        }
-        else {
+        } else {
             TypeDefinitionContainer tc = fTypes.get(typeId);
             if (tc == null || tc.getChildren() == null) {
                 return result;
@@ -209,8 +207,7 @@ public class GregTypeManager implements TypeManager {
         if (typeId == null) {
             result.add(getTypesDescendants(d, fTypes.get(FOLDER_TYPE_ID), ipd));
             result.add(getTypesDescendants(d, fTypes.get(DOCUMENT_TYPE_ID), ipd));
-        }
-        else {
+        } else {
             TypeDefinitionContainer tc = fTypes.get(typeId);
             if (tc != null) {
                 result.add(getTypesDescendants(d, tc, ipd));
@@ -220,7 +217,7 @@ public class GregTypeManager implements TypeManager {
         return result;
     }
 
-    //------------------------------------------< GregTypeManager >---
+    //GregTypeManager
 
     public TypeDefinitionContainer getTypeById(String typeId) {
         return fTypes.get(typeId);
@@ -403,7 +400,6 @@ public class GregTypeManager implements TypeManager {
         return result;
     }
 
-    //------------------------------------------< private >---
 
     /**
      * Adds a type to collection.

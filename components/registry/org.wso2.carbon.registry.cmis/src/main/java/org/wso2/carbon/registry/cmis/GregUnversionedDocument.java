@@ -33,8 +33,6 @@ public class GregUnversionedDocument extends GregDocument {
         super(repository, node, typeManager, pathManager);
     }
 
-    //------------------------------------------< protected >--- 
-
     @Override
     protected Resource getContextNode() throws RegistryException {
         return getNode();

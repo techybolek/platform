@@ -32,6 +32,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+/**
+ *
+ */
 public class GregStaticMethods {
 
     public static Resource getResourceById(Registry repository, String resourceId){
@@ -105,8 +108,7 @@ public class GregStaticMethods {
         else if (PropertyIds.CONTENT_STREAM_MIME_TYPE.equals(propertyName)) {
             resource.setProperty(GregProperty.GREG_MIMETYPE, values);
             resource.setMediaType(values.get(0));
-        }
-        else {
+        } else {
             resource.setProperty(propertyName, values);
         }
 
@@ -128,8 +130,6 @@ public class GregStaticMethods {
         }
 
     }
-
-    //------------------------------------------< private >---
 
     /**
      * Convert an array of <code>Value</code>s to a list of <code>String</code>s.

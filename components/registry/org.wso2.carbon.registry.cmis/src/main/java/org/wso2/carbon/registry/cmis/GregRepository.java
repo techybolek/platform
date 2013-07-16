@@ -42,7 +42,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * GREG back-end for CMIS server.
+ * This class represents the GREG back-end for CMIS server.
  */
 public class GregRepository {
     private static final Logger log = LoggerFactory.getLogger(GregRepository.class);
@@ -63,9 +63,7 @@ public class GregRepository {
     public GregRepository(Registry repository, PathManager pathManager, GregTypeManager typeManager) {
         this.repository = repository;
         this.typeManager = typeManager;
-        //this.typeHandlerManager = typeHandlerManager;
         this.pathManager = pathManager;
-        
     }
 
     public Registry getRegistry(){
@@ -161,12 +159,11 @@ public class GregRepository {
             throw new CmisConstraintException("Versioning required for " + typeId);
         }
         //-----------------------------GREG DEPENDANT-------------------------------------------------------------
-        if(versioningState==VersioningState.NONE){
+        if(versioningState == VersioningState.NONE){
             UnversionedDocumentTypeHandler handler = new UnversionedDocumentTypeHandler(getRegistry(), pathManager, typeManager);
             GregObject gregNode = handler.createDocument(parent, name, properties, contentStream, versioningState);
             return gregNode.getId();
-        }
-        else{
+        } else{
             DocumentTypeHandler typeHandler = new DocumentTypeHandler(getRegistry(), pathManager, typeManager);
             GregObject gregNode = typeHandler.createDocument(parent, name, properties, contentStream, versioningState);
             return gregNode.getId();
@@ -284,8 +281,7 @@ public class GregRepository {
 
                 if( pathOfLatestVersion.equals(pathOfObject )){
                     //It's okay
-                }
-                else{
+                } else{
                     throw new CmisInvalidArgumentException("Cannot set or delete content in a Version");
                 }
             } catch (RegistryException e) {
@@ -312,8 +308,7 @@ public class GregRepository {
         //boolean isCheckedOut = property !=null && property.equals("true");
         if(objectId.endsWith("_pwc")){
             cancelCheckout(objectId);
-        }
-        else{
+        } else{
             gregNode.delete(Boolean.TRUE.equals(allVersions), GregPrivateWorkingCopy.isPwc(repository, objectId));
         }
     }
@@ -410,8 +405,7 @@ public class GregRepository {
         ContentStream contentStream = gregDocument.getContentStream();
         if(contentStream.getStream() != null){
             return contentStream;
-        }
-        else{
+        } else{
             throw new CmisConstraintException("Resource content is empty");
         }
 
@@ -587,8 +581,7 @@ public class GregRepository {
         GregObject gregNode;
         if (PathManager.isRoot(folderPath)) {
             gregNode = root;
-        }
-        else {
+        } else {
             String path = PathManager.relativize(PathManager.CMIS_ROOT_PATH, folderPath);
             try{
                 gregNode = root.getNode(path);
@@ -630,8 +623,7 @@ public class GregRepository {
                 //Get the list of tracked out documents
                 Resource tracker = repository.get(GregProperty.GREG_CHECKED_OUT_TRACKER);
                 children = tracker.getProperties().keySet().toArray(new String[0]);
-            }
-            else{
+            } else{
                 GregFolder folder = getGregNode(folderId).asFolder();
                 children  = folder.getNode().getChildren();
             }
@@ -672,8 +664,7 @@ public class GregRepository {
                     GregPrivateWorkingCopy gregVersion = node.asVersion().getPwc();
                     ObjectData objectData = gregVersion.compileObjectType(splitFilter, includeAllowableActions, null, false);
                     result.getObjects().add(objectData);
-                }
-                else{
+                } else {
                     Resource resource = getRegistry().get(GregProperty.GREG_CHECKED_OUT_TRACKER);
                     resource.removeProperty(child);
                     getRegistry().put(GregProperty.GREG_CHECKED_OUT_TRACKER, resource);
@@ -697,12 +688,10 @@ public class GregRepository {
         boolean createdAsPwc = createdAsPwcProperty != null && createdAsPwcProperty.equals("true");
         boolean endsWithPwc = node.getNode().getPath().endsWith("_pwc");
 
-        if(checkedOut || createdAsPwc || endsWithPwc){
+        if(checkedOut || createdAsPwc || endsWithPwc)
             return  true;
-        }
-        else{
-            return false;
-        }
+
+        return false;
     }
 
 
@@ -836,8 +825,7 @@ public class GregRepository {
             //Collections.reverse(allVersions);
 
             return allVersions;
-        }
-        else {
+        } else {
             // Single version
             ObjectData objectData = gregNode.compileObjectType(splitFilter, includeAllowableActions, objectInfos,
                     requiresObjectInfo);
@@ -858,7 +846,6 @@ public class GregRepository {
         return new ObjectListImpl();
     }
 
-    //------------------------------------------< protected >---
 
     protected RepositoryInfo compileRepositoryInfo(String repositoryId) {
         RepositoryInfoImpl fRepositoryInfo = new RepositoryInfoImpl();
@@ -945,8 +932,7 @@ public class GregRepository {
                 if(node!=null){
                 	if(node instanceof Collection){
                 		gregNode = new FolderTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(node);
-                	}
-                	else if( node instanceof Resource){
+                	} else if( node instanceof Resource){
                 		gregNode = new DocumentTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(node);
                 	}
                 }
@@ -956,16 +942,14 @@ public class GregRepository {
                 //else {
                     return gregNode.asVersion().getVersion(versionName);
                 //}
-            }
-            else {
+            } else {
             	Resource node = null;
                 node = repository.get(id);
                 GregObject gregNode = null;
                 if(node!=null){
                 	if(node instanceof Collection){
                 		gregNode = new FolderTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(repository.get(id));
-                	}
-                	else if( node instanceof Resource){
+                	} else if( node instanceof Resource){
 
                         //check if Unversioned type
                         String property = node.getProperty(GregProperty.GREG_UNVERSIONED_TYPE);
@@ -989,8 +973,7 @@ public class GregRepository {
             throw new CmisObjectNotFoundException(e.getMessage(), e);
         }
     }
-    
-    //------------------------------------------< private >---
+
 
     /**
      * Transitively gather the children of a node down to a specific depth

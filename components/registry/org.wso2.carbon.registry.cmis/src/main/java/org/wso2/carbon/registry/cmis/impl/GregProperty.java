@@ -18,18 +18,18 @@ package org.wso2.carbon.registry.cmis.impl;
 
 public class GregProperty {
 
-	public static String GREG_MIMETYPE = "registry.cmis.property.mime";
-    public static String GREG_MAJOR_VERSION = "registry.cmis.property.gregMajorVersion";
-    public static String GREG_MINOR_VERSION = "registry.cmis.property.gregMinorVersion";
-    public static String GREG_VERSION_STATE = "registry.cmis.property.gregVersionState";
-    public static String GREG_CREATED_AS_PWC = "registry.cmis.original document created as pwc";
-    public static String GREG_CHECKED_OUT_TRACKER = "/_system/config/repository/components/org.wso2.carbon.registry.cmis/checkedOutDocs";
-    public static String GREG_IS_CHECKED_OUT = "registry.cmis.property.ischeckedout";
-    public static String GREG_DATA = "registry.cmis.property.gregdata";
+	public static final String GREG_MIMETYPE = "registry.cmis.property.mime";
+    public static final String GREG_MAJOR_VERSION = "registry.cmis.property.gregMajorVersion";
+    public static final String GREG_MINOR_VERSION = "registry.cmis.property.gregMinorVersion";
+    public static final String GREG_VERSION_STATE = "registry.cmis.property.gregVersionState";
+    public static final String GREG_CREATED_AS_PWC = "registry.cmis.original document created as pwc";
+    public static final String GREG_CHECKED_OUT_TRACKER = "/_system/config/repository/components/org.wso2.carbon.registry.cmis/checkedOutDocs";
+    public static final String GREG_IS_CHECKED_OUT = "registry.cmis.property.ischeckedout";
+    public static final String GREG_DATA = "registry.cmis.property.gregdata";
 
-    public static String GREG_CHECKED_OUT_BY = "registry.cmis.property.checkedoutby";
-    public static String GREG_PROPERTY_NOT_SET = "registry.cmis.property.notset";
+    public static final String GREG_CHECKED_OUT_BY = "registry.cmis.property.checkedoutby";
+    public static final String GREG_PROPERTY_NOT_SET = "registry.cmis.property.notset";
 
-    public static String GREG_UNVERSIONED_TYPE = "registry.cmis.type.unversioneddocument";
+    public static final String GREG_UNVERSIONED_TYPE = "registry.cmis.type.unversioneddocument";
 
 }

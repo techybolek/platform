@@ -26,6 +26,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisStorageException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.DocumentTypeDefinitionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.util.Util;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -39,7 +40,6 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
     public DocumentTypeHandler(Registry repository, PathManager pathManager,
 			GregTypeManager typeManager) {
 		super(repository, pathManager, typeManager);
-		// TODO Auto-generated constructor stub
 	}
 
 	private static final Logger log = LoggerFactory.getLogger(GregFolder.class);
@@ -72,10 +72,7 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
 
         return documentType;
     }
-    /*TODO
-    public IdentifierMap getIdentifierMap() {
-        //return new DefaultDocumentIdentifierMap(true);
-    }*/
+
 
     //Method can be replaced with GREG. Returns GregDocument
     public GregDocument getGregNode(Resource node) throws RegistryException {
@@ -88,29 +85,20 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
     	return new GregVersion(repository, node, version, typeManager, pathManager);
     }
 
-    //TODO
-    /*---This might not be needed
-    public boolean canHandle(Node node) throws RepositoryException {
-        return node.isNodeType(NodeType.NT_FILE) && node.isNodeType(NodeType.MIX_SIMPLE_VERSIONABLE);
-    }
-	*/
     
     public GregObject createDocument(GregFolder parentFolder, String name, Properties properties, ContentStream contentStream, VersioningState versioningState) {
         try {
         	Resource fileNode = repository.newResource();
         	
         	// write content, if available
-            if(contentStream == null || contentStream.getStream() == null){
-            	//Do nothing :)
-            }
-            else{
+            if(contentStream != null && contentStream.getStream() != null){
             	//set stream
                 fileNode.setProperty(GregProperty.GREG_DATA, "true");
             	fileNode.setContentStream(contentStream.getStream());
             }
 
             //Put to registry AS A PWC (Look at getDestPathOfNode() )
-            String destinationPath = getDestPathOfNode(parentFolder, name);
+            String destinationPath = Util.getTargetPathOfNode(parentFolder, name);
             repository.put(destinationPath, fileNode);
             fileNode = repository.get(destinationPath);
             
@@ -147,8 +135,7 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
                 Resource resource = null;
                 if(repository.resourceExists(GregProperty.GREG_CHECKED_OUT_TRACKER)){
                     resource  = repository.get(GregProperty.GREG_CHECKED_OUT_TRACKER);
-                }
-                else{
+                } else{
                     resource = repository.newResource();
                     //Have to set content, otherwise Greg will throw exception when browsing this file in Workbench
                     resource.setContent("tracker");
@@ -161,39 +148,22 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
                 repository.put(gregVersion.getNode().getPath(), gregVersion.getNode());
                 gregVersion = getGregNode(repository.get(gregVersion.getNode().getPath())).asVersion();
                 return gregVersion.getPwc();
-            }
-
-            else  {
+            } else  {
                 if( versioningState == VersioningState.MAJOR){
                     gregVersion.getNode().addProperty(GregProperty.GREG_VERSION_STATE, GregProperty.GREG_MAJOR_VERSION);
-                }
-                else if (versioningState==VersioningState.MINOR){
+                } else if (versioningState==VersioningState.MINOR){
                     gregVersion.getNode().addProperty(GregProperty.GREG_VERSION_STATE, GregProperty.GREG_MINOR_VERSION);
                 }
                 //put properties
                 repository.put(gregVersion.getNode().getPath(), gregVersion.getNode());
 
                 return gregVersion.checkin(null, null, "auto checkin");
-
             }
-
         }
         catch (RegistryException e) {
             log.debug(e.getMessage(), e);
             throw new CmisStorageException(e.getMessage(), e);
         }
     }
-
-	private String getDestPathOfNode(GregFolder parentFolder, String name) {
-		
-		String parentPath = parentFolder.getNode().getPath();
-		if (parentPath.endsWith("/")){
-			return parentPath+name;
-		}
-		else{
-			return parentPath+"/"+name;
-		}
-		
-	}
 }
 

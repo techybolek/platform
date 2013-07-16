@@ -75,8 +75,7 @@ public class GregFolder extends GregObject {
                 Resource resource = null;
                 try{
         		    resource = getRepository().get(child);
-                }
-                catch (RegistryException e){
+                } catch (RegistryException e){
                     log.debug(e.getMessage());
                     throw new CmisObjectNotFoundException(e.getMessage(), e);
                 }
@@ -86,12 +85,10 @@ public class GregFolder extends GregObject {
                         if(property != null && property.equals("true")){
                             list.add(child);
                         }
-        			}
-        			else{
+                    } else{
         				list.add(child);
         			}
-        		}
-        		else{
+                } else {
         			list.add(child); //if property doesn't exist, still add it to the list
         		}
         	}
@@ -143,7 +140,7 @@ public class GregFolder extends GregObject {
     public GregObject addNodeFromSource(GregDocument source, Properties properties) {
         try {
         	String filename = source.getNodeName();
-            String destPath = getRepository().copy(source.getNode().getPath(), getNode().getPath()+"/"+filename);
+            String destPath = getRepository().copy(source.getNode().getPath(), getNode().getPath() + "/" + filename);
             GregObject gregObject = create(getRepository().get(destPath));
 
             // overlay new properties
@@ -171,8 +168,7 @@ public class GregFolder extends GregObject {
         try {
             if (getNode().getChildCount()>0) {
                 throw new CmisConstraintException("Folder is not empty!");
-            }
-            else {
+            } else {
                 super.delete(allVersions, isPwc);
             }
         }
@@ -197,15 +193,13 @@ public class GregFolder extends GregObject {
         try {
             String path = getNode().getPath();
             getRepository().delete(path);
-        }
-        catch (RegistryException e) {
+        } catch (RegistryException e) {
         	log.debug(e.getMessage(), e); 
         }
 
         return result;
     }
 
-    //------------------------------------------< protected >---
 
     @Override
     protected void compileProperties(PropertiesImpl properties, Set<String> filter, ObjectInfoImpl objectInfo)
@@ -238,8 +232,7 @@ public class GregFolder extends GregObject {
         //ParentId must be set for all folder objects except for root folder
         if(pathManager.isRoot(getNode())){
             addPropertyId(properties, typeId, filter, PropertyIds.PARENT_ID, GregProperty.GREG_PROPERTY_NOT_SET);
-        }
-        else{
+        } else{
             addPropertyId(properties, typeId, filter, PropertyIds.PARENT_ID, getNode().getPath());
         }
 
@@ -261,10 +254,10 @@ public class GregFolder extends GregObject {
         setAction(result, Action.CAN_GET_FOLDER_TREE, true);
         setAction(result, Action.CAN_CREATE_DOCUMENT, true);
         setAction(result, Action.CAN_CREATE_FOLDER, true);
-        if(getNode().getPath().equals("/")){
+
+        if(getNode().getPath().equals("/")) {
             setAction(result, Action.CAN_DELETE_TREE, false);
-        }
-        else{
+        } else {
             setAction(result, Action.CAN_DELETE_TREE, true);
         }
         return result;
@@ -277,9 +270,7 @@ public class GregFolder extends GregObject {
 
     @Override
     protected String getObjectId() throws RegistryException {
-        return isRoot()
-                ? PathManager.CMIS_ROOT_ID
-                : super.getObjectId();
+        return isRoot() ? PathManager.CMIS_ROOT_ID : super.getObjectId();
     }
 
     @Override
@@ -350,8 +341,7 @@ public class GregFolder extends GregObject {
                     PropertyData<?> prop = PropertyHelper.getDefaultValue(propDef);
                     if (prop == null && propDef.isRequired()) {
                         throw new CmisConstraintException("Property '" + propDef.getId() + "' is required!");
-                    }
-                    else if (prop != null) {
+                    } else if (prop != null) {
                         GregStaticMethods.setProperty(repository, node, prop);
                     }
                 }
@@ -368,8 +358,7 @@ public class GregFolder extends GregObject {
 		if  (resource instanceof CollectionImpl){
             FolderTypeHandler handler = new FolderTypeHandler(getRepository(), pathManager, typeManager);
 		    return handler.getGregNode(resource);
-        }
-        else{
+        } else{
             DocumentTypeHandler documentTypeHandler = new DocumentTypeHandler(getRepository(),pathManager,typeManager);
             try {
                 return documentTypeHandler.getGregNode(resource);

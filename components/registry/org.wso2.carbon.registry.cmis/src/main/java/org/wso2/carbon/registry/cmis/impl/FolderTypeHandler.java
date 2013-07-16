@@ -23,6 +23,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisStorageException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.FolderTypeDefinitionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.util.Util;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -39,7 +40,6 @@ public class FolderTypeHandler extends AbstractGregTypeHandler {
     public FolderTypeHandler(Registry repository, PathManager pathManager,
 			GregTypeManager typeManager) {
 		super(repository, pathManager, typeManager);
-		// TODO Auto-generated constructor stub
 	}
 
 	private static final Logger log = LoggerFactory.getLogger(FolderTypeHandler.class);
@@ -79,26 +79,16 @@ public class FolderTypeHandler extends AbstractGregTypeHandler {
 
         return folderType;
     }
-    /*
-    public IdentifierMap getIdentifierMap() {
-        return new FolderIdentifierMap();
-    }*/
 
     public GregFolder getGregNode(Resource node) {
         return new GregFolder(repository, node, typeManager, pathManager);
     }
-    
-    /*
-    public boolean canHandle(Node node) throws RepositoryException {
-        return node.isNodeType(NodeType.NT_FOLDER) || node.getDepth() == 0;
-    }
-	*/
-    
+
     public GregFolder createFolder(GregFolder parentFolder, String name, Properties properties) {
         try {
         	
         	Collection node = repository.newCollection();
-            String destinationPath = getNodeDestPath(parentFolder,name);
+            String destinationPath = Util.getTargetPathOfNode(parentFolder, name);
         	repository.put(destinationPath, node);
         	Resource resource = repository.get(destinationPath);
         	// compile the properties
@@ -112,14 +102,4 @@ public class FolderTypeHandler extends AbstractGregTypeHandler {
         }
     }
 
-	private String getNodeDestPath(GregFolder parentFolder, String name) {
-		
-		String parentPath = parentFolder.getNode().getPath();
-		if(parentPath.endsWith("/")){
-			return parentPath+name;
-		}
-		else{
-			return parentPath+"/"+name;
-		}
-	}
 }

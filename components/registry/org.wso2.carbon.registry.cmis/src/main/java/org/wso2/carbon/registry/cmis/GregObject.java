@@ -156,8 +156,7 @@ public abstract class GregObject {
     public GregDocument asDocument() {
         if (isDocument()) {
             return (GregDocument) this;
-        }
-        else {
+        } else {
             throw new CmisConstraintException("Not a document: " + this);
         }
     }
@@ -169,8 +168,7 @@ public abstract class GregObject {
     public GregFolder asFolder() {
         if (isFolder()) {
             return (GregFolder) this;
-        }
-        else {
+        } else {
             throw new CmisObjectNotFoundException("Not a folder: " + this);
         }
     }
@@ -182,8 +180,7 @@ public abstract class GregObject {
     public GregVersionBase asVersion() {
         if (isVersionable()) {
             return (GregVersionBase) this;
-        }
-        else {
+        } else {
             throw new CmisObjectNotFoundException("Not a version: " + this);
         }
     }
@@ -232,7 +229,11 @@ public abstract class GregObject {
             ObjectInfoImpl objectInfo = new ObjectInfoImpl();
 
             PropertiesImpl properties = new PropertiesImpl();
-            filter = filter == null ? null : new HashSet<String>(filter);
+            //filter = filter == null ? null : new HashSet<String>(filter);
+            
+            if (filter != null)
+                filter = new HashSet<String>(filter);
+            
             compileProperties(properties, filter, objectInfo);
             result.setProperties(properties);
             if (filter != null && !filter.isEmpty()) {
@@ -249,8 +250,7 @@ public abstract class GregObject {
             }
 
             return result;
-        }
-        catch (RegistryException e) {
+        } catch (RegistryException e) {
             log.debug(e.getMessage(), e);
             throw new CmisRuntimeException(e.getMessage(), e);
         }
@@ -279,8 +279,7 @@ public abstract class GregObject {
             if  (parent instanceof CollectionImpl){
                 FolderTypeHandler handler = new FolderTypeHandler(getRepository(), pathManager, typeManager);
 		        return handler.getGregNode(parent);
-            }
-            else{
+            } else{
                 throw new CmisInvalidArgumentException("Resource found. Collection expected");
             }
         }
@@ -306,8 +305,7 @@ public abstract class GregObject {
         setAction(aas, Action.CAN_MOVE_OBJECT, true);
         if(pathManager.isRoot(getNode())){
             setAction(aas, Action.CAN_DELETE_OBJECT, false);
-        }
-        else{
+        } else {
             setAction(aas, Action.CAN_DELETE_OBJECT, true);
         }
         setAction(aas, Action.CAN_GET_ACL, false);
@@ -332,8 +330,7 @@ public abstract class GregObject {
     protected static void setAction(Set<Action> actions, Action action, boolean condition) {
         if (condition) {
             actions.add(action);
-        }
-        else {
+        } else {
             actions.remove(action);
         }
     }
@@ -392,14 +389,13 @@ public abstract class GregObject {
             if(property != null && !property.equals("true")){
                 return 0;
             }
-        	long count=0;
+        	long count = 0;
             //node.getContent();
             Object dataObject = node.getContent();
 
         	if(dataObject == null){
         		return count;
-        	}
-        	else{
+        	} else{
                 count = 0;
                 byte[] buffer = new byte[64 * 1024];
                 InputStream inputStream = node.getContentStream();
@@ -416,12 +412,10 @@ public abstract class GregObject {
                 return count;
         	}
         	
-        }
-        else{
-            if(property==null){
+        } else{
+            if(property == null){
                 return -1;
-            }
-            else{
+            } else{
         	    return property.length();
             }
         }
@@ -456,14 +450,13 @@ public abstract class GregObject {
         if(path.endsWith("_pwc")){
             int endIndex = path.indexOf("_pwc");
             return path.substring(0, endIndex);
-        }
-        else if(path.contains(";")){
+        } else if(path.contains(";")){
             int endIndex = path.indexOf(';');
             return path.substring(0, endIndex);
         }
-        else{
-            return resource.getPath();
-        }
+
+        return resource.getPath();
+
     }
 
     /**
@@ -477,10 +470,9 @@ public abstract class GregObject {
         }
     	String[] parts = path.split("/");
         String actualName = null;
-    	if(parts==null){
+    	if(parts == null){
             actualName = path;
-    	}
-    	else{
+    	} else{
     		actualName = parts[parts.length-1];
     	}
 
@@ -491,8 +483,7 @@ public abstract class GregObject {
         else if(actualName.contains(";")){  //if name includes the ;version:xxx part
             //TODO maybe remove the ;version:xxx
             return actualName;
-        }
-        else{
+        } else{
             return actualName;
         }
     }
@@ -509,18 +500,19 @@ public abstract class GregObject {
      * Add Id property to the CMIS object represented by this instance
      */
     protected final void addPropertyId(PropertiesImpl props, String typeId, Set<String> filter, String id, String value) {
-        if (value.equals(GregProperty.GREG_PROPERTY_NOT_SET)) {
-            value = null;
-        }
-
         if (!checkAddProperty(props, typeId, filter, id)) {
             return;
+        }
+
+        if (value.equals(GregProperty.GREG_PROPERTY_NOT_SET)) {
+            value = null;
         }
 
         PropertyIdImpl prop = new PropertyIdImpl(id, value);
         prop.setQueryName(id);
         props.addProperty(prop);
     }
+
     protected final void addPropertyId(PropertiesImpl props, String typeId, Set<String> filter, String id, List<String> values) {
 
         if (!checkAddProperty(props, typeId, filter, id)) {
@@ -611,8 +603,7 @@ public abstract class GregObject {
         if (queryName != null && filter != null) {
             if (filter.contains(queryName)) {
                 filter.remove(queryName);
-            }
-            else {
+            } else {
                 return false;
             }
         }
@@ -651,18 +642,14 @@ public abstract class GregObject {
                 newNode = repository.get(destPath);
                 //newNode.setProperty(PropertyIds.NAME);
                 setNode(newNode);
-            }
-            else {
+            } else {
                 newNode = resource;
             }
-
 
         	// Are there properties to update?
             PropertyUpdater propertyUpdater = PropertyUpdater.create(typeManager, getTypeId(), properties);
 
-            GregVersionBase gregVersion = isVersionable()
-                    ? asVersion()
-                    : null;
+            GregVersionBase gregVersion = isVersionable() ? asVersion() : null;
 
             // Update properties. Checkout if required
             boolean autoCheckout = false;
@@ -680,16 +667,13 @@ public abstract class GregObject {
             if (autoCheckout) {
                 // auto versioning -> return new version created by checkin
                 return gregVersion.checkin(null, null, "auto checkout");
-            }
-            else if (gregVersion != null && gregVersion.isCheckedOut()) {
+            } else if (gregVersion != null && gregVersion.isCheckedOut()) {
                 // the node is checked out -> return pwc.
                 GregVersionBase gregNewVersion = create(newNode).asVersion();
                 return gregNewVersion.getPwc();
-            }
-            else {
+            } else {
                 // non versionable or not a new node -> return this
                 return create(newNode);
-
             }
         }
         catch (RegistryException e) {
@@ -703,9 +687,8 @@ public abstract class GregObject {
 
 		if (parentPath.endsWith("/")){
 			return parentPath+name;
-		}
-		else{
-			return parentPath+"/"+name;
+		} else{
+			return parentPath + "/" + name;
 		}
     }
 
@@ -739,10 +722,7 @@ public abstract class GregObject {
             Resource newNode;
             if (srcPath.equals(destPath)) {
                 newNode = resource;
-            }
-            else {
-
-
+            } else {
                 repository.move(srcPath, destPath);
                 newNode = repository.get(destPath);
             }
@@ -816,8 +796,7 @@ public abstract class GregObject {
                 // Schedule for remove or update
                 if (newProp == null) {
                     propertyUpdater.removeProperties.add(prop);
-                }
-                else {
+                } else {
                     propertyUpdater.updateProperties.add(newProp);
                 }
             }
@@ -851,8 +830,7 @@ public abstract class GregObject {
         if (hasProperty(resource, propertyName)) {
             Calendar date = toDate(resource.getProperty(propertyName));
             return toCalendar(date);
-        }
-        else {
+        } else {
             return defaultValue;
         }
     }
@@ -869,8 +847,7 @@ public abstract class GregObject {
     protected static GregorianCalendar toCalendar(Calendar date) {
         if (date instanceof GregorianCalendar) {
             return (GregorianCalendar) date;
-        }
-        else {
+        } else {
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTimeZone(date.getTimeZone());
             calendar.setTimeInMillis(date.getTimeInMillis());
@@ -889,10 +866,10 @@ public abstract class GregObject {
     protected static boolean hasProperty(Resource resource,String propertyName){
     	
     	String property = resource.getProperty(propertyName);
-    	if (property==null)
-    		return false;
-    	else
+    	if (property != null)
     		return true;
+
+    	return false;
     }
     
     protected void compileProperties(PropertiesImpl properties, Set<String> filter, ObjectInfoImpl objectInfo)
@@ -944,7 +921,5 @@ public abstract class GregObject {
 
         addPropertyString(properties, typeId, filter, PropertyIds.CHANGE_TOKEN, getChangeToken());
     }
-
-    
     
 }

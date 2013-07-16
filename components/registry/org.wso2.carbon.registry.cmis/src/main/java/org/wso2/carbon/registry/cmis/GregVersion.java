@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
  * GREG <code>Node</code>.
  */
 public class GregVersion extends GregVersionBase {
+
     private static final Pattern VERSION_LABEL_PATTERN = Pattern.compile("(\\d+)(\\.(\\d+))?.*");
     private static final int GROUP_MAJOR = 1;
     private static final int GROUP_MINOR = 3;
@@ -46,8 +47,6 @@ public class GregVersion extends GregVersionBase {
         this.version = version;
     }
 
-    //------------------------------------------< protected >---
-
     @Override
     protected Resource getContextNode() throws RegistryException {
         return getNode();
@@ -61,10 +60,9 @@ public class GregVersion extends GregVersionBase {
     @Override
     protected boolean isLatestVersion() throws RegistryException {
         String[] versions = getRepository().getVersions(getNode().getPath());
-        if(versions!=null){
+        if(versions!=null) {
             return versions[0].equals(version);
-        }
-        else{
+        } else{
             return getNode().getPath().equals(version);
         }
     }
@@ -72,15 +70,13 @@ public class GregVersion extends GregVersionBase {
     @Override
     protected boolean isMajorVersion() {
         String property = getNode().getProperty(GregProperty.GREG_VERSION_STATE);
-        if(property != null){
+        if(property != null) {
             if(property.equals(GregProperty.GREG_MAJOR_VERSION)){
                 return true;
-            }
-            else{
+            } else{
                 return false;
             }
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -111,7 +107,6 @@ public class GregVersion extends GregVersionBase {
         return "";
     }
 
-    //------------------------------------------< private >---
 
     private static String parseVersion(String name, int group) {
         Matcher matcher = VERSION_LABEL_PATTERN.matcher(name);
@@ -130,8 +125,6 @@ public class GregVersion extends GregVersionBase {
 			log.debug(e.getMessage(), e);
 		}
 		return null;
-		
 	}
-
 
 }

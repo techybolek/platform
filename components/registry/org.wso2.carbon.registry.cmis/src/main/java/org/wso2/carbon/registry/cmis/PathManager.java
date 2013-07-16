@@ -117,13 +117,10 @@ public class PathManager {
     public static String relativize(String prefix, String cmisPath) {
         if (cmisPath.startsWith(prefix)) {
             return cmisPath.substring(prefix.length());
-        }
-        else {
+        } else {
             throw new IllegalArgumentException(prefix + " is not a prefix of " + cmisPath);
         }
     }
-
-    //------------------------------------------< private >---
 
     private static String normalize(String path) {
         if (path == null || path.length() == 0) {

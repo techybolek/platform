@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.registry.cmis.util;
 
+import org.wso2.carbon.registry.cmis.GregFolder;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -35,8 +37,7 @@ public final class Util {
     public static GregorianCalendar toCalendar(Calendar date) {
         if (date instanceof GregorianCalendar) {
             return (GregorianCalendar) date;
-        }
-        else {
+        } else {
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTimeZone(date.getTimeZone());
             calendar.setTimeInMillis(date.getTimeInMillis());
@@ -69,11 +70,9 @@ public final class Util {
             j = string.indexOf(target, k);
             if (j < 0) {
                 result.append(string.substring(k));
-            }
-            else {
+            } else {
                 result.append(string.substring(k, j)).append(replacement);
             }
-
             k = j + d;
         } while (j >= 0);
 
@@ -88,5 +87,20 @@ public final class Util {
     public static String escape(String path) {
         return replace(path, " ", "_x0020_"); // fixme do more thorough escaping of path
     }
+
+
+    /*
+          Common method to use to get target path
+     */
+    public static String getTargetPathOfNode(GregFolder parentFolder, String name) {
+
+        String parentPath = parentFolder.getNode().getPath();
+        if (parentPath.endsWith("/")){
+            return parentPath+name;
+        } else {
+            return parentPath + "/" + name;
+        }
+    }
+
 
 }

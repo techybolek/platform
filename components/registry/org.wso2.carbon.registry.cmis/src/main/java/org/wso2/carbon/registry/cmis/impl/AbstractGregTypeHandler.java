@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.registry.cmis.impl;
 
+import org.wso2.carbon.registry.cmis.GregFolder;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.cmis.GregTypeManager;
 import org.wso2.carbon.registry.cmis.PathManager;
@@ -36,4 +37,5 @@ public abstract class AbstractGregTypeHandler{
         this.repository = repository;
         
     }
+
 }

@@ -59,8 +59,6 @@ public class GregService extends AbstractCmisService {
         return context;
     }
 
-    //------------------------------------------< repository service >---
-
     @Override
     public RepositoryInfo getRepositoryInfo(String repositoryId, ExtensionsData extension) {
         return gregRepository.getRepositoryInfo();
@@ -90,7 +88,7 @@ public class GregService extends AbstractCmisService {
         return gregRepository.getTypesDescendants(typeId, depth, includePropertyDefinitions);
     }
 
-    //------------------------------------------< navigation service >---
+    // navigation service
 
     @Override
     public ObjectInFolderList getChildren(String repositoryId, String folderId, String filter, String orderBy,
@@ -142,7 +140,7 @@ public class GregService extends AbstractCmisService {
                 maxItems, skipCount);
     }
 
-    //------------------------------------------< object service >---
+    //object service
 
     @Override
     public String createDocument(String repositoryId, Properties properties, String folderId,
@@ -245,7 +243,7 @@ public class GregService extends AbstractCmisService {
         gregRepository.updateProperties(objectId, properties, this, context.isObjectInfoRequired());
     }
 
-    //------------------------------------------< versioning service >---
+    //versioning service
 
     @Override
     public void checkOut(String repositoryId, Holder<String> objectId, ExtensionsData extension,
@@ -294,7 +292,7 @@ public class GregService extends AbstractCmisService {
         return object.getProperties();
     }
 
-    // --- discovery service ---
+    //discovery service
 
     @Override
     public ObjectList query(String repositoryId, String statement, Boolean searchAllVersions,
@@ -304,9 +302,6 @@ public class GregService extends AbstractCmisService {
         return gregRepository.query(statement, searchAllVersions, includeAllowableActions,
                 maxItems, skipCount);
     }
-
-    //------------------------------------------< protected >---
-
 
 }
 

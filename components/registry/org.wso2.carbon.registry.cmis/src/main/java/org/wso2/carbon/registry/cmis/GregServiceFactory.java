@@ -104,8 +104,7 @@ public class GregServiceFactory extends AbstractServiceFactory {
         if(sessions.containsKey(username)){
             repository = sessions.get(username);
             //TODO check for session timeout
-        }
-        else{
+        } else{
             try {
                 repository = new GregRepository(acquireGregRepository(gregConfig, context), pathManager, typeManager);
                 //put to sessions for future reference
@@ -129,7 +128,6 @@ public class GregServiceFactory extends AbstractServiceFactory {
         return serviceWrapper;
     }
 
-    //------------------------------------------< factories >---
 
    /**
      * @param gregConfig  configuration determining the GREG repository to be returned
@@ -174,8 +172,6 @@ public class GregServiceFactory extends AbstractServiceFactory {
     protected GregTypeManager createTypeManager() {
         return  new GregTypeManager();   
     }
-
-    //------------------------------------------< private >---
 
    private void readConfiguration(Map<String, String> parameters) {
         Map<String, String> map = new HashMap<String, String>();

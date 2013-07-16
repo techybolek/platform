@@ -63,8 +63,7 @@ public abstract class GregVersionBase extends GregDocument {
                 //Get the base node
                 versions = new ArrayList<String>();
                 versions.add(getNode().getPath());
-            }
-            else{
+            } else {
                 //int endIndex = versionArray.length-1;
                 //skip base node
                 //versionArray = (String [])Arrays.copyOfRange(versionArray, 0, endIndex-1);
@@ -109,12 +108,10 @@ public abstract class GregVersionBase extends GregDocument {
             if (isCheckedOut(node) && !node.getPath().endsWith("_pwc")) {
                 if (isPwc) {
                     cancelCheckout(getRepository(), node);
-                }
-                else {
+                } else {
                     throw new CmisStorageException("Cannot delete checked out document: " + node.getId());
                 }
-            }
-            else if (allVersions) {
+            } else if (allVersions) {
                 //checkout(getRepository(), node);
                 String path = node.getPath();
 
@@ -139,8 +136,7 @@ public abstract class GregVersionBase extends GregDocument {
                 }
                 //Delete major resource TODO- check whether this has to execute
                 getRepository().delete(path);
-            }
-            else {
+            } else {
                 //Delete the specific version
                 //Permanent path = /abc/def/resourceName;version=xxxx
                 String resourcePath = node.getPath();
@@ -241,8 +237,7 @@ public abstract class GregVersionBase extends GregDocument {
     public GregPrivateWorkingCopy getPwc(Resource node) {
         if (node.getPath().endsWith("_pwc")) {
 		    return new GregPrivateWorkingCopy(getRepository(), node, typeManager, pathManager);
-		}
-		else {
+		} else {
 		    throw new CmisObjectNotFoundException("Not checked out document has no private working copy");
 		}
     }
@@ -252,8 +247,7 @@ public abstract class GregVersionBase extends GregDocument {
         Resource node = getNode();
         if (isCheckedOut(node)) {
             return new GregPrivateWorkingCopy(getRepository(), node, typeManager, pathManager);
-		}
-		else {
+		} else {
 		    throw new CmisObjectNotFoundException("Not checked out document has no private working copy");
 		}
     }
@@ -300,8 +294,7 @@ public abstract class GregVersionBase extends GregDocument {
             String[] versions = getRepository().getVersions(getNode().getPath());
             String baseNodePath = versions[versions.length-1];
     	    return baseNodePath;
-        }
-        else{
+        } else{
             String baseNodePath = getNode().getPath();
     	    return baseNodePath;
         }
@@ -313,7 +306,7 @@ public abstract class GregVersionBase extends GregDocument {
      * @throws RegistryException
      */
     protected String getPwcId() throws RegistryException {
-        return null;
+        return null; //// WHAT the heck we return
     }
     
     @Override
@@ -335,8 +328,7 @@ public abstract class GregVersionBase extends GregDocument {
                 setAction(result, Action.CAN_CANCEL_CHECK_OUT, true);
                 setAction(result, Action.CAN_CHECK_IN, true);
                 setAction(result, Action.CAN_CHECK_OUT, false);
-            }
-            else{
+            } else{
                 //setAction(result, Action.CAN_CANCEL_CHECK_OUT, false);
                 //setAction(result, Action.CAN_CHECK_IN, false);
                 setAction(result, Action.CAN_CHECK_OUT, true);
@@ -363,12 +355,10 @@ public abstract class GregVersionBase extends GregDocument {
             String property = getNode().getProperty(GregProperty.GREG_CREATED_AS_PWC);
             if(property != null && property.equals("true")){
                 return getVersionSeriesId();
-            }
-            else{
+            } else{
                 return getVersionSeriesId()+"_pwc";
             }
-        }
-        else{
+        } else{
             return null;
         }
 
@@ -407,8 +397,7 @@ public abstract class GregVersionBase extends GregDocument {
         Resource resource = null;
         if(repository.resourceExists(GregProperty.GREG_CHECKED_OUT_TRACKER)){
             resource = repository.get(GregProperty.GREG_CHECKED_OUT_TRACKER);
-        }
-        else{
+        } else{
             resource  = repository.newResource();
             //Have to set content, otherwise Greg will throw exception when browsing this file in Workbench
             resource.setContent("tracker");
@@ -427,10 +416,9 @@ public abstract class GregVersionBase extends GregDocument {
             return "/";
         }
     	String[] parts = path.split("/");
-    	if(parts==null){
+    	if (parts ==  null) {
     		return path;
-    	}
-    	else{
+    	} else{
     		return parts[parts.length-1];
     	}
     }
@@ -454,12 +442,10 @@ public abstract class GregVersionBase extends GregDocument {
                 if(resource.getProperty(nodePath)!=null){
                     resource.removeProperty(nodePath);
                     getRepository().put(resource.getPath(), resource);
-                }
-                else{
+                } else{
                     throw new CmisRuntimeException("Checked out doc not in tracker!");
                 }
-            }
-            else{
+            } else{
                 throw new CmisRuntimeException("Tracker not found");
             }
 
@@ -473,8 +459,7 @@ public abstract class GregVersionBase extends GregDocument {
             //get the latest version
             String pathOfLatestVersion = getRepository().getVersions(destPath)[0];
             return getRepository().get(pathOfLatestVersion);
-        }
-        else{
+        } else{
             //This code is run when a newly created document is checked in
 
             //create base version
@@ -504,12 +489,10 @@ public abstract class GregVersionBase extends GregDocument {
             if(tracker.getProperty(node.getPath())!=null){
                 tracker.removeProperty(node.getPath());
                 repository.put(tracker.getPath(), tracker);
-            }
-            else{
+            } else{
                 throw new CmisRuntimeException("Checked out doc not in tracker!");
             }
-        }
-        else{
+        } else{
             throw new CmisRuntimeException("Tracker not found");
         }
 
@@ -537,8 +520,7 @@ public abstract class GregVersionBase extends GregDocument {
             //delete the pwc
             repository.delete(node.getPath());
 
-        }
-        else{
+        } else{
             //Document created as a pwc
             repository.delete(node.getPath());
         }
@@ -566,11 +548,9 @@ public abstract class GregVersionBase extends GregDocument {
     	}
     	if(property.equals("true")){
     		return true;
-    	}
-    	else{
+    	} else{
     		return false;
     	}
     }
-
 
 }

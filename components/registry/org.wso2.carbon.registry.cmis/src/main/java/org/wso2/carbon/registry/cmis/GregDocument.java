@@ -39,6 +39,9 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Set;
 
+/**
+ * Instances of this class represent a cmis:document of an underlying GREG <code>Node</code>.
+ */
 public abstract class GregDocument extends GregObject{
 	
 	private static final Logger log = LoggerFactory.getLogger(GregDocument.class);
@@ -58,18 +61,17 @@ public abstract class GregDocument extends GregObject{
     }
     
     /**
-     * @return  <code>true</code> iff the document is checked out
+     * @return  <code>true</code> if the document is checked out
      */
-    //TODO
     public boolean isDocumentCheckedOut() {
 
         String property = getNode().getProperty(GregProperty.GREG_IS_CHECKED_OUT);
 		
-		if(property==null || property.equals("false")){
+		if(property == null || property.equals("false")){
             return false;
         }
-        else
-			return true;
+
+        return true;
     }
     
     public ContentStream getContentStream(){
@@ -84,23 +86,21 @@ public abstract class GregDocument extends GregObject{
                 String mimeType = getNode().getProperty(GregProperty.GREG_MIMETYPE);
                 result.setMimeType(mimeType);
                 //result.setMimeType(getNode().getMediaType());
-            }
-            else{
+            } else {
                 result.setMimeType(null);
             }
-            if(getNode().getContent()!=null){
-            InputStream inputStream = getNode().getContentStream();
-            result.setStream(new BufferedInputStream(inputStream));  // stream closed by consumer
-            }
-            else{
+            if(getNode().getContent() != null){
+
+                InputStream inputStream = getNode().getContentStream();
+                result.setStream(new BufferedInputStream(inputStream));  // stream closed by consumer
+            } else {
                 result.setStream(null);
             }
         } catch (RegistryException e) {
             throw new CmisRuntimeException(e.getMessage(), e);
         }
-        finally {
-            return result;
-        }
+
+        return result;
     }
     
     /**
@@ -112,26 +112,23 @@ public abstract class GregDocument extends GregObject{
         try {
             //Check for existing data
             Object dataObject = getNode().getContent();
-            int length=0;
-            if (dataObject!=null){
-            	length=1;
-
+            int length = 0;
+            if (dataObject != null){
+            	length = 1;
             }
+
             // check overwrite
             if (!overwriteFlag && length != 0) {
                 throw new CmisContentAlreadyExistsException("Content already exists!");
             }
 
-            GregVersionBase gregVersion = isVersionable()
-                    ? asVersion()
-                    : null;
+            GregVersionBase gregVersion = isVersionable() ? asVersion() : null;
 
             boolean autoCheckout = gregVersion != null && !gregVersion.isCheckedOut();
             GregVersionBase gregVersionContext = null;
             if (autoCheckout) {
                 gregVersionContext = gregVersion.checkout();
-            }
-            else{
+            } else {
                 gregVersionContext = gregVersion;
             }
 
@@ -141,8 +138,7 @@ public abstract class GregDocument extends GregObject{
 
                resource = gregVersionContext.getNode();
                resource.setContent(null);
-            }
-            else{
+            } else{
             	//Sets the content stream
                 resource = gregVersionContext.getNode();
             	resource.setContentStream(contentStream.getStream());
@@ -159,12 +155,10 @@ public abstract class GregDocument extends GregObject{
             if (autoCheckout) {
                 // auto versioning -> return new version created by checkin
                 return gregVersionContext.checkin(null, null, "auto checkout");
-            }
-            else if (gregVersionContext != null) {
+            } else if (gregVersionContext != null) {
                 // the node is checked out -> return pwc.
                 return gregVersionContext.getPwc();
-            }
-            else {
+            } else {
                 // non versionable -> return this
                 return this;
             }
@@ -264,8 +258,7 @@ public abstract class GregDocument extends GregObject{
 
         if(getNode().getContent()!=null){
             objectInfo.setHasContent(true);
-        }
-        else{
+        } else{
             objectInfo.setHasContent(false);
         }
         objectInfo.setHasParent(true);
@@ -308,8 +301,7 @@ public abstract class GregDocument extends GregObject{
         if (isCheckedOut) {
             addPropertyId(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_ID, getCheckedOutId());
             //addPropertyString(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_BY, getCheckedOutBy());
-        }
-        else{
+        } else{
             addPropertyId(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_ID,GregProperty.GREG_PROPERTY_NOT_SET);
             //addPropertyString(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_BY, null);
         }
@@ -323,8 +315,7 @@ public abstract class GregDocument extends GregObject{
         try {
                 if( getNode().getContentStream() != null){
                     setAction(result, Action.CAN_GET_CONTENT_STREAM, true);
-                }
-                else{
+                } else{
                     setAction(result, Action.CAN_GET_CONTENT_STREAM, false);
                 }
         } catch (RegistryException e) {
