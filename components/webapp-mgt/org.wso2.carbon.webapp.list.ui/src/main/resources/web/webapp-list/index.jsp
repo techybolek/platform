@@ -18,17 +18,19 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.context.CarbonContext" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
+<%@page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
 <%@page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappMetadata" %>
-<%@page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappsWrapper" %>
+<%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappsWrapper" %>
+<%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="java.util.TreeMap" %>
-<%@ page import="java.util.Map" %>
 <jsp:include page="../dialog/display_messages.jsp"/>
 
 <%
@@ -39,6 +41,9 @@
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+    String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    String tenantContext = "/t/" + tenantDomain + "/webapps";
+
     WebappAdminClient client;
 
     int numberOfPages;
@@ -338,7 +343,7 @@
                                 <select name="webappType">
                                     <%
                                  Map<String, String> map = new TreeMap<String, String>();
-                                 
+
                                  if (map.isEmpty()) {
                                      map.put("WebApp", "Webapp");
                                      map.put("JaxWebApp", "JAX-WS/RS Webapp");
@@ -346,7 +351,7 @@
                                      map.put("All", "All");
                                  }
                                     for (Object obj : map.keySet().toArray()) {
-                                    
+
                                     String type = String.valueOf(obj);
                                             if (webappType.equalsIgnoreCase(type)) {
                                     %>
@@ -456,169 +461,255 @@
             </thead>
     </table>--%>
 <form action="delete_webapps.jsp" name="webappsForm" method="post">
-    <input type="hidden" name="pageNumber" value="<%= pageNumber%>"/>
-    <input type="hidden" name="webappState" value="<%= webappState %>"/>
-    <input type="hidden" name="webappType" value="<%= webappType %>"/>
-    <table class="styledLeft" id="webappsTable" width="100%">
-        <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th><fmt:message key="webapp.context"/></th>
-            <th>
-                <nobr><fmt:message key="webapp.display.name"/></nobr>
-            </th>
-            <th>
-                <nobr><fmt:message key="webapp.state"/></nobr>
-            </th>
-            <th>
-                <nobr><fmt:message key="webapp.type"/></nobr>
-            </th>
-            <th width="8%" style="text-align: right; padding-right: 5px; !important"><fmt:message
-                    key="webapp.sessions"/></th>
-            <th>
-                <nobr><fmt:message key="webapp.file"/></nobr>
-            </th>
-            <th>
-                <nobr><fmt:message key="webapp.last.modified"/></nobr>
-            </th>
-            <% if (webappState.equalsIgnoreCase("started") ||
-                   webappState.equalsIgnoreCase("all")||
-                   webappState.equalsIgnoreCase("stopped")) { %>
-            <th colspan="2"><fmt:message key="webapp.action"/></th>
-            <% } else { %>
-            <th><fmt:message key="webapp.action"/></th>
-            <%  }   %>
-        </tr>
-        </thead>
-        <tbody>
+<input type="hidden" name="pageNumber" value="<%= pageNumber%>"/>
+<input type="hidden" name="webappState" value="<%= webappState %>"/>
+<input type="hidden" name="webappType" value="<%= webappType %>"/>
+<table class="styledLeft" id="webappsTable" width="100%">
+<thead>
+<tr>
+    <th>&nbsp;</th>
+    <th><fmt:message key="webapp.context"/></th>
+    <th><fmt:message key="webapp.carbon.version"/></th>
+    <th>
+        <nobr><fmt:message key="webapp.display.name"/></nobr>
+    </th>
+    <th>
+        <nobr><fmt:message key="webapp.state"/></nobr>
+    </th>
+    <th>
+        <nobr><fmt:message key="webapp.type"/></nobr>
+    </th>
+    <th width="8%" style="text-align: right; padding-right: 5px; !important"><fmt:message
+            key="webapp.sessions"/></th>
+    <th>
+        <nobr><fmt:message key="webapp.file"/></nobr>
+    </th>
+    <th>
+        <nobr><fmt:message key="webapp.last.modified"/></nobr>
+    </th>
+    <% if (webappState.equalsIgnoreCase("started") ||
+            webappState.equalsIgnoreCase("all")||
+            webappState.equalsIgnoreCase("stopped")) { %>
+    <th colspan="2"><fmt:message key="webapp.action"/></th>
+    <% } else { %>
+    <th><fmt:message key="webapp.action"/></th>
+    <%  }   %>
+</tr>
+</thead>
+<tbody>
 
-        <%
-            int position = 0;
-            String urlPrefix = null;
+<%
+    int position = 0;
+    String urlPrefix = null;
 
-            if(webappsWrapper.getHttpPort() != 0) {
-                urlPrefix = "http://" + webappsWrapper.getHostName() + ":" +
-                               webappsWrapper.getHttpPort();
-            } else {
-                urlPrefix = "https://" + webappsWrapper.getHostName() + ":" +
-                               webappsWrapper.getHttpsPort();
-            }
+    if(webappsWrapper.getHttpPort() != 0) {
+        urlPrefix = "http://" + webappsWrapper.getHostName() + ":" +
+                webappsWrapper.getHttpPort();
+    } else {
+        urlPrefix = "https://" + webappsWrapper.getHostName() + ":" +
+                webappsWrapper.getHttpsPort();
+    }
+
+    for (int count = 0; count < webapps.length; count++) {
+        WebappMetadata webapp = webapps[count];
+        System.out.println("my context +++ ++++++++++++++ " + webapp.getContext() + "&&&&&&& count " +count);
 
 
-            for (WebappMetadata webapp : webapps) {
-                String bgColor = ((position % 2) == 1) ? "#EEEFFB" : "white";
-                position++;
-                String currentWebappType = webapp.getWebappType();
-                String webappURL = urlPrefix + webapp.getContext();
-                if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
-                    webappURL += webapp.getServletContext();
+        String contextPrefix;
+        if ("carbon.super".equals(tenantDomain)) {
+            String tmpContext = webapp.getContext();
+            contextPrefix = tmpContext.lastIndexOf('/') > 0 ?
+                    tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
+        } else {
+            String tmpContext = webapp.getContext().substring(tenantContext.length());
+            contextPrefix = tmpContext.lastIndexOf('/') > 0 ?             //todo not last index of
+                    tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
+            contextPrefix = tenantContext + contextPrefix;
+        }
+
+        System.out.println("my context Prefix 1 111111111111++++++++++ " + contextPrefix);
+        int rowspan = 1;
+        int range = count;
+        while(range + 1 < webapps.length) {
+            if (range + 1 < webapps.length) {
+                WebappMetadata webapp2 =webapps [range + 1];
+                String contextPrefix2;
+                if ("carbon.super".equals(tenantDomain)) {
+                    String tmpContext = webapp2.getContext();
+                    contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?
+                            tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
                 } else {
-                    webappURL = webappURL + "/";
+                    String tmpContext = webapp2.getContext().substring(tenantContext.length());
+                    contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?             //todo not last index of
+                            tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
+                    contextPrefix2 = tenantContext + contextPrefix2;
                 }
-        %>
 
-        <tr bgcolor="<%= bgColor%>">
-            <td width="10px" style="text-align:center; !important">
-                <input type="checkbox" name="webappFileName"
-                       value="<%= webapp.getWebappFile() %>"
-                       onclick="resetVars()" class="chkBox"/>
-            </td>
-            <td>
-                <a href="../webapp-list/webapp_info.jsp?webappFileName=<%= webapp.getWebappFile()%>&webappState=<%= webappState %>&hostName=<%= webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
-                    <%= webapp.getContext()%>
-                </a>
-            </td>
-            <td><%= (webapp.getDisplayName() != null ? webapp.getDisplayName() : "") %>
-            </td>
-            <td><%= (webapp.getState() != null ? webapp.getState() : "Started") %>
-            </td>
-            <td>
-                <%
-                    String iconPath = "";
-                    String webappDisplayType = "";
-                    if(currentWebappType.equalsIgnoreCase("Webapp")) {
-                        iconPath = "../webapp-mgt/images/webapps.gif";
-                        webappDisplayType = "WebApp";
-                    } else if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
-                        iconPath = "../jax-webapp-mgt/images/jax_type.gif";
-                        webappDisplayType = "JAX-WS/RS Webapp";
-                    } else if(currentWebappType.equalsIgnoreCase("JaggeryWebapp")) {
-                        iconPath = "../jaggeryapp-mgt/images/webapps.gif";
-                        webappDisplayType = "JaggeryWebApp";
-                    }
-                %>
-                <nobr>
-                    <img src="<%=iconPath%>"
-                         title="<%= currentWebappType%>"
-                         alt="<%= currentWebappType%>"/>
-                    <%= webappDisplayType %>
-                </nobr>
-            </td>
-
-            <td style="text-align: right; !important">
-                <%
-                if(!currentWebappType.equalsIgnoreCase("JaxWebapp")) {
-                    if (webapp.getStatistics().getActiveSessions() != 0) {
-                %>
-                <a href="sessions.jsp?webappFileName=<%= webapp.getWebappFile() %>">
-                    <%= webapp.getStatistics().getActiveSessions() %>
-                </a>
-                <%
-                    } else {
-                %>
-                <%= webapp.getStatistics().getActiveSessions() %>
-                <%
-                    }
+                System.out.println("my context prefix2 3333333@@@@@@@@@@@@@@@" + contextPrefix2);
+                if (contextPrefix.equalsIgnoreCase(contextPrefix2)) {
+                    System.out.println("context match found");
+                    rowspan++;
+                    range++;
+                } else {
+                    System.out.println("no context found");
+                    break;
                 }
-                %>
-            </td>
-            <td>
-                <%= webapp.getWebappFile()%>
-            </td>
-            <td>
-                <%
-                    SimpleDateFormat dateFormatter =
-                            new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
-                    String lastModified = dateFormatter.format(webapp.getLastModifiedTime());
-                %>
-                <nobr><%= lastModified %>
-                </nobr>
-            </td>
-            <% if (!"stopped".equalsIgnoreCase(webapp.getState())) {
-            %>
-            <td>
-                <a href="<%= webappURL %>" target="_blank" 
-                   style='background:url(images/goto_url.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
-                    <%
-                        if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
-                    %>
-                    <fmt:message key="find.services"/>
-                    <%
-                        } else {
-                    %>
-                    <fmt:message key="go.to.url"/>
-                    <%
-                        }
-                    %>
-                </a>
-            </td>
-            <% } else if (!webappState.equalsIgnoreCase("stopped")){ %>
-            <td>
-            </td>
-            <%}%>
-            <td>
-                <%--<%if (webapp.getWebappFile().endsWith(".war")) {%>--%>
-                <a href="download-ajaxprocessor.jsp?name=<%=webapp.getWebappFile()%>&type=<%=webapp.getWebappType()%>"
-                   target="_self"
-						style='background:url(images/download.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
-                    <fmt:message key="download"/>
-                </a>
-                <%--<% } %>--%>
-            </td>
-        </tr>
+            }
+        }
+
+        int noOfVersionedWebapps = rowspan;
+
+        boolean firstWebappFlag = true;
+        for (int vCount = count; vCount < count + noOfVersionedWebapps; vCount++) {
+            WebappMetadata vWebapp = webapps[vCount];
+            String bgColor = ((position % 2) == 1) ? "#EEEFFB" : "white";
+            position++;
+            String currentWebappType = vWebapp.getWebappType();
+            String vContext = vWebapp.getContext().startsWith(tenantContext) ?
+                    vWebapp.getContext().substring(tenantContext.length()) : vWebapp.getContext();
+//            System.out.println(vContext + " webapp.getContext " + webapp.getConte);
+            String version = vContext.lastIndexOf('/') > 0 ?
+                    vContext.substring(vContext.lastIndexOf('/')).trim() : "$default";
+            String webappURL = urlPrefix + vWebapp.getContext();
+            if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
+                webappURL += vWebapp.getServletContext();
+            } else {
+                webappURL = webappURL + "/";
+            }
+%>
+
+<tr bgcolor="<%= bgColor%>">
+    <td width="10px" style="text-align:center; !important">
+        <input type="checkbox" name="webappFileName"
+               value="<%= vWebapp.getWebappFile() %>"
+               onclick="resetVars()" class="chkBox"/>
+    </td>
+    <%
+
+        System.out.println(vContext + "    version $$$$$$$$$$$$$$$" +version + "            $$$$$ vcount  "  + vCount);
+        System.out.println(vContext + "  rowspan - ##############"+rowspan+"########" +firstWebappFlag);
+        String rowspanHtmlAtt = "";
+        if (firstWebappFlag) {
+            if (rowspan > 1) {
+                rowspanHtmlAtt = " rowspan = \"" + rowspan + "\"";
+            }
+            firstWebappFlag = false;
+    %>
+    <td <%= rowspanHtmlAtt %> >
+        <a href="../webapp-list/webapp_info.jsp?webappFileName=<%=
+            URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>&webappState=<%= webappState %>&hostName=<%=
+            webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
+            <%= contextPrefix %>
+        </a>
+
+    </td>
+
+    <% } %>
+    <td> &nbsp;
+        <% if (!"".equals(version)) { %>
+        <a href="../webapp-list/webapp_info.jsp?webappFileName=<%=
+                    URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>&webappState=<%= webappState %>&hostName=<%=
+                     webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
+            <%= version %>
+        </a>
         <% } %>
-        </tbody>
-    </table>
+    </td>
+    <td><%= (vWebapp.getDisplayName() != null ? vWebapp.getDisplayName() : "") %>
+    </td>
+    <td><%= (vWebapp.getState() != null ? vWebapp.getState() : "Started") %>
+    </td>
+    <td>
+        <%
+            String iconPath = "";
+            String webappDisplayType = "";
+            if(currentWebappType.equalsIgnoreCase("Webapp")) {
+                iconPath = "../webapp-mgt/images/webapps.gif";
+                webappDisplayType = "WebApp";
+            } else if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
+                iconPath = "../jax-webapp-mgt/images/jax_type.gif";
+                webappDisplayType = "JAX-WS/RS Webapp";
+            } else if(currentWebappType.equalsIgnoreCase("JaggeryWebapp")) {
+                iconPath = "../jaggeryapp-mgt/images/webapps.gif";
+                webappDisplayType = "JaggeryWebApp";
+            }
+        %>
+        <nobr>
+            <img src="<%=iconPath%>"
+                 title="<%= currentWebappType%>"
+                 alt="<%= currentWebappType%>"/>
+            <%= webappDisplayType %>
+        </nobr>
+    </td>
+
+    <td style="text-align: right; !important">
+        <%
+            if(!currentWebappType.equalsIgnoreCase("JaxWebapp")) {
+                if (vWebapp.getStatistics().getActiveSessions() != 0) {
+        %>
+        <a href="sessions.jsp?webappFileName=<%= vWebapp.getWebappFile() %>">
+            <%= vWebapp.getStatistics().getActiveSessions() %>
+        </a>
+        <%
+        } else {
+        %>
+        <%= vWebapp.getStatistics().getActiveSessions() %>
+        <%
+                }
+            }
+        %>
+    </td>
+    <td>
+        <%= vWebapp.getWebappFile()%>
+    </td>
+    <td>
+        <%
+            SimpleDateFormat dateFormatter =
+                    new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
+            String lastModified = dateFormatter.format(vWebapp.getLastModifiedTime());
+        %>
+        <nobr><%= lastModified %>
+        </nobr>
+    </td>
+    <% if (!"stopped".equalsIgnoreCase(vWebapp.getState())) {
+    %>
+    <td>
+        <a href="<%= webappURL %>" target="_blank"
+           style='background:url(images/goto_url.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
+            <%
+                if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
+            %>
+            <fmt:message key="find.services"/>
+            <%
+            } else {
+            %>
+            <fmt:message key="go.to.url"/>
+            <%
+                }
+            %>
+        </a>
+    </td>
+    <% } else if (!webappState.equalsIgnoreCase("stopped")){ %>
+    <td>
+    </td>
+    <%}%>
+    <td>
+            <%--<%if (vWebapp.getWebappFile().endsWith(".war")) {%>--%>
+        <a href="download-ajaxprocessor.jsp?name=<%=vWebapp.getWebappFile()%>&type=<%=vWebapp.getWebappType()%>"
+           target="_self"
+           style='background:url(images/download.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
+            <fmt:message key="download"/>
+        </a>
+            <%--<% } %>--%>
+    </td>
+</tr>
+
+<% }
+    count += noOfVersionedWebapps - 1;
+
+%>
+<% } %>
+</tbody>
+</table>
 </form>
 <p>&nbsp;</p>
 <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
