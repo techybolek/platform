@@ -31,7 +31,7 @@ public class IdentityProviderMgtService {
 
     private static final Log log = LogFactory.getLog(IdentityProviderMgtService.class);
 
-    private static IdPMgtDAO dao = new IdPMgtDAO();
+    private IdPMgtDAO dao = new IdPMgtDAO();
 
     /**
      * Retrieves trusted IdP information about a given tenant

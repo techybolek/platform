@@ -314,18 +314,18 @@ public class IdPMgtDAO {
             throws SQLException, IdentityProviderMgtException {
         PreparedStatement prepStmt = null;
         String sqlStmt = null;
-        for(String addedRole:addedRoles){
-            sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLES_SQL;
-            prepStmt = conn.prepareStatement(sqlStmt);
-            prepStmt.setInt(1, idPId);
-            prepStmt.setString(2, addedRole);
-            prepStmt.executeUpdate();
-        }
         for(String deletedRole:deletedRoles){
             sqlStmt = IdentityProviderMgtConstants.SQLQueries.DELETE_TENANT_IDP_ROLES_SQL;
             prepStmt = conn.prepareStatement(sqlStmt);
             prepStmt.setInt(1, idPId);
             prepStmt.setString(2, deletedRole);
+            prepStmt.executeUpdate();
+        }
+        for(String addedRole:addedRoles){
+            sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLES_SQL;
+            prepStmt = conn.prepareStatement(sqlStmt);
+            prepStmt.setInt(1, idPId);
+            prepStmt.setString(2, addedRole);
             prepStmt.executeUpdate();
         }
         for(int i = 0; i < renamedOldRoles.size(); i++){
@@ -359,24 +359,6 @@ public class IdPMgtDAO {
             log.error(msg + " " + tenantDomain);
             throw new IdentityProviderMgtException(msg);
         }
-        if(!addedRoleMappings.isEmpty()){
-            for(Map.Entry<String,String> entry : addedRoleMappings.entrySet()){
-                if(roleIdMap.containsKey(entry.getKey())){
-                    int idpRoleId = roleIdMap.get(entry.getKey());
-                    String localRole = entry.getValue();
-                    sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLES_MAPPING_SQL;
-                    prepStmt = conn.prepareStatement(sqlStmt);
-                    prepStmt.setInt(1, idpRoleId);
-                    prepStmt.setInt(2, tenantId);
-                    prepStmt.setString(3, localRole);
-                    prepStmt.executeUpdate();
-                } else {
-                    String msg = "Cannot find IdP role " + entry.getKey() + "for tenant";
-                    log.error(msg + " " + tenantDomain);
-                    throw new IdentityProviderMgtException(msg);
-                }
-            }
-        }
         if(!deletedRoleMappings.isEmpty()){
             Map<String,String> temp = new HashMap<String, String>();
             for(Map.Entry<String,String> entry : deletedRoleMappings.entrySet()){
@@ -401,6 +383,24 @@ public class IdPMgtDAO {
                     prepStmt.executeUpdate();
                 } else {
                     String msg = "Cannot find IdP role " + entry.getKey() + " for tenant";
+                    log.error(msg + " " + tenantDomain);
+                    throw new IdentityProviderMgtException(msg);
+                }
+            }
+        }
+        if(!addedRoleMappings.isEmpty()){
+            for(Map.Entry<String,String> entry : addedRoleMappings.entrySet()){
+                if(roleIdMap.containsKey(entry.getKey())){
+                    int idpRoleId = roleIdMap.get(entry.getKey());
+                    String localRole = entry.getValue();
+                    sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLES_MAPPING_SQL;
+                    prepStmt = conn.prepareStatement(sqlStmt);
+                    prepStmt.setInt(1, idpRoleId);
+                    prepStmt.setInt(2, tenantId);
+                    prepStmt.setString(3, localRole);
+                    prepStmt.executeUpdate();
+                } else {
+                    String msg = "Cannot find IdP role " + entry.getKey() + "for tenant";
                     log.error(msg + " " + tenantDomain);
                     throw new IdentityProviderMgtException(msg);
                 }
@@ -435,5 +435,25 @@ public class IdPMgtDAO {
             throw new IdentityProviderMgtException(msg);
         }
         return 0;
+    }
+
+    public void deleteTenantRole(String role) throws IdentityProviderMgtException {
+        Connection dbConnection = null;
+        PreparedStatement prepStmt = null;
+        try {
+            dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            String sqlStmt = IdentityProviderMgtConstants.SQLQueries.DELETE_TENANT_ROLE_SQL;
+            prepStmt = dbConnection.prepareStatement(sqlStmt);
+            prepStmt.setString(1, role);
+            prepStmt.executeUpdate();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting roles of tenant";
+            log.error(msg, e);
+            IdentityDatabaseUtil.rollBack(dbConnection);
+            throw new IdentityProviderMgtException(msg);
+        } finally {
+            IdentityDatabaseUtil.closeConnection(dbConnection);
+        }
     }
 }

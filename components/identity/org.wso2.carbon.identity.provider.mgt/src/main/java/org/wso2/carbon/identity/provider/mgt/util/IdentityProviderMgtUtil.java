@@ -60,7 +60,7 @@ public class IdentityProviderMgtUtil {
         return true;
     }
 
-    public static Connection getDBConnection() throws IdentityProviderMgtException{
+    public static Connection getDBConnection() throws IdentityProviderMgtException {
         try {
             Connection conn = IdentityDatabaseUtil.getDBConnection();
             conn.setAutoCommit(false);
@@ -119,7 +119,7 @@ public class IdentityProviderMgtUtil {
      * @throws IdentityException Error when getting an instance of Tenant Manger
      */
     public static int getTenantIdOfDomain(String tenantDomain) throws IdentityProviderMgtException {
-        int tenantId = -1234;;
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
         if (tenantDomain != null) {
             try {
                 TenantManager tenantManager = IdentityTenantUtil.getRealmService().getTenantManager();
@@ -169,7 +169,8 @@ public class IdentityProviderMgtUtil {
                 String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
-                keyStoreName = tenantDomain + ".jks";
+                String ksName = tenantDomain.trim().replace(".", "-");
+                keyStoreName = ksName + ".jks";
             }
             Certificate cert = null;
             MessageDigest sha = null;
@@ -220,7 +221,7 @@ public class IdentityProviderMgtUtil {
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
-            String alias = tenantDomain+"-idp";
+            String alias = keyStoreName.replace(".jks", "-idp");
             Certificate cert = ks.getCertificate(alias);
             if(cert != null){
                 return Base64.encode(cert.getEncoded());
@@ -254,7 +255,7 @@ public class IdentityProviderMgtUtil {
             X509Certificate cert;
             cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(bytes));
 
-            String alias = tenantDomain+"-idp";
+            String alias = keyStoreName.replace(".jks", "-idp");
             if (ks.getCertificate(alias) != null) {
                 String msg = "Certificate with alias " + alias + " already exists for tenant";
                 log.error(msg + " " + tenantDomain);
@@ -292,7 +293,7 @@ public class IdentityProviderMgtUtil {
             X509Certificate cert;
             cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(bytes));
 
-            String alias = tenantDomain+"-idp";
+            String alias = keyStoreName.replace(".jks", "-idp");
             if (ks.getCertificate(alias) != null) {
                 if(log.isDebugEnabled()){
                     log.debug("Deleting existing certificate with alias " + alias + " for tenant " + tenantDomain);
@@ -328,7 +329,7 @@ public class IdentityProviderMgtUtil {
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
-            String alias = tenantDomain+"-idp";
+            String alias = keyStoreName.replace(".jks", "-idp");
             if (ks.getCertificate(alias) == null) {
                 log.warn("Certificate with alias " + alias + " does not exist in tenant key store " + keyStoreName);
             } else {
