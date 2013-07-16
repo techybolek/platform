@@ -19,6 +19,7 @@ package org.wso2.carbon.identity.provider.mgt;
 
 import org.wso2.carbon.identity.provider.mgt.dao.IdPMgtDAO;
 import org.wso2.carbon.identity.provider.mgt.dto.TrustedIdPDTO;
+import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.identity.provider.mgt.model.TrustedIdPDO;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtUtil;
 
@@ -34,9 +35,9 @@ public class IdPMetadataService {
      * Retrieves trusted IdP information about a given tenant
      *
      * @param tenantDomain Tenant domain whose information is requested
-     * @throws IdentityProviderMgtException
+     * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
      */
-    public TrustedIdPDTO getTenantIdPMetaData(String tenantDomain) throws IdentityProviderMgtException{
+    public TrustedIdPDTO getTenantIdPMetaData(String tenantDomain) throws IdentityProviderMgtException {
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
         TrustedIdPDO trustedIdPDO = dao.getTenantIdP(tenantId, tenantDomain);
         TrustedIdPDTO trustedIdPDTO = null;

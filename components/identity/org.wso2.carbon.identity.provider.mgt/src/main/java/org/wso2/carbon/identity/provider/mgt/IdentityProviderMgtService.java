@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.provider.mgt.dao.IdPMgtDAO;
 import org.wso2.carbon.identity.provider.mgt.dto.TrustedIdPDTO;
+import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.identity.provider.mgt.model.TrustedIdPDO;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtUtil;
 
@@ -36,7 +37,7 @@ public class IdentityProviderMgtService {
     /**
      * Retrieves trusted IdP information about a given tenant
      *
-     * @throws IdentityProviderMgtException
+     * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
      */
     public TrustedIdPDTO getTenantIdP() throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();

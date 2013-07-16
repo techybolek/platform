@@ -15,7 +15,7 @@
 *specific language governing permissions and limitations
 *under the License.
 */
-package org.wso2.carbon.identity.provider.mgt;
+package org.wso2.carbon.identity.provider.mgt.exception;
 
 public class IdentityProviderMgtException extends Exception {
 

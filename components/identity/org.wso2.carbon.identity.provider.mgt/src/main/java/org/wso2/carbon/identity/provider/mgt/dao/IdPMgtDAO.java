@@ -20,7 +20,7 @@ package org.wso2.carbon.identity.provider.mgt.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
-import org.wso2.carbon.identity.provider.mgt.IdentityProviderMgtException;
+import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.identity.provider.mgt.model.TrustedIdPDO;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtConstants;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtUtil;

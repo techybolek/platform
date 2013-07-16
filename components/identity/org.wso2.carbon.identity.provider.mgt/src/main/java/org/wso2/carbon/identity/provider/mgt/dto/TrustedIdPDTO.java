@@ -17,15 +17,10 @@
 */
 package org.wso2.carbon.identity.provider.mgt.dto;
 
-import org.wso2.carbon.identity.provider.mgt.IdentityProviderMgtException;
+import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtUtil;
 
 public class TrustedIdPDTO {
-
-    /**
-     * The tenant domain used when retrieving IdP information.
-     */
-    private String tenantDomain;
 
     /**
      * The trusted IDP's Issuer ID for this tenant.
@@ -54,13 +49,6 @@ public class TrustedIdPDTO {
 
     //////////////////// Getters and Setters //////////////////////////
 
-    public String getTenantDomain() {
-        return tenantDomain;
-    }
-
-    public void setTenantDomain(String tenantDomain) {
-        this.tenantDomain = tenantDomain;
-    }
 
     public String getIdPIssuerId() {
         return idPIssuerId;
@@ -75,7 +63,9 @@ public class TrustedIdPDTO {
     }
 
     public void setIdPUrl(String idPUrl) throws IdentityProviderMgtException {
-        IdentityProviderMgtUtil.validateURI(idPUrl);
+        if(idPUrl != null && !idPUrl.equals("")){
+            IdentityProviderMgtUtil.validateURI(idPUrl);
+        }
         this.idPUrl = idPUrl;
     }
 

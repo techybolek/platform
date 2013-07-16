@@ -17,7 +17,7 @@
 */
 package org.wso2.carbon.identity.provider.mgt.model;
 
-import org.wso2.carbon.identity.provider.mgt.IdentityProviderMgtException;
+import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtUtil;
 
 import java.util.List;
@@ -78,7 +78,9 @@ public class TrustedIdPDO {
         }
 
         public void setIdPUrl(String idPUrl) throws IdentityProviderMgtException {
-            IdentityProviderMgtUtil.validateURI(idPUrl);
+            if(idPUrl != null && !idPUrl.equals("")){
+                IdentityProviderMgtUtil.validateURI(idPUrl);
+            }
             this.idPUrl = idPUrl;
         }
 
