@@ -528,8 +528,11 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
             if (identityDTO == null) { // no such user is added to the system
                 return false;
             }
-            identityDTO.setUserIdentityDataClaim(claimURI, claimValue);
-            return false; // this claim will not be added to the user store
+//            modified - why is it adding claim in preSet method?
+//            identityDTO.setUserIdentityDataClaim(claimURI, claimValue);
+//            return false; // this will cause 
+//			  the whole listner to return and fail adding the cliam in doSetUserClaim
+            return true;
         } else {
             // a simple user claim. add it to the user store
             return true;

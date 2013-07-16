@@ -76,11 +76,13 @@ public class RegistryRecoveryDataStore implements UserRecoveryDataStore{
                         dataDO.setSecret(resource.getProperty(key));
                     } else if (key.equals(EXPIRE_TIME)){
                         String time = resource.getProperty(key);
+                        
                         if(System.currentTimeMillis() > Long.parseLong(time)){
                             dataDO.setValid(false);
-                            break;
+                            break;                            
+                        } else {
+                        	dataDO.setValid(true);
                         }
-
                     }
                 }
                 registry.delete(resource.getPath());

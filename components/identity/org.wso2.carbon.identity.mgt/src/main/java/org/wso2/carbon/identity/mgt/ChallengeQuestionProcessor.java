@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
+import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionIdsDTO;
 import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.Utils;
@@ -193,6 +194,114 @@ public class ChallengeQuestionProcessor {
 
     }
 
+    
+	public UserChallengesDTO getUserChallengeQuestion(String userName, int tenantId,
+			boolean adminService) throws IdentityMgtServiceException {
+
+		UserChallengesDTO dto = null;
+
+		ArrayList<UserChallengesDTO> challengesDTOs = new ArrayList<UserChallengesDTO>();
+		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Retrieving Challenge question from the user profile.");
+			}
+			List<String> challengesUris = getChallengeQuestionUris(userName, tenantId);
+
+			for (int i = 0; i < challengesUris.size(); i++) {
+				String challengesUri = challengesUris.get(i).trim();
+				String challengeValue = Utils.getClaimFromUserStoreManager(userName, tenantId,
+						challengesUri);
+
+				String[] challengeValues = challengeValue.split(IdentityMgtConfig.getInstance()
+						.getChallengeQuestionSeparator());
+				if (challengeValues != null && challengeValues.length == 2) {
+					dto = new UserChallengesDTO();
+					dto.setId(challengesUri);
+					dto.setQuestion(challengeValues[0].trim());
+					if (adminService) {
+						dto.setAnswer(challengeValues[1].trim());
+					}
+					dto.setOrder(i);
+					dto.setPrimary(false);
+					challengesDTOs.add(dto);
+				}
+			}
+
+		} catch (Exception e) {
+			String msg = "No associated challenge question found for the user";
+			log.debug(msg, e);
+		}
+
+		return dto;
+	}
+    
+	public UserChallengesDTO getUserChallengeQuestion(String userName, int tenantId,
+			String challengesUri) throws IdentityMgtServiceException {
+
+		UserChallengesDTO dto = null;
+
+		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Retrieving Challenge question from the user profile.");
+			}
+
+			String challengeValue = Utils.getClaimFromUserStoreManager(userName, tenantId,
+					challengesUri);
+
+			if (challengeValue != null) {
+
+				String[] challengeValues = challengeValue.split(IdentityMgtConfig.getInstance()
+						.getChallengeQuestionSeparator());
+				if (challengeValues != null && challengeValues.length == 2) {
+					dto = new UserChallengesDTO();
+					dto.setId(challengesUri);
+					dto.setQuestion(challengeValues[0].trim());
+
+				}
+			} else {
+				dto = new UserChallengesDTO();
+				dto.setError("Challenge questions have not been answered by the user: " + userName);
+			}
+
+		} catch (Exception e) {
+			String errorMsg = "Error while getting the challenge questions for the user: "
+					+ userName;
+			log.debug(errorMsg + " Error:" + e.getMessage());
+			dto = new UserChallengesDTO();
+			dto.setError(errorMsg);
+		}
+
+		return dto;
+
+	}
+
+	public ChallengeQuestionIdsDTO getUserChallengeQuestionIds(String userName, int tenantId)
+			throws IdentityMgtServiceException {
+
+		ChallengeQuestionIdsDTO dto = new ChallengeQuestionIdsDTO();
+
+		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Retrieving Challenge question ids from the user profile.");
+			}
+			List<String> challengesUris = getChallengeQuestionUris(userName, tenantId);
+			String[] ids = new String[challengesUris.size()];
+
+			for (int i = 0; i < challengesUris.size(); i++) {
+				ids[i] = challengesUris.get(i).trim();
+			}
+
+			dto.setIds(ids);
+
+		} catch (Exception e) {
+			String msg = "No associated challenge question found for the user";
+			log.debug(msg, e);
+		}
+
+		return dto;
+
+	}
+    
     /**
      *
      * @param userName
@@ -213,7 +322,7 @@ public class ChallengeQuestionProcessor {
             claimValue = Utils.getClaimFromUserStoreManager(userName, tenantId,
                     "http://wso2.org/claims/challengeQuestionUris");
         } catch (IdentityException e) {
-            log.error("");
+            log.debug("Error while getting cliams. " + e.getMessage());
         }
 
         if(claimValue != null){
@@ -358,6 +467,42 @@ public class ChallengeQuestionProcessor {
         return verification;
     }
 
+	public boolean verifyUserChallengeAnswer(String userName, int tenantId,
+			UserChallengesDTO challengesDTO) {
+
+		boolean verification = false;
+		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Challenge Question from the user profile.");
+			}
+
+			UserChallengesDTO[] storedDto = getChallengeQuestionsOfUser(userName, tenantId, true);
+
+			if (challengesDTO.getAnswer() == null || challengesDTO.getAnswer().trim().length() < 1) {
+				return false;
+			}
+
+			for (UserChallengesDTO dto : storedDto) {
+
+				if (dto.getId().equals(challengesDTO.getId())) {
+
+					String hashedAnswer = Utils.doHash(challengesDTO.getAnswer().trim()
+							.toLowerCase());
+					if (hashedAnswer.equals(dto.getAnswer())) {
+						verification = true;
+					} else {
+						return false;
+					}
+				}
+
+			}
+		} catch (Exception e) {
+			String msg = "No associated challenge question found for the user";
+			log.debug(msg, e);
+		}
+
+		return verification;
+	}
 
     /**
      *

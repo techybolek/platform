@@ -120,12 +120,16 @@ public class RecoveryProcessor {
         if(recoveryDTO.getNotification() != null){
             String notification = recoveryDTO.getNotification().trim();
             notificationData.setNotification(notification);
-            if(IdentityMgtConstants.Notification.ACCOUNT_CONFORM.equals(notification) ||
-                    IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)){
-
+            if(IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)){
                 confirmationKey = UUIDGenerator.generateUUID();
                 secretKey = UUIDGenerator.generateUUID();
                 notificationData.setNotificationCode(confirmationKey);
+                
+            } else if(IdentityMgtConstants.Notification.ACCOUNT_CONFORM.equals(notification)){
+                confirmationKey = UUIDGenerator.generateUUID();
+                secretKey = UUIDGenerator.generateUUID();
+                notificationData.setNotificationCode(confirmationKey);
+                
             } else if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)){
                 String temporaryPassword = recoveryDTO.getTemporaryPassword();  // TODO
                 if(temporaryPassword == null || temporaryPassword.trim().length() < 1){
@@ -146,10 +150,9 @@ public class RecoveryProcessor {
         notificationData.setUserId(userId);
         notificationData.setDomainName(domainName);
 
-
         if(persistData){
             UserRecoveryDataDO recoveryDataDO =
-                            new UserRecoveryDataDO(userId, tenantId,  secretKey, confirmationKey);
+                            new UserRecoveryDataDO(userId, tenantId,  confirmationKey, secretKey);
             dataStore.store(recoveryDataDO);
 
         }
@@ -186,10 +189,51 @@ public class RecoveryProcessor {
             return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_CODE);
         }
 
-        if(dataDO.isValid()){
+        if(!dataDO.isValid()){
             return new VerificationBean(VerificationBean.ERROR_CODE_EXPIRED_CODE);
         } else {
-            return new VerificationBean(dataDO.getUserName(), dataDO.getSecret());
+        	// Verification successful.
+            return new VerificationBean(true);
+        }
+
+    }
+    
+    /**
+     * This method is used to verify the confirmation code supplied by user. This invalidates 
+     * the current code and generates a new code and send to user.
+     * 
+     * @param code
+     * @param userDto
+     * @return
+     * @throws IdentityException
+     */
+    public VerificationBean verifyConfirmationCode(String code, UserDTO userDto) throws IdentityException{
+
+        UserRecoveryDataDO dataDO = null;
+
+        try {
+            dataDO = dataStore.load(code);
+        } catch (IdentityException e) {
+            return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_USER);
+        }
+
+        if(dataDO == null){
+            return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_CODE);
+        }
+
+        if(!dataDO.isValid()){
+            return new VerificationBean(VerificationBean.ERROR_CODE_EXPIRED_CODE);
+        } else {
+//        	Generate new code to be send to updatedPassword.
+            String confirmationKey = UUIDGenerator.generateUUID();
+            String secretKey = UUIDGenerator.generateUUID();
+            
+			UserRecoveryDataDO recoveryDataDO = new UserRecoveryDataDO(userDto.getUserId(),
+					userDto.getTenantId(), confirmationKey, secretKey);
+
+			dataStore.store(recoveryDataDO);
+
+            return new VerificationBean(dataDO.getUserName(), confirmationKey);
         }
 
     }
@@ -239,15 +283,18 @@ public class RecoveryProcessor {
                 dataStore.store(dataDO);
                 log.info("User verification successful for user : " + userId +
                         " from tenant domain " + userDTO.getTenantDomain());
+                
                 return new VerificationBean(userId, code);
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.debug(e.getMessage());
             return  new VerificationBean(VerificationBean.ERROR_CODE_UN_EXPECTED);
         }
-
-        log.error("User verification failed for user : " + userId +
-                " from tenant domain " + userDTO.getTenantDomain());
+        
+        if(log.isDebugEnabled()){
+            log.debug("User verification failed for user : " + userId +
+                    " from tenant domain " + userDTO.getTenantDomain());
+        }
 
         return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_USER);
     }
@@ -255,7 +302,7 @@ public class RecoveryProcessor {
     public void createConfirmationCode(UserDTO userDTO, String code) throws IdentityException {
         String key = UUID.randomUUID().toString();
         UserRecoveryDataDO  dataDO =
-                new UserRecoveryDataDO(userDTO.getUserId(), userDTO.getTenantId(), code, key);
+                new UserRecoveryDataDO(userDTO.getUserId(), userDTO.getTenantId(), key, code);
         dataStore.store(dataDO);
     }
     

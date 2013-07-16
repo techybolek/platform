@@ -62,12 +62,23 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 		    userParameters.put("temporary-password", notificationData.getNotificationCode());
         } else if (IdentityMgtConstants.Notification.OTP_PASSWORD.equals(notification)) {
         	userParameters.put("otp-password", notificationData.getNotificationCode());
+        } else if (IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)) {
+
+			String resetLink = emailConfig.getTargetEpr() + "?" + CONF_STRING + "="
+					+ notificationData.getNotificationCode() + "\n";
+			userParameters.put("password-reset-link", resetLink);
+			userParameters.put("user-name", notificationData.getUserId());
         }
 
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			if (notificationData.getUserId().length() == 0) {
-				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, EmailConfig.DEFAULT_VALUE_SUBJECT);
+
+			if (notificationData.getNotificationSubject() == null) {
+				if(emailConfig.getSubject() != null) {
+					headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, emailConfig.getSubject());
+				} else {
+					headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, EmailConfig.DEFAULT_VALUE_SUBJECT);
+				}				
 			} else {
 				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, notificationData.getNotificationSubject());
 			}
@@ -99,7 +110,7 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 			log.debug("Verification url : " + requestMessage);
 			log.info("User credentials configuration mail has been sent to " + emailAddress);
 		} catch (Exception e) {
-			log.error("Failed Sending Email", e);
+			log.error("Failed Sending Email" + e.getMessage());
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
 		}
@@ -132,9 +143,9 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 		} else {
 			msg = emailConfig.getEmailBody() + "\n";
 			if (notificationData.getNotificationCode() != null) {
-				msg =
-				      msg + targetEpr + "?" + CONF_STRING + "=" + notificationData.getNotificationCode() +
-				              "\n";
+//				msg =
+//				      msg + targetEpr + "?" + CONF_STRING + "=" + notificationData.getNotificationCode() +
+//				              "\n";
 			}
 		}
 		if (emailConfig.getEmailFooter() != null) {
