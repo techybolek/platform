@@ -477,7 +477,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
              </div>
             <div class="form-actions" id="saveButtons">
                 <input type="submit" id="updateButton" class="btn btn-primary" value="<%=i18n.localize("save")%>"/>
-                <input type="reset" id="cancelEdit" class="btn btn-primary" value="<%=i18n.localize("cancel")%>">
+                <input type="reset" id="cancelEdit" class="btn" value="<%=i18n.localize("cancel")%>">
             </div>
 
         </form>

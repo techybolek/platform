@@ -305,7 +305,7 @@
                 </div>
                 <div class="form-actions" id="saveButtons">
                     <input type="submit" id="addNewAPIButton" name="addNewAPIButton" class="btn btn-primary" value="<%=i18n.localize("create")%>"/>
-                    <input type="reset" class="btn btn-primary" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
+                    <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />
                 </div>
 
                 <input type="hidden" name="resourceCount" id="resourceCount" value="0"/>
