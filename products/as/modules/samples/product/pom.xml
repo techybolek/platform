@@ -92,6 +92,7 @@
         <module>ClientAPI</module>
         <module>Mail</module>
         <module>HelloWorldWebapp</module>
+        <module>WebappVersioning</module>
         <module>VirtualDirectoryListing</module>
         <module>EJBLibrary</module>
         <module>TomcatWebApps/GenericJavaBeanResource</module>
