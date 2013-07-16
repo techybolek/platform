@@ -30,7 +30,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticatorsComparator;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticatorsConfiguration;
-import org.wso2.carbon.identity.application.authentication.framework.CommonAuthenticationServlet;
+import org.wso2.carbon.identity.application.authentication.framework.CommonApplicationAuthenticationServlet;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -58,7 +58,7 @@ public class ApplicationAuthenticationFrameworkServiceComponent{
     	getAuthenticators(ctxt.getBundleContext());
     	
         // Register Common servlet
-        Servlet commonServlet = new ContextPathServletAdaptor(new CommonAuthenticationServlet(), COMMON_SERVLET_URL);
+        Servlet commonServlet = new ContextPathServletAdaptor(new CommonApplicationAuthenticationServlet(), COMMON_SERVLET_URL);
         try {
             httpService.registerServlet(COMMON_SERVLET_URL, commonServlet, null, null);
         } catch (Exception e) {

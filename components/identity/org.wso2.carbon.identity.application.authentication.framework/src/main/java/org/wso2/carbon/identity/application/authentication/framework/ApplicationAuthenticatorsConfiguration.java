@@ -32,6 +32,8 @@ public class ApplicationAuthenticatorsConfiguration {
     //Constant definitions for Elements
     private static final String ELEM_AUTHENTICATOR = "Authenticator";
     private static final String ELEM_STATUS = "Status";
+    private static final String ELEM_CONFIG = "Config";
+    private static final String ELEM_PARAMETER = "Parameter";
 
     //Constant definitions for attributes
     private static final String AUTHENTICATOR_ATTR_NAME = "name";
@@ -40,6 +42,8 @@ public class ApplicationAuthenticatorsConfiguration {
     
     private static final String STATUS_ATTR_VALUE = "value";
     private static final String STATUS_ATTR_LOGIN_PAGE = "loginPage";
+    
+    private static final String PARAMETER_ATTR_NAME = "name";
 
     /**
      * this class is used to represent an authenticator configuration in the runtime
@@ -53,13 +57,16 @@ public class ApplicationAuthenticatorsConfiguration {
         private boolean disabled;
         
         private Map<String, String> statusMap;
+        private Map<String, String> parameterMap;
 
-        private AuthenticatorConfig(String name, int factor, boolean disabled, Map<String, String> statusMap) {
-            this.name = name;
-            this.factor = factor;
-            this.disabled = disabled;
-            this.statusMap = statusMap;
-        }
+		private AuthenticatorConfig(String name, int factor, boolean disabled,
+		                            Map<String, String> statusMap, Map<String, String> parameterMap) {
+			this.name = name;
+			this.factor = factor;
+			this.disabled = disabled;
+			this.statusMap = statusMap;
+			this.parameterMap = parameterMap;
+		}
 
         public String getName() {
             return name;
@@ -75,6 +82,10 @@ public class ApplicationAuthenticatorsConfiguration {
 
 		public Map<String, String> getStatusMap() {
         	return statusMap;
+        }
+
+		public Map<String, String> getParameterMap() {
+        	return parameterMap;
         }
     }
     
@@ -160,9 +171,26 @@ public class ApplicationAuthenticatorsConfiguration {
             String loginPage = statusElement.getAttributeValue(new QName(STATUS_ATTR_LOGIN_PAGE));
             statusMap.put(value, loginPage);
         }
+        
+        // read the config parameters
+        Map<String, String> parameterMap = new Hashtable<String, String>();
+        for(Iterator configElemItr = authenticatorElem.getChildrenWithLocalName(ELEM_CONFIG);
+            configElemItr.hasNext();){
+            OMElement configElement = (OMElement)configElemItr.next();
+            for(Iterator paramIterator = configElement.getChildrenWithLocalName(ELEM_PARAMETER);
+                paramIterator.hasNext();){
+                OMElement paramElem = (OMElement)paramIterator.next();
+                OMAttribute paramNameAttr = paramElem.getAttribute(new QName(PARAMETER_ATTR_NAME));
+                if(paramNameAttr == null){
+                    log.warn("An Authenticator Parameter should have a name attribute. Skipping the parameter.");
+                    continue;
+                }   
+                parameterMap.put(paramNameAttr.getAttributeValue(), paramElem.getText());
+            }   
+        }   
 
         AuthenticatorConfig authenticatorConfig = new AuthenticatorConfig(authenticatorName,
-                factor, disabled, statusMap);
+                factor, disabled, statusMap, parameterMap);
 
         return authenticatorConfig;
     }
