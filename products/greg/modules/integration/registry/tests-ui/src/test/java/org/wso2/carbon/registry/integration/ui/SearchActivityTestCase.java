@@ -29,7 +29,7 @@ public class SearchActivityTestCase extends GregUiIntegrationTest{
         SearchActivityPage searchActivityPage = new SearchActivityPage(driver);
         //searching an element
         searchActivityPage.searchElement();
-        //Seach element verify
+        //Search element verify
         searchActivityPage.verifySearchElement("/Capp_1.0.0.carTestFile");
         driver.close();
 

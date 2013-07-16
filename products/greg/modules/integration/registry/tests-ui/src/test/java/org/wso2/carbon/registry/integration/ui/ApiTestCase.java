@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.automation.api.selenium.apilist.ApiListPage;
+import org.wso2.carbon.automation.api.selenium.apimanager.apilist.ApiListPage;
 import org.wso2.carbon.automation.api.selenium.login.LoginPage;
 import org.wso2.carbon.automation.api.selenium.metadata.ApiPage;
 import org.wso2.carbon.automation.core.BrowserManager;

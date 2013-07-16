@@ -6,7 +6,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.automation.api.selenium.login.LoginPage;
 import org.wso2.carbon.automation.api.selenium.tenant.TenantHomePage;
-import org.wso2.carbon.automation.api.selenium.tenant.TenantListPage;
+import org.wso2.carbon.automation.api.selenium.tenant.TenantListpage;
 import org.wso2.carbon.automation.core.BrowserManager;
 import org.wso2.carbon.automation.core.ProductConstant;
 
@@ -36,8 +36,8 @@ public class CreateNewTenantTestCase extends GregUiIntegrationTest{
         String password = "tenantpassword";
         String email = "test@wso2.com";
         addNewTenantHome.addNewTenant(tenantDomain, tenantFirstName, tenantLastName, adminUsername, password, email);
-        TenantListPage tenantListpage = new TenantListPage(driver);
-        tenantListpage.checkOnUploadedTenant(tenantDomain);
+        TenantListpage tenantListpage = new TenantListpage(driver);
+        tenantListpage.checkOnUplodedTenant(tenantDomain);
         driver.close();
 
     }

@@ -31,10 +31,9 @@ public class AddKeyStoreTestCase extends GregUiIntegrationTest {
         //adding the key store
         String keyStoreFilePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator + "artifacts" + File.separator +
                                   "GREG" + File.separator + "keystore" + File.separator + "examplestore";
-
         String keyStorePassWord = "randika123";
         String keyStoreProvider = "testprovider";
-        String keyStoreName = "examplestore";
+        String keyStoreName = "wso2carbon.jks";
 
         keyStoreHome.addKeyStore(keyStoreFilePath, keyStorePassWord, keyStoreProvider);
         KeyStoreManagementPage keyStoreManagementPage = new KeyStoreManagementPage(driver);

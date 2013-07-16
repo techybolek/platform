@@ -31,8 +31,8 @@ public class AddNewExtensionTestCase extends GregUiIntegrationTest{
         test.loginAs(userInfo.getUserName(), userInfo.getPassword());
         ExtensionPage addNewExtension = new ExtensionPage(driver);
         String extensionFilePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator + "artifacts" + File.separator +
-                                   "GREG" + File.separator + "extensions" + File.separator + "JarService.jar";
-        String extensionName = "JarService.jar";
+                                   "GREG" + File.separator + "extensions" + File.separator + "HelloWorld.jar";
+        String extensionName = "HelloWorld.jar";
         addNewExtension.addNewExtension(extensionFilePath);
         ExtensionListPage extensionListpage = new ExtensionListPage(driver);
         extensionListpage.checkOnUploadedExtension(extensionName);
