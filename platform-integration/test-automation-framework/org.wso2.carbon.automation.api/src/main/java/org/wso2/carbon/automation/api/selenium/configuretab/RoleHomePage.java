@@ -48,7 +48,6 @@ public class RoleHomePage {
         if (roleName.equals(roleNameOnServer)) {
             log.info("Uploaded Api exists");
             return true;
-
         } else {
             String resourceXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/table/tbody/tr[";
             String resourceXpath2 = "]/td";
@@ -65,18 +64,13 @@ public class RoleHomePage {
                     if (roleName.contains(actualRoleName)) {
                         log.info("newly Created Role   exists");
                         return true;
-
-                    }  else {
+                    } else {
                         return false;
                     }
-
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created ROle");
-
                 }
-
             }
-
         }
 
         return false;
@@ -88,23 +82,19 @@ public class RoleHomePage {
         driver.findElement(By.name(uiElementMapper.getElement("role.add.new.user.name.id"))).sendKeys(roleName);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("doNext()");
-
         driver.findElement(By.className(uiElementMapper.getElement("role.permission.id"))).click();
-
         Thread.sleep(3000);
-
         js.executeScript("doNext()");
-
+        driver.findElement(By.name(uiElementMapper.getElement("role.add.user.to.role.name"))).clear();
         driver.findElement(By.name(uiElementMapper.getElement("role.add.user.to.role.name"))).sendKeys("Seleniumtest");
-        driver.findElement(By.xpath(uiElementMapper.getElement("role.search.button"))).click();
-        driver.findElement(By.name(uiElementMapper.getElement("role.add.user.to.role.name.tick"))).click();
-        driver.findElement(By.xpath(uiElementMapper.getElement("role.add.user.finish.button"))).click();
-
+        //This thread waits until roles list appears
+        Thread.sleep(2000);
+        driver.findElement(By.cssSelector(uiElementMapper.getElement("role.search.button"))).click();
+        driver.findElement(By.cssSelector(uiElementMapper.getElement("role.add.ok.button.css"))).click();
     }
 
     public LoginPage logout() throws IOException {
         driver.findElement(By.xpath(uiElementMapper.getElement("home.greg.sign.out.xpath"))).click();
         return new LoginPage(driver);
     }
-
 }

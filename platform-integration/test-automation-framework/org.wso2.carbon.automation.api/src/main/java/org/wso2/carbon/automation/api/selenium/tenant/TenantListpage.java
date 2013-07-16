@@ -20,11 +20,9 @@ public class TenantListpage {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
-        driver.findElement(By.id(uiElementMapper.getElement("configure.tab.id"))).click();
-        driver.findElement(By.linkText(uiElementMapper.getElement("add.new.tenant.link.text"))).click();
         log.info("New Tenant list page");
         if (!driver.findElement(By.id(uiElementMapper.getElement("tenant.role.dashboard.middle.text"))).
-          getText().contains("Register A New Organization")) {
+          getText().contains("Tenants List")) {
           throw new IllegalStateException("This is not the correct Page");
         }
     }
@@ -34,7 +32,7 @@ public class TenantListpage {
         log.info("---------------------------->>>> " + tenantName);
         Thread.sleep(5000);
         driver.findElement(By.id(uiElementMapper.getElement("configure.tab.id"))).click();
-        driver.findElement(By.linkText(uiElementMapper.getElement("veiw.tenant.link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("view.tenant.link"))).click();
         String tenantNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]" +
                                                                 "/table/tbody/tr[2]/td/div[2]/div/table/tbody/tr/td")).getText();
         log.info(tenantNameOnServer);
