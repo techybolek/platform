@@ -735,9 +735,12 @@ body {
 }
 .thumbnail h5 div{
     white-space: nowrap;
-       overflow: hidden;
-       text-overflow: ellipsis;
-       -o-text-overflow: ellipsis;
-       -ms-text-overflow: ellipsis;
-       display: block;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   -o-text-overflow: ellipsis;
+   -ms-text-overflow: ellipsis;
+   display: block;
+}
+.navbar-inner,.menu-content{
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }

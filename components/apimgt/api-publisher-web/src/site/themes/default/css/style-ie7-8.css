@@ -16,3 +16,28 @@ div#newDoc div.ieFix{
 div#header  div.container-fluid{
     width:970px;margin:0 auto !important;
 }
+ul.breadcrumb {
+    height:20px;
+    margin-top: -50px;
+    margin-left: -490px;
+    left:50%;
+}
+.menu-back{
+    margin-top: 0;
+}
+.logo-section{
+    margin-top:-10px;
+}
+#left{
+    margin-top: 40px;
+}
+#middle{
+    margin-top: 40px;
+}
+#middle div.title-section{
+    background: #ccc;
+    padding:5px;
+}
+div.menu-back div.menu-content{
+    margin-top: 7px !important;
+}

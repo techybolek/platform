@@ -1,5 +1,8 @@
 ul.breadcrumb {
     height:20px;
+    margin-top: -40px;
+    margin-left: -490px;
+    left:50%;
 }
 ul.breadcrumb li{
     float:left;
@@ -7,4 +10,16 @@ ul.breadcrumb li{
 }
 button.btn-api-del{
     padding:0 5px;
+}
+div.menu-back{
+    margin-top: -18px;
+}
+#left{
+    margin-top: 50px;
+}
+#middle{
+    margin-top: 50px;
+}
+.logo-section{
+    margin-top:-18px;
 }
