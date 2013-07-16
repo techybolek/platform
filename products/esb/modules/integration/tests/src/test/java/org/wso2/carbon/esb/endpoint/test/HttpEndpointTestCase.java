@@ -21,6 +21,10 @@ package org.wso2.carbon.esb.endpoint.test;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,18 +33,29 @@ import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.api.clients.endpoint.EndPointAdminClient;
 import org.wso2.carbon.automation.api.clients.proxy.admin.ProxyServiceAdminClient;
 import org.wso2.carbon.automation.api.clients.registry.ResourceAdminServiceClient;
+import org.wso2.carbon.automation.core.ProductConstant;
+import org.wso2.carbon.automation.core.utils.HttpResponse;
+import org.wso2.carbon.automation.core.utils.axis2serverutils.SampleAxis2Server;
+import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
+import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariables;
+import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkFactory;
 import org.wso2.carbon.automation.utils.esb.ESBTestCaseUtils;
+import org.wso2.carbon.automation.utils.httpclient.HttpURLConnectionClient;
+import org.wso2.carbon.automation.utils.httpclient.HttpsResponse;
+import org.wso2.carbon.automation.utils.httpclient.HttpsURLConnectionClient;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 import org.wso2.carbon.esb.util.ESBTestConstant;
+import org.wso2.carbon.esb.util.ServiceDeploymentUtil;
+import org.wso2.carbon.esb.util.WireMonitorServer;
 import org.wso2.carbon.proxyadmin.stub.ProxyServiceAdminProxyAdminException;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.List;
@@ -51,11 +66,36 @@ import static org.testng.Assert.fail;
 
 public class HttpEndpointTestCase extends ESBIntegrationTest {
 
+    private SampleAxis2Server axis2Server1 = null;
+    EnvironmentBuilder builder = null;
+
     private final String ENDPOINT_NAME = "HTTPEndpointTest";
     private EndPointAdminClient endPointAdminClient;
 
+    private static final String studentName = "automationStudent";
+    private static final String updateStudentName = "automationStudent2";
+
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
+        if (FrameworkFactory.getFrameworkProperties(ProductConstant.ESB_SERVER_NAME).getEnvironmentSettings().is_builderEnabled()) {
+            axis2Server1 = new SampleAxis2Server("test_axis2_server_9009.xml");
+            axis2Server1.start();
+            axis2Server1.deployService(ESBTestConstant.STUDENT_REST_SERVICE);
+        } else {
+
+            builder = new EnvironmentBuilder().as(ProductConstant.ADMIN_USER_ID);
+
+            EnvironmentVariables appServer = builder.build().getAs();
+
+            int deploymentDelay = builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay();
+            ServiceDeploymentUtil deployer = new ServiceDeploymentUtil();
+            String serviceFilePath = ProductConstant.getResourceLocations(ProductConstant.AXIS2_SERVER_NAME)
+                    + File.separator + "aar" + File.separator + ESBTestConstant.STUDENT_REST_SERVICE + ".aar";
+
+            deployer.deployArrService(appServer.getBackEndUrl(), appServer.getSessionCookie()
+                    , ESBTestConstant.STUDENT_REST_SERVICE, serviceFilePath, deploymentDelay);
+        }
+
         super.init();
         loadESBConfigurationFromClasspath(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "endpoint" + File.separator + "httpEndpointConfig" + File.separator + "synapse.xml");
 
@@ -65,11 +105,24 @@ public class HttpEndpointTestCase extends ESBIntegrationTest {
     @AfterClass(groups = "wso2.esb")
     public void close() throws Exception {
         //resourceAdminServiceClient.deleteResource("/_system/config/test_ep_config");
+        if (axis2Server1 != null && axis2Server1.isStarted()) {
+            axis2Server1.stop();
+        } else {
+            if (builder != null) {
+                EnvironmentVariables appServer = builder.build().getAs();
+                int deploymentDelay = builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay();
+
+                ServiceDeploymentUtil deployer = new ServiceDeploymentUtil();
+                deployer.unDeployArrService(appServer.getBackEndUrl(), appServer.getSessionCookie()
+                        , ESBTestConstant.STUDENT_REST_SERVICE, deploymentDelay);
+            }
+        }
+
         endPointAdminClient = null;
         super.cleanup();
     }
 
-    @Test(groups = {"wso2.esb"}, description = "Test http endpoint addition, deletion & stats")
+    @Test(groups = {"wso2.esb"}, description = "Test HTTP Endpoint addition, deletion & stats", priority = 1)
     public void testHttpEndpoint() throws Exception {
         cleanupEndpoints();
         endpointAdditionScenario();
@@ -77,7 +130,86 @@ public class HttpEndpointTestCase extends ESBIntegrationTest {
         endpointDeletionScenario();
     }
 
-    @Test(groups = {"wso2.esb"}, description = "Sending a Message to HTTP endpoint")
+    @Test(groups = {"wso2.esb"}, description = "HTTP Endpoint POST Test: RESTful", priority = 5)
+    public void testToPost() throws IOException, Exception {
+        String addStudentData = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n" +
+                "   <p:addStudent xmlns:p=\"http://axis2.apache.org\">\n" +
+                "      <!--0 to 1 occurrence-->\n" +
+                "      <ns:student xmlns:ns=\"http://axis2.apache.org\">\n" +
+                "         <!--0 to 1 occurrence-->\n" +
+                "         <xs:age xmlns:xs=\"http://axis2.apache.org\">100</xs:age>\n" +
+                "         <!--0 to 1 occurrence-->\n" +
+                "         <xs:name xmlns:xs=\"http://axis2.apache.org\">" + studentName + "</xs:name>\n" +
+                "         <!--0 or more occurrences-->\n" +
+                "         <xs:subjects xmlns:xs=\"http://axis2.apache.org\">testAutomation</xs:subjects>\n" +
+                "      </ns:student>\n" +
+                "   </p:addStudent>";
+
+        StringReader sendData = new StringReader(addStudentData);
+        StringWriter responseData = new StringWriter();
+        URL restURL = new URL((getProxyServiceURL("postEPProxy")) + "/students/");
+        HttpURLConnectionClient.sendPostRequest(sendData, restURL, responseData, "application/xml");
+
+        assertTrue(responseData.toString().contains(studentName), "response doesn't contain the expected output");
+    }
+
+    @Test(groups = {"wso2.esb"}, description = "HTTP Endpoint GET test: RESTful", priority = 6)
+    public void testToGet() throws IOException {
+        //check whether the student is added.
+        String studentGetUri = getProxyServiceURL("getEPProxy") + "/student/" + studentName;
+        HttpResponse getResponse = HttpURLConnectionClient.sendGetRequest(studentGetUri, null);
+
+        assertTrue(getResponse.getData().contains("<ns:getStudentResponse xmlns:ns=\"http://axis2.apache.org\"><ns:return>" +
+                "<ns:age>100</ns:age>" +
+                "<ns:name>" + studentName + "</ns:name>" +
+                "<ns:subjects>testAutomation</ns:subjects>" +
+                "</ns:return></ns:getStudentResponse>"));
+    }
+
+    @Test(groups = {"wso2.esb"}, description = "HTTP Endpoint PUT Test: RESTful", priority = 7)
+    public void testToPut() throws MalformedURLException, Exception {
+        String updateStudentData = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n" +
+                "   <p:addStudent xmlns:p=\"http://axis2.apache.org\">\n" +
+                "      <!--0 to 1 occurrence-->\n" +
+                "      <ns:student xmlns:ns=\"http://axis2.apache.org\">\n" +
+                "         <!--0 to 1 occurrence-->\n" +
+                "         <xs:age xmlns:xs=\"http://axis2.apache.org\">100</xs:age>\n" +
+                "         <!--0 to 1 occurrence-->\n" +
+                "         <xs:name xmlns:xs=\"http://axis2.apache.org\">" + updateStudentName + "</xs:name>\n" +
+                "         <!--0 or more occurrences-->\n" +
+                "         <xs:subjects xmlns:xs=\"http://axis2.apache.org\">testAutomation</xs:subjects>\n" +
+                "      </ns:student>\n" +
+                "   </p:addStudent>";
+
+        StringReader sendData = new StringReader(updateStudentData);
+        StringWriter responseData = new StringWriter();
+        URL restURL = new URL((getProxyServiceURL("putEPProxy")) + "/student/" + studentName);
+        HttpURLConnectionClient.sendPutRequest(sendData, restURL, responseData, "application/xml");
+
+        assertTrue(responseData.toString().contains(updateStudentName), "response doesn't contain the expected output");
+    }
+
+
+//    @Test(groups = {"wso2.esb"}, description = "HTTP Method X to HEAD HTTP Endpoint Test", priority = 8)
+//    public void testToHead() {
+//
+//    }
+
+    @Test(groups = {"wso2.esb"}, description = "HTTP Endpoint DELETE Test: RESTful", expectedExceptions = IOException.class, priority = 9)
+    public void testToDelete() throws IOException {
+        StringWriter responseData = new StringWriter();
+        try {
+            URL restURL = new URL((getProxyServiceURL("deleteEPProxy")) + "/student/" + updateStudentName);
+            HttpURLConnectionClient.sendDeleteRequest(restURL, null);
+        } catch (Exception e) {
+            assertTrue(e instanceof Exception, "Failed to complete DELETE request.");
+        }
+
+        String studentGetUri = getProxyServiceURL("getEPProxy") + "/student/" + updateStudentName;
+        HttpResponse getResponse = HttpURLConnectionClient.sendGetRequest(studentGetUri, null);
+    }
+
+    @Test(groups = {"wso2.esb"}, description = "HTTP endpoint POST test: SOAP", priority = 2)
     public void testSendingToHttpEndpoint()
             throws IOException, EndpointAdminEndpointAdminException,
             LoginAuthenticationExceptionException,
@@ -88,7 +220,7 @@ public class HttpEndpointTestCase extends ESBIntegrationTest {
         Assert.assertTrue(response.toString().contains("WSO2 Company"));
     }
 
-    @Test(groups = {"wso2.esb"}, description = "Sending a Message to a Invalid Http endpoint")
+    @Test(groups = {"wso2.esb"}, description = "Sending a Message to HTTP Endpoint with invalid URI", priority = 3)
     public void testSendingToInvalidHttpEndpoint()
             throws IOException, EndpointAdminEndpointAdminException,
             LoginAuthenticationExceptionException,
@@ -101,7 +233,7 @@ public class HttpEndpointTestCase extends ESBIntegrationTest {
         }
     }
 
-    @Test(groups = {"wso2.esb"}, description = "Sending a Message to a HTTP endpoint with missing uri.var variable")
+    @Test(groups = {"wso2.esb"}, description = "Sending a Message to a HTTP endpoint with missing uri.var variable", priority = 4)
     public void testSendingToNoVarHttpEndpoint()
             throws XMLStreamException, FileNotFoundException, AxisFault {
         try {
