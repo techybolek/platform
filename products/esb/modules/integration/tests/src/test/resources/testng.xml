@@ -249,7 +249,11 @@
             <package name="org.wso2.carbon.esb.mediator.test.xslt"/>
         </packages>
     </test>
-
+    <test name="FastXSLT-mediator-Test" preserve-order="true" verbose="2">
+        <packages>
+            <package name="org.wso2.carbon.esb.mediator.test.fastXslt"/>
+        </packages>
+    </test>
     <test name="Class-mediator-Test" preserve-order="true" verbose="2">
         <packages>
             <package name="org.wso2.carbon.esb.mediator.test.classMediator"/>
