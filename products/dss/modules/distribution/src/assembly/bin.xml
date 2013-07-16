@@ -271,11 +271,11 @@
         <!-- Including log4j.properties file -->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/bundle-config/org.wso2.carbon.logging/log4j.properties
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/log4j.properties
             </source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/bundle-config/org.wso2.carbon.logging
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/
             </outputDirectory>
-        </file>      
+        </file>
 
         <!--file>
             <source>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/resources/security/userRP.jks</source>
