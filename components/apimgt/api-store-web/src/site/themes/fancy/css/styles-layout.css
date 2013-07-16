@@ -4,6 +4,9 @@ body,textarea,pre,.navbar-search .search-query{
     font-size:12px;
     line-height:20px;
 }
+body{
+    min-width: 960px;
+}
 label, input, button, select, textarea{
     font-family: Arial, Helvetica, Verdana, monospace, san-serif;
         font-size:12px;
@@ -1248,4 +1251,7 @@ div.api-info div.tabs-section{
     background: transparent url(../images/left-menu-back02.png) repeat left top;
     padding:10px 0;
     border-bottom: solid 1px #9abd64;
+}
+.navbar-inner,.menu-content{
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }

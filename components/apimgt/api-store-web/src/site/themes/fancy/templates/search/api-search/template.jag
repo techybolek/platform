@@ -1,7 +1,7 @@
 <% jagg.template("search/api-search", function(inputs, outputs, jagg) {
 var query=request.getParameter("query");
 %>
-    <div class="container-fluid">
+    <div class="container-fluid search-section-custom">
         <div class="row-fluid">
             <div class="span9 offset3">
                 <div class="input-append pull-left big-search-box">
