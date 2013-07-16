@@ -123,7 +123,7 @@ public class EndpointUtil {
     public static String getErrorPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clienDTO,
                                          String errorCode, String errorMessage) {
 
-        String errorPageUrl = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_login.do";
+        String errorPageUrl = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_error.do";
         try {
             errorPageUrl += "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" + URLEncoder.encode(errorCode, "UTF-8") + "&" +
                     OAuthConstants.OAUTH_ERROR_MESSAGE + "=" + URLEncoder.encode(errorMessage, "UTF-8");
@@ -172,7 +172,7 @@ public class EndpointUtil {
 	public static String getUserConsentURL(OAuth2Parameters params, String loggedInUser) {
 		String consentPage =
 		                     CarbonUIUtil.getAdminConsoleURL("/") +
-		                             "../authenticationendpoint/oauth2_login.do";
+		                             "../authenticationendpoint/oauth2_consent.do";
 		StringBuffer scopes = new StringBuffer();
 		for(String scope : params.getScopes()) {
 			scopes.append(scope);
