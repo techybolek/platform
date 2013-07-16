@@ -4,11 +4,19 @@
 <web-app>
 
     <servlet>
-        <servlet-name>LoginUrl</servlet-name>
-        <servlet-class>org.wso2.carbon.identity.application.authentication.endpoint.OAuth2LoginServlet</servlet-class>
+        <servlet-name>OAuth2Servlet</servlet-name>
+        <servlet-class>org.wso2.carbon.identity.application.authentication.endpoint.OAuth2Servlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>LoginUrl</servlet-name>
+        <servlet-name>OAuth2Servlet</servlet-name>
         <url-pattern>/oauth2_login.do</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OAuth2Servlet</servlet-name>
+        <url-pattern>/oauth2_error.do</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OAuth2Servlet</servlet-name>
+        <url-pattern>/oauth2_consent.do</url-pattern>
     </servlet-mapping>
 </web-app>

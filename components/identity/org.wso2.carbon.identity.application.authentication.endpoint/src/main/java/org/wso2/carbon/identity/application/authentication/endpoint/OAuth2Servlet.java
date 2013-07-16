@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class OAuth2LoginServlet extends HttpServlet {
+public class OAuth2Servlet extends HttpServlet {
 
 	/**
 	 * 
@@ -34,17 +34,22 @@ public class OAuth2LoginServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
 	                                                                              IOException {
 
-		if (request.getParameter("scope") != null) {
-			request.getRequestDispatcher("oauth2/oauth2_login.jsp").forward(request, response);
+		if (request.getRequestURI().contains("/oauth2_login.do")) {
 
-		} else if (request.getParameter("oauthErrorCode") != null) {
-			request.getRequestDispatcher("oauth2/oauth2_error.jsp").forward(request, response);
+            request.getRequestDispatcher("oauth2/oauth2_login.jsp").forward(request, response);
+
+		} else if (request.getRequestURI().contains("/oauth2_error.do")) {
+
+            request.getRequestDispatcher("oauth2/oauth2_error.jsp").forward(request, response);
 			
-		} else if (request.getParameter("loggedInUser") != null) {
+		} else if (request.getRequestURI().contains("/oauth2_consent.do")) {
+
 			request.getRequestDispatcher("oauth2/oauth2_consent.jsp").forward(request, response);
 
 		} else {
-			System.out.println("Error");
+
+            request.getRequestDispatcher("oauth2/oauth2_error.jsp").forward(request, response);
+
 		}
 
 	}
