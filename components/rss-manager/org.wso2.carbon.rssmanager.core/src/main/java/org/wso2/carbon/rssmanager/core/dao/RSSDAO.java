@@ -18,163 +18,47 @@
  */
 package org.wso2.carbon.rssmanager.core.dao;
 
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
-import org.wso2.carbon.rssmanager.core.entity.*;
+import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.config.DSXMLConfiguration;
+import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Data Access Object interface for WSO2 RSS based database operations.
  */
-public interface RSSDAO {
+public abstract class RSSDAO {
 
-    RSSEnvironment createRSSEnvironment(RSSEnvironment rssEnvironment,
-                                        int tenantId) throws RSSManagerException;
+    private static DataSource dataSource = null;
 
-    void dropRSSEnvironment(String rssEnvironmentName, int tenantId) throws RSSManagerException;
+        public RSSDAO(DSXMLConfiguration config) {
+            dataSource = RSSManagerUtil.createDataSource((RDBMSConfiguration) config);
+        }
 
-    void updateRSSEnvironment(RSSEnvironment rssEnvironment, int tenantId) throws RSSManagerException;
+        public static Connection createConnection() throws RSSDAOException {
+            if (dataSource == null) {
+                throw new RSSDAOException("RSS meta data repository data source is not " +
+                        "initialized and is null");
+            }
+            try {
+                return dataSource.getConnection();
+            } catch (SQLException e) {
+                throw new RSSDAOException("Error occurred while creating data source " +
+                        "connection : " + e.getMessage(), e);
+            }
+        }
 
-    boolean isEnvironmentExists(String name, int tenantId) throws RSSManagerException;
+        public abstract RSSInstanceDAO getRSSInstanceDAO();
 
-    void createRSSInstance(String environmentName, RSSInstance rssInstance,
-                           int tenantId) throws RSSManagerException;
+        public abstract DatabaseDAO getDatabaseDAO();
 
-    RSSInstance[] getAllSystemRSSInstances(String environmentName) throws RSSManagerException;
+        public abstract DatabaseUserDAO getDatabaseUserDAO();
 
-    void dropRSSInstance(String environmentName, String rssInstanceName,
-                         int tenantId) throws RSSManagerException;
+        public abstract DatabasePrivilegeTemplateDAO getDatabasePrivilegeTemplateDAO();
 
-    void updateRSSInstance(String environmentName, RSSInstance rssInstance,
-                           int tenantId) throws RSSManagerException;
-
-    void createDatabase(String environmentName, Database database,
-                        int tenantId) throws RSSManagerException;
-
-    Database[] getAllDatabases(String environmentName, int tenantId) throws RSSManagerException;
-
-    void dropDatabase(String environmentName, RSSInstance rssInstance, String databaseName,
-                      int tenantId) throws RSSManagerException;
-
-    void createDatabaseUser(String environmentName, RSSInstance rssInstance, DatabaseUser user,
-                            int tenantId) throws RSSManagerException;
-
-    void dropDatabaseUser(String environmentName, RSSInstance rssInstance, String username,
-                          int tenantId) throws RSSManagerException;
-
-    UserDatabaseEntry createUserDatabaseEntry(String environmentName, RSSInstance rssInstance,
-                                              Database database, String username,
-                                              int tenantId) throws RSSManagerException;
-
-    void deleteUserDatabaseEntry(String environmentName, RSSInstance rssInstance, String username,
-                                 int tenantId) throws RSSManagerException;
-
-    int getSystemRSSDatabaseCount(String environmentName) throws RSSManagerException;
-
-    RSSInstance[] getAllRSSInstances(String environmentName,
-                                     int tenantId) throws RSSManagerException;
-
-    RSSInstance getRSSInstance(String environmentName, String rssInstanceName,
-                               int tenantId) throws RSSManagerException;
-
-    RSSInstance getSystemRSSInstance(String environmentName,
-                                     String rssInstanceName) throws RSSManagerException;
-
-    Database getDatabase(String environmentName, RSSInstance rssInstance, String databaseName,
-                         int tenantId) throws RSSManagerException;
-
-    DatabaseUser getDatabaseUser(String environmentName, RSSInstance rssInstance, String username,
-                                 int tenantId) throws RSSManagerException;
-
-    DatabasePrivilegeSet getUserDatabasePrivileges(String environmentName, RSSInstance rssInstance,
-                                                   String databaseName, String username,
-                                                   int tenantId) throws RSSManagerException;
-
-    void updateDatabaseUser(String environmentName, DatabasePrivilegeSet privileges,
-                            RSSInstance rssInstance, DatabaseUser user,
-                            String databaseName) throws RSSManagerException;
-
-    DatabasePrivilegeTemplate createDatabasePrivilegesTemplate(
-            String environmentName, DatabasePrivilegeTemplate template,
-            int tenantId) throws RSSManagerException;
-
-    void dropDatabasePrivilegesTemplate(String environmentName, String templateName,
-                                        int tenantId) throws RSSManagerException;
-
-    void editDatabasePrivilegesTemplate(String environmentName, DatabasePrivilegeTemplate template,
-                                        int tenantId) throws RSSManagerException;
-
-    DatabasePrivilegeTemplate[] getAllDatabasePrivilegesTemplates(
-            String environmentName, int tenantId) throws RSSManagerException;
-
-    DatabasePrivilegeTemplate getDatabasePrivilegesTemplate(
-            String environmentName, String templateName, int tenantId) throws RSSManagerException;
-
-    DatabaseUserMetaData[] getAllDatabaseUsers(String environmentName,
-                                               int tenantId) throws RSSManagerException;
-
-    DatabaseUser[] getUsersByRSSInstance(String environmentName, RSSInstance rssInstance,
-                                         int tenantId) throws RSSManagerException;
-
-    DatabaseUserMetaData[] getUsersAssignedToDatabase(String environmentName,
-                                                      RSSInstance rssInstance, String databaseName,
-                                                      int tenantId) throws RSSManagerException;
-
-    DatabaseUser[] getSystemCreatedDatabaseUsers(String environmentName) throws RSSManagerException;
-
-    DatabaseUserMetaData[] getSystemUsersAssignedToDatabase(
-            String environmentName, RSSInstance rssInstance,
-            String databaseName) throws RSSManagerException;
-
-    DatabasePrivilegeSet getSystemUserDatabasePrivileges(
-            String environmentName, RSSInstance rssInstance, String databaseName,
-            String username) throws RSSManagerException;
-
-    RSSInstance findRSSInstanceDatabaseBelongsTo(
-            String environmentName, String rssInstanceName, String databaseName,
-            int tenantId) throws RSSManagerException;
-
-    RSSInstance findRSSInstanceDatabaseUserBelongsTo(
-            String environmentName, String rssInstanceName, String username,
-            int tenantId) throws RSSManagerException;
-
-    void setUserDatabasePrivileges(String environmentName, UserDatabaseEntry userDBEntry,
-                                   DatabasePrivilegeTemplate template,
-                                   int tenantId) throws RSSManagerException;
-
-    void deleteUserDatabasePrivilegeEntriesByDatabaseUser(
-            String environmentName, RSSInstance rssInstance, String username,
-            int tenantId) throws RSSManagerException;
-
-    void removeUserDatabaseEntriesByDatabaseUser(String environmentName, RSSInstance rssInstance,
-                                                 String username,
-                                                 int tenantId) throws RSSManagerException;
-
-    void removeUserDatabaseEntriesByDatabase(String environmentName, RSSInstance rssInstance,
-                                             String databaseName,
-                                             int tenantId) throws RSSManagerException;
-
-    void removeDatabasePrivilegesTemplateEntries(String environmentName, String templateName,
-                                                 int tenantId) throws RSSManagerException;
-
-    void incrementSystemRSSDatabaseCount(String environmentName) throws RSSManagerException;
-
-    void deleteUserDatabasePrivileges(String environmentName, RSSInstance rssInstance, 
-                                      String username, int tenantId) throws RSSManagerException;
-
-    void setDatabasePrivilegeTemplateProperties(String environmentName,
-                                                DatabasePrivilegeTemplate template,
-                                                int tenantId) throws RSSManagerException;
-
-    boolean isDatabaseExist(String environmentName, String rssInstanceName, String databaseName,
-                            int tenantId) throws RSSManagerException;
-
-    boolean isDatabaseUserExist(String environmentName, String rssInstanceName,
-                                String databaseUsername, int tenantId) throws RSSManagerException;
-
-    boolean isDatabasePrivilegeTemplateExist(String environmentName, String templateName,
-                                             int tenantId) throws RSSManagerException;
-
-	void deleteUserDatabasePrivilegeEntriesByDatabase(RSSInstance rssInstance,
-			String databaseName, int tenantId)throws RSSManagerException;
+        public abstract UserDatabaseEntryDAO getUserDatabaseEntryDAO();
 
 }

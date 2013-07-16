@@ -18,12 +18,13 @@
  */
 package org.wso2.carbon.rssmanager.core.manager;
 
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.entity.UserDatabaseEntry;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
 import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
 
-public class OracleRSSManager extends RSSManager {
+public class OracleRSSManager extends SystemRSSManager {
     
     public OracleRSSManager() {
         super(null);
@@ -58,14 +59,13 @@ public class OracleRSSManager extends RSSManager {
     }
 
     @Override
-    public void attachUserToDatabase(String rssInstanceName, String databaseName, String username,
+    public void attachUserToDatabase(UserDatabaseEntry entry,
                                      String templateName) throws RSSManagerException {
 
     }
 
     @Override
-    public void detachUserFromDatabase(String rssInstanceName, String databaseName,
-                                       String username) throws RSSManagerException {
+    public void detachUserFromDatabase(UserDatabaseEntry entry) throws RSSManagerException {
 
     }
     

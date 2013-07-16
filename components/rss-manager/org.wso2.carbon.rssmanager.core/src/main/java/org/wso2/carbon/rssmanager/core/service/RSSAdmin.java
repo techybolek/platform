@@ -25,7 +25,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
@@ -58,14 +58,13 @@ public class RSSAdmin extends AbstractAdmin {
         this.getRSSManager(ctx).editRSSInstanceConfiguration(rssInstance);
     }
 
-    public RSSInstanceMetaData getRSSInstance(RSSEnvironmentContext ctx) throws RSSManagerException {
-        RSSInstance rssInstance = this.getRSSManager(ctx).getRSSInstance(ctx.getRssInstanceName());
-        return RSSManagerUtil.convertToRSSInstanceMetadata(rssInstance, getCurrentTenantId());
+    public RSSInstance getRSSInstance(RSSEnvironmentContext ctx) throws RSSManagerException {
+        return this.getRSSManager(ctx).getRSSInstance(ctx.getRssInstanceName());
     }
 
-    public RSSInstanceMetaData[] getRSSInstances(
+    public RSSInstance[] getRSSInstances(
             RSSEnvironmentContext ctx) throws RSSManagerException {
-        RSSInstanceMetaData[] rssInstances = new RSSInstanceMetaData[0];
+        RSSInstance[] rssInstances = new RSSInstance[0];
         try {
             rssInstances = this.getRSSManager(ctx).getRSSInstances();
         } catch (RSSManagerException e) {
@@ -76,10 +75,9 @@ public class RSSAdmin extends AbstractAdmin {
         return rssInstances;
     }
 
-    public DatabaseMetaData createDatabase(RSSEnvironmentContext ctx,
+    public Database createDatabase(RSSEnvironmentContext ctx,
                                Database database) throws RSSManagerException {
-        database = this.getRSSManager(ctx).createDatabase(database);
-        return RSSManagerUtil.convertToDatabaseMetaData(database, getCurrentTenantId());
+        return this.getRSSManager(ctx).createDatabase(database);
     }
 
     public void dropDatabase(RSSEnvironmentContext ctx,
@@ -87,8 +85,8 @@ public class RSSAdmin extends AbstractAdmin {
         this.getRSSManager(ctx).dropDatabase(ctx.getRssInstanceName(), databaseName);
     }
 
-    public DatabaseMetaData[] getDatabases(RSSEnvironmentContext ctx) throws RSSManagerException {
-        DatabaseMetaData[] databases = new DatabaseMetaData[0];
+    public Database[] getDatabases(RSSEnvironmentContext ctx) throws RSSManagerException {
+        Database[] databases = new Database[0];
         try {
             databases = this.getRSSManager(ctx).getDatabases();
         } catch (RSSManagerException e) {
@@ -99,11 +97,9 @@ public class RSSAdmin extends AbstractAdmin {
         return databases;
     }
 
-    public DatabaseMetaData getDatabase(RSSEnvironmentContext ctx,
+    public Database getDatabase(RSSEnvironmentContext ctx,
                                         String databaseName) throws RSSManagerException {
-        Database database =
-                this.getRSSManager(ctx).getDatabase(ctx.getRssInstanceName(), databaseName);
-        return RSSManagerUtil.convertToDatabaseMetadata(database, getCurrentTenantId());
+        return this.getRSSManager(ctx).getDatabase(ctx.getRssInstanceName(), databaseName);
     }
 
     public boolean isDatabaseExist(RSSEnvironmentContext ctx,
@@ -122,10 +118,9 @@ public class RSSAdmin extends AbstractAdmin {
         return this.getRSSManager(ctx).isDatabasePrivilegeTemplateExist(templateName);
     }
 
-    public DatabaseUserMetaData createDatabaseUser(RSSEnvironmentContext ctx,
+    public DatabaseUser createDatabaseUser(RSSEnvironmentContext ctx,
                                    DatabaseUser user) throws RSSManagerException {
-        user = this.getRSSManager(ctx).createDatabaseUser(user);
-        return RSSManagerUtil.convertToDatabaseUserMetadata(user, getCurrentTenantId());
+        return this.getRSSManager(ctx).createDatabaseUser(user);
     }
 
     public void dropDatabaseUser(RSSEnvironmentContext ctx,
@@ -140,14 +135,12 @@ public class RSSAdmin extends AbstractAdmin {
         this.getRSSManager(ctx).editDatabaseUserPrivileges(privileges, user, databaseName);
     }
 
-    public DatabaseUserMetaData getDatabaseUser(RSSEnvironmentContext ctx,
+    public DatabaseUser getDatabaseUser(RSSEnvironmentContext ctx,
                                                 String username) throws RSSManagerException {
-        DatabaseUser user =
-                this.getRSSManager(ctx).getDatabaseUser(ctx.getRssInstanceName(), username);
-        return RSSManagerUtil.convertToDatabaseUserMetadata(user, getCurrentTenantId());
+        return this.getRSSManager(ctx).getDatabaseUser(ctx.getRssInstanceName(), username);
     }
 
-    public DatabaseUserMetaData[] getDatabaseUsers(
+    public DatabaseUser[] getDatabaseUsers(
             RSSEnvironmentContext ctx) throws RSSManagerException {
         return this.getRSSManager(ctx).getDatabaseUsers();
     }
@@ -245,25 +238,23 @@ public class RSSAdmin extends AbstractAdmin {
         return this.getRSSManager(ctx).getSystemRSSInstanceCount();
     }
 
-    public void attachUserToDatabase(RSSEnvironmentContext ctx, String databaseName,
-                                     String username, String templateName) throws RSSManagerException {
-        this.getRSSManager(ctx).attachUserToDatabase(ctx.getRssInstanceName(), databaseName,
-                username, templateName);
+    public void attachUserToDatabase(RSSEnvironmentContext ctx, UserDatabaseEntry ude,
+                                     String templateName) throws RSSManagerException {
+        this.getRSSManager(ctx).attachUserToDatabase(ude, templateName);
     }
 
-    public void detachUserFromDatabase(RSSEnvironmentContext ctx, String databaseName,
-                                       String username) throws RSSManagerException {
-        this.getRSSManager(ctx).detachUserFromDatabase(ctx.getRssInstanceName(), databaseName,
-                username);
+    public void detachUserFromDatabase(RSSEnvironmentContext ctx,
+                                       UserDatabaseEntry ude) throws RSSManagerException {
+        this.getRSSManager(ctx).detachUserFromDatabase(ude);
     }
 
-    public DatabaseUserMetaData[] getUsersAttachedToDatabase(
+    public DatabaseUser[] getUsersAttachedToDatabase(
             RSSEnvironmentContext ctx, String databaseName) throws RSSManagerException {
         return this.getRSSManager(ctx).getUsersAttachedToDatabase(ctx.getRssInstanceName(),
                 databaseName);
     }
 
-    public DatabaseUserMetaData[] getAvailableUsersToAttachToDatabase(
+    public DatabaseUser[] getAvailableUsersToAttachToDatabase(
             RSSEnvironmentContext ctx, String databaseName) throws RSSManagerException {
         return this.getRSSManager(ctx).getAvailableUsersToAttachToDatabase(ctx.getRssInstanceName(),
                 databaseName);
@@ -326,7 +317,7 @@ public class RSSAdmin extends AbstractAdmin {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
     }
 
-    public DatabaseMetaData[] getDatabasesForTenant(RSSEnvironmentContext ctx,
+    public Database[] getDatabasesForTenant(RSSEnvironmentContext ctx,
                                                     String tenantDomain) throws RSSManagerException {
         if (!isSuperTenantUser()) {
             String msg = "Unauthorized operation, only super tenant is authorized. " +
@@ -337,7 +328,7 @@ public class RSSAdmin extends AbstractAdmin {
         int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-        DatabaseMetaData[] databases = null;
+        Database[] databases = null;
         try {
             databases = this.getDatabases(ctx);
         } finally {
@@ -369,7 +360,7 @@ public class RSSAdmin extends AbstractAdmin {
         }
     }
 
-    public DatabaseMetaData getDatabaseForTenant(
+    public Database getDatabaseForTenant(
             RSSEnvironmentContext ctx, String databaseName,
             String tenantDomain) throws RSSManagerException {
         if (!isSuperTenantUser()) {
@@ -381,7 +372,7 @@ public class RSSAdmin extends AbstractAdmin {
         int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-        DatabaseMetaData metaData = null;
+        Database metaData = null;
         try {
             metaData = this.getDatabase(ctx, databaseName);
         } finally {

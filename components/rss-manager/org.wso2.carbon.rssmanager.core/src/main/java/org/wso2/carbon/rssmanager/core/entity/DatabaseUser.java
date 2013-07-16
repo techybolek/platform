@@ -23,7 +23,7 @@ package org.wso2.carbon.rssmanager.core.entity;
  */
 public class DatabaseUser {
 
-	private String username;
+	private String name;
 
 	private String password;
 	
@@ -31,8 +31,8 @@ public class DatabaseUser {
 
     private String type;
 
-	public DatabaseUser(String username, String password, String rssInstanceName, String type) {
-		this.username = username;
+	public DatabaseUser(String name, String password, String rssInstanceName, String type) {
+		this.name = name;
 		this.password = password;
 		this.rssInstanceName = rssInstanceName;
         this.type = type;
@@ -40,12 +40,12 @@ public class DatabaseUser {
 
     public DatabaseUser() {}
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPassword() {

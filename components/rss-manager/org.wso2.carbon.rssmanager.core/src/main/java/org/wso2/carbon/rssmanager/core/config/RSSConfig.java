@@ -20,7 +20,7 @@ package org.wso2.carbon.rssmanager.core.config;
 
 import org.w3c.dom.Document;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
@@ -111,7 +111,7 @@ public class RSSConfig {
     /**
      * Initializes RSS environments
      *
-     * @throws RSSManagerException If the flow is interrupted by some erroneous condition
+     * @throws org.wso2.carbon.rssmanager.core.exception.RSSManagerException If the flow is interrupted by some erroneous condition
      */
     public void initRSSEnvironments() throws RSSManagerException {
         RSSEnvironment[] rssEnvironments = getRSSEnvironments();

@@ -21,11 +21,14 @@ package org.wso2.carbon.rssmanager.core.config.environment;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -116,7 +119,7 @@ public class RSSEnvironment {
     /**
      * Initialises the RSS DAO database by reading from the "rss-config.xml".
      *
-     * @throws org.wso2.carbon.rssmanager.core.RSSManagerException
+     * @throws org.wso2.carbon.rssmanager.core.exception.RSSManagerException
      *          rssDaoException
      */
     private void initSystemRSSInstances() throws RSSManagerException {
@@ -129,7 +132,14 @@ public class RSSEnvironment {
             }
             int tenantId = RSSManagerUtil.getTenantId();
             getRSSManager().beginTransaction();
-            for (RSSInstance tmpInst : getRSSManager().getDAO().getAllSystemRSSInstances(getName())) {
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                    MultitenantConstants.SUPER_TENANT_ID);
+
+            RSSInstance[] systemRSSInstances = new RSSInstance[0];
+
+            for (RSSInstance tmpInst : systemRSSInstances) {
                 RSSInstance reloadedRssInst = rssInstances.get(tmpInst.getName());
                 RSSInstance prevKey = rssInstances.remove(tmpInst.getName());
                 if (prevKey == null) {
@@ -137,17 +147,18 @@ public class RSSEnvironment {
                             "' is missing in the rss-config.xml");
                     continue;
                 }
-                getRSSManager().getDAO().updateRSSInstance(getName(), reloadedRssInst, tenantId);
+                getRSSManager().getRSSDAO().getRSSInstanceDAO().updateRSSInstance(reloadedRssInst, tenantId);
             }
             for (RSSInstance inst : rssInstances.values()) {
-                getRSSManager().getDAO().createRSSInstance(getName(), inst, tenantId);
+                getRSSManager().getRSSDAO().getRSSInstanceDAO().addRSSInstance(inst, tenantId);
             }
             getRSSManager().endTransaction();
-        } catch (RSSManagerException e) {
+        } catch (RSSDAOException e) {
             if (getRSSManager().isInTransaction()) {
                 getRSSManager().rollbackTransaction();
             }
-            throw e;
+            throw new RSSManagerException("Error occurred while initializing RSS environment '" +
+                    getName() + "' : " + e.getMessage(), e);
         }
     }
 

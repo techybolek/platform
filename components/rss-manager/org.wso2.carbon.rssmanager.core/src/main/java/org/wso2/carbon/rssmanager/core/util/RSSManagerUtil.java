@@ -32,7 +32,7 @@ import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration;
 import org.wso2.carbon.ndatasource.rdbms.RDBMSDataSource;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.entity.*;
@@ -58,6 +58,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -179,19 +183,19 @@ public class RSSManagerUtil {
         return "";
     }
 
-    public static DatabaseMetaData convertToDatabaseMetaData(
-            Database database, int tenantId) throws RSSManagerException {
-        DatabaseMetaData metadata = new DatabaseMetaData();
-        String fullyQualifiedDatabaseName =
-                RSSManagerUtil.getFullyQualifiedDatabaseName(database.getName());
-        metadata.setName(fullyQualifiedDatabaseName);
-        metadata.setRssInstanceName(metadata.getRssInstanceName());
-        metadata.setUrl(database.getUrl());
-        String tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
-        metadata.setRssTenantDomain(tenantDomain);
-
-        return metadata;
-    }
+//    public static DatabaseMetaData convertToDatabaseMetaData(
+//            Database database, int tenantId) throws RSSManagerException {
+//        DatabaseMetaData metadata = new DatabaseMetaData();
+//        String fullyQualifiedDatabaseName =
+//                RSSManagerUtil.getFullyQualifiedDatabaseName(database.getName());
+//        metadata.setName(fullyQualifiedDatabaseName);
+//        metadata.setRssInstanceName(metadata.getRssInstanceName());
+//        metadata.setUrl(database.getUrl());
+//        String tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
+//        metadata.setRssTenantDomain(tenantDomain);
+//
+//        return metadata;
+//    }
 
     public static DataSource createDataSource(RDBMSConfiguration config) {
         try {
@@ -217,52 +221,52 @@ public class RSSManagerUtil {
         return createDataSource(config);
     }
 
-    public static RSSInstanceMetaData convertToRSSInstanceMetadata(
-            RSSInstance rssInstance, int tenantId) throws RSSManagerException {
-        if (rssInstance == null) {
-            return null;
-        }
-        RSSInstanceMetaData metadata = new RSSInstanceMetaData();
-        metadata.setName(rssInstance.getName());
-        metadata.setServerUrl(rssInstance.getDataSourceConfig().getUrl());
-        metadata.setInstanceType(rssInstance.getDbmsType());
-        metadata.setServerCategory(rssInstance.getServerCategory());
-        metadata.setTenantDomainName(getTenantDomainFromTenantId(tenantId));
-        return metadata;
-    }
+//    public static RSSInstanceMetaData convertToRSSInstanceMetadata(
+//            RSSInstance rssInstance, int tenantId) throws RSSManagerException {
+//        if (rssInstance == null) {
+//            return null;
+//        }
+//        RSSInstanceMetaData metadata = new RSSInstanceMetaData();
+//        metadata.setName(rssInstance.getName());
+//        metadata.setServerUrl(rssInstance.getDataSourceConfig().getUrl());
+//        metadata.setInstanceType(rssInstance.getDbmsType());
+//        metadata.setServerCategory(rssInstance.getServerCategory());
+//        metadata.setTenantDomainName(getTenantDomainFromTenantId(tenantId));
+//        return metadata;
+//    }
 
-    public static DatabaseMetaData convertToDatabaseMetadata(
-            Database database, int tenantId) throws RSSManagerException {
-        if (database == null) {
-            return null;
-        }
-        DatabaseMetaData metadata = new DatabaseMetaData();
-        metadata.setName(database.getName());
-        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(database.getType())) {
-            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
-        } else {
-            metadata.setRssInstanceName(database.getRssInstanceName());
-        }
-        metadata.setUrl(database.getUrl());
-        metadata.setRssTenantDomain(getTenantDomainFromTenantId(tenantId));
-        return metadata;
-    }
+//    public static DatabaseMetaData convertToDatabaseMetadata(
+//            Database database, int tenantId) throws RSSManagerException {
+//        if (database == null) {
+//            return null;
+//        }
+//        DatabaseMetaData metadata = new DatabaseMetaData();
+//        metadata.setName(database.getName());
+//        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(database.getType())) {
+//            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+//        } else {
+//            metadata.setRssInstanceName(database.getRssInstanceName());
+//        }
+//        metadata.setUrl(database.getUrl());
+//        metadata.setRssTenantDomain(getTenantDomainFromTenantId(tenantId));
+//        return metadata;
+//    }
 
-    public static DatabaseUserMetaData convertToDatabaseUserMetadata(
-            DatabaseUser user, int tenantId) throws RSSManagerException {
-        if (user == null) {
-            return null;
-        }
-        DatabaseUserMetaData metadata = new DatabaseUserMetaData();
-        metadata.setUsername(user.getUsername());
-        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(user.getType())) {
-            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
-        } else {
-            metadata.setRssInstanceName(user.getRssInstanceName());
-        }
-        metadata.setTenantDomain(getTenantDomainFromTenantId(tenantId));
-        return metadata;
-    }
+//    public static DatabaseUserMetaData convertToDatabaseUserMetadata(
+//            DatabaseUser user, int tenantId) throws RSSManagerException {
+//        if (user == null) {
+//            return null;
+//        }
+//        DatabaseUserMetaData metadata = new DatabaseUserMetaData();
+//        metadata.setUsername(user.getName());
+//        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(user.getType())) {
+//            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+//        } else {
+//            metadata.setRssInstanceName(user.getRssInstanceName());
+//        }
+//        metadata.setTenantDomain(getTenantDomainFromTenantId(tenantId));
+//        return metadata;
+//    }
 
     public static String composeDatabaseUrl(RSSInstance rssInstance, String databaseName) {
         return rssInstance.getDataSourceConfig().getUrl() + "/" + databaseName;
@@ -411,31 +415,56 @@ public class RSSManagerUtil {
     }
 
     public static void secureResolveDocument(Document doc) throws RSSManagerException {
-		Element element = doc.getDocumentElement();
-		if (element != null) {
-			secureLoadElement(element);
-		}
-	}
+        Element element = doc.getDocumentElement();
+        if (element != null) {
+            secureLoadElement(element);
+        }
+    }
 
-	private static void secureLoadElement(Element element) throws RSSManagerException {
-		Attr secureAttr = element
-				.getAttributeNodeNS(
-						RSSManagerConstants.SecureValueProperties.SECURE_VAULT_NS,
-						RSSManagerConstants.SecureValueProperties.SECRET_ALIAS_ATTRIBUTE_NAME_WITH_NAMESPACE);
-		if (secureAttr != null) {
-			element.setTextContent(RSSManagerUtil
-					.loadFromSecureVault(secureAttr.getValue()));
-			element.removeAttributeNode(secureAttr);
-		}
-		NodeList childNodes = element.getChildNodes();
-		int count = childNodes.getLength();
-		Node tmpNode;
-		for (int i = 0; i < count; i++) {
-			tmpNode = childNodes.item(i);
-			if (tmpNode instanceof Element) {
-				secureLoadElement((Element) tmpNode);
-			}
-		}
-	}
+    private static void secureLoadElement(Element element) throws RSSManagerException {
+        Attr secureAttr = element
+                .getAttributeNodeNS(
+                        RSSManagerConstants.SecureValueProperties.SECURE_VAULT_NS,
+                        RSSManagerConstants.SecureValueProperties.SECRET_ALIAS_ATTRIBUTE_NAME_WITH_NAMESPACE);
+        if (secureAttr != null) {
+            element.setTextContent(RSSManagerUtil
+                    .loadFromSecureVault(secureAttr.getValue()));
+            element.removeAttributeNode(secureAttr);
+        }
+        NodeList childNodes = element.getChildNodes();
+        int count = childNodes.getLength();
+        Node tmpNode;
+        for (int i = 0; i < count; i++) {
+            tmpNode = childNodes.item(i);
+            if (tmpNode instanceof Element) {
+                secureLoadElement((Element) tmpNode);
+            }
+        }
+    }
+
+    public static synchronized void cleanupResources(ResultSet rs, PreparedStatement stmt,
+                                                     Connection conn) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException ignore) {
+                //ignore
+            }
+        }
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException ignore) {
+                //ignore
+            }
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException ignore) {
+                //ignore
+            }
+        }
+    }
 
 }

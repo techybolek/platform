@@ -26,9 +26,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
-import org.wso2.carbon.rssmanager.core.dao.RSSDAOFactory;
-import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.transaction.manager.TransactionManagerDummyService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -105,7 +104,7 @@ public class RSSManagerServiceComponent {
             /* Initializes the RSS configuration */
             RSSConfig.init();
             /* Initializing RSSDAO Factory */
-            RSSDAOFactory.init(RSSConfig.getInstance().getRSSManagementRepository());
+            //RSSDAOFactory.init(RSSConfig.getInstance().getRSSManagementRepository());
             /* Initializing RSS environments */
             RSSConfig.getInstance().initRSSEnvironments();
         } catch (Throwable e) {

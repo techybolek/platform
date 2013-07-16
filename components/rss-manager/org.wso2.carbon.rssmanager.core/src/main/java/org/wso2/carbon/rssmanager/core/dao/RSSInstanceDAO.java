@@ -16,19 +16,24 @@
  *  under the License.
  *
  */
+
 package org.wso2.carbon.rssmanager.core.dao;
 
-import org.wso2.carbon.rssmanager.core.config.DSXMLConfiguration;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
-import org.wso2.carbon.rssmanager.core.dao.impl.RSSDAOImpl;
+import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 
-/**
- * DAO factory class for creating RSS DAO objects.
- */
-public class RSSDAOFactory {
+public interface RSSInstanceDAO {
 
-    public static RSSDAO getRSSDAO(DSXMLConfiguration config) throws RSSDAOException {
-        return new RSSDAOImpl(config);
-    }
-	
+    void addRSSInstance(RSSInstance instance, int tenantId) throws RSSDAOException;
+
+    void removeRSSInstance(String name, int tenantId) throws RSSDAOException;
+
+    void updateRSSInstance(RSSInstance instance, int tenantId) throws RSSDAOException;
+
+    RSSInstance getRSSInstance(String name, int tenantId) throws RSSDAOException;
+
+    RSSInstance[] getSystemRSSInstances(int tenantId) throws RSSDAOException;
+
+    RSSInstance[] getRSSInstances(int tenantId) throws RSSDAOException;
+
 }

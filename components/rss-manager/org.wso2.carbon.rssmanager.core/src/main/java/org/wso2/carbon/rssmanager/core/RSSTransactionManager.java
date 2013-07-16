@@ -20,6 +20,7 @@ package org.wso2.carbon.rssmanager.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;

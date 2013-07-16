@@ -20,7 +20,7 @@
 package org.wso2.carbon.rssmanager.core.entity;
 
 import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration;
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 
 import javax.sql.DataSource;
