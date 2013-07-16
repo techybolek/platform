@@ -128,6 +128,7 @@ public class OAuthServerConfiguration {
 		public static final String OPENID_CONNECT_IDTOKEN_SUB_CLAIM = "IDTokenSubjectClaim";
 		public static final String OPENID_CONNECT_IDTOKEN_ISSUER_ID = "IDTokenIssuerID";
 		public static final String OPENID_CONNECT_IDTOKEN_EXPIRATION = "IDTokenExpiration";
+		public static final String OPENID_CONNECT_SKIP_USER_CONSENT = "SkipeUserConsent";
 		public static final String OPENID_CONNECT_USERINFO_ENDPOINT_CLAIM_DIALECT =
 		                                                                            "UserInfoEndpointClaimDialect";
 		public static final String OPENID_CONNECT_USERINFO_ENDPOINT_CLAIM_RETRIEVER =
@@ -218,6 +219,8 @@ public class OAuthServerConfiguration {
 	private String openIDConnectIDTokenIssuerIdentifier = "OIDCAuthzServer";
 	
 	private String openIDConnectIDTokenSubClaim = "http://wso2.org/claims/fullname";
+	
+	private String openIDConnectSkipUserConsent = "false";
 
 	private String openIDConnectIDTokenExpiration = "300";
 
@@ -538,6 +541,14 @@ public class OAuthServerConfiguration {
 	
 	public String getOpenIDConnectIDTokenSubClaim() {
 		return openIDConnectIDTokenSubClaim;
+	}
+	
+	/**
+	 * Returns if skip user consent enabled or not
+	 * @return
+	 */
+	public boolean getOpenIDConnectSkipeUserConsentConfig() {
+		return "true".equalsIgnoreCase(openIDConnectSkipUserConsent);
 	}
 
 	/**
@@ -1093,6 +1104,11 @@ public class OAuthServerConfiguration {
 			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_SUB_CLAIM)) != null) {
 				openIDConnectIDTokenSubClaim =
 				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_SUB_CLAIM))
+				                                                    .getText().trim();
+			}
+			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_SKIP_USER_CONSENT)) != null) {
+				openIDConnectSkipUserConsent =
+				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_SKIP_USER_CONSENT))
 				                                                    .getText().trim();
 			}
 			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER_ID)) != null) {
