@@ -383,8 +383,13 @@ public class OAuth2AuthzEndpoint {
 			} else if (oauth2Params.getPrompt().contains(OIDC.Prompt.NONE)) {
 				// load the users approved applications
 				String appName = oauth2Params.getApplicationName();
-				boolean hasUserApproved = OpenIDConnectUserRPStore.getInstance()
-				                                                  .hasUserApproved(loggedInUser, appName);
+				boolean skipConsent = EndpointUtil.getOAuthServerConfiguration()
+				                                  .getOpenIDConnectSkipeUserConsentConfig();
+				boolean hasUserApproved = true;
+				if (!skipConsent) {
+					hasUserApproved = OpenIDConnectUserRPStore.getInstance().hasUserApproved(loggedInUser,
+					                                                                         appName);
+				} 
 				if (hasUserApproved) {
 					return redirectUrl; // should not prompt for consent
 				} else {
