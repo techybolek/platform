@@ -21,10 +21,14 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
+import org.wso2.carbon.automation.core.annotations.SetEnvironment;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 import org.wso2.carbon.esb.util.WireMonitorServer;
 
@@ -41,7 +45,7 @@ public class UrlEncordedFormPostViaProxyTestCase extends ESBIntegrationTest {
     private WireMonitorServer wireMonitorServer;
 
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {
         init();
         uploadSynapseConfig();
@@ -49,16 +53,18 @@ public class UrlEncordedFormPostViaProxyTestCase extends ESBIntegrationTest {
         wireMonitorServer.start();
     }
 
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     @Test(groups = {"wso2.esb"}, description = "Patch : ESBJAVA-1696 : Encoded Special characters in the URL is decoded at the Gateway and not re-encoded")
-    public void testHttpsRequestViaHttpProxy() throws IOException {
+    public void testEncodingSpecialCharacterViaHttpProxy() throws IOException {
         HttpClient client = new HttpClient();
         client.getParams().setParameter(
                 HttpMethodParams.RETRY_HANDLER,
                 new DefaultHttpMethodRetryHandler(0, false));
+        client.getParams().setSoTimeout(5000);
+        client.getParams().setConnectionManagerTimeout(5000);
 
         // Create POST method
         String url = getProxyServiceURL("MyProxy");
-        System.out.println(url);
         PostMethod method = new PostMethod(url);
         // Set parameters on POST
         String value1 = "Hello World";
@@ -67,6 +73,7 @@ public class UrlEncordedFormPostViaProxyTestCase extends ESBIntegrationTest {
         method.setParameter("test1", value1);
         method.addParameter("test2", value2);
         method.addParameter("test3", value3);
+
 
         // Execute and print response
         try {
@@ -96,7 +103,6 @@ public class UrlEncordedFormPostViaProxyTestCase extends ESBIntegrationTest {
 
     @AfterClass(alwaysRun = true)
     public void afterClass() throws Exception {
-
         cleanup();
     }
 

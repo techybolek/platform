@@ -27,6 +27,7 @@ import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 import org.wso2.carbon.esb.proxyservice.test.secureProxy.util.SecureEndpointSetter;
 import org.wso2.carbon.esb.util.SecureServiceClient;
+import org.wso2.carbon.esb.util.ServiceTransportUtil;
 import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConfigExceptionException;
 
 import javax.activation.DataHandler;
@@ -88,6 +89,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy2() throws Exception {
         final int policyId = 2;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -101,6 +105,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy3() throws Exception {
         final int policyId = 3;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -114,6 +121,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy4() throws Exception {
         final int policyId = 4;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -127,6 +137,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy5() throws Exception {
         final int policyId = 5;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -140,6 +153,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy6() throws Exception {
         final int policyId = 6;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -153,6 +169,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy7() throws Exception {
         final int policyId = 7;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -166,6 +185,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy8() throws Exception {
         final int policyId = 8;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -179,6 +201,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy9() throws Exception {
         final int policyId = 9;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -193,6 +218,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy10() throws Exception {
         final int policyId = 10;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -207,6 +235,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy11() throws Exception {
         final int policyId = 11;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -220,6 +251,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy12() throws Exception {
         final int policyId = 12;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -248,6 +282,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy14() throws Exception {
         final int policyId = 14;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -262,6 +299,9 @@ public class SecurityTransformationProxyForPolicy5BackEndTestCase extends ESBInt
     public void securityPolicy15() throws Exception {
         final int policyId = 15;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {

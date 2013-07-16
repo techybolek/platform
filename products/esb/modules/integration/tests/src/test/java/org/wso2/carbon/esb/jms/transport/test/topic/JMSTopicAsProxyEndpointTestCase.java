@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.esb.jms.transport.test.topic;
 
+import org.apache.axiom.om.OMElement;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -25,6 +26,7 @@ import org.wso2.carbon.automation.core.utils.jmsbrokerutils.client.JMSTopicMessa
 import org.wso2.carbon.automation.core.utils.jmsbrokerutils.controller.config.JMSBrokerConfigurationProvider;
 import org.wso2.carbon.automation.utils.axis2client.AxisServiceClient;
 import org.wso2.carbon.esb.ESBIntegrationTest;
+import org.wso2.carbon.esb.util.JMSEndpointManager;
 import org.wso2.carbon.esb.util.Utils;
 
 public class JMSTopicAsProxyEndpointTestCase extends ESBIntegrationTest {
@@ -32,7 +34,8 @@ public class JMSTopicAsProxyEndpointTestCase extends ESBIntegrationTest {
     @BeforeClass(alwaysRun = true)
     protected void init() throws Exception {
         super.init();
-        loadESBConfigurationFromClasspath("/artifacts/ESB/jms/transport/topic/send_messages_topic_synapse.xml");
+        OMElement synapse = esbUtils.loadClasspathResource("/artifacts/ESB/jms/transport/topic/send_messages_topic_synapse.xml");
+        updateESBConfiguration(JMSEndpointManager.setConfigurations(synapse));
     }
 
     @Test(groups = {"wso2.esb"}, description = "Test proxy service with jms transport")
@@ -40,7 +43,6 @@ public class JMSTopicAsProxyEndpointTestCase extends ESBIntegrationTest {
 
         AxisServiceClient client = new AxisServiceClient();
         int messageCount = 5;
-        client.sendRobust(Utils.getStockQuoteRequest("JMS"), getProxyServiceURL("StockQuoteProxyToJMSTopic"), "getQuote");
 
         JMSTopicMessageConsumer consumer = new JMSTopicMessageConsumer(
                 JMSBrokerConfigurationProvider.getInstance().getBrokerConfiguration());

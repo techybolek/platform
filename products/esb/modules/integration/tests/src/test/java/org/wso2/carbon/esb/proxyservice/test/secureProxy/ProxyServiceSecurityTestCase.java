@@ -24,6 +24,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 import org.wso2.carbon.esb.util.SecureServiceClient;
+import org.wso2.carbon.esb.util.ServiceTransportUtil;
 import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConfigExceptionException;
 
 import javax.xml.namespace.QName;
@@ -67,6 +68,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy2() throws Exception {
         final int policyId = 2;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -80,6 +84,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy3() throws Exception {
         final int policyId = 3;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -93,6 +100,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy4() throws Exception {
         final int policyId = 4;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -106,6 +116,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy5() throws Exception {
         final int policyId = 5;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -119,6 +132,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy6() throws Exception {
         final int policyId = 6;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -132,6 +148,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy7() throws Exception {
         final int policyId = 7;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -145,6 +164,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy8() throws Exception {
         final int policyId = 8;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -158,6 +180,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy9() throws Exception {
         final int policyId = 9;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -172,6 +197,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy10() throws Exception {
         final int policyId = 10;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -186,6 +214,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy11() throws Exception {
         final int policyId = 11;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         Thread.sleep(5000);
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
@@ -200,6 +231,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy12() throws Exception {
         final int policyId = 12;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -214,6 +248,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy13() throws Exception {
         final int policyId = 13;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -228,6 +265,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy14() throws Exception {
         final int policyId = 14;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -242,6 +282,9 @@ public class ProxyServiceSecurityTestCase extends ESBIntegrationTest {
     public void securityPolicy15() throws Exception {
         final int policyId = 15;
         this.secureService(policyId);
+        if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
+            ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
+        }
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
