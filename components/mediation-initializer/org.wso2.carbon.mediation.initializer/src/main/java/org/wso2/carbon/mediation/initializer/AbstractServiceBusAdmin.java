@@ -16,8 +16,11 @@
 
 package org.wso2.carbon.mediation.initializer;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.description.Parameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.ServerConfigurationInformation;
 import org.apache.synapse.ServerContextInformation;
@@ -27,12 +30,15 @@ import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
 
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
  */
 @SuppressWarnings({"UnusedDeclaration"})
 public class AbstractServiceBusAdmin extends AbstractAdmin {
+
+    private static final Log log = LogFactory.getLog(AbstractServiceBusAdmin.class);
 
     /**
      * Setting the tenant id for the local thread CarbonContextHolder
@@ -96,6 +102,15 @@ public class AbstractServiceBusAdmin extends AbstractAdmin {
         Parameter p = getAxisConfig().getParameter(ServiceBusConstants.SYNAPSE_CONFIG_LOCK);
         if (p != null) {
             return (Lock) p.getValue();
+        } else {
+            log.warn(ServiceBusConstants.SYNAPSE_CONFIG_LOCK + " is null, Recreating a new lock");
+            Lock lock = new ReentrantLock();
+            try {
+                getAxisConfig().addParameter(ServiceBusConstants.SYNAPSE_CONFIG_LOCK, lock);
+                return lock;
+            } catch (AxisFault axisFault) {
+                log.error("Error while setting " + ServiceBusConstants.SYNAPSE_CONFIG_LOCK);
+            }
         }
 
         return null;
