@@ -105,6 +105,15 @@ public final class VFSConstants {
     public static final String DEFAULT_TRANSPORT_FAILED_RECORD_TIMESTAMP_FORMAT =
             "dd/MM/yyyy/ HH:mm:ss";
 
+    /**
+     * This specify the interval between files processed (in milliseconds)
+     * */
+    public static final String TRANSPORT_FILE_INTERVAL = "transport.vfs.FileProcessInterval";
+    /**
+     * This specify the file count that will be processed in a cycle/batch 
+     * */    
+    public static final String TRANSPORT_FILE_COUNT = "transport.vfs.FileProcessCount";
+    
     public static final String FAILED_RECORD_DELIMITER = " ";
 
     public static final int DEFAULT_MAX_RETRY_COUNT = 3;

@@ -81,6 +81,10 @@ public class PollTableEntry extends AbstractPollTableEntry {
 
     private String failedRecordTimestampFormat;
 
+    private Integer fileProcessingInterval;
+    
+    private Integer fileProcessingCount;
+    
     private static final Log log = LogFactory.getLog(PollTableEntry.class);
     
     public PollTableEntry(boolean fileLocking) {
@@ -144,7 +148,15 @@ public class PollTableEntry extends AbstractPollTableEntry {
         return failedRecordTimestampFormat;
     }
 
-    private void setMoveAfterProcess(String moveAfterProcess) {
+    public Integer getFileProcessingInterval() {
+		return fileProcessingInterval;
+	}
+
+	public Integer getFileProcessingCount() {
+		return fileProcessingCount;
+	}
+
+	private void setMoveAfterProcess(String moveAfterProcess) {
         if (moveAfterProcess == null) {
             this.moveAfterProcess = null;
         } else if (moveAfterProcess.startsWith(VFSConstants.VFS_PREFIX)) {
@@ -307,6 +319,26 @@ public class PollTableEntry extends AbstractPollTableEntry {
                 failedRecordTimestampFormat =
                         VFSConstants.DEFAULT_TRANSPORT_FAILED_RECORD_TIMESTAMP_FORMAT;
             }
+
+            String strFileProcessingInterval = ParamUtils.getOptionalParam(params, VFSConstants.TRANSPORT_FILE_INTERVAL);
+            fileProcessingInterval = null;
+            if (strFileProcessingInterval != null) {
+            	try{
+            		fileProcessingInterval = Integer.parseInt(strFileProcessingInterval);
+            	}catch(NumberFormatException nfe){
+            		log.warn("VFS File Processing Interval not set correctly. Current value is : " + strFileProcessingInterval , nfe);
+            	}
+            }  
+            
+            String strFileProcessingCount = ParamUtils.getOptionalParam(params, VFSConstants.TRANSPORT_FILE_COUNT);
+            fileProcessingCount = null;
+            if (strFileProcessingCount != null) {
+            	try{
+            		fileProcessingCount = Integer.parseInt(strFileProcessingCount);
+            	}catch(NumberFormatException nfe){
+            		log.warn("VFS File Processing Count not set correctly. Current value is : " + strFileProcessingCount , nfe);
+            	}
+            }                        
             
             return super.loadConfiguration(params);
         }
