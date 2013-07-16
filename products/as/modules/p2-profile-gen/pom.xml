@@ -244,6 +244,9 @@
                                     org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.git.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.transaction.manager.feature:${carbon.platform.version}
                                 </featureArtifactDef>
 
@@ -572,6 +575,11 @@
 
                                 <feature>
                                     <id>org.wso2.carbon.deployment.synchronizer.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+
+                                <feature>
+                                    <id>org.wso2.carbon.deployment.synchronizer.git.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
