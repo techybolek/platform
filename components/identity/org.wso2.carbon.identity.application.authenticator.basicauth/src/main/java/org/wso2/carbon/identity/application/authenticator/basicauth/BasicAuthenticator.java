@@ -1,7 +1,6 @@
 package org.wso2.carbon.identity.application.authenticator.basicauth;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,9 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
-import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticator;
-import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticatorsConfiguration;
-import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticatorsConfiguration.AuthenticatorConfig;
+import org.wso2.carbon.identity.application.authentication.framework.AbstractApplicationAuthenticator;
+import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticatorConstants;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -20,85 +18,72 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-public class BasicAuthenticator implements ApplicationAuthenticator {
+public class BasicAuthenticator extends AbstractApplicationAuthenticator {
 
 	private static Log log = LogFactory.getLog(BasicAuthenticator.class);
-	
-	private final int CUSTOM_STATUS_SEND_TO_LOGIN = 10;
-	private final int CUSTOM_STATUS_AUTHENTICATE = 11;
-	
-	private final String AUTHENTICATOR_NAME = "BasicAuthenticator";
-	private final String AUTHENTICATOR_STATUS = "BasicAuthenticatorStatus";
 	
 	private RegistryService registryService;
 	private RealmService realmService;
 	
-	AuthenticatorConfig authenticatorConfig;
-	private Map<String, String> statusMap;
-	
 	public BasicAuthenticator(RegistryService registryService, RealmService realmService) {
 		this.registryService = registryService;
 		this.realmService = realmService;
-		
-		authenticatorConfig = ApplicationAuthenticatorsConfiguration.getInstance().getAuthenticatorConfig(AUTHENTICATOR_NAME);
-		statusMap = authenticatorConfig.getStatusMap();
 	}
 	
 	@Override
     public int doAuthentication(HttpServletRequest request, HttpServletResponse response) {
 		int status = getStatus(request);
 		
-		if (status == CUSTOM_STATUS_AUTHENTICATE
-				|| (Boolean)request.getSession().getAttribute(ApplicationAuthenticator.DO_AUTHENTICATION)) {
-			if(canHandle(request)){
+		if (status == BasicAuthenticatorConstants.CUSTOM_STATUS_AUTHENTICATE
+				|| request.getSession().getAttribute(ApplicationAuthenticatorConstants.DO_AUTHENTICATION) != null) {
+			
+			if (canHandle(request)) {
 				try {
-    				status = authenticate(request) ? ApplicationAuthenticator.STATUS_AUTHENTICATION_PASS 
-    				                               : ApplicationAuthenticator.STATUS_AUTHENTICATION_FAIL;
+    				status = authenticate(request) ? ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS 
+    				                               : ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_FAIL;
 				} catch (Exception e) {
 		            String msg = "Error on BasicAuthenticator authentication";
 		            log.error(msg, e);
-		            status = ApplicationAuthenticator.STATUS_AUTHENTICATION_FAIL;
+		            status = ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_FAIL;
 		        }
 			} else {
-				status = ApplicationAuthenticator.STATUS_AUTHENTICATION_CANNOT_HANDLE;
+				status = ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_CANNOT_HANDLE;
 			}
-		}
-		
-		else if(status == CUSTOM_STATUS_SEND_TO_LOGIN){
-			String loginPage = statusMap.get(String.valueOf(status));
-			status = CUSTOM_STATUS_AUTHENTICATE;
+		} else if (status == BasicAuthenticatorConstants.CUSTOM_STATUS_SEND_TO_LOGIN) {
+			String loginPage = getAuthenticatorConfig().getStatusMap().get(String.valueOf(status));
+			status = BasicAuthenticatorConstants.CUSTOM_STATUS_AUTHENTICATE;
 			
-			if(ApplicationAuthenticatorsConfiguration.getInstance().isSingleFactor()){
-				request.getSession().setAttribute(DO_AUTHENTICATION, Boolean.TRUE);
+			if (isSingleFactorMode()) {
+				request.getSession().setAttribute(ApplicationAuthenticatorConstants.DO_AUTHENTICATION, Boolean.TRUE);
 			}
 			
 			try {
-	            response.sendRedirect(loginPage);
+	            response.sendRedirect(loginPage + request.getSession().getAttribute("commonAuthQueryParams"));
             } catch (IOException e) {
 	            e.printStackTrace();
             }
 		} 
 		
-		request.getSession().setAttribute(AUTHENTICATOR_STATUS, status);
+		request.getSession().setAttribute(BasicAuthenticatorConstants.AUTHENTICATOR_STATUS, status);
 		return status;
     }
-
+	
 	@Override
-    public int getStatus(HttpServletRequest request) {
-		Integer status = (Integer)request.getSession().getAttribute(AUTHENTICATOR_STATUS);
+	public int getStatus(HttpServletRequest request) {
+		Integer status = (Integer)request.getSession().getAttribute(BasicAuthenticatorConstants.AUTHENTICATOR_STATUS);
 		
 		//Read from the configuration , if this is the first time this method is called, 
 		if (status == null){
-			status = Integer.valueOf(statusMap.entrySet().iterator().next().getKey());
+			status = super.getStatus(request);
 		} 
 		
 	    return status;
     }
 	
 	@Override
-	public int getFactor(){
-	    return authenticatorConfig.getFactor();
-	}
+    public String getAuthenticatorName() {
+	    return BasicAuthenticatorConstants.AUTHENTICATOR_NAME;
+    }
 
     public boolean canHandle(HttpServletRequest request) {
 
@@ -122,7 +107,7 @@ public class BasicAuthenticator implements ApplicationAuthenticator {
         return false;
     }
     
-    public boolean authenticate(HttpServletRequest request) throws Exception {
+    private boolean authenticate(HttpServletRequest request) throws Exception {
     	
     	String username = request.getParameter("username");
         String password = request.getParameter("password");
