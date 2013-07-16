@@ -57,12 +57,18 @@
     <% } else { %>
         var rowId = -1;
     <% } %>
+
     function deleteRoleRow(obj){
-        jQuery(obj).parent().parent().remove();
-        if($(jQuery('#roleAddTable tr')).length == 1){
-            $(jQuery('#roleAddTable')).toggle();
-        }
+        CARBON.showConfirmationDialog('Are you sure you want to delete "'  + jQuery(obj).parent().prev().children()[0].value + '"',
+            function (obj){
+                jQuery(obj).parent().parent().remove();
+                if($(jQuery('#roleAddTable tr')).length == 1){
+                    $(jQuery('#roleAddTable')).toggle();
+                }
+            },
+            null);
     }
+
     jQuery(document).ready(function(){
         jQuery('#roleAddLink').click(function(){
             rowId++;
@@ -155,12 +161,24 @@
                                 <fmt:message key='idp.certificate.help'/>
                             </div>
                             <% if(certData != null) { %>
-                            <table class="styledLeft">
-                                <thead><tr><th class="leftCol-big"><fmt:message key='issuerdn'/></th><th><fmt:message key='subjectdn'/></th></tr></thead>
-                                <tbody>
-                                    <tr><td><%=certData.getIssuerDN()%></td><td><%=certData.getSubjectDN()%></td></tr>
-                                </tbody>
-                            </table>
+                                <table class="styledLeft">
+                                    <thead><tr><th><fmt:message key='issuerdn'/></th>
+                                        <th><fmt:message key='subjectdn'/></th>
+                                        <th><fmt:message key='notafter'/></th>
+                                        <th><fmt:message key='notbefore'/></th>
+                                        <th><fmt:message key='serialno'/></th>
+                                        <th><fmt:message key='version'/></th>
+                                    </tr></thead>
+                                    <tbody>
+                                        <tr><td><%=certData.getIssuerDN()%></td>
+                                            <td><%=certData.getSubjectDN()%></td>
+                                            <td><%=certData.getNotAfter()%></td>
+                                            <td><%=certData.getNotBefore()%></td>
+                                            <td><%=certData.getSerialNumber()%></td>
+                                            <td><%=certData.getVersion()%></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             <% } %>
                         </td>
                     </tr>
@@ -173,7 +191,7 @@
                                 <fmt:message key='idp.roles.help'/>
                             </div>
                             <table class="styledLeft" id="roleAddTable" style="display:none">
-                                <thead><tr><th class="leftCol-big"><fmt:message key='idp.role'/></th><th></th></tr></thead>
+                                <thead><tr><th class="leftCol-big"><fmt:message key='idp.role'/></th><th><fmt:message key='idp.actions'/></th></tr></thead>
                                 <tbody>
                                 <% if(roles != null && roles.size() > 0){ %>
                                     <script>
@@ -182,10 +200,15 @@
                                     <% for(int i = 0; i < roles.size(); i++){ %>
                                         <tr>
                                             <td><input type="text" value="<%=roles.get(i)%>" id="rowid_<%=i%>" name="rowname_<%=i%>"/></td>
-                                            <td><a onclick="deleteRoleRow(this)" class="icon-link"
+                                            <td>
+                                                <a title="<fmt:message key='idp.role.delete'/>"
+                                                   onclick="deleteRoleRow(this);return false;"
+                                                   href="#"
+                                                   class="icon-link"
                                                    style="background-image: url(images/delete.gif)">
-                                                <fmt:message key='idp.role.delete'/>
-                                            </a></td>
+                                                    <fmt:message key='idp.role.delete'/>
+                                                </a>
+                                            </td>
                                         </tr>
                                     <% } %>
                                 <% } %>

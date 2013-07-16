@@ -44,6 +44,8 @@
         } else {
             client.updateTenantIdP((TrustedIdPDTO)session.getAttribute("trustedIdPDTO"), (TrustedIdPDTO)objects[0]);
         }
+        String message = MessageFormat.format(resourceBundle.getString("success.updating.idp"),null);
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
     } catch (Exception e) {
         String message = MessageFormat.format(resourceBundle.getString("error.updating.idp"),
                 new Object[]{e.getMessage()});
