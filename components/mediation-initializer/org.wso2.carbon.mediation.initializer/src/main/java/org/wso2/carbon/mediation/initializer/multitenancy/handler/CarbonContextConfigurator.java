@@ -12,12 +12,21 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
  */
 
 public class CarbonContextConfigurator extends AbstractHandler {
+
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
 
         PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
 
         //if cc is already populated ( servlet transport ) just return
-        if (cc.getTenantDomain() != null) {
+        //TODO: Ideally only tenant domain need to check, but there are some admin calls comes with null domain and tenant ID
+        if (cc.getTenantDomain() != null || cc.getTenantId() != MultitenantConstants.INVALID_TENANT_ID) {
+            return InvocationResponse.CONTINUE;
+        }
+
+        //for non-http we assume that it's for ST
+        if (!messageContext.getTransportIn().getName().contains("http")) {
+            cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             return InvocationResponse.CONTINUE;
         }
 
@@ -29,6 +38,7 @@ public class CarbonContextConfigurator extends AbstractHandler {
                     String str1 = to.substring(to.indexOf("/t/") + 3);
                     String domain = str1.substring(0, str1.indexOf("/"));
                     cc.setTenantDomain(domain);
+                    //cc.setTenantId(1231312); need to figureout how to do it
                 } else {
                     cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                     cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
