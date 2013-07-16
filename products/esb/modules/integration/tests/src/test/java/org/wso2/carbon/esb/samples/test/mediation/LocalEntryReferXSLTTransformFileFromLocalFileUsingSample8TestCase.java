@@ -38,20 +38,20 @@ public class LocalEntryReferXSLTTransformFileFromLocalFileUsingSample8TestCase e
     @BeforeClass(alwaysRun = true)
     public void uploadSynapseConfig() throws Exception {
         super.init();
-        loadSampleESBConfiguration(8);
+        loadESBConfigurationFromClasspath("/artifacts/ESB/mediatorconfig/xslt/local_entry_refer_xslt_transformation_synapse.xml");
     }
 
-    @Test(groups = {"wso2.esb"}, description = "Test for local entry XSLT file refer from File System", enabled = false)
+    @Test(groups = {"wso2.esb"}, description = "Test for local entry XSLT file refer from File System")
     public void testLocalEntryXSLTFileFromLocalFile() throws IOException,
             XMLStreamException {
         OMElement response = axis2Client.sendCustomQuoteRequest(getMainSequenceURL()
-                , getBackEndServiceUrl(ESBTestConstant.SIMPLE_STOCK_QUOTE_SERVICE), "IBM");
+                , getBackEndServiceUrl(ESBTestConstant.SIMPLE_STOCK_QUOTE_SERVICE), "WSO2");
         assertNotNull(response, "Response message is null");
         assertEquals(response.getLocalName(), "CheckPriceResponse", "CheckPriceResponse not match");
         assertTrue(response.toString().contains("Price"), "No price tag in response");
         assertTrue(response.toString().contains("Code"), "No code tag in response");
         assertEquals(response.getFirstChildWithName
-                (new QName("http://services.samples/xsd", "Code")).getText(), "IBM", "Symbol not match");
+                (new QName("http://services.samples/xsd", "Code")).getText(), "WSO2", "Symbol not match");
     }
 
     @AfterClass(alwaysRun = true)
