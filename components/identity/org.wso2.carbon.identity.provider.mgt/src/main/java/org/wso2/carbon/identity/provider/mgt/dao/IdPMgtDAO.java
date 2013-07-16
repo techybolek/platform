@@ -400,7 +400,7 @@ public class IdPMgtDAO {
                     prepStmt.setString(3, localRole);
                     prepStmt.executeUpdate();
                 } else {
-                    String msg = "Cannot find IdP role " + entry.getKey() + "for tenant";
+                    String msg = "Cannot find IdP role " + entry.getKey() + " for tenant";
                     log.error(msg + " " + tenantDomain);
                     throw new IdentityProviderMgtException(msg);
                 }
