@@ -27,19 +27,7 @@
 	<parameter name="latitude"/>
 	<parameter name="longitude"/>
 	<sequence>
-		<log level="custom">
-			<property name="FLW" value="Twitter : Login"/>
-			<property name="oauth.consumerKey" expression="$ctx:oauth.consumerKey"/>
-			<property name="oauth.consumerSecret" expression="$ctx:oauth.consumerSecret"/>
-			<property name="oauth.accessToken" expression="$ctx:oauth.accessToken"/>
-			<property name="oauth.accessTokenSecret" expression="$ctx:oauth.accessTokenSecret"/>
-			<property name="latitude" expression="$ctx:latitude"/>
-			<property name="longitude" expression="$ctx:longitude"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
-		<log level="custom">
-			<property name="FLW" value="Twitter : Search for Places"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterSearchPlaces" />
 	</sequence>
 </template>

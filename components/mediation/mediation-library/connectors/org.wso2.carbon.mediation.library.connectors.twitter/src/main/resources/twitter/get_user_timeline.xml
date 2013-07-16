@@ -28,20 +28,7 @@
 	<parameter name="page"/>
 	<parameter name="userID"/>
 	<sequence>
-		<log level="custom">
-			<property name="FLW" value="Twitter : Login"/>
-			<property name="oauth.consumerKey" expression="$ctx:oauth.consumerKey"/>
-			<property name="oauth.consumerSecret" expression="$ctx:oauth.consumerSecret"/>
-			<property name="oauth.accessToken" expression="$ctx:oauth.accessToken"/>
-			<property name="oauth.accessTokenSecret" expression="$ctx:oauth.accessTokenSecret"/>
-			<property name="count" expression="$ctx:count"/>
-			<property name="page" expression="$ctx:page"/>
-			<property name="userID" expression="$ctx:userID"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
-		<log level="custom">
-			<property name="FLW" value="Twitter : Search for Places"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterGetUserTimeLine" />
 	</sequence>
 </template>

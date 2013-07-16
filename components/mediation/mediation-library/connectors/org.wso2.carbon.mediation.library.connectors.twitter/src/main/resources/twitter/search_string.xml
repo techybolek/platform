@@ -26,18 +26,7 @@
 	<parameter name="oauth.accessTokenSecret"/>
 	<parameter name="search"/>
 	<sequence>
-		<log level="custom">
-			<property name="FLW" value="Twitter : Login"/>
-			<property name="oauth.consumerKey" expression="$ctx:oauth.consumerKey"/>
-			<property name="oauth.consumerSecret" expression="$ctx:oauth.consumerSecret"/>
-			<property name="oauth.accessToken" expression="$ctx:oauth.accessToken"/>
-			<property name="oauth.accessTokenSecret" expression="$ctx:oauth.accessTokenSecret"/>
-			<property name="search" expression="$ctx:search"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
-		<log level="custom">
-			<property name="FLW" value="Twitter : Search for"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterSearch" />
 	</sequence>
 </template>

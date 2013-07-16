@@ -2,6 +2,6 @@
 <artifacts>
     <artifact name="twitter" package="org.wso2.carbon.connectors" >
         <dependency artifact="twitter" />
-        <description>synapse library for twitter</description>
+        <description>synapse library for twitter connector</description>
     </artifact>
 </artifacts>

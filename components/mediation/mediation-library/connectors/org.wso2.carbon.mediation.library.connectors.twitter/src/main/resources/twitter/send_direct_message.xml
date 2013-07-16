@@ -27,19 +27,7 @@
 	<parameter name="userID" />
 	<parameter name="message" />
 	<sequence>
-		<log level="custom">
-			<property name="FLW" value="Twitter : Login"/>
-			<property name="oauth.consumerKey" expression="$ctx:oauth.consumerKey"/>
-			<property name="oauth.consumerSecret" expression="$ctx:oauth.consumerSecret"/>
-			<property name="oauth.accessToken" expression="$ctx:oauth.accessToken"/>
-			<property name="oauth.accessTokenSecret" expression="$ctx:oauth.accessTokenSecret"/>
-			<property name="userID" expression="$ctx:userID"/>
-			<property name="message" expression="$ctx:message"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
-		<log level="custom">
-			<property name="FLW" value="Twitter : Tweet"/>
-		</log>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterSendDirectMesage" />
 	</sequence>
 </template>
