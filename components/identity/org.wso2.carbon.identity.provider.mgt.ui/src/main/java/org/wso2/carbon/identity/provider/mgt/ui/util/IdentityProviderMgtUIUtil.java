@@ -23,7 +23,6 @@ import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
-import org.wso2.carbon.identity.provider.mgt.stub.IdentityProviderMgtExceptionException;
 import org.wso2.carbon.identity.provider.mgt.stub.dto.TrustedIdPDTO;
 import org.wso2.carbon.identity.provider.mgt.ui.bean.CertData;
 import org.wso2.carbon.identity.provider.mgt.ui.bean.TrustedIdPBean;
@@ -68,7 +67,7 @@ public class IdentityProviderMgtUIUtil {
         return roleMappingsMap;
     }
 
-    public static Object[] getFormData(HttpServletRequest request) throws FileUploadException, IdentityProviderMgtExceptionException {
+    public static Object[] getFormData(HttpServletRequest request) throws FileUploadException, Exception {
         if (ServletFileUpload.isMultipartContent(request)) {
             Object[] objects = new Object[2];
             ServletRequestContext servletContext = new ServletRequestContext(request);
@@ -99,25 +98,24 @@ public class IdentityProviderMgtUIUtil {
             }
             List<String> tempList = new ArrayList<String>();
             String delete = null;
-            int finalRowId = -1;
             TrustedIdPDTO trustedIdPDTO = new TrustedIdPDTO();
             for (Object item : items) {
                 DiskFileItem diskFileItem = (DiskFileItem) item;
                 String name = diskFileItem.getFieldName();
                 if (name.equals("issuer")) {
-                    FileItem fileItem = (FileItem) diskFileItem;
+                    FileItem fileItem = diskFileItem;
                     byte[] issuerArray = fileItem.get();
                     if(issuerArray != null && issuerArray.length > 0){
                         issuer = new String(issuerArray);
                     }
                 } else if(name.equals("url")){
-                    FileItem fileItem = (FileItem) diskFileItem;
+                    FileItem fileItem = diskFileItem;
                     byte[] urlArray = fileItem.get();
                     if(urlArray != null && urlArray.length > 0){
                         url = new String(urlArray);
                     }
                 } else if(name.equals("certFile")){
-                    FileItem fileItem = (FileItem) diskFileItem;
+                    FileItem fileItem = diskFileItem;
                     byte[] publicCertArray = fileItem.get();
                     if(publicCertArray != null && publicCertArray.length > 0){
                         publicCert = Base64.encode(publicCertArray);
@@ -127,7 +125,7 @@ public class IdentityProviderMgtUIUtil {
                         }
                     }
                 } else if(name.equals("roleMappingFile")){
-                    FileItem fileItem = (FileItem) diskFileItem;
+                    FileItem fileItem = diskFileItem;
                     byte[] roleMappingsArray = fileItem.get();
                     if(roleMappingsArray != null && roleMappingsArray.length > 0){
                         String roleMappingsString = new String(roleMappingsArray);
@@ -142,7 +140,7 @@ public class IdentityProviderMgtUIUtil {
                     }
                 } else if(name.startsWith("rowname_")){
                     int rowId = Integer.parseInt(name.substring(name.indexOf("_")+1));
-                    FileItem fileItem = (FileItem) diskFileItem;
+                    FileItem fileItem = diskFileItem;
                     byte[] rolesArray = fileItem.get();
                     if(oldRoles != null && rowId < oldRoles.size()){
                         newRoles.remove(rowId);
@@ -153,16 +151,10 @@ public class IdentityProviderMgtUIUtil {
                         }
                     }
                 } else if(name.equals("delete")){
-                    FileItem fileItem = (FileItem) diskFileItem;
+                    FileItem fileItem = diskFileItem;
                     byte[] deleteArray = fileItem.get();
                     if(deleteArray != null && deleteArray.length > 0){
                         delete = new String(deleteArray);
-                    }
-                } else if(name.equals("finalRowId")){
-                    FileItem fileItem = (FileItem) diskFileItem;
-                    byte[] finalRowIdArray = fileItem.get();
-                    if(finalRowIdArray != null && finalRowIdArray.length > 0){
-                        finalRowId = Integer.parseInt(new String(finalRowIdArray));
                     }
                 }
             }
@@ -176,7 +168,7 @@ public class IdentityProviderMgtUIUtil {
             objects[1] = delete;
             return objects;
         } else {
-            throw new IdentityProviderMgtExceptionException("Invalid Content Type: Not multipart/form-data");
+            throw new Exception("Invalid Content Type: Not multipart/form-data");
         }
     }
 

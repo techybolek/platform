@@ -24,11 +24,6 @@ import java.util.Map;
 public class TrustedIdPBean {
 
     /**
-     * The tenant domain used when retrieving IdP information.
-     */
-    private String tenantDomain;
-
-    /**
      * The trusted IDP's Issuer ID for this tenant.
      */
     private String idPIssuerId;
@@ -37,11 +32,6 @@ public class TrustedIdPBean {
      * The trusted IDP's URL for this tenant.
      */
     private String idPUrl;
-
-    /**
-     * The trusted IdP's Certificate for this tenant.
-     */
-    private String publicCert;
 
     /**
      * The trusted IdP's Certificate for this tenant
@@ -60,13 +50,6 @@ public class TrustedIdPBean {
 
     //////////////////// Getters and Setters //////////////////////////
 
-    public String getTenantDomain() {
-        return tenantDomain;
-    }
-
-    public void setTenantDomain(String tenantDomain) {
-        this.tenantDomain = tenantDomain;
-    }
 
     public String getIdPIssuerId() {
         return idPIssuerId;
@@ -81,16 +64,10 @@ public class TrustedIdPBean {
     }
 
     public void setIdPUrl(String idPUrl) throws MalformedURLException {
-        IdentityProviderMgtUIUtil.validateURI(idPUrl);
+        if(idPUrl != null && !idPUrl.equals("")){
+            IdentityProviderMgtUIUtil.validateURI(idPUrl);
+        }
         this.idPUrl = idPUrl;
-    }
-
-    public String getPublicCert() {
-        return publicCert;
-    }
-
-    public void setPublicCert(String publicCert) {
-        this.publicCert = publicCert;
     }
 
     public CertData getCertData(){

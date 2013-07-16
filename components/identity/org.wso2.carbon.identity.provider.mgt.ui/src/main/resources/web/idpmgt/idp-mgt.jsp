@@ -1,7 +1,3 @@
-<%@ page import="org.wso2.carbon.identity.provider.mgt.ui.bean.CertData" %>
-<%@ page import="org.wso2.carbon.identity.provider.mgt.ui.bean.TrustedIdPBean" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
 <!--
 ~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 ~
@@ -22,6 +18,10 @@
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"%>
+<%@ page import="org.wso2.carbon.identity.provider.mgt.ui.bean.CertData" %>
+<%@ page import="org.wso2.carbon.identity.provider.mgt.ui.bean.TrustedIdPBean" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 
 <carbon:breadcrumb label="trusted.idp" resourceBundle="org.wso2.carbon.identity.provider.mgt.ui.i18n.Resources"
                     topPage="true" request="<%=request%>" />
@@ -58,15 +58,26 @@
         var rowId = -1;
     <% } %>
 
+    var objTemp;
     function deleteRoleRow(obj){
-        CARBON.showConfirmationDialog('Are you sure you want to delete "'  + jQuery(obj).parent().prev().children()[0].value + '"',
-            function (obj){
-                jQuery(obj).parent().parent().remove();
-                if($(jQuery('#roleAddTable tr')).length == 1){
-                    $(jQuery('#roleAddTable')).toggle();
-                }
-            },
-            null);
+        objTemp = obj;
+        if(jQuery(obj).parent().prev().children()[0].value == ''){
+            jQuery(objTemp).parent().parent().remove();
+            if($(jQuery('#roleAddTable tr')).length == 1){
+                $(jQuery('#roleAddTable')).toggle();
+            }
+        } else {
+            CARBON.showConfirmationDialog('Are you sure you want to delete "'  + jQuery(obj).parent().prev().children()[0].value +
+                    '"? All the corresponding role mappings will also be deleted.',
+                    function (){
+                        jQuery(objTemp).parent().parent().remove();
+                        if($(jQuery('#roleAddTable tr')).length == 1){
+                            $(jQuery('#roleAddTable')).toggle();
+                        }
+                    },
+                    null);
+        }
+
     }
 
     jQuery(document).ready(function(){
@@ -84,24 +95,30 @@
     })
     function idpMgtUpdate(){
         if(doValidation()){
-            jQuery('#finalRowId').val(rowId);
             jQuery('#idp-mgt-form').submit();
         }
     }
     function idpMgtDelete(){
-        var input = document.createElement('input');
-        input.type = "hidden";
-        input.name = "delete";
-        input.value = "delete";
-        document.forms['idp-mgt-form'].appendChild(input);
-        jQuery('#idp-mgt-form').submit();
+        CARBON.showConfirmationDialog('Are you sure you want to delete "'  + jQuery('#issuer').val() + '" IdP information?',
+                function (){
+                    var input = document.createElement('input');
+                    input.type = "hidden";
+                    input.name = "delete";
+                    input.value = "delete";
+                    document.forms['idp-mgt-form'].appendChild(input);
+                    jQuery('#idp-mgt-form').submit();
+                },
+                null);
+    }
+    function idpMgtCancel(){
+        location.href = "idp-mgt.jsp"
     }
 
     function doValidation() {
         var reason = "";
         reason = validateEmpty("issuer");
         if (reason != "") {
-            CARBON.showWarningDialog("<fmt:message key="idp.issuer.warn"/>");
+            CARBON.showWarningDialog("IssuerId of IdP cannot be empty");
             return false;
         }
         for(var i=0; i <= rowId; i++){
@@ -237,15 +254,15 @@
                     </tr>
                 </table>
             </div>
-            <% if(roles != null && roles.size() > 0) { %>
-                <input type="hidden" name="finalRowId" id="finalRowId" value="<%=roles.size()-1%>"/>
-            <% } else { %>
-                <input type="hidden" name="finalRowId" id="finalRowId" value="-1"/>
-            <% } %>
             <!-- sectionSub Div -->
             <div class="buttonRow">
-                <input type="button" value="<fmt:message key='idp.update'/>" onclick="idpMgtUpdate();"/>
+                <% if(bean != null){ %>
+                    <input type="button" value="<fmt:message key='idp.update'/>" onclick="idpMgtUpdate();"/>
+                <% } else { %>
+                    <input type="button" value="<fmt:message key='idp.register'/>" onclick="idpMgtUpdate();"/>
+                <% } %>
                 <input type="button" value="<fmt:message key='idp.delete'/>" onclick="idpMgtDelete();"/>
+                <input type="button" value="<fmt:message key='idp.cancel'/>" onclick="idpMgtCancel();"/>
             </div>
             </form>
         </div>

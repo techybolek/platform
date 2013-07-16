@@ -21,7 +21,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.provider.mgt.stub.IdentityProviderMgtExceptionException;
+import org.wso2.carbon.identity.provider.mgt.stub.IdentityProviderMgtServiceIdentityProviderMgtExceptionException;
 import org.wso2.carbon.identity.provider.mgt.stub.IdentityProviderMgtServiceStub;
 import org.wso2.carbon.identity.provider.mgt.stub.dto.TrustedIdPDTO;
 
@@ -55,28 +55,34 @@ public class IdentityProviderMgtServiceClient {
     /**
      * Returns IdP information of the logged in user's tenant
      * @return TrustedIdPDTO
-     * @throws IdentityProviderMgtExceptionException
+     * @throws Exception
      */
-    public TrustedIdPDTO getTenantIdP() throws IdentityProviderMgtExceptionException{
+    public TrustedIdPDTO getTenantIdP() throws Exception{
         try {
             return stub.getTenantIdP();
         } catch (RemoteException e) {
             log.error("Error invoking remote service", e);
-            throw new IdentityProviderMgtExceptionException("Error invoking remote service");
+            throw new Exception("Error invoking remote service");
+        } catch (IdentityProviderMgtServiceIdentityProviderMgtExceptionException e) {
+            log.error("Error invoking remote service", e);
+            throw new Exception("Error invoking remote service");
         }
     }
 
     /**
      * @param oldTrustedIdPDTO
      * @param newTrustedIdPDTO
-     * @throws IdentityProviderMgtExceptionException
+     * @throws Exception
      */
-    public void updateTenantIdP(TrustedIdPDTO oldTrustedIdPDTO, TrustedIdPDTO newTrustedIdPDTO) throws IdentityProviderMgtExceptionException{
+    public void updateTenantIdP(TrustedIdPDTO oldTrustedIdPDTO, TrustedIdPDTO newTrustedIdPDTO) throws Exception {
         try {
             stub.updateTenantIdP(oldTrustedIdPDTO, newTrustedIdPDTO);
         } catch (RemoteException e) {
             log.error("Error invoking remote service", e);
-            throw new IdentityProviderMgtExceptionException("Error invoking remote service");
+            throw new Exception("Error invoking remote service");
+        } catch (IdentityProviderMgtServiceIdentityProviderMgtExceptionException e) {
+            log.error("Error invoking remote service", e);
+            throw new Exception("Error invoking remote service");
         }
     }
 
