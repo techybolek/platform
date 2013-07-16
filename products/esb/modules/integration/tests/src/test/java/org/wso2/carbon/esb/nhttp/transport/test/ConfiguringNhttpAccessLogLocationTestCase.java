@@ -55,10 +55,18 @@ public class ConfiguringNhttpAccessLogLocationTestCase extends ESBIntegrationTes
         String carbonHome = System.getProperty(ServerConstants.CARBON_HOME);
         nhttpLogDir = carbonHome + File.separator + "repository" + File.separator + "logs"
                       + File.separator + "nhttpLogs";
+
+        File log4jProperties = new File(carbonHome + File.separator + "repository" + File.separator + "conf" +
+                                        File.separator + "log4j.properties");
+
         String propertyName = "nhttp.log.directory";
 
         createNewDir(nhttpLogDir);
+
         applyProperty(srcFile, propertyName, nhttpLogDir);
+        applyProperty(log4jProperties, "log4j.logger.org.apache.synapse.transport.http.access", "INFO");
+        serverConfigurationManager.restartGracefully();
+
         super.init();
         loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/nhttp_transport/nhttp_test_synapse.xml");
     }
@@ -101,13 +109,12 @@ public class ConfiguringNhttpAccessLogLocationTestCase extends ESBIntegrationTes
      * @throws Exception
      */
     private void applyProperty(File srcFile, String key, String value) throws Exception {
-        File destinationFile = new File("nhttp.properties");
+        File destinationFile = new File(srcFile.getName());
         Properties properties = new Properties();
         properties.load(new FileInputStream(srcFile));
         properties.setProperty(key, value);
         properties.store(new FileOutputStream(destinationFile), null);
-        serverConfigurationManager.applyConfiguration(destinationFile);
-
+        serverConfigurationManager.applyConfigurationWithoutRestart(destinationFile);
     }
 
     /**
@@ -125,6 +132,5 @@ public class ConfiguringNhttpAccessLogLocationTestCase extends ESBIntegrationTes
             serverConfigurationManager = null;
             nhttpLogDir = null;
         }
-
     }
 }

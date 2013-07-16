@@ -23,7 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.automation.utils.httpclient.HttpClientUtil;
+import org.wso2.carbon.automation.utils.httpclient.HttpURLConnectionClient;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 
 /**
@@ -36,12 +36,12 @@ import org.wso2.carbon.esb.ESBIntegrationTest;
 
 public class MalformedHTTPRequestTest extends ESBIntegrationTest {
 
-	private HttpClientUtil httpClientUtil;
+	private HttpURLConnectionClient httpClientUtil;
 
 	@BeforeClass(alwaysRun = true)
 	public void setEnvironment() throws Exception {
 		init();
-		httpClientUtil = new HttpClientUtil();
+		httpClientUtil = new HttpURLConnectionClient();
 	}
 
 	@Test(groups = "wso2.esb", description = "test with different kinds of malformed urls")
@@ -51,7 +51,7 @@ public class MalformedHTTPRequestTest extends ESBIntegrationTest {
 		for (int i = 0; i < 3; i++) {
 			try {
 				//tests a url with a space
-				httpClientUtil.get(getProxyServiceURL("simpleProxy").replace("services", " services")+"?WSO2");
+				httpClientUtil.sendGetRequest(getProxyServiceURL("simpleProxy").replace("services", " services")+"?WSO2", null);
 			} catch (Exception e) {
 			}
 		}
@@ -64,7 +64,7 @@ public class MalformedHTTPRequestTest extends ESBIntegrationTest {
 		for (int i = 0; i < 3; i++) {
 			try {
 				//tests a url with double slash
-				httpClientUtil.get(getProxyServiceURL("simpleProxy").replace("services/", "services//") + "?WSO2");
+				httpClientUtil.sendGetRequest(getProxyServiceURL("simpleProxy").replace("services/", "services//") + "?WSO2", null);
 			} catch (Exception e) {
 			}
 		}
@@ -77,7 +77,7 @@ public class MalformedHTTPRequestTest extends ESBIntegrationTest {
 		for (int i = 0; i < 3; i++) {
 			try {
 				//tests a url with invalid characters
-				httpClientUtil.get(getMainSequenceURL() + "services/$$simpleProxy?WSO2");
+				httpClientUtil.sendGetRequest(getMainSequenceURL() + "services/$$simpleProxy?WSO2", null);
 			} catch (Exception e) {
 			}
 		}

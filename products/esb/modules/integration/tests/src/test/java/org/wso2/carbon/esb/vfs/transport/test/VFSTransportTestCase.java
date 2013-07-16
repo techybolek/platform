@@ -30,6 +30,9 @@ import org.wso2.carbon.automation.core.utils.serverutils.ServerConfigurationMana
 import org.wso2.carbon.esb.ESBIntegrationTest;
 
 import java.io.File;
+import java.io.IOException;
+
+import static org.testng.Assert.assertTrue;
 
 /**
  * This test class in skipped when user mode is tenant because of this release not support vfs transport for tenants
@@ -37,23 +40,31 @@ import java.io.File;
 public class VFSTransportTestCase extends ESBIntegrationTest {
 
     private ServerConfigurationManager serverConfigurationManager;
+    private String pathToVfsDir;
 
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
         super.init();
+        pathToVfsDir = getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" +
+                                              File.separator + "synapseconfig" + File.separator +
+                                              "vfsTransport" + File.separator).getPath();
 
         serverConfigurationManager = new ServerConfigurationManager(esbServer.getBackEndUrl());
-        serverConfigurationManager.applyConfiguration(new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "axis2.xml").getPath()));
+        serverConfigurationManager.applyConfiguration(new File(pathToVfsDir + File.separator + "axis2.xml"));
         super.init();
 
-        File outfolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator);
-        File infolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator);
-        File originalfolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "original" + File.separator);
-        File failurelfolder = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator);
-        outfolder.mkdirs();
-        infolder.mkdirs();
-        originalfolder.mkdirs();
-        failurelfolder.mkdirs();
+        File outFolder = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator);
+        File inFolder = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator);
+        File originalFolder = new File(pathToVfsDir + "test" + File.separator + "original" + File.separator);
+        File failureFolder = new File(pathToVfsDir + "test" + File.separator + "failure" + File.separator);
+        assertTrue(outFolder.mkdirs(), "file folder not created");
+        assertTrue(inFolder.mkdirs(), "file folder not created");
+        assertTrue(originalFolder.mkdirs(), "file folder not created");
+        assertTrue(failureFolder.mkdirs(), "file folder not created");
+        assertTrue(outFolder.exists(), "File folder doesn't exists");
+        assertTrue(inFolder.exists(), "File folder doesn't exists");
+        assertTrue(originalFolder.exists(), "File folder doesn't exists");
+        assertTrue(failureFolder.exists(), "File folder doesn't exists");
     }
 
     @AfterClass(alwaysRun = true)
@@ -68,342 +79,425 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml")
     public void testVFSProxyFileURI_LinuxPath_ContentType_XML()
             throws Exception {
 
         addVFSProxy1();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("WSO2 Company"));
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy1");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("WSO2 Company"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy1");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir" +
+                                               " transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt")
     public void testVFSProxyFileURI_LinuxPath_ContentType_Plain()
             throws Exception {
 
         addVFSProxy2();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
-
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy2");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy2");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = *")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = " +
+                                               "/home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = *")
     public void testVFSProxyFileURI_LinuxPath_SelectAll_FileNamePattern()
             throws Exception {
 
         addVFSProxy3();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
-
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy3");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy3");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = nothing")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = nothing")
     public void testVFSProxyFileURI_LinuxPath_No_FileNamePattern()
             throws Exception {
 
         addVFSProxy4();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
-
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
-
-        Assert.assertTrue(!outfile.exists());
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy4");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
+            Assert.assertTrue(!outfile.exists());
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy4");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1")
     public void testVFSProxyPollInterval_1()
             throws Exception {
 
         addVFSProxy5();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
-
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy5");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy5");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=30")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=30")
     public void testVFSProxyPollInterval_30()
             throws Exception {
 
         addVFSProxy6();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(1000);
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(1000);
 
-        Assert.assertTrue(!outfile.exists());
+            Assert.assertTrue(!outfile.exists());
 
-        Thread.sleep(31000);
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy6");
+            Thread.sleep(31000);
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy6");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1, transport.vfs.ActionAfterProcess=MOVE")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport :" +
+                                               " transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt, " +
+                                               "transport.PollInterval=1, transport.vfs.ActionAfterProcess=MOVE")
     public void testVFSProxyActionAfterProcess_Move()
             throws Exception {
 
         addVFSProxy7();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "original" + File.separator + "test.txt");
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
 
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "original" + File.separator + "test.txt");
-
-        Assert.assertTrue(originalFile.exists());
-        String vfsOriginal = FileUtils.readFileToString(originalFile);
-        Assert.assertTrue(vfsOriginal.contains("andun@wso2.com"));
-
-        bfile.delete();
-        outfile.delete();
-        originalFile.delete();
-        removeProxy("VFSProxy7");
+            Assert.assertTrue(originalFile.exists());
+            String vfsOriginal = FileUtils.readFileToString(originalFile);
+            Assert.assertTrue(vfsOriginal.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            removeProxy("VFSProxy7");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1, transport.vfs.ActionAfterProcess=DELETE")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1, " +
+                                               "transport.vfs.ActionAfterProcess=DELETE")
     public void testVFSProxyActionAfterProcess_DELETE()
             throws Exception {
 
         addVFSProxy8();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "original" + File.separator + "test.txt");
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
 
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "original" + File.separator + "test.txt");
-
-        Assert.assertTrue(!originalFile.exists());
-        Assert.assertTrue(!bfile.exists());
-
-        bfile.delete();
-        outfile.delete();
-        originalFile.delete();
-        removeProxy("VFSProxy8");
+            Assert.assertTrue(!originalFile.exists());
+            Assert.assertTrue(!targetFile.exists());
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            removeProxy("VFSProxy8");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1, transport.vfs.ReplyFileName = out.txt ")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt, " +
+                                               "transport.PollInterval=1," +
+                                               " transport.vfs.ReplyFileName = out.txt ")
     public void testVFSProxyReplyFileName_Normal()
             throws Exception {
 
         addVFSProxy9();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy9");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy9");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1, transport.vfs.ReplyFileName = out123@wso2_text.txt ")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt, " +
+                                               "transport.PollInterval=1, " +
+                                               "transport.vfs.ReplyFileName = out123@wso2_text.txt ")
     public void testVFSProxyReplyFileName_SpecialChars()
             throws Exception {
 
         addVFSProxy10();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out123@wso2_text.txt");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out123@wso2_text.txt");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy10");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = /home/someuser/somedir transport.vfs.ContentType = text/plain, transport.vfs.FileNamePattern = - *\\.txt, transport.PollInterval=1, transport.vfs.ReplyFileName = not specified ")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = /home/someuser/somedir " +
+                                               "transport.vfs.ContentType = text/plain, " +
+                                               "transport.vfs.FileNamePattern = - *\\.txt, " +
+                                               "transport.PollInterval=1, " +
+                                               "transport.vfs.ReplyFileName = not specified ")
     public void testVFSProxyReplyFileName_NotSpecified()
             throws Exception {
 
         addVFSProxy11();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.txt").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.txt");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.txt");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.txt");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "response.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "response.xml");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-
-        bfile.delete();
-        outfile.delete();
-        removeProxy("VFSProxy11");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy11");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.ActionAfterFailure=MOVE")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.ActionAfterFailure=MOVE")
     public void testVFSProxyActionAfterFailure_MOVE()
             throws Exception {
 
         addVFSProxy12();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "fail.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "fail.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "failure" + File.separator + "fail.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
+            Assert.assertTrue(!outfile.exists());
 
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
-
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator + "fail.xml");
-        Assert.assertTrue(originalFile.exists());
-        String vfsOut = FileUtils.readFileToString(originalFile);
-        Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
-
-        originalFile.delete();
-        bfile.delete();
-        removeProxy("VFSProxy12");
+            Assert.assertTrue(originalFile.exists());
+            String vfsOut = FileUtils.readFileToString(originalFile);
+            Assert.assertTrue(vfsOut.contains("andun@wso2.com"));
+            Assert.assertFalse(new File(pathToVfsDir + "test" + File.separator + "in" + File.separator +
+                                        "fail.xml.lock").exists(), "lock file exists even after moving the failed file");
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            removeProxy("VFSProxy12");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.ActionAfterFailure=DELETE")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.ActionAfterFailure=DELETE")
     public void testVFSProxyActionAfterFailure_DELETE()
             throws Exception {
 
         addVFSProxy13();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "fail.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "fail.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "fail.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
+            File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+            Assert.assertTrue(!outfile.exists());
 
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
+            File originalFile = new File(pathToVfsDir + "test" + File.separator + "failure" + File.separator + "fail.xml");
 
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator + "fail.xml");
-
-        Assert.assertTrue(!originalFile.exists());
-
-        bfile.delete();
-        removeProxy("VFSProxy13");
+            Assert.assertTrue(!originalFile.exists());
+            Assert.assertFalse(new File(pathToVfsDir + "test" + File.separator + "in" + File.separator +
+                                        "fail.xml.lock").exists(), "lock file exists even after moving the failed file");
+        } finally {
+            deleteFile(targetFile);
+            removeProxy("VFSProxy13");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.ActionAfterFailure=NotSpecified")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport :" +
+                                               " transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.ActionAfterFailure=NotSpecified")
     public void testVFSProxyActionAfterFailure_NotSpecified()
             throws Exception {
 
         addVFSProxy14();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "fail.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "fail.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "failure" + File.separator + "fail.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
-
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator + "fail.xml");
-
-        Assert.assertTrue(!originalFile.exists());
-
-        bfile.delete();
-        removeProxy("VFSProxy14");
+            Assert.assertTrue(!outfile.exists());
+            Assert.assertTrue(!originalFile.exists());
+            Assert.assertFalse(new File(pathToVfsDir + "test" + File.separator + "in" + File.separator +
+                                        "fail.xml.lock").exists(), "lock file exists even after moving the failed file");
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            removeProxy("VFSProxy14");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Invalid, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Invalid, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml")
     public void testVFSProxyFileURI_Invalid()
             throws Exception {
 
@@ -411,216 +505,279 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         Thread.sleep(2000);
 
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
         Assert.assertTrue(!outfile.exists());
 
         removeProxy("VFSProxy15");
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = Invalid, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.FileURI = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = Invalid, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.FileURI = Invalid")
     public void testVFSProxyContentType_Invalid()
             throws Exception {
 
         addVFSProxy16();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("WSO2 Company"));
-
-        outfile.delete();
-        bfile.delete();
-        removeProxy("VFSProxy16");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("WSO2 Company"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy16");
+        }
     }
 
+    //https://wso2.org/jira/browse/ESBJAVA-2273
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = Not Specified, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.FileURI = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = Not Specified, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.FileURI = Invalid", enabled = false)
     public void testVFSProxyContentType_NotSpecified()
             throws Exception {
 
         addVFSProxy17();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
-
-        bfile.delete();
-        removeProxy("VFSProxy17");
+            Assert.assertTrue(!outfile.exists());
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy17");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.PollInterval = Non Integer")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.PollInterval = Non Integer")
     public void testVFSProxyPollInterval_NonInteger()
             throws Exception {
 
         addVFSProxy18();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
+            //The poll interval will be set to 300s here,
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-        //The poll interval will be set to 300s here,
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
-
-        bfile.delete();
-        removeProxy("VFSProxy18");
+            Assert.assertTrue(!outfile.exists());
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy18");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.ActionAfterProcess = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.ActionAfterProcess = Invalid")
     public void testVFSProxyActionAfterProcess_Invalid()
             throws Exception {
 
         addVFSProxy19();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "original" + File.separator + "test.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("WSO2 Company"));
 
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("WSO2 Company"));
-
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "original" + File.separator + "test.xml");
-        Assert.assertTrue(!originalFile.exists());
-        Assert.assertTrue(!bfile.exists());
-
-        outfile.delete();
-        removeProxy("VFSProxy19");
+            Assert.assertTrue(!originalFile.exists());
+            Assert.assertTrue(!targetFile.exists());
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            removeProxy("VFSProxy19");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.ActionAfterFailure = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport :" +
+                                               " transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.ActionAfterFailure = Invalid")
     public void testVFSProxyActionAfterFailure_Invalid()
             throws Exception {
 
         addVFSProxy20();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "fail.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "fail.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "failure" + File.separator + "fail.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
-
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator + "fail.xml");
-        Assert.assertTrue(!originalFile.exists());
-        Assert.assertTrue(!bfile.exists());
-
-        removeProxy("VFSProxy20");
+            Assert.assertTrue(!outfile.exists());
+            Assert.assertTrue(!originalFile.exists());
+            Assert.assertTrue(!targetFile.exists());
+            Assert.assertFalse(new File(pathToVfsDir + "test" + File.separator + "in" + File.separator +
+                                        "fail.xml.lock").exists(), "lock file exists even after moving the failed file");
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            removeProxy("VFSProxy20");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.MoveAfterProcess = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path," +
+                                               " transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.MoveAfterProcess = Invalid")
     public void testVFSProxyMoveAfterProcess_Invalid()
             throws Exception {
 
         addVFSProxy21();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "invalid" + File.separator + "test.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("WSO2 Company"));
-
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "invalid" + File.separator + "test.xml");
-        Assert.assertTrue(!originalFile.exists());
-        Assert.assertTrue(bfile.exists());
-
-        outfile.delete();
-        bfile.delete();
-        removeProxy("VFSProxy21");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("WSO2 Company"));
+            Assert.assertTrue(!originalFile.exists());
+            Assert.assertTrue(targetFile.exists());
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            removeProxy("VFSProxy21");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml transport.vfs.MoveAfterFailure = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml " +
+                                               "transport.vfs.MoveAfterFailure = Invalid")
     public void testVFSProxyMoveAfterFailure_Invalid()
             throws Exception {
 
         addVFSProxy22();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "fail.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File sourceFile = new File(pathToVfsDir + "fail.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "fail.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        File originalFile = new File(pathToVfsDir + "test" + File.separator + "invalid" + File.separator + "fail.xml");
+        File lockFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator +
+                                 "fail.xml.lock");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
-
-        File originalFile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "invalid" + File.separator + "fail.xml");
-        Assert.assertTrue(!originalFile.exists());
-        Assert.assertTrue(bfile.exists());
-
-        bfile.delete();
-        removeProxy("VFSProxy22");
+            Assert.assertTrue(!outfile.exists());
+            Assert.assertTrue(!originalFile.exists());
+            Assert.assertTrue(targetFile.exists());
+            //reason - https://wso2.org/jira/browse/ESBJAVA-1838
+            Assert.assertTrue(lockFile.exists(), "lock file doesn't exists");
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            deleteFile(originalFile);
+            deleteFile(lockFile);
+            removeProxy("VFSProxy22");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml, transport.vfs.ReplyFileURI  = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : " +
+                                               "transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml, " +
+                                               "transport.vfs.ReplyFileURI  = Invalid")
     public void testVFSProxyReplyFileURI_Invalid()
             throws Exception {
 
         addVFSProxy23();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "invalid" + File.separator + "out.xml");
+        deleteFile(outfile); //delete outfile dir if exists
+        FileUtils.cleanDirectory(new File(pathToVfsDir + "test" + File.separator + "in"));
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(4000);
 
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "invalid" + File.separator + "out.xml");
-        Assert.assertTrue(outfile.exists());
-        String vfsOut = FileUtils.readFileToString(outfile);
-        Assert.assertTrue(vfsOut.contains("WSO2 Company"));
-
-        bfile.delete();
-        removeProxy("VFSProxy23");
+            Assert.assertTrue(outfile.exists());
+            String vfsOut = FileUtils.readFileToString(outfile);
+            Assert.assertTrue(vfsOut.contains("WSO2 Company"));
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy23");
+        }
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
-    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport : transport.vfs.FileURI = Linux Path, transport.vfs.ContentType = text/xml, transport.vfs.FileNamePattern = - *\\.xml, transport.vfs.ReplyFileName  = Invalid")
+    @Test(groups = {"wso2.esb"}, description = "Sending a file through VFS Transport :" +
+                                               " transport.vfs.FileURI = Linux Path, " +
+                                               "transport.vfs.ContentType = text/xml, " +
+                                               "transport.vfs.FileNamePattern = - *\\.xml, " +
+                                               "transport.vfs.ReplyFileName  = Invalid")
     public void testVFSProxyReplyFileName_Invalid()
             throws Exception {
 
         addVFSProxy24();
 
-        File afile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator + "test.xml").getPath());
-        File bfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "test.xml");
-
-        FileUtils.copyFile(afile, bfile);
-        Thread.sleep(2000);
-
-        File outfile = new File(getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml");
-        Assert.assertTrue(!outfile.exists());
-
-        bfile.delete();
-        removeProxy("VFSProxy24");
+        File sourceFile = new File(pathToVfsDir + File.separator + "test.xml");
+        File targetFile = new File(pathToVfsDir + "test" + File.separator + "in" + File.separator + "test.xml");
+        File outfile = new File(pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml");
+        try {
+            FileUtils.copyFile(sourceFile, targetFile);
+            Thread.sleep(2000);
+            Assert.assertTrue(!outfile.exists());
+        } finally {
+            deleteFile(targetFile);
+            deleteFile(outfile);
+            removeProxy("VFSProxy24");
+        }
     }
 
     private void addVFSProxy1()
@@ -628,7 +785,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy1\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -637,10 +794,11 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <address format=\"soap12\" uri=\"http://localhost:9000/services/SimpleStockQuoteService\"/>\n" +
                                              "                        </endpoint>\n" +
                                              "                        <outSequence>\n" +
+                                             "                           <log level=\"full\"/>\n" +
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -653,7 +811,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy2\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -663,7 +821,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -676,7 +834,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy3\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.*</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -686,7 +844,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -699,7 +857,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy4\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\"></parameter>" +
@@ -709,7 +867,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -722,7 +880,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy5\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -732,7 +890,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -745,7 +903,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy6\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">30</parameter>\n" +
@@ -755,7 +913,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -763,25 +921,24 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "        </proxy>"));
     }
 
-
     private void addVFSProxy7()
             throws Exception {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy7\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.ActionAfterProcess\">MOVE</parameter>\n" +
-                                             "                <parameter name=\"transport.vfs.MoveAfterProcess\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "original" + File.separator + "</parameter>" +
+                                             "                <parameter name=\"transport.vfs.MoveAfterProcess\">file://" + pathToVfsDir + "test" + File.separator + "original" + File.separator + "</parameter>" +
                                              "                <target>\n" +
                                              "                        <inSequence>\n" +
                                              "                           <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -794,7 +951,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy8\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -805,7 +962,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.txt\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -818,7 +975,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy9\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -829,7 +986,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -842,7 +999,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy10\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -853,7 +1010,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -866,7 +1023,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy11\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/plain</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*.txt</parameter>" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -876,7 +1033,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                           <log level=\"full\"/>\n" +
                                              "                           <send>\n" +
                                              "                               <endpoint name=\"FileEpr\">\n" +
-                                             "                                   <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "\"/>\n" +
+                                             "                                   <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "\"/>\n" +
                                              "                               </endpoint>\n" +
                                              "                           </send>" +
                                              "                        </inSequence>" +
@@ -889,11 +1046,11 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy12\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
-                                             "                <parameter name=\"transport.vfs.MoveAfterFailure\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator + "</parameter>\n" +
+                                             "                <parameter name=\"transport.vfs.MoveAfterFailure\">file://" + pathToVfsDir + "test" + File.separator + "failure" + File.separator + "</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.ActionAfterFailure\">MOVE</parameter>" +
                                              "                <target>\n" +
                                              "                        <endpoint>\n" +
@@ -903,7 +1060,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -916,7 +1073,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy13\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -929,7 +1086,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -942,7 +1099,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy14\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -954,7 +1111,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -967,7 +1124,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy15\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "invalid" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "invalid" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -979,7 +1136,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -992,7 +1149,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy16\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">invalid/invalid</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -1001,10 +1158,11 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <address format=\"soap12\" uri=\"http://localhost:9000/services/SimpleStockQuoteService\"/>\n" +
                                              "                        </endpoint>\n" +
                                              "                        <outSequence>\n" +
+                                             "                                <log level=\"full\"/>" +
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1012,13 +1170,12 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "        </proxy>"));
     }
 
-
     private void addVFSProxy17()
             throws Exception {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy17\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
                                              "                <target>\n" +
@@ -1029,7 +1186,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1042,7 +1199,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy18\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1.1</parameter>\n" +
@@ -1054,7 +1211,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1067,21 +1224,22 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy19\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.ActionAfterProcess\">MOVEDD</parameter>\n" +
-                                             "                <parameter name=\"transport.vfs.MoveAfterProcess\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "original" + File.separator + "</parameter>" +
+                                             "                <parameter name=\"transport.vfs.MoveAfterProcess\">file://" + pathToVfsDir + "test" + File.separator + "original" + File.separator + "</parameter>" +
                                              "                <target>\n" +
                                              "                        <endpoint>\n" +
                                              "                                <address format=\"soap12\" uri=\"http://localhost:9000/services/SimpleStockQuoteService\"/>\n" +
                                              "                        </endpoint>\n" +
                                              "                        <outSequence>\n" +
+                                             "                        <log level=\"full\"/>" +
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1094,11 +1252,11 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy20\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
-                                             "                <parameter name=\"transport.vfs.MoveAfterFailure\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "failure" + File.separator + "</parameter>\n" +
+                                             "                <parameter name=\"transport.vfs.MoveAfterFailure\">file://" + pathToVfsDir + "test" + File.separator + "failure" + File.separator + "</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.ActionAfterFailure\">MOVEDD</parameter>" +
                                              "                <target>\n" +
                                              "                        <endpoint>\n" +
@@ -1108,7 +1266,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1121,21 +1279,22 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy21\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.ActionAfterProcess\">MOVE</parameter>\n" +
-                                             "                <parameter name=\"transport.vfs.MoveAfterProcess\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "invalid" + File.separator + "</parameter>" +
+                                             "                <parameter name=\"transport.vfs.MoveAfterProcess\">file://" + pathToVfsDir + "test" + File.separator + "invalid" + File.separator + "</parameter>" +
                                              "                <target>\n" +
                                              "                        <endpoint>\n" +
                                              "                                <address format=\"soap12\" uri=\"http://localhost:9000/services/SimpleStockQuoteService\"/>\n" +
                                              "                        </endpoint>\n" +
                                              "                        <outSequence>\n" +
+                                             "                        <log level=\"full\"/>" +
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1148,11 +1307,11 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy22\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
-                                             "                <parameter name=\"transport.vfs.MoveAfterFailure\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "invalid" + File.separator + "</parameter>\n" +
+                                             "                <parameter name=\"transport.vfs.MoveAfterFailure\">file://" + pathToVfsDir + "test" + File.separator + "invalid" + File.separator + "</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.ActionAfterFailure\">MOVE</parameter>" +
                                              "                <target>\n" +
                                              "                        <endpoint>\n" +
@@ -1162,7 +1321,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1175,7 +1334,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy23\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -1185,23 +1344,44 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                        </endpoint>\n" +
                                              "                        <outSequence>\n" +
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
+                                             "                                 <log level=\"full\"/>" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "invalid" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:file://" + pathToVfsDir + "test" + File.separator + "invalid" + File.separator + "out.xml\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
                                              "                </target>\n" +
                                              "        </proxy>"));
-    }
 
+        System.out.println("\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n\" +\n" +
+                           "                                             \"<proxy xmlns=\\\"http://ws.apache.org/ns/synapse\\\" name=\\\"VFSProxy23\\\" transports=\\\"vfs\\\">\\n\" +\n" +
+                           "                                             \"                <parameter name=\\\"transport.vfs.FileURI\\\">file://\" + getClass().getResource(File.separator + \"artifacts\" + File.separator + \"ESB\" + File.separator + \"synapseconfig\" + File.separator + \"vfsTransport\" + File.separator).getPath() + \"test\" + File.separator + \"in\" + File.separator + \"</parameter> <!--CHANGE-->\\n\" +\n" +
+                           "                                             \"                <parameter name=\\\"transport.vfs.ContentType\\\">text/xml</parameter>\\n\" +\n" +
+                           "                                             \"                <parameter name=\\\"transport.vfs.FileNamePattern\\\">.*\\\\.xml</parameter>\\n\" +\n" +
+                           "                                             \"                <parameter name=\\\"transport.PollInterval\\\">1</parameter>\\n\" +\n" +
+                           "                                             \"                <target>\\n\" +\n" +
+                           "                                             \"                        <endpoint>\\n\" +\n" +
+                           "                                             \"                                <address format=\\\"soap12\\\" uri=\\\"http://localhost:9000/services/SimpleStockQuoteService\\\"/>\\n\" +\n" +
+                           "                                             \"                        </endpoint>\\n\" +\n" +
+                           "                                             \"                        <outSequence>\\n\" +\n" +
+                           "                                             \"                                <property action=\\\"set\\\" name=\\\"OUT_ONLY\\\" value=\\\"true\\\"/>\\n\" +\n" +
+                           "                                             \"                                <send>\\n\" +\n" +
+                           "                                             \"                                        <endpoint>\\n\" +\n" +
+                           "                                             \"                                                <address uri=\\\"vfs:file://\" + getClass().getResource(File.separator + \"artifacts\" + File.separator + \"ESB\" + File.separator + \"synapseconfig\" + File.separator + \"vfsTransport\" + File.separator).getPath() + \"test\" + File.separator + \"invalid\" + File.separator + \"out.xml\\\"/> <!--CHANGE-->\\n\" +\n" +
+                           "                                             \"                                        </endpoint>\\n\" +\n" +
+                           "                                             \"                                </send>\\n\" +\n" +
+                           "                                             \"                        </outSequence>\\n\" +\n" +
+                           "                                             \"                </target>\\n\" +\n" +
+                           "                                             \"        </proxy>\")");
+    }
 
     private void addVFSProxy24()
             throws Exception {
 
         addProxyService(AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                              "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"VFSProxy24\" transports=\"vfs\">\n" +
-                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
+                                             "                <parameter name=\"transport.vfs.FileURI\">file://" + pathToVfsDir + "test" + File.separator + "in" + File.separator + "</parameter> <!--CHANGE-->\n" +
                                              "                <parameter name=\"transport.vfs.ContentType\">text/xml</parameter>\n" +
                                              "                <parameter name=\"transport.vfs.FileNamePattern\">.*\\.xml</parameter>\n" +
                                              "                <parameter name=\"transport.PollInterval\">1</parameter>\n" +
@@ -1214,7 +1394,7 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
                                              "                                <property action=\"set\" name=\"OUT_ONLY\" value=\"true\"/>\n" +
                                              "                                <send>\n" +
                                              "                                        <endpoint>\n" +
-                                             "                                                <address uri=\"vfs:ftpd://" + getClass().getResource(File.separator + "artifacts" + File.separator + "ESB" + File.separator + "synapseconfig" + File.separator + "vfsTransport" + File.separator).getPath() + "test" + File.separator + "out" + File.separator + "\"/> <!--CHANGE-->\n" +
+                                             "                                                <address uri=\"vfs:ftpd://" + pathToVfsDir + "test" + File.separator + "out" + File.separator + "\"/> <!--CHANGE-->\n" +
                                              "                                        </endpoint>\n" +
                                              "                                </send>\n" +
                                              "                        </outSequence>\n" +
@@ -1224,6 +1404,10 @@ public class VFSTransportTestCase extends ESBIntegrationTest {
 
     private void removeProxy(String proxyName) throws Exception {
         deleteProxyService(proxyName);
+    }
+
+    private boolean deleteFile(File file) throws IOException {
+        return file.exists() && file.delete();
     }
 }
 
