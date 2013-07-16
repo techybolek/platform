@@ -60,7 +60,6 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector{
 			GeoQuery query = new GeoQuery(new GeoLocation(Double.parseDouble(latitude), Double.parseDouble(longitude)));
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
-			SOAPBody soapBody = messageContext.getEnvelope().getBody();
 			if(log.isDebugEnabled()){
 				log.info("executing prparing soap envolope"+element.toString());
 			}
