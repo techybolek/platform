@@ -23,7 +23,66 @@
             </outSequence>
         </target>
     </proxy>
-
+    <proxy name="deleteEPProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property name="uri.var.port" value="9009"/>
+                <property name="uri.var.servicePath" value="services"/>
+                <property name="uri.var.serviceName" value="StudentService"/>
+                <send>
+                    <endpoint key="DELETEEndpoint"/>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="putEPProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property name="uri.var.port" value="9009"/>
+                <property name="uri.var.servicePath" value="services"/>
+                <property name="uri.var.serviceName" value="StudentService"/>
+                <send>
+                    <endpoint key="PUTEndpoint"/>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="getEPProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property name="uri.var.port" value="9009"/>
+                <property name="uri.var.servicePath" value="services"/>
+                <property name="uri.var.serviceName" value="StudentService"/>
+                <send>
+                    <endpoint key="GETEndpoint"/>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
     <proxy name="missingVariableEndPoint"
            transports="https http"
            startOnLoad="true"
@@ -44,12 +103,33 @@
             </outSequence>
         </target>
     </proxy>
-
-    <proxy name="invalidHttpEndPoint" transports="http,https">
+    <proxy name="postEPProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property name="uri.var.port" value="9009"/>
+                <property name="uri.var.servicePath" value="services"/>
+                <property name="uri.var.serviceName" value="StudentService"/>
+                <send>
+                    <endpoint key="POSTEndpoint"/>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <proxy name="invalidHttpEndPoint"
+           transports="http https"
+           startOnLoad="true">
         <target>
             <inSequence>
                 <send>
-                    <endpoint key="InvalidEndpoint" />
+                    <endpoint key="InvalidEndpoint"/>
                 </send>
             </inSequence>
             <outSequence>
@@ -57,14 +137,52 @@
             </outSequence>
         </target>
     </proxy>
-
+    <proxy name="headEPProxy"
+           transports="https http"
+           startOnLoad="true"
+           trace="disable">
+        <description/>
+        <target>
+            <inSequence>
+                <property name="uri.var.port" value="9009"/>
+                <property name="uri.var.servicePath" value="services"/>
+                <property name="uri.var.serviceName" value="StudentService"/>
+                <send>
+                    <endpoint key="HEADEndpoint"/>
+                </send>
+            </inSequence>
+            <outSequence>
+                <log level="full"/>
+                <send/>
+            </outSequence>
+        </target>
+    </proxy>
+    <endpoint name="DELETEEndpoint">
+        <http method="delete"
+              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
+    </endpoint>
+    <endpoint name="HTTPEndpoint">
+        <http method="POST"
+              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
+    </endpoint>
+    <endpoint name="POSTEndpoint">
+        <http method="post"
+              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
+    </endpoint>
     <endpoint name="InvalidEndpoint">
         <http method="POST"
               uri-template="http://localhost:9010/services/SimpleStockQuoteService"/>
     </endpoint>
-
-    <endpoint name="HTTPEndpoint">
-        <http method="POST"
+    <endpoint name="GETEndpoint">
+        <http method="get"
+              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
+    </endpoint>
+    <endpoint name="PUTEndpoint">
+        <http method="put"
+              uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
+    </endpoint>
+    <endpoint name="HEADEndpoint">
+        <http method="head"
               uri-template="http://localhost:{uri.var.port}/{uri.var.servicePath}/{uri.var.serviceName}"/>
     </endpoint>
     <sequence name="fault">
