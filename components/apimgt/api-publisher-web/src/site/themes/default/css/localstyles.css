@@ -5,6 +5,7 @@ body{
     font-size: 13px;
     line-height: 18px;
     margin: 0;
+    min-width: 980px;
 }
 label, input, button, select, textarea{
     font-size: 13px;
@@ -311,6 +312,7 @@ a.powered-by-logo {
 .appSpecialCell{
     width:150px;
 }
+/*
 @media all and (max-width: 850px) {
     #left{
         display:block;
@@ -336,6 +338,7 @@ a.powered-by-logo {
         padding:0 9px;
     }
 }
+*/
 .login-container{
     margin-top:20px;
 }

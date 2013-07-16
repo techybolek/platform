@@ -798,7 +798,7 @@
     width: 28px;
   }
 }
-
+/*
 @media (max-width: 767px) {
   body {
     padding-right: 20px;
@@ -896,7 +896,8 @@
     top: 20px;
   }
 }
-
+*/
+/*
 @media (max-width: 480px) {
   .nav-collapse {
     -webkit-transform: translate3d(0, 0, 0);
@@ -948,7 +949,7 @@
     position: static;
   }
 }
-
+*/
 @media (max-width: 979px) {
   body {
     padding-top: 0;
