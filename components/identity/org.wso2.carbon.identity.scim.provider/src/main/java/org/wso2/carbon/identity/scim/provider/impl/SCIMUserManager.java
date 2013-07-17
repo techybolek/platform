@@ -727,16 +727,16 @@ public class SCIMUserManager implements UserManager {
             }
         } catch (UserStoreException e) {
             throw new CharonException("Error in getting user information from Carbon User Store for " +
-                                      "user: " + userName);
+                                      "user: " + userName, e);
         } catch (CharonException e) {
             throw new CharonException("Error in getting user information from Carbon User Store for " +
-                                      "user: " + userName);
+                                      "user: " + userName, e);
         } catch (NotFoundException e) {
             throw new CharonException("Error in getting user information from Carbon User Store for " +
-                                      "user: " + userName);
+                                      "user: " + userName, e);
         } catch (IdentitySCIMException e) {
             throw new CharonException("Error in getting group information from Identity DB for " +
-                                      "user: " + userName);
+                                      "user: " + userName, e);
         }
         return scimUser;
     }
