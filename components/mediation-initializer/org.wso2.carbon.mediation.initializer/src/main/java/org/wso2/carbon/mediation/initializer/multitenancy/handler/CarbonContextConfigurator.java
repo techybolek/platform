@@ -34,11 +34,10 @@ public class CarbonContextConfigurator extends AbstractHandler {
             EndpointReference epr = messageContext.getTo();
             if (epr != null) {
                 String to = epr.getAddress();
-                if (to != null && to.indexOf("/t/") != -1) {
+                if (to != null && to.indexOf("/" + MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/") != -1) {
                     String str1 = to.substring(to.indexOf("/t/") + 3);
                     String domain = str1.substring(0, str1.indexOf("/"));
-                    cc.setTenantDomain(domain);
-                    //cc.setTenantId(1231312); need to figureout how to do it
+                    cc.setTenantDomain(domain, true);
                 } else {
                     cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                     cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
