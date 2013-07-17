@@ -142,13 +142,13 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
             PrivilegedCarbonContext.endTenantFlow();
         }
 
-        if (value.getAccessKey() == null) {
+        if (value == null) {
             if (log.isDebugEnabled()) {
                 log.debug("The key is not present in the cache...");
                 log.debug("Credentials for Username : " + username + " retrieved from cache");
             }
         }
-        if (keyAccess != null && keyAccess.equals(value.getAccessKey())) {
+        if (keyAccess != null && value != null && keyAccess.equals(value.getAccessKey())) {
             return true;
         }
         return false;
