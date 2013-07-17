@@ -37,6 +37,8 @@ import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.ws.client.resource.OnDemandContentCollectionImpl;
 import org.wso2.carbon.registry.ws.client.resource.OnDemandContentResourceImpl;
 import org.wso2.carbon.registry.ws.stub.WSRegistryServiceStub;
@@ -501,7 +503,14 @@ public class WSRegistryServiceClient implements Registry {
 	}
 	public Tag[] getTags(String resourcePath) throws RegistryException {
 		try {
-            WSTag[] wsTags = stub.wSgetTags(resourcePath);
+            WSTag[] wsTags;
+            if(PaginationContext.getInstance() == null){
+                wsTags = stub.wSgetTags(resourcePath);
+            }else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                wsTags = stub.wSgetTags(resourcePath);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            }
             if(null == wsTags) {
                 return new Tag[0];
             }
@@ -514,8 +523,10 @@ public class WSRegistryServiceClient implements Registry {
 			String msg = "Failed to perform getTags operation.";
 			log.error(msg, e);
 			throw new RegistryException(msg, e);
-		}
-	}
+		}finally {
+            PaginationContext.destroy();
+        }
+    }
 	public  void removeTag(String path,String tag) throws RegistryException {
 		try {
 			stub.removeTag(path,tag);
@@ -546,7 +557,14 @@ public class WSRegistryServiceClient implements Registry {
 	}
 	public  Comment[] getComments(String resourcePath) throws RegistryException {
 		try {
-			WSComment[] wsComment =  stub.wSgetComments(resourcePath);
+            WSComment[] wsComment;
+            if(PaginationContext.getInstance() == null){
+                wsComment =  stub.wSgetComments(resourcePath);
+            }else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                wsComment =  stub.wSgetComments(resourcePath);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            }
             if(null == wsComment) {
                 return  new Comment[0];
             }
@@ -617,8 +635,18 @@ public class WSRegistryServiceClient implements Registry {
 	                          Date to,
 	                          boolean recentFirst) throws RegistryException {
 		try {
-            WSLogEntry[] wsLogEntries = stub.wSgetLogs(resourcePath, action, userName, from, to,
-                    recentFirst);
+            WSLogEntry[] wsLogEntries;
+
+            if(PaginationContext.getInstance() == null){
+                 wsLogEntries = stub.wSgetLogs(resourcePath, action, userName, from, to,
+                        recentFirst);
+
+            }else {
+                PaginationUtils.copyPaginationContext(stub._getServiceClient());
+                wsLogEntries = stub.wSgetLogs(resourcePath, action, userName, from, to,
+                        recentFirst);
+                int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            }
             if(null == wsLogEntries) {
                 return  new LogEntry[0];
             }
