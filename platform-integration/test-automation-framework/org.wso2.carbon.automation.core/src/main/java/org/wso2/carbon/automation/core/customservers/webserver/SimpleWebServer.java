@@ -16,7 +16,7 @@
 *under the License.
 */
 
-package org.wso2.carbon.automation.core.customservers.webserver;
+package org.wso2.carbon.automation.core.customservers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,12 +75,12 @@ public class SimpleWebServer extends Thread {
                     //(header + requested file) to the client.
 
                 } catch (Exception e) { //catch any errors, and print them
-                    log.info("\nError1:" + e.getMessage());
+                    log.info("\nError:" + e.getMessage());
                     running = false;
                 }
             }
         } catch (Exception e) {
-            log.info("\nFatal Error2:" + e.getMessage());
+            log.error("\nFatal Error:" + e.getMessage());
             running = false;
         } finally {
             try {
@@ -92,7 +92,8 @@ public class SimpleWebServer extends Thread {
         }
     }
 
-    private void httpHandler(BufferedReader input, DataOutputStream output) {
+    private void httpHandler(BufferedReader input, DataOutputStream output)
+            throws IOException, InterruptedException {
         String contentType;
         String tmp;
         try {
@@ -107,12 +108,13 @@ public class SimpleWebServer extends Thread {
 
             output.writeBytes(constructHttpHeader(expectedResponseCode, contentType));
             output.write(sampleReturnResponse.getBytes());
+        } catch (Exception e) {
+            log.error("error" + e.getMessage());
+        } finally {
             output.flush();
             Thread.sleep(1000);
             input.close();
             output.close();
-        } catch (Exception e) {
-            log.info("error" + e.getMessage());
         }
     }
 
