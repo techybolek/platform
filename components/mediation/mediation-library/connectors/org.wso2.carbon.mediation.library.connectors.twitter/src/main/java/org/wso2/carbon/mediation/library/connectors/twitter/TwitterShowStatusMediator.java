@@ -30,6 +30,7 @@ import twitter4j.TwitterException;
 public class TwitterShowStatusMediator extends AbstractConnector {
 
 	private static Log log = LogFactory.getLog(TwitterShowStatusMediator.class);
+	
 	public static final String ID = "id";
 
 	public void connect(MessageContext messageContext) throws ConnectException {
@@ -38,7 +39,6 @@ public class TwitterShowStatusMediator extends AbstractConnector {
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			Status status = twitter.showStatus(Long.parseLong(id));
 			TwitterMediatorUtils.storeResponseStatus(messageContext, status);
-			log.info("@" + status.getUser().getScreenName() + " - " + status.getText());
 		} catch (TwitterException te) {
 			log.error("Failed to show status: " + te.getMessage(), te);
 			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, te);

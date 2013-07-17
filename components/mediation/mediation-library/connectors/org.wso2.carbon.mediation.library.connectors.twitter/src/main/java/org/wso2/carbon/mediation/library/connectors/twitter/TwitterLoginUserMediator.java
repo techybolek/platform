@@ -26,12 +26,14 @@ import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
 public class TwitterLoginUserMediator extends AbstractConnector {
 
+	private static Log log = LogFactory.getLog(TwitterLoginUserMediator.class);
+	
 	public static final String CONSUMER_KEY = "oauth.consumerKey";
 	public static final String CONSUMER_SECRET = "oauth.consumerSecret";
 	public static final String ACCESS_TOKEN = "oauth.accessToken";
 	public static final String ACCESS_TOKEN_SECRET = "oauth.accessTokenSecret";
 
-	private static Log log = LogFactory.getLog(TwitterLoginUserMediator.class);
+
 
 	@Override
 	public void connect(MessageContext messageContext) throws ConnectException {
@@ -52,9 +54,6 @@ public class TwitterLoginUserMediator extends AbstractConnector {
 		} catch (Exception e) {
 			log.error("Failed to login user: " + e.getMessage(), e);
 			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, e);
-		}
-		if (log.isDebugEnabled()) {
-			log.info("testing synapse twitter.......");
 		}
 	}
 }

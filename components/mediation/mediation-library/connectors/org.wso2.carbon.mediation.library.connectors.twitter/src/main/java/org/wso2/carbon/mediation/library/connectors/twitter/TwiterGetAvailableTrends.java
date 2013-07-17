@@ -5,11 +5,7 @@ import java.util.List;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.SynapseEnvironment;
-import org.codehaus.jettison.json.JSONException;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserRealm;
 
 import twitter4j.Location;
 import twitter4j.Twitter;

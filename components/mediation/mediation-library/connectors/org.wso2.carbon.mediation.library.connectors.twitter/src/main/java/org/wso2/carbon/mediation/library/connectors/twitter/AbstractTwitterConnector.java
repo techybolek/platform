@@ -40,8 +40,6 @@ import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
 
 public abstract class AbstractTwitterConnector extends AbstractConnector {
 
-	protected Log log = LogFactory.getLog(this.getClass());
-
 	/**
 	 * Util method which converts the the json to xml string format
 	 * 

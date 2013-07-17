@@ -25,7 +25,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axiom.soap.SOAPBody;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.json.JSONException;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
@@ -39,6 +40,8 @@ import twitter4j.json.DataObjectFactory;
 
 public class TwitterSearchPlaces extends AbstractTwitterConnector {
 
+	private static Log log = LogFactory.getLog(TwitterSearchPlaces.class);
+	
 	public static final String SEARCH_BY_LATITUDE = "latitude";
 
 	public static final String SEARCH_LONGITUDE = "longitude";
@@ -99,7 +102,6 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector {
 			String json = DataObjectFactory.getRawJSON(place);
 			stringBuilder.append(json);
 			stringBuilder.append("} ");
-			// System.out.println(stringBuilder.toString());
 			OMElement element = super.parseJsonToXml(stringBuilder.toString());
 			resultElement.addChild(element);
 		}

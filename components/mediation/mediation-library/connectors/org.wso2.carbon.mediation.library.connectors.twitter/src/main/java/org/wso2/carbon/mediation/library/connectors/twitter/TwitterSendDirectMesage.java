@@ -28,11 +28,11 @@ import twitter4j.Twitter;
 
 public class TwitterSendDirectMesage extends AbstractConnector {
 
+	private static Log log = LogFactory.getLog(TwitterSendDirectMesage.class);
+	
 	public static final String USER_ID = "userID";
 	public static final String MESSAGE = "message";
 	public static final String SCREEN_NAME = "screenName";
-
-	private static Log log = LogFactory.getLog(TwitterSendDirectMesage.class);
 
 	@Override
 	public void connect(MessageContext messageContext) throws ConnectException {

@@ -25,6 +25,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.json.JSONException;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
@@ -35,12 +37,12 @@ import twitter4j.QueryResult;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
 public class TwitterSearch extends AbstractTwitterConnector {
 
+	private static Log log = LogFactory.getLog(TwitterSearch.class);
+	
 	public static final String SEARCH_STRING = "search";
 	public static final String LANG = "lang";
 	public static final String LOCALE = "locale";
@@ -159,30 +161,4 @@ public class TwitterSearch extends AbstractTwitterConnector {
 
 	}
 
-	public static void main(String ar[]) {
-		TwitterGetUserTimeLine getUserTimeLine = new TwitterGetUserTimeLine();
-		TwitterSearchPlaces search = new TwitterSearchPlaces();
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setOAuthAccessToken("1114764380-JNGKRkrUFUDCHC0WdmjDurZ3wwi9BV6ysbDRYca");
-		cb.setOAuthAccessTokenSecret("vkpELc3OWK0TM0BjYcPLCn22Wm3HRliNUyx1QSxg4JI");
-		cb.setOAuthConsumerKey("6U5CNaHKh7hVSGpk1CXo6A");
-		cb.setOAuthConsumerSecret("EvTEzc3jj9Z1Kx58ylNfkpnuXYuCeGgKhkVkziYNMs");
-		cb.setJSONStoreEnabled(true);
-		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-
-		try {
-			Query query = new Query("hotel");
-			query.setGeoCode(new GeoLocation(40.71435, -74.00597), 10, "mi");
-			QueryResult result = twitter.search(query);
-			for (Status tweet : result.getTweets()) {
-				String json = DataObjectFactory.getRawJSON(tweet);
-				System.out.println(json);
-			}
-
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
 }

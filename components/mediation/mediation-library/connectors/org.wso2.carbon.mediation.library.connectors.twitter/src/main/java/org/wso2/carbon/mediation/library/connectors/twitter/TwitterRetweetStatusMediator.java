@@ -30,8 +30,10 @@ import twitter4j.TwitterException;
 
 public class TwitterRetweetStatusMediator extends AbstractConnector {
 
-	public static final String ID = "id";
 	private static Log log = LogFactory.getLog(TwitterRetweetStatusMediator.class);
+	
+	public static final String ID = "id";
+	
 
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
@@ -48,7 +50,6 @@ public class TwitterRetweetStatusMediator extends AbstractConnector {
 			log.error("Failed to retweet status: " + te.getMessage(), te);
 			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, te);
 		}
-		log.info("testing synapse twitter.......");
 	}
 
 }

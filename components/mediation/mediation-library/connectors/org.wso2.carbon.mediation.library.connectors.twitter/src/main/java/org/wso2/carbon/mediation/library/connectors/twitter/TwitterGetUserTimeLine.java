@@ -25,6 +25,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.codehaus.jettison.json.JSONException;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
@@ -39,6 +41,8 @@ import twitter4j.json.DataObjectFactory;
 
 public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 
+	private static Log log = LogFactory.getLog(TwitterGetUserTimeLine.class);
+	
 	public static final String USER_ID = "userID";
 
 	public static final String PAGE = "page";
@@ -111,48 +115,5 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 
 	}
 
-	public static void main(String ar[]) {
-		TwitterGetUserTimeLine getUserTimeLine = new TwitterGetUserTimeLine();
-		TwitterSearchPlaces search = new TwitterSearchPlaces();
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setOAuthAccessToken("1114764380-JNGKRkrUFUDCHC0WdmjDurZ3wwi9BV6ysbDRYca");
-		cb.setOAuthAccessTokenSecret("vkpELc3OWK0TM0BjYcPLCn22Wm3HRliNUyx1QSxg4JI");
-		cb.setOAuthConsumerKey("6U5CNaHKh7hVSGpk1CXo6A");
-		cb.setOAuthConsumerSecret("EvTEzc3jj9Z1Kx58ylNfkpnuXYuCeGgKhkVkziYNMs");
-		cb.setJSONStoreEnabled(true);
-		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-
-		String userID = "15479536";
-		String page = "";
-
-		List<Status> results = null;
-		try {
-			if (!userID.isEmpty() && !page.isEmpty()) {
-				results = twitter.getUserTimeline(Long.parseLong(userID),
-						new Paging(Long.parseLong(page)));
-			} else if (!userID.isEmpty()) {
-				results = twitter.getUserTimeline(Long.parseLong(userID));
-			} else if (!page.isEmpty()) {
-				results = twitter.getUserTimeline(new Paging(Long.parseLong(page)));
-			} else {
-				results = twitter.getUserTimeline();
-			}
-			OMElement element = getUserTimeLine.performSearch(results);
-			System.out.println(element);
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
+	
 }
