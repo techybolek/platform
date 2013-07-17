@@ -31,7 +31,7 @@
     <name>WSO2 Carbon - Mediation Template Libray Connectors</name>
     <url>http://wso2.org</url>
     <modules>
-        <module>org.wso2.carbon.mediation.library.connectors.linked-in</module>
+        <!--<module>org.wso2.carbon.mediation.library.connectors.linked-in</module> -->
         <module>org.wso2.carbon.mediation.library.connectors.twitter</module>
         <module>org.wso2.carbon.mediation.library.connectors.core</module>
     </modules>
