@@ -116,12 +116,6 @@ public class ActivityBeanPopulator {
 
         try {
             List<LogEntry> logList = new LinkedList<LogEntry>();
-            //If the search criteria doesn't contains the username and if the user is not and admin user
-            //we only show the activities relevant to that user. Therefore we can internally set the username.
-            if(!list.contains(userRegistry.getUserRealm().getRealmConfiguration().getAdminRoleName()) &&
-                    userName ==null){
-               userName = userRegistry.getUserName();
-            }
             for (Integer filterValue : filterValues) {
                 logList.addAll(Arrays.asList(userRegistry.getLogs(resourcePath, filterValue,
                         userName, computeDate(fromDate), computeDate(toDate), true)));
@@ -132,7 +126,6 @@ public class ActivityBeanPopulator {
                     return o2.getDate().compareTo(o1.getDate());
                 }
             });
-            logs = getPaginatedLogs(logs);
             if (list.contains(userRegistry.getUserRealm().getRealmConfiguration().getAdminRoleName())) {
                 activityBean.setActivity(constructActivityStatements(userRegistry, logs));
             } else{
@@ -147,43 +140,6 @@ public class ActivityBeanPopulator {
             activityBean.setErrorMessage(msg);
         }
         return activityBean;
-    }
-
-    private static LogEntry[] getPaginatedLogs(LogEntry[] logEntries){
-        LogEntry[] paginatedResult;
-        MessageContext messageContext = MessageContext.getCurrentMessageContext();
-        if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
-
-            int rowCount = logEntries.length;
-            try {
-                PaginationUtils.setRowCount(messageContext, Integer.toString(rowCount));
-                PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
-
-                int start = paginationContext.getStart();
-                int count = paginationContext.getCount();
-
-                int startIndex;
-                if (start == 1) {
-                    startIndex = 0;
-                } else {
-                    startIndex = start;
-                }
-                if (rowCount < start + count) {
-                    paginatedResult = new LogEntry[rowCount - startIndex];
-                    System.arraycopy(logEntries, startIndex, paginatedResult, 0, (rowCount - startIndex));
-                } else {
-                    paginatedResult = new LogEntry[count];
-                    System.arraycopy(logEntries, startIndex, paginatedResult, 0, count);
-                }
-
-                return paginatedResult;
-
-            } finally {
-                PaginationContext.destroy();
-            }
-        } else {
-            return logEntries;
-        }
     }
 
     private static String [] constructActivityStatements(Registry registry, LogEntry[] logs) {
