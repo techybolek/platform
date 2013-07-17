@@ -234,7 +234,7 @@ public class IdentityProviderMgtUtil {
         return null;
     }
 
-    public static void updateCertToStore(String certData, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
+    public static void importCertToStore(String certData, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
         try {
 
@@ -271,7 +271,7 @@ public class IdentityProviderMgtUtil {
         }
     }
 
-    public static void importCertToStore(String certData, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
+    public static void updateCertToStore(String certData, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
         try {
 

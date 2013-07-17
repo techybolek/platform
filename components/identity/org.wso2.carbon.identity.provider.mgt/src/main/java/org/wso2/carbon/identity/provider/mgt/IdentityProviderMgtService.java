@@ -163,10 +163,12 @@ public class IdentityProviderMgtService {
 
         if(oldTrustedIdPDO.getPublicCertThumbPrint() != null &&
                 newTrustedIdPDO.getPublicCertThumbPrint() != null &&
-                !oldTrustedIdPDO.getPublicCertThumbPrint().equals(newTrustedIdPDO.getPublicCertThumbPrint()) ||
-                oldTrustedIdPDO.getPublicCertThumbPrint() != null && newTrustedIdPDO.getPublicCertThumbPrint() == null ||
-                oldTrustedIdPDO.getPublicCertThumbPrint() == null && newTrustedIdPDO.getPublicCertThumbPrint() != null){
+                !oldTrustedIdPDO.getPublicCertThumbPrint().equals(newTrustedIdPDO.getPublicCertThumbPrint())){
             IdentityProviderMgtUtil.updateCertToStore(newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
+        } else if(oldTrustedIdPDO.getPublicCertThumbPrint() == null && newTrustedIdPDO.getPublicCertThumbPrint() != null){
+            IdentityProviderMgtUtil.importCertToStore(newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
+        } else if(oldTrustedIdPDO.getPublicCertThumbPrint() != null && newTrustedIdPDO.getPublicCertThumbPrint() == null){
+            IdentityProviderMgtUtil.deleteCertFromStore(tenantId, tenantDomain);
         }
     }
 
