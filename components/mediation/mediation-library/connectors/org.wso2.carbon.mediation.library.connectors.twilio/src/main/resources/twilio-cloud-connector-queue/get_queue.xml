@@ -1,0 +1,8 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_queue">
+    <parameter name="QueueSid"/>
+    <sequence>
+        <property name="TwilioQueueSid" expression="$func:QueueSid"/>
+        <class name="org.wso2.carbon.connectors.twilio.queue.GetQueue" />
+        <property name="TwilioQueueSid" action="remove"/>
+    </sequence>
+</template>

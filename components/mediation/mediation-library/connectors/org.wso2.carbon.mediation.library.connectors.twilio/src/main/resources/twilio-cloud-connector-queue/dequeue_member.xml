@@ -1,0 +1,22 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="dequeue_member">
+    <parameter name="QueueSid"/>
+    <parameter name="CallSid"/>
+    <parameter name="Url"/>
+
+    <!--
+     All parameters are compulsory. The string 'Front' may be used as the
+     CallSid value in order to dequeue the first member on the queue.
+    -->
+
+    <sequence>
+        <property name="TwilioQueueSid" expression="$func:QueueSid"/>
+        <property name="TwilioQueuedCallSid" expression="$func:CallSid"/>
+        <property name="TwilioQueuedCallUrl" expression="$func:Url"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.queue.DequeueMember" />
+
+        <property name="TwilioQueueSid" action="remove"/>
+        <property name="TwilioQueuedCallSid" action="remove"/>
+        <property name="TwilioQueuedCallUrl" action="remove"/>
+    </sequence>
+</template>

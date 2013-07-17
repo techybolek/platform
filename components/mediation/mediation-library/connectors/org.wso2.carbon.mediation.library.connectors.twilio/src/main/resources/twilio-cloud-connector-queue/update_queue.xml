@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="update_queue">
+    <parameter name="QueueSid"/>
+    <parameter name="FriendlyName"/>
+    <parameter name="MaxSize"/>
+    <sequence>
+        <property name="TwilioQueueSid" expression="$func:QueueSid"/>
+        <property name="TwilioQueueFriendlyName" expression="$func:FriendlyName"/>
+        <property name="TwilioQueueMaxSize" expression="$func:MaxSize"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.queue.UpdateQueue" />
+
+        <property name="TwilioQueueSid" action="remove"/>
+        <property name="TwilioQueueFriendlyName" action="remove"/>
+        <property name="TwilioQueueMaxSize" action="remove"/>
+    </sequence>
+</template>

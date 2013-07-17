@@ -1,0 +1,6 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_authorized_connect-app_list">
+    <!--Mandatory parameter(s) - none. -->
+    <sequence>
+        <class name="org.wso2.carbon.connectors.twilio.application.getAuthorizedConnectAppList" />
+    </sequence>
+</template>

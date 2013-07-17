@@ -1,0 +1,10 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_application_list">
+
+    <!-- Optional filter. See http://www.twilio.com/docs/api/rest/applications#list-get-filters -->
+    <parameter name="FriendlyName"/>
+    <sequence>
+        <property name="TwilioApplicationFriendlyName" expression="$func:FriendlyName"/>
+        <class name="org.wso2.carbon.connectors.twilio.application.getApplicationList" />
+        <property name="TwilioApplicationFriendlyName" action="remove"/>
+    </sequence>
+</template>

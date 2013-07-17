@@ -1,0 +1,34 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="send_sms">
+
+    <!--Required  parameters.
+        See http://www.twilio.com/docs/api/rest/sending-sms#post-parameters-required for full specification and allowed values.
+    -->
+    <parameter name="Body"/>
+    <parameter name="To"/>
+    <parameter name="From"/>
+
+    <!--Optional parameters.
+        See http://www.twilio.com/docs/api/rest/sending-sms#post-parameters-optional for full specification and allowed values.
+    -->
+    <parameter name="StatusCallBackUrl"/>
+    <parameter name="ApplicationSid"/>
+
+    <sequence>
+
+        <property name="TwilioSMSBody" expression="$func:Body"/>
+        <property name="TwilioSMSTo" expression="$func:To"/>
+        <property name="TwilioSMSFrom" expression="$func:From"/>
+        <property name="TwilioSMSStatusCallBackUrl" expression="$func:StatusCallBackUrl"/>
+        <property name="TwilioApplicationSid" expression="$func:ApplicationSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.sms.SendSms"/>
+
+        <property name="TwilioSMSBody" action="remove"/>
+        <property name="TwilioSMSTo" action="remove"/>
+        <property name="TwilioSMSFrom" action="remove"/>
+        <property name="TwilioSMSStatusCallBackUrl" action="remove"/>
+        <property name="TwilioApplicationSid" action="remove"/>
+
+    </sequence>
+
+</template>

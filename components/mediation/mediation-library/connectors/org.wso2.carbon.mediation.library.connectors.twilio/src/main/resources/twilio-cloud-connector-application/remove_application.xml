@@ -1,0 +1,9 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="remove_application">
+    <!-- Mandatory parameter - Application SID -->
+    <parameter name="ApplicationSid"/>
+    <sequence>
+        <property name="TwilioApplicationSid" expression="$func:ApplicationSid"/>
+        <class name="org.wso2.carbon.connectors.twilio.application.RemoveApplication" />
+        <property name="TwilioApplicationSid" action="remove"/>
+    </sequence>
+</template>

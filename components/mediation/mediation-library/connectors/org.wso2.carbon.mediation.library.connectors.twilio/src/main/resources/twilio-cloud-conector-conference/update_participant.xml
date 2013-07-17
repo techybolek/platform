@@ -1,0 +1,17 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_participant">
+    <!--Compulsory-->
+    <parameter name="ConferenceSid"/>
+    <parameter name="CallSid"/>
+    <parameter name="Muted"/>
+    <sequence>
+        <property name="TwilioConferenceSid" expression="$func:ConferenceSid" />
+        <property name="TwilioCallSidOfParticipant" expression="$func:CallSid" />
+        <property name="TwilioParticipantMuted" expression="$func:Muted" />
+
+        <class name="org.wso2.carbon.connectors.twilio.conference.UpdateParticipant"/>
+
+        <property name="TwilioConferenceSid" action="remove"/>
+        <property name="TwilioCallSidOfParticipant" action="remove"/>
+        <property name="TwilioParticipantMuted" action="remove"/>
+    </sequence>
+</template>

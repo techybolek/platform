@@ -1,0 +1,15 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_transcription">
+
+    <!--Required-->
+    <parameter name="TranscriptionSid"/>
+
+    <sequence>
+        <property name="TwilioTranscriptionSid" expression="$func:TranscriptionSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.GetTranscription"/>
+
+        <property name="TwilioTranscriptionSid" action="remove"/>
+
+    </sequence>
+
+</template>

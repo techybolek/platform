@@ -1,0 +1,27 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_conference_list">
+
+    <!--Optional Parameters.
+        See http://www.twilio.com/docs/api/rest/conference#list-get-filters for full specification and allowed values.
+    -->
+    <parameter name="Status"/>
+    <parameter name="FriendlyName"/>
+    <parameter name="DateCreated"/>
+    <parameter name="DateUpdated"/>
+
+    <sequence>
+
+        <property name="TwilioStatus" expression="$func:Status"/>
+        <property name="TwilioFriendlyName" expression="$func:FriendlyName"/>
+        <property name="TwilioDateCreated" expression="$func:DateCreated"/>
+        <property name="TwilioDateUpdated" expression="$func:DateUpdated"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.conference.GetConferenceList"/>
+
+        <property name="TwilioStatus" action="remove"/>
+        <property name="TwilioFriendlyName" action="remove"/>
+        <property name="TwilioDateCreated" action="remove"/>
+        <property name="TwilioDateUpdated" action="remove"/>
+
+    </sequence>
+
+</template>

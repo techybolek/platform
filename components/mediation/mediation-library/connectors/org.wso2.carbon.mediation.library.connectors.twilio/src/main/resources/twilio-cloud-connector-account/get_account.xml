@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_account">
+
+    <!--Required-->
+    <parameter name="SubAccountSid"/>
+
+    <sequence>
+
+        <property name="TwilioSubAccountSid" expression="$func:SubAccountSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.account.GetAccount"/>
+
+        <property name="TwilioSubAccountSid" action="remove"/>
+
+    </sequence>
+
+</template>

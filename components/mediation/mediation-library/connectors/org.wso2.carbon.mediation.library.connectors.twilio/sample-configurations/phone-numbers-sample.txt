@@ -1,0 +1,111 @@
+==============================================================================================================================================
+
+1.1) Get Available Local Phone Numbers
+
+With a Simple Filter ( Area Code : CA and ends with 555)
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="ACCOUNT_SID"/>
+            <with-param name="AuthToken" value="AUTH_TOKEN"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_available_local_numbers">
+            <with-param name="Country" value="US"/>
+            <with-param name="AreaCode" value="CA"/>
+            <with-param name="Contains" value="*********555"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+
+1.2) With a advance filter (near the location defined by coordinates and withing 50 Miles )
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="ACCOUNT_SID"/>
+            <with-param name="AuthToken" value="AUTH_TOKEN"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_available_local_numbers">
+            <with-param name="NearLatLong" value="37.840699,-122.461853"/>
+            <with-param name="Distance" value="50"/>
+            <with-param name="Country" value="US"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+
+1.3) With a combined filter (near the location defined by coordinates, withing 50 Miles and ending with 555)
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="ACCOUNT_SID"/>
+            <with-param name="AuthToken" value="AUTH_TOKEN"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_available_local_numbers">
+            <with-param name="NearLatLong" value="37.840699,-122.461853"/>
+            <with-param name="Distance" value="50"/>
+            <with-param name="Contains" value="*********555"/>
+            <with-param name="Country" value="US"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+==============================================================================================================================================
+
+2) Get Available Toll Free Numbers (Filter with: AreaCode 877 which contains 55 anywhere)
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="ACCOUNT_SID"/>
+            <with-param name="AuthToken" value="AUTH_TOKEN"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_available_toll_free_numbers">
+            <with-param name="AreaCode" value="877"/>
+            <with-param name="Contains" value="55"/>
+            <with-param name="Country" value="US"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+==============================================================================================================================================
+
+3) Get Incoming phone Number allocated to the account by its Sid
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="ACCOUNT_SID"/>
+            <with-param name="AuthToken" value="AUTH_TOKEN"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_incoming_phone_number">
+            <with-param name="IncomingPhoneNumberSid" value="PHONE_NUMBER_SID"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+==============================================================================================================================================
+

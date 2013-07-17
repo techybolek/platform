@@ -1,0 +1,70 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="purchase_phone_number">
+
+    <!--
+    Exactly One of the below parameters must be provided
+    For more information see https://www.twilio.com/docs/api/rest/incoming-phone-numbers#list-post-required-parameters
+    -->
+    <parameter name="PhoneNumber"/>
+    <parameter name="AreaCode"/>
+
+    <!--Optional Parameters -->
+    <parameter name="FriendlyName"/>
+    <parameter name="VoiceUrl"/>
+    <parameter name="VoiceMethod"/>
+    <parameter name="VoiceFallbackUrl"/>
+    <parameter name="VoiceFallbackMethod"/>
+    <parameter name="StatusCallback"/>
+    <parameter name="StatusCallbackMethod"/>
+    <parameter name="VoiceCallerIdLookup"/>
+    <parameter name="VoiceApplicationSid"/>
+    <parameter name="SmsUrl"/>
+    <parameter name="SmsMethod"/>
+    <parameter name="SmsFallbackUrl"/>
+    <parameter name="SmsFallbackMethod"/>
+    <parameter name="SmsApplicationSid"/>
+    <parameter name="ApiVersion"/>
+
+    <sequence>
+
+        <property name="TwilioPhoneNumber" expression="$func:PhoneNumber" />
+        <property name="TwilioPhoneNumberAreaCode" expression="$func:AreaCode" />
+
+        <property name="TwilioPhoneNumberFriendlyName" expression="$func:FriendlyName" />
+        <property name="TwilioPhoneNumberVoiceUrl" expression="$func:VoiceUrl" />
+        <property name="TwilioPhoneNumberVoiceMethod" expression="$func:VoiceMethod" />
+        <property name="TwilioPhoneNumberVoiceFallbackUrl" expression="$func:VoiceFallbackUrl" />
+        <property name="TwilioPhoneNumberVoiceFallbackMethod" expression="$func:VoiceFallbackMethod" />
+        <property name="TwilioPhoneNumberStatusCallback" expression="$func:StatusCallback" />
+        <property name="TwilioPhoneNumberStatusCallbackMethod" expression="$func:StatusCallbackMethod" />
+        <property name="TwilioPhoneNumberVoiceCallerIdLookup" expression="$func:VoiceCallerIdLookup" />
+        <property name="TwilioPhoneNumberVoiceApplicationSid" expression="$func:VoiceApplicationSid" />
+        <property name="TwilioPhoneNumberSmsUrl" expression="$func:SmsUrl" />
+        <property name="TwilioPhoneNumberSmsMethod" expression="$func:SmsMethod" />
+        <property name="TwilioPhoneNumberSmsFallbackUrl" expression="$func:SmsFallbackUrl" />
+        <property name="TwilioPhoneNumberSmsFallbackMethod" expression="$func:SmsFallbackMethod" />
+        <property name="TwilioPhoneNumberSmsApplicationSid" expression="$func:SmsApplicationSid" />
+        <property name="TwilioPhoneNumberApiVersion" expression="$func:ApiVersion" />
+
+
+        <class name="org.wso2.carbon.connectors.twilio.phone_numbers.PurchasePhoneNumber" />
+
+        <property name="TwilioPhoneNumber" action="remove" />
+        <property name="TwilioPhoneNumberAreaCode" action="remove" />
+        <property name="TwilioPhoneNumberFriendlyName" action="remove"/>
+        <property name="TwilioPhoneNumberApiVersion" action="remove" />
+        <property name="TwilioPhoneNumberVoiceUrl" action="remove" />
+        <property name="TwilioPhoneNumberVoiceMethod" action="remove" />
+        <property name="TwilioPhoneNumberVoiceFallbackUrl" action="remove" />
+        <property name="TwilioPhoneNumberVoiceFallbackMethod" action="remove" />
+        <property name="TwilioPhoneNumberStatusCallback" action="remove" />
+        <property name="TwilioPhoneNumberStatusCallbackMethod" action="remove" />
+        <property name="TwilioPhoneNumberVoiceCallerIdLookup" action="remove" />
+        <property name="TwilioPhoneNumberVoiceApplicationSid" action="remove" />
+        <property name="TwilioPhoneNumberSmsUrl" action="remove" />
+        <property name="TwilioPhoneNumberSmsMethod" action="remove" />
+        <property name="TwilioPhoneNumberSmsFallbackUrl" action="remove" />
+        <property name="TwilioPhoneNumberSmsFallbackMethod" action="remove" />
+        <property name="TwilioPhoneNumberSmsApplicationSid" action="remove" />
+
+    </sequence>
+</template>

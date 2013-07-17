@@ -1,0 +1,39 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="update_connect_app">
+    <!-- Mandatory parameter-->
+    <parameter name="ConnectAppSid"/>
+
+    <!-- optional parameters. For more information, refer http://www.twilio.com/docs/api/rest/connect-apps#instance-post-optional-parameters -->
+    <parameter name="FriendlyName"/>
+    <parameter name="AuthorizeRedirectUrl"/>
+    <parameter name="DeauthorizeCallbackUrl"/>
+    <parameter name="DeauthorizeCallbackMethod"/>
+    <parameter name="Permissions"/>
+    <parameter name="Description"/>
+    <parameter name="CompanyName"/>
+    <parameter name="HomepageUrl"/>
+
+    <sequence>
+        <property name="TwilioConnectAppSid" expression="$func:ConnectAppSid"/>
+
+        <property name="TwilioConnectAppFriendlyName" expression="$func:FriendlyName"/>
+        <property name="TwilioConnectAppAuthorizeRedirectUrl" expression="$func:AuthorizeRedirectUrl"/>
+        <property name="TwilioConnectAppDeauthorizeCallbackUrl" expression="$func:DeauthorizeCallbackUrl"/>
+        <property name="TwilioConnectAppDeauthorizeCallbackMethod" expression="$func:DeauthorizeCallbackMethod"/>
+        <property name="TwilioConnectAppPermissions" expression="$func:Permissions"/>
+        <property name="TwilioConnectAppDescription" expression="$func:Description"/>
+        <property name="TwilioConnectAppCompanyName" expression="$func:CompanyName"/>
+        <property name="TwilioConnectAppHomepageUrl" expression="$func:HomepageUrl"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.application.updateConnectApp" />
+
+        <property name="TwilioConnectAppSid" action="remove"/>
+        <property name="TwilioConnectAppFriendlyName" action="remove"/>
+        <property name="TwilioConnectAppAuthorizeRedirectUrl" action="remove"/>
+        <property name="TwilioConnectAppDeauthorizeCallbackUrl" action="remove"/>
+        <property name="TwilioConnectAppDeauthorizeCallbackMethod" action="remove"/>
+        <property name="TwilioConnectAppPermissions" action="remove"/>
+        <property name="TwilioConnectAppDescription" action="remove"/>
+        <property name="TwilioConnectAppCompanyName" action="remove"/>
+        <property name="TwilioConnectAppHomepageUrl" action="remove"/>
+        </sequence>
+</template>

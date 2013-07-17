@@ -1,0 +1,30 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_call_list">
+
+    <!--Optional parameters.
+        See http://www.twilio.com/docs/api/rest/call#list-get-filters for full specification and allowed values.
+    -->
+    <parameter name="To"/>
+    <parameter name="From"/>
+    <parameter name="Status"/>
+    <parameter name="StartTime"/>
+    <parameter name="ParentCallSid"/>
+
+    <sequence>
+
+        <property name="TwilioCallListByTo" expression="$func:To"/>
+        <property name="TwilioCallListByFrom" expression="$func:From"/>
+        <property name="TwilioCallListByStatus" expression="$func:Status"/>
+        <property name="TwilioCallListByStartTime" expression="$func:StartTime"/>
+        <property name="TwilioCallListByParentCallSid" expression="$func:ParentCallSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.GetCallList"/>
+
+        <property name="TwilioCallListByTo" action="remove"/>
+        <property name="TwilioCallListByFrom" action="remove"/>
+        <property name="TwilioCallListByStatus" action="remove"/>
+        <property name="TwilioCallListByStartTime" action="remove"/>
+        <property name="TwilioCallListByParentCallSid" action="remove"/>
+
+    </sequence>
+
+</template>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifacts>
+	<artifact name="twilio" package="org.wso2.carbon.connectors">
+		<dependency artifact="twilio-cloud-connector-conference" />
+		<dependency artifact="twilio-cloud-connector-account" />
+		<dependency artifact="twilio-cloud-connector-application" />
+		<dependency artifact="twilio-cloud-connector-sms" />
+		<dependency artifact="twilio-cloud-connector-call" />
+		<dependency artifact="twilio-cloud-connector-sms" />
+		<dependency artifact="twilio-cloud-connector-queue" />
+		<dependency artifact="twilio-cloud-connector-phone-numbers" />
+		<description>Synapse mediation library for Twilio Connector
+		</description>
+	</artifact>
+</artifacts>

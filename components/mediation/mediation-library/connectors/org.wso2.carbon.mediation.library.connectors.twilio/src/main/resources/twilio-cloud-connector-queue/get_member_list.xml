@@ -1,0 +1,10 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_member_list">
+    <parameter name="QueueSid"/>
+
+    <!-- Use the QueueSid parameter as the key for retrieving the members in the queue.-->
+    <sequence>
+        <property name="TwilioQueueSid" expression="$func:QueueSid"/>
+        <class name="org.wso2.carbon.connectors.twilio.queue.GetMemberList" />
+        <property name="TwilioQueueSid" action="remove"/>
+    </sequence>
+</template>

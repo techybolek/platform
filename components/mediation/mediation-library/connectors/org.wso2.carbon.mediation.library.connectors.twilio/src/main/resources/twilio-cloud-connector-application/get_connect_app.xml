@@ -1,0 +1,10 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_connect_app">
+
+    <!-- Mandatory parameter - Connect App SID -->
+    <parameter name="ConnectAppSid"/>
+    <sequence>
+        <property name="TwilioConnectAppSid" expression="$func:ConnectAppSid"/>
+        <class name="org.wso2.carbon.connectors.twilio.application.getConnectApp" />
+        <property name="TwilioConnectAppSid" action="remove"/>
+    </sequence>
+</template>

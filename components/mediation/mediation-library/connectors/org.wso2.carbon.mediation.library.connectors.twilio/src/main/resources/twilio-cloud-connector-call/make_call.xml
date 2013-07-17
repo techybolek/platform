@@ -1,0 +1,63 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="make_call">
+
+    <!--Required Parameters.
+        See http://www.twilio.com/docs/api/rest/making-calls#post-parameters-required for full specification and allowed values.
+    -->
+    <parameter name="To"/>
+    <parameter name="From"/>
+
+    <!--One of the below must be provided.
+        See http://www.twilio.com/docs/api/rest/making-calls#post-parameters-required for full specification and allowed values.
+    -->
+    <parameter name="Url"/>
+    <parameter name="ApplicationSid"/>
+
+    <!--Optional parameters.
+        See http://www.twilio.com/docs/api/rest/making-calls#post-parameters-optional for full specification and allowed values.
+     -->
+    <parameter name="Method"/>
+    <parameter name="FallbackUrl"/>
+    <parameter name="FallbackMethod"/>
+    <parameter name="StatusCallback"/>
+    <parameter name="StatusCallbackMethod"/>
+    <parameter name="SendDigits"/>
+    <parameter name="IfMachine"/>
+    <parameter name="Timeout"/>
+    <parameter name="Record"/>
+
+
+    <sequence>
+
+        <property name="TwilioCallTo" expression="$func:To"/>
+        <property name="TwilioCallFrom" expression="$func:From"/>
+        <property name="TwilioCallUrl" expression="$func:Url"/>
+        <property name="ApplicationSid" expression="$func:ApplicationSid"/>
+        <property name="TwilioMethod" expression="$func:Method"/>
+        <property name="TwilioFallbackUrl" expression="$func:FallbackUrl"/>
+        <property name="TwilioFallbackMethod" expression="$func:FallbackMethod"/>
+        <property name="TwilioStatusCallback" expression="$func:StatusCallback"/>
+        <property name="TwilioStatusCallbackMethod" expression="$func:StatusCallbackMethod"/>
+        <property name="TwilioSendDigits" expression="$func:SendDigits"/>
+        <property name="TwilioIfMachine" expression="$func:IfMachine"/>
+        <property name="TwilioTimeout" expression="$func:Timeout"/>
+        <property name="TwilioRecord" expression="$func:Record"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.MakeCall"/>
+
+        <property name="TwilioCallTo" action="remove"/>
+        <property name="TwilioCallFrom" action="remove"/>
+        <property name="TwilioCallUrl" action="remove"/>
+        <property name="TwilioApplicationSid" action="remove"/>
+        <property name="TwilioMethod" action="remove"/>
+        <property name="TwilioFallbackUrl" action="remove"/>
+        <property name="TwilioFallbackMethod" action="remove"/>
+        <property name="TwilioStatusCallback" action="remove"/>
+        <property name="TwilioStatusCallbackMethod" action="remove"/>
+        <property name="TwilioSendDigits" action="remove"/>
+        <property name="TwilioIfMachine" action="remove"/>
+        <property name="TwilioTimeout" action="remove"/>
+        <property name="TwilioRecord" action="remove"/>
+
+    </sequence>
+
+</template>

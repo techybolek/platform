@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="twilio-cloud-connector-application" type="synapse/template">
+
+    <subArtifacts>
+        <!--APPLICATIONS-->
+        <artifact name="twilio.create_application">
+            <file>create_application.xml</file>
+            <description>Create a new application given a FriendlyName</description>
+        </artifact>
+        <artifact name="twilio.get_application">
+            <file>get_application.xml</file>
+            <description>Get an application</description>
+        </artifact>
+        <artifact name="twilio.get_application_list">
+            <file>get_application_list.xml</file>
+            <description>Get a list of applications bound to the account</description>
+        </artifact>
+        <artifact name="twilio.update_application">
+            <file>update_application.xml</file>
+            <description>Update the parameters of an existing application</description>
+        </artifact>
+        <artifact name="twilio.remove_application">
+            <file>remove_application.xml</file>
+            <description>Remove an application from the account</description>
+        </artifact>
+
+        <!-- CONNECT APPS -->
+        <artifact name="twilio.get_connect_app">
+            <file>get_connect_app.xml</file>
+            <description>Get a connect app from the Sid reference</description>
+        </artifact>
+        <artifact name="twilio.update_connect_app">
+            <file>update_connect_app.xml</file>
+            <description>Update a connect app from the Sid reference</description>
+        </artifact>
+        <artifact name="twilio.get_connect_app_list">
+            <file>get_connect_app_list.xml</file>
+            <description>Get a list of all connect app for the account</description>
+        </artifact>
+
+        <!-- AUTHORIZED CONNECT APPS -->
+        <artifact name="twilio.get_authorized_connect_app">
+            <file>get_authorized_connect_app.xml</file>
+            <description>Get an authorized connect app from the Sid reference</description>
+        </artifact>
+        <artifact name="twilio.get_authorized_connect_app_list">
+            <file>get_authorized_connect_app_list.xml</file>
+            <description>Get a list of authorized connect apps for the account</description>
+        </artifact>
+    </subArtifacts>
+
+</artifact>

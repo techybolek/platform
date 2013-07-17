@@ -1,0 +1,20 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_recording">
+
+    <!--Required.-->
+    <parameter name="RecordingSid"/>
+
+    <parameter name="ReturnType"/>
+
+    <sequence>
+
+        <property name="TwilioRecordingSid" expression="$func:RecordingSid"/>
+        <property name="TwilioRecordingReturnType" expression="$func:ReturnType"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.GetRecording"/>
+
+        <property name="TwilioRecordingSid" action="remove"/>
+        <property name="TwilioRecordingReturnType" action="remove"/>
+
+    </sequence>
+
+</template>

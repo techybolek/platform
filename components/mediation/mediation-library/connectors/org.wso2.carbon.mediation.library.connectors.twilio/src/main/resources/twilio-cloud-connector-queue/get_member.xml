@@ -1,0 +1,15 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_member">
+    <parameter name="QueueSid"/>
+    <parameter name="CallSid"/>
+    <!--  Both parameters are compulsory.
+    -->
+    <sequence>
+        <property name="TwilioQueueSid" expression="$func:QueueSid"/>
+        <property name="TwilioQueuedCallSid" expression="$func:CallSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.queue.GetMember" />
+
+        <property name="TwilioQueueSid" action="remove"/>
+        <property name="TwilioQueuedCallSid" action="remove"/>
+    </sequence>
+</template>

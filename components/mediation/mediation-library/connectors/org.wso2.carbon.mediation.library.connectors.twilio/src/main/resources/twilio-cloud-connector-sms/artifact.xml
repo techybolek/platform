@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="twilio-cloud-connector-sms" type="synapse/template">
+
+    <subArtifacts>
+        <!--SMS-->
+        <artifact name="twilio.send_sms">
+            <file>send_sms.xml</file>
+            <description>Send SMS</description>
+        </artifact>
+        <artifact name="twilio.get_sms">
+            <file>get_sms.xml</file>
+            <description>Returns Incoming and Outgoing SMS by Message Sid</description>
+        </artifact>
+        <artifact name="twilio.get_sms_list">
+            <file>get_sms_list.xml</file>
+            <description>Returns a list of Incoming and Outgoing SMS Records</description>
+        </artifact>
+        <artifact name="twilio.get_short_code">
+            <file>get_short_code.xml</file>
+            <description>Returns the details of a Short Code associated with your account</description>
+        </artifact>
+        <artifact name="twilio.update_short_code_properties">
+            <file>update_short_code_properties.xml</file>
+            <description>Updates the short code's properties</description>
+        </artifact>
+        <artifact name="twilio.get_short_code_list">
+            <file>get_short_code_list.xml</file>
+            <description>Returns the short codes list associated to an account</description>
+        </artifact>
+    </subArtifacts>
+
+</artifact>

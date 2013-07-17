@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="delete_recording">
+
+    <!--Required.-->
+    <parameter name="RecordingSid"/>
+
+    <sequence>
+
+        <property name="TwilioRecordingSid" expression="$func:RecordingSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.DeleteRecording"/>
+
+        <property name="TwilioRecordingSid" action="remove"/>
+
+    </sequence>
+
+</template>

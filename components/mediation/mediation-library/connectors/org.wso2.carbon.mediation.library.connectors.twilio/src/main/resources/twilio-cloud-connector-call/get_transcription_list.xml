@@ -1,0 +1,9 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_transcription_list">
+
+    <sequence>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.GetTranscriptionList"/>
+
+    </sequence>
+
+</template>

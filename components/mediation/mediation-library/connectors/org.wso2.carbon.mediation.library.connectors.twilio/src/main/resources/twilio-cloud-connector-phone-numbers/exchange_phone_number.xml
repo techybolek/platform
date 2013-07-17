@@ -1,0 +1,19 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="exchange_phone_number">
+
+    <!--Compulsory Parameters-->
+    <parameter name="PhoneNumberSid"/>
+    <parameter name="AccountSid"/>
+
+    <sequence>
+
+        <property name="TwilioPhoneNumberSid" expression="$func:IncomingPhoneNumberSid" />
+        <property name="TwilioExchangePhoneNumberToAccountSid" expression="$func:IncomingPhoneNumberSid" />
+
+        <class name="org.wso2.carbon.connectors.twilio.phone_numbers.ExchangePhoneNumber" />
+
+        <property name="TwilioPhoneNumberSid" action="remove" />
+        <property name="TwilioExchangePhoneNumberToAccountSid" action="remove" />
+
+
+    </sequence>
+</template>

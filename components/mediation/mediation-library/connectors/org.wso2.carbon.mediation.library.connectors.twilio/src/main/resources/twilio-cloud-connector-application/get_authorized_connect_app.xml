@@ -1,0 +1,10 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_authorized_connect_app">
+
+    <!-- Mandatory parameter - Authorized Connect App SID -->
+    <parameter name="AuthorizedConnectAppSid"/>
+    <sequence>
+        <property name="TwilioAuthorizedConnectAppSid" expression="$func:AuthorizedConnectAppSid"/>
+        <class name="org.wso2.carbon.connectors.twilio.application.getAuthorizedConnectApp" />
+        <property name="TwilioAuthorizedConnectAppSid" action="remove"/>
+    </sequence>
+</template>

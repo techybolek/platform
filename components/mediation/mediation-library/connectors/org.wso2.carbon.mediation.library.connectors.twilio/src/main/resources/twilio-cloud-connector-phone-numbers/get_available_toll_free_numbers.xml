@@ -1,0 +1,23 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_available_toll_free_numbers">
+    <!--Compulsory-->
+    <parameter name="Country"/>
+
+    <parameter name="AreaCode"/>
+    <parameter name="Contains"/>
+
+    <sequence>
+
+        <property name="TwilioCountry" expression="$func:Country" />
+
+        <property name="TwilioPhoneNumberAreaCode" expression="$func:AreaCode" />
+        <property name="TwilioPhoneNumberContains" expression="$func:Contains" />
+
+        <class name="org.wso2.carbon.connectors.twilio.phone_numbers.GetAvailableTollFreeNumbers" />
+
+        <property name="TwilioCountry" action="remove" />
+        <property name="TwilioPhoneNumberAreaCode" action="remove" />
+        <property name="TwilioPhoneNumberContains" action="remove" />
+
+
+    </sequence>
+</template>

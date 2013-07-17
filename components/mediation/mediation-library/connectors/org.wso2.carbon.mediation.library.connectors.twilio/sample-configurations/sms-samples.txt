@@ -1,0 +1,113 @@
+1) Get a SMS by its Sid
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="AC02a560da64d83fced8023e5a178b8dd8"/>
+            <with-param name="AuthToken" value="e7dc9624600bf48e01f18c5c7d61ee10"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_sms">
+            <with-param name="MessageSid" value="SM4aee0277c6f78c2e073601d53cb1aed1"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+===================================================================================================================================================
+
+2) Get SMS list
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AuthToken" value="e7dc9624600bf48e01f18c5c7d61ee10"/>
+            <with-param name="AccountSid" value="AC02a560da64d83fced8023e5a178b8dd8"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_sms_list">
+            <with-param name="To" value="+61452619002"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AuthToken" value="e7dc9624600bf48e01f18c5c7d61ee10"/>
+            <with-param name="AccountSid" value="AC02a560da64d83fced8023e5a178b8dd8"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_sms_list">
+            <with-param name="DateSent" value="2013-02-08"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+
+===================================================================================================================================================
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AuthToken" value="218e4a1bb2098f8bf8f2a5c836d1f4f8"/>
+            <with-param name="AccountSid" value="ACf23cd250f9606eab0183a6f1a6431b77"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.send_sms">
+            <with-param name="Body" value=" MESSAGE "/>
+            <with-param name="To" value="+94718081124"/>
+            <with-param name="From" value="+15005550006"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+===================================================================================================================================================
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AuthToken" value="e7dc9624600bf48e01f18c5c7d61ee10"/>
+            <with-param name="AccountSid" value="AC02a560da64d83fced8023e5a178b8dd8"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_short_code">
+            <with-param name="ShortCodeSid" value="SC6b20cb705c1e8f00210049b20b70fce2"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+===================================================================================================================================================
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="AC02a560da64d83fced8023e5a178b8dd8"/>
+            <with-param name="AuthToken" value="e7dc9624600bf48e01f18c5c7d61ee10"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.update_short_code_properties">
+            <with-param name="ShortCodeSid" value="SC6b20cb705c1e8f00210049b20b70fce3"/>
+            <with-param name="SmsUrl" value="SC6b20cb705c1e8f00210049b20b70fce3"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+

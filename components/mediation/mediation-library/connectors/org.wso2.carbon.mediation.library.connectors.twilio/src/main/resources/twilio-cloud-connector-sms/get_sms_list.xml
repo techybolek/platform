@@ -1,0 +1,24 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_sms_list">
+
+    <!--Optional parameters.
+        See http://www.twilio.com/docs/api/rest/sms#list-get-filters for full specification and allowed values.
+    -->
+    <parameter name="To"/>
+    <parameter name="From"/>
+    <parameter name="DateSent"/>
+
+    <sequence>
+
+        <property name="TwilioSMSTo" expression="$func:To"/>
+        <property name="TwilioSMSFrom" expression="$func:From"/>
+        <property name="TwilioSMSDateSent" expression="$func:DateSent"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.sms.GetSmsList"/>
+
+        <property name="TwilioSMSTo" action="remove"/>
+        <property name="TwilioSMSFrom" action="remove"/>
+        <property name="TwilioSMSDateSent" action="remove"/>
+
+    </sequence>
+
+</template>

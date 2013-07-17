@@ -1,0 +1,30 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="modify_live_call">
+
+    <!--Required-->
+    <parameter name="CallSid"/>
+
+    <!--Available parameters to be modified (Optional).
+        See http://www.twilio.com/docs/api/rest/change-call-state#post-parameters for full specification and allowed values.
+    -->
+    <parameter name="Url"/>
+    <parameter name="Method"/>
+    <parameter name="Status"/>
+
+    <sequence>
+
+        <property name="TwilioCallSid" expression="$func:CallSid"/>
+        <property name="TwilioCallUrl" expression="$func:Url"/>
+        <property name="TwilioCallMethod" expression="$func:Method"/>
+        <property name="TwilioCallStatus" expression="$func:Status"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.ModifyLiveCall"/>
+
+        <property name="TwilioResponseType" action="remove"/>
+        <property name="TwilioCallSid" action="remove"/>
+        <property name="TwilioCallUrl" action="remove"/>
+        <property name="TwilioCallMethod" action="remove"/>
+        <property name="TwilioCallStatus" action="remove"/>
+
+    </sequence>
+
+</template>

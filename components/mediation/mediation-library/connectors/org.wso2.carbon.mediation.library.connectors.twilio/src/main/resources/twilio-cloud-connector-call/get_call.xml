@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_call">
+
+    <!--Required.-->
+    <parameter name="CallSid"/>
+
+    <sequence>
+
+        <property name="TwilioCallSid" expression="$func:CallSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.GetCall"/>
+
+        <property name="TwilioCallSid" action="remove"/>
+
+    </sequence>
+
+</template>

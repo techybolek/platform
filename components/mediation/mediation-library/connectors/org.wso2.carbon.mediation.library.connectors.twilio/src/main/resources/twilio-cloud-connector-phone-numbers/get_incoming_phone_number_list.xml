@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_incoming_phone_number_list">
+    <parameter name="PhoneNumber"/>
+    <parameter name="FriendlyName"/>
+
+    <sequence>
+
+        <property name="TwilioIncomingPhoneNumber" expression="$func:PhoneNumber" />
+        <property name="TwilioIncomingPhoneNumberFriendlyName" expression="$func:FriendlyName" />
+
+        <class name="org.wso2.carbon.connectors.twilio.phone_numbers.GetIncomingPhoneNumberList" />
+
+        <property name="TwilioIncomingPhoneNumber" action="remove" />
+        <property name="TwilioIncomingPhoneNumberFriendlyName" action="remove" />
+
+    </sequence>
+</template>

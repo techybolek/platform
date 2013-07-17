@@ -1,0 +1,38 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="update_short_code_properties">
+
+    <!--Required-->
+    <parameter name="ShortCodeSid"/>
+
+    <!--Optional parameters.
+        See http://www.twilio.com/docs/api/rest/short-codes#instance-post-optional-parameters for full specification and allowed values.
+    -->
+    <parameter name="FriendlyName"/>
+    <parameter name="ApiVersion"/>
+    <parameter name="SmsUrl"/>
+    <parameter name="SmsMethod"/>
+    <parameter name="SmsFallBackUrl"/>
+    <parameter name="SmsFallBackMethod"/>
+
+    <sequence>
+
+        <property name="TwilioShortCodeSid" expression="$func:ShortCodeSid"/>
+        <property name="TwilioFriendlyName" expression="$func:FriendlyName"/>
+        <property name="TwilioApiVersion" expression="$func:ApiVersion"/>
+        <property name="TwilioSmsUrl" expression="$func:SmsUrl"/>
+        <property name="TwilioSmsMethod" expression="$func:SmsMethod"/>
+        <property name="TwilioSmsFallBackUrl" expression="$func:SmsFallBackUrl"/>
+        <property name="TwilioSmsFallBackMethod" expression="$func:SmsFallBackMethod"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.sms.UpdateShortCodeProperties"/>
+
+        <property name="TwilioShortCodeSid" action="remove"/>
+        <property name="TwilioFriendlyName" action="remove"/>
+        <property name="TwilioApiVersion" action="remove"/>
+        <property name="TwilioSmsUrl" action="remove"/>
+        <property name="TwilioSmsMethod" action="remove"/>
+        <property name="TwilioSmsFallBackUrl" action="remove"/>
+        <property name="TwilioSmsFallBackMethod" action="remove"/>
+
+    </sequence>
+
+</template>

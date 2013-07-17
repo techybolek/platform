@@ -1,0 +1,12 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_participant_list">
+    <!--Compulsory-->
+    <parameter name="ConferenceSid"/>
+    <parameter name="CallSid"/>
+    <sequence>
+        <property name="TwilioConferenceSid" expression="$func:ConferenceSid" />
+
+        <class name="org.wso2.carbon.connectors.twilio.conference.GetParticipantList"/>
+
+        <property name="TwilioConferenceSid" action="remove"/>
+    </sequence>
+</template>

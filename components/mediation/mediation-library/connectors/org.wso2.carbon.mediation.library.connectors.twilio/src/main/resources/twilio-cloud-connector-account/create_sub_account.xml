@@ -1,0 +1,17 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="create_sub_account">
+
+    <!--Optional Parameter.
+        See https://www.twilio.com/docs/api/rest/subaccounts#creating-subaccounts-post-parameters-optional for full specification and allowed values.
+    -->
+    <parameter name="FriendlyName"/>
+
+    <sequence>
+
+        <property name="TwilioAccountFriendlyName" expression="$func:FriendlyName"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.account.CreateSubAccount"/>
+
+        <property name="TwilioAccountFriendlyName" action="remove"/>
+
+    </sequence>
+</template>

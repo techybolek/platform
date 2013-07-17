@@ -1,0 +1,21 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_accounts_list">
+
+    <!--Optional parameters.
+        See http://www.twilio.com/docs/api/rest/account#list-get-filters for full specification and allowed values.
+    -->
+    <parameter name="FriendlyName"/>
+    <parameter name="Status"/>
+
+    <sequence>
+
+        <property name="TwilioAccountFriendlyName" expression="$func:FriendlyName"/>
+        <property name="TwilioAccountStatus" expression="$func:Status"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.account.GetAccountsList"/>
+
+        <property name="TwilioAccountFriendlyName" action="remove"/>
+        <property name="TwilioAccountStatus" action="remove"/>
+
+    </sequence>
+
+</template>

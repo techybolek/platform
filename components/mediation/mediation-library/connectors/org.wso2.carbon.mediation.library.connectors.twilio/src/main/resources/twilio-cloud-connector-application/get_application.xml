@@ -1,0 +1,8 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_application">
+    <parameter name="ApplicationSid"/>
+    <sequence>
+        <property name="TwilioApplicationSid" expression="$func:ApplicationSid"/>
+        <class name="org.wso2.carbon.connectors.twilio.application.getApplication" />
+        <property name="TwilioApplicationSid" action="remove"/>
+    </sequence>
+</template>

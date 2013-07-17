@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="twilio-cloud-connector-account" type="synapse/template">
+
+    <subArtifacts>
+        <!-- Accounts -->
+        <artifact name="twilio.configure_account">
+            <file>configure_account.xml</file>
+            <description>Configure Twilio Account with AccountSid and AuthToken</description>
+        </artifact>
+        <artifact name="twilio.get_account">
+            <file>get_account.xml</file>
+            <description>Get the details associated with the account</description>
+        </artifact>
+        <artifact name="twilio.get_accounts_list">
+            <file>get_accounts_list.xml</file>
+            <description>Get the details of all accounts associated with the configured account with the given list
+                filters
+            </description>
+        </artifact>
+        <artifact name="twilio.update_account">
+            <file>update_account.xml</file>
+            <description>Updates the account (Status can be only changed in sub accounts) </description>
+        </artifact>
+        <artifact name="twilio.create_sub_account">
+            <file>create_sub_account.xml</file>
+            <description>Creates a sub account under the pre configured main account </description>
+        </artifact>
+    </subArtifacts>
+
+</artifact>

@@ -1,0 +1,19 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_recording_list">
+
+    <!--Optional.-->
+    <parameter name="CallSid"/>
+    <parameter name="DateCreated"/>
+
+    <sequence>
+
+        <property name="TwilioRecordingCallSid" expression="$func:CallSid"/>
+        <property name="TwilioRecordingDateCreated" expression="$func:DateCreated"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.call.GetRecordingList"/>
+
+        <property name="TwilioRecordingCallSid" action="remove"/>
+        <property name="TwilioRecordingDateCreated" action="remove"/>
+
+    </sequence>
+
+</template>

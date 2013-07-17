@@ -1,0 +1,57 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="update_application">
+    <!-- Mandatory parameter-->
+    <parameter name="ApplicationSid"/>
+
+    <!-- optional parameters. For more information, refer http://www.twilio.com/docs/api/rest/applications#instance-post-optional-parameters -->
+    <parameter name="FriendlyName"/>
+    <parameter name="ApiVersion"/>
+    <parameter name="VoiceUrl"/>
+    <parameter name="VoiceMethod"/>
+    <parameter name="VoiceFallbackUrl"/>
+    <parameter name="VoiceFallbackMethod"/>
+    <parameter name="StatusCallback"/>
+    <parameter name="StatusCallbackMethod"/>
+    <parameter name="VoiceCallerIdLookup"/>
+    <parameter name="SmsUrl"/>
+    <parameter name="SmsMethod"/>
+    <parameter name="SmsFallbackUrl"/>
+    <parameter name="SmsFallbackMethod"/>
+    <parameter name="SmsStatusCallback"/>
+
+    <sequence>
+        <property name="TwilioApplicationSid" expression="$func:ApplicationSid"/>
+
+        <property name="TwilioApplicationFriendlyName" expression="$func:FriendlyName"/>
+        <property name="TwilioApplicationApiVersion" expression="$func:ApiVersion"/>
+        <property name="TwilioApplicationVoiceUrl" expression="$func:VoiceUrl"/>
+        <property name="TwilioApplicationVoiceMethod" expression="$func:VoiceMethod"/>
+        <property name="TwilioApplicationVoiceFallbackUrl" expression="$func:VoiceFallbackUrl"/>
+        <property name="TwilioApplicationVoiceFallbackMethod" expression="$func:VoiceFallbackMethod"/>
+        <property name="TwilioApplicationStatusCallback" expression="$func:StatusCallback"/>
+        <property name="TwilioApplicationStatusCallbackMethod" expression="$func:StatusCallbackMethod"/>
+        <property name="TwilioApplicationVoiceCallerIdLookup" expression="$func:VoiceCallerIdLookup"/>
+        <property name="TwilioApplicationSmsUrl" expression="$func:SmsUrl"/>
+        <property name="TwilioApplicationSmsMethod" expression="$func:SmsMethod"/>
+        <property name="TwilioApplicationSmsFallbackUrl" expression="$func:SmsFallbackUrl"/>
+        <property name="TwilioApplicationSmsFallbackMethod" expression="$func:SmsFallbackMethod"/>
+        <property name="TwilioApplicationSmsStatusCallback" expression="$func:SmsStatusCallback"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.application.updateApplication" />
+
+        <property name="TwilioApplicationSid" action="remove"/>
+        <property name="TwilioApplicationFriendlyName" action="remove"/>
+        <property name="TwilioApplicationApiVersion" action="remove"/>
+        <property name="TwilioApplicationVoiceUrl" action="remove"/>
+        <property name="TwilioApplicationVoiceMethod" action="remove"/>
+        <property name="TwilioApplicationVoiceFallbackUrl" action="remove"/>
+        <property name="TwilioApplicationVoiceFallbackMethod" action="remove"/>
+        <property name="TwilioApplicationStatusCallback" action="remove"/>
+        <property name="TwilioApplicationStatusCallbackMethod" action="remove"/>
+        <property name="TwilioApplicationVoiceCallerIdLookup" action="remove"/>
+        <property name="TwilioApplicationSmsUrl" action="remove"/>
+        <property name="TwilioApplicationSmsMethod" action="remove"/>
+        <property name="TwilioApplicationSmsFallbackUrl" action="remove"/>
+        <property name="TwilioApplicationSmsFallbackMethod" action="remove"/>
+        <property name="TwilioApplicationSmsStatusCallback" action="remove"/>
+    </sequence>
+</template>

@@ -1,0 +1,54 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_available_local_numbers">
+    <!--Compulsory-->
+    <parameter name="Country"/>
+
+    <!--Basic Filters
+    Refer: https://www.twilio.com/docs/api/rest/available-phone-numbers#local-get-basic-filters
+    -->
+    <parameter name="AreaCode"/>
+    <parameter name="Contains"/>
+    <parameter name="InRegion"/>
+    <parameter name="InPostalCode"/>
+
+    <!--Advance Filters
+    Refer: https://www.twilio.com/docs/api/rest/available-phone-numbers#local-get-advanced-filters
+    -->
+    <parameter name="NearLatLong"/>
+    <parameter name="NearNumber"/>
+    <parameter name="InLata"/>
+    <parameter name="InRateCenter"/>
+    <parameter name="Distance"/>
+
+    <sequence>
+
+        <property name="TwilioCountry" expression="$func:Country" />
+
+        <!--Basic-->
+        <property name="TwilioPhoneNumberAreaCode" expression="$func:AreaCode" />
+        <property name="TwilioPhoneNumberContains" expression="$func:Contains" />
+        <property name="TwilioPhoneNumberInRegion" expression="$func:InRegion" />
+        <property name="TwilioPhoneNumberInPostalCode" expression="$func:InPostalCode" />
+
+        <!--Advance-->
+        <property name="TwilioPhoneNumberNearLatLong" expression="$func:NearLatLong" />
+        <property name="TwilioPhoneNumberNearNumber" expression="$func:NearNumber" />
+        <property name="TwilioPhoneNumberInLata" expression="$func:InLata" />
+        <property name="TwilioPhoneNumberInRateCenter" expression="$func:InRateCenter" />
+        <property name="TwilioPhoneNumberDistance" expression="$func:Distance" />
+
+        <class name="org.wso2.carbon.connectors.twilio.phone_numbers.GetAvailableLocalNumbers" />
+
+        <property name="TwilioCountry" action="remove" />
+        <property name="TwilioPhoneNumberAreaCode" action="remove" />
+        <property name="TwilioPhoneNumberContains" action="remove" />
+        <property name="TwilioPhoneNumberInRegion" action="remove" />
+        <property name="TwilioPhoneNumberInPostalCode" action="remove" />
+        <property name="TwilioPhoneNumberNearLatLong" action="remove" />
+        <property name="TwilioPhoneNumberNearNumber" action="remove" />
+        <property name="TwilioPhoneNumberInLata" action="remove" />
+        <property name="TwilioPhoneNumberInRateCenter" action="remove" />
+        <property name="TwilioPhoneNumberDistance" action="remove" />
+
+
+    </sequence>
+</template>

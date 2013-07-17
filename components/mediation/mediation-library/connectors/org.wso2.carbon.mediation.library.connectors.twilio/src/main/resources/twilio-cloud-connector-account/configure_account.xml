@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="configure_account">
+
+    <!--This template should be called prior to other Twilio templates. Once this has been added to
+         the flow, any number of templates can access the values.
+     -->
+
+    <!--Required.-->
+    <parameter name="AccountSid"/>
+    <parameter name="AuthToken"/>
+
+    <sequence>
+        <property name="TwilioAccountSid" expression="$func:AccountSid" />
+        <property name="TwilioAuthToken" expression="$func:AuthToken" />
+    </sequence>
+
+</template>

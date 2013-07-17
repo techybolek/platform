@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_short_code">
+
+    <!--Required parameter-->
+    <parameter name="ShortCodeSid"/>
+
+    <sequence>
+
+        <property name="TwilioShortCodeSid" expression="$func:ShortCodeSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.sms.GetShortCode"/>
+
+        <property name="TwilioShortCodeSid" action="remove"/>
+
+    </sequence>
+
+</template>

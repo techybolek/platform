@@ -1,0 +1,21 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_short_code_list">
+
+    <!--Optional parameters.
+        See http://www.twilio.com/docs/api/rest/short-codes#list-get-filters for full specification and allowed values.
+    -->
+    <parameter name="ShortCode"/>
+    <parameter name="FriendlyName"/>
+
+    <sequence>
+
+        <property name="TwilioShortCode" expression="$func:ShortCode"/>
+        <property name="TwilioFriendlyName" expression="$func:FriendlyName"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.sms.GetShortCodeList"/>
+
+        <property name="TwilioShortCode" action="remove"/>
+        <property name="TwilioFriendlyName" action="remove"/>
+
+    </sequence>
+
+</template>

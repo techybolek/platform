@@ -1,0 +1,79 @@
+
+1) Make Call
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+    <target>
+        <inSequence>
+            <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+                 <with-param name="TwilioAccountSid" value="ACCOUNT_SID"/>
+                 <with-param name="TwilioAuthToken" value="AUTH_TOKEN"/>
+            </call-template>
+            <call-template target="org.wso2.carbon.connectors.twilio.make_call">
+                <with-param name="Url" value="URL"/>
+                <with-param name="To" value="TO"/>
+                <with-param name="From" value="FROM"/>
+            </call-template>
+            <drop/>
+        </inSequence>
+    </target>
+    <description></description>
+</proxy>
+
+==============================================================================================================================================
+
+2) Get Call (Use Twilio Account Credentials with a CallSid)
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+<target>
+    <inSequence>
+        <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="TwilioAccountSid" value="ACCOUNT_SID"/>
+            <with-param name="TwilioAuthToken" value="AUTH_TOKEN"/>
+        </call-template>
+        <call-template target="org.wso2.carbon.connectors.twilio.get_call">
+            <with-param name="CallSid" value="CALL_SID"/>
+        </call-template>
+        <drop/>
+    </inSequence>
+</target>
+<description></description>
+</proxy>
+
+==============================================================================================================================================
+
+3.1) Get Call List   (Query by "To")
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="ACCOUNT_SID"/>
+            <with-param name="AuthToken" value="AUTH_TOKEN"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_call_list">
+            <with-param name="To" value="TO"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+
+3.2) Query by "Status"
+
+<proxy xmlns="http://ws.apache.org/ns/synapse" name="Twilio" transports="https,http" statistics="disable" trace="disable" startOnLoad="true">
+   <target>
+      <inSequence>
+         <call-template target="org.wso2.carbon.connectors.twilio.configure_account">
+            <with-param name="AccountSid" value="ACCOUNT_SID"/>
+            <with-param name="AuthToken" value="AUTH_TOKEN"/>
+         </call-template>
+         <call-template target="org.wso2.carbon.connectors.twilio.get_call_list">
+            <with-param name="Status" value="STATUS"/>
+         </call-template>
+         <drop/>
+      </inSequence>
+   </target>
+   <description></description>
+</proxy>
+

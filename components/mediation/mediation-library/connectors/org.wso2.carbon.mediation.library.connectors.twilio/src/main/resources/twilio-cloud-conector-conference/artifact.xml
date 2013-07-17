@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="twilio-cloud-connector-conference" type="synapse/template">
+
+    <subArtifacts>
+        <!-- Accounts -->
+        <artifact name="twilio.get_conference">
+            <file>get_conference.xml</file>
+            <description>Get a conference by its Sid</description>
+        </artifact>
+        <artifact name="twilio.get_conference_list">
+            <file>get_conference_list.xml</file>
+            <description>Get a conference list by parameters</description>
+        </artifact>
+        <artifact name="twilio.get_participant">
+            <file>get_participant.xml</file>
+            <description>Get a participant of a given conference by call sid of the participant</description>
+        </artifact>
+        <artifact name="twilio.get_participant_list">
+            <file>get_participant_list.xml</file>
+            <description>Get a participant list of a conference</description>
+        </artifact>
+        <artifact name="twilio.update_participant">
+            <file>update_participant.xml</file>
+            <description>Updates a participant</description>
+        </artifact>
+
+    </subArtifacts>
+
+</artifact>

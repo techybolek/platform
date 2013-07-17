@@ -1,0 +1,27 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="update_account">
+
+    <!--ACb2168356f1694894955c015eb3c6ea7f
+    -->
+    <parameter name="SubAccountSid"/>
+
+    <!--Optional parameters.
+        See  http://www.twilio.com/docs/api/rest/account#instance-post for full specification and allowed values.
+    -->
+    <parameter name="FriendlyName"/>
+    <parameter name="Status"/>
+
+    <sequence>
+
+        <property name="TwilioAccountFriendlyName" expression="$func:FriendlyName"/>
+        <property name="TwilioAccountStatus" expression="$func:Status"/>
+        <property name="TwilioSubAccountSid" expression="$func:SubAccountSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.account.UpdateAccount"/>
+
+        <property name="TwilioAccountFriendlyName" action="remove"/>
+        <property name="TwilioAccountStatus" action="remove"/>
+        <property name="TwilioSubAccountSid" action="remove"/>
+
+    </sequence>
+
+</template>

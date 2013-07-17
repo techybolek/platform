@@ -1,0 +1,16 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_sms">
+
+    <!--Required parameter-->
+    <parameter name="MessageSid"/>
+
+    <sequence>
+
+        <property name="TwilioSMSMessageSid" expression="$func:MessageSid"/>
+
+        <class name="org.wso2.carbon.connectors.twilio.sms.GetSms"/>
+
+        <property name="TwilioSMSMessageSid" action="remove"/>
+
+    </sequence>
+
+</template>

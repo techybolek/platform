@@ -1,0 +1,13 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="remove_incoming_phone_number">
+    <parameter name="IncomingPhoneNumberSid"/>
+
+    <sequence>
+
+        <property name="TwilioIncomingPhoneNumberSid" expression="$func:IncomingPhoneNumberSid" />
+
+        <class name="org.wso2.carbon.connectors.twilio.phone_numbers.RemoveIncomingPhoneNumber" />
+
+        <property name="TwilioIncomingPhoneNumberSid" action="remove" />
+
+    </sequence>
+</template>
