@@ -22,6 +22,8 @@ import org.apache.cassandra.auth.*;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -124,6 +126,11 @@ public class CarbonCassandraAuthority implements IAuthority {
                                                   String tenantLessUsername,
                                                   String resourcePath) {
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+
             EnumSet<Permission> authorized = EnumSet.noneOf(Permission.class);
             boolean isAuthorized = authorizationManager.isUserAuthorized(tenantLessUsername,
                     resourcePath,
@@ -135,6 +142,8 @@ public class CarbonCassandraAuthority implements IAuthority {
         } catch (UserStoreException e) {
             log.error("Authorization failure for user " + tenantLessUsername +
                     " for performing write on resource" + resourcePath);
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
 
         return Permission.NONE;
@@ -152,6 +161,11 @@ public class CarbonCassandraAuthority implements IAuthority {
                                                  String tenantLessUsername,
                                                  String resourcePath) {
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+
             EnumSet<Permission> authorized = EnumSet.noneOf(Permission.class);
             boolean isAuthorized = authorizationManager.isUserAuthorized(tenantLessUsername,
                     resourcePath,
@@ -164,6 +178,8 @@ public class CarbonCassandraAuthority implements IAuthority {
         } catch (UserStoreException e) {
             log.error("Authorization failure for user " + tenantLessUsername +
                     " for performing read on resource" + resourcePath);
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
         return Permission.NONE;
     }
@@ -183,6 +199,10 @@ public class CarbonCassandraAuthority implements IAuthority {
                                                 String tenantLessUsername,
                                                 String resourcePath) {
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 //            if(authorizationManager.isUserAuthorized(tenantLessUsername,resourcePath,ACTION_READ) && authorizationManager.isUserAuthorized(tenantLessUsername,resourcePath,ACTION_WRITE)){
 //                  return  Permission.ALL;
 //              }
@@ -201,6 +221,8 @@ public class CarbonCassandraAuthority implements IAuthority {
             log.error("Authorization failure for user " + tenantLessUsername +
                     " for performing add resource" + resourcePath);
             return Permission.NONE;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
         return Permission.ALL;
     }

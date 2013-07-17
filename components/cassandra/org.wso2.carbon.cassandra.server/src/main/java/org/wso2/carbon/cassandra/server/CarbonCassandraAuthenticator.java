@@ -24,13 +24,17 @@ import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.thrift.AuthenticationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 //import org.wso2.carbon.caching.core.CacheEntry;
 //import org.wso2.carbon.caching.core.StringCacheEntry;
 //import org.wso2.carbon.caching.core.StringCacheKey;
 //    import org.wso2.carbon.caching.internal.CacheEntry;
 //    import org.wso2.carbon.cassandra.server.cache.UserAccessKeyCache;
+import org.wso2.carbon.cassandra.server.cache.UserAccessKeyCache;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -54,23 +58,11 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
     private static final String CASSANDRA_ACCESS_CACHE_MANAGER = "CASSANDRA_ACCESS_CACHE_MANAGER";
     private AuthenticationService authenticationService;
 
-    private static Cache<String, String> cache = Caching.getCacheManagerFactory()
-                                    .getCacheManager(CASSANDRA_ACCESS_CACHE_MANAGER).getCache(CASSANDRA_ACCESS_KEY_CACHE);
-    //private static final UserAccessKeyCache cache = UserAccessKeyCache.getInstance();
-
-
     /**
      * @return null as a user must call login().
      */
     public AuthenticatedUser defaultUser() {
         return null; // A user must log-in to the Cassandra
-    }
-
-    //public static void addToCache(String username, String accessKey) {
-    public static void addToCache(String username, String accessKey) {
-        //cache.addToCache(new StringCacheKey(username), new StringCacheEntry(accessKey));
-        cache.put(username, accessKey);
-
     }
 
     /**
@@ -136,15 +128,27 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
 
     private boolean isAuthenticated(String username, String keyAccess) {
 
-        //CacheEntry cacheEntry = cache.getValueFromCache(new StringCacheKey(username));
-        String value = cache.get(username);
-        if (value == null) {
+        UserAccessKeyCache value = null;
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            Cache<String, UserAccessKeyCache> cache = Caching.getCacheManagerFactory()
+                .getCacheManager(CASSANDRA_ACCESS_CACHE_MANAGER).getCache(CASSANDRA_ACCESS_KEY_CACHE);
+            value = cache.get(username);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+        if (value.getAccessKey() == null) {
             if (log.isDebugEnabled()) {
                 log.debug("The key is not present in the cache...");
                 log.debug("Credentials for Username : " + username + " retrieved from cache");
             }
         }
-        if (keyAccess != null && keyAccess.equals(value)) {
+        if (keyAccess != null && keyAccess.equals(value.getAccessKey())) {
             return true;
         }
         return false;
