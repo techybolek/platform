@@ -18,14 +18,12 @@
 
 package org.wso2.carbon.deployment.synchronizer.git;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.*;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.storage.file.FileRepository;
-import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
@@ -43,10 +41,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Git based artifact repository
@@ -64,6 +60,10 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
     * */
     public GitBasedArtifactRepository () {
 
+        if(!isGitDeploymentSynchronizationEnabled()) {
+            return;
+        }
+
         readConfiguration();
 
         if(gitDepsyncConfig.isStandardDeployment()) {
@@ -72,6 +72,32 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         else {
             repositoryManager = new S2GitRepositoryManager();
         }
+    }
+
+    /**
+     * Checks if git based deployment synchronization is enabled
+     *
+     * @return true if deployment synchronization is enabled, else false
+     */
+    private boolean isGitDeploymentSynchronizationEnabled() {
+
+        String enableParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.ENABLED);
+        if (enableParam == null) {
+            return false;
+        }
+
+        if (enableParam.equalsIgnoreCase("false")) {
+            return  false;
+        }
+
+        if (enableParam.equalsIgnoreCase("true")) {
+            String repoTypeParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.REPOSITORY_TYPE);
+            if(repoTypeParam != null && (repoTypeParam.equalsIgnoreCase(getRepositoryType()))) {
+                 return true;
+            }
+        }
+
+        return false;
     }
 
     /**

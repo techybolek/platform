@@ -26,6 +26,8 @@ public class GitDeploymentSynchronizerConstants {
     //ServerKey property name from carbon.xml, for the cartridge short name --> not used. CARTRIDGE_ALIAS is used instead.
     //public static final String SERVER_KEY = "ServerKey";
 
+    public static final String ENABLED = DEPLOYMENT_SYNCHRONIZER + ".Enabled";
+
     //EPR for the repository Information Service
     public static final String REPO_INFO_SERVICE_EPR = "RepoInfoServiceEpr";
 
@@ -41,6 +43,7 @@ public class GitDeploymentSynchronizerConstants {
     public static final String PASSWORD_REGEX = "password:(.*?)}";
 
     //Configuration parameter names read from carbon.xml
+    public static final String REPOSITORY_TYPE = DEPLOYMENT_SYNCHRONIZER + ".RepositoryType";
     public static final String DEPLOYMENT_METHOD = DEPLOYMENT_SYNCHRONIZER + ".StandardDeployment";
     public static final String GIT_REPO_BASE_URL = DEPLOYMENT_SYNCHRONIZER + ".GitBaseUrl";
     public static final String GIT_USERNAME = DEPLOYMENT_SYNCHRONIZER + ".GitUserName";
