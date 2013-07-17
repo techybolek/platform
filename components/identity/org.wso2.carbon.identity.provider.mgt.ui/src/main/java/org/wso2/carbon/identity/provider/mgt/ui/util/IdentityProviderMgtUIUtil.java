@@ -98,6 +98,8 @@ public class IdentityProviderMgtUIUtil {
             }
             List<String> tempList = new ArrayList<String>();
             String delete = null;
+            String deletePublicCert = null;
+            String deleteRoleMapping = null;
             TrustedIdPDTO trustedIdPDTO = new TrustedIdPDTO();
             for (Object item : items) {
                 DiskFileItem diskFileItem = (DiskFileItem) item;
@@ -120,9 +122,7 @@ public class IdentityProviderMgtUIUtil {
                     if(publicCertArray != null && publicCertArray.length > 0){
                         publicCert = Base64.encode(publicCertArray);
                     } else {
-                        if(fileItem.getName() == null || fileItem.getName().equals("")) {
-                            publicCert = oldPublicCert;
-                        }
+                        publicCert = oldPublicCert;
                     }
                 } else if(name.equals("roleMappingFile")){
                     FileItem fileItem = diskFileItem;
@@ -134,9 +134,7 @@ public class IdentityProviderMgtUIUtil {
                         }
                         roleMappings = roleMappingsString.split(",");
                     } else {
-                        if(fileItem.getName() == null || fileItem.getName().equals("")){
-                            roleMappings = oldRoleMappings;
-                        }
+                        roleMappings = oldRoleMappings;
                     }
                 } else if(name.startsWith("rowname_")){
                     int rowId = Integer.parseInt(name.substring(name.indexOf("_")+1));
@@ -156,14 +154,34 @@ public class IdentityProviderMgtUIUtil {
                     if(deleteArray != null && deleteArray.length > 0){
                         delete = new String(deleteArray);
                     }
+                } else if(name.equals("deleteRoleMappings")){
+                    FileItem fileItem = diskFileItem;
+                    byte[] deleteRoleMappingsArray = fileItem.get();
+                    if(deleteRoleMappingsArray != null && deleteRoleMappingsArray.length > 0){
+                        deleteRoleMapping = new String(deleteRoleMappingsArray);
+                    }
+                } else if(name.equals("deletePublicCert")){
+                    FileItem fileItem = diskFileItem;
+                    byte[] deletePublicCertArray = fileItem.get();
+                    if(deletePublicCertArray != null && deletePublicCertArray.length > 0){
+                        deletePublicCert = new String(deletePublicCertArray);
+                    }
                 }
             }
             newRoles.addAll(tempList);
             trustedIdPDTO.setIdPIssuerId(issuer);
             trustedIdPDTO.setIdPUrl(url);
-            trustedIdPDTO.setPublicCert(publicCert);
+            if(deletePublicCert != null && deletePublicCert.equals("true")){
+                trustedIdPDTO.setPublicCert(null);
+            } else {
+                trustedIdPDTO.setPublicCert(publicCert);
+            }
             trustedIdPDTO.setRoles(newRoles.toArray(new String[newRoles.size()]));
-            trustedIdPDTO.setRoleMappings(roleMappings);
+            if(deleteRoleMapping != null && deleteRoleMapping.equals("true")){
+                trustedIdPDTO.setRoleMappings(null);
+            } else {
+                trustedIdPDTO.setRoleMappings(roleMappings);
+            }
             objects[0] = trustedIdPDTO;
             objects[1] = delete;
             return objects;

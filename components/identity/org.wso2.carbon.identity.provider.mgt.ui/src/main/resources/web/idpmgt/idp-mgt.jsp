@@ -58,28 +58,27 @@
         var rowId = -1;
     <% } %>
 
-    var objTemp;
+    jQuery(document).ready(function(){
+        jQuery('#publicCertDeleteLink').click(function(){
+            $(jQuery('#publicCertDiv')).toggle();
+            var input = document.createElement('input');
+            input.type = "hidden";
+            input.name = "deletePublicCert";
+            input.id = "deletePublicCert";
+            input.value = "true";
+            document.forms['idp-mgt-form'].appendChild(input);
+        })
+    })
+    var deletedRows = [];
     function deleteRoleRow(obj){
-        objTemp = obj;
-        if(jQuery(obj).parent().prev().children()[0].value == ''){
-            jQuery(objTemp).parent().parent().remove();
-            if($(jQuery('#roleAddTable tr')).length == 1){
-                $(jQuery('#roleAddTable')).toggle();
-            }
-        } else {
-            CARBON.showConfirmationDialog('Are you sure you want to delete "'  + jQuery(obj).parent().prev().children()[0].value +
-                    '"? All the corresponding role mappings will also be deleted.',
-                    function (){
-                        jQuery(objTemp).parent().parent().remove();
-                        if($(jQuery('#roleAddTable tr')).length == 1){
-                            $(jQuery('#roleAddTable')).toggle();
-                        }
-                    },
-                    null);
+       if(jQuery(obj).parent().prev().children()[0].value != ''){
+            deletedRows.push(jQuery(obj).parent().prev().children()[0].value);
         }
-
+        jQuery(obj).parent().parent().remove();
+        if($(jQuery('#roleAddTable tr')).length == 1){
+            $(jQuery('#roleAddTable')).toggle();
+        }
     }
-
     jQuery(document).ready(function(){
         jQuery('#roleAddLink').click(function(){
             rowId++;
@@ -93,9 +92,87 @@
             }
         })
     })
+    jQuery(document).ready(function(){
+        jQuery('#roleMappingDeleteLink').click(function(){
+            $(jQuery('#roleMappingDiv')).toggle();
+            var input = document.createElement('input');
+            input.type = "hidden";
+            input.name = "deleteRoleMappings";
+            input.id = "deleteRoleMappings";
+            input.value = "true";
+            document.forms['idp-mgt-form'].appendChild(input);
+        })
+    })
     function idpMgtUpdate(){
         if(doValidation()){
-            jQuery('#idp-mgt-form').submit();
+            var allDeletedStr = "";
+            for(var i = 0;i<deletedRows.length;i++){
+                if(i < deletedRows.length-1){
+                    allDeletedStr += deletedRows[i] + ", ";
+                } else {
+                    allDeletedStr += deletedRows[i] + "?";
+                }
+            }
+            if(allDeletedStr != "") {
+                CARBON.showConfirmationDialog('Are you sure you want to delete the role ' + allDeletedStr,
+                        function(){
+                            if(jQuery('#deleteRoleMappings').val() == 'true'){
+                                CARBON.showConfirmationDialog('Are you sure you want to delete all the role mappings?',
+                                        function (){
+                                            if(jQuery('#deletePublicCert').val() == 'true'){
+                                                CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
+                                                        jQuery('#issuer').val() + '?',
+                                                        function (){
+                                                            jQuery('#idp-mgt-form').submit();
+                                                        },
+                                                        function(){
+                                                            location.href = "idp-mgt.jsp"
+                                                        });
+                                            } else {
+                                                jQuery('#idp-mgt-form').submit();
+                                            }
+                                        },
+                                        function(){
+                                            location.href = "idp-mgt.jsp"
+                                        });
+                            } else {
+                                jQuery('#idp-mgt-form').submit();
+                            }
+                        },
+                        function(){
+                            location.href = "idp-mgt.jsp"
+                        });
+            } else if(jQuery('#deleteRoleMappings').val() == 'true'){
+                CARBON.showConfirmationDialog('Are you sure you want to delete all the role mappings?',
+                        function (){
+                            if(jQuery('#deletePublicCert').val() == 'true'){
+                                CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
+                                        jQuery('#issuer').val() + '?',
+                                        function (){
+                                            jQuery('#idp-mgt-form').submit();
+                                        },
+                                        function(){
+                                            location.href = "idp-mgt.jsp"
+                                        });
+                            } else {
+                                jQuery('#idp-mgt-form').submit();
+                            }
+                        },
+                        function(){
+                            location.href = "idp-mgt.jsp"
+                        });
+            } else if(jQuery('#deletePublicCert').val() == 'true'){
+                CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
+                        jQuery('#issuer').val() + '?',
+                        function (){
+                            jQuery('#idp-mgt-form').submit();
+                        },
+                        function(){
+                            location.href = "idp-mgt.jsp"
+                        });
+            } else {
+                jQuery('#idp-mgt-form').submit();
+            }
         }
     }
     function idpMgtDelete(){
@@ -104,7 +181,7 @@
                     var input = document.createElement('input');
                     input.type = "hidden";
                     input.name = "delete";
-                    input.value = "delete";
+                    input.value = "true";
                     document.forms['idp-mgt-form'].appendChild(input);
                     jQuery('#idp-mgt-form').submit();
                 },
@@ -177,33 +254,36 @@
                             <div class="sectionHelp">
                                 <fmt:message key='idp.certificate.help'/>
                             </div>
-                            <% if(certData != null) { %>
-                                <table class="styledLeft">
-                                    <thead><tr><th><fmt:message key='issuerdn'/></th>
-                                        <th><fmt:message key='subjectdn'/></th>
-                                        <th><fmt:message key='notafter'/></th>
-                                        <th><fmt:message key='notbefore'/></th>
-                                        <th><fmt:message key='serialno'/></th>
-                                        <th><fmt:message key='version'/></th>
-                                    </tr></thead>
-                                    <tbody>
-                                        <tr><td><%=certData.getIssuerDN()%></td>
-                                            <td><%=certData.getSubjectDN()%></td>
-                                            <td><%=certData.getNotAfter()%></td>
-                                            <td><%=certData.getNotBefore()%></td>
-                                            <td><%=certData.getSerialNumber()%></td>
-                                            <td><%=certData.getVersion()%></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            <% } %>
+                            <div id="publicCertDiv">
+                                <% if(certData != null) { %>
+                                <a id="publicCertDeleteLink" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key='idp.public.cert.delete'/></a>
+                                    <table class="styledLeft">
+                                        <thead><tr><th><fmt:message key='issuerdn'/></th>
+                                            <th><fmt:message key='subjectdn'/></th>
+                                            <th><fmt:message key='notafter'/></th>
+                                            <th><fmt:message key='notbefore'/></th>
+                                            <th><fmt:message key='serialno'/></th>
+                                            <th><fmt:message key='version'/></th>
+                                        </tr></thead>
+                                        <tbody>
+                                            <tr><td><%=certData.getIssuerDN()%></td>
+                                                <td><%=certData.getSubjectDN()%></td>
+                                                <td><%=certData.getNotAfter()%></td>
+                                                <td><%=certData.getNotBefore()%></td>
+                                                <td><%=certData.getSerialNumber()%></td>
+                                                <td><%=certData.getVersion()%></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                <% } %>
+                            </div>
                         </td>
                     </tr>
                     <tr>
                         <td class="leftCol-med labelField"><fmt:message key='idp.roles'/>:</td>
                         <td>
                             <a id="roleAddLink" class="icon-link" style="background-image:url(images/add.gif);"><fmt:message key='add.role'/></a>
-                            <br/><br>
+                            <div style="clear:both"/>
                             <div class="sectionHelp">
                                 <fmt:message key='idp.roles.help'/>
                             </div>
@@ -241,14 +321,17 @@
                                 <fmt:message key='idp.role.mappings.help'/>
                             </div>
                             <% if(roleMappings != null && roleMappings.size()>0){ %>
-                                <table class="styledLeft">
-                                    <thead><tr><th class="leftCol-big"><fmt:message key='idp.role'/></th><th><fmt:message key='tenant.role'/></th></tr></thead>
-                                    <tbody>
-                                        <% for(Map.Entry<String,String> entry:roleMappings.entrySet()){ %>
-                                            <tr><td><%=entry.getKey()%></td><td><%=entry.getValue()%></td></tr>
-                                        <% } %>
-                                    </tbody>
-                                </table>
+                                <div id="roleMappingDiv">
+                                    <a id="roleMappingDeleteLink" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key='idp.role.mapping.delete'/></a>
+                                    <table class="styledLeft">
+                                        <thead><tr><th class="leftCol-big"><fmt:message key='idp.role'/></th><th><fmt:message key='tenant.role'/></th></tr></thead>
+                                        <tbody>
+                                            <% for(Map.Entry<String,String> entry:roleMappings.entrySet()){ %>
+                                                <tr><td><%=entry.getKey()%></td><td><%=entry.getValue()%></td></tr>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
                             <% } %>
                         </td>
                     </tr>

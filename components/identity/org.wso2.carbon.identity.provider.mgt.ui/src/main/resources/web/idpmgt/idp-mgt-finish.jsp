@@ -38,8 +38,7 @@
         IdentityProviderMgtServiceClient client = new IdentityProviderMgtServiceClient(cookie, backendServerURL, configContext);
 
         Object[] objects = IdentityProviderMgtUIUtil.getFormData(request);
-
-        if(objects[1] != null && objects[1].equals("delete")){
+        if(objects[1] != null && objects[1].equals("true")){
             client.updateTenantIdP((TrustedIdPDTO)session.getAttribute("trustedIdPDTO"), null);
         } else {
             client.updateTenantIdP((TrustedIdPDTO)session.getAttribute("trustedIdPDTO"), (TrustedIdPDTO)objects[0]);
