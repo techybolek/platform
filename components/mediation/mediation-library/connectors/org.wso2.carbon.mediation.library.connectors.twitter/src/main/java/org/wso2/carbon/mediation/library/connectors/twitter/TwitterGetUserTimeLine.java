@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
@@ -42,38 +42,37 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 	public static final String USER_ID = "userID";
 
 	public static final String PAGE = "page";
-	
+
 	public static final String SCREEN_NAME = "screenName";
 
 	@Override
-	public void connect() throws ConnectException {
-		if(log.isDebugEnabled()){
+	public void connect(MessageContext messageContext) throws ConnectException {
+		if (log.isDebugEnabled()) {
 			log.info("executing twitter get user time line");
 		}
-		
-		MessageContext messageContext = getMessageContext();
+
 		try {
-			String userID = TwitterMediatorUtils.lookupFunctionParam(messageContext, USER_ID);
+			String userID = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					USER_ID);
 			String page = TwitterMediatorUtils.lookupFunctionParam(messageContext, PAGE);
-					
 
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 
 			List<Status> results = null;
-		    if(userID != null && page != null && !userID.isEmpty() && !page.isEmpty()){
-				 results = twitter.getUserTimeline(Long.parseLong(userID),new Paging(Long.parseLong(page)));
-			}else if(userID != null && !userID.isEmpty()){
+			if (userID != null && page != null && !userID.isEmpty() && !page.isEmpty()) {
+				results = twitter.getUserTimeline(Long.parseLong(userID),
+						new Paging(Long.parseLong(page)));
+			} else if (userID != null && !userID.isEmpty()) {
 				results = twitter.getUserTimeline(Long.parseLong(userID));
-			}else if(page != null && !page.isEmpty()){
+			} else if (page != null && !page.isEmpty()) {
 				results = twitter.getUserTimeline(new Paging(Long.parseLong(page)));
-			}else{
+			} else {
 				results = twitter.getUserTimeline();
 			}
-			OMElement element =this.performSearch(results);
-			
+			OMElement element = this.performSearch(results);
+
 			super.preparePayload(messageContext, element);
-			
-	
+
 		} catch (TwitterException te) {
 			log.error("Failed to search twitter : " + te.getMessage(), te);
 			TwitterMediatorUtils.storeErrorResponseStatus(messageContext, te);
@@ -83,9 +82,6 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 		}
 	}
 
-
-	
-	
 	/**
 	 * Performing the searching operation for the given Geo Query criteria.
 	 * 
@@ -97,17 +93,18 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	private OMElement performSearch(List<Status> results) throws XMLStreamException, TwitterException, JSONException, IOException {
+	private OMElement performSearch(List<Status> results) throws XMLStreamException,
+			TwitterException, JSONException, IOException {
 		OMElement resultElement = AXIOMUtil.stringToOM("<XMLPayload/>");
 
 		for (Status place : results) {
-		    StringBuilder stringBuilder = new StringBuilder();
-		    stringBuilder.append("{ \"status\" : ");
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("{ \"status\" : ");
 			String json = DataObjectFactory.getRawJSON(place);
 			stringBuilder.append(json);
 			stringBuilder.append("} ");
-			//System.out.println(stringBuilder.toString());
-			OMElement element =super.parseJsonToXml(stringBuilder.toString());
+			// System.out.println(stringBuilder.toString());
+			OMElement element = super.parseJsonToXml(stringBuilder.toString());
 			resultElement.addChild(element);
 		}
 		return resultElement;
@@ -115,7 +112,7 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 	}
 
 	public static void main(String ar[]) {
-		TwitterGetUserTimeLine  getUserTimeLine = new TwitterGetUserTimeLine();
+		TwitterGetUserTimeLine getUserTimeLine = new TwitterGetUserTimeLine();
 		TwitterSearchPlaces search = new TwitterSearchPlaces();
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setOAuthAccessToken("1114764380-JNGKRkrUFUDCHC0WdmjDurZ3wwi9BV6ysbDRYca");
@@ -124,41 +121,37 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 		cb.setOAuthConsumerSecret("EvTEzc3jj9Z1Kx58ylNfkpnuXYuCeGgKhkVkziYNMs");
 		cb.setJSONStoreEnabled(true);
 		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-		
+
 		String userID = "15479536";
-		String page ="";
-		
+		String page = "";
+
 		List<Status> results = null;
 		try {
-	        if(!userID.isEmpty() && !page.isEmpty()){
-				 results = twitter.getUserTimeline(Long.parseLong(userID),new Paging(Long.parseLong(page)));
-			}else if(!userID.isEmpty()){
+			if (!userID.isEmpty() && !page.isEmpty()) {
+				results = twitter.getUserTimeline(Long.parseLong(userID),
+						new Paging(Long.parseLong(page)));
+			} else if (!userID.isEmpty()) {
 				results = twitter.getUserTimeline(Long.parseLong(userID));
-			}else if(!page.isEmpty()){
+			} else if (!page.isEmpty()) {
 				results = twitter.getUserTimeline(new Paging(Long.parseLong(page)));
-			}else{
+			} else {
 				results = twitter.getUserTimeline();
 			}
-			OMElement element =getUserTimeLine.performSearch(results);
+			OMElement element = getUserTimeLine.performSearch(results);
 			System.out.println(element);
-        } catch (TwitterException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        } catch (XMLStreamException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        } catch (JSONException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        } catch (IOException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        }
-		
-		
-		
-		
-	
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (XMLStreamException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

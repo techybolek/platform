@@ -18,12 +18,13 @@
 package org.wso2.carbon.mediation.library.connectors.core;
 
 import org.apache.synapse.Mediator;
+import org.apache.synapse.MessageContext;
 
-public interface Connector extends Mediator, BaseServices {
+public interface Connector extends Mediator {
     /**
      * implements the connection logic to external API or custom service pattern
      * @throws ConnectException when error during conenction to APIs or unexpected errors
      */
-    public void connect() throws ConnectException;
+    public void connect(MessageContext messageContext) throws ConnectException;
 
 }

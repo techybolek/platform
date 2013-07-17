@@ -25,6 +25,7 @@
 	<parameter name="oauth.accessToken"/>
 	<parameter name="oauth.accessTokenSecret"/>
 	<parameter name="userID" />
+	<parameter name="screenName" />
 	<parameter name="message" />
 	<sequence>
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />

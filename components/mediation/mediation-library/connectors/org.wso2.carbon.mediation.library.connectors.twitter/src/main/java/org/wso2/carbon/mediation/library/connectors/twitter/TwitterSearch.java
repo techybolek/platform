@@ -60,12 +60,11 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	 * ()
 	 */
 	@Override
-	public void connect() throws ConnectException {
-		// TODO Auto-generated method stub
-		MessageContext messageContext = getMessageContext();
+	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
 
-			Query query = new Query(TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_STRING));
+			Query query = new Query(TwitterMediatorUtils.lookupFunctionParam(
+					messageContext, SEARCH_STRING));
 			polulateOptionalParamters(messageContext, query);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
@@ -91,8 +90,10 @@ public class TwitterSearch extends AbstractTwitterConnector {
 		String locale = TwitterMediatorUtils.lookupFunctionParam(messageContext, LOCALE);
 		String maxID = TwitterMediatorUtils.lookupFunctionParam(messageContext, MAX_ID);
 		String since = TwitterMediatorUtils.lookupFunctionParam(messageContext, SINCE);
-		String sinceID = TwitterMediatorUtils.lookupFunctionParam(messageContext, SINCE_ID);
-		String geocode = TwitterMediatorUtils.lookupFunctionParam(messageContext, GEO_CODE);
+		String sinceID = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+				SINCE_ID);
+		String geocode = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+				GEO_CODE);
 		String radius = TwitterMediatorUtils.lookupFunctionParam(messageContext, RADIUS);
 		String unit = TwitterMediatorUtils.lookupFunctionParam(messageContext, UNIT);
 		String until = TwitterMediatorUtils.lookupFunctionParam(messageContext, UNITL);
@@ -112,9 +113,12 @@ public class TwitterSearch extends AbstractTwitterConnector {
 		if (sinceID != null && !sinceID.isEmpty()) {
 			query.setSinceId(Long.parseLong(sinceID));
 		}
-		if (geocode != null && !geocode.isEmpty() && radius != null && !radius.isEmpty() && unit != null && !unit.isEmpty()) {
+		if (geocode != null && !geocode.isEmpty() && radius != null && !radius.isEmpty()
+				&& unit != null && !unit.isEmpty()) {
 			String[] codes = geocode.split(",");
-			query.setGeoCode(new GeoLocation(Double.parseDouble(codes[0]), Double.parseDouble(codes[1])), Double.parseDouble(radius), unit);
+			query.setGeoCode(
+					new GeoLocation(Double.parseDouble(codes[0]), Double
+							.parseDouble(codes[1])), Double.parseDouble(radius), unit);
 		}
 
 		if (until != null && !until.isEmpty()) {
@@ -133,7 +137,8 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	private OMElement performSearch(Twitter twitter, Query query) throws XMLStreamException, TwitterException, JSONException, IOException {
+	private OMElement performSearch(Twitter twitter, Query query)
+			throws XMLStreamException, TwitterException, JSONException, IOException {
 		OMElement resultElement = AXIOMUtil.stringToOM("<XMLPayload/>");
 		QueryResult result;
 		result = twitter.search(query);
@@ -150,9 +155,9 @@ public class TwitterSearch extends AbstractTwitterConnector {
 		return resultElement;
 
 	}
-	
+
 	public static void main(String ar[]) {
-		TwitterGetUserTimeLine  getUserTimeLine = new TwitterGetUserTimeLine();
+		TwitterGetUserTimeLine getUserTimeLine = new TwitterGetUserTimeLine();
 		TwitterSearchPlaces search = new TwitterSearchPlaces();
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setOAuthAccessToken("1114764380-JNGKRkrUFUDCHC0WdmjDurZ3wwi9BV6ysbDRYca");
@@ -161,7 +166,7 @@ public class TwitterSearch extends AbstractTwitterConnector {
 		cb.setOAuthConsumerSecret("EvTEzc3jj9Z1Kx58ylNfkpnuXYuCeGgKhkVkziYNMs");
 		cb.setJSONStoreEnabled(true);
 		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
-	
+
 		try {
 			Query query = new Query("hotel");
 			query.setGeoCode(new GeoLocation(40.71435, -74.00597), 10, "mi");
@@ -170,16 +175,11 @@ public class TwitterSearch extends AbstractTwitterConnector {
 				String json = DataObjectFactory.getRawJSON(tweet);
 				System.out.println(json);
 			}
-			
-        } catch (TwitterException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        } 
-		
-		
-		
-		
-	
+
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 }

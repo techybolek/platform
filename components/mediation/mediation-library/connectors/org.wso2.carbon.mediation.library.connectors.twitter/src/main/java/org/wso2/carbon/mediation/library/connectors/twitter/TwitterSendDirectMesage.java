@@ -30,17 +30,27 @@ public class TwitterSendDirectMesage extends AbstractConnector {
 
 	public static final String USER_ID = "userID";
 	public static final String MESSAGE = "message";
+	public static final String SCREEN_NAME = "screenName";
 
 	private static Log log = LogFactory.getLog(TwitterSendDirectMesage.class);
 
 	@Override
-	public void connect() throws ConnectException {
-		MessageContext messageContext = getMessageContext();
+	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
-			String userID = TwitterMediatorUtils.lookupFunctionParam(messageContext, USER_ID);
-			String message = TwitterMediatorUtils.lookupFunctionParam(messageContext, MESSAGE);
+			String userID = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					USER_ID);
+			String screenName = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					SCREEN_NAME);
+			String message = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					MESSAGE);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
-			twitter.sendDirectMessage(Long.parseLong(userID), message);
+			if (userID != null && userID.isEmpty()) {
+				twitter.sendDirectMessage(Long.parseLong(userID), message);
+			}
+
+			if (screenName != null && screenName.isEmpty()) {
+				twitter.sendDirectMessage(screenName, message);
+			}
 
 			if (log.isDebugEnabled()) {
 				log.info("sending direct message to user completed!");

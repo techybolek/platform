@@ -32,8 +32,7 @@ public class TwitterShowStatusMediator extends AbstractConnector {
 	private static Log log = LogFactory.getLog(TwitterShowStatusMediator.class);
 	public static final String ID = "id";
 
-	public void connect() throws ConnectException {
-		MessageContext messageContext = getMessageContext();
+	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
 			String id = TwitterMediatorUtils.lookupFunctionParam(messageContext, ID);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();

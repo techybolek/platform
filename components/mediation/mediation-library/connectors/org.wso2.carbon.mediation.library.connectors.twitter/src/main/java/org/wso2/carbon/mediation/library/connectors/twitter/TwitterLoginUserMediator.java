@@ -34,15 +34,18 @@ public class TwitterLoginUserMediator extends AbstractConnector {
 	private static Log log = LogFactory.getLog(TwitterLoginUserMediator.class);
 
 	@Override
-	public void connect() throws ConnectException {
-		MessageContext messageContext = null;
+	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
-			messageContext = getMessageContext();
-			String consumerKey = TwitterMediatorUtils.lookupFunctionParam(messageContext, CONSUMER_KEY);
-			String consumerSecret = TwitterMediatorUtils.lookupFunctionParam(messageContext, CONSUMER_SECRET);
-			String accessToken = TwitterMediatorUtils.lookupFunctionParam(messageContext, ACCESS_TOKEN);
-			String accessTokenSecret = TwitterMediatorUtils.lookupFunctionParam(messageContext, ACCESS_TOKEN_SECRET);
-			TwitterMediatorUtils.storeLoginUser(messageContext, consumerKey, consumerSecret, accessToken, accessTokenSecret);
+			String consumerKey = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					CONSUMER_KEY);
+			String consumerSecret = TwitterMediatorUtils.lookupFunctionParam(
+					messageContext, CONSUMER_SECRET);
+			String accessToken = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					ACCESS_TOKEN);
+			String accessTokenSecret = TwitterMediatorUtils.lookupFunctionParam(
+					messageContext, ACCESS_TOKEN_SECRET);
+			TwitterMediatorUtils.storeLoginUser(messageContext, consumerKey,
+					consumerSecret, accessToken, accessTokenSecret);
 			if (log.isDebugEnabled()) {
 				log.info("login user status done");
 			}

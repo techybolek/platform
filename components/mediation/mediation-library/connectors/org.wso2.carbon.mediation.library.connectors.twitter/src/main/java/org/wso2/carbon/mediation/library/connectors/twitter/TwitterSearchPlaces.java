@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
@@ -37,31 +37,33 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.json.DataObjectFactory;
 
-public class TwitterSearchPlaces extends AbstractTwitterConnector{
+public class TwitterSearchPlaces extends AbstractTwitterConnector {
 
 	public static final String SEARCH_BY_LATITUDE = "latitude";
-	
+
 	public static final String SEARCH_LONGITUDE = "longitude";
-	
+
 	public static final String SEARCH_IP = "ip";
-	
-	
+
 	@Override
-	public void connect() throws ConnectException {
+	public void connect(MessageContext messageContext) throws ConnectException {
 		// TODO Auto-generated method stub
-		if(log.isDebugEnabled()){
+		if (log.isDebugEnabled()) {
 			log.info("executing twitter search places");
 		}
-		MessageContext messageContext = getMessageContext();
 		try {
-			String latitude = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_BY_LATITUDE);
-			String longitude = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_LONGITUDE);
-			String ip = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_IP);
-			GeoQuery query = new GeoQuery(new GeoLocation(Double.parseDouble(latitude), Double.parseDouble(longitude)));
+			String latitude = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					SEARCH_BY_LATITUDE);
+			String longitude = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					SEARCH_LONGITUDE);
+			String ip = TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					SEARCH_IP);
+			GeoQuery query = new GeoQuery(new GeoLocation(Double.parseDouble(latitude),
+					Double.parseDouble(longitude)));
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
-			if(log.isDebugEnabled()){
-				log.info("executing prparing soap envolope"+element.toString());
+			if (log.isDebugEnabled()) {
+				log.info("executing prparing soap envolope" + element.toString());
 			}
 			super.preparePayload(messageContext, element);
 		} catch (TwitterException te) {
@@ -84,25 +86,25 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector{
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	private OMElement performSearch(Twitter twitter, GeoQuery query) throws XMLStreamException, TwitterException, JSONException, IOException {
+	private OMElement performSearch(Twitter twitter, GeoQuery query)
+			throws XMLStreamException, TwitterException, JSONException, IOException {
 		OMElement resultElement = AXIOMUtil.stringToOM("<XMLPayload/>");
 		List<Place> results = twitter.searchPlaces(query);
-		if(log.isDebugEnabled()){
-			log.info("executing executing search"+query);
+		if (log.isDebugEnabled()) {
+			log.info("executing executing search" + query);
 		}
 		for (Place place : results) {
-		    StringBuilder stringBuilder = new StringBuilder();
-		    stringBuilder.append("{ \"Place\" : ");
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("{ \"Place\" : ");
 			String json = DataObjectFactory.getRawJSON(place);
 			stringBuilder.append(json);
 			stringBuilder.append("} ");
-			//System.out.println(stringBuilder.toString());
-			OMElement element =super.parseJsonToXml(stringBuilder.toString());
+			// System.out.println(stringBuilder.toString());
+			OMElement element = super.parseJsonToXml(stringBuilder.toString());
 			resultElement.addChild(element);
 		}
 		return resultElement;
 
 	}
-	
-		
+
 }
