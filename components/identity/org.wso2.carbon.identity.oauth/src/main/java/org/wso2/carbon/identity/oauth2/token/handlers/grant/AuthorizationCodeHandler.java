@@ -149,7 +149,7 @@ public class AuthorizationCodeHandler extends AbstractAuthorizationGrantHandler 
 
         // get the token from the OAuthTokenReqMessageContext which is stored while validating
         // the authorization code.
-        String preprocessedAuthzCode = tokReqMsgCtx.getProperty(PRE_PROCESSED_AUTHZ_CODE);
+        String preprocessedAuthzCode = (String)tokReqMsgCtx.getProperty(PRE_PROCESSED_AUTHZ_CODE);
         // if it's not there (which is unlikely), recalculate it.
         if (preprocessedAuthzCode == null) {
             String authorizationCode = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getAuthorizationCode();

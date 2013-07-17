@@ -383,7 +383,7 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
         tokReqMsgCtx.setScope(tokReqMsgCtx.getOauth2AccessTokenReqDTO().getScope());
         
         // Storing the Assertion. This will be used in OpenID Connect for example
-        MessageContext.getCurrentMessageContext().setProperty(OAuth2Constants.OAUTH_SAML2_ASSERTION, assertion);
+        tokReqMsgCtx.addProperty(OAuth2Constants.OAUTH_SAML2_ASSERTION, assertion);
         
 		// Invoking extension
 		SAML2TokenCallbackHandler callback =

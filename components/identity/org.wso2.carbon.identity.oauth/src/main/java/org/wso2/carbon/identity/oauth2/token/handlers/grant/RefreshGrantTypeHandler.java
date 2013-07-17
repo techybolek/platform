@@ -159,7 +159,7 @@ public class RefreshGrantTypeHandler extends AbstractAuthorizationGrantHandler {
         accessTokenDO.setAccessToken(preprocessedAccessToken);
 
         String clientId = oauth2AccessTokenReqDTO.getClientId();
-        String oldAccessToken = tokReqMsgCtx.getProperty(PREV_ACCESS_TOKEN);
+        String oldAccessToken = (String)tokReqMsgCtx.getProperty(PREV_ACCESS_TOKEN);
 
         String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
         String authorizedUser = tokReqMsgCtx.getAuthorizedUser();

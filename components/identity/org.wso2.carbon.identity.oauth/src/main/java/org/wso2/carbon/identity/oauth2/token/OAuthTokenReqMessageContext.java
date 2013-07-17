@@ -76,11 +76,11 @@ public class OAuthTokenReqMessageContext {
         this.validityPeriod = validityPeriod;
     }
     
-    public void addProperty(String propName, String propValue){
+    public void addProperty(Object propName, Object propValue){
         properties.put(propName, propValue);
     }
     
-    public String getProperty(String propName){
-        return (String) properties.get(propName);
+    public Object getProperty(Object propName){
+        return properties.get(propName);
     }
 }
