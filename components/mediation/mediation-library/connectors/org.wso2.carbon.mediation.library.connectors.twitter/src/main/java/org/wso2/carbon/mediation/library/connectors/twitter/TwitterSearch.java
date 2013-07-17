@@ -68,6 +68,9 @@ public class TwitterSearch extends AbstractTwitterConnector {
 			polulateOptionalParamters(messageContext, query);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
+			if(log.isDebugEnabled()){
+				log.error("seach twitter result"+ element.toString());
+			}
 			super.preparePayload(messageContext, element);
 		} catch (TwitterException te) {
 			log.error("Failed to search twitter : " + te.getMessage(), te);
@@ -148,7 +151,7 @@ public class TwitterSearch extends AbstractTwitterConnector {
 			stringBuilder.append("{ \"status\" : ");
 			String json = DataObjectFactory.getRawJSON(tweet);
 			stringBuilder.append(json);
-			stringBuilder.append("} ");
+			stringBuilder.append("}");
 			OMElement element = super.parseJsonToXml(stringBuilder.toString());
 			resultElement.addChild(element);
 		}
