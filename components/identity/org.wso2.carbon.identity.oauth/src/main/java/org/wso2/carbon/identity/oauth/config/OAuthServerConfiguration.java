@@ -518,7 +518,7 @@ public class OAuthServerConfiguration {
 						Class clazz =
 						              Thread.currentThread().getContextClassLoader()
 						                    .loadClass(openIDConnectIDTokenCustomClaimsHanlderClassName);
-						openIDConnectIDTokenBuilder = (IDTokenBuilder) clazz.newInstance();
+						openidConnectIDTokenCustomClaimsCallbackHandler = (CustomClaimsCallbackHandler) clazz.newInstance();
 					} catch (ClassNotFoundException e) {
 						log.error("Error while instantiating the IDTokenBuilder ", e);
 					} catch (InstantiationException e) {
@@ -539,7 +539,7 @@ public class OAuthServerConfiguration {
 		return openIDConnectIDTokenIssuerIdentifier;
 	}
 	
-	public String getOpenIDConnectIDTokenSubClaim() {
+	public String getOpenIDConnectIDTokenSubjectClaim() {
 		return openIDConnectIDTokenSubClaim;
 	}
 	

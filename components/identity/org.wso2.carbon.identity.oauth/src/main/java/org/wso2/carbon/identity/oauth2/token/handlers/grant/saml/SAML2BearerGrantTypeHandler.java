@@ -18,14 +18,28 @@
 
 package org.wso2.carbon.identity.oauth2.token.handlers.grant.saml;
 
-import org.apache.axis2.context.MessageContext;
+import java.io.ByteArrayInputStream;
+import java.security.KeyStore;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
+import org.opensaml.saml2.core.Conditions;
+import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
@@ -51,12 +65,6 @@ import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.security.KeyStore;
-import java.util.*;
 
 /**
  * This implements SAML 2.0 Bearer Assertion Profile for OAuth 2.0 -

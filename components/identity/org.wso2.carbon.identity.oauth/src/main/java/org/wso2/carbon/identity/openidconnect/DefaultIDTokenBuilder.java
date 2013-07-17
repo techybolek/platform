@@ -48,7 +48,7 @@ public class DefaultIDTokenBuilder implements org.wso2.carbon.identity.openidcon
 		int curTime = (int) Calendar.getInstance().getTimeInMillis();
 		// setting subject 
 		String subject = request.getAuthorizedUser();
-		String claim = config.getOpenIDConnectIDTokenSubClaim();
+		String claim = config.getOpenIDConnectIDTokenSubjectClaim();
 		if (claim != null) {
 			String tenantUser = MultitenantUtils.getTenantAwareUsername(request.getAuthorizedUser());
 			String domainName = MultitenantUtils.getTenantDomain(request.getAuthorizedUser());
@@ -80,7 +80,7 @@ public class DefaultIDTokenBuilder implements org.wso2.carbon.identity.openidcon
 			CustomClaimsCallbackHandler claimsCallBackHandler =
 			                                                    OAuthServerConfiguration.getInstance()
 			                                                                            .getOpenIDConnectCustomClaimsCallbackHandler();
-			claimsCallBackHandler.handleCustomClaims(builder);
+			claimsCallBackHandler.handleCustomClaims(builder, request);
 			return builder.buildIDToken();
 		} catch (IDTokenException e) {
 			throw new IdentityOAuth2Exception("Erro while generating the IDToken", e);

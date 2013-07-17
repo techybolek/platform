@@ -17,45 +17,48 @@
  */
 package org.wso2.carbon.identity.openidconnect;
 
-import org.apache.axis2.context.MessageContext;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.openidconnect.as.messages.IDTokenBuilder;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.AttributeStatement;
+import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 
-import java.util.Iterator;
-import java.util.List;
-
 /**
- * Returns the claims of the SAML assertion 
- *
+ * Returns the claims of the SAML assertion
+ * 
  */
 public class SAMLAssertionClaimsCallback implements CustomClaimsCallbackHandler {
-	
+
 	Log log = LogFactory.getLog(SAMLAssertionClaimsCallback.class);
 
 	@Override
-    public void handleCustomClaims(IDTokenBuilder builder) {
-		Assertion assertion =
-		                      (Assertion) MessageContext.getCurrentMessageContext()
-		                                                .getProperty(OAuth2Constants.OAUTH_SAML2_ASSERTION);
-		List<AttributeStatement> list = assertion.getAttributeStatements();
-		if(list.size() > 0) {
-			Iterator<Attribute> attribIterator = assertion.getAttributeStatements().get(0).getAttributes().iterator();
-			while(attribIterator.hasNext()) {
-				Attribute attribute = attribIterator.next();
-				String value = attribute.getAttributeValues().get(0).getDOM().getTextContent();
-				builder.setClaim(attribute.getName(), value);
-				if(log.isDebugEnabled()) {
-					log.debug("Attribute: " + attribute.getName() + ", Value: " + value);
+	public void handleCustomClaims(IDTokenBuilder builder, OAuthTokenReqMessageContext requestMsgCtx) {
+		// reading the token set in the same grant
+		Assertion assertion = (Assertion) requestMsgCtx.getProperty(OAuth2Constants.OAUTH_SAML2_ASSERTION);
+		if (assertion != null) {
+			List<AttributeStatement> list = assertion.getAttributeStatements();
+			if (list.size() > 0) {
+				Iterator<Attribute> attribIterator =
+				                                     assertion.getAttributeStatements().get(0)
+				                                              .getAttributes().iterator();
+				while (attribIterator.hasNext()) {
+					Attribute attribute = attribIterator.next();
+					String value = attribute.getAttributeValues().get(0).getDOM().getTextContent();
+					builder.setClaim(attribute.getName(), value);
+					if (log.isDebugEnabled()) {
+						log.debug("Attribute: " + attribute.getName() + ", Value: " + value);
+					}
 				}
+			} else {
+				log.debug("No AttributeStatement found! ");
 			}
-		} else {
-			log.debug("No AttributeStatement found! ");
 		}
-    }
+	}
 
 }

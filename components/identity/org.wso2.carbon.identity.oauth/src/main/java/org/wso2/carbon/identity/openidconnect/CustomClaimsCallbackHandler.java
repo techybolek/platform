@@ -18,6 +18,7 @@
 package org.wso2.carbon.identity.openidconnect;
 
 import org.apache.oltu.openidconnect.as.messages.IDTokenBuilder;
+import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 
 /**
  * Builds custom claims for the {@code IDToken}
@@ -25,6 +26,6 @@ import org.apache.oltu.openidconnect.as.messages.IDTokenBuilder;
  */
 public interface CustomClaimsCallbackHandler {
 
-	public void handleCustomClaims(IDTokenBuilder builder);
+	public void handleCustomClaims(IDTokenBuilder builder, OAuthTokenReqMessageContext request);
 
 }
