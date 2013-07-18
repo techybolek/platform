@@ -17,6 +17,11 @@
  */
 package org.wso2.carbon.identity.oauth.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -25,12 +30,8 @@ import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO;
-import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.ui.CarbonUIUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import org.wso2.carbon.ui.util.CharacterEncoder;
 
 public class EndpointUtil {
 
@@ -115,22 +116,36 @@ public class EndpointUtil {
      * default will be returned.
      *
      * @param req
-     * @param clienDTO
+     * @param oauth2Params 
      * @param errorCode
      * @param errorMessage
      * @return
      */
-    public static String getErrorPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clienDTO,
-                                         String errorCode, String errorMessage) {
+    public static String getErrorPageURL(HttpServletRequest req, OAuth2Parameters oauth2Params, String errorCode,
+                                         String errorMessage) {
+		String appName = null;
+		if (oauth2Params != null) {
+			try {
+				appName = URLEncoder.encode(CharacterEncoder.getSafeText(oauth2Params.getApplicationName()),
+				                            "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// ignore
+			}
+		}
 
-        String errorPageUrl = CarbonUIUtil.getAdminConsoleURL("/") + "../authenticationendpoint/oauth2_error.do";
-        try {
-            errorPageUrl += "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" + URLEncoder.encode(errorCode, "UTF-8") + "&" +
-                    OAuthConstants.OAUTH_ERROR_MESSAGE + "=" + URLEncoder.encode(errorMessage, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // ignore
-        }
-        return errorPageUrl;
+		String errorPageUrl = CarbonUIUtil.getAdminConsoleURL("/") +
+		                              "../authenticationendpoint/oauth2_error.do";
+		try {
+			errorPageUrl +=
+			                "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" +
+			                        URLEncoder.encode(errorCode, "UTF-8") + "&" +
+			                        OAuthConstants.OAUTH_ERROR_MESSAGE + "=" +
+			                        URLEncoder.encode(errorMessage, "UTF-8") + "&" + "application" + "=" +
+			                        appName;
+		} catch (UnsupportedEncodingException e) {
+			// ignore
+		}
+		return errorPageUrl;
     }
 
     /**

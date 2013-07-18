@@ -91,8 +91,7 @@ public class OAuth2AuthzEndpoint {
 			} else {
 				log.error("Invalid Authorization Request");
 				return Response.status(HttpServletResponse.SC_FOUND)
-				               .location(new URI(EndpointUtil.getErrorPageURL(request,
-				                                                              null,
+				               .location(new URI(EndpointUtil.getErrorPageURL(request, oauth2Params,
 				                                                              OAuth2ErrorCodes.INVALID_REQUEST,
 				                                                              "Invalid Authorization Request")))
 				               .build();
@@ -100,8 +99,7 @@ public class OAuth2AuthzEndpoint {
 		} catch (OAuthSystemException e) {
 			log.error(e.getMessage(), e);
 			return Response.status(HttpServletResponse.SC_FOUND)
-			               .location(new URI(EndpointUtil.getErrorPageURL(request, null,
-			                                                              OAuth2ErrorCodes.INVALID_REQUEST,
+			               .location(new URI(EndpointUtil.getErrorPageURL(request, oauth2Params, OAuth2ErrorCodes.INVALID_REQUEST,
 			                                                              e.getMessage()))).build();
 		}
     }
@@ -171,12 +169,11 @@ public class OAuth2AuthzEndpoint {
 			clientDTO = validateClient(req, clientId, callbackURL);
 		} else {
 			log.warn("Client Id is not present in the authorization request.");
-			return EndpointUtil.getErrorPageURL(req, clientDTO, OAuth2ErrorCodes.INVALID_REQUEST,
+			return EndpointUtil.getErrorPageURL(req, null, OAuth2ErrorCodes.INVALID_REQUEST,
 			                                    "Invalid Request. Client Id is not present in the request");
 		}
 		if (!clientDTO.isValidClient()) {
-			return EndpointUtil.getErrorPageURL(req, clientDTO, clientDTO.getErrorCode(),
-			                                    clientDTO.getErrorMsg());
+			return EndpointUtil.getErrorPageURL(req, null, clientDTO.getErrorCode(), clientDTO.getErrorMsg());
 		}
 
 		// Now the client is valid, redirect him to the authorization page.

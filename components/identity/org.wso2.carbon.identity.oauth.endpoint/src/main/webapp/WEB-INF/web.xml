@@ -26,6 +26,27 @@
         <servlet-name>OAuth2Endpoints</servlet-name>
         <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
+
+        <!-- Application based page loading configs -->
+
+        <!-- *********** Pages for the SampleApp *************** -->
+        <!--init-param> 
+              <description>Login page for the application SampleApp</description> 
+              <param-name>SampleApp-LoginPage</param-name> 
+              <param-value>https://localhost:9443/mypages/sampleapp-login</param-value> 
+        </init-param>
+        <init-param>
+              <description>Error page for the application SampleApp</description>
+              <param-name>SampleApp-ErrorPage</param-name>
+              <param-value>https://localhost:9443/mypages/sampleapp-error</param-value>
+        </init-param>
+        <init-param>
+              <description>Consent page for the application SampleApp</description>
+              <param-name>SampleApp-ConsentPage</param-name>
+              <param-value>https://localhost:9443/mypages/sampleapp-consent</param-value>
+        </init-param-->
+        <!-- ******************* End of SampleApp configs ***************** -->
+
     </servlet>
 
     <servlet-mapping>
