@@ -36,3 +36,7 @@ JCR Client is using the JCR implementation of WSO2 Governance Registry and does 
 7.) ws-client
 
 The WS Registry API exposes a complete set of registry operations that can be accessed through Web Service calls. This sample explains how to uses the WS Registry API as an client.
+
+8.) ws-executor
+
+This sample explains how the Web Service Executor can be used in lifecycle configurations to invoke a Web Service in a synchronous manner.
