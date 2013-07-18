@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.registry.samples.populator.utils;
 
 import java.util.HashMap;
@@ -6,53 +24,32 @@ import java.util.Map;
 public class CommandHandler {
 
     private static final Map<String, String> inputs = new HashMap<String, String>();
+    private static final Map<String, String> argumentMap = new HashMap<String, String>();
+
+    static {
+        argumentMap.put("-cr", "Context Root of the Service");
+        argumentMap.put("-l", "Location of Model");
+        argumentMap.put("-pw", "Password of the Admin");
+        argumentMap.put("-u", "Username of the Admin");
+        argumentMap.put("-p", "Port of the registry");
+        argumentMap.put("-h", "Hostname of the registry");
+    }
 
     public static boolean setInputs(String[] arguments) {
 
-        if (arguments.length == 0) {
-            printMessage();
-            return false;
-        }
-        if (arguments.length == 1 && arguments[0].equals("--help")) {
+        if (arguments.length == 0 || (arguments.length == 1 && arguments[0].equals("--help"))) {
             printMessage();
             return false;
         }
 
         // now loop through the arguments list to capture the options
         for (int i = 0; i < arguments.length; i++) {
-            if (arguments[i].equals("-h")) {
+            String val = argumentMap.get(arguments[i]);
+            if (val != null) {
                 if (arguments.length - 1 == i) {
-                    throw new RuntimeException("Hostname of the registry is missing");
+                    throw new RuntimeException(val + " is missing");
                 }
-                inputs.put("-h", arguments[++i]);
-
-            } else if (arguments[i].equals("-p")) {
-                if (arguments.length - 1 == i) {
-                    throw new RuntimeException("Port of the registry is missing");
-                }
-                inputs.put("-p", arguments[++i]);
-
-            } else if (arguments[i].equals("-u")) {
-                if (arguments.length - 1 == i) {
-                    throw new RuntimeException("Username of the admin is missing");
-                }
-                inputs.put("-u", arguments[++i]);
-
-            } else if (arguments[i].equals("-pw")) {
-                if (arguments.length - 1 == i) {
-                    throw new RuntimeException("Password of the admin is missing");
-                }
-                inputs.put("-pw", arguments[++i]);
-            } else if (arguments[i].equals("-l")) {
-                if (arguments.length - 1 == i) {
-                    throw new RuntimeException("Location of Model is missing");
-                }
-                inputs.put("-l", arguments[++i]);
-            }  else if (arguments[i].equals("-cr")) {
-                if (arguments.length - 1 == i) {
-                    throw new RuntimeException("Context root of the service is missing");
-                }
-                inputs.put("-cr", arguments[++i]);
+                inputs.put(arguments[i], arguments[++i]);
             }
         }
 

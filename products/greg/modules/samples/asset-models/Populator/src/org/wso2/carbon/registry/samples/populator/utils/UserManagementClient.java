@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.registry.samples.populator.utils;
 
 import org.apache.axis2.AxisFault;
@@ -32,48 +50,39 @@ public class UserManagementClient {
             String epr = backendServerURL + "UserProfileMgtService";
             profileMgtServiceStub = new UserProfileMgtServiceStub(configContext, epr);
 
-            ServiceClient client = profileMgtServiceStub._getServiceClient();
-            Options option = client.getOptions();
-            option.setManageSession(true);
-            option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
+            PopulatorUtil.setCookie(profileMgtServiceStub, cookie);
         } catch (AxisFault e) {
-            String msg = "Failed to initiate user profile management service client. " + e.getMessage();
+            String msg = "Failed to initiate user profile management service client.";
             throw new RegistryException(msg, e);
         }
 
         try {
             String epr = backendServerURL + "UserAdmin";
             userAdminStub = new UserAdminStub(configContext, epr);
-            ServiceClient client = userAdminStub._getServiceClient();
-            Options option = client.getOptions();
-            option.setManageSession(true);
-            option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
+
+            PopulatorUtil.setCookie(userAdminStub, cookie);
         } catch (AxisFault e) {
-            String msg = "Failed to initiate user admin service client. " + e.getMessage();
+            String msg = "Failed to initiate user admin service client.";
             throw new RegistryException(msg, e);
         }
 
         try {
             String epr = backendServerURL + "ResourceAdminService";
             resourceAdminStub = new ResourceAdminServiceStub(configContext, epr);
-            ServiceClient client = resourceAdminStub._getServiceClient();
-            Options option = client.getOptions();
-            option.setManageSession(true);
-            option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
+
+            PopulatorUtil.setCookie(resourceAdminStub, cookie);
         } catch (AxisFault e) {
-            String msg = "Failed to initiate resource admin service client. " + e.getMessage();
+            String msg = "Failed to initiate resource admin service client.";
             throw new RegistryException(msg, e);
         }
 
         try {
             String epr = backendServerURL + "TenantMgtAdminService";
             tenantAdminStub = new TenantMgtAdminServiceStub(configContext, epr);
-            ServiceClient client = tenantAdminStub._getServiceClient();
-            Options option = client.getOptions();
-            option.setManageSession(true);
-            option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
+
+            PopulatorUtil.setCookie(tenantAdminStub, cookie);
         } catch (AxisFault e) {
-            String msg = "Failed to initiate tenant management admin service client. " + e.getMessage();
+            String msg = "Failed to initiate tenant management admin service client.";
             throw new RegistryException(msg, e);
         }
     }
