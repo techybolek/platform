@@ -62,26 +62,26 @@ public class IdentityManagementClient {
         }
     }
         
-    public CaptchaInfoBean generateRandomCaptcha() throws AxisFault {
-        
-        try {
-            return stub.generateRandomCaptcha();
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public VerificationBean verifyUser(String userId, CaptchaInfoBean captchaInfoBean)
-                                                                        throws AxisFault {
-        try {
-            return stub.verifyUser(userId, captchaInfoBean);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-
-        return null;
-    }
+//    public CaptchaInfoBean generateRandomCaptcha() throws AxisFault {
+//
+//        try {
+//            return stub.generateRandomCaptcha();
+//        } catch (Exception e) {
+//            handleException(e.getMessage(), e);
+//        }
+//        return null;
+//    }
+//
+//    public VerificationBean verifyUser(String userId, CaptchaInfoBean captchaInfoBean)
+//                                                                        throws AxisFault {
+//        try {
+//            return stub.verifyUser(userId, captchaInfoBean);
+//        } catch (Exception e) {
+//            handleException(e.getMessage(), e);
+//        }
+//
+//        return null;
+//    }
 
     public boolean processPasswordRecoveryLink(String userId, String userKey)
                                                                         throws AxisFault {
