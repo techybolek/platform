@@ -93,11 +93,8 @@ public class ClientConnFactoryBuilder {
 
         final Parameter hvp = transportOut.getParameter("HostnameVerifier");
         final String hvs = hvp != null ? hvp.getValue().toString() : null;
-        final Parameter cvp = transportOut.getParameter("CertificateRevocationVerifier");
-        final String cvs = cvp != null ? cvp.getValue().toString() : null;
-
         final X509HostnameVerifier hostnameVerifier;
-        RevocationVerificationManager revocationVerifier = null;
+
 
         if ("Strict".equalsIgnoreCase(hvs)) {
             hostnameVerifier = ClientSSLSetupHandler.STRICT;
@@ -109,8 +106,22 @@ public class ClientConnFactoryBuilder {
             hostnameVerifier = ClientSSLSetupHandler.DEFAULT;
         }
 
-        if ("true".equalsIgnoreCase(cvs)) {
-            revocationVerifier = new RevocationVerificationManager(null, null);
+        final Parameter cvp = transportOut.getParameter("CertificateRevocationVerifier");
+        final String cvEnable = cvp != null ?
+                cvp.getParameterElement().getAttribute(new QName("enable")).getAttributeValue() : null;
+        RevocationVerificationManager revocationVerifier = null;
+
+        if ("true".equalsIgnoreCase(cvEnable)) {
+            String cacheSizeString = cvp.getParameterElement().getFirstChildWithName(new QName("CacheSize")).getText();
+            String cacheDelayString = cvp.getParameterElement().getFirstChildWithName(new QName("CacheDelay")).getText();
+            Integer cacheSize = null;
+            Integer cacheDelay = null;
+            try {
+                cacheSize = new Integer(cacheSizeString);
+                cacheDelay = new Integer(cacheDelayString);
+            }
+            catch (NumberFormatException e) {}
+            revocationVerifier = new RevocationVerificationManager(cacheSize, cacheDelay);
         }
 
         ssl = new SSLContextDetails(sslContext, new ClientSSLSetupHandler(hostnameVerifier, revocationVerifier));
