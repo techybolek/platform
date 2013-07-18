@@ -1290,6 +1290,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
 
         if (!axisService.isEnableAllTransports()) {
             axisService.addExposedTransport(transportProtocol);
+            org.apache.axis2.deployment.util.Utils.addEndpointsToService(axisService, axisConfig);
         } else {
             return "Service [" + serviceId + "] already contains the " + transportProtocol
                    + " transport binding!";
