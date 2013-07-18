@@ -94,7 +94,7 @@ public class APIPaginationTestCase {
         }
     }
 
-    @Test(groups = {"wso2.com"}, dependsOnMethods = {"resourceComment", "resourceTag"})
+    @Test(groups = {"wso2.greg"}, dependsOnMethods = {"resourceComment", "resourceTag"})
     public void resourceLog() throws Exception {
 
         LogEntry[] logEntries = registry.getLogs("", 1, "admin", null, null, false);
