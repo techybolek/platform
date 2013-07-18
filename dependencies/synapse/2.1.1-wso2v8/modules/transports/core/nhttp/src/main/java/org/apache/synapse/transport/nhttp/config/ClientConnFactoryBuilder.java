@@ -110,7 +110,7 @@ public class ClientConnFactoryBuilder {
         }
 
         if ("true".equalsIgnoreCase(cvs)) {
-            revocationVerifier = new RevocationVerificationManager();
+            revocationVerifier = new RevocationVerificationManager(null, null);
         }
 
         ssl = new SSLContextDetails(sslContext, new ClientSSLSetupHandler(hostnameVerifier, revocationVerifier));

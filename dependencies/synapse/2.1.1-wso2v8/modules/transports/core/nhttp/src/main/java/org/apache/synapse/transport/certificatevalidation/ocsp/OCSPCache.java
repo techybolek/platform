@@ -20,7 +20,9 @@ package org.apache.synapse.transport.certificatevalidation.ocsp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.commons.jmx.MBeanRegistrar;
 import org.apache.synapse.transport.certificatevalidation.CertificateVerificationException;
+import org.apache.synapse.transport.certificatevalidation.cache.CacheController;
 import org.apache.synapse.transport.certificatevalidation.cache.CacheManager;
 import org.apache.synapse.transport.certificatevalidation.cache.ManageableCache;
 import org.apache.synapse.transport.certificatevalidation.cache.ManageableCacheValue;
@@ -62,14 +64,15 @@ public class OCSPCache implements ManageableCache {
     /**
      * This lazy initializes the Cache with a CacheManager. If this method is not called, a cache manager will not be used.
      * @param size max size of the cache
-     * @param time defines how frequently the CacheManager will be started
+     * @param delay defines how frequently the CacheManager will be started
      */
-    public void init(int size, int time) {
+    public void init(int size, int delay) {
         if (cacheManager == null) {
             synchronized (OCSPCache.class) {
                 if (cacheManager == null) {
-                    cacheManager = new CacheManager(cache, size);
-                    cacheManager.start(time);
+                    cacheManager = new CacheManager(cache, size, delay);
+                    CacheController mbean = new CacheController(cache,cacheManager);
+                    MBeanRegistrar.getInstance().registerMBean(mbean, "CacheController", "OCSPCacheController");
                 }
             }
         }

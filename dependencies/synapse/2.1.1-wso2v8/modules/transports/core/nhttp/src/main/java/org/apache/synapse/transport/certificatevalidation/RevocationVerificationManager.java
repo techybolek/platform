@@ -35,9 +35,21 @@ import java.security.cert.X509Certificate;
  */
 public class RevocationVerificationManager {
 
+    private int cacheSize = Constants.CACHE_DEFAULT_ALLOCATED_SIZE;
+    private int cacheDelayMins = Constants.CACHE_DEFAULT_DELAY_MINS;
     private static final Log log = LogFactory.getLog(RevocationVerificationManager.class);
 
-    public RevocationVerificationManager() {}
+    public RevocationVerificationManager(Integer cacheAllocatedSize, Integer cacheDelayMins) {
+
+        if (cacheAllocatedSize != null && cacheAllocatedSize > Constants.CACHE_MIN_ALLOCATED_SIZE
+                && cacheAllocatedSize < Constants.CACHE_MAX_ALLOCATED_SIZE) {
+            this.cacheSize = cacheAllocatedSize;
+        }
+        if (cacheDelayMins != null && cacheDelayMins > Constants.CACHE_MIN_DELAY_MINS
+                && cacheDelayMins < Constants.CACHE_MAX_DELAY_MINS) {
+            this.cacheDelayMins = cacheDelayMins;
+        }
+    }
 
     /**
      * This method first tries to verify the given certificate chain using OCSP since OCSP verification is
@@ -49,13 +61,13 @@ public class RevocationVerificationManager {
             throws CertificateVerificationException {
 
         X509Certificate[] convertedCertificates = convert(peerCertificates);
+
         long start = System.currentTimeMillis();
+
         OCSPCache ocspCache = OCSPCache.getCache();
-        //Start every 5 minutes.
-        ocspCache.init(50, 60 * 5);
+        ocspCache.init(cacheSize, cacheDelayMins);
         CRLCache crlCache = CRLCache.getCache();
-        //Start every 5 minutes.
-        crlCache.init(50, 60 * 5);
+        crlCache.init(cacheSize, cacheDelayMins);
 
         RevocationVerifier[] verifiers = {new OCSPVerifier(ocspCache), new CRLVerifier(crlCache)};
 
