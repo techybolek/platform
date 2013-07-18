@@ -5,34 +5,35 @@ import org.wso2.carbon.governance.generic.ui.utils.UIGeneratorConstants;
 
 public class TextArea extends UIComponent {
 
-	private String value;
-	private int height;
-	private int width;
-	private boolean isRichText;
-	private boolean isSkipName;
-	
-	public TextArea(String label, String name,String id, String mandatory, String widget,
-                    String value, int height, int width, boolean isReadOnly,
-                    boolean isRichText, String tooltip,boolean isSkipName,boolean isJSGenerate){
-		super(label, name, id, mandatory, widget, isReadOnly, tooltip, isJSGenerate);
-		this.value = value;
-		this.height = height;
-		this.width = width;
-		this.isRichText = isRichText;
-		this.isSkipName = isSkipName;
-	}
+    private String value;
+    private int height;
+    private int width;
+    private boolean isRichText;
+    private boolean isSkipName;
 
-	@Override
+    public TextArea(String label, String name, String id, String mandatory, String widget,
+                    String value, int height, int width, boolean isReadOnly,
+                    boolean isRichText, String tooltip, boolean isSkipName, boolean isJSGenerating) {
+        super(label, name, id, mandatory, widget, isReadOnly, tooltip, isJSGenerating);
+        this.value = value;
+        this.height = height;
+        this.width = width;
+        this.isRichText = isRichText;
+        this.isSkipName = isSkipName;
+    }
+
+    @Override
     public String generate() {
-		
-		StringBuilder element = new StringBuilder();
-		String id;		
-		if (this.id == null) {
-			id = "id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
-		} else {
-			id = this.id;
-		}
-		
+
+        StringBuilder element = new StringBuilder();
+        String id;
+        String partialName = widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
+        if (this.id == null) {
+            id = "id_" + partialName;
+        } else {
+            id = this.id;
+        }
+
         StringBuilder size = new StringBuilder("style=\"");
         value = StringEscapeUtils.escapeHtml(value);
         if (height > 0) {
@@ -44,113 +45,117 @@ public class TextArea extends UIComponent {
             size.append("width:").append(UIGeneratorConstants.DEFAULT_WIDTH).append("px\"");
         }
         if (isSkipName) {
-        	 element.append("<td><textarea  name=\"" + widget.replaceAll(" ","") + "_" + name.replaceAll(" ", "") + "\" title=\"" + tooltip + "\" " +
-                     "id=\"id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ",
-                     "") + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + (value != null ? StringEscapeUtils.escapeHtml(value): "" )+"</textarea></td>");
+             element.append("<td><textarea  name=\"").append(partialName)
+                     .append("\" title=\"").append(tooltip).append("\" id=\"id_").append(partialName)
+                     .append("\" ").append(size).append((isReadOnly ? " readonly" : "")).append(" >")
+                     .append((value != null ? StringEscapeUtils.escapeHtml(value) : "")).append("</textarea></td>");
               return element.toString();
         }
         
         if ("true".equals(mandatory)) {
             if (isRichText) {
-                element.append("<td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>" +
-                        " <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\""
-                        + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ",
-                        "") + "\" title=\"" + tooltip + "\" id=\""
-                        + id + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + (value != null ? value : "") + "</textarea>");
-                element = appendRichTextScript(element, width, height, widget, name);
+                element.append("<td class=\"leftCol-big\">").append(label).append("<span class=\"required\">*</span></td>")
+                        .append(" <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\"")
+                        .append(partialName).append("\" title=\"")
+                        .append(tooltip).append("\" id=\"").append(id).append("\" ").append(size)
+                        .append((isReadOnly ? " readonly" : "")).append(" >").append((value != null ? value : ""))
+                        .append("</textarea>");
+                element = appendRichTextScript(element, width, height, widget, name, partialName);
                 element.append("</td></tr>");
 
             } else {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>" +
-                        " <td><textarea  name=\"" + widget.replaceAll(" ",
-                        "") + "_" + name.replaceAll(" ", "") + "\" title=\"" + tooltip + "\" id=\""
-                        + id + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + (value != null ? value : "")  + "</textarea>");
-                //element = appendEmptyScript(element, widget, name);
+                element.append("<tr><td class=\"leftCol-big\">").append(label)
+                        .append("<span class=\"required\">*</span></td> <td><textarea  name=\"")
+                        .append(partialName).append("\" title=\"")
+                        .append(tooltip).append("\" id=\"").append(id).append("\" ").append(size)
+                        .append((isReadOnly ? " readonly" : "")).append(" >").append((value != null ? value : ""))
+                        .append("</textarea>");
+                //element = appendEmptyScript(element, widget, name, partialName);
                 element.append("</td></tr>");
 
             }
         } else {
             if (isRichText) {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>" +
-                        " <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\""
-                        + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ",
-                        "") + "\" title=\"" + tooltip + "\" id=\""
-                        + id + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + (value != null ? value : "")  + "</textarea>");
-                element = appendRichTextScript(element, width, height, widget, name);
+                element.append("<tr><td class=\"leftCol-big\">").append(label).append("<span class=\"required\">*</span></td>")
+                        .append(" <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\"")
+                        .append(partialName).append("\" title=\"")
+                        .append(tooltip).append("\" id=\"").append(id).append("\" ").append(size)
+                        .append((isReadOnly ? " readonly" : "")).append(" >").append((value != null ? value : ""))
+                        .append("</textarea>");
+                element = appendRichTextScript(element, width, height, widget, name, partialName);
                 element.append("</td></tr>");
 
             } else {
-            	if (label != null) {
-            		element.append("<tr><td class=\"leftCol-big\">" + label + "</td>" );
-            	}
-            	
-            	element.append("<td><textarea  name=\"" + widget.replaceAll(" ",
-                        "") + "_" + name.replaceAll(" ", "") + "\" title=\"" + tooltip + "\" id=\""
-                        + id + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + (value != null ? value : "")  + "</textarea>");
+                if (label != null) {
+                    element.append("<tr><td class=\"leftCol-big\">").append(label).append("</td>");
+                }
+                element.append("<td><textarea  name=\"").append(partialName).append("\" title=\"").append(tooltip)
+                        .append("\" id=\"").append(id).append("\" ").append(size).append((isReadOnly ? " readonly" : ""))
+                        .append(" >").append((value != null ? value : "")).append("</textarea>");
                 //element = appendEmptyScript(element, widget, name);
-            	if (label != null) {
-            		element.append("</td></tr>");
-            	}
+                if (label != null) {
+                    element.append("</td></tr>");
+                }
 
             }
         }
         
         return element.toString();
     }
-	
-	private StringBuilder appendRichTextScript(StringBuilder element, int width, int height, String widget, String name) {
-        String attrName = widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
-        String eleName = "id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
-        String ele_id = "_id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
+
+    private StringBuilder appendRichTextScript(StringBuilder element, int width, int height, String widget, String name,
+                                               String attrName) {
+        String eleName = "id_" + attrName;
+        String ele_id = "_id_" + attrName;
         String fun_name = "set_" + eleName;
         String richTextAttrName = "yui_txt_" + eleName;
-        element.append("<script>\n" +
-                "\n" + "var " + richTextAttrName + ";\n" +
-                "(function() {\n" +
-                "    var Dom = YAHOO.util.Dom,\n" +
-                "        Event = YAHOO.util.Event;\n" +
-                "    \n" +
-                "    var myConfig = {\n" +
-                "        height: '" + "120" + "px',\n" +
-                "        width: '" + "400" + "px',\n" +
-                "        dompath: true,\n" +
-                "        focusAtStart: true\n" +
-                "    };\n" +
-                "\n" +
-                "    YAHOO.log('Create the Editor..', 'info', 'example');\n" +
-                "    " + richTextAttrName + " = new YAHOO.widget.SimpleEditor('" + eleName + "', myConfig);\n" +
-                "    " + richTextAttrName + ".render();\n" +
-                "\n" +
-                "})();\n");
+        element.append("<script>\n")
+                .append("\n").append("var ").append(richTextAttrName).append(";\n")
+                .append("(function() {\n")
+                .append("    var Dom = YAHOO.util.Dom,\n")
+                .append("        Event = YAHOO.util.Event;\n")
+                .append("    \n")
+                .append("    var myConfig = {\n")
+                .append("        height: '").append("120px',\n")
+                .append("        width: '").append("400px',\n")
+                .append("        dompath: true,\n")
+                .append("        focusAtStart: true\n")
+                .append("    };\n")
+                .append("\n")
+                .append("    YAHOO.log('Create the Editor..', 'info', 'example');\n")
+                .append("    ").append(richTextAttrName).append(" = new YAHOO.widget.SimpleEditor('").append(eleName).append("', myConfig);\n")
+                .append("    ").append(richTextAttrName).append(".render();\n")
+                .append("\n")
+                .append("})();\n");
 
-        element.append("function " + fun_name + "(){\n" +
-                "        var form1 = document.getElementById('CustomUIForm');\n" +
-                "        var newInput = document.createElement('input');\n" +
-                "        newInput.setAttribute('type','hidden');\n" +
-                "        newInput.setAttribute('name','" + attrName + "');\n" +
-                "        newInput.setAttribute('id','" + ele_id + "');\n" +
-                "        form1.appendChild(newInput);" +
+        element.append("function ").append(fun_name).append("(){\n")
+                .append("        var form1 = document.getElementById('CustomUIForm');\n")
+                .append("        var newInput = document.createElement('input');\n")
+                .append("        newInput.setAttribute('type','hidden');\n")
+                .append("        newInput.setAttribute('name','").append(attrName).append("');\n")
+                .append("        newInput.setAttribute('id','").append(ele_id).append("');\n")
+                .append("        form1.appendChild(newInput);")
 
-                "    var contentText=\"\";\n" +
-                "    " + richTextAttrName + ".saveHTML();\n" +
-                "    contentText = " + richTextAttrName + ".get('textarea').value;\n" +
-                "    document.getElementById(\"" + ele_id + "\").value = contentText;\n" +
-                "}");
+                .append("    var contentText=\"\";\n")
+                .append("    ").append(richTextAttrName).append(".saveHTML();\n")
+                .append("    contentText = ").append(richTextAttrName).append(".get('textarea').value;\n")
+                .append("    document.getElementById(\"").append(ele_id).append("\").value = contentText;\n")
+                .append("}");
 
         element.append("</script>");
 
         return element;
     }
-	
-	private StringBuilder appendEmptyScript(StringBuilder element, String widget, String name) {
-	        //Create a empty JS function to avoid errors in rich text false state;
-	        String eleName = "id_" + widget.replaceAll(" ", "") + "_" + name.replaceAll(" ", "");
-	        String fun_name = "set_" + eleName;
-	        element.append("<script>\n");
-	        element.append("function " + fun_name + "(){}");
-	        element.append("</script>");
-	        return element;
-	}
+
+    private StringBuilder appendEmptyScript(StringBuilder element, String widget, String name, String partialName) {
+            //Create a empty JS function to avoid errors in rich text false state;
+            String eleName = "id_" + partialName;
+            String fun_name = "set_" + eleName;
+            element.append("<script>\n");
+            element.append("function ").append(fun_name).append("(){}");
+            element.append("</script>");
+            return element;
+    }
 
 
 }
