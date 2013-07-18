@@ -52,6 +52,8 @@
     "subscriptions":"Subscriptions",
     "statistics":"Statistics",
     "revokeTokens":"Revoke Tokens",
+    "blockProduction":"Production Only",
+    "blockAll":"Production & Sandbox",
 
     "addNewDoc":"Add New Document",
     "summary":"Summary",

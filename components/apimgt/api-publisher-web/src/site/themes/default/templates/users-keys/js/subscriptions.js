@@ -2,9 +2,13 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     //var ahrefId = $('#' + apiName + provider + appId);
     var ahrefId = $(link);
     var status = ahrefId.text();
+    var blockType = getRadioValue($('input[name=blockType'+n+']:radio:checked'));
     var newStatus;
     if (status.trim().toUpperCase() == 'Unblock'.toUpperCase()) {
         newStatus = 'UNBLOCKED';
+        $('input[name=blockType'+n+']:radio:checked').removeAttr("checked");
+    } else if(blockType == 'blockProduction') {
+    	newStatus = 'PROD_ONLY_BLOCKED';
     } else {
         newStatus = 'BLOCKED';
     }
@@ -32,3 +36,12 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
 
 
 }
+
+var getRadioValue = function (radioButton) {
+    if (radioButton.length > 0) {
+        return radioButton.val();
+    }
+    else {
+        return 0;
+    }
+};

@@ -524,9 +524,16 @@ public class ApiMgtDAO {
                 apiName = rs.getString(APIConstants.FIELD_API_NAME);
                 consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
                 apiPublisher = rs.getString(APIConstants.FIELD_API_PUBLISHER);
-
+                
+                /* If Subscription Status is PROD_ONLY_BLOCKED, block production access only */
                 if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.BLOCKED)) {
                     keyValidationInfoDTO.setValidationStatus(
+                            APIConstants.KeyValidationStatus.API_BLOCKED);
+                    keyValidationInfoDTO.setAuthorized(false);
+                    return keyValidationInfoDTO;
+                } else if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED) &&
+                		!APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
+                	keyValidationInfoDTO.setValidationStatus(
                             APIConstants.KeyValidationStatus.API_BLOCKED);
                     keyValidationInfoDTO.setAuthorized(false);
                     return keyValidationInfoDTO;

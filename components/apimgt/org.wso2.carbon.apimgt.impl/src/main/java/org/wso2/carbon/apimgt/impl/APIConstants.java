@@ -172,6 +172,7 @@ public final class APIConstants {
     }
     public static class SubscriptionStatus {
         public static final String BLOCKED = "BLOCKED";
+        public static final String PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
         public static final String UNBLOCKED = "UNBLOCKED";
     }
 

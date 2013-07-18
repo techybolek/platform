@@ -747,3 +747,14 @@ body {
 .navbar-inner,.menu-content{
     filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
+.radio-class {
+	float:left;
+	clear:none;
+	margin: 2px 0 0 2px;
+}
+.radio-label-class {
+	float:left;
+	clear:none;
+	display:block;
+	padding: 2px 1em 0 0;
+}

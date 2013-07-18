@@ -101,7 +101,7 @@
         version=api[2];
         apiPath=jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + apiName + "&version=" + version + "&provider=" + jagg.getUser().username+urlPostfix;
         %>
-        <a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})"><%=apiName%>-<%=version%></a>
+        <div><a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})"><%=apiName%>-<%=version%></a></div>
         <br/>
 
         <%}}else{
@@ -110,32 +110,48 @@
         version = api[2];
         apiPath=jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + apiName + "&version=" + version + "&provider=" + jagg.getUser().username+urlPostfix;
         %>
-        <a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})"><%=apiName%>-<%=version%></a>
+        <div><a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})"><%=apiName%>-<%=version%></a></div>
         <%}%>
     </td>
-    <td>
+    <td style="width:300px">
       <%
         var apis=apiList.split(",");
        if(apis != null){
         for(var n=0;n<apis.length;n++){
-        var api=apis[n].split("::");
-        var existingStatus=api[0];
-        var apiName=api[1];
-        var version=api[2];
-        var status;
-        var newStatus;
-        var className;
-        if(existingStatus=='BLOCKED'){
-        status='Unblock';
-        newStatus='UNBLOCKED';
-        className='icon-ok-circle';
-        }else{
-        status='Block';
-        newStatus='BLOCKED';
-        className='icon-ban-circle';
-        }
+	        var api=apis[n].split("::");
+	        var existingStatus=api[0];
+	        var apiName=api[1];
+	        var version=api[2];
+	        var status;
+	        var newStatus;
+	        var className;
+	        if(existingStatus=='BLOCKED'){
+		        status='Unblock';
+		        newStatus='UNBLOCKED';
+		        className='icon-ok-circle';
+	        }else{
+		        status='Block';
+		        newStatus='BLOCKED';
+		        className='icon-ban-circle';
+	        }
        %>
-       <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>" onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', this)"> <i class="<%=className%>"></i> <%=status%> </a> <br/>
+       <div>
+       <%if (existingStatus=='PROD_ONLY_BLOCKED') { %>
+       		<input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" id="y" checked="true" />
+       		<label for="y" class="radio-label-class"><%=i18n.localize("blockProduction")%></label>
+       		<input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll" id="z" />
+       <%} else if (existingStatus=='BLOCKED'){%>
+       		<input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" id="y" />
+       		<label for="y" class="radio-label-class"><%=i18n.localize("blockProduction")%></label>
+       		<input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll" id="z" checked="true"/>
+       <%} else {%>
+       		<input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" id="y"/>
+       		<label for="y" class="radio-label-class"><%=i18n.localize("blockProduction")%></label>
+       		<input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll" id="z" />
+       <% }%>
+       <label for="z" class="radio-label-class"><%=i18n.localize("blockAll")%></label>
+       <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>" onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', <%=n%>, this)"> <i class="<%=className%>"></i> <%=status%> </a>
+       </div> <br/>
       <%}
         }%>
     </td>
