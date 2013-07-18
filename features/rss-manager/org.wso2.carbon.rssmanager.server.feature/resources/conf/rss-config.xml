@@ -19,39 +19,42 @@
  - under the License.
  -
  -->
-<wso2-rss>
+<rss-configuration>
 
- <rss-type>MYSQL</rss-type>
-  <!-- RSS database used to store database servers, database instance information, users etc.. -->
-  <rss-mgt-repository>
-      <datasource-config>
-         <dataSourceClassName>org.h2.jdbcx.JdbcDataSource</dataSourceClassName>
-         <dataSourceProps>
-            <property name="URL">jdbc:h2:repository/database/RSS_DATABASE;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000</property>
-            <property name="user">wso2carbon</property>
-            <property name="password">wso2carbon</property>
-         </dataSourceProps>
-      </datasource-config>
-  </rss-mgt-repository>
+  	<!-- RSS database used to store database servers, database instance information, users etc.. -->
+  	<rss-mgt-repository>
+      		<datasource-config>
+         		<dataSourceClassName>org.h2.jdbcx.JdbcDataSource</dataSourceClassName>
+         		<dataSourceProps>
+            			<property name="URL">jdbc:h2:repository/database/RSS_DATABASE;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000</property>
+            			<property name="user">wso2carbon</property>
+            			<property name="password">wso2carbon</property>
+         		</dataSourceProps>
+      		</datasource-config>
+  	</rss-mgt-repository>
 
-  <!-- WSO2 RSS instances are predefined constant server instances to be used by users,
-       the other type is User Defined RSS instances, 
-       which are defined by individual tenants -->
-  <system-rss-instances>
-      <!--system-rss-instance>
-          <name>WSO2RSS1</name>
-          <dbms-type>MYSQL</dbms-type>
-          <server-category>LOCAL</server-category>
-          <admin-datasource-config>
-             <dataSourceClassName>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</dataSourceClassName>
-             <dataSourceProps>
-                <property name="url">jdbc:mysql://localhost:3306</property>
-                <property name="user">root</property>
-                <property name="password">root</property>
-             </dataSourceProps>
-          </admin-datasource-config>
-      </system-rss-instance-->
-  </system-rss-instances>
-
-</wso2-rss>
+  	<!-- WSO2 RSS instances are predefined constant server instances to be used by users,
+       	the other type is User Defined RSS instances, 
+       	which are defined by individual tenants -->
+	<rss-environments>
+    		<rss-environment>
+                        <name>DEFAULT</name>
+			<rss-provider>MYSQL</rss-provider>
+  			<rss-instances>
+      				<!--rss-instance>
+          				<name>WSO2RSS1</name>
+					<instance-type>WSO2_RSS</instance-type>
+          				<dbms-type>MYSQL</dbms-type>
+          				<server-category>LOCAL</server-category>
+                                             <datasource-config>
+                                             <url>jdbc:mysql://localhost:3306</url>
+					     <username>root</username>
+					     <password>root</password>
+					     <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+          				</datasource-config>
+      				</rss-instance-->
+  			</rss-instances>
+		</rss-environment>
+	</rss-environments>
+</rss-configuration>
 
