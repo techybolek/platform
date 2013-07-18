@@ -17,30 +17,18 @@
  */
 package org.wso2.carbon.mediation.library.service;
 
+public class LibraryArtifiactInfo {
 
-public class LibraryInfo {
+	private String name;
 
-	private String libName;
-	private String packageName;
 	private String description;
-	private LibraryArtifiactInfo [] artifacts;
 
-	private String qName;
-
-	public String getLibName() {
-		return libName;
+	public String getName() {
+		return name;
 	}
 
-	public void setLibName(String libName) {
-		this.libName = libName;
-	}
-
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getDescription() {
@@ -50,31 +38,5 @@ public class LibraryInfo {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	public void setQName(String description) {
-		this.qName = description;
-	}
-
-	public String getQName() {
-		return this.qName;
-	}
-
-	public String getqName() {
-		return qName;
-	}
-
-	public void setqName(String qName) {
-		this.qName = qName;
-	}
-
-	public LibraryArtifiactInfo[] getArtifacts() {
-		return artifacts;
-	}
-
-	public void setArtifacts(LibraryArtifiactInfo[] artifacts) {
-		this.artifacts = artifacts;
-	}
-	
-	
 
 }

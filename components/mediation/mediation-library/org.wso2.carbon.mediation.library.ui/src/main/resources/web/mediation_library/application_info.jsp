@@ -23,6 +23,7 @@
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.wso2.carbon.mediation.library.ui.LibraryAdminClient" %>
 <%@ page import="org.wso2.carbon.mediation.library.stub.types.carbon.LibraryInfo" %>
+<%@ page import="org.wso2.carbon.mediation.library.stub.types.carbon.LibraryArtifiactInfo" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
@@ -52,7 +53,6 @@ try {
         msg = bundle.getString("successfully.imported.app") + " " + importLibName + ". " +
               bundle.getString("refresh.capp.page");
     }
-    System.out.print(libraryInfo);
     CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.INFO, request);
 } catch (Exception e) {
     CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
@@ -75,9 +75,8 @@ try {
 		<div id="workArea">
 			<table class="styledLeft" id="appTable" width="100%">
 				<tr><th>Library Artifacts</th></tr>
-					 
-				 <% for (String info : libraryInfo.getArtifacts()) {  %>
-						<tr><td><%=info%></td></tr>
+					 <% for (LibraryArtifiactInfo info : libraryInfo.getArtifacts()) {  %>
+						<tr><td><%=info.getName()%></td><td><%=info.getDescription()%></td></tr>
 				 <%} %>
 				 
 			</table>

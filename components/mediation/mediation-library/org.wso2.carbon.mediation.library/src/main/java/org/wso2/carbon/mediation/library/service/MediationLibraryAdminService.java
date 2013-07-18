@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataHandler;
@@ -45,7 +46,6 @@ import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
 import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
-import org.wso2.carbon.mediation.library.util.ConfigHolder;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class MediationLibraryAdminService extends AbstractServiceBusAdmin {
@@ -143,19 +143,25 @@ public class MediationLibraryAdminService extends AbstractServiceBusAdmin {
                        LibraryInfo info = new LibraryInfo();
                        info.setLibName(libName);
                        info.setPackageName(packageName);
-                       String [] artifacts = new String[synLib.getLibArtifactDetails().size()];
-                       int i = 0;
+                       
+                       List<LibraryArtifiactInfo> artifactsList = new ArrayList<LibraryArtifiactInfo>();
+                    
                        for(Map.Entry<String, String> entry : synLib.getLibArtifactDetails().entrySet()){
                     	   if(entry.getValue() != null && entry.getKey() !=null){
-                    		   artifacts[i] = entry.getKey();
-                    		   i++;
+                    		  LibraryArtifiactInfo artifactInfo = new LibraryArtifiactInfo();
+                    		  artifactInfo.setName(entry.getKey());
+                    		  artifactInfo.setDescription(synLib.getArtifactDescription(entry.getKey()));
+                    		  artifactsList.add(artifactInfo);
                     	   }
+                       }
+                       LibraryArtifiactInfo [] artifacts = new LibraryArtifiactInfo[artifactsList.size()];
+                       for(int i = 0 ; i< artifacts.length ; i++){
+                    	   artifacts[i] = artifactsList.get(i);
                        }
                        info.setArtifacts(artifacts);
                        return info;
                     }
                     
-                   
                     
                 }
 
