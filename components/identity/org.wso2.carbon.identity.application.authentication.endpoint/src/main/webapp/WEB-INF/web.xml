@@ -3,20 +3,54 @@
 
 <web-app>
 
-    <servlet>
-        <servlet-name>OAuth2Servlet</servlet-name>
-        <servlet-class>org.wso2.carbon.identity.application.authentication.endpoint.OAuth2Servlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>OAuth2Servlet</servlet-name>
-        <url-pattern>/oauth2_login.do</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>OAuth2Servlet</servlet-name>
-        <url-pattern>/oauth2_error.do</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>OAuth2Servlet</servlet-name>
-        <url-pattern>/oauth2_consent.do</url-pattern>
-    </servlet-mapping>
+	<servlet>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<servlet-class>org.wso2.carbon.identity.application.authentication.endpoint.OAuth2Servlet</servlet-class>
+		<!--  Custom Page configurations -->
+		
+		<!-- *************** LoginPage configs for SampleApp ********************** -->
+		<init-param>
+			<param-name>SampleApp-LoginPage</param-name>
+			<param-value>https://localhost:9443/sampleapp-pages/login</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SampleApp-ErrorPage</param-name>
+			<param-value>https://localhost:9443/sampleapp-pages/error</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SampleApp-ConsentPage</param-name>
+			<param-value>https://localhost:9443/sampleapp-pages/consent</param-value>
+		</init-param>
+		<!-- **************** End of configs for SampleApp ************************* -->
+		
+		<!-- ################## Global confg ##################################### -->		
+		<init-param>
+			<param-name>Global-LoginPage</param-name>
+			<param-value>https://localhost:9443/sampleapp-pages/login</param-value>
+		</init-param>
+		<init-param>
+			<param-name>Global-ErrorPage</param-name>
+			<param-value>https://localhost:9443/sampleapp-pages/error</param-value>
+		</init-param>
+		<init-param>
+			<param-name>Global-ConsentPage</param-name>
+			<param-value>https://localhost:9443/sampleapp-pages/consent</param-value>
+		</init-param>		
+		<!-- ################## End of Global confg ############################## -->
+		
+	</servlet>
+	
+	
+	<servlet-mapping>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<url-pattern>/oauth2_login.do</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<url-pattern>/oauth2_error.do</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<url-pattern>/oauth2_consent.do</url-pattern>
+	</servlet-mapping>
 </web-app>
