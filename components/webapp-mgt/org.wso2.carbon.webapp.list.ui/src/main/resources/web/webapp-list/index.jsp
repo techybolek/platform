@@ -517,11 +517,11 @@
         if ("carbon.super".equals(tenantDomain)) {
             String tmpContext = webapp.getContext();
             contextPrefix = tmpContext.lastIndexOf('/') > 0 ?
-                    tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
+                    tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
         } else {
             String tmpContext = webapp.getContext().substring(tenantContext.length());
             contextPrefix = tmpContext.lastIndexOf('/') > 0 ?             //todo not last index of
-                    tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
+                    tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
             contextPrefix = tenantContext + contextPrefix;
         }
 
@@ -534,11 +534,11 @@
                 if ("carbon.super".equals(tenantDomain)) {
                     String tmpContext = webapp2.getContext();
                     contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?
-                            tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
+                            tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
                 } else {
                     String tmpContext = webapp2.getContext().substring(tenantContext.length());
                     contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?             //todo not last index of
-                            tmpContext.substring(0, tmpContext.lastIndexOf('/')).trim() : tmpContext;
+                            tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
                     contextPrefix2 = tenantContext + contextPrefix2;
                 }
 
@@ -561,8 +561,9 @@
             String currentWebappType = vWebapp.getWebappType();
             String vContext = vWebapp.getContext().startsWith(tenantContext) ?
                     vWebapp.getContext().substring(tenantContext.length()) : vWebapp.getContext();
+
             String version = vContext.lastIndexOf('/') > 0 ?
-                    vContext.substring(vContext.lastIndexOf('/')).trim() : "$default";
+                    vContext.substring(vContext.substring(1).indexOf('/') + 1).trim() : "default";
 
             String webappURL = urlPrefix + vWebapp.getContext();
             if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
