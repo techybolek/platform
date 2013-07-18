@@ -173,11 +173,9 @@
     </dependencyManagement>
 
     <properties>
-        <carbon.version>4.1.0</carbon.version>
-        <carbon.kernel.version>4.1.0</carbon.kernel.version>
-        <carbon.kernel.patch.version.411>4.1.1</carbon.kernel.patch.version.411>
-        <carbon.platform.version.410>4.1.0</carbon.platform.version.410>
-        <carbon.platform.patch.version.411>4.1.1</carbon.platform.patch.version.411>
+        <carbon.version>4.2.0-SNAPSHOT</carbon.version>
+        <carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
+        <carbon.platform.version>4.2.0-SNAPSHOT</carbon.platform.version>
         <log4j.version>1.2.13</log4j.version>
         <commons.logging.version>1.1</commons.logging.version>
         <opencsv.version>1.8</opencsv.version>
@@ -192,7 +190,7 @@
         <commons-cli.version>1.2.0.wso2v1</commons-cli.version>
         <commons-daemon.version>1.0.7</commons-daemon.version>
         <version.h2.engine>1.2.140.wso2v3</version.h2.engine>
-        <ss.version>1.0.3</ss.version>
+        <ss.version>1.1.0-SNAPSHOT</ss.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
