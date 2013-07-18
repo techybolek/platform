@@ -246,6 +246,8 @@
     <indexingConfiguration>
         <startingDelayInSeconds>300</startingDelayInSeconds>
         <indexingFrequencyInSeconds>60</indexingFrequencyInSeconds>
+        <!--number of resources submit for given indexing thread -->
+        <batchSize>50</batchSize>  
         <!-- location storing the time the indexing took place-->
         <lastAccessTimeLocation>/_system/local/repository/components/org.wso2.carbon.registry/indexing/lastaccesstime</lastAccessTimeLocation>
         <!-- the indexers that implement the indexer interface for a relevant media type/(s) -->
