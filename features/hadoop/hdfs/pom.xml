@@ -136,7 +136,7 @@
     <properties>
         <wso2carbon.version.hadoop>${wso2carbon.version}</wso2carbon.version.hadoop>
         <wso2carbon.version.hadoop.feature>${wso2carbon.version}</wso2carbon.version.hadoop.feature>
-        <hadoop.version>1.0.1.wso2v1</hadoop.version>
+        <hadoop.version>0.20.203.1.wso2v4</hadoop.version>
     </properties>
 
 </project>
