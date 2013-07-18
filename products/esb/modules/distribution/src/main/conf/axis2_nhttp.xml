@@ -417,6 +417,11 @@
         </parameter>
         <!--<parameter name="HostnameVerifier">DefaultAndLocalhost</parameter>-->
         <!--supports Strict|AllowAll|DefaultAndLocalhost or the default if none specified -->
+        <parameter name="CertificateRevocationVerifier" enable="false">
+                <CacheSize>50</CacheSize>
+                <!-- In minutes -->
+                <CacheDelay>5</CacheDelay>
+        </parameter>
     </transportSender>
 
 
