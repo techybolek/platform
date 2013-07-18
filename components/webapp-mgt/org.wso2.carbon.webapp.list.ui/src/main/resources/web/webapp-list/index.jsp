@@ -589,23 +589,28 @@
             firstWebappFlag = false;
     %>
     <td <%= rowspanHtmlAtt %> >
-        <a href="../webapp-list/webapp_info.jsp?webappFileName=<%=
-            URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>&webappState=<%= webappState %>&hostName=<%=
-            webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
-            <%= contextPrefix %>
-        </a>
-
+       <% if (!"default".equals(version)) { %>
+           <%= contextPrefix %>
+       <% } else { %>
+           <a href="../webapp-list/webapp_info.jsp?webappFileName=<%=
+              URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>&webappState=<%= webappState %>&hostName=<%=
+              webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
+              <%= contextPrefix %>
+           </a>
+       <% } %>
     </td>
 
     <% } %>
     <td> &nbsp;
-        <% if (!"".equals(version)) { %>
+        <% if (!"default".equals(version)) { %>
         <a href="../webapp-list/webapp_info.jsp?webappFileName=<%=
                     URLEncoder.encode(vWebapp.getWebappFile(), "UTF-8")%>&webappState=<%= webappState %>&hostName=<%=
                      webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
             <%= version %>
         </a>
-        <% } %>
+        <% } else { %>
+            <%= version %>
+        <% }%>
     </td>
     <td><%= (vWebapp.getDisplayName() != null ? vWebapp.getDisplayName() : "") %>
     </td>
