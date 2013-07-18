@@ -228,7 +228,7 @@ public class UserRealmProxy {
 
             for(String externalRole : externalRoles){
 				FlaggedName fName = new FlaggedName();
-				mapEntityName(externalRole, fName);
+				mapEntityName(externalRole, fName, userStoreMan);
                 fName.setRoleType(UserMgtConstants.EXTERNAL_ROLE);
                 
                 // setting read only or writable
@@ -1034,7 +1034,7 @@ public class UserRealmProxy {
                     }
 
                     FlaggedName fName = new FlaggedName();
-                    mapEntityName(role, fName);
+                    mapEntityName(role, fName, admin);
                     fName.setSelected(true);
                     if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
                         if ((admin.getSecondaryUserStoreManager(domain).isReadOnly() ||
@@ -1152,7 +1152,7 @@ public class UserRealmProxy {
                 for (String externalRole : externalRoles) {
                     FlaggedName fname = new FlaggedName();
                     
-    				mapEntityName(externalRole, fname);
+    				mapEntityName(externalRole, fname, admin);
                     fname.setDomainName(domain);
                     if (Arrays.binarySearch(userRoles, externalRole) > -1) {
                         fname.setSelected(true);
@@ -1926,14 +1926,34 @@ public class UserRealmProxy {
         return null;
     }
     
-    private void mapEntityName(String entityName, FlaggedName fName){
+	private void mapEntityName(String entityName, FlaggedName fName,
+	                           UserStoreManager userStoreManager) {
 		if (entityName.contains(UserCoreConstants.DN_COMBINER)) {
 			String[] nameAndDn = entityName.split(UserCoreConstants.DN_COMBINER);
 			fName.setItemName(nameAndDn[0]);
 			fName.setDn(nameAndDn[1]);
+
+			fName.setShared(((AbstractUserStoreManager)userStoreManager).  // TODO remove abstract user store
+                    isOthersSharedRole(fName.getItemName(), fName.getDn()));
+			if (fName.isShared()) {
+				fName.setItemDisplayName(UserCoreConstants.SHARED_DOMAIN_NAME +
+				                         UserCoreConstants.SHARED_ROLE_TENANT_SEPERATOR + fName.getItemName());
+			}
+
 		} else {
 			fName.setItemName(entityName);
 		}
 
-    }
+	}
+
+	public boolean isSharedRolesEnabled() throws UserAdminException {
+		UserStoreManager userManager;
+		try {
+			userManager = realm.getUserStoreManager();   // TODO remove abstract user store
+			return ((AbstractUserStoreManager)userManager).isSharedGroupEnabled();
+		} catch (UserStoreException e) {
+			log.error(e);
+			throw new UserAdminException("Unable to check shared role enabled", e);
+		}
+	}
 }

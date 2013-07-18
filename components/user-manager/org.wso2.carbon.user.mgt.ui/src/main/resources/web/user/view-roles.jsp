@@ -376,7 +376,7 @@
                                             <input type="checkbox" name="selectedRoles" value="<%=name.getItemName() + UserCoreConstants.DN_COMBINER + name.getDn()%>" <%=doCheck%> <%=doEdit%> />
                                                 <%=CharacterEncoder.getSafeText(name.getItemName())%>
                                                 <%if (!name.getEditable()) { %> <%="(Read-Only)"%> <% } %>
-                                            <input type="hidden" name="shownRoles" value="<%=CharacterEncoder.getSafeText(name.getItemName())%>"/>
+                                            <input type="hidden" name="shownRoles" value="<%=CharacterEncoder.getSafeText(name.getItemName() + UserCoreConstants.DN_COMBINER + name.getDn())%>"/>
                                         </label>
                                     </td>
                                     <td>

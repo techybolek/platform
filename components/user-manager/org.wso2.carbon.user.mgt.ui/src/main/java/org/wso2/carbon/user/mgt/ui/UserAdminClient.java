@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.user.mgt.ui;
 
+import java.rmi.RemoteException;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -284,6 +286,15 @@ public class UserAdminClient  {
 
         log.error(errorMessage, e);
         throw new AxisFault(errorMessage, e);
+    
     }
-
+    
+	public boolean isSharedRolesEnabled() throws AxisFault {
+		try {
+			return stub.isSharedRolesEnabled();
+		} catch (Exception e) {
+			handleException(e);
+		}
+		return false;
+	}
 }

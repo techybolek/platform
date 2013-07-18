@@ -57,6 +57,7 @@ public class FlaggedName {
 	private String domainName;
 	private boolean readOnly;
 	private String dn;
+    private boolean isShared;
 
 	public String getItemName() {
 		return itemName;
@@ -122,4 +123,11 @@ public class FlaggedName {
 		this.dn = dn;
 	}
 
+    public boolean isShared() {
+        return isShared;
+    }
+
+    public void setShared(boolean shared) {
+        isShared = shared;
+    }
 }

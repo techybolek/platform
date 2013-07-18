@@ -15,7 +15,8 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@page import="org.jboss.marshalling.TraceInformation.UserInfo"%>
+ <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -47,9 +48,16 @@ List<String> domainNames = null;
 String selectedDomain  = null;
 String roleType = null; 
 UserStoreInfo[] allUserStoreInfo = null;
+Boolean sharedRoleEnabled = false;
+boolean internal = false;
+
 try{
 
-    roleType= request.getParameter("roleType");
+	sharedRoleEnabled = (Boolean)session.getAttribute(UserAdminUIConstants.SHARED_ROLE_ENABLED);
+    roleType = request.getParameter("roleType");
+    internal = UserAdminUIConstants.INTERNAL_ROLE.equals(roleType);    
+    sharedRoleEnabled = sharedRoleEnabled && !internal;
+    
     userRealmInfo = (UserRealmInfo)session.getAttribute(UserAdminUIConstants.USER_STORE_INFO);
     if(userRealmInfo == null){
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -262,8 +270,13 @@ try{
                                     <td><fmt:message key="role.name"/><font color="red">*</font>
                                     </td>
                                     <td><input type="text" name="roleName" value=""/></td>
-                                    <td><input type="checkbox" value="true" name="sharedRole" id="sharedRoleBox" /><label for="sharedRoleBox">&nbsp;<fmt:message key="shared.role" /></label></td>
-                                    <td><input type="hidden" name="roleType" value="<%=roleType%>"/></td>
+									<td><c:if test="<%=sharedRoleEnabled%>">
+											<input type="checkbox" value="true" name="sharedRole"
+												id="sharedRoleBox" />
+											<label for="sharedRoleBox">&nbsp;<fmt:message
+													key="shared.role" /></label>
+										</c:if></td>
+									<td><input type="hidden" name="roleType" value="<%=roleType%>"/></td>
                                 </tr>
                             </table>
                             <!-- normal table -->

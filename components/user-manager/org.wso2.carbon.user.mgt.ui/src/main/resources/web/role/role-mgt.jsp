@@ -145,6 +145,9 @@
             ConfigurationContext configContext =
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
+            
+            boolean sharedRoleEnabled = client.isSharedRolesEnabled();
+            session.setAttribute(UserAdminUIConstants.SHARED_ROLE_ENABLED, sharedRoleEnabled);
 
             if (filter.length() > 0) {
                 FlaggedName[] datas = client.getAllRolesNames(modifiedFilter, -1);
@@ -335,12 +338,15 @@
                         </td>
                     <%}%>--%>
                     <td>
+                    <%if(!data.getShared()){ %>
                     <% if(data.getItemName().equals(userRealmInfo.getAdminRole()) == false && data.getItemName().equals(userRealmInfo.getEveryOneRole()) == false && data.getEditable()){%>
 <a href="#" onclick="updateUserGroup('<%=roleName%>', '<%=index %>')" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="rename"/></a>
                     <% }  %>
                     <% if(!data.getItemName().equals(userRealmInfo.getAdminRole())) {%>
 <a href="edit-permissions.jsp?roleName=<%=roleName%>&i=<%=index %>" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="edit.permissions"/></a>
-                    <% } %>
+                    <% }
+                    }%>
+                    
                     <% if (!userRealmInfo.getEveryOneRole().equals(data.getItemName()) && data.getEditable()) { %>
 <a href="edit-users.jsp?roleName=<%=roleName%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%=!data.getEditable()%>&i=<%=index %>" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="edit.users"/></a>
                     <% } %>
@@ -348,21 +354,11 @@
                         <a href="view-users.jsp?roleName=<%=roleName%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%=!data.getEditable()%>&i=<%=index %>"
                            class="icon-link" style="background-image:url(images/view.gif);"><fmt:message key="view.users"/></a>
                       <% } %>
-
-                        <%
-                            if (CarbonUIUtil.isContextRegistered(config, "/identity-authorization/" ) &&
-                                    CarbonUIUtil.isUserAuthorized(request, "/permission/admin/configure/security/")) {
-                        %>
-                            <a href="../identity-authorization/permission-root.jsp?roleName=<%=data.getItemName()%>&fromUserMgt=true&i=<%=index %>"
-                               class="icon-link"
-                               style="background-image:url(../admin/images/edit.gif);"><fmt:message key="authorization"/></a>
-                        <%
-                            }
-                         %>
+                    <%if(!data.getShared()){ %>
 
                     <% if(data.getItemName().equals(userRealmInfo.getAdminRole()) == false && data.getItemName().equals(userRealmInfo.getEveryOneRole()) == false && data.getEditable()){%>
 <a href="#" onclick="deleteUserGroup('<%=roleName%>', '<%=index %>')" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key="delete"/></a>
-                    <% }  %>
+                    <% }}  %>
 
                     </td>
                 </tr>

@@ -700,4 +700,8 @@ public class UserAdmin {
         return CarbonContext.getCurrentContext().getUsername() + "@" +
                 CarbonContext.getCurrentContext().getTenantDomain();
     }
+    
+    public boolean isSharedRolesEnabled() throws UserAdminException{
+    	return  getUserAdminProxy().isSharedRolesEnabled();
+    }
 }
