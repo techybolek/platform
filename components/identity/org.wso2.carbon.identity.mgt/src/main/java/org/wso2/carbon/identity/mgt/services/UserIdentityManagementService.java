@@ -307,15 +307,15 @@ public class UserIdentityManagementService {
 	 * @return
 	 * @throws IdentityMgtServiceException
 	 */
-	public CaptchaInfoBean generateRandomCaptcha() throws IdentityMgtServiceException {
-		try {
-			CaptchaUtil.cleanOldCaptchas();
-			return CaptchaUtil.generateCaptchaImage();
-		} catch (Exception e) {
-			log.error("Error while generating captcha", e);
-			throw new IdentityMgtServiceException("Error while generating captcha", e);
-		}
-	}
+//	public CaptchaInfoBean generateRandomCaptcha() throws IdentityMgtServiceException {
+//		try {
+//			CaptchaUtil.cleanOldCaptchas();
+//			return CaptchaUtil.generateCaptchaImage();
+//		} catch (Exception e) {
+//			log.error("Error while generating captcha", e);
+//			throw new IdentityMgtServiceException("Error while generating captcha", e);
+//		}
+//	}
 
 	/**
 	 * Returns an array of primary security questions. Primary security
@@ -355,35 +355,35 @@ public class UserIdentityManagementService {
      * @param captchaInfoBean  bean class that contains captcha information
      * @return user key; secret for sub-sequence communication. If null, user and domain not verified.
      */
-    public VerificationBean verifyUser(String userName, CaptchaInfoBean captchaInfoBean){
-
-        UserDTO userDTO;
-        VerificationBean bean = new VerificationBean();
-
-        if(IdentityMgtConfig.getInstance().isCaptchaVerificationInternallyManaged()){
-            try {
-                CaptchaUtil.processCaptchaInfoBean(captchaInfoBean);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                bean.setError(VerificationBean.ERROR_CODE_INVALID_CAPTCHA);
-                bean.setVerified(false);
-                return bean;
-            }
-        }
-
-        try {
-            userDTO = Utils.processUserId(userName);
-        } catch (IdentityException e) {
-            log.error(e.getMessage());
-            bean.setError(VerificationBean.ERROR_CODE_INVALID_USER);
-            bean.setVerified(false);
-            return bean;
-        }
-
-        RecoveryProcessor  processor = IdentityMgtServiceComponent.getRecoveryProcessor();
-
-        return processor.verifyUserForRecovery(userDTO);
-    }
+//    public VerificationBean verifyUser(String username, CaptchaInfoBean captchaInfoBean){
+//
+//        UserDTO userDTO;
+//        VerificationBean bean = new VerificationBean();
+//
+//        if(IdentityMgtConfig.getInstance().isCaptchaVerificationInternallyManaged()){
+//            try {
+//                CaptchaUtil.processCaptchaInfoBean(captchaInfoBean);
+//            } catch (Exception e) {
+//                log.error(e.getMessage());
+//                bean.setError(VerificationBean.ERROR_CODE_INVALID_CAPTCHA);
+//                bean.setVerified(false);
+//                return bean;
+//            }
+//        }
+//
+//        try {
+//            userDTO = Utils.processUserId(username);
+//        } catch (IdentityException e) {
+//            log.error(e.getMessage());
+//            bean.setError(VerificationBean.ERROR_CODE_INVALID_USER);
+//            bean.setVerified(false);
+//            return bean;
+//        }
+//
+//        RecoveryProcessor  processor = IdentityMgtServiceComponent.getRecoveryProcessor();
+//
+//        return processor.verifyUserForRecovery(userDTO);
+//    }
 
     /**
      * process password recovery for given user
