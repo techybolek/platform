@@ -13,7 +13,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.throttle.core</artifactId>
     <packaging>bundle</packaging>
-    <version>3.3.0</version>
     <name>WSO2 Throttling module - core</name>
     <build>
         <plugins>
@@ -35,6 +34,7 @@
                         </Private-Package>
                         <Export-Package>
                             org.wso2.carbon.throttle.core.*,
+                            org.wso2.carbon.throttle.module.*
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.registry.core.service; version=1.0.1,
