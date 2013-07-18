@@ -76,9 +76,13 @@ public class JIBXServiceTestCase extends ASIntegrationTest {
 
         OMElement response = axisServiceClient.sendReceive(addBookPayLoad(), endpoint, "addBook");
         log.info("Response : " + response);
-        assertTrue(response.toString().equals("<addBookResponse " +
+	assertTrue(response != null, "response is null");
+        assertTrue(response.toString().contains("<success>true</success>"), "<success>true</success> is missing");
+    
+	/* response - "<addBookResponse " +
                 "xmlns=\"http://jibx.appserver.wso2.org/library/types\"><success>true</success>" +
                 "</addBookResponse>"));
+	*/
     }
 
     @Test(groups = "wso2.as", description = "Getting the book details"
@@ -87,10 +91,15 @@ public class JIBXServiceTestCase extends ASIntegrationTest {
 
         OMElement response = axisServiceClient.sendReceive(getBookPayLoad(), endpoint, "getBook");
         log.info("Response : " + response);
-        assertTrue(response.toString().equals("<getBookResponse xmlns=\"http://jibx.appserver.wso2.org/" +
+        assertTrue(response.toString().contains("getBookResponse"), "message body doesn't contain getBookResponse");
+        assertTrue(response.toString().contains("<author>JIBX Service Sample Demo</author>"), "<author>JIBX Service Sample Demo</author> is missing");
+        
+	/* response
+	"<getBookResponse xmlns=\"http://jibx.appserver.wso2.org/" +
                 "library/types\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
                 "<book type=\"Novel\" isbn=\"123456\"><author>JIBX Service Sample Demo</author>" +
                 "<title /></book></getBookResponse>"));
+	*/
     }
 
     private static OMElement addBookPayLoad() {   // payload for addBook operation
