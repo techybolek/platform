@@ -445,6 +445,8 @@
 		<include>com.sun.xml.bind:jaxb-impl:jar</include>
 		<include>com.sun.xml.bind:jaxb-xjc:jar</include>
 		<include>org.apache.neethi:neethi:jar</include>
+		<include>org.codehaus.woodstox:woodstox-core-asl</include>
+		<include>org.codehaus.woodstox:stax2-api</include>
 		<include>org.apache.ws.security:wss4j:jar</include>
 		<include>xml-resolver:xml-resolver:jar</include>
 		<include>org.apache.ws.xmlschema:xmlschema-core:jar</include>
