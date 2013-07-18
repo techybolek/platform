@@ -23,6 +23,8 @@ import org.wso2.esb.integration.services.jaxrs.coffeesample.bean.PaymentStatus;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  *
  */
+
 public class StarbucksOutletServiceImpl implements StarbucksOutletService{
     private Map<String, Order> ordersList = new ConcurrentHashMap<String, Order>();
 
@@ -103,10 +106,11 @@ public class StarbucksOutletServiceImpl implements StarbucksOutletService{
         return Response.notModified().entity(id).type(MediaType.APPLICATION_XML).build();
     }
 
-    public Response removeOrder(String id) {    // @PathParam("orderId") 
+    public Response removeOrder(String id) {    // @PathParam("orderId")
         Boolean removed = ordersList.remove(id) != null;
         paymentRegister.remove(id);
-        return removed ? Response.ok(removed).build() : Response.notModified().build();
+        String status = removed.toString();
+        return removed ? Response.ok(status).build() : Response.notModified().build();
     }
 
     public Response doPayment(String id, Payment payment) {    // @PathParam("orderId")

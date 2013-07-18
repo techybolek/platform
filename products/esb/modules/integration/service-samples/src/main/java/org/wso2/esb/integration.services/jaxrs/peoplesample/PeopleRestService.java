@@ -20,13 +20,11 @@ package org.wso2.esb.integration.services.jaxrs.peoplesample;
 
 
 import org.wso2.esb.integration.services.jaxrs.peoplesample.bean.Person;
+import org.apache.cxf.rs.security.cors.CorsHeaderConstants;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 import java.util.Collection;
 
 @Path("/people")
@@ -80,7 +78,7 @@ public class PeopleRestService {
         return Response.created(uriInfo.getRequestUriBuilder().path(email).build()).build();
     }
 
-    @Produces({MediaType.APPLICATION_JSON})
+   /* @Produces({MediaType.APPLICATION_JSON})
     @Path("/{email}")
     @PUT
     public Person updatePerson(@PathParam("email") final String email,
@@ -98,7 +96,7 @@ public class PeopleRestService {
 
         return person;
     }
-
+*/
     @Produces({MediaType.APPLICATION_JSON})
     @Path("/{email}")
     @HEAD
@@ -135,5 +133,17 @@ public class PeopleRestService {
     public Response deletePerson(@PathParam("email") final String email) {
         peopleService.removePerson(email);
         return Response.ok().build();
+    }
+
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/options")
+    @OPTIONS
+    public Response getOptions(@Context HttpHeaders headers,
+                               @Context Request request) {
+        return Response.ok()
+                .header(CorsHeaderConstants.HEADER_AC_ALLOW_METHODS, "GET POST DELETE PUT OPTIONS")
+                .header(CorsHeaderConstants.HEADER_AC_ALLOW_CREDENTIALS, "false")
+                .header(CorsHeaderConstants.HEADER_AC_REQUEST_HEADERS, MediaType.APPLICATION_JSON)
+                .build();
     }
 }

@@ -25,6 +25,8 @@ import org.springframework.context.annotation.Bean;
 
 import javax.ws.rs.ext.RuntimeDelegate;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 public class CoffeeConfig {
     @Bean( destroyMethod = "shutdown" )
@@ -37,7 +39,11 @@ public class CoffeeConfig {
         JAXRSServerFactoryBean factory = RuntimeDelegate.getInstance().createEndpoint( jaxRsApiApplication(), JAXRSServerFactoryBean.class );
         factory.setServiceBeans( Arrays.< Object >asList(starbucksOutletService()) );
         factory.setAddress( "/" + factory.getAddress() );
-        factory.setProviders( Arrays.< Object >asList( jsonProvider() ) );
+		 List<Object> providers = new ArrayList<Object>();
+        providers.add(jsonProvider());
+        providers.add(new OrderReader());
+        factory.setProviders(providers);
+        //factory.setProviders( Arrays.< Object >asList( jsonProvider() ) );
         return factory.create();
     }
 

@@ -16,7 +16,7 @@ public interface StarbucksOutletService {
     @Path("/orders/")
 //    @Produces(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)   // produces application/json
-    @Consumes(MediaType.TEXT_XML)   // consumes text/xml
+    @Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML})   // consumes text/xml
     public Response addOrder(Order orderBean);
 
     /**
@@ -27,7 +27,7 @@ public interface StarbucksOutletService {
      */
     @GET
     @Path("/orders/{orderId}")
-    @Produces( { "application/json", "application/atom+xml;type=entry" } )  // produces atom and json as relevant
+    @Produces( { "application/json", "application/xml" } )  // produces atom and json as relevant
     public Order getOrder(@PathParam("orderId") String id);
 
     @PUT
@@ -38,7 +38,7 @@ public interface StarbucksOutletService {
 
     @GET
     @Path("/orders/pending/")
-    @Produces( { "application/json", "application/atom+xml;type=feed" } )   // application/atom+xml and json
+    @Produces( { "application/json", "application/atom+xml;type=feed", "application/xml" } )   // application/atom+xml and json
     public Response getPendingOrders(); //todo add a atom feader
     
     @PUT
@@ -48,7 +48,7 @@ public interface StarbucksOutletService {
     
     @DELETE
     @Path("/orders/{orderId}/")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.TEXT_PLAIN})
     public Response removeOrder(@PathParam("orderId") String id);
 
     @POST
