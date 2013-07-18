@@ -512,8 +512,6 @@
 
     for (int count = 0; count < webapps.length; count++) {
         WebappMetadata webapp = webapps[count];
-        System.out.println("my context +++ ++++++++++++++ " + webapp.getContext() + "&&&&&&& count " +count);
-
 
         String contextPrefix;
         if ("carbon.super".equals(tenantDomain)) {
@@ -527,7 +525,6 @@
             contextPrefix = tenantContext + contextPrefix;
         }
 
-        System.out.println("my context Prefix 1 111111111111++++++++++ " + contextPrefix);
         int rowspan = 1;
         int range = count;
         while(range + 1 < webapps.length) {
@@ -545,13 +542,10 @@
                     contextPrefix2 = tenantContext + contextPrefix2;
                 }
 
-                System.out.println("my context prefix2 3333333@@@@@@@@@@@@@@@" + contextPrefix2);
                 if (contextPrefix.equalsIgnoreCase(contextPrefix2)) {
-                    System.out.println("context match found");
                     rowspan++;
                     range++;
                 } else {
-                    System.out.println("no context found");
                     break;
                 }
             }
@@ -567,9 +561,9 @@
             String currentWebappType = vWebapp.getWebappType();
             String vContext = vWebapp.getContext().startsWith(tenantContext) ?
                     vWebapp.getContext().substring(tenantContext.length()) : vWebapp.getContext();
-//            System.out.println(vContext + " webapp.getContext " + webapp.getConte);
             String version = vContext.lastIndexOf('/') > 0 ?
                     vContext.substring(vContext.lastIndexOf('/')).trim() : "$default";
+
             String webappURL = urlPrefix + vWebapp.getContext();
             if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
                 webappURL += vWebapp.getServletContext();
@@ -586,8 +580,6 @@
     </td>
     <%
 
-        System.out.println(vContext + "    version $$$$$$$$$$$$$$$" +version + "            $$$$$ vcount  "  + vCount);
-        System.out.println(vContext + "  rowspan - ##############"+rowspan+"########" +firstWebappFlag);
         String rowspanHtmlAtt = "";
         if (firstWebappFlag) {
             if (rowspan > 1) {
