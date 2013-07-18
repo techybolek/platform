@@ -81,7 +81,7 @@
                             <featureArtifacts>
                                 <!--Start Cassandra features-->
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.cassandra.feature:${carbon.platform.patch.version.412}
+                                    org.wso2.carbon:org.wso2.carbon.cassandra.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.cassandra.cluster.feature:${carbon.platform.version}
@@ -99,12 +99,12 @@
                                                                 org.wso2.carbon:org.wso2.carbon.styles.feature:${carbon.platform.version}
                                                         </featureArtifactDef-->
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.cassandra.explorer.feature:${carbon.platform.patch.version.412}
+                                    org.wso2.carbon:org.wso2.carbon.cassandra.explorer.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <!--End Cassandra features-->
                                 <!--Start RSS features-->
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.rssmanager.feature:${carbon.platform.patch.version.412}
+                                    org.wso2.carbon:org.wso2.carbon.rssmanager.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.dbconsole.ui.feature:${carbon.platform.version}
@@ -119,16 +119,16 @@
                                 <!--End RSS features-->
                                 <!--Start HDFS features-->
                                 <featureArtifactDef>
-					org.wso2.carbon:org.wso2.carbon.hdfs.dataaccess.feature:${carbon.platform.patch.version.412}
+					org.wso2.carbon:org.wso2.carbon.hdfs.dataaccess.feature:${carbon.platform.version}
      				</featureArtifactDef>
                                 <featureArtifactDef>
-					org.wso2.carbon:org.wso2.carbon.hdfs.mgt.feature:${carbon.platform.patch.version.412}
+					org.wso2.carbon:org.wso2.carbon.hdfs.mgt.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <!--featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.hdfs.mgt.ui.feature:${carbon.platform.version}
                                 </featureArtifactDef-->
                                 <featureArtifactDef>
-					org.wso2.carbon:org.wso2.carbon.hdfs.namenode.feature:${carbon.platform.patch.version.412}
+					org.wso2.carbon:org.wso2.carbon.hdfs.namenode.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <!--<featureArtifactDef>-->
                                 <!--org.wso2.carbon:org.wso2.carbon.hdfs.datanode.feature:${carbon.platform.version}-->
@@ -136,10 +136,10 @@
                                 <!--End HDFS features-->
                                 <!--Start Secure Hadoop features-->
                                 <featureArtifactDef>
-					org.wso2.carbon:org.wso2.carbon.hadoop.security.feature:${carbon.platform.patch.version.412}
+					org.wso2.carbon:org.wso2.carbon.hadoop.security.feature:${carbon.platform.version}
 				</featureArtifactDef>
                                 <featureArtifactDef>
-					org.wso2.carbon:org.wso2.carbon.identity.authenticator.krb5.feature:${carbon.platform.patch.version.412}
+					org.wso2.carbon:org.wso2.carbon.identity.authenticator.krb5.feature:${carbon.platform.version}
 				</featureArtifactDef>
                                 <!--<featureArtifactDef>-->
                                     <!--org.wso2.carbon:org.wso2.carbon.identity.authenticator.krb5.ui.feature:${carbon.platform.version}-->
@@ -242,7 +242,7 @@
                                 <!--Start Cassandra features-->
                                 <feature>
                                     <id>org.wso2.carbon.cassandra.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.cassandra.cluster.feature.group</id>
@@ -266,13 +266,13 @@
                                                                 </feature-->
                                 <feature>
                                     <id>org.wso2.carbon.cassandra.explorer.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <!--End Cassandra featrues-->
                                 <!--Start RSS featrues-->
                                 <feature>
                                     <id>org.wso2.carbon.rssmanager.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.dbconsole.ui.feature.group</id>
@@ -290,11 +290,11 @@
                                 <!--Start HDFS featrues-->
                                 <feature>
                                     <id>org.wso2.carbon.hdfs.dataaccess.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.hdfs.mgt.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <!--feature>
                                     <id>org.wso2.carbon.hdfs.mgt.ui.feature.group</id>
@@ -302,7 +302,7 @@
                                 </feature-->
                                 <feature>
                                     <id>org.wso2.carbon.hdfs.namenode.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <!--<feature>-->
                                 <!--<id>org.wso2.carbon.hdfs.datanode.feature.group</id>-->
@@ -312,11 +312,11 @@
                                 <!--Start Secure Hadoop featrues-->
                                 <feature>
                                     <id>org.wso2.carbon.hadoop.security.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.identity.authenticator.krb5.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <!--<feature>-->
                                     <!--<id>org.wso2.carbon.identity.authenticator.krb5.ui.feature.group</id>-->
@@ -466,8 +466,5 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-	<carbon.platform.patch.version.412>4.1.2</carbon.platform.patch.version.412>
-    </properties>
 
 </project>
