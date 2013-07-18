@@ -159,7 +159,6 @@ public class Axis2ModuleTestCase extends ASIntegrationTest {
 
     private void defineLogLevel() throws IOException {
         String log4jFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "conf" +
-                               File.separator + "bundle-config" + File.separator + "org.wso2.carbon.logging" +
                                File.separator + "log4j.properties";
 
         FileWriter fileWriter = new FileWriter(new File(log4jFilePath), true);
@@ -171,7 +170,6 @@ public class Axis2ModuleTestCase extends ASIntegrationTest {
 
     private void removeLogLevel() throws IOException {
         String log4jFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "conf" +
-                               File.separator + "bundle-config" + File.separator + "org.wso2.carbon.logging" +
                                File.separator + "log4j.properties";
 
         File inFile = new File(log4jFilePath);
