@@ -51,6 +51,12 @@ public class RegistryConfigLoader {
 
     private List<Pattern> exclusionList = new ArrayList<Pattern>();
 
+    private long batchSize = 50;
+
+    public long getBatchSize() {
+        return batchSize;
+    }
+
 
     public RegistryConfigLoader() {
         try {
@@ -78,6 +84,9 @@ public class RegistryConfigLoader {
             } catch (OMException e) {
                 lastAccessTimeLocation = IndexingConstants.LAST_ACCESS_TIME_LOCATION;
             }
+
+            batchSize =  Long.parseLong(indexingConfig.getFirstChildWithName(new QName("batchSize")).getText());
+
             Iterator exclusions = indexingConfig.getFirstChildWithName(new QName("exclusions")).
                     getChildrenWithName(new QName("exclusion"));
             while (exclusions.hasNext()) {

@@ -118,10 +118,14 @@ public class AsyncIndexer implements Runnable {
 
     private boolean indexFile() {
         try {
+
+            long batchSize = IndexingManager.getInstance().getBatchSize();
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            if (queue.size() > 0) {
+            long i =0;
+            if (queue.size() > 0 && i<= batchSize) {
+                ++i;
                 File2Index fileData = queue.take();
                 Indexer indexer = IndexingManager.getInstance().getIndexerForMediaType(
                         fileData.mediaType);

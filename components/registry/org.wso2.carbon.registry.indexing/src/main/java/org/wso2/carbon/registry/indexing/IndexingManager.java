@@ -135,6 +135,10 @@ public class IndexingManager {
         return indexer;
     }
 
+    public long getBatchSize(){
+        return registryConfig.getBatchSize();
+    }
+
     public void deleteFromIndex(String oldPath, int tenantId) throws RegistryException {
         getIndexer().getClient().deleteFromIndex(oldPath, tenantId);
     }
