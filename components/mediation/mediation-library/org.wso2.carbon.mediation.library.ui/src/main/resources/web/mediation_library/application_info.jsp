@@ -15,23 +15,27 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<link type="text/css" href="../dialog/js/jqueryui/tabs/ui.all.css"
+	rel="stylesheet" />
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
-<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.apache.axis2.context.ConfigurationContext" %>
-<%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="java.util.ResourceBundle" %>
-<%@ page import="org.wso2.carbon.mediation.library.ui.LibraryAdminClient" %>
-<%@ page import="org.wso2.carbon.mediation.library.stub.types.carbon.LibraryInfo" %>
-<%@ page import="org.wso2.carbon.mediation.library.stub.types.carbon.LibraryArtifiactInfo" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil"%>
+<%@ page import="org.apache.axis2.context.ConfigurationContext"%>
+<%@ page import="org.wso2.carbon.CarbonConstants"%>
+<%@ page import="org.wso2.carbon.utils.ServerConstants"%>
+<%@ page import="java.util.ResourceBundle"%>
+<%@ page
+	import="org.wso2.carbon.mediation.library.ui.LibraryAdminClient"%>
+<%@ page
+	import="org.wso2.carbon.mediation.library.stub.types.carbon.LibraryInfo"%>
+<%@ page
+	import="org.wso2.carbon.mediation.library.stub.types.carbon.LibraryArtifiactInfo"%>
+<%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
 	prefix="carbon"%>
 
 <%
-  
-String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+	String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
 ConfigurationContext configContext = (ConfigurationContext) config.getServletContext()
         .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 
@@ -50,14 +54,13 @@ try {
     if (importLibName != null && importPackageName != null && !"".equals(importLibName.trim())
             && !"".equals(importPackageName.trim())) {
     	libraryInfo = client.getLibraryInfo(importLibName, importPackageName);
-        msg = bundle.getString("successfully.imported.app") + " " + importLibName + ". " +
-              bundle.getString("refresh.capp.page");
+        //msg = bundle.getString("successfully.imported.app") + " " + importLibName + ". " +
+              //bundle.getString("refresh.capp.page");
     }
-    CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.INFO, request);
+    //CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.INFO, request);
 } catch (Exception e) {
     CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
 }
-
 %>
 
 
@@ -68,17 +71,34 @@ try {
 		topPage="false" request="<%=request%>" />
 
 	<script type="text/javascript">
-
+		
 	</script>
 
 	<div id="middle">
 		<div id="workArea">
 			<table class="styledLeft" id="appTable" width="100%">
-				<tr><th>Library Artifacts</th></tr>
-					 <% for (LibraryArtifiactInfo info : libraryInfo.getArtifacts()) {  %>
-						<tr><td><%=info.getName()%></td><td><%=info.getDescription()%></td></tr>
-				 <%} %>
-				 
+				<thead>
+					<tr>
+						<th><fmt:message key="libs.table.header" /></th>
+					</tr>
+					<tr>
+						<th><fmt:message key="libs.table.operation" /></th>
+						<th><fmt:message key="libs.table.description" /></th>
+					</tr>
+				</thead>
+				<tbody>
+					<%
+					for (LibraryArtifiactInfo info : libraryInfo.getArtifacts()) {
+				%>
+					<tr>
+						<td><%=info.getName()%></td>
+						<td><%=info.getDescription()%></td>
+					</tr>
+					<%
+					}
+				%>
+				
+				</tbody>
 			</table>
 		</div>
 	</div>
