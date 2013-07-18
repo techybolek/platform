@@ -1,72 +1,65 @@
 package org.wso2.carbon.connectors.twilio.queue;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Queue;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.Queue;
 /*
-* Class mediator for updating a queue instance
-* For more information, see http://www.twilio.com/docs/api/rest/queue
-*/
-public class UpdateQueue extends AbstractMediator {
+ * Class mediator for updating a queue instance
+ * For more information, see http://www.twilio.com/docs/api/rest/queue
+ */
+public class UpdateQueue extends AbstractTwilioConnector {
 
-    private String accountSid;
-    private String authToken;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    private String queueSid;
+		SynapseLog log = getLog(messageContext);
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-    //optional parameters
-    private String friendlyName;
-    private String maxSize;
+		String queueSid = (String) messageContext.getProperty("TwilioQueueSid");
 
-    public boolean mediate(MessageContext messageContext) {
+		String friendlyName = (String) messageContext
+				.getProperty("TwilioQueueFriendlyName");
+		String maxSize = (String) messageContext.getProperty("TwilioQueueMaxSize");
 
-        SynapseLog log = getLog(messageContext);
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		Map<String, String> params = new HashMap<String, String>();
 
-        queueSid = (String) messageContext.getProperty("TwilioQueueSid");
+		if (friendlyName != null) {
+			params.put("FriendlyName", friendlyName);
+		}
 
-        friendlyName = (String) messageContext.getProperty("TwilioQueueFriendlyName");
-        maxSize = (String) messageContext.getProperty("TwilioQueueMaxSize");
+		if (maxSize != null) {
+			params.put("MaxSize", maxSize);
+		}
 
-        Map<String, String> params = new HashMap<String, String>();
+		try {
+			updateQueue(accountSid, authToken, queueSid, log, params);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        if(friendlyName != null){
-            params.put("FriendlyName", friendlyName);
-        }
+	}
 
-        if(maxSize != null){
-            params.put("MaxSize", maxSize);
-        }
+	private void updateQueue(String accountSid, String authToken, String queueSid,
+			SynapseLog log, Map<String, String> params) throws TwilioRestException,
+			IllegalArgumentException {
 
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        try {
-            updateQueue(log, params);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+		Queue queue = twilioRestClient.getAccount().getQueue(queueSid);
+		queue.update(params);
 
-        return true;
-    }
-
-    private void updateQueue(SynapseLog log, Map<String, String> params) throws
-            TwilioRestException ,IllegalArgumentException{
-
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        Queue queue =twilioRestClient.getAccount().getQueue(queueSid);
-        queue.update(params);
-
-        //TODO: change response
-        log.auditLog("Queue editing successful.");
-    }
+		// TODO: change response
+		log.auditLog("Queue editing successful.");
+	}
 
 }

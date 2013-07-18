@@ -1,77 +1,70 @@
 package org.wso2.carbon.connectors.twilio.phone_numbers;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.instance.IncomingPhoneNumber;
 import com.twilio.sdk.resource.list.IncomingPhoneNumberList;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
-
-import java.util.HashMap;
-import java.util.Map;
 /*
-* Class mediator for getting the list of incoming phone numbers.
-* For more information, see http://www.twilio.com/docs/api/rest/incoming-phone-numbers
-*/
-public class GetIncomingPhoneNumberList extends AbstractMediator {
+ * Class mediator for getting the list of incoming phone numbers.
+ * For more information, see http://www.twilio.com/docs/api/rest/incoming-phone-numbers
+ */
+public class GetIncomingPhoneNumberList extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
+	@Override
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    //Filters for the results
-    private String phoneNumber;
-    private String friendlyName;
+		SynapseLog log = getLog(messageContext);
 
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
+		// Parameters for the filters
+		String phoneNumber = (String) messageContext
+				.getProperty("TwilioIncomingPhoneNumber");
+		String friendlyName = (String) messageContext
+				.getProperty("TwilioIncomingPhoneNumberFriendlyName");
 
-    @Override
-    public boolean mediate(MessageContext messageContext) {
+		Map<String, String> filter = new HashMap<String, String>();
 
-        SynapseLog log = getLog(messageContext);
+		if (phoneNumber != null) {
+			filter.put("PhoneNumber", phoneNumber);
+		}
+		if (friendlyName != null) {
+			filter.put("FriendlyName", friendlyName);
+		}
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			getIncomingPhoneNumberList(accountSid, authToken, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
+	}
 
-        //Parameters for the filters
-        phoneNumber = (String) messageContext.getProperty("TwilioIncomingPhoneNumber");
-        friendlyName = (String) messageContext.getProperty("TwilioIncomingPhoneNumberFriendlyName");
+	private void getIncomingPhoneNumberList(String accountSid, String authToken,
+			SynapseLog log) throws IllegalArgumentException, TwilioRestException {
 
-        Map<String,String> filter = new HashMap<String, String>();
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        if ( phoneNumber != null){
-            filter.put("PhoneNumber", phoneNumber);
-        }
-        if ( friendlyName != null){
-            filter.put("FriendlyName", friendlyName);
-        }
+		IncomingPhoneNumberList numbers = twilioRestClient.getAccount()
+				.getIncomingPhoneNumbers();
 
-        try {
-            getIncomingPhoneNumberList(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
-
-        return true;
-    }
-
-    private void getIncomingPhoneNumberList(SynapseLog log)throws
-            IllegalArgumentException, TwilioRestException{
-
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        IncomingPhoneNumberList numbers = twilioRestClient.getAccount().getIncomingPhoneNumbers();
-
-        //TODO: change response
-        // Loop over numbers and print out a property
-        for (IncomingPhoneNumber number : numbers) {
-            log.auditLog("Friendly Name:" + number.getFriendlyName()
-                    + "    Phone Number: " + number.getPhoneNumber());
-        }
-    }
+		// TODO: change response
+		// Loop over numbers and print out a property
+		for (IncomingPhoneNumber number : numbers) {
+			log.auditLog("Friendly Name:" + number.getFriendlyName()
+					+ "    Phone Number: " + number.getPhoneNumber());
+		}
+	}
 }

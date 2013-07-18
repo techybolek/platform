@@ -1,78 +1,79 @@
 package org.wso2.carbon.connectors.twilio.call;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Recording;
+import java.io.InputStream;
+
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
-import java.io.InputStream;
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.Recording;
 
 /*
-* Class mediator for getting a recording instance based on its Sid.
-* For more information, see http://www.twilio.com/docs/api/rest/recording
-*/
-public class GetRecording extends AbstractMediator {
+ * Class mediator for getting a recording instance based on its Sid.
+ * For more information, see http://www.twilio.com/docs/api/rest/recording
+ */
+public class GetRecording extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
-    private String recordingSid;
-    private String recordingReturnType;
+	@Override
+	public void connect(MessageContext messageContext) throws ConnectException {
 
+		SynapseLog log = getLog(messageContext);
 
-    @Override
-    public boolean mediate(MessageContext messageContext) {
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		// The Sid of the recording, must be provided
+		String recordingSid = (String) messageContext.getProperty("TwilioRecordingSid");
+		String recordingReturnType = (String) messageContext
+				.getProperty("TwilioRecordingReturnType");
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			if (recordingReturnType != null) {
+				getRecording(accountSid, authToken, recordingSid, log,
+						recordingReturnType);
+			} else {
+				getRecording(accountSid, authToken, recordingSid, log);
+			}
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        //The Sid of the recording, must be provided
-        recordingSid = (String) messageContext.getProperty("TwilioRecordingSid");
-        recordingReturnType = (String) messageContext.getProperty("TwilioRecordingReturnType");
+	}
 
-        try {
-            if (recordingReturnType != null) {
-                getRecording(log, recordingReturnType);
-            } else {
-                getRecording(log);
-            }
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getRecording(String accountSid, String authToken, String recordingSid,
+			SynapseLog log, String recordingReturnType) throws IllegalArgumentException,
+			TwilioRestException {
 
-        return true;
-    }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-    private void getRecording(SynapseLog log, String recordingReturnType) throws IllegalArgumentException, TwilioRestException {
+		// Get an recording object from its sid.
+		Recording recording = twilioRestClient.getAccount().getRecording(recordingSid);
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		InputStream inputStream = recording.getMedia(recordingReturnType);
 
-        // Get an recording object from its sid.
-        Recording recording = twilioRestClient.getAccount().getRecording(recordingSid);
+		// TODO: change response
+		log.auditLog("Call Sid: " + recording.getCallSid() + "  Duration: "
+				+ recording.getDuration());
 
-        InputStream inputStream = recording.getMedia(recordingReturnType);
+	}
 
-        //TODO: change response
-        log.auditLog("Call Sid: " + recording.getCallSid() + "  Duration: " + recording.getDuration());
+	private void getRecording(String accountSid, String authToken, String recordingSid,
+			SynapseLog log) throws IllegalArgumentException, TwilioRestException {
 
-    }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-    private void getRecording(SynapseLog log) throws IllegalArgumentException, TwilioRestException {
+		// Get an recording object from its sid.
+		Recording recording = twilioRestClient.getAccount().getRecording(recordingSid);
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		// TODO: change response
+		log.auditLog("Call Sid: " + recording.getCallSid() + "  Duration: "
+				+ recording.getDuration());
 
-        // Get an recording object from its sid.
-        Recording recording = twilioRestClient.getAccount().getRecording(recordingSid);
-
-        //TODO: change response
-        log.auditLog("Call Sid: " + recording.getCallSid() + "  Duration: " + recording.getDuration());
-
-    }
+	}
 }

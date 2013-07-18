@@ -1,62 +1,60 @@
 package org.wso2.carbon.connectors.twilio.conference;
 
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.instance.Conference;
 import com.twilio.sdk.resource.instance.Participant;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
 
 /*
-* Class mediator for getting a participant of a given conference.
-* For more information, see http://www.twilio.com/docs/api/rest/conference#instance-subresources-participants
-*/
-public class GetParticipant extends AbstractMediator {
+ * Class mediator for getting a participant of a given conference.
+ * For more information, see http://www.twilio.com/docs/api/rest/conference#instance-subresources-participants
+ */
+public class GetParticipant extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    private String conferenceSid;
-    private String callSidOfParticipant;
+		SynapseLog log = getLog(messageContext);
 
-    public boolean mediate(MessageContext messageContext) {
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		// Get the conference Sid
+		String conferenceSid = (String) messageContext.getProperty("TwilioConferenceSid");
+		String callSidOfParticipant = (String) messageContext
+				.getProperty("TwilioCallSidOfParticipant");
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			getParticipant(accountSid, authToken, conferenceSid, callSidOfParticipant,
+					log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        //Get the conference Sid
-        conferenceSid = (String) messageContext.getProperty("TwilioConferenceSid");
-        callSidOfParticipant = (String) messageContext.getProperty("TwilioCallSidOfParticipant");
+	}
 
-        try {
-            getParticipant(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getParticipant(String accountSid, String authToken,
+			String conferenceSid, String callSidOfParticipant, SynapseLog log)
+			throws IllegalArgumentException, TwilioRestException {
 
-        return true;
-    }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-    private void getParticipant(SynapseLog log) throws IllegalArgumentException, TwilioRestException {
+		// Get the conference
+		Conference conference = twilioRestClient.getAccount()
+				.getConference(conferenceSid);
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		// TODO: change response
+		// Get the participant by his call sid.
+		// Refer https://www.twilio.com/docs/api/rest/participant
+		Participant participant = conference.getParticipant(callSidOfParticipant);
 
-        //Get the conference
-        Conference conference = twilioRestClient.getAccount().getConference(conferenceSid);
-
-        //TODO: change response
-        //Get the participant by his call sid.
-        // Refer https://www.twilio.com/docs/api/rest/participant
-        Participant participant = conference.getParticipant(callSidOfParticipant);
-
-        log.auditLog("Is Participant Muted: " + participant.isMuted());
-    }
+		log.auditLog("Is Participant Muted: " + participant.isMuted());
+	}
 }

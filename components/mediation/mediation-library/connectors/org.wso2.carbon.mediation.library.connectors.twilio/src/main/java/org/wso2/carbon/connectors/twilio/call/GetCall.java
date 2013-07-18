@@ -1,56 +1,52 @@
 package org.wso2.carbon.connectors.twilio.call;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Call;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.Call;
 
 /*
-* Class mediator for getting a Call instance based on its Sid.
-* For more information, see http://www.twilio.com/docs/api/rest/call
-*/
-public class GetCall extends AbstractMediator {
+ * Class mediator for getting a Call instance based on its Sid.
+ * For more information, see http://www.twilio.com/docs/api/rest/call
+ */
+public class GetCall extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
-    private String callSid;
+	@Override
+	public void connect(MessageContext messageContext) throws ConnectException {
 
+		SynapseLog log = getLog(messageContext);
 
-    @Override
-    public boolean mediate(MessageContext messageContext) {
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		// The Sid of the required Call, must be provided
+		String callSid = (String) messageContext.getProperty("TwilioCallSid");
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			getCall(accountSid, authToken, callSid, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        //The Sid of the required Call, must be provided
-        callSid = (String) messageContext.getProperty("TwilioCallSid");
+	}
 
-        try {
-            getCall(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getCall(String accountSid, String authToken, String callSid,
+			SynapseLog log) throws IllegalArgumentException, TwilioRestException {
 
-        return true;
-    }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-    private void getCall(SynapseLog log) throws IllegalArgumentException, TwilioRestException {
+		// Get an call object from its sid.
+		Call call = twilioRestClient.getAccount().getCall(callSid);
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		// TODO: change response
+		log.auditLog("Called To: " + call.getTo() + "   From: " + call.getFrom());
 
-        // Get an call object from its sid.
-        Call call = twilioRestClient.getAccount().getCall(callSid);
-
-        //TODO: change response
-        log.auditLog("Called To: " + call.getTo() + "   From: " + call.getFrom());
-
-    }
+	}
 }

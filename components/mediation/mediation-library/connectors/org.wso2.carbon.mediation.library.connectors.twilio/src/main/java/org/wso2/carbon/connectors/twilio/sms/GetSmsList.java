@@ -1,80 +1,75 @@
 package org.wso2.carbon.connectors.twilio.sms;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.instance.Sms;
 import com.twilio.sdk.resource.list.SmsList;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /*
-* Class mediator for getting a list of SMSs, with support for filters.
-* For more information, see http://www.twilio.com/docs/api/rest/sms#list
-*/
-public class GetSmsList extends AbstractMediator {
+ * Class mediator for getting a list of SMSs, with support for filters.
+ * For more information, see http://www.twilio.com/docs/api/rest/sms#list
+ */
+public class GetSmsList extends AbstractTwilioConnector {
 
-    //authentication parameters
-    private String accountSid;
-    private String authToken;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    //optional parameters. For more information, see
-    //http://www.twilio.com/docs/api/rest/sms#list-get-filters
-    private String to;
-    private String from;
-    private String dateSent;
+		SynapseLog log = getLog(messageContext);
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-    public boolean mediate(MessageContext messageContext) {
+		// optional parameters. For more information, see
+		// http://www.twilio.com/docs/api/rest/sms#list-get-filters
+		String to = (String) messageContext.getProperty("TwilioSMSTo");
+		String from = (String) messageContext.getProperty("TwilioSMSFrom");
+		String dateSent = (String) messageContext.getProperty("TwilioSMSDateSent");
 
-        SynapseLog log = getLog(messageContext);
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		// map for holding optional parameters
+		Map<String, String> filter = new HashMap<String, String>();
 
-        to = (String) messageContext.getProperty("TwilioSMSTo");
-        from = (String) messageContext.getProperty("TwilioSMSFrom");
-        dateSent = (String) messageContext.getProperty("TwilioSMSDateSent");
+		// null-checking and addition to map
+		if (to != null) {
+			filter.put("To", to);
+		}
+		if (from != null) {
+			filter.put("From", from);
+		}
+		if (dateSent != null) {
+			filter.put("DateSent", dateSent);
+		}
 
-        //map for holding optional parameters
-        Map<String, String> filter = new HashMap<String, String>();
+		try {
+			getSmsList(accountSid, authToken, log, filter);
+		} catch (Exception e) {
+			// TODO: handle the exception
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        //null-checking and addition to map
-        if (to != null) {
-            filter.put("To", to);
-        }
-        if (from != null) {
-            filter.put("From", from);
-        }
-        if (dateSent != null) {
-            filter.put("DateSent", dateSent);
-        }
+	}
 
-        try {
-            getSmsList(log, filter);
-        } catch (Exception e) {
-            //TODO: handle the exception
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getSmsList(String accountSid, String authToken, SynapseLog log,
+			Map<String, String> filter) throws IllegalArgumentException,
+			TwilioRestException {
 
-        return true;
-    }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-    private void getSmsList(SynapseLog log, Map<String, String> filter) throws
-            IllegalArgumentException, TwilioRestException {
+		SmsList messages = twilioRestClient.getAccount().getSmsMessages(filter);
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        SmsList messages = twilioRestClient.getAccount().getSmsMessages(filter);
-
-        //iterate through the list obtained from the api query
-        //TODO: change response.
-        for (Sms message : messages) {
-            log.auditLog("Message Sid: " + message.getSid() + "  Message: " + message.getBody());
-        }
-    }
+		// iterate through the list obtained from the api query
+		// TODO: change response.
+		for (Sms message : messages) {
+			log.auditLog("Message Sid: " + message.getSid() + "  Message: "
+					+ message.getBody());
+		}
+	}
 
 }

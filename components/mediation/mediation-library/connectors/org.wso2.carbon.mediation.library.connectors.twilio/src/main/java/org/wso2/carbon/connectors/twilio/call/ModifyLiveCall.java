@@ -1,83 +1,76 @@
 package org.wso2.carbon.connectors.twilio.call;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Call;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.Call;
 /*
-* Class mediator for modifying a live call.
-* For more information, see http://www.twilio.com/docs/api/rest/change-call-state
-*/
-public class ModifyLiveCall extends AbstractMediator {
+ * Class mediator for modifying a live call.
+ * For more information, see http://www.twilio.com/docs/api/rest/change-call-state
+ */
+public class ModifyLiveCall extends AbstractTwilioConnector {
 
-    private String accountSid;
-    private String authToken;
+	@Override
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    private String callSid;
+		SynapseLog log = getLog(messageContext);
 
-    //Optional parameters. For specifications and formats, see
-    //http://www.twilio.com/docs/api/rest/change-call-state
-    private String url;
-    private String status;
-    private String method;
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-    @Override
-    public boolean mediate(MessageContext messageContext) {
+		// Must be provided
+		String callSid = (String) messageContext.getProperty("TwilioCallSid");
 
-        SynapseLog log = getLog(messageContext);
+		// Optional parameters. For specifications and formats, see
+		// http://www.twilio.com/docs/api/rest/change-call-state
+		// Available parameters to be modified (Optional)
+		String url = (String) messageContext.getProperty("TwilioCallUrl");
+		String status = (String) messageContext.getProperty("TwilioCallStatus");
+		String method = (String) messageContext.getProperty("TwilioCallMethod");
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		// Map for optional parameters
+		Map<String, String> params = new HashMap<String, String>();
 
-        //Must be provided
-        callSid = (String) messageContext.getProperty("TwilioCallSid");
+		if (url != null) {
+			params.put("Url", url);
+		}
+		if (status != null) {
+			params.put("Status", status);
+		}
+		if (method != null) {
+			params.put("Method", method);
+		}
 
-        //Available parameters to be modified (Optional)
-        url = (String) messageContext.getProperty("TwilioCallUrl");
-        status = (String) messageContext.getProperty("TwilioCallStatus");
-        method = (String) messageContext.getProperty("TwilioCallMethod");
+		try {
+			modifyLiveCall(accountSid, authToken, callSid, log, params);
+		} catch (Exception e) {
+			log.auditError(e);
+			throw new SynapseException(e);
+		}
 
-        //Map for optional parameters
-        Map<String,String> params = new HashMap<String, String>();
+	}
 
-        if (url != null){
-            params.put("Url", url);
-        }
-        if (status != null){
-            params.put("Status", status);
-        }
-        if (method != null){
-            params.put("Method", method);
-        }
+	private void modifyLiveCall(String accountSid, String authToken, String callSid,
+			SynapseLog log, Map<String, String> params) throws TwilioRestException,
+			IllegalArgumentException {
 
-        try {
-            modifyLiveCall(log, params);
-        } catch (Exception e) {
-            log.auditError(e);
-            throw new SynapseException(e);
-        }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        return true;
-    }
+		// Get the call to be modified
+		Call call = twilioRestClient.getAccount().getCall(callSid);
+		// update the matching live call with the specified parameters
+		call.update(params);
 
-    private void modifyLiveCall(SynapseLog log, Map<String, String> params) throws
-            TwilioRestException, IllegalArgumentException {
-
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        //Get the call to be modified
-        Call call = twilioRestClient.getAccount().getCall(callSid);
-        //update the matching live call with the specified parameters
-        call.update(params);
-
-        //TODO: chane response
-        log.auditLog("Call "+callSid+" Modified.");
-    }
+		// TODO: chane response
+		log.auditLog("Call " + callSid + " Modified.");
+	}
 }

@@ -1,60 +1,63 @@
 package org.wso2.carbon.connectors.twilio.phone_numbers;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.IncomingPhoneNumber;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.IncomingPhoneNumber;
 
 /*
-* Class mediator for removing an incoming a phone numbers.
-* For more information, see http://www.twilio.com/docs/api/rest/incoming-phone-numbers#instance-delete
-*/
-public class RemoveIncomingPhoneNumber extends AbstractMediator {
+ * Class mediator for removing an incoming a phone numbers.
+ * For more information, see http://www.twilio.com/docs/api/rest/incoming-phone-numbers#instance-delete
+ */
+public class RemoveIncomingPhoneNumber extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
+	// //Authorization details
+	// private String accountSid;
+	// private String authToken;
+	//
+	// //Sid of the required number
+	// private String incomingPhoneNumberSid;
 
-    //Sid of the required number
-    private String incomingPhoneNumberSid;
+	@Override
+	public void connect(MessageContext messageContext) throws ConnectException {
 
+		SynapseLog log = getLog(messageContext);
 
-    @Override
-    public boolean mediate(MessageContext messageContext) {
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		// Must be provided
+		String incomingPhoneNumberSid = (String) messageContext
+				.getProperty("TwilioIncomingPhoneNumberSid");
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			removeIncomingPhoneNumber(accountSid, authToken, incomingPhoneNumberSid, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
+	}
 
-        //Must be provided
-        incomingPhoneNumberSid = (String) messageContext.getProperty("TwilioIncomingPhoneNumberSid");
+	private void removeIncomingPhoneNumber(String accountSid, String authToken,
+			String incomingPhoneNumberSid, SynapseLog log) throws TwilioRestException,
+			IllegalArgumentException {
 
-        try {
-            removeIncomingPhoneNumber(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        return true;
-    }
+		// Get an incoming phone number allocated to the Twilio account by its
+		// Sid.
+		IncomingPhoneNumber number = twilioRestClient.getAccount()
+				.getIncomingPhoneNumber(incomingPhoneNumberSid);
 
-    private void removeIncomingPhoneNumber(SynapseLog log) throws
-            TwilioRestException, IllegalArgumentException {
+		number.delete();
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        // Get an incoming phone number allocated to the Twilio account by its Sid.
-        IncomingPhoneNumber number = twilioRestClient.getAccount().getIncomingPhoneNumber(incomingPhoneNumberSid);
-
-        number.delete();
-
-        //TODO: change response
-        log.auditLog("Number Deleted.");
-    }
+		// TODO: change response
+		log.auditLog("Number Deleted.");
+	}
 }

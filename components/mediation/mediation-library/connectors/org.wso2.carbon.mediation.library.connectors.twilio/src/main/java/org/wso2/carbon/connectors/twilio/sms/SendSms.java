@@ -36,15 +36,18 @@ public class SendSms extends AbstractMediator {
 
         SynapseLog log = getLog(messageContext);
 
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+        String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+        String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        to = (String) messageContext.getProperty("TwilioSMSTo");
-        from = (String) messageContext.getProperty("TwilioSMSFrom");
-        body = (String) messageContext.getProperty("TwilioSMSBody");
+        String to = (String) messageContext.getProperty("TwilioSMSTo");
+        String from = (String) messageContext.getProperty("TwilioSMSFrom");
+        String body = (String) messageContext.getProperty("TwilioSMSBody");
 
-        statusCallBackUrl = (String) messageContext.getProperty("TwilioSMSStatusCallBackUrl");
-        applicationSid = (String) messageContext.getProperty("TwilioApplicationSid");
+        // optional parameters
+        //see http://www.twilio.com/docs/api/rest/sending-sms#post-parameters-optional for more details.
+      
+        String statusCallBackUrl = (String) messageContext.getProperty("TwilioSMSStatusCallBackUrl");
+        String applicationSid = (String) messageContext.getProperty("TwilioApplicationSid");
 
 
         //the map used for passing parameters

@@ -1,53 +1,49 @@
 package org.wso2.carbon.connectors.twilio.sms;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Sms;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.Sms;
 
 /*
-* Class mediator for getting a an SMS resource given its Sid.
-* For more information, see http://www.twilio.com/docs/api/rest/sms
-*/
-public class GetSms extends AbstractMediator {
-    //authentication parameters
-    private String accountSid;
-    private String authToken;
+ * Class mediator for getting a an SMS resource given its Sid.
+ * For more information, see http://www.twilio.com/docs/api/rest/sms
+ */
+public class GetSms extends AbstractTwilioConnector {
 
-    //the unique identifier for messages
-    private String messageSid;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    public boolean mediate(MessageContext messageContext) {
+		SynapseLog log = getLog(messageContext);
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		String messageSid = (String) messageContext.getProperty("TwilioSMSMessageSid");
 
-        messageSid = (String) messageContext.getProperty("TwilioSMSMessageSid");
+		try {
+			getSms(accountSid, authToken, messageSid, log);
+		} catch (Exception e) {
+			// TODO: handle the exception
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        try {
-            getSms(log);
-        } catch (Exception e) {
-            //TODO: handle the exception
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	}
 
-        return true;
-    }
+	private void getSms(String accountSid, String authToken, String messageSid,
+			SynapseLog log) throws IllegalArgumentException, TwilioRestException {
 
-    private void getSms(SynapseLog log) throws IllegalArgumentException, TwilioRestException {
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		// retrieving the Sms object associated with the Sid
+		Sms message = twilioRestClient.getAccount().getSms(messageSid);
 
-        //retrieving the Sms object associated with the Sid
-        Sms message = twilioRestClient.getAccount().getSms(messageSid);
-
-        //TODO: change response
-        log.auditLog("From: " + message.getFrom() + "   Message: " + message.getBody());
-    }
+		// TODO: change response
+		log.auditLog("From: " + message.getFrom() + "   Message: " + message.getBody());
+	}
 
 }

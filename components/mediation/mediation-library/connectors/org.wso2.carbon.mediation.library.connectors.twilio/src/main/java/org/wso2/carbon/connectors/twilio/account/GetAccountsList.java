@@ -1,42 +1,39 @@
 package org.wso2.carbon.connectors.twilio.account;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.instance.Account;
 import com.twilio.sdk.resource.list.AccountList;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /*
 * Class mediator for retrieving a list of all accounts for an accountSID.
 * For more information, see http://www.twilio.com/docs/api/rest/account
 */
-public class GetAccountsList extends AbstractMediator {
+public class GetAccountsList extends AbstractConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
 
-    //Optional parameters. For more information, see http://www.twilio.com/docs/api/rest/account#list-get-filters
-    private String friendlyName;
-    private String status;
-
-    public boolean mediate(MessageContext messageContext) {
+	public void connect(MessageContext messageContext) throws ConnectException {
 
         SynapseLog log = getLog(messageContext);
 
+        //Authorization details
         //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+        String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+        String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        friendlyName = (String) messageContext.getProperty("TwilioAccountFriendlyName");
-        status = (String) messageContext.getProperty("TwilioAccountStatus");
+        //Optional parameters. For more information, see http://www.twilio.com/docs/api/rest/account#list-get-filters
+        String friendlyName = (String) messageContext.getProperty("TwilioAccountFriendlyName");
+        String status = (String) messageContext.getProperty("TwilioAccountStatus");
 
         // Build a filter for the AccountList, i.e. filter parameters are passed as a Map
         Map<String, String> filter = new HashMap<String, String>();
@@ -49,16 +46,15 @@ public class GetAccountsList extends AbstractMediator {
         }
 
         try {
-            getAccountList(log, filter);
+            getAccountList(accountSid,authToken,log, filter);
         } catch (Exception e) {
             log.auditError(e.getMessage());
             throw new SynapseException(e);
         }
 
-        return true;
     }
 
-    private void getAccountList(SynapseLog log, Map<String, String> filter) throws
+    private void getAccountList(String accountSid,String authToken,SynapseLog log, Map<String, String> filter) throws
             IllegalArgumentException, TwilioRestException{
 
         TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);

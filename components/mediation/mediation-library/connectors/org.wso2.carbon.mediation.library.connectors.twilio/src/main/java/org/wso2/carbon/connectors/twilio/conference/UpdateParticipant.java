@@ -1,76 +1,75 @@
 package org.wso2.carbon.connectors.twilio.conference;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.instance.Conference;
 import com.twilio.sdk.resource.instance.Participant;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /*
-* Class mediator for updating a particulars of a participant in a given conference.
-* For more information, seehttp://www.twilio.com/docs/api/rest/participant
-*/
-public class UpdateParticipant extends AbstractMediator {
+ * Class mediator for updating a particulars of a participant in a given conference.
+ * For more information, seehttp://www.twilio.com/docs/api/rest/participant
+ */
+public class UpdateParticipant extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
-    private String conferenceSid;
-    private String callSidOfParticipant;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    //Optional parameter
-    //Also see http://www.twilio.com/docs/api/rest/participant#instance-post
-    private String muted;
+		SynapseLog log = getLog(messageContext);
 
-    public boolean mediate(MessageContext messageContext) {
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		// Get the conference Sid
+		String conferenceSid = (String) messageContext.getProperty("TwilioConferenceSid");
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		// Get the call sid of the participant
+		String callSidOfParticipant = (String) messageContext
+				.getProperty("TwilioCallSidOfParticipant");
 
-        //Get the conference Sid
-        conferenceSid = (String) messageContext.getProperty("TwilioConferenceSid");
+		// Optional parameter
+		// Also see
+		// http://www.twilio.com/docs/api/rest/participant#instance-post
+		String muted = (String) messageContext.getProperty("TwilioParticipantMuted");
 
-        //Get the call sid of the participant
-        callSidOfParticipant = (String) messageContext.getProperty("TwilioCallSidOfParticipant");
+		try {
+			updateParticipant(accountSid, authToken, conferenceSid, callSidOfParticipant,
+					muted, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        muted = (String) messageContext.getProperty("TwilioParticipantMuted");
+	}
 
-        try {
-            updateParticipant(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void updateParticipant(String accountSid, String authToken,
+			String conferenceSid, String callSidOfParticipant, String muted,
+			SynapseLog log) throws TwilioRestException, IllegalArgumentException {
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        return true;
-    }
+		// Get the conference
+		Conference conference = twilioRestClient.getAccount()
+				.getConference(conferenceSid);
 
-    private void updateParticipant(SynapseLog log) throws TwilioRestException, IllegalArgumentException {
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		// Get the participant by his call sid.
+		// Refer https://www.twilio.com/docs/api/rest/participant
+		Participant participant = conference.getParticipant(callSidOfParticipant);
 
-        //Get the conference
-        Conference conference = twilioRestClient.getAccount().getConference(conferenceSid);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("Muted", muted);
 
-        //Get the participant by his call sid.
-        // Refer https://www.twilio.com/docs/api/rest/participant
-        Participant participant = conference.getParticipant(callSidOfParticipant);
+		// update the matching participant instance
+		participant.update(params);
+		// TODO: change response
+		log.auditLog("Is Participant Muted: " + participant.isMuted());
 
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("Muted", muted);
-
-        //update the matching participant instance
-        participant.update(params);
-        //TODO: change response
-        log.auditLog("Is Participant Muted: " + participant.isMuted());
-
-    }
+	}
 }

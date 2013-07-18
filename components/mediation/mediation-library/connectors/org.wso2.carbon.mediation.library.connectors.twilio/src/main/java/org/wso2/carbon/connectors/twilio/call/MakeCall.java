@@ -1,156 +1,134 @@
 package org.wso2.carbon.connectors.twilio.call;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.factory.CallFactory;
 import com.twilio.sdk.resource.instance.Call;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
-
-import java.util.HashMap;
-import java.util.Map;
 /*
-* Class mediator for making a call.
-* For more information, see http://www.twilio.com/docs/api/rest/making-calls
-*/
-public class MakeCall extends AbstractMediator{
-    //Parameter details. For specifications and formats, see
-    //http://www.twilio.com/docs/api/rest/making-calls#post-parameters-required and
-    //http://www.twilio.com/docs/api/rest/making-calls#post-parameters-optional.
+ * Class mediator for making a call.
+ * For more information, see http://www.twilio.com/docs/api/rest/making-calls
+ */
+public class MakeCall extends AbstractTwilioConnector {
+	// Parameter details. For specifications and formats, see
+	// http://www.twilio.com/docs/api/rest/making-calls#post-parameters-required
+	// and
+	// http://www.twilio.com/docs/api/rest/making-calls#post-parameters-optional.
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
+	@Override
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    //Compulsory parameters
-    private String to;
-    private String from;
+		SynapseLog log = getLog(messageContext);
 
-    //One of the below parameters must be provided
-    private String callUrl;
-    private String applicationSid;
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-    //Optional parameters
-    private String method;
-    private String fallbackUrl;
-    private String fallbackMethod;
-    private String statusCallback;
-    private String statusCallbackMethod;
-    private String sendDigits;
-    private String ifMachine;
-    private String timeout;
-    private String record;
+		Map<String, String> callParams = createParameterMap(messageContext);
 
-    @Override
-    public boolean mediate(MessageContext messageContext) {
+		try {
+			makeCall(accountSid, authToken, log, callParams);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        SynapseLog log = getLog(messageContext);
+	}
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+	private void makeCall(String accountSid, String authToken, SynapseLog log,
+			Map<String, String> callParams) throws TwilioRestException {
 
-        getParameters(messageContext);
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        Map<String, String> callParams = createParameterMap();
+		CallFactory callFactory = twilioRestClient.getAccount().getCallFactory();
 
-        try {
-            makeCall(log, callParams);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+		Call call = callFactory.create(callParams);
 
-        return true;
-    }
+		log.auditLog("Call Successful. Call Sid: " + call.getSid());
+	}
 
-    private void makeCall(SynapseLog log, Map<String, String> callParams) throws TwilioRestException {
+	/**
+	 * Create a map containing the parameters required to make the call, which
+	 * has been defined
+	 * 
+	 * @return The map containing the defined parameters
+	 */
+	private Map<String, String> createParameterMap(MessageContext messageContext) {
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		// These are compulsory
+		String to = (String) messageContext.getProperty("TwilioCallTo");
+		String from = (String) messageContext.getProperty("TwilioCallFrom");
 
-        CallFactory callFactory = twilioRestClient.getAccount().getCallFactory();
+		// One of the below
+		String callUrl = (String) messageContext.getProperty("TwilioCallUrl");
+		String applicationSid = (String) messageContext
+				.getProperty("TwilioApplicationSid");
 
-        Call call = callFactory.create(callParams);
+		// Optional parameters
+		String method = (String) messageContext.getProperty("TwilioMethod");
+		String fallbackUrl = (String) messageContext.getProperty("TwilioFallbackUrl");
+		String fallbackMethod = (String) messageContext
+				.getProperty("TwilioFallbackMethod");
+		String statusCallback = (String) messageContext
+				.getProperty("TwilioStatusCallback");
+		String statusCallbackMethod = (String) messageContext
+				.getProperty("TwilioStatusCallbackMethod");
+		String sendDigits = (String) messageContext.getProperty("TwilioSendDigits");
+		String ifMachine = (String) messageContext.getProperty("TwilioIfMachine");
+		String timeout = (String) messageContext.getProperty("TwilioTimeout");
+		String record = (String) messageContext.getProperty("TwilioRecord");
 
-        log.auditLog("Call Successful. Call Sid: " + call.getSid());
-    }
+		Map<String, String> callParams = new HashMap<String, String>();
 
-    /**
-     * Create a map containing the parameters required to make the call, which has been defined
-     * @return The map containing the defined parameters
-     */
-    private Map<String, String> createParameterMap() {
+		callParams.put("To", to);
+		callParams.put("From", from);
 
-        Map<String,String> callParams = new HashMap<String, String>();
+		// Only one of the below must be provided
+		if (callUrl != null) {
+			callParams.put("Url", callUrl);
+		} else {
+			callParams.put("ApplicationSid", applicationSid);
+		}
 
-        callParams.put("To", to);
-        callParams.put("From", from);
+		// These are optional parameters. Need to check whether the parameters
+		// have been defined
+		if (method != null) {
+			callParams.put("Method", method);
+		}
+		if (fallbackUrl != null) {
+			callParams.put("FallbackUrl", fallbackUrl);
+		}
+		if (fallbackMethod != null) {
+			callParams.put("FallbackMethod", fallbackMethod);
+		}
+		if (statusCallback != null) {
+			callParams.put("StatusCallback", statusCallback);
+		}
+		if (statusCallbackMethod != null) {
+			callParams.put("StatusCallbackMethod", statusCallbackMethod);
+		}
+		if (sendDigits != null) {
+			callParams.put("SendDigits", sendDigits);
+		}
+		if (ifMachine != null) {
+			callParams.put("IfMachine", ifMachine);
+		}
+		if (timeout != null) {
+			callParams.put("Timeout", timeout);
+		}
+		if (record != null) {
+			callParams.put("Record", record);
+		}
 
-        //Only one of the below must be provided
-        if (callUrl != null){
-            callParams.put("Url", callUrl);
-        }
-        else {
-            callParams.put("ApplicationSid", applicationSid);
-        }
+		return callParams;
+	}
 
-        //These are optional parameters. Need to check whether the parameters have been defined
-        if (method != null){
-            callParams.put("Method", method);
-        }
-        if (fallbackUrl != null){
-            callParams.put("FallbackUrl", fallbackUrl);
-        }
-        if (fallbackMethod != null){
-            callParams.put("FallbackMethod", fallbackMethod);
-        }
-        if (statusCallback != null){
-            callParams.put("StatusCallback", statusCallback);
-        }
-        if (statusCallbackMethod != null){
-            callParams.put("StatusCallbackMethod",statusCallbackMethod);
-        }
-        if (sendDigits != null){
-            callParams.put("SendDigits",sendDigits);
-        }
-        if (ifMachine != null){
-            callParams.put("IfMachine", ifMachine);
-        }
-        if (timeout != null){
-            callParams.put("Timeout", timeout);
-        }
-        if (record != null){
-            callParams.put("Record",record);
-        }
-
-        return callParams;
-    }
-
-    /**
-     * Populates the parameters from the properties from the message context (If provided)
-     * @param messageContext SynapseMessageContext
-     */
-    private void getParameters(MessageContext messageContext) {
-
-        //These are compulsory
-        to = (String) messageContext.getProperty("TwilioCallTo");
-        from =(String) messageContext.getProperty("TwilioCallFrom");
-
-        //One of the below
-        callUrl =(String) messageContext.getProperty("TwilioCallUrl");
-        applicationSid = (String) messageContext .getProperty("TwilioApplicationSid");
-
-        //Optional parameters
-        method = (String) messageContext.getProperty("TwilioMethod");
-        fallbackUrl = (String) messageContext.getProperty("TwilioFallbackUrl");
-        fallbackMethod = (String) messageContext.getProperty("TwilioFallbackMethod");
-        statusCallback = (String) messageContext.getProperty("TwilioStatusCallback");
-        statusCallbackMethod = (String) messageContext.getProperty("TwilioStatusCallbackMethod");
-        sendDigits = (String) messageContext.getProperty("TwilioSendDigits");
-        ifMachine = (String) messageContext.getProperty("TwilioIfMachine");
-        timeout = (String) messageContext.getProperty("TwilioTimeout");
-        record = (String) messageContext.getProperty("TwilioRecord");
-    }
 }

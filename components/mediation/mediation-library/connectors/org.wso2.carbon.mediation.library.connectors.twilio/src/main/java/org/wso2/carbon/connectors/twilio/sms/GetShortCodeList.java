@@ -13,67 +13,62 @@ import java.util.HashMap;
 import java.util.Map;
 
 /*
-* Class mediator for getting a list of all short codes associated with an account.
-* For more information, http://www.twilio.com/docs/api/rest/short-codes#list
-*/
+ * Class mediator for getting a list of all short codes associated with an account.
+ * For more information, http://www.twilio.com/docs/api/rest/short-codes#list
+ */
 public class GetShortCodeList extends AbstractMediator {
 
-    private String accountSid;
-    private String authToken;
+	public boolean mediate(MessageContext messageContext) {
 
-    //optional filters
-    //See http://www.twilio.com/docs/api/rest/short-codes#list-get-filters for
-    //full specification and allowed values.
-    private String shortCode;
-    private String friendlyName;
+		SynapseLog log = getLog(messageContext);
 
-    public boolean mediate(MessageContext messageContext) {
+		// optional filters
+		// See http://www.twilio.com/docs/api/rest/short-codes#list-get-filters
+		// for
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		String shortCode = (String) messageContext.getProperty("TwilioShortCode");
+		String friendlyName = (String) messageContext.getProperty("TwilioFriendlyName");
 
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		// Map for holding optional filter parameters
+		Map<String, String> filter = new HashMap<String, String>();
 
-        shortCode = (String) messageContext.getProperty("TwilioShortCode");
-        friendlyName = (String) messageContext.getProperty("TwilioFriendlyName");
+		// null-checking and addition to map
+		if (shortCode != null) {
+			filter.put("ShortCode", shortCode);
+		}
+		if (friendlyName != null) {
+			filter.put("FriendlyName", friendlyName);
+		}
 
-        //Map for holding optional filter parameters
-        Map<String, String> filter = new HashMap<String, String>();
+		try {
+			getShortCodeList(accountSid,authToken,log, filter);
+		} catch (Exception e) {
+			// TODO: handle exception
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        //null-checking and addition to map
-        if (shortCode != null) {
-            filter.put("ShortCode", shortCode);
-        }
-        if (friendlyName != null) {
-            filter.put("FriendlyName", friendlyName);
-        }
+		return true;
+	}
 
-        try {
-            getShortCodeList(log, filter);
-        } catch (Exception e) {
-            //TODO: handle exception
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getShortCodeList(String accountSid, String authToken, SynapseLog log,
+			Map<String, String> filter) throws IllegalArgumentException,
+			TwilioRestException {
 
-        return true;
-    }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-    private void getShortCodeList(SynapseLog log, Map<String, String> filter) throws
-            IllegalArgumentException, TwilioRestException {
+		ShortCodeList shortCodeList = twilioRestClient.getAccount().getShortCodes(filter);
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        ShortCodeList shortCodeList = twilioRestClient.getAccount().getShortCodes(filter);
-
-        //Iterate through list
-        //TODO: change response type
-        if (shortCodeList.getTotal() == 0) {
-            log.auditLog("No short codes found in the account.");
-        }
-        for (ShortCode code : shortCodeList) {
-            log.auditLog("Short Code: " + code.getShortCode());
-        }
-    }
+		// Iterate through list
+		// TODO: change response type
+		if (shortCodeList.getTotal() == 0) {
+			log.auditLog("No short codes found in the account.");
+		}
+		for (ShortCode code : shortCodeList) {
+			log.auditLog("Short Code: " + code.getShortCode());
+		}
+	}
 
 }

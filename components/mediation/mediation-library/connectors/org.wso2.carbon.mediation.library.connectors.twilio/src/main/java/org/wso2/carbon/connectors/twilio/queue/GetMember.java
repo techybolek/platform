@@ -1,51 +1,48 @@
 package org.wso2.carbon.connectors.twilio.queue;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Member;
-import com.twilio.sdk.verbs.TwiMLException;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.Member;
 /*
-* Class mediator for getting a member based on its callSid parameter
-* For more information, see http://www.twilio.com/docs/api/rest/member
-*/
-public class GetMember extends AbstractMediator {
+ * Class mediator for getting a member based on its callSid parameter
+ * For more information, see http://www.twilio.com/docs/api/rest/member
+ */
+public class GetMember extends AbstractTwilioConnector {
 
-    private String accountSid;
-    private String authToken;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    private String queueSid;
-    private String callSid;
+		SynapseLog log = getLog(messageContext);
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-    public boolean mediate(MessageContext messageContext) {
+		String queueSid = (String) messageContext.getProperty("TwilioQueueSid");
+		String callSid = (String) messageContext.getProperty("TwilioQueuedCallSid");
 
-        SynapseLog log = getLog(messageContext);
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			getMember(accountSid, authToken, queueSid, callSid, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        queueSid = (String) messageContext.getProperty("TwilioQueueSid");
-        callSid = (String) messageContext.getProperty("TwilioQueuedCallSid");
+	}
 
-        try {
-            getMember(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getMember(String accountSid, String authToken, String queueSid,
+			String callSid, SynapseLog log) throws IllegalArgumentException,
+			TwilioRestException {
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        return true;
-    }
+		Member member = twilioRestClient.getAccount().getQueue(queueSid)
+				.getMember(callSid);
 
-    private void getMember(SynapseLog log) throws IllegalArgumentException, TwilioRestException{
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        Member member = twilioRestClient.getAccount().getQueue(queueSid).getMember(callSid);
-
-        //TODO: change response
-        log.auditLog(callSid+" wait time: "+member.getWaitTime());
-    }
+		// TODO: change response
+		log.auditLog(callSid + " wait time: " + member.getWaitTime());
+	}
 
 }

@@ -1,48 +1,44 @@
 package org.wso2.carbon.connectors.twilio.queue;
 
-import com.twilio.sdk.TwilioRestClient;
-import com.twilio.sdk.TwilioRestException;
-import com.twilio.sdk.resource.instance.Queue;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
+import com.twilio.sdk.TwilioRestClient;
+import com.twilio.sdk.TwilioRestException;
+import com.twilio.sdk.resource.instance.Queue;
 /*
-* Class mediator for getting a queue instance based on the QueueSid parameter
-* For more information, see http://www.twilio.com/docs/api/rest/queue
-*/
-public class GetQueue extends AbstractMediator {
+ * Class mediator for getting a queue instance based on the QueueSid parameter
+ * For more information, see http://www.twilio.com/docs/api/rest/queue
+ */
+public class GetQueue extends AbstractTwilioConnector {
 
-    private String accountSid;
-    private String authToken;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    private String queueSid;
+		SynapseLog log = getLog(messageContext);
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-    public boolean mediate(MessageContext messageContext) {
+		String queueSid = (String) messageContext.getProperty("TwilioQueueSid");
 
-        SynapseLog log = getLog(messageContext);
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			getQueue(accountSid, authToken, queueSid, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		};
+	}
 
-        queueSid = (String) messageContext.getProperty("TwilioQueueSid");
+	private void getQueue(String accountSid, String authToken, String queueSid,
+			SynapseLog log) throws IllegalArgumentException, TwilioRestException {
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        try {
-            getQueue(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+		Queue queue = twilioRestClient.getAccount().getQueue(queueSid);
 
-        return true;
-    }
-
-    private void getQueue(SynapseLog log) throws IllegalArgumentException, TwilioRestException{
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        Queue queue =twilioRestClient.getAccount().getQueue(queueSid);
-
-        //TODO: change response
-        log.auditLog(queue.toString());
-    }
+		// TODO: change response
+		log.auditLog(queue.toString());
+	}
 
 }

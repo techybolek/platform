@@ -1,55 +1,52 @@
 package org.wso2.carbon.connectors.twilio.call;
 
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.instance.Transcription;
 import com.twilio.sdk.resource.list.TranscriptionList;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
 /*
-* Class mediator for getting a list of Call transcription instances.
-* For more information, see http://www.twilio.com/docs/api/rest/transcription
-*/
-public class GetTranscriptionList extends AbstractMediator {
+ * Class mediator for getting a list of Call transcription instances.
+ * For more information, see http://www.twilio.com/docs/api/rest/transcription
+ */
+public class GetTranscriptionList extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
+	@Override
+	public void connect(MessageContext messageContext) throws ConnectException {
 
+		SynapseLog log = getLog(messageContext);
 
-    @Override
-    public boolean mediate(MessageContext messageContext) {
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		try {
+			getTranscriptionList(accountSid, authToken, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+	}
 
-        try {
-            getTranscriptionList(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getTranscriptionList(String accountSid, String authToken, SynapseLog log)
+			throws IllegalArgumentException, TwilioRestException {
 
-        return true;
-    }
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-    private void getTranscriptionList(SynapseLog log) throws
-            IllegalArgumentException, TwilioRestException{
+		// Get the Transcription List
+		TranscriptionList transcriptions = twilioRestClient.getAccount()
+				.getTranscriptions();
 
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
+		// Loop over transcriptions and print out a property
+		for (Transcription transcription : transcriptions) {
+			log.auditLog("Transcription Text" + transcription.getTranscriptionText());
+		}
 
-        //Get the Transcription List
-        TranscriptionList transcriptions = twilioRestClient.getAccount().getTranscriptions();
-
-        // Loop over transcriptions and print out a property
-        for (Transcription transcription : transcriptions) {
-            log.auditLog("Transcription Text" + transcription.getTranscriptionText());
-        }
-
-    }
+	}
 }

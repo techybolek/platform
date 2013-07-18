@@ -1,56 +1,51 @@
 package org.wso2.carbon.connectors.twilio.conference;
 
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.SynapseLog;
+import org.wso2.carbon.connector.twilio.AbstractTwilioConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
 import com.twilio.sdk.TwilioRestClient;
 import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.instance.Conference;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.SynapseLog;
-import org.apache.synapse.mediators.AbstractMediator;
 
 /*
-* Class mediator for getting Conference instance based on its Sid.
-* For more information, see http://www.twilio.com/docs/api/rest/conference
-*/
-public class GetConference extends AbstractMediator {
+ * Class mediator for getting Conference instance based on its Sid.
+ * For more information, see http://www.twilio.com/docs/api/rest/conference
+ */
+public class GetConference extends AbstractTwilioConnector {
 
-    //Authorization details
-    private String accountSid;
-    private String authToken;
+	public void connect(MessageContext messageContext) throws ConnectException {
 
-    //unique Sid for a conference
-    private String conferenceSid;
+		SynapseLog log = getLog(messageContext);
 
-    public boolean mediate(MessageContext messageContext) {
+		// Get parameters from the messageContext
+		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
+		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
 
-        SynapseLog log = getLog(messageContext);
+		// Get the conference Sid
+		String conferenceSid = (String) messageContext.getProperty("TwilioConferenceSid");
 
-        //Get parameters from the messageContext
-        accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-        authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		try {
+			getConference(accountSid, authToken, conferenceSid, log);
+		} catch (Exception e) {
+			log.auditError(e.getMessage());
+			throw new SynapseException(e);
+		}
 
-        //Get the conference Sid
-        conferenceSid = (String) messageContext.getProperty("TwilioConferenceSid");
+	}
 
-        try {
-            getConference(log);
-        } catch (Exception e) {
-            log.auditError(e.getMessage());
-            throw new SynapseException(e);
-        }
+	private void getConference(String accountSid, String authToken, String conferenceSid,
+			SynapseLog log) throws IllegalArgumentException, TwilioRestException {
+		TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
 
-        return true;
-    }
+		// Get the conference
+		Conference conference = twilioRestClient.getAccount()
+				.getConference(conferenceSid);
 
-    private void getConference(SynapseLog log) throws IllegalArgumentException, TwilioRestException {
-        TwilioRestClient twilioRestClient = new TwilioRestClient(accountSid, authToken);
-
-        //Get the conference
-        Conference conference = twilioRestClient.getAccount().getConference(conferenceSid);
-
-        //TODO: change response
-        log.auditLog("Conference Name: " + conference.getFriendlyName() + "     Status: "
-                + conference.getStatus());
-    }
+		// TODO: change response
+		log.auditLog("Conference Name: " + conference.getFriendlyName() + "     Status: "
+				+ conference.getStatus());
+	}
 }
