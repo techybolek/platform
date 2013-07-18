@@ -101,7 +101,7 @@ public class TomcatWebAppsTestCase extends ASIntegrationTest {
     }
 
     @Test(groups = "wso2.as", description = "JDBC Data Source Service invocation, Executing queries " +
-            "and validation of results", dependsOnMethods = "testJNDIResourcesLookup")
+            "and validation of results", dependsOnMethods = "testJNDIResourcesLookup", enabled = false)
     public void testJDBCDataSourceServiceInvoke() throws Exception {
 
         SqlDataSourceUtil sqlDataSourceUtil = new SqlDataSourceUtil(asServer.getSessionCookie(),
