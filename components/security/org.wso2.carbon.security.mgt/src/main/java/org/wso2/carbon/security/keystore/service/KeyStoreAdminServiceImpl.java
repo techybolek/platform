@@ -40,6 +40,13 @@ public class KeyStoreAdminServiceImpl extends AbstractAdmin implements KeyStoreA
         admin.addKeyStore(fileData, filename, password, provider, type, pvtkeyPass);
     }
 
+    public void addTrustStore(String fileData, String filename, String password, String provider,
+                            String type) throws SecurityConfigException {
+        KeyStoreAdmin admin = new KeyStoreAdmin(CarbonContext.getCurrentContext().getTenantId(),
+                getGovernanceSystemRegistry());
+        admin.addTrustStore(fileData, filename, password, provider, type);
+    }
+
     public void deleteStore(String keyStoreName) throws SecurityConfigException {
         KeyStoreAdmin admin = new KeyStoreAdmin(CarbonContext.getCurrentContext().getTenantId(),
                 getGovernanceSystemRegistry());

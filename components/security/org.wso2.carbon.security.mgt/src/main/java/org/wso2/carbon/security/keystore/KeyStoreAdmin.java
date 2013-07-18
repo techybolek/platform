@@ -244,6 +244,41 @@ public class KeyStoreAdmin {
 		}
 	}
 
+    public void addTrustStore(String fileData, String filename, String password, String provider,
+                            String type) throws SecurityConfigException {
+        byte[] content = Base64.decode(fileData);
+        addTrustStore(content, filename, password, provider, type);
+    }
+
+    public void addTrustStore(byte[] content, String filename, String password, String provider, String type) throws SecurityConfigException {
+        if (filename == null) {
+            throw new SecurityConfigException("Key Store name can't be null");
+        }
+        try {
+            if (KeyStoreUtil.isPrimaryStore(filename)) {
+                throw new SecurityConfigException("Key store "+ filename + " already available");
+            }
+
+            String path = SecurityConstants.KEY_STORES + "/" + filename;
+            if (registry.resourceExists(path)) {
+                throw new SecurityConfigException("Key store "+ filename + " already available");
+            }
+
+            KeyStore keyStore = KeyStore.getInstance(type);
+            keyStore.load(new ByteArrayInputStream(content), password.toCharArray());
+            Resource resource = registry.newResource();
+            resource.addProperty(SecurityConstants.PROP_PROVIDER, provider);
+            resource.addProperty(SecurityConstants.PROP_TYPE, type);
+            resource.setContent(content);
+            registry.put(path, resource);
+        } catch (SecurityConfigException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new SecurityConfigException(e.getMessage(), e);
+        }
+    }
+
 	public void deleteStore(String keyStoreName) throws SecurityConfigException {
 		try {
 			if (keyStoreName == null || (keyStoreName = keyStoreName.trim()).length() == 0) {

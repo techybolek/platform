@@ -27,6 +27,9 @@ public interface KeyStoreAdminInterface {
     void addKeyStore(String file, String filename,
                                 String password, String provider, String type, String pvtkeyPass) throws SecurityConfigException;
 
+    void addTrustStore(String file, String filename,
+                     String password, String provider, String type) throws SecurityConfigException;
+
     void deleteStore(String keyStoreName) throws SecurityConfigException;
 
     void importCertToStore(String fileName, String fileData, String keyStoreName) throws SecurityConfigException;
