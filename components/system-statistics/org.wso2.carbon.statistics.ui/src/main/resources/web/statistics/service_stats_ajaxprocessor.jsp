@@ -42,7 +42,8 @@
     try {
         serviceStats = client.getServiceStatistics(serviceName);
     } catch (Exception e) {
-        if(e.getCause().getMessage().toLowerCase().indexOf("you are not authorized") == -1){
+        if(e.getCause().getMessage().toLowerCase().indexOf("you are not authorized") == -1 || 
+            e.getCause().getMessage().toLowerCase().indexOf("while trying to authenticate access to service") == -1) {
             response.setStatus(500);
             CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
             session.setAttribute(CarbonUIMessage.ID, uiMsg);

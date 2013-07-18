@@ -62,6 +62,11 @@ public class StatisticsAdminClient {
         try {
             return stub.getSystemStatistics();
         } catch (RemoteException e) {
+            if (e.getMessage().contains("Backend server may be unavailable")) {
+                log.debug("Backend server may be unavailable", e);
+                throw new RemoteException("Backend server may be unavailable", e);
+            }
+
             handleException(bundle.getString("cannot.get.system.stats"), e);
         }
         return null;
@@ -71,6 +76,11 @@ public class StatisticsAdminClient {
         try {
             return stub.getServiceStatistics(serviceName);
         } catch (RemoteException e) {
+            if (e.getMessage().contains("Backend server may be unavailable")) {
+                log.debug("Backend server may be unavailable", e);
+                return null;
+            }
+
             handleException(MessageFormat.format(bundle.getString("cannot.get.service.stats"),
                     serviceName), e);
         }
