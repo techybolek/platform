@@ -9,7 +9,7 @@
 		<!--  Custom Page configurations -->
 		
 		<!-- *************** LoginPage configs for SampleApp ********************** -->
-		<init-param>
+		<!--init-param>
 			<param-name>SampleApp-LoginPage</param-name>
 			<param-value>https://localhost:9443/sampleapp-pages/login</param-value>
 		</init-param>
@@ -20,11 +20,11 @@
 		<init-param>
 			<param-name>SampleApp-ConsentPage</param-name>
 			<param-value>https://localhost:9443/sampleapp-pages/consent</param-value>
-		</init-param>
+		</init-param-->
 		<!-- **************** End of configs for SampleApp ************************* -->
 		
 		<!-- ################## Global confg ##################################### -->		
-		<init-param>
+		<!--init-param>
 			<param-name>Global-LoginPage</param-name>
 			<param-value>https://localhost:9443/sampleapp-pages/login</param-value>
 		</init-param>
@@ -35,7 +35,7 @@
 		<init-param>
 			<param-name>Global-ConsentPage</param-name>
 			<param-value>https://localhost:9443/sampleapp-pages/consent</param-value>
-		</init-param>		
+		</init-param-->		
 		<!-- ################## End of Global confg ############################## -->
 		
 	</servlet>
