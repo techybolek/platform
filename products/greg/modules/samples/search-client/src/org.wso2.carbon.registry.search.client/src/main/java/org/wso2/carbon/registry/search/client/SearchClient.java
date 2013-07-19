@@ -24,6 +24,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.client.WSRegistrySearchClient;
+import org.wso2.carbon.governance.lcm.ui.clients.LifeCycleManagementServiceClient;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -61,8 +62,11 @@ public class SearchClient {
         System.setProperty("carbon.repo.write.mode", "true");
         configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(
                 axis2Repo, axis2Conf);
+        LifeCycleManagementServiceClient
         return new WSRegistryServiceClient(serverURL, username, password, configContext);
     }
+
+
 
     public static void main(String[] args) throws Exception {
         try {
@@ -73,7 +77,8 @@ public class SearchClient {
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) gov);
             addServices(gov);
             //Initialize the pagination context.
-            PaginationContext.init(0, 5, "overview_name", "DES", 100);
+            //Top five services, sortBy name , and sort order descending.
+            PaginationContext.init(0, 5, "DES", "overview_name", 100);
             WSRegistrySearchClient wsRegistrySearchClient =
                     new WSRegistrySearchClient(serverURL, username, password, configContext);
             //This should be execute to initialize the AttributeSearchService.
@@ -90,11 +95,17 @@ public class SearchClient {
                 add("Development");
             }});
             //Find the results.
-            System.out.println("\n\nSearch services having ServiceLifeCycle and  in development state ...\n");
+            System.out.println("\n\nSearch services having ServiceLifeCycle and development state ...\n");
+            System.out.println("Get top five services ..\n");
             System.out.println("Sort by  service name ..\n");
             System.out.println("Sort order descending ..\n\n");
             GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
 
+            if(genericArtifacts.length == 0){
+                System.out.println("No results found ..");
+            }
+
+            System.out.println("\nResults found ... \n");
             for (GenericArtifact artifact : genericArtifacts) {
                 System.out.println(artifact.getPath());
             }
@@ -116,7 +127,7 @@ public class SearchClient {
         }
         //Services need to be index before search.
         try {
-            System.out.println("Waiting to index services .....!");
+            System.out.println("\n.....Waiting to index services .....!");
             Thread.sleep(2 * 60 * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
