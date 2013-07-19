@@ -10,14 +10,14 @@ import java.util.Stack;
 
 public class ConnectorUtils {
 
-    public static String lookupFunctionParam(MessageContext ctxt, String paramName) {
+    public static Object lookupFunctionParam(MessageContext ctxt, String paramName) {
         Stack<TemplateContext> funcStack = (Stack) ctxt.getProperty(SynapseConstants.SYNAPSE__FUNCTION__STACK);
         TemplateContext currentFuncHolder = funcStack.peek();
         String paramValue = (String) currentFuncHolder.getParameterValue(paramName);
         return paramValue;
     }
 
-    public static String lookupFunctionParam(MessageContext ctxt, int index) {
+    public static Object lookupFunctionParam(MessageContext ctxt, int index) {
         Stack<TemplateContext> funcStack = (Stack) ctxt.getProperty(SynapseConstants.SYNAPSE__FUNCTION__STACK);
         TemplateContext currentFuncHolder = funcStack.peek();
         Collection paramList = currentFuncHolder.getParameters();

@@ -26,7 +26,8 @@ import twitter4j.Status;
 public class TwitterMediatorUtils {
 
 	public static String lookupFunctionParam(MessageContext ctxt, String paramName) {
-		return ConnectorUtils.lookupFunctionParam(ctxt, paramName);
+		return (String)ConnectorUtils.lookupFunctionParam(ctxt, paramName);
+		
 	}
 
 	public static void storeResponseStatus(MessageContext ctxt, Status status) {
