@@ -216,7 +216,7 @@ public class UserInformationRecoveryService {
 		return new VerificationBean(VerificationBean.ERROR_CODE_UN_EXPECTED);
 	}
 
-	public ChallengeQuestionIdsDTO getUserChanllegneQuestionIds(String username, String confirmation)
+	public ChallengeQuestionIdsDTO getUserChallengeQuestionIds(String username, String confirmation)
 			throws IdentityMgtServiceException {
 
 		UserDTO userDTO = null;
