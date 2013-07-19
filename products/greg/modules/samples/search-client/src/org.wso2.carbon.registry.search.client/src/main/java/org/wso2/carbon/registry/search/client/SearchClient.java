@@ -24,7 +24,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.client.WSRegistrySearchClient;
-import org.wso2.carbon.governance.lcm.ui.clients.LifeCycleManagementServiceClient;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -62,10 +61,8 @@ public class SearchClient {
         System.setProperty("carbon.repo.write.mode", "true");
         configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(
                 axis2Repo, axis2Conf);
-        LifeCycleManagementServiceClient
         return new WSRegistryServiceClient(serverURL, username, password, configContext);
     }
-
 
 
     public static void main(String[] args) throws Exception {
@@ -101,7 +98,7 @@ public class SearchClient {
             System.out.println("Sort order descending ..\n\n");
             GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
 
-            if(genericArtifacts.length == 0){
+            if (genericArtifacts.length == 0) {
                 System.out.println("No results found ..");
             }
 
@@ -118,11 +115,11 @@ public class SearchClient {
     }
 
     private static void addServices(Registry govRegistry) throws RegistryException {
-        GenericArtifactManager artifactManager = new GenericArtifactManager(govRegistry,  "service");
+        GenericArtifactManager artifactManager = new GenericArtifactManager(govRegistry, "service");
         System.out.println("#############################################\n");
         for (int i = 1; i < 10; i++) {
             System.out.println("Adding FlightService" + i + " ....");
-            GenericArtifact artifact =  artifactManager.newGovernanceArtifact(new QName("ns", "FlightService" + i));
+            GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName("ns", "FlightService" + i));
             artifactManager.addGenericArtifact(artifact);
         }
         //Services need to be index before search.
