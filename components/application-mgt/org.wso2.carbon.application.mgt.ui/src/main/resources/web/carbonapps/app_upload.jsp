@@ -65,7 +65,7 @@
                                     </td>
                                     <td>
                                         <input type="file" id="filename" name="filename"
-                                               size="100"/>
+                                               size="50"/>
                                     </td>
                                 </tr>
                             </table>
