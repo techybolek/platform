@@ -43,7 +43,7 @@ public class TemplateContext {
      */
     private Map mappedValues;
 
-    TemplateContext(String name, Collection<String> parameters) {
+    public TemplateContext(String name, Collection<String> parameters) {
         this.fName = name;
         this.parameters = parameters;
         mappedValues = new HashMap();
