@@ -66,7 +66,7 @@
             input.name = "deletePublicCert";
             input.id = "deletePublicCert";
             input.value = "true";
-            document.forms['idp-mgt-form'].appendChild(input);
+            document.forms['idp-mgt-edit-form'].appendChild(input);
         })
     })
     var deletedRows = [];
@@ -100,7 +100,7 @@
             input.name = "deleteRoleMappings";
             input.id = "deleteRoleMappings";
             input.value = "true";
-            document.forms['idp-mgt-form'].appendChild(input);
+            document.forms['idp-mgt-edit-form'].appendChild(input);
         })
     })
     function idpMgtUpdate(){
@@ -114,7 +114,7 @@
                 }
             }
             if(allDeletedStr != "") {
-                CARBON.showConfirmationDialog('Are you sure you want to delete the role ' + allDeletedStr,
+                CARBON.showConfirmationDialog('Are you sure you want to delete the role(s) ' + allDeletedStr,
                         function(){
                             if(jQuery('#deleteRoleMappings').val() == 'true'){
                                 CARBON.showConfirmationDialog('Are you sure you want to delete all the role mappings?',
@@ -123,24 +123,24 @@
                                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                                                         jQuery('#issuer').val() + '?',
                                                         function (){
-                                                            jQuery('#idp-mgt-form').submit();
+                                                            jQuery('#idp-mgt-edit-form').submit();
                                                         },
                                                         function(){
-                                                            location.href = "idp-mgt.jsp"
+                                                            location.href = "idp-mgt-edit.jsp"
                                                         });
                                             } else {
-                                                jQuery('#idp-mgt-form').submit();
+                                                jQuery('#idp-mgt-edit-form').submit();
                                             }
                                         },
                                         function(){
-                                            location.href = "idp-mgt.jsp"
+                                            location.href = "idp-mgt-edit.jsp"
                                         });
                             } else {
-                                jQuery('#idp-mgt-form').submit();
+                                jQuery('#idp-mgt-edit-form').submit();
                             }
                         },
                         function(){
-                            location.href = "idp-mgt.jsp"
+                            location.href = "idp-mgt-edit.jsp"
                         });
             } else if(jQuery('#deleteRoleMappings').val() == 'true'){
                 CARBON.showConfirmationDialog('Are you sure you want to delete all the role mappings?',
@@ -149,48 +149,35 @@
                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                                         jQuery('#issuer').val() + '?',
                                         function (){
-                                            jQuery('#idp-mgt-form').submit();
+                                            jQuery('#idp-mgt-edit-form').submit();
                                         },
                                         function(){
-                                            location.href = "idp-mgt.jsp"
+                                            location.href = "idp-mgt-edit.jsp"
                                         });
                             } else {
-                                jQuery('#idp-mgt-form').submit();
+                                jQuery('#idp-mgt-edit-form').submit();
                             }
                         },
                         function(){
-                            location.href = "idp-mgt.jsp"
+                            location.href = "idp-mgt-edit.jsp"
                         });
             } else if(jQuery('#deletePublicCert').val() == 'true'){
                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                         jQuery('#issuer').val() + '?',
                         function (){
-                            jQuery('#idp-mgt-form').submit();
+                            jQuery('#idp-mgt-edit-form').submit();
                         },
                         function(){
-                            location.href = "idp-mgt.jsp"
+                            location.href = "idp-mgt-edit.jsp"
                         });
             } else {
-                jQuery('#idp-mgt-form').submit();
+                jQuery('#idp-mgt-edit-form').submit();
             }
         }
     }
-    function idpMgtDelete(){
-        CARBON.showConfirmationDialog('Are you sure you want to delete "'  + jQuery('#issuer').val() + '" IdP information?',
-                function (){
-                    var input = document.createElement('input');
-                    input.type = "hidden";
-                    input.name = "delete";
-                    input.value = "true";
-                    document.forms['idp-mgt-form'].appendChild(input);
-                    jQuery('#idp-mgt-form').submit();
-                },
-                null);
-    }
     function idpMgtCancel(){
-        location.href = "idp-mgt.jsp"
+        location.href = "idp-mgt-list.jsp"
     }
-
     function doValidation() {
         var reason = "";
         reason = validateEmpty("issuer");
@@ -214,10 +201,10 @@
 <fmt:bundle basename="org.wso2.carbon.identity.provider.mgt.ui.i18n.Resources">
     <div id="middle">
         <h2>
-            <fmt:message key='identity.provider'/>
+            <fmt:message key='identity.providers'/>
         </h2>
         <div id="workArea">
-            <form id="idp-mgt-form" name="idp-mgtform" method="post" action="idp-mgt-finish.jsp" enctype="multipart/form-data" >
+            <form id="idp-mgt-edit-form" name="idp-mgt-edit-form" method="post" action="idp-mgt-edit-finish.jsp" enctype="multipart/form-data" >
             <div class="sectionSeperator togglebleTitle"><fmt:message key='identity.provider.info'/></div>
             <div class="sectionSub">
                 <table class="carbonFormTable">
@@ -298,12 +285,12 @@
                                         <tr>
                                             <td><input type="text" value="<%=roles.get(i)%>" id="rowid_<%=i%>" name="rowname_<%=i%>"/></td>
                                             <td>
-                                                <a title="<fmt:message key='idp.role.delete'/>"
+                                                <a title="<fmt:message key='delete.role'/>"
                                                    onclick="deleteRoleRow(this);return false;"
                                                    href="#"
                                                    class="icon-link"
                                                    style="background-image: url(images/delete.gif)">
-                                                    <fmt:message key='idp.role.delete'/>
+                                                    <fmt:message key='delete.role'/>
                                                 </a>
                                             </td>
                                         </tr>
@@ -314,15 +301,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="leftCol-med labelField"><fmt:message key='idp.role.mappings'/>:</td>
+                        <td class="leftCol-med labelField"><fmt:message key='role.mappings'/>:</td>
                         <td>
                             <input id="roleMappingFile" name="roleMappingFile" type="file" />
                             <div class="sectionHelp">
-                                <fmt:message key='idp.role.mappings.help'/>
+                                <fmt:message key='role.mappings.help'/>
                             </div>
                             <% if(roleMappings != null && roleMappings.size()>0){ %>
                                 <div id="roleMappingDiv">
-                                    <a id="roleMappingDeleteLink" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key='idp.role.mapping.delete'/></a>
+                                    <a id="roleMappingDeleteLink" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key='role.mapping.delete'/></a>
                                     <table class="styledLeft">
                                         <thead><tr><th class="leftCol-big"><fmt:message key='idp.role'/></th><th><fmt:message key='tenant.role'/></th></tr></thead>
                                         <tbody>
@@ -344,7 +331,6 @@
                 <% } else { %>
                     <input type="button" value="<fmt:message key='idp.register'/>" onclick="idpMgtUpdate();"/>
                 <% } %>
-                <input type="button" value="<fmt:message key='idp.delete'/>" onclick="idpMgtDelete();"/>
                 <input type="button" value="<fmt:message key='idp.cancel'/>" onclick="idpMgtCancel();"/>
             </div>
             </form>

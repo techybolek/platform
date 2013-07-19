@@ -6,30 +6,26 @@
 ~ in compliance with the License.
 ~ You may obtain a copy of the License at
 ~
-~    http://www.apache.org/licenses/LICENSE-2.0
+~ http://www.apache.org/licenses/LICENSE-2.0
 ~
 ~ Unless required by applicable law or agreed to in writing,
 ~ software distributed under the License is distributed on an
 ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-~ KIND, either express or implied.  See the License for the
+~ KIND, either express or implied. See the License for the
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.context.CarbonContext" %>
 <%@ page import="org.wso2.carbon.identity.provider.mgt.stub.dto.TrustedIdPDTO" %>
-<%@ page import="org.wso2.carbon.identity.provider.mgt.ui.bean.TrustedIdPBean" %>
 <%@ page import="org.wso2.carbon.identity.provider.mgt.ui.client.IdentityProviderMgtServiceClient" %>
 <%@ page import="org.wso2.carbon.identity.provider.mgt.ui.util.IdentityProviderMgtUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.text.MessageFormat" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ResourceBundle" %>
-<%@ page import="java.util.HashMap" %>
 
 <%
     String BUNDLE = "org.wso2.carbon.identity.provider.mgt.ui.i18n.Resources";
@@ -40,37 +36,21 @@
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         IdentityProviderMgtServiceClient client = new IdentityProviderMgtServiceClient(cookie, backendServerURL, configContext);
-        TrustedIdPDTO trustedIdPDTO = client.getTenantIdP();
-        if(trustedIdPDTO != null){
-            TrustedIdPBean trustedIdPBean = new TrustedIdPBean();
-            trustedIdPBean.setIdPIssuerId(trustedIdPDTO.getIdPIssuerId());
-            trustedIdPBean.setIdPUrl(trustedIdPDTO.getIdPUrl());
-            if(trustedIdPDTO.getPublicCert() != null){
-                trustedIdPBean.setCertData(IdentityProviderMgtUIUtil.getCertData(trustedIdPDTO.getPublicCert()));
-            }
-            if(trustedIdPDTO.getRoles() != null){
-                trustedIdPBean.setRoles(new ArrayList<String>(Arrays.asList(trustedIdPDTO.getRoles())));
-            } else {
-                trustedIdPDTO.setRoles(new String[0]);
-                trustedIdPBean.setRoles(new ArrayList<String>());
-            }
-            if(trustedIdPDTO.getRoleMappings() != null){
-                trustedIdPBean.setRoleMappings(IdentityProviderMgtUIUtil.getRoleMappings(trustedIdPDTO.getRoleMappings()));
-            } else {
-                trustedIdPDTO.setRoleMappings(new String[0]);
-                trustedIdPBean.setRoleMappings(new HashMap<String, String>());
-            }
-            session.setAttribute("trustedIdPDTO", trustedIdPDTO);
-            session.setAttribute("trustedIdPBean", trustedIdPBean);
-        }
+
+        TrustedIdPDTO trustedIdPDTO = IdentityProviderMgtUIUtil.getFormData(request);
+        client.updateTenantIdP((TrustedIdPDTO)session.getAttribute("trustedIdPDTO"), trustedIdPDTO);
+        String message = MessageFormat.format(resourceBundle.getString("success.updating.idp"),null);
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
     } catch (Exception e) {
-        String message = MessageFormat.format(resourceBundle.getString("error.loading.idp"),
+        String message = MessageFormat.format(resourceBundle.getString("error.updating.idp"),
                 new Object[]{e.getMessage()});
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+    } finally {
+        session.removeAttribute("trustedIdPDTO");
+        session.removeAttribute("trustedIdPBean");
+        session.removeAttribute("tenantIdPList");
     }
 %>
 <script type="text/javascript">
-    location.href = "idp-mgt.jsp";
+    location.href = "idp-mgt-list-load.jsp";
 </script>
-
-

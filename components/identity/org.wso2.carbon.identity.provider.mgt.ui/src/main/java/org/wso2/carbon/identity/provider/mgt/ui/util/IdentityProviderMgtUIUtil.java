@@ -67,7 +67,7 @@ public class IdentityProviderMgtUIUtil {
         return roleMappingsMap;
     }
 
-    public static Object[] getFormData(HttpServletRequest request) throws FileUploadException, Exception {
+    public static TrustedIdPDTO getFormData(HttpServletRequest request) throws FileUploadException, Exception {
         if (ServletFileUpload.isMultipartContent(request)) {
             Object[] objects = new Object[2];
             ServletRequestContext servletContext = new ServletRequestContext(request);
@@ -97,7 +97,6 @@ public class IdentityProviderMgtUIUtil {
                 }
             }
             List<String> tempList = new ArrayList<String>();
-            String delete = null;
             String deletePublicCert = null;
             String deleteRoleMapping = null;
             TrustedIdPDTO trustedIdPDTO = new TrustedIdPDTO();
@@ -148,12 +147,6 @@ public class IdentityProviderMgtUIUtil {
                             tempList.add(new String(rolesArray));
                         }
                     }
-                } else if(name.equals("delete")){
-                    FileItem fileItem = diskFileItem;
-                    byte[] deleteArray = fileItem.get();
-                    if(deleteArray != null && deleteArray.length > 0){
-                        delete = new String(deleteArray);
-                    }
                 } else if(name.equals("deleteRoleMappings")){
                     FileItem fileItem = diskFileItem;
                     byte[] deleteRoleMappingsArray = fileItem.get();
@@ -182,9 +175,7 @@ public class IdentityProviderMgtUIUtil {
             } else {
                 trustedIdPDTO.setRoleMappings(roleMappings);
             }
-            objects[0] = trustedIdPDTO;
-            objects[1] = delete;
-            return objects;
+            return trustedIdPDTO;
         } else {
             throw new Exception("Invalid Content Type: Not multipart/form-data");
         }

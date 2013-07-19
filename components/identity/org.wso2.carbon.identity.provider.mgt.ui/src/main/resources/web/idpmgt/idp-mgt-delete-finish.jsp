@@ -20,7 +20,6 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.identity.provider.mgt.stub.dto.TrustedIdPDTO" %>
 <%@ page import="org.wso2.carbon.identity.provider.mgt.ui.client.IdentityProviderMgtServiceClient" %>
-<%@ page import="org.wso2.carbon.identity.provider.mgt.ui.util.IdentityProviderMgtUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
@@ -36,24 +35,23 @@
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         IdentityProviderMgtServiceClient client = new IdentityProviderMgtServiceClient(cookie, backendServerURL, configContext);
-
-        Object[] objects = IdentityProviderMgtUIUtil.getFormData(request);
-        if(objects[1] != null && objects[1].equals("true")){
-            client.updateTenantIdP((TrustedIdPDTO)session.getAttribute("trustedIdPDTO"), null);
-        } else {
-            client.updateTenantIdP((TrustedIdPDTO)session.getAttribute("trustedIdPDTO"), (TrustedIdPDTO)objects[0]);
+        if(request.getParameter("issuer") != null && !request.getParameter("issuer").equals("")){
+            TrustedIdPDTO deleteDTO = new TrustedIdPDTO();
+            deleteDTO.setIdPIssuerId(request.getParameter("issuer"));
+            client.updateTenantIdP(deleteDTO, null);
+            String message = MessageFormat.format(resourceBundle.getString("success.deleting.idp"),null);
+            CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
         }
-        String message = MessageFormat.format(resourceBundle.getString("success.updating.idp"),null);
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
     } catch (Exception e) {
-        String message = MessageFormat.format(resourceBundle.getString("error.updating.idp"),
+        String message = MessageFormat.format(resourceBundle.getString("error.deleting.idp"),
                 new Object[]{e.getMessage()});
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
     } finally {
+        session.removeAttribute("tenantIdPList");
         session.removeAttribute("trustedIdPDTO");
         session.removeAttribute("trustedIdPBean");
     }
 %>
 <script type="text/javascript">
-    location.href = "idp-mgt-load.jsp";
+    location.href = "idp-mgt-list-load.jsp";
 </script>
