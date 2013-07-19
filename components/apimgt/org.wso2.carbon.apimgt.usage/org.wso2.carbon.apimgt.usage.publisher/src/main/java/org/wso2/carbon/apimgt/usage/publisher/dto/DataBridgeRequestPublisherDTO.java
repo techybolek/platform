@@ -38,8 +38,11 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setVersion(requestPublisherDTO.getVersion());
         setRequestTime(requestPublisherDTO.getRequestTime());
         setUsername(requestPublisherDTO.getUsername());
+        setTenantDomain(requestPublisherDTO.getTenantDomain());
         setHostName(DataPublisherUtil.getHostAddress());
         setApiPublisher(requestPublisherDTO.getApiPublisher());
+        setApplicationName(requestPublisherDTO.getApplicationName());
+        setApplicationId(requestPublisherDTO.getApplicationId());
     }
 
     public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
@@ -71,8 +74,11 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                                        "          {'name':'request','type':'INT'}," +
                                        "          {'name':'requestTime','type':'LONG'}," +
                                        "          {'name':'userId','type':'STRING'}," +
+                                       "          {'name':'tenantDomain','type':'STRING'}," +
                                        "          {'name':'hostName','type':'STRING'}," +
-                                       "          {'name':'apiPublisher','type':'STRING'}" +
+                                       "          {'name':'apiPublisher','type':'STRING'}," +
+                                       "          {'name':'applicationName','type':'STRING'}," +
+                                       "          {'name':'applicationId','type':'STRING'}" +
                                        "  ]" +
                                        "}");
         }
@@ -83,8 +89,9 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
-                            getVersion(), getRequestCount(),getRequestTime(),getUsername(),getHostName(),
-                            getApiPublisher()};
+                            getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),getHostName(),
+                            getApiPublisher(), getApplicationName(), getApplicationId()};
+        
     }
 
 }

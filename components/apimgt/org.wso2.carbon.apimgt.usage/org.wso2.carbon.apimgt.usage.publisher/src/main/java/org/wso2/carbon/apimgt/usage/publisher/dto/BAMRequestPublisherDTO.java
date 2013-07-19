@@ -33,6 +33,9 @@ public class BAMRequestPublisherDTO extends RequestPublisherDTO{
         setVersion(requestPublisherDTO.getVersion());
         setRequestTime(requestPublisherDTO.getRequestTime());
         setUsername(requestPublisherDTO.getUsername());
+        setTenantDomain(requestPublisherDTO.getTenantDomain());
+        setApplicationName(requestPublisherDTO.getApplicationName());
+        setApplicationId(requestPublisherDTO.getApplicationId());
     }
 
     public Map<String, ByteBuffer> createEventDataMap() {
@@ -47,6 +50,9 @@ public class BAMRequestPublisherDTO extends RequestPublisherDTO{
         eventMap.put("request", ByteBuffer.wrap(String.valueOf(getRequestCount()).getBytes()));
         eventMap.put("requestTime", ByteBuffer.wrap(String.valueOf(getRequestTime()).getBytes()));
         eventMap.put("userId", ByteBuffer.wrap(getUsername().getBytes()));
+        eventMap.put("tenantDomain", ByteBuffer.wrap(String.valueOf(getTenantDomain()).getBytes()));
+        eventMap.put("applicationName", ByteBuffer.wrap(getApplicationName().getBytes()));
+        eventMap.put("applicationId", ByteBuffer.wrap(getApplicationId().getBytes()));
         return eventMap;
     }
 

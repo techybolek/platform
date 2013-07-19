@@ -41,8 +41,11 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setErrorMessage(faultPublisherDTO.getErrorMessage());
         setRequestTime((faultPublisherDTO.getRequestTime()));
         setUsername(faultPublisherDTO.getUsername());
+        setTenantDomain(faultPublisherDTO.getTenantDomain());
         setHostName(DataPublisherUtil.getHostAddress());
         setApiPublisher(faultPublisherDTO.getApiPublisher());
+        setApplicationName(faultPublisherDTO.getApplicationName());
+        setApplicationId(faultPublisherDTO.getApplicationId());
     }
 
     public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
@@ -76,8 +79,11 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
                     "          {'name':'errorMessage','type':'STRING'}," +
                     "          {'name':'requestTime','type':'STRING'}," +
                     "          {'name':'userId','type':'STRING'}," +
+                    "          {'name':'tenantDomain','type':'STRING'}," +
                     "          {'name':'hostName','type':'STRING'}," +
-                    "          {'name':'apiPublisher','type':'STRING'}" +
+                    "          {'name':'apiPublisher','type':'STRING'}," +
+                    "          {'name':'applicationName','type':'STRING'}," +
+                    "          {'name':'applicationId','type':'STRING'}" +
                     "  ]" +
 
                     "}");
@@ -90,6 +96,6 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
                 getVersion(),getErrorCode(),getErrorMessage(), String.valueOf(getRequestTime()),getUsername()
-                ,getHostName(),getApiPublisher()};
+                ,getHostName(),getApiPublisher(), getApplicationName(), getApplicationId()};
     }
 }

@@ -34,6 +34,9 @@ public class BAMResponsePublisherDTO extends ResponsePublisherDTO {
         setResponseTime(responsePublisherDTO.getResponseTime());
         setServiceTime(responsePublisherDTO.getServiceTime());
         setUsername(responsePublisherDTO.getUsername());
+        setTenantDomain(responsePublisherDTO.getTenantDomain());
+        setApplicationName(responsePublisherDTO.getApplicationName());
+        setApplicationId(responsePublisherDTO.getApplicationId());
     }
 
         public Map<String, ByteBuffer> createEventDataMap() {
@@ -49,6 +52,8 @@ public class BAMResponsePublisherDTO extends ResponsePublisherDTO {
         eventMap.put("responseTime", ByteBuffer.wrap(String.valueOf(getResponseTime()).getBytes()));
         eventMap.put("serviceTime", ByteBuffer.wrap(String.valueOf(getServiceTime()).getBytes()));
         eventMap.put("userId", ByteBuffer.wrap(getUsername().getBytes()));
+        eventMap.put("applicationName", ByteBuffer.wrap(getApplicationName().getBytes()));
+        eventMap.put("applicationId", ByteBuffer.wrap(getApplicationId().getBytes()));
         return eventMap;
     }
 

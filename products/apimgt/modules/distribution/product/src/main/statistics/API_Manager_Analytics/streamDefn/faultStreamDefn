@@ -18,7 +18,11 @@
                                                  {'name':'errorMessage','type':'STRING'}, 
 						 {'name':'requestTime','type':'STRING'},
                                                  {'name':'userId','type':'STRING'}, 
-                                                 {'name':'hostName','type':'STRING'} 
+					         {'name':'tenantDomain','type':'STRING'},
+                    		                 {'name':'hostName','type':'STRING'},
+   		                                 {'name':'apiPublisher','type':'STRING'},
+				                 {'name':'applicationName','type':'STRING'},
+                    		                 {'name':'applicationId','type':'STRING'}
                                          ] 
 
                                        }

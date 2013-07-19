@@ -3,8 +3,10 @@ package org.wso2.carbon.apimgt.usage.publisher;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class APIMgtFaultHandler extends AbstractMediator{
 
@@ -50,7 +52,8 @@ public class APIMgtFaultHandler extends AbstractMediator{
 
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
             faultPublisherDTO.setConsumerKey((String)messageContext.getProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY));
-            faultPublisherDTO.setUsername((String)messageContext.getProperty(APIMgtUsagePublisherConstants.USER_ID));
+            faultPublisherDTO.setUsername((String) messageContext.getProperty(APIMgtUsagePublisherConstants.USER_ID));
+            faultPublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(faultPublisherDTO.getUsername()));
             faultPublisherDTO.setContext((String) messageContext.getProperty(APIMgtUsagePublisherConstants.CONTEXT));
             faultPublisherDTO.setApi_version((String) messageContext.getProperty(APIMgtUsagePublisherConstants.API_VERSION));
             faultPublisherDTO.setApi((String) messageContext.getProperty(APIMgtUsagePublisherConstants.API));
@@ -62,6 +65,8 @@ public class APIMgtFaultHandler extends AbstractMediator{
             faultPublisherDTO.setRequestTime(requestTime);
             faultPublisherDTO.setHostName((String)messageContext.getProperty(APIMgtUsagePublisherConstants.HOST_NAME));
             faultPublisherDTO.setApiPublisher((String)messageContext.getProperty(APIMgtUsagePublisherConstants.API_PUBLISHER));
+            faultPublisherDTO.setApplicationName((String) messageContext.getProperty(APIMgtUsagePublisherConstants.APPLICATION_NAME));
+            faultPublisherDTO.setApplicationId((String) messageContext.getProperty(APIMgtUsagePublisherConstants.APPLICATION_ID));
 
             publisher.publishEvent(faultPublisherDTO);
 

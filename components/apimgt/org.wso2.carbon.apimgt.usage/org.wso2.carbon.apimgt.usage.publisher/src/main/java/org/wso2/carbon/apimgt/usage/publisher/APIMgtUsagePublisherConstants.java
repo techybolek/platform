@@ -44,6 +44,8 @@ public final class APIMgtUsagePublisherConstants {
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
+    public static final String APPLICATION_NAME = "api.ut.application.name";
+    public static final String APPLICATION_ID = "api.ut.application.id";
 
     public static final String  API_MANAGER_REQUEST_STREAM_NAME = "org.wso2.apimgt.statistics.request";
     public static final String  API_MANAGER_REQUEST_STREAM_VERSION = "1.0.0";

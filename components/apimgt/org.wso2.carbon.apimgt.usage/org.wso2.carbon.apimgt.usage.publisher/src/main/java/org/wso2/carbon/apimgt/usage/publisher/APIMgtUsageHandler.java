@@ -79,9 +79,13 @@ public class APIMgtUsageHandler extends AbstractHandler {
             AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(mc);
             String consumerKey = "";
             String username = "";
+            String applicationName = "";
+            String applicationId = "";
             if (authContext != null) {
                 consumerKey = authContext.getConsumerKey();
                 username = authContext.getUsername();
+                applicationName = authContext.getApplicationName();
+                applicationId = authContext.getApplicationId();
             }
             String hostName = DataPublisherUtil.getHostAddress();
             String context = (String)mc.getProperty(RESTConstants.REST_API_CONTEXT);
@@ -108,6 +112,9 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String resource = extractResource(mc);
             String method =  (String)((Axis2MessageContext) mc).getAxis2MessageContext().getProperty(
                     Constants.Configuration.HTTP_METHOD);
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
 
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setConsumerKey(consumerKey);
@@ -119,8 +126,12 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setMethod(method);
             requestPublisherDTO.setRequestTime(currentTime);
             requestPublisherDTO.setUsername(username);
+            requestPublisherDTO.setTenantDomain(tenantDomain);
             requestPublisherDTO.setHostName(hostName);
             requestPublisherDTO.setApiPublisher(apiPublisher);
+            requestPublisherDTO.setApiPublisher(apiPublisher);
+            requestPublisherDTO.setApplicationName(applicationName);
+            requestPublisherDTO.setApplicationId(applicationId);
 
             publisher.publishEvent(requestPublisherDTO);
             //We check if usage metering is enabled for billing purpose
@@ -128,7 +139,6 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 //If usage metering enabled create new usage stat object and publish to bam
                 APIManagerRequestStats stats = new APIManagerRequestStats();
                 stats.setRequestCount(1);
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(MultitenantUtils.getTenantDomain(username));
                 stats.setTenantId(tenantId);
                 try {
                     //Publish stat to bam
@@ -152,6 +162,8 @@ public class APIMgtUsageHandler extends AbstractHandler {
             mc.setProperty(APIMgtUsagePublisherConstants.REQUEST_TIME, currentTime);
             mc.setProperty(APIMgtUsagePublisherConstants.HOST_NAME,hostName);
             mc.setProperty(APIMgtUsagePublisherConstants.API_PUBLISHER,apiPublisher);
+            mc.setProperty(APIMgtUsagePublisherConstants.APPLICATION_NAME, applicationName);
+            mc.setProperty(APIMgtUsagePublisherConstants.APPLICATION_ID, applicationId);
 
         }catch (Throwable e){
             log.error("Cannot publish event. " + e.getMessage(), e);
@@ -173,6 +185,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
             responsePublisherDTO.setConsumerKey((String)mc.getProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY));
             responsePublisherDTO.setUsername((String)mc.getProperty(APIMgtUsagePublisherConstants.USER_ID));
+            responsePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(responsePublisherDTO.getUsername()));
             responsePublisherDTO.setContext((String) mc.getProperty(APIMgtUsagePublisherConstants.CONTEXT));
             responsePublisherDTO.setApi_version((String) mc.getProperty(APIMgtUsagePublisherConstants.API_VERSION));
             responsePublisherDTO.setApi((String) mc.getProperty(APIMgtUsagePublisherConstants.API));
@@ -183,6 +196,8 @@ public class APIMgtUsageHandler extends AbstractHandler {
             responsePublisherDTO.setServiceTime(serviceTime);
             responsePublisherDTO.setHostName((String)mc.getProperty(APIMgtUsagePublisherConstants.HOST_NAME));
             responsePublisherDTO.setApiPublisher((String)mc.getProperty(APIMgtUsagePublisherConstants.API_PUBLISHER));
+            responsePublisherDTO.setApplicationName((String) mc.getProperty(APIMgtUsagePublisherConstants.APPLICATION_NAME));
+            responsePublisherDTO.setApplicationId((String) mc.getProperty(APIMgtUsagePublisherConstants.APPLICATION_ID));
 
             publisher.publishEvent(responsePublisherDTO);
 

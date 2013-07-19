@@ -23,6 +23,8 @@ public abstract class PublisherDTO {
     
     private String username;
 
+    private String tenantDomain;
+
     private String context;
 
     private String api_version;
@@ -38,6 +40,10 @@ public abstract class PublisherDTO {
     private String hostName;
 
     private String apiPublisher;
+    
+    private String applicationName;
+
+    private String applicationId;
 
     public String getHostName() {
         return hostName;
@@ -61,6 +67,14 @@ public abstract class PublisherDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
     }
 
     public String getContext() {
@@ -119,4 +133,25 @@ public abstract class PublisherDTO {
         return apiPublisher;
     }
 
+	/**
+	 * @return the applicationName
+	 */
+	public String getApplicationName() {
+		return applicationName;
+	}
+
+	/**
+	 * @param applicationName the applicationName to set
+	 */
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
+	}
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
 }

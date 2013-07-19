@@ -39,8 +39,11 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setResponseTime(responsePublisherDTO.getResponseTime());
         setServiceTime(responsePublisherDTO.getServiceTime());
         setUsername(responsePublisherDTO.getUsername());
+        setTenantDomain(responsePublisherDTO.getTenantDomain());
         setHostName(DataPublisherUtil.getHostAddress());
         setApiPublisher(responsePublisherDTO.getApiPublisher());
+        setApplicationName(responsePublisherDTO.getApplicationName());
+        setApplicationId(responsePublisherDTO.getApplicationId());
     }
 
     public static String addStreamId(DataPublisher dataPublisher) throws AgentException,
@@ -74,11 +77,15 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                                        "          {'name':'responseTime','type':'LONG'}," +
                                        "          {'name':'serviceTime','type':'LONG'}," +
                                        "          {'name':'userId','type':'STRING'}," +
+                                       "          {'name':'tenantDomain','type':'STRING'}," +
                                        "          {'name':'hostName','type':'STRING'}," +
-                                       "          {'name':'apiPublisher','type':'STRING'}" +
+                                       "          {'name':'apiPublisher','type':'STRING'}," +
+                                       "          {'name':'applicationName','type':'STRING'}," +
+                                       "          {'name':'applicationId','type':'STRING'}" +
                                        "  ]" +
 
                                        "}");
+            System.out.println("adding response stream");
 
                     }
         return dataPublisher.findStream(APIMgtUsagePublisherConstants.API_MANAGER_RESPONSE_STREAM_NAME,
@@ -87,8 +94,8 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
 
     public Object createPayload(){
         return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(),getResource(),getMethod(),
-                getVersion(),getResponse(),getResponseTime(),getServiceTime(),getUsername(),getHostName(),
-                getApiPublisher()};
+                getVersion(),getResponse(),getResponseTime(),getServiceTime(),getUsername(),getTenantDomain(),getHostName(),
+                getApiPublisher(), getApplicationName(), getApplicationId()};
     }
 
 }

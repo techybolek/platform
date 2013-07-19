@@ -17,6 +17,10 @@
                                                  {'name':'request','type':'INT'}, 
                                                  {'name':'requestTime','type':'LONG'}, 
                                                  {'name':'userId','type':'STRING'},
-                                                 {'name':'hostName','type':'STRING'} 
+					         {'name':'tenantDomain','type':'STRING'},
+                    		                 {'name':'hostName','type':'STRING'},
+   		                                 {'name':'apiPublisher','type':'STRING'},
+				                 {'name':'applicationName','type':'STRING'},
+                    		                 {'name':'applicationId','type':'STRING'}
                                          ] 
                                        }
