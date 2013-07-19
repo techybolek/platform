@@ -20,6 +20,7 @@ import java.util.HashMap;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -27,9 +28,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.TaggedResourcePath;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 @Path("/tag")
 public class SingleTag extends PaginationCalculation<TaggedResourcePath> {
@@ -59,25 +65,29 @@ public class SingleTag extends PaginationCalculation<TaggedResourcePath> {
 	public Response getTaggedResources(@QueryParam("name") String tagName,
 	                                   @QueryParam("start") int start,
 	                                   @QueryParam("size") int size,
-	                                   @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                   @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (tagName.length() == 0) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (RestPathPaginationValidation.validate(start, size) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			
+			if (tagName.length() == 0) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
+			}
+			if (RestPathPaginationValidation.validate(start, size) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
+			}
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			} else {
+				tag = tagName;
+				return displayPaginatedResult(start, size);
+			}
 		} else {
-			tag = tagName;
-			return displayPaginatedResult(start, size);
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 
 	}
@@ -99,51 +109,54 @@ public class SingleTag extends PaginationCalculation<TaggedResourcePath> {
 	@Produces("application/json")
 	public Response deleteTag(@QueryParam("path") String resourcePath,
 	                          @QueryParam("name") String tagName,
-	                          @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                          @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			boolean tagFound = false;
-			if (exist) {
-				Tag[] tags = super.getUserRegistry().getTags(resourcePath);
-				for (int j = 0; j < tags.length; j++) {
-					// if tag has been found remove the tag,set the tag found
-					// variable to true
-					if (tagName.equals(tags[j].getTagName())) {
-						super.getUserRegistry().removeTag(resourcePath, tagName);
-						tagFound = true;
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
+			}
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				boolean tagFound = false;
+				if (exist) {
+					Tag[] tags = super.getUserRegistry().getTags(resourcePath);
+					for (int j = 0; j < tags.length; j++) {
+						// if tag has been found remove the tag,set the tag found
+						// variable to true
+						if (tagName.equals(tags[j].getTagName())) {
+							super.getUserRegistry().removeTag(resourcePath, tagName);
+							tagFound = true;
+						}
 					}
-				}
-				if (tagFound) {
-					// if tag deleted
-					return Response.status(Response.Status.NO_CONTENT).build();
+					if (tagFound) {
+						// if tag deleted
+						return Response.status(Response.Status.NO_CONTENT).build();
+					} else {
+						log.debug("tag not found");
+						// if the specified tag is not found,returns http 404
+						return Response.status(Response.Status.NOT_FOUND).build();
+					}
 				} else {
-					log.debug("tag not found");
-					// if the specified tag is not found,returns http 404
+					log.debug("resource not found");
+					// if resource is not found,returns http 404
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
-			} else {
-				log.debug("resource not found");
-				// if resource is not found,returns http 404
-				return Response.status(Response.Status.NOT_FOUND).build();
+			} catch (RegistryException e) {
+				log.error("user doesn't have permission to delete a tag", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 			}
-		} catch (RegistryException e) {
-			log.error("user doesn't have permission to delete a tag", e);
-			// if user doesn't have permission to delete the resource, http 401
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 

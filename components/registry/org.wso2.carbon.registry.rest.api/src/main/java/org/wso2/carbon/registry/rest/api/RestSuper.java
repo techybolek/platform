@@ -46,12 +46,12 @@ public class RestSuper {
 	 *            tenantID of the authorized enduser belongs to the access token
 	 * @return user registry instance
 	 */
-	protected void createUserRegistry(String username, String tenantID) {
+	protected void createUserRegistry(String username, int tenantID) {
 		RegistryService registryService =
 		                                  (RegistryService) PrivilegedCarbonContext.getCurrentContext()
 		                                                                           .getOSGiService(RegistryService.class);
 		try {
-			userRegistry = registryService.getUserRegistry(username, Integer.parseInt(tenantID));
+			userRegistry = registryService.getUserRegistry(username, tenantID);
 			this.setUserRegistry(userRegistry);
 		} catch (NumberFormatException e) {
 			log.error("Unable to convert the tenantID to integer", e);

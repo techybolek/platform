@@ -24,6 +24,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -32,12 +33,17 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.TagModel;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 @Path("/tags")
 public class Tags extends PaginationCalculation<Tag> {
@@ -65,41 +71,43 @@ public class Tags extends PaginationCalculation<Tag> {
 	public Response getTagsOnAResource(@QueryParam("path") String resourcePath,
 	                                   @QueryParam("start") int start,
 	                                   @QueryParam("size") int size,
-	                                   @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                   @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(start, size) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		path = resourcePath;
-		try {
-			if (resourcePath.length() == 0) {
-				// retrieve all the tags
-				return getAllTags();
+			
+			if (RestPathPaginationValidation.validate(start, size) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-			// check resource exist
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				return displayPaginatedResult(start, size);
-			} else {
-				// resource does not found,HTTP 404
-				return Response.status(Response.Status.NOT_FOUND).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 			}
-		} catch (RegistryException e) {
-			log.error("user doesn't have permission to read the tag names for a given resource", e);
-			// if user don't have permission to get tags
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			boolean exist;
+			path = resourcePath;
+			try {
+				if (resourcePath.length() == 0) {
+					// retrieve all the tags
+					return getAllTags();
+				}
+				// check resource exist
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					return displayPaginatedResult(start, size);
+				} else {
+					// resource does not found,HTTP 404
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user doesn't have permission to read the tag names for a given resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
-
 	}
 
 	/**
@@ -119,36 +127,39 @@ public class Tags extends PaginationCalculation<Tag> {
 	@Consumes("application/json")
 	@Produces("application/json")
 	public Response setTagsOnAResource(@QueryParam("path") String resourcePath, TagModel tags,
-	                                   @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+			@HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		try {
-			boolean exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				String[] tagsOnResource = tags.getTags();
-				for (int i = 0; i < tagsOnResource.length; i++) {
-					super.getUserRegistry().applyTag(resourcePath, tagsOnResource[i]);
-				}
-				return Response.status(Response.Status.CREATED).build();
-			} else {
-				// if resource does not exist, returns HTTP 404
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user doesn't have permission to put the tags for the given resource", e);
-			// if user does not have permission to access the resource
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			try {
+				boolean exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					String[] tagsOnResource = tags.getTags();
+					for (int i = 0; i < tagsOnResource.length; i++) {
+						super.getUserRegistry().applyTag(resourcePath, tagsOnResource[i]);
+					}
+					return Response.status(Response.Status.CREATED).build();
+				} else {
+					// if resource does not exist, returns HTTP 404
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user doesn't have permission to put the tags for the given resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 

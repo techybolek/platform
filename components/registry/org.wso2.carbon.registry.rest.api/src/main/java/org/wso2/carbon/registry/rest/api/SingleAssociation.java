@@ -17,6 +17,7 @@ package org.wso2.carbon.registry.rest.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -25,9 +26,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.AssociationModel;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 @Path("/association")
 public class SingleAssociation extends RestSuper {
@@ -55,64 +61,67 @@ public class SingleAssociation extends RestSuper {
 	@Produces("application/json")
 	public Response AddAssociationOnAResource(@QueryParam("path") String resourcePath,
 	                                          AssociationModel[] association,
-	                                          @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                          @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean existResourcePath;
-		try {
-			// check for resource exist
-			existResourcePath = super.getUserRegistry().resourceExists(resourcePath);
-			if (existResourcePath) {
-				for (int i = 0; i < association.length; i++) {
-					// check for target resource exist
-					boolean existTargetPath =
-					                          super.getUserRegistry()
-					                               .resourceExists(association[i].getTarget());
-					if (existTargetPath) {
-						// add association for the given resource
-						super.getUserRegistry().addAssociation(resourcePath,
-						                                       association[i].getTarget(),
-						                                       association[i].getType());
-						if (log.isDebugEnabled()) {
-							log.debug("association has been added");
-						}
-					} else {
-						if (log.isDebugEnabled()) {
-							log.debug("target resource path does not exist");
-						}
-						return Response.status(Response.Status.BAD_REQUEST).build();
-					}
-				}
-				// get all the associations after added
-				Association[] result = super.getUserRegistry().getAllAssociations(resourcePath);
-				AssociationModel[] message = new AssociationModel[result.length];
-				for (int i = 0; i < result.length; i++) {
-					message[i] = new AssociationModel(result[i]);
-				}
-				// return the associations in JSON
-				return Response.ok(message).build();
-			} else {
-				if (log.isDebugEnabled()) {
-					log.debug("The source resource path does not exist");
-				}
-				// if resource is not found
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user is not allowed to add associations to a resource", e);
-			// if user is not authorized
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean existResourcePath;
+			try {
+				// check for resource exist
+				existResourcePath = super.getUserRegistry().resourceExists(resourcePath);
+				if (existResourcePath) {
+					for (int i = 0; i < association.length; i++) {
+						// check for target resource exist
+						boolean existTargetPath =
+						                          super.getUserRegistry()
+						                               .resourceExists(association[i].getTarget());
+						if (existTargetPath) {
+							// add association for the given resource
+							super.getUserRegistry().addAssociation(resourcePath,
+							                                       association[i].getTarget(),
+							                                       association[i].getType());
+							if (log.isDebugEnabled()) {
+								log.debug("association has been added");
+							}
+						} else {
+							if (log.isDebugEnabled()) {
+								log.debug("target resource path does not exist");
+							}
+							return Response.status(Response.Status.BAD_REQUEST).build();
+						}
+					}
+					// get all the associations after added
+					Association[] result = super.getUserRegistry().getAllAssociations(resourcePath);
+					AssociationModel[] message = new AssociationModel[result.length];
+					for (int i = 0; i < result.length; i++) {
+						message[i] = new AssociationModel(result[i]);
+					}
+					// return the associations in JSON
+					return Response.ok(message).build();
+				} else {
+					if (log.isDebugEnabled()) {
+						log.debug("The source resource path does not exist");
+					}
+					// if resource is not found
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user is not allowed to add associations to a resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -136,49 +145,52 @@ public class SingleAssociation extends RestSuper {
 	public Response DeleteAssociationOnAResource(@QueryParam("path") String resourcePath,
 	                                             @QueryParam("type") String type,
 	                                             @QueryParam("target") String target,
-	                                             @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                             @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean existResourcePath;
-		try {
-			// check for the existence of the resource
-			existResourcePath = super.getUserRegistry().resourceExists(resourcePath);
-			boolean existTargetPath = super.getUserRegistry().resourceExists(target);
-			if (existResourcePath && existTargetPath) {
-				// removes the association on the resource
-				super.getUserRegistry().removeAssociation(resourcePath, target, type);
-				if (log.isDebugEnabled()) {
-					log.debug("resource has been deleted");
-				}
-				Association[] result = super.getUserRegistry().getAllAssociations(resourcePath);
-				AssociationModel[] message = new AssociationModel[result.length];
-				// bind the association to a model object array
-				for (int i = 0; i < result.length; i++) {
-					message[i] = new AssociationModel(result[i]);
-				}
-				return Response.ok(message).build();
-			} else {
-				if (log.isDebugEnabled()) {
-					log.debug("source and/or target resource path don't exist");
-				}
-				// if resource not found
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user is not allowed to delete association on the resource", e);
-			// if user is not authorized to access the resource
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean existResourcePath;
+			try {
+				// check for the existence of the resource
+				existResourcePath = super.getUserRegistry().resourceExists(resourcePath);
+				boolean existTargetPath = super.getUserRegistry().resourceExists(target);
+				if (existResourcePath && existTargetPath) {
+					// removes the association on the resource
+					super.getUserRegistry().removeAssociation(resourcePath, target, type);
+					if (log.isDebugEnabled()) {
+						log.debug("resource has been deleted");
+					}
+					Association[] result = super.getUserRegistry().getAllAssociations(resourcePath);
+					AssociationModel[] message = new AssociationModel[result.length];
+					// bind the association to a model object array
+					for (int i = 0; i < result.length; i++) {
+						message[i] = new AssociationModel(result[i]);
+					}
+					return Response.ok(message).build();
+				} else {
+					if (log.isDebugEnabled()) {
+						log.debug("source and/or target resource path don't exist");
+					}
+					// if resource not found
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user is not allowed to delete association on the resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 }

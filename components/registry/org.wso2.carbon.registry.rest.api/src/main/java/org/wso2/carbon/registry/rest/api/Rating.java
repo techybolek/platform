@@ -16,6 +16,7 @@
 package org.wso2.carbon.registry.rest.api;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -23,8 +24,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.RatingModel;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 /**
  * This class retrieved the rating of the requested resource.
@@ -49,37 +55,42 @@ public class Rating extends RestSuper {
 	@GET
 	@Produces("application/json")
 	public Response getRatingOfAResource(@QueryParam("path") String resourcePath,
-	                                     @QueryParam("user") String username) {
+			@HeaderParam("X-JWT-Assertion") String JWTToken) {
 
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				RatingModel result =
-				                     new RatingModel(super.getUserRegistry()
-				                                          .getRating(resourcePath, username),
-				                                     super.getUserRegistry()
-				                                          .getAverageRating(resourcePath));
-				response = Response.ok().entity(result).build();
-				return response;
-			} else {
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("User does not have permission to read the rating of the resource", e);
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					RatingModel result =
+					                     new RatingModel(super.getUserRegistry()
+					                                          .getRating(resourcePath, username),
+					                                     super.getUserRegistry()
+					                                          .getAverageRating(resourcePath));
+					response = Response.ok().entity(result).build();
+					return response;
+				} else {
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("User does not have permission to read the rating of the resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 }

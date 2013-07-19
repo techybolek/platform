@@ -17,6 +17,7 @@
 package org.wso2.carbon.registry.rest.api;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -24,9 +25,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.ResourceModel;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 @Path("/metadata")
 public class SingleResource extends RestSuper {
@@ -47,37 +53,40 @@ public class SingleResource extends RestSuper {
 	@GET
 	@Produces("application/json")
 	public Response getMetaData(@QueryParam("path") String rPath,
-	                            @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+			@HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(rPath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exists;
-		try {
-			// check the resource exist
-			exists = super.getUserRegistry().resourceExists(rPath);
-			if (exists) {
-				Resource resource = super.getUserRegistry().get(rPath);
-				ResourceModel resourceModel = new ResourceModel(resource);
-				return Response.ok(resourceModel).build();
-			} else {
-				log.debug("resource not found at the given path");
-				// if resource is not found
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(rPath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user doesn't have permission to read the resource", e);
-			// if user does not have permission to read the resource meta data
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exists;
+			try {
+				// check the resource exist
+				exists = super.getUserRegistry().resourceExists(rPath);
+				if (exists) {
+					Resource resource = super.getUserRegistry().get(rPath);
+					ResourceModel resourceModel = new ResourceModel(resource);
+					return Response.ok(resourceModel).build();
+				} else {
+					log.debug("resource not found at the given path");
+					// if resource is not found
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user doesn't have permission to read the resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 }

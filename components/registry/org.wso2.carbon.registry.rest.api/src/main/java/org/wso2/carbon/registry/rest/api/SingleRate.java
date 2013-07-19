@@ -17,6 +17,7 @@
 package org.wso2.carbon.registry.rest.api;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -25,8 +26,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.RatingModel;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 @Path("/rate")
 public class SingleRate extends RestSuper {
@@ -49,45 +55,48 @@ public class SingleRate extends RestSuper {
 	@PUT
 	@Produces("application/json")
 	public Response RateResource(@QueryParam("path") String resourcePath,
-	                             @QueryParam("value") int value, @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                             @QueryParam("value") int value, @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				// if user try to rate a resource with value greater than 5,
-				// will throws HTTP 400.
-				if (value > 5) {
-					return Response.status(Response.Status.BAD_REQUEST).build();
-				}
-				super.getUserRegistry().rateResource(resourcePath, value);
-				RatingModel result =
-				                     new RatingModel(super.getUserRegistry()
-				                                          .getRating(resourcePath, username),
-				                                     super.getUserRegistry()
-				                                          .getAverageRating(resourcePath));
-				return Response.ok(result).build();
-			} else {
-				log.debug("resource does not exist on the path");
-				// if resource is not found, returns HTTP 404
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user doesn't have permission to rate a resource", e);
-			// if user does not have permission to read the resource
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					// if user try to rate a resource with value greater than 5,
+					// will throws HTTP 400.
+					if (value > 5) {
+						return Response.status(Response.Status.BAD_REQUEST).build();
+					}
+					super.getUserRegistry().rateResource(resourcePath, value);
+					RatingModel result =
+					                     new RatingModel(super.getUserRegistry()
+					                                          .getRating(resourcePath, username),
+					                                     super.getUserRegistry()
+					                                          .getAverageRating(resourcePath));
+					return Response.ok(result).build();
+				} else {
+					log.debug("resource does not exist on the path");
+					// if resource is not found, returns HTTP 404
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user doesn't have permission to rate a resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -102,39 +111,43 @@ public class SingleRate extends RestSuper {
 	@DELETE
 	@Produces("application/json")
 	public Response deleteRating(@QueryParam("path") String resourcePath,
-	                             @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+			@HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				// set the user specific rating to 0
-				super.getUserRegistry().rateResource(resourcePath, 0);
-				RatingModel result =
-				                     new RatingModel(super.getUserRegistry()
-				                                          .getRating(resourcePath, username),
-				                                     super.getUserRegistry()
-				                                          .getAverageRating(resourcePath));
-				return Response.ok(result).build();
-			} else {
-				log.debug("resource does not exist on the path");
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user doesn't have permission to delete the rating", e);
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					// set the user specific rating to 0
+					super.getUserRegistry().rateResource(resourcePath, 0);
+					RatingModel result =
+					                     new RatingModel(super.getUserRegistry()
+					                                          .getRating(resourcePath, username),
+					                                     super.getUserRegistry()
+					                                          .getAverageRating(resourcePath));
+					return Response.ok(result).build();
+				} else {
+					log.debug("resource does not exist on the path");
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user doesn't have permission to delete the rating", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 }

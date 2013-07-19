@@ -31,9 +31,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 /**
  * This class retrieves the requested resource according to the path parameters
@@ -60,46 +65,49 @@ public class Resources extends RestSuper {
 	@Path("/{path:.*}")
 	@Produces("application/octet-stream")
 	public Response getResource(@PathParam("path") List<PathSegment> path,
-	                            @QueryParam("user") String username) {
-
-		String resourcePath = getResourcePath(path);
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                            @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String resourcePath = getResourcePath(path);
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-
-		try {
-			boolean exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				Resource resource = super.getUserRegistry().get(resourcePath);
-				// check whether the resource is a collection
-				if (resource instanceof Collection) {
-					return Response.ok().entity(resource.getContent()).type("application/json")
-					               .build();
-				} else {
-					// get the content of the resource as a stream
-					String fileName = resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
-					return Response.ok(resource.getContentStream())
-					               .type(resource.getMediaType())
-					               .header("Content-Disposition",
-					                       "attachment; filename=" + fileName).build();
-				}
-			} else {
-				// the resource is not found
-				return Response.status(Response.Status.NOT_FOUND).type("application/json").build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user is not authorized to read the given resource", e);
-			// the user is not authorized to access the resourcereturn
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+	
+			try {
+				boolean exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					Resource resource = super.getUserRegistry().get(resourcePath);
+					// check whether the resource is a collection
+					if (resource instanceof Collection) {
+						return Response.ok().entity(resource.getContent()).type("application/json")
+						               .build();
+					} else {
+						// get the content of the resource as a stream
+						String fileName = resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
+						return Response.ok(resource.getContentStream())
+						               .type(resource.getMediaType())
+						               .header("Content-Disposition",
+						                       "attachment; filename=" + fileName).build();
+					}
+				} else {
+					// the resource is not found
+					return Response.status(Response.Status.NOT_FOUND).type("application/json").build();
+				}
+			} catch (RegistryException e) {
+				log.error("user is not authorized to read the given resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -126,63 +134,67 @@ public class Resources extends RestSuper {
 	@Produces("application/json")
 	public Response createResource(@PathParam("path") List<PathSegment> path, InputStream input,
 	                               @HeaderParam("Content-Type") String type,
-	                               @QueryParam("user") String username) {
-
-		String resourcePath = getResourcePath(path);
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                               @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String resourcePath = getResourcePath(path);
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				// check if collection already exists
-				if (type.contains("application/atomcoll+xml")) {
-					return Response.status(Response.Status.CONFLICT).build();
-				} else {
-					// check if resource already exists.
-					return Response.status(Response.Status.CONFLICT).build();
-				}
-			} else if (type != null) {
-
-				Resource resource = null;
-				// extract the <mediatype> from the <mediatype>;<encoding
-				// format>
-				if (type.indexOf(';') > 0) {
-					type = type.substring(0, type.indexOf(';'));
-				}
-				// check for collection media type
-				if (type.contains("application/atomcoll+xml")) {
-					resource = super.getUserRegistry().newCollection();
-					resource.setMediaType(type);
-				} else {
-					// otherwise create a resource instance
-					resource = super.getUserRegistry().newResource();
-					resource.setContentStream(input);
-				}
-				try {
-					super.getUserRegistry().put(resourcePath, resource);
-					return Response.status(Response.Status.CREATED).build();
-				} catch (RegistryException e) {
-					log.error(e.getCause(), e);
-					return Response.status(Response.Status.UNAUTHORIZED).build();
-				}
-			} else {
-				// if media type of the resource not specified
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
 				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user doesn't have permission to put the resource into the registry", e);
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					// check if collection already exists
+					if (type.contains("application/atomcoll+xml")) {
+						return Response.status(Response.Status.CONFLICT).build();
+					} else {
+						// check if resource already exists.
+						return Response.status(Response.Status.CONFLICT).build();
+					}
+				} else if (type != null) {
+	
+					Resource resource = null;
+					// extract the <mediatype> from the <mediatype>;<encoding
+					// format>
+					if (type.indexOf(';') > 0) {
+						type = type.substring(0, type.indexOf(';'));
+					}
+					// check for collection media type
+					if (type.contains("application/atomcoll+xml")) {
+						resource = super.getUserRegistry().newCollection();
+						resource.setMediaType(type);
+					} else {
+						// otherwise create a resource instance
+						resource = super.getUserRegistry().newResource();
+						resource.setContentStream(input);
+					}
+					try {
+						super.getUserRegistry().put(resourcePath, resource);
+						return Response.status(Response.Status.CREATED).build();
+					} catch (RegistryException e) {
+						log.error(e.getCause(), e);
+						throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+					}
+				} else {
+					// if media type of the resource not specified
+					return Response.status(Response.Status.BAD_REQUEST).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user doesn't have permission to put the resource into the registry", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -201,45 +213,49 @@ public class Resources extends RestSuper {
 	@Path("/{path:.*}")
 	@Produces("application/json")
 	public Response deleteResource(@PathParam("path") List<PathSegment> path,
-	                               @QueryParam("user") String username) {
-
-		String resourcePath = getResourcePath(path);
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+			@HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String resourcePath = getResourcePath(path);
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				// if resource exists delete the resource
-				super.getUserRegistry().delete(resourcePath);
-				// check whether the resource deleted
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
+			}
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
 				exist = super.getUserRegistry().resourceExists(resourcePath);
 				if (exist) {
-					// some internal error occurred during the deletion
-					return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+					// if resource exists delete the resource
+					super.getUserRegistry().delete(resourcePath);
+					// check whether the resource deleted
+					exist = super.getUserRegistry().resourceExists(resourcePath);
+					if (exist) {
+						// some internal error occurred during the deletion
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+					} else {
+						// the resource has been deleted
+						return Response.status(Response.Status.NO_CONTENT).build();
+					}
 				} else {
-					// the resource has been deleted
-					return Response.status(Response.Status.NO_CONTENT).build();
+					// requested resource is not found
+					return Response.status(Response.Status.NOT_FOUND).build();
 				}
-			} else {
-				// requested resource is not found
-				return Response.status(Response.Status.NOT_FOUND).build();
+			} catch (RegistryException e) {
+				log.error("user is not authorized to delete the resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 			}
-		} catch (RegistryException e) {
-			log.error("user is not authorized to delete the resource", e);
-			// user is not authorized to delete the resource
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
+	
 }
 

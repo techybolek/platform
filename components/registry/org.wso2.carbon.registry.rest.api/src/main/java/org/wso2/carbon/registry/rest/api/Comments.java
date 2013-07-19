@@ -16,6 +16,7 @@
 package org.wso2.carbon.registry.rest.api;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -23,9 +24,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Comment;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.CommentModel;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 /**
  * This class retrieves the comments of the requested resource according to the
@@ -56,37 +62,40 @@ public class Comments extends PaginationCalculation<Comment> {
 	public Response getCommentsOnAResource(@QueryParam("path") String resourcePath,
 	                                       @QueryParam("start") int start,
 	                                       @QueryParam("size") int size,
-	                                       @QueryParam("user") String username) {
-
-		path = resourcePath;
-		if (username == null || username.length() == 0) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                       @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			path = resourcePath;
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath, start, size) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		// check for null instance of user registry unless can not be created.
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-
-		boolean exist;
-		try {
-			// check whether resource exist.
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				return displayPaginatedResult(start, size);
-			} else {
-				// if resource does not exist
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath, start, size) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			// if the user doesn't allow to access the resource.
-			log.error("User does not have required permission to access the resource", e);
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			// check for null instance of user registry unless can not be created.
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+
+			boolean exist;
+			try {
+				// check whether resource exist.
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					return displayPaginatedResult(start, size);
+				} else {
+					// if resource does not exist
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("User is not authorized to access the resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -112,4 +121,5 @@ public class Comments extends PaginationCalculation<Comment> {
 		}
 		return Response.ok(message).build();
 	}
+	
 }

@@ -22,6 +22,7 @@ import java.util.Properties;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -31,9 +32,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.rest.api.model.PropertyModel;
+import org.wso2.carbon.registry.rest.api.security.RestAPIAuthContext;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityConstants;
+import org.wso2.carbon.registry.rest.api.security.RestAPISecurityUtils;
+import org.wso2.carbon.registry.rest.api.security.UnAuthorizedException;
 
 @Path("/property")
 public class SingleProperty extends RestSuper {
@@ -57,42 +63,45 @@ public class SingleProperty extends RestSuper {
 	@Consumes("application/json")
 	public Response addPropertyOnAResource(@QueryParam("path") String resourcePath,
 	                                       PropertyModel[] addProperty,
-	                                       @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                       @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			// check whether the resource exist
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				// get the resource instance for the given path
-				Resource resource = super.getUserRegistry().get(resourcePath);
-				// save the resource after set the properties
-				super.getUserRegistry().put(resourcePath,
-				                            setPropertyOnAResource(addProperty, "add", resource));
-				if (log.isDebugEnabled()) {
-					log.debug("specified property added for the given resource");
-				}
-				return Response.status(Response.Status.CREATED).build();
-			} else {
-				// if the resource is not found
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user is not allowed to add properties to a resource", e);
-			// if user unauthorized to add property to a resource
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				// check whether the resource exist
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					// get the resource instance for the given path
+					Resource resource = super.getUserRegistry().get(resourcePath);
+					// save the resource after set the properties
+					super.getUserRegistry().put(resourcePath,
+					                            setPropertyOnAResource(addProperty, "add", resource));
+					if (log.isDebugEnabled()) {
+						log.debug("specified property added for the given resource");
+					}
+					return Response.status(Response.Status.CREATED).build();
+				} else {
+					// if the resource is not found
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user is not allowed to add properties to a resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -113,36 +122,40 @@ public class SingleProperty extends RestSuper {
 	@Produces("application/json")
 	public Response deleteProperty(@QueryParam("path") String resourcePath,
 	                               @QueryParam("name") String name,
-	                               @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                               @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				Resource resource = super.getUserRegistry().get(resourcePath);
-				resource.removeProperty(name);
-				super.getUserRegistry().put(resourcePath, resource);
-				return Response.status(Response.Status.NO_CONTENT).build();
-
-			} else {
-				log.debug("Resource does not exist at the given path");
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user is not allowed to delete properties on a resource", e);
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					Resource resource = super.getUserRegistry().get(resourcePath);
+					resource.removeProperty(name);
+					super.getUserRegistry().put(resourcePath, resource);
+					return Response.status(Response.Status.NO_CONTENT).build();
+	
+				} else {
+					log.debug("Resource does not exist at the given path");
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user is not allowed to delete properties on a resource", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -163,37 +176,42 @@ public class SingleProperty extends RestSuper {
 	@Produces("application/json")
 	public Response getPropertyOfAResource(@QueryParam("path") String resourcePath,
 	                                       @QueryParam("name") String propertyName,
-	                                       @QueryParam("user") String username) {
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                       @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				Resource resource = super.getUserRegistry().get(resourcePath);
-				java.util.Properties prop = resource.getProperties();
-				if (prop.containsKey(propertyName)) {
-					return getSingleProperty(propertyName, prop);
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
+			}
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					Resource resource = super.getUserRegistry().get(resourcePath);
+					java.util.Properties prop = resource.getProperties();
+					if (prop.containsKey(propertyName)) {
+						return getSingleProperty(propertyName, prop);
+					} else {
+						return Response.status(Response.Status.NOT_FOUND).build();
+					}
+	
 				} else {
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
-
-			} else {
-				return Response.status(Response.Status.NOT_FOUND).build();
+			} catch (RegistryException e) {
+				log.error("user is not allowed to read a specified property", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 			}
-		} catch (RegistryException e) {
-			log.error("user is not allowed to read a specified property", e);
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
@@ -215,33 +233,37 @@ public class SingleProperty extends RestSuper {
 	@Produces("application/json")
 	public Response editPropertyOfAResource(@QueryParam("path") String resourcePath,
 	                                        PropertyModel[] editProperty,
-	                                        @QueryParam("user") String username) {
-
-		if (username == null) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		} else {
-			String tenantID = super.getTenantID();
+	                                        @HeaderParam("X-JWT-Assertion") String JWTToken) {
+		RestAPIAuthContext authContext = RestAPISecurityUtils.isAuthorized
+				(PrivilegedCarbonContext.getThreadLocalCarbonContext(), JWTToken);
+		
+		if (authContext.isAuthorized()) {
+			String username = authContext.getUserName();
+			int tenantID = authContext.getTenantId();
 			super.createUserRegistry(username, tenantID);
-		}
-		if (RestPathPaginationValidation.validate(resourcePath) == -1) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-		if (super.getUserRegistry() == null) {
-			return Response.status(Response.Status.UNAUTHORIZED).build();
-		}
-		boolean exist;
-		try {
-			exist = super.getUserRegistry().resourceExists(resourcePath);
-			if (exist) {
-				Resource resource = super.getUserRegistry().get(resourcePath);
-				setPropertyOnAResource(editProperty, "edit", resource);
-				return Response.status(Response.Status.CREATED).build();
-			} else {
-				return Response.status(Response.Status.NOT_FOUND).build();
+			
+			if (RestPathPaginationValidation.validate(resourcePath) == -1) {
+				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
-		} catch (RegistryException e) {
-			log.error("user is not allowed to update the existing property", e);
-			return Response.status(Response.Status.UNAUTHORIZED).build();
+			if (super.getUserRegistry() == null) {
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+			boolean exist;
+			try {
+				exist = super.getUserRegistry().resourceExists(resourcePath);
+				if (exist) {
+					Resource resource = super.getUserRegistry().get(resourcePath);
+					setPropertyOnAResource(editProperty, "edit", resource);
+					return Response.status(Response.Status.CREATED).build();
+				} else {
+					return Response.status(Response.Status.NOT_FOUND).build();
+				}
+			} catch (RegistryException e) {
+				log.error("user is not allowed to update the existing property", e);
+				throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
+			}
+		} else {
+			throw new UnAuthorizedException(RestAPISecurityConstants.UNAUTHORIZED_ERROR);
 		}
 	}
 
