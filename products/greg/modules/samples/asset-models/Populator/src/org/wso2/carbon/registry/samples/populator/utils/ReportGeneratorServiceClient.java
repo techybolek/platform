@@ -19,10 +19,7 @@
 package org.wso2.carbon.registry.samples.populator.utils;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.reporting.stub.ReportingAdminServiceCryptoExceptionException;
 import org.wso2.carbon.registry.reporting.stub.ReportingAdminServiceRegistryExceptionException;
@@ -31,6 +28,9 @@ import org.wso2.carbon.registry.reporting.stub.beans.xsd.ReportConfigurationBean
 
 import java.rmi.RemoteException;
 
+/**
+ * Report generating admin service client
+ */
 public class ReportGeneratorServiceClient {
 
     ReportingAdminServiceStub stub;
@@ -38,7 +38,7 @@ public class ReportGeneratorServiceClient {
     public ReportGeneratorServiceClient(String cookie, String serverURL,
                                         ConfigurationContext configContext) throws RegistryException {
         String epr = serverURL + "ReportingAdminService";
-        try{
+        try {
             stub = new ReportingAdminServiceStub(configContext, epr);
 
             PopulatorUtil.setCookie(stub, cookie);
@@ -48,6 +48,16 @@ public class ReportGeneratorServiceClient {
         }
     }
 
+    /**
+     * Save report configuration to the registry
+     *
+     * @param configurationBean
+     * @throws ReportingAdminServiceRegistryExceptionException
+     *
+     * @throws ReportingAdminServiceCryptoExceptionException
+     *
+     * @throws RemoteException
+     */
     public void saveReport(ReportConfigurationBean configurationBean)
             throws ReportingAdminServiceRegistryExceptionException,
             ReportingAdminServiceCryptoExceptionException, RemoteException {

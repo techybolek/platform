@@ -26,8 +26,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -37,12 +35,13 @@ import org.wso2.carbon.core.common.AuthenticationException;
 import org.wso2.carbon.registry.reporting.stub.beans.xsd.ReportConfigurationBean;
 
 import java.io.*;
-import java.io.File;
-import java.lang.String;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Util methods used
+ */
 public class PopulatorUtil {
 
     public static void setCookie(Stub stub, String cookie) {
@@ -54,14 +53,27 @@ public class PopulatorUtil {
         }
     }
 
-    public static String authenticate(ConfigurationContext ctx, String serverURL, String username, String password) throws AxisFault, AuthenticationException {
+    /**
+     * Authenticate user
+     *
+     * @param ctx
+     * @param serverURL
+     * @param username
+     * @param password
+     * @return
+     * @throws AxisFault
+     * @throws AuthenticationException
+     */
+    public static String authenticate(ConfigurationContext ctx,
+                                      String serverURL, String username, String password)
+            throws AxisFault, AuthenticationException {
         String serviceEPR = serverURL + "AuthenticationAdmin";
 
         AuthenticationAdminStub stub = new AuthenticationAdminStub(ctx, serviceEPR);
         PopulatorUtil.setCookie(stub, null);
         try {
             boolean result = stub.login(username, password, new URL(serviceEPR).getHost());
-            if (result){
+            if (result) {
                 return (String) stub._getServiceClient().getServiceContext().
                         getProperty(HTTPConstants.COOKIE_STRING);
             }
@@ -72,8 +84,17 @@ public class PopulatorUtil {
         }
     }
 
-    public static ReportConfigurationBean getReportConfigurationBean(String name, String template, String type,
-                                                                     String reportClass){
+    /**
+     * Return the reporting configuration bean
+     *
+     * @param name
+     * @param template
+     * @param type
+     * @param reportClass
+     * @return
+     */
+    public static ReportConfigurationBean getReportConfigurationBean(
+            String name, String template, String type, String reportClass) {
         ReportConfigurationBean bean = new ReportConfigurationBean();
         bean.setName(name);
         bean.setTemplate(template);
@@ -82,6 +103,13 @@ public class PopulatorUtil {
         return bean;
     }
 
+    /**
+     * Create workbook array from files in a given directory
+     *
+     * @param usersDir
+     * @param prefix
+     * @return
+     */
     public static Workbook[] getWorkbooks(File usersDir, String prefix) {
         List<Workbook> workbooks = new LinkedList<Workbook>();
         FileFilter filter = new PrefixFileFilter(prefix);
@@ -103,6 +131,13 @@ public class PopulatorUtil {
         return workbooks.toArray(new Workbook[workbooks.size()]);
     }
 
+    /**
+     * Create a workbook from a file in a given location
+     *
+     * @param usersDir
+     * @param prefix
+     * @return
+     */
     public static Workbook getWorkbook(File usersDir, String prefix) {
         Workbook[] workbooks = getWorkbooks(usersDir, prefix);
         if (workbooks.length == 0) {

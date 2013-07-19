@@ -19,8 +19,6 @@
 package org.wso2.carbon.registry.samples.populator.utils;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.handler.stub.ExceptionException;
@@ -29,11 +27,15 @@ import org.wso2.carbon.registry.handler.stub.HandlerManagementServiceStub;
 import javax.xml.stream.XMLStreamException;
 import java.rmi.RemoteException;
 
+/**
+ * Handler management admin service client
+ */
 public class PopulatorHandlerManagerServiceClient {
 
     private HandlerManagementServiceStub stub;
 
-    public PopulatorHandlerManagerServiceClient(String cookie, String backendServerURL, ConfigurationContext configContext) throws RegistryException {
+    public PopulatorHandlerManagerServiceClient(
+            String cookie, String backendServerURL, ConfigurationContext configContext) throws RegistryException {
         String epr = backendServerURL + "HandlerManagementService";
         try {
             stub = new HandlerManagementServiceStub(configContext, epr);
@@ -46,6 +48,14 @@ public class PopulatorHandlerManagerServiceClient {
         }
     }
 
+    /**
+     * Adding new handler to the registry
+     *
+     * @param payload
+     * @throws ExceptionException
+     * @throws RemoteException
+     * @throws XMLStreamException
+     */
     public void newHandler(String payload) throws ExceptionException, RemoteException, XMLStreamException {
         stub.createHandler(payload);
     }

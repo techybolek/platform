@@ -19,15 +19,9 @@
 package org.wso2.carbon.registry.samples.populator.utils;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.governance.notifications.stub.InfoAdminServiceStub;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-
-import javax.xml.stream.XMLStreamException;
-import java.lang.String;
-import java.rmi.RemoteException;
 
 public class SubscriberClient {
 

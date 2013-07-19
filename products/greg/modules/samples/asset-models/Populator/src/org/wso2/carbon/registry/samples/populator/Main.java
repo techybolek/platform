@@ -35,9 +35,8 @@ import org.wso2.carbon.registry.core.Comment;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
-import org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient;
-import org.wso2.carbon.registry.samples.populator.utils.CommandHandler;
 import org.wso2.carbon.registry.resource.services.utils.InputStreamBasedDataSource;
+import org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient;
 import org.wso2.carbon.registry.samples.populator.utils.*;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.wso2.carbon.user.mgt.common.ClaimValue;
@@ -45,23 +44,25 @@ import org.wso2.carbon.user.mgt.common.ClaimValue;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.xml.namespace.QName;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
 
 public class Main {
     private static String cookie;
 
-    private static void setSystemProperties(){
+    private static void setSystemProperties() {
         String trustStore = System.getProperty("carbon.home") + File.separator + "repository" + File.separator +
-                "resources" + File.separator + "security" + File.separator +"wso2carbon.jks";
+                "resources" + File.separator + "security" + File.separator + "wso2carbon.jks";
         System.setProperty("javax.net.ssl.trustStore", trustStore);
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-        System.setProperty("carbon.repo.write.mode","true");
+        System.setProperty("carbon.repo.write.mode", "true");
     }
 
     public static void main(String[] args) {
-        try{
+        try {
             CommandHandler.setInputs(args);
             setSystemProperties();
 
@@ -80,7 +81,7 @@ public class Main {
             };
 
             ResourceServiceClient resourceServiceClient = new ResourceServiceClient(cookie,
-                    CommandHandler.getServiceURL(),configContext);
+                    CommandHandler.getServiceURL(), configContext);
 
             int currentTask = 0;
             int tasks = 10;
@@ -104,7 +105,7 @@ public class Main {
             currentTask = printStatusMessage("Completed lifecycle operations", tasks, currentTask);
             addUsersRolesAndTenants(configContext);
             currentTask = printStatusMessage("Completed populating users and roles", tasks, currentTask);
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
@@ -133,16 +134,16 @@ public class Main {
     private static void addRXT(ResourceServiceClient resourceServiceClient) throws Exception {
         File extensionFolder = new File(CommandHandler.getRxtFileLocation());
         File[] extensions = extensionFolder.listFiles();
-        if(extensions != null){
-            for(File extension : extensions){
+        if (extensions != null) {
+            for (File extension : extensions) {
                 String extensionName = getResourceName(extension.getAbsolutePath().replace("\\", "/"));
-                if(extensionName.endsWith(".rxt")){
+                if (extensionName.endsWith(".rxt")) {
                     DataSource dataSource = new InputStreamBasedDataSource(
                             new FileInputStream(new File(extension.getAbsolutePath())));
                     DataHandler dataHandler = new DataHandler(dataSource);
                     resourceServiceClient.addResource(
-                            "/_system/governance/repository/components/org.wso2.carbon.governance/types/"+extensionName,
-                            "application/vnd.wso2.registry-ext-type+xml", null, dataHandler, null,null);
+                            "/_system/governance/repository/components/org.wso2.carbon.governance/types/" + extensionName,
+                            "application/vnd.wso2.registry-ext-type+xml", null, dataHandler, null, null);
                 }
             }
         }
@@ -151,16 +152,16 @@ public class Main {
     private static void addReportTemplates(ResourceServiceClient resourceServiceClient) throws Exception {
         File templateFolder = new File(CommandHandler.getJRTemplateLocation());
         File[] templates = templateFolder.listFiles();
-        if(templates != null){
-            for(File template : templates){
+        if (templates != null) {
+            for (File template : templates) {
                 String templateName = getResourceName(template.getAbsolutePath().replace("\\", "/"));
-                if(templateName.endsWith(".jrxml")){
+                if (templateName.endsWith(".jrxml")) {
                     DataSource dataSource = new InputStreamBasedDataSource(
                             new FileInputStream(new File(template.getAbsolutePath())));
                     DataHandler dataHandler = new DataHandler(dataSource);
                     resourceServiceClient.addResource(
                             "/_system/governance/repository/components/org.wso2.carbon.governance/templates/" +
-                                    templateName, "application/xml", null, dataHandler, null,null);
+                                    templateName, "application/xml", null, dataHandler, null, null);
                 }
             }
 
@@ -194,18 +195,18 @@ public class Main {
 
     private static void addExtensions(ConfigurationContext configContext) throws Exception {
         String extensionJarLocation = CommandHandler.getHandlerJarLocation();
-        if(extensionJarLocation != null){
+        if (extensionJarLocation != null) {
             org.wso2.carbon.registry.extensions.ui.clients.ResourceServiceClient extensionResourceServiceClient =
                     new org.wso2.carbon.registry.extensions.ui.clients.ResourceServiceClient(cookie,
                             CommandHandler.getServiceURL(), configContext);
             File folder = new File(extensionJarLocation);
             File[] filesList = folder.listFiles();
-            if(filesList != null){
-                for(File file : filesList){
+            if (filesList != null) {
+                for (File file : filesList) {
                     String name = file.getName();
-                    if(file.isFile() && name.endsWith(".jar")){
+                    if (file.isFile() && name.endsWith(".jar")) {
                         String fileName = getResourceName(file.getAbsolutePath().replace("\\", "/"));
-                        DataSource dataSource =new InputStreamBasedDataSource(
+                        DataSource dataSource = new InputStreamBasedDataSource(
                                 new FileInputStream(new File(file.getAbsolutePath())));
                         DataHandler dataHandler = new DataHandler(dataSource);
                         extensionResourceServiceClient.addExtension(fileName, dataHandler);
@@ -221,7 +222,7 @@ public class Main {
             OMElement handlersOMElement = builder.getDocumentElement();
             Iterator<OMElement> handlers = handlersOMElement.getChildElements();
             PopulatorHandlerManagerServiceClient handlerManagementServiceClient
-                    = new PopulatorHandlerManagerServiceClient(cookie, CommandHandler.getServiceURL(),configContext);
+                    = new PopulatorHandlerManagerServiceClient(cookie, CommandHandler.getServiceURL(), configContext);
             while (handlers.hasNext()) {
                 handlerManagementServiceClient.newHandler(handlers.next().toString());
             }
@@ -235,7 +236,7 @@ public class Main {
                 String[] filesList = lifecycleConfigLocation.list();
                 if (filesList != null) {
                     LifeCycleManagementClient lifeCycleManagementClient = new LifeCycleManagementClient(
-                            cookie, CommandHandler.getServiceURL(),configContext);
+                            cookie, CommandHandler.getServiceURL(), configContext);
                     for (String file : filesList) {
                         lifeCycleManagementClient.createLifecycle(
                                 new StAXOMBuilder(CommandHandler.getLifecycleConfigLocation() +
@@ -499,7 +500,7 @@ public class Main {
         if (CommandHandler.getLifecycleConfigLocation() != null) {
             File lifecycleOperationsLocation = new File(CommandHandler.getLifecycleOperationsLocation());
             LifeCycleManagementClient client = new LifeCycleManagementClient(
-                    cookie, CommandHandler.getServiceURL(),configContext);
+                    cookie, CommandHandler.getServiceURL(), configContext);
             if (lifecycleOperationsLocation.exists()) {
                 Workbook[] workbooks = PopulatorUtil.getWorkbooks(lifecycleOperationsLocation, "actions");
                 for (Workbook workbook : workbooks) {
@@ -656,9 +657,9 @@ public class Main {
         }
     }
 
-    private static String getResourceName(String fileLocation){
-        String[] s =  fileLocation.split("/");
-        return s[s.length-1];
+    private static String getResourceName(String fileLocation) {
+        String[] s = fileLocation.split("/");
+        return s[s.length - 1];
     }
 }
 

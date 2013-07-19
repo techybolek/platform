@@ -19,19 +19,20 @@
 package org.wso2.carbon.registry.samples.populator.utils;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceStub;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.services.ArrayOfString;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceStub;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.lang.Exception;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+
+/**
+ * Lifecycle admin service client
+ */
 public class LifeCycleManagementClient {
 
     private LifeCycleManagementServiceStub lcmStub;
@@ -59,10 +60,26 @@ public class LifeCycleManagementClient {
         }
     }
 
+    /**
+     * Adding a new lifecycle to the registry
+     *
+     * @param configuration
+     * @throws Exception
+     */
     public void createLifecycle(String configuration) throws Exception {
         lcmStub.createLifecycle(configuration);
     }
 
+    /**
+     * Invoke lifecycle action
+     *
+     * @param path
+     * @param aspect
+     * @param action
+     * @param items
+     * @param params
+     * @throws Exception
+     */
     public void invokeAspect(String path, String aspect, String action, String[] items, Map<String, String> params)
             throws Exception {
         if (params.size() == 0) {
@@ -80,10 +97,24 @@ public class LifeCycleManagementClient {
         }
     }
 
+    /**
+     * Add new aspect to the registry
+     *
+     * @param path
+     * @param aspect
+     * @throws Exception
+     */
     public void addAspect(String path, String aspect) throws Exception {
         stub.addAspect(path, aspect);
     }
 
+    /**
+     * Remove aspect from the registry
+     *
+     * @param path
+     * @param aspect
+     * @throws Exception
+     */
     public void removeAspect(String path, String aspect) throws Exception {
         stub.removeAspect(path, aspect);
     }

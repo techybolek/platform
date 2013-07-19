@@ -21,6 +21,10 @@ package org.wso2.carbon.registry.samples.populator.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Store the input arguments
+ * Fabricating the required information
+ */
 public class CommandHandler {
 
     private static final Map<String, String> inputs = new HashMap<String, String>();
@@ -35,6 +39,12 @@ public class CommandHandler {
         argumentMap.put("-h", "Hostname of the registry");
     }
 
+    /**
+     * Set the input arguments in a map
+     *
+     * @param arguments
+     * @return
+     */
     public static boolean setInputs(String[] arguments) {
 
         if (arguments.length == 0 || (arguments.length == 1 && arguments[0].equals("--help"))) {
@@ -56,7 +66,9 @@ public class CommandHandler {
         return true;
     }
 
-
+    /**
+     * Print help message
+     */
     private static void printMessage() {
         System.out.println("Usage: migration-client <options>");
         System.out.println("Valid options are:");
@@ -69,103 +81,175 @@ public class CommandHandler {
         System.out.println("\te.g: migration-client -h localhost -p 9443 -u admin -pw admin");
     }
 
+    /**
+     * Return registry URL
+     *
+     * @return
+     */
     public static String getRegistryURL() {
-        String contextRoot = inputs.get("-cr");
-        if (contextRoot == null) {
-            if(getDomain() != null){
-                return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/t/" + getDomain() + "/registry/";
-            } else {
-            	return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/registry/";
-	    }
-        } else {
-	    if(getDomain() != null){
-                return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/t/" + getDomain() + "/" + contextRoot + "/registry/";
-            } else {
-            	return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/" + contextRoot + "/registry/";
-	    }
-        }
+        return getBaseUrl() + "/registry/";
     }
 
+    /**
+     * Return registry host
+     *
+     * @return
+     */
     public static String getHost() {
- 	return inputs.get("-h");	
+        return inputs.get("-h");
     }
 
+    /**
+     * Return registry service URL
+     *
+     * @return
+     */
     public static String getServiceURL() {
+        return getBaseUrl() + "/services/";
+    }
+
+    /**
+     * Get registry base URL
+     *
+     * @return
+     */
+    public static String getBaseUrl() {
         String contextRoot = inputs.get("-cr");
-	if (contextRoot == null) {
-            if(getDomain() != null){
-                return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/t/" + getDomain() + "/services/";
-            } else {
-                return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/services/";
-            }
-        } else {
-            if(getDomain() != null){
-                return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/t/" + getDomain() + "/" + contextRoot + "/services/";
-            } else {
-                return "https://" + inputs.get("-h") + ":" + inputs.get("-p") + "/" + contextRoot + "/services/";
-            }
-        }
+        String domain = getDomain();
+        return "https://" + inputs.get("-h") + ":" + inputs.get("-p") +
+                domain != null ? "/t/" + domain : "" +
+                contextRoot != null ? "/" + contextRoot : "";
     }
 
+    /**
+     * Returns handler jar stored location
+     *
+     * @return
+     */
     public static String getHandlerJarLocation() {
-        return inputs.get("-l")+"/target";
+        return inputs.get("-l") + "/target";
     }
 
+    /**
+     * Returns the handler configuration file location
+     *
+     * @return
+     */
     public static String getHandlerDef() {
-        return inputs.get("-l")+"/handler-def/handlers.xml";
+        return inputs.get("-l") + "/handler-def/handlers.xml";
     }
 
+    /**
+     * Returns the lifecycle configuration location
+     *
+     * @return
+     */
     public static String getLifecycleConfigLocation() {
-        return inputs.get("-l")+"/lifecycles";
+        return inputs.get("-l") + "/lifecycles";
     }
 
+    /**
+     * Returns the lifecycle operations location
+     *
+     * @return
+     */
     public static String getLifecycleOperationsLocation() {
-        return inputs.get("-l")+"/lifecycle-operations";
+        return inputs.get("-l") + "/lifecycle-operations";
     }
 
+    /**
+     * Returns the user and roles location
+     *
+     * @return
+     */
     public static String getUsersAndRolesLocation() {
         return inputs.get("-l") + "/users-and-roles";
     }
 
+    /**
+     * Returns the subscriptions location
+     *
+     * @return
+     */
     public static String getSubscriptionsLocation() {
         return inputs.get("-l") + "/subscriptions";
     }
 
+    /**
+     * Return the sample data location
+     *
+     * @return
+     */
     public static String getDataLocation() {
         return inputs.get("-l") + "/data";
     }
 
+    /**
+     * Returns the registry extension files location
+     *
+     * @return
+     */
     public static String getRxtFileLocation() {
-        return inputs.get("-l")+"/registry-extensions";
+        return inputs.get("-l") + "/registry-extensions";
     }
 
+    /**
+     * Returns username
+     *
+     * @return
+     */
     public static String getUsername() {
         return inputs.get("-u");
     }
 
-    public static String getDomain(){
-	String[] s = inputs.get("-u").split("@");
-	if(s.length == 2){
-	    return s[1];
-	} else {
-	    return null;
-	}
+    /**
+     * Return the tenant domain of the user
+     *
+     * @return
+     */
+    public static String getDomain() {
+        String[] s = inputs.get("-u").split("@");
+        if (s.length == 2) {
+            return s[1];
+        } else {
+            return null;
+        }
 
     }
 
+    /**
+     * Returns the password of the user
+     *
+     * @return
+     */
     public static String getPassword() {
         return inputs.get("-pw");
     }
 
-    public static String getJRTemplateLocation(){
-        return inputs.get("-l")+"/reporting-templates";
+    /**
+     * Returns the Jasper Report template location
+     *
+     * @return
+     */
+    public static String getJRTemplateLocation() {
+        return inputs.get("-l") + "/reporting-templates";
     }
 
-    public static String getReportsLocation(){
-        return inputs.get("-l")+"/reports";
+    /**
+     * Returns the Jasper reports location
+     *
+     * @return
+     */
+    public static String getReportsLocation() {
+        return inputs.get("-l") + "/reports";
     }
 
-    public static String getModelName(){
+    /**
+     * Returns the model name
+     *
+     * @return
+     */
+    public static String getModelName() {
         return inputs.get("-l").split("/")[1];
     }
 }

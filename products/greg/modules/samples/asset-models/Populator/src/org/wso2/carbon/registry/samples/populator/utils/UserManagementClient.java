@@ -19,24 +19,23 @@
 package org.wso2.carbon.registry.samples.populator.utils;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
-import org.wso2.carbon.identity.user.profile.stub.types.UserFieldDTO;
 import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceStub;
 import org.wso2.carbon.tenant.mgt.stub.TenantMgtAdminServiceStub;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.user.mgt.common.ClaimValue;
-import org.wso2.carbon.user.mgt.stub.*;
+import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.ui.Util;
 
-import javax.xml.stream.XMLStreamException;
-import java.rmi.RemoteException;
 import java.util.Calendar;
 
+
+/**
+ * User management admin service client
+ */
 public class UserManagementClient {
 
     private UserProfileMgtServiceStub profileMgtServiceStub;
@@ -87,27 +86,75 @@ public class UserManagementClient {
         }
     }
 
+    /**
+     * Ger user profile
+     *
+     * @param username
+     * @param profile
+     * @return
+     * @throws Exception
+     */
     public UserProfileDTO getUserProfile(String username, String profile) throws Exception {
         return profileMgtServiceStub.getUserProfile(username, profile);
     }
 
+    /**
+     * Save user profile
+     *
+     * @param username
+     * @param profile
+     * @throws Exception
+     */
     public void setUserProfile(String username, UserProfileDTO profile) throws Exception {
         profileMgtServiceStub.setUserProfile(username, profile);
     }
 
+    /**
+     * Adding a user role
+     *
+     * @param roleName
+     * @param userList
+     * @param permissions
+     * @throws Exception
+     */
     public void addRole(String roleName, String[] userList, String[] permissions) throws Exception {
         userAdminStub.addRole(roleName, userList, permissions);
     }
 
+    /**
+     * Adding a user
+     *
+     * @param userName
+     * @param password
+     * @param roles
+     * @param claims
+     * @param profileName
+     * @throws Exception
+     */
     public void addUser(String userName, String password, String[] roles, ClaimValue[] claims,
                         String profileName) throws Exception {
         userAdminStub.addUser(userName, password, roles, Util.toADBClaimValues(claims), profileName);
     }
 
+    /**
+     * Set user role UI permission
+     *
+     * @param roleName
+     * @param permissions
+     * @throws Exception
+     */
     public void setRoleUIPermission(String roleName, String[] permissions) throws Exception {
         userAdminStub.setRoleUIPermission(roleName, permissions);
     }
 
+    /**
+     * Set user role resource permission
+     *
+     * @param path
+     * @param roleName
+     * @param permissions
+     * @throws Exception
+     */
     public void setRoleResourcePermission(String path, String roleName, String[] permissions) throws Exception {
         String permissionString = "ra^false:rd^false:wa^false:wd^false:da^false:dd^false:aa^false:ad^false";
         for (String permission : permissions) {
@@ -117,6 +164,17 @@ public class UserManagementClient {
         resourceAdminStub.changeRolePermissions(path, roleName + ":" + permissionString);
     }
 
+    /**
+     * Adding a new tenant
+     *
+     * @param adminUsername
+     * @param adminPassword
+     * @param adminEmail
+     * @param firstName
+     * @param lastName
+     * @param tenantDomain
+     * @throws Exception
+     */
     public void addTenant(String adminUsername, String adminPassword, String adminEmail, String firstName,
                           String lastName, String tenantDomain) throws Exception {
         TenantInfoBean tenantInfoBean = new TenantInfoBean();
