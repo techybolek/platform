@@ -335,7 +335,7 @@
                                     <classpath refid="maven.compile.classpath"/>
                                     <classpath refid="maven.runtime.classpath"/>
 
-                                  <fileset file="${basedir}/bam-resources/sql/wso2_rss.sql"/>
+                                  <fileset file="${basedir}/bam-resources/sql/rss-manager/h2/wso2_rss_h2.sql"/>
                                 </sql>
                             </tasks>
                         </configuration>

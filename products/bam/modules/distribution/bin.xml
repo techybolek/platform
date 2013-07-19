@@ -82,6 +82,11 @@
             </includes>
 	  </fileSet>-->
 
+	<fileSet>
+            <directory>bam-resources/sql/rss-manager</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/dbscripts</outputDirectory>
+            <filtered>true</filtered>
+        </fileSet>
 
 	<fileSet>
             <directory>src/main/resources/carbon-home/resources/dashboard</directory>
