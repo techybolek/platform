@@ -202,12 +202,12 @@
             </includes>
         </fileSet>
 	 
-	<!--copy jaxrs web app for OAuth feature-->
+	<!--copy web app for OAuth feature-->
         <fileSet>
        	    <directory>
-../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/repository/deployment/server/jaxwebapps
+../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/repository/deployment/server/webapps
             </directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps</outputDirectory>
             <includes>
                 <include>oauth2endpoints.war</include>
             </includes>
