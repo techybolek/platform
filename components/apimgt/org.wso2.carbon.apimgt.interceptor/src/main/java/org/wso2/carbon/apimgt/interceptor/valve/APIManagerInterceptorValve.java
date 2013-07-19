@@ -40,6 +40,9 @@ import org.wso2.carbon.apimgt.interceptor.valve.internal.DataHolder;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
 import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -132,7 +135,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
                 String bearerToken = request.getHeader(APIConstants.OperationParameter.AUTH_PARAM_NAME);
                 String accessToken = null;
                 if (bearerToken != null) {
-                    String[] token = bearerToken.split("Bearer");
+                    String[] token = bearerToken.split("Bearer");/*Check a util method*/
                     if (token.length > 0 && token[1] != null) {
                         accessToken = token[1].trim();
                     }
@@ -185,9 +188,19 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 	private boolean doAuthenticate(String context, String version, String accessToken, String requiredAuthenticationLevel, String clientDomain)
             throws APIManagementException, APIFaultException {
             APITokenValidator tokenValidator = new APITokenValidator();
-            apiKeyValidationDTO = tokenValidator.validateKey(context, version,accessToken, APIConstants.AUTH_APPLICATION_LEVEL_TOKEN,
+            apiKeyValidationDTO = tokenValidator.validateKey(context, version,accessToken, APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN,
                     clientDomain);
             if (apiKeyValidationDTO.isAuthorized()) {
+            	String userName = apiKeyValidationDTO.getEndUserName();
+            	PrivilegedCarbonContext.getThreadLocalCarbonContext().
+            			setUsername(apiKeyValidationDTO.getEndUserName());
+   	           	try {
+					PrivilegedCarbonContext.getThreadLocalCarbonContext().
+							setTenantId(IdentityUtil.getTenantIdOFUser(userName));
+				} catch (IdentityException e) {
+					log.error("Error while retrieving Tenant Id", e);
+					return false;
+				}
             	return true;
             } else {
             	throw new APIFaultException(apiKeyValidationDTO.getValidationStatus(), 
