@@ -58,7 +58,7 @@ public class RegistryMountTestCase extends TestSetup {
         Assert.assertTrue(registry.resourceExists("/_system/governance/mounted/ABC.txt"),
                 "Resource not saved in the mounted registry");
         Resource resource1 = registry.get("/_system/governance/mounted/ABC.txt");
-        Assert.assertEquals(resource1.getContent(), "This is a sample content");
+        Assert.assertEquals(new String((byte [])resource1.getContent()), "This is a sample content");
 
     }
 
@@ -85,10 +85,10 @@ public class RegistryMountTestCase extends TestSetup {
             description = "Copy a resource to the mounted collection")
     public void testCopyResource() throws RegistryException {
         registry.copy("/_system/governance/trunk/ABC.txt", "/_system/governance/mounted/ABC.txt");
-        Assert.assertFalse(registry.resourceExists("/_system/governance/mounted/ABC.txt"),
+        Assert.assertTrue(registry.resourceExists("/_system/governance/mounted/ABC.txt"),
                 "Resource not deleted in the mounted registry");
         Resource resource1 = registry.get("/_system/governance/mounted/ABC.txt");
-        Assert.assertEquals(resource1.getContent(),
+        Assert.assertEquals(new String((byte [])resource1.getContent()),
                 "This is a sample content", "Different resource content expected");
     }
 
@@ -139,12 +139,12 @@ public class RegistryMountTestCase extends TestSetup {
             description = "Copy a collection to the mounted collection")
     public void testCopyCollection() throws RegistryException {
         registry.copy("/_system/governance/trunk/store", "/_system/governance/mounted/store");
-        Assert.assertFalse(registry.resourceExists("/_system/governance/mounted/store"),
+        Assert.assertTrue(registry.resourceExists("/_system/governance/mounted/store"),
                 "Collection not added to the mounted registry");
-        Assert.assertFalse(registry.resourceExists("/_system/governance/mounted/store/BCD.txt"),
+        Assert.assertTrue(registry.resourceExists("/_system/governance/mounted/store/BCD.txt"),
                         "Collection not added to the mounted registry");
         Resource resource1 = registry.get("/_system/governance/mounted/store/BCD.txt");
-        Assert.assertEquals(resource1.getContent(),
+        Assert.assertEquals(new String((byte [])resource1.getContent()),
                 "This is a sample content2", "Different resource content expected");
     }
 
