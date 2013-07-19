@@ -1376,6 +1376,7 @@ public class SecurityConfigAdmin {
                  
     public SecurityConfigData getSecurityConfigData(String serviceName, String scenarioId,
                                                     String policyPath) throws SecurityConfigException {
+
         SecurityConfigData data = null;
         AxisService service = axisConfig.getServiceForActivation(serviceName);
         String serviceGroupId = service.getAxisServiceGroup().getServiceGroupName();

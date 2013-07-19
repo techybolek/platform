@@ -26,6 +26,7 @@ import org.wso2.carbon.registry.core.jdbc.InMemoryEmbeddedRegistryService;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.Throwable;
 
 public class BaseTestCase extends TestCase {
 
@@ -64,7 +65,8 @@ public class BaseTestCase extends TestCase {
             configRegistry = embeddedRegistryService.getConfigSystemRegistry();
             governanceRegistry = embeddedRegistryService.getGovernanceSystemRegistry();
         } catch (RegistryException e) {
-            fail("Failed to initialize the registry. Caused by: " + e.getMessage());
+            throw e;
+            //fail("Failed to initialize the registry. Caused by: " + e.getMessage());
         }
     }
 }
