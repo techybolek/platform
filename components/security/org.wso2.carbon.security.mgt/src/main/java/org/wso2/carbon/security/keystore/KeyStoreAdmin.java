@@ -266,7 +266,10 @@ public class KeyStoreAdmin {
 
             KeyStore keyStore = KeyStore.getInstance(type);
             keyStore.load(new ByteArrayInputStream(content), password.toCharArray());
+            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
             Resource resource = registry.newResource();
+            resource.addProperty(SecurityConstants.PROP_PASSWORD, cryptoUtil
+                    .encryptAndBase64Encode(password.getBytes()));
             resource.addProperty(SecurityConstants.PROP_PROVIDER, provider);
             resource.addProperty(SecurityConstants.PROP_TYPE, type);
             resource.setContent(content);
