@@ -18,7 +18,9 @@
 package org.wso2.carbon.service.mgt;
 
 import junit.framework.TestCase;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
@@ -49,6 +51,8 @@ public class BaseTestCase extends TestCase {
 
         // The line below is responsible for initializing the cache.
         CarbonContext.getCurrentContext();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
         try {
             InputStream regConfigStream = Thread.currentThread().getContextClassLoader()
