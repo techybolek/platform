@@ -8,5 +8,6 @@ public abstract class ApplicationAuthenticatorConstants {
 	
 	public static final String DO_AUTHENTICATION = "doAuthentication";
 	public static final String AUTHENTICATED = "commonAuthAuthenticated";
-	public static final String CALLING_SERVLET_PATH = "commonAuthCallingServletPath";
+	public static final String CALLER_PATH = "commonAuthCallerPath";
+	public static final String QUERY_PARAMS = "commonAuthQueryParams";
 }

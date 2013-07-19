@@ -17,6 +17,8 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 	
 	private static Log log = LogFactory.getLog(CommonApplicationAuthenticationServlet.class);
 	
+	private static final String REQUEST_CAN_BE_HANDLED = "requestCanBeHandled";
+	
 	public ApplicationAuthenticator[] authenticators;
 	private final boolean isSingleFactor = ApplicationAuthenticatorsConfiguration.getInstance().isSingleFactor();
 	
@@ -26,54 +28,67 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 	}
 	
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+														throws ServletException, IOException {
 		doPost(request, response);
 	}
 	
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+														throws ServletException, IOException {
 		
 		for (ApplicationAuthenticator authenticator : authenticators) {
 			
-			if (!authenticator.isDisabled()){
+			if (!authenticator.isDisabled()) {
 				int status = authenticator.getStatus(request);
 				
 				//Authenticator is called if it's not already AUTHENTICATED and if its status is not CONNOT HANDLE.
-				if(status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS 
+				if (status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS 
 						|| status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_CANNOT_HANDLE) {
 					
-					//"canHandle" session attribute is set to indicate atleast one Authenticator can handle the request.
-					if(request.getSession().getAttribute("canHandle") == null){
-						request.getSession().setAttribute("canHandle", Boolean.TRUE);
+					//"canHandle" session attribute is set to indicate atleast one Authenticator 
+					//can handle the request.
+					if (request.getSession().getAttribute(REQUEST_CAN_BE_HANDLED) == null) {
+						request.getSession().setAttribute(REQUEST_CAN_BE_HANDLED, Boolean.TRUE);
 					}
 					
 					status = authenticator.doAuthentication(request, response);
 					
 					//Authenticator setting a custom status means, its job is not completed yet.
-					if(status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS
+					if (status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS
 							&& status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_FAIL
-							&& status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_CANNOT_HANDLE){
+							&& status != ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_CANNOT_HANDLE) {
+						
 						if (log.isDebugEnabled()) {
-							log.debug(authenticator.getAuthenticatorName() + " has set custom status code: " + String.valueOf(status));
+							log.debug(authenticator.getAuthenticatorName() + 
+							          " has set custom status code: " + String.valueOf(status));
 						}
+						
 						return;
 					}
 					
-					//In single or multi factor modes, one Authenticator failing means whole authentication chain is failed.
-					if(status == ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_FAIL){
+					//In single or multi factor modes, one Authenticator failing means whole authentication 
+					//chain is failed.
+					if (status == ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_FAIL) {
+						
 						if (log.isDebugEnabled()) {
-							log.debug("Authentication failed for " + authenticator.getAuthenticatorName());
+							log.debug("Authentication chain failed due to " + authenticator.getAuthenticatorName() 
+							          + "failure");
 						}
-			            sendResponseToCallingServlet(request, response, Boolean.FALSE);
+						
+			            sendResponseToCaller(request, response, Boolean.FALSE);
 			            return;
 					}
 					
 					//If in single-factor mode, no need to check the other Authenticators. Send the response back.
-					if(status == ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS && isSingleFactor){
+					if (status == ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS && isSingleFactor) {
+						
 						if (log.isDebugEnabled()) {
-							log.debug("Authenticaticated by " + authenticator.getAuthenticatorName() + " in single-factor mode");
+							log.debug("Authenticaticated by " + authenticator.getAuthenticatorName() 
+							          + " in single-factor mode");
 						}
-						sendResponseToCallingServlet(request, response, Boolean.TRUE);
+						
+						sendResponseToCaller(request, response, Boolean.TRUE);
 						return;
 					}
 				} 
@@ -81,33 +96,46 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 		}
 		
 		//If all the Authenticators failed to handle the request
-		if(request.getSession().getAttribute("canHandle") == null){
+		if (request.getSession().getAttribute(REQUEST_CAN_BE_HANDLED) == null) {
+			
 			if (log.isDebugEnabled()) {
 				log.debug("No Authenticator can handle the request");
 			}
-			sendResponseToCallingServlet(request, response, Boolean.FALSE);
+			
+			sendResponseToCaller(request, response, Boolean.FALSE);
 		} 
 		//Otherwise, authentication has PASSED in multi-factor mode
 		else { 
+			
 			if (log.isDebugEnabled()) {
 				log.debug("Authenticared passed in multi-factor mode");
 			}
-			sendResponseToCallingServlet(request, response, Boolean.TRUE);
+			
+			sendResponseToCaller(request, response, Boolean.TRUE);
 		}
 	}
 	
-	private void sendResponseToCallingServlet(HttpServletRequest request, 
+	private void sendResponseToCaller(HttpServletRequest request, 
 	                                          HttpServletResponse response, 
 	                                          Boolean isAuthenticated) 
-	                                        		  throws ServletException, IOException{
+	                                        		  throws ServletException, IOException {
+		cleanUpSession(request);
+		
+		//Set in session whether authenticated or not. Caller will check this.
 		request.getSession().setAttribute(ApplicationAuthenticatorConstants.AUTHENTICATED, isAuthenticated);
-		String callingServlet = (String)request.getSession().getAttribute(ApplicationAuthenticatorConstants.CALLING_SERVLET_PATH);
+		
+		String caller = (String)request.getSession().getAttribute(ApplicationAuthenticatorConstants.CALLER_PATH);
 		
 		if (log.isDebugEnabled()) {
-			log.debug("Sending response back to: " + callingServlet);
+			log.debug("Sending response back to: " + caller);
 		}
 		
-		RequestDispatcher dispatcher = request.getRequestDispatcher(callingServlet);
+		RequestDispatcher dispatcher = request.getRequestDispatcher(caller);
         dispatcher.forward(request, response);
+	}
+	
+	private void cleanUpSession(HttpServletRequest request) {
+		request.getSession().removeAttribute(REQUEST_CAN_BE_HANDLED);
+		request.getSession().removeAttribute(ApplicationAuthenticatorConstants.DO_AUTHENTICATION);
 	}
 }
