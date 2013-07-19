@@ -13,7 +13,7 @@ public class ConnectorUtils {
     public static Object lookupFunctionParam(MessageContext ctxt, String paramName) {
         Stack<TemplateContext> funcStack = (Stack) ctxt.getProperty(SynapseConstants.SYNAPSE__FUNCTION__STACK);
         TemplateContext currentFuncHolder = funcStack.peek();
-        String paramValue = (String) currentFuncHolder.getParameterValue(paramName);
+        Object paramValue =  currentFuncHolder.getParameterValue(paramName);
         return paramValue;
     }
 
