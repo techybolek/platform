@@ -46,7 +46,7 @@ public class ESBJAVA2283ReturnContentTypeTestCase extends ESBIntegrationTest {
 
     @Test(groups = {"wso2.esb"}, description = "test return content type")
     public void testReturnContentType() throws Exception {
-        simpleWebServer = new SimpleWebServer(9005);
+        simpleWebServer = new SimpleWebServer(9005,200);
         simpleWebServer.start();
         SimpleHttpClient httpClient = new SimpleHttpClient();
         Map<String, String> headers = new HashMap<String, String>();
