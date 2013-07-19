@@ -1,0 +1,59 @@
+<project name="STS_Client" default="main">
+    <property name="wso2is.home" value="../../"/>
+    <property name="wso2is.plugins" value="${wso2is.home}/repository/components/plugins"/>
+    <property name="wso2is.lib.api" value="${wso2is.home}/lib/api"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="src.dir" value="src"/>
+    <property name="jar.dir" value="${build.dir}/jar"/>
+    <property name="main-class" value="org.wso2.carbon.identity.samples.sts.Client"/>
+
+    <path  id="classpath">
+        <fileset dir="${wso2is.plugins}" includes="**/*.jar"/>
+    </path>
+
+    <target name="copy-resources">
+        <mkdir dir="resources/keystore"/>
+        <mkdir dir="resources/repo/modules"/>
+        <copyfile src="${wso2is.home}/repository/resources/security/wso2carbon.jks" dest="resources/keystore/wso2carbon.jks"/> 
+        <copy todir="resources/repo/modules">
+			<fileset dir="${wso2is.home}/repository/deployment/client/modules">
+				<include name="**/*.mar"/>
+			</fileset>
+		</copy>
+    </target>
+
+    <target name="init" depends="clean">
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+    
+    <target name="compile" depends="init">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"  classpathref="classpath"/>
+    </target>
+
+    <target name="jarit" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/STS_Client.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.carbon.identity.samples.sts.Client"/>
+        </manifest>
+        </jar>        
+    </target>
+ 
+    <target name="run" depends="jarit,copy-resources">
+        <java classname="${main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/${ant.project.name}.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target  name="main" depends="run"/>
+
+</project>
