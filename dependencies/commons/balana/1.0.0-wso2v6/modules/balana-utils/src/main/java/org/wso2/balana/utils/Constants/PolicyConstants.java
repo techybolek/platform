@@ -174,7 +174,7 @@ public class PolicyConstants {
 
         public static final String FUNCTION_EQUAL = "equal";
 
-        public static final String FUNCTION_EQUAL_MATCH_REGEXP = "equal-matching-regexp";
+        public static final String FUNCTION_EQUAL_MATCH_REGEXP = "regexp-match";
         
         
         public static final String[] targetFunctions =
@@ -185,7 +185,7 @@ public class PolicyConstants {
 
         public static final String[] simpleBagRuleFunctions = new String[] {
                 FUNCTION_AT_LEAST_ONE, FUNCTION_AT_LEAST_ONE_MATCH_REGEXP,
-                FUNCTION_IS_IN, FUNCTION_SET_EQUALS, FUNCTION_SET_EQUALS_MATCH_REGEXP};
+                FUNCTION_SET_EQUALS, FUNCTION_SET_EQUALS_MATCH_REGEXP};
 
         public static final String[] advanceRuleFunctions = new String[] {
                 FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL,
