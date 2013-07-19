@@ -35,14 +35,26 @@ public class IdentityProviderMgtService {
     private IdPMgtDAO dao = new IdPMgtDAO();
 
     /**
+     * Retrieves registered IdPs for a given tenant
+     *
+     * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
+     */
+    public String[] getTenantIdPs() throws IdentityProviderMgtException {
+        String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
+        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+        List<String> tenantIdPs = dao.getTenantIdPs(tenantId, tenantDomain);
+        return tenantIdPs.toArray(new String[tenantIdPs.size()]);
+    }
+
+    /**
      * Retrieves trusted IdP information about a given tenant
      *
      * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
      */
-    public TrustedIdPDTO getTenantIdP() throws IdentityProviderMgtException {
+    public TrustedIdPDTO getTenantIdP(String issuer) throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(tenantId, tenantDomain);
+        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
         TrustedIdPDTO trustedIdPDTO = null;
         if(trustedIdPDO != null){
             trustedIdPDTO = new TrustedIdPDTO();

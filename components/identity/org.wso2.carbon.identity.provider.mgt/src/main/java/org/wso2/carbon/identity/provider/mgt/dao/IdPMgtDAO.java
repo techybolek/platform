@@ -38,7 +38,32 @@ public class IdPMgtDAO {
 
     private static final Log log = LogFactory.getLog(IdPMgtDAO.class);
 
-    public TrustedIdPDO getTenantIdP(int tenantId, String tenantDomain) throws IdentityProviderMgtException{
+    public List<String> getTenantIdPs(int tenantId, String tenantDomain) throws IdentityProviderMgtException {
+        Connection dbConnection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<String> tenantIdPs = new ArrayList<String>();
+        try {
+            dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            String sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDPS_SQL;
+            prepStmt = dbConnection.prepareStatement(sqlStmt);
+            prepStmt.setInt(1, tenantId);
+            rs = prepStmt.executeQuery();
+            if(rs.next()){
+                tenantIdPs.add(rs.getString(1));
+            }
+            return tenantIdPs;
+        } catch (SQLException e){
+            String msg = "Error occurred while retrieving registered IdP Issuers for tenant";
+            log.error(msg + " " + tenantDomain, e);
+            IdentityDatabaseUtil.rollBack(dbConnection);
+            throw new IdentityProviderMgtException(msg);
+        } finally {
+            IdentityDatabaseUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public TrustedIdPDO getTenantIdP(String issuer, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
         Connection dbConnection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -48,13 +73,14 @@ public class IdPMgtDAO {
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDP_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, issuer);
             rs = prepStmt.executeQuery();
             if(rs.next()){
                 trustedIdPDO = new TrustedIdPDO();
                 int idPId = rs.getInt(1);
-                trustedIdPDO.setIdPIssuerId(rs.getString(2));
-                trustedIdPDO.setIdPUrl(rs.getString(3));
-                trustedIdPDO.setPublicCertThumbPrint(rs.getString(4));
+                trustedIdPDO.setIdPIssuerId(issuer);
+                trustedIdPDO.setIdPUrl(rs.getString(2));
+                trustedIdPDO.setPublicCertThumbPrint(rs.getString(3));
 
                 Map<String, Integer> roleIdMap = new HashMap<String, Integer>();
                 sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDP_ROLES_SQL;

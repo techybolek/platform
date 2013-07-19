@@ -170,7 +170,7 @@ public class IdentityProviderMgtUtil {
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
                 String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + ".jks";
+                keyStoreName = ksName + "-truststore.jks";
             }
             Certificate cert = null;
             MessageDigest sha = null;
@@ -217,7 +217,7 @@ public class IdentityProviderMgtUtil {
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
                 String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + ".jks";
+                keyStoreName = ksName + "-truststore.jks";
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
@@ -246,7 +246,7 @@ public class IdentityProviderMgtUtil {
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
                 String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + ".jks";
+                keyStoreName = ksName + "-truststore.jks";
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
@@ -283,7 +283,7 @@ public class IdentityProviderMgtUtil {
                 keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
                 String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + ".jks";
+                keyStoreName = ksName + "-truststore.jks";
 
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
@@ -325,7 +325,7 @@ public class IdentityProviderMgtUtil {
                 keyStoreName  = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
             } else {
                 String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + ".jks";
+                keyStoreName = ksName + "-truststore.jks";
             }
             KeyStore ks = keyMan.getKeyStore(keyStoreName);
 

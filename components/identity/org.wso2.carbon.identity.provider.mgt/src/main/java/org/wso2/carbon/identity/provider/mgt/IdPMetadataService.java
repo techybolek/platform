@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.identity.provider.mgt;
 
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.provider.mgt.dao.IdPMgtDAO;
 import org.wso2.carbon.identity.provider.mgt.dto.TrustedIdPDTO;
 import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
@@ -32,14 +33,26 @@ public class IdPMetadataService {
     private static IdPMgtDAO dao = new IdPMgtDAO();
 
     /**
+     * Retrieves registered IdPs for a given tenant
+     *
+     * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
+     */
+    public String[] getTenantIdPs() throws IdentityProviderMgtException {
+        String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
+        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+        List<String> tenantIdPs = dao.getTenantIdPs(tenantId, tenantDomain);
+        return tenantIdPs.toArray(new String[tenantIdPs.size()]);
+    }
+
+    /**
      * Retrieves trusted IdP information about a given tenant
      *
      * @param tenantDomain Tenant domain whose information is requested
      * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
      */
-    public TrustedIdPDTO getTenantIdPMetaData(String tenantDomain) throws IdentityProviderMgtException {
+    public TrustedIdPDTO getTenantIdPMetaData(String issuer, String tenantDomain) throws IdentityProviderMgtException {
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(tenantId, tenantDomain);
+        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
         TrustedIdPDTO trustedIdPDTO = null;
         if(trustedIdPDO != null){
             trustedIdPDTO = new TrustedIdPDTO();
@@ -66,10 +79,9 @@ public class IdPMetadataService {
      * @param tenantDomain Tenant domain whose information is requested
      * @throws IdentityProviderMgtException
      */
-    public String getTenantIdPUrl(String tenantDomain) throws IdentityProviderMgtException{
+    public String getTenantIdPUrl(String issuer, String tenantDomain) throws IdentityProviderMgtException{
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(tenantId, tenantDomain);
-        TrustedIdPDTO trustedIdPDTO = null;
+        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
         if(trustedIdPDO != null){
             return trustedIdPDO.getIdPUrl();
         }

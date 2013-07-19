@@ -19,8 +19,8 @@ package org.wso2.carbon.identity.provider.mgt.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.identity.provider.mgt.dao.IdPMgtDAO;
+import org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserOperationEventListener;
