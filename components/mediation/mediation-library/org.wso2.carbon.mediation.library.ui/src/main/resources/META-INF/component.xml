@@ -20,7 +20,7 @@
 	    <menu>
             <id>libs_menu</id>
             <i18n-key>mediation.libs</i18n-key>
-            <i18n-bundle>org.wso2.carbon.i18n.Resources</i18n-bundle>
+            <i18n-bundle>org.wso2.carbon.mediation.library.ui.i18n.Resources</i18n-bundle>
             <parent-menu>manage_menu</parent-menu>
             <link>#</link>
             <region>region1</region>
@@ -31,7 +31,7 @@
 		<menu>
 			<id>libs_list_menu</id>
 			<i18n-key>mediation.libs.list</i18n-key>
-			<i18n-bundle>org.wso2.carbon.i18n.Resources</i18n-bundle>
+			<i18n-bundle>org.wso2.carbon.mediation.library.ui.i18n.Resources</i18n-bundle>
 			<parent-menu>libs_menu</parent-menu>
 			<link>../mediation_library/index.jsp</link>
 			<region>region1</region>
@@ -43,7 +43,7 @@
 		 <menu>
             <id>libs_add_menu</id>
             <i18n-key>mediation.libs.add</i18n-key>
-            <i18n-bundle>org.wso2.carbon.i18n.Resources</i18n-bundle>
+            <i18n-bundle>org.wso2.carbon.mediation.library.ui.i18n.Resources</i18n-bundle>
             <parent-menu>libs_menu</parent-menu>
             <link>../mediation_library/app_upload.jsp</link>
             <region>region1</region>
