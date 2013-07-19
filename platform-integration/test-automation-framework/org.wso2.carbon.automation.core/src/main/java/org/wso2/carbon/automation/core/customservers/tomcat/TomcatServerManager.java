@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.wso2.carbon.automation.core.ProductConstant;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,10 +41,10 @@ public class TomcatServerManager {
     String basedir = null;
     private Thread tomcatThread = null;
 
-    public TomcatServerManager(String className, String server, int port, String baseDirLocation) {
+    public TomcatServerManager(String className, String server, int port) {
         this.tomcatPort = port;
         this.tomcatClass = className;
-        this.basedir = baseDirLocation;
+        this.basedir = ProductConstant.getReportLocation();
     }
 
     public void startJaxRsServer() throws Exception {
