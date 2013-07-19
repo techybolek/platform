@@ -28,7 +28,7 @@
 	<parameter name="screenName" />
 	<parameter name="message" />
 	<sequence>
-		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
+		<!-- <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" /> -->
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterSendDirectMesage" />
 	</sequence>
 </template>

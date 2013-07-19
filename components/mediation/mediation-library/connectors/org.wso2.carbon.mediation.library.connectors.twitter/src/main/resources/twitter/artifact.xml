@@ -43,6 +43,10 @@
 			<description>send direct messages to user</description>
 		</artifact>
 
+		<artifact name="twitter.config">
+			<file>config.xml</file>
+			<description>configure twitter related setup</description>
+		</artifact>
 	</subArtifacts>
 
 </artifact>

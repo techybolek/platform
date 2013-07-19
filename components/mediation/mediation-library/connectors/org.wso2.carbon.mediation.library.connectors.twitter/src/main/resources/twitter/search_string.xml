@@ -15,7 +15,7 @@
     <parameter name="unit"/>
     <parameter name="until"/>
     <sequence>
-        <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator"/>
+        <!-- <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator"/> -->
         <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterSearch"/>
     </sequence>
 </template>

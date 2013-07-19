@@ -26,7 +26,7 @@
 	<parameter name="oauth.accessTokenSecret"/>
 	<parameter name="status"/>
 	<sequence>
-		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
+		<!-- <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" /> -->
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterUpdateStatusMediator" />
 	</sequence>
 </template>

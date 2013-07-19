@@ -28,7 +28,7 @@
 	<parameter name="page"/>
 	<parameter name="userID"/>
 	<sequence>
-		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
+		<!-- <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" /> -->
 		<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterGetUserTimeLine" />
 	</sequence>
 </template>
