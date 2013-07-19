@@ -92,7 +92,7 @@ public class ServerConnFactoryBuilder {
                 KeyStore keyStore = KeyStore.getInstance(type);
                 fis = new FileInputStream(location);
                 if (log.isInfoEnabled()) {
-                    log.info(name + " Loading Identity Keystore from : " + location);
+                    log.debug(name + " Loading Identity Keystore from : " + location);
                 }
 
                 keyStore.load(fis, storePassword.toCharArray());
@@ -111,8 +111,8 @@ public class ServerConnFactoryBuilder {
                                 X509Certificate[] certs = x509keymanager.getCertificateChain(s);
                                 if (certs==null) continue;
                                 for (X509Certificate cert: certs) {
-                                    log.info(name + " Subject DN: " + cert.getSubjectDN());
-                                    log.info(name + " Issuer DN: " + cert.getIssuerDN());
+                                    log.debug(name + " Subject DN: " + cert.getSubjectDN());
+                                    log.debug(name + " Issuer DN: " + cert.getIssuerDN());
                                 }
                             }
                         }
@@ -144,7 +144,7 @@ public class ServerConnFactoryBuilder {
                 KeyStore trustStore = KeyStore.getInstance(type);
                 fis = new FileInputStream(location);
                 if (log.isInfoEnabled()) {
-                    log.info(name + " Loading Trust Keystore from : " + location);
+                    log.debug(name + " Loading Trust Keystore from : " + location);
                 }
 
                 trustStore.load(fis, storePassword.toCharArray());
