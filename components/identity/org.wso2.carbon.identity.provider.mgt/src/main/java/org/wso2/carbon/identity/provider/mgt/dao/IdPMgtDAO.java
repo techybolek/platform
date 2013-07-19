@@ -49,7 +49,7 @@ public class IdPMgtDAO {
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
             rs = prepStmt.executeQuery();
-            if(rs.next()){
+            while(rs.next()){
                 tenantIdPs.add(rs.getString(1));
             }
             return tenantIdPs;
