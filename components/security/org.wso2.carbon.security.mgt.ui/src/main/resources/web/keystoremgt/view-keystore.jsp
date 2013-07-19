@@ -224,7 +224,7 @@
                                           page="view-keystore.jsp"
                                           pageNumberParameterName="pageNumber"
                                           parameters="<%=paginationValue%>"
-                                          resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                                          resourceBundle="org.wso2.carbon.security.ui.i18n.Resources"
                                           prevKey="prev" nextKey="next"/>
             </tr>
 
