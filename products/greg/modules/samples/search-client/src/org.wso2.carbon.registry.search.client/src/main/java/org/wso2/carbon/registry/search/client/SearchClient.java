@@ -25,10 +25,12 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.client.WSRegistrySearchClient;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.PaginationContext;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +41,8 @@ public class SearchClient {
 
     private static ConfigurationContext configContext = null;
 
-    private static final String CARBON_HOME = ".." + File.separator + ".." + File.separator;
+    private static final String CARBON_HOME = ".." + File.separator + ".." +
+            File.separator + ".." + File.separator + ".." + File.separator;
     private static final String axis2Repo = CARBON_HOME + File.separator + "repository" +
             File.separator + "deployment" + File.separator + "client";
     private static final String axis2Conf =
@@ -63,12 +66,14 @@ public class SearchClient {
 
     public static void main(String[] args) throws Exception {
         try {
+
             final Registry registry = initialize();
             Registry gov = GovernanceUtils.getGovernanceUserRegistry(registry, "admin");
             // Should be load the governance artifact.
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) gov);
+            addServices(gov);
             //Initialize the pagination context.
-            PaginationContext.init(0, 5, "", "", 100);
+            PaginationContext.init(0, 5, "overview_name", "DES", 100);
             WSRegistrySearchClient wsRegistrySearchClient =
                     new WSRegistrySearchClient(serverURL, username, password, configContext);
             //This should be execute to initialize the AttributeSearchService.
@@ -85,6 +90,9 @@ public class SearchClient {
                 add("Development");
             }});
             //Find the results.
+            System.out.println("\n\nSearch services having ServiceLifeCycle and  in development state ...\n");
+            System.out.println("Sort by  service name ..\n");
+            System.out.println("Sort order descending ..\n\n");
             GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
 
             for (GenericArtifact artifact : genericArtifacts) {
@@ -93,6 +101,25 @@ public class SearchClient {
 
         } finally {
             PaginationContext.destroy();
+        }
+        System.exit(1);
+
+    }
+
+    private static void addServices(Registry govRegistry) throws RegistryException {
+        GenericArtifactManager artifactManager = new GenericArtifactManager(govRegistry,  "service");
+        System.out.println("#############################################\n");
+        for (int i = 1; i < 10; i++) {
+            System.out.println("Adding FlightService" + i + " ....");
+            GenericArtifact artifact =  artifactManager.newGovernanceArtifact(new QName("ns", "FlightService" + i));
+            artifactManager.addGenericArtifact(artifact);
+        }
+        //Services need to be index before search.
+        try {
+            System.out.println("Waiting to index services .....!");
+            Thread.sleep(2 * 60 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
