@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.analytics.hive.extension.annotation;
+package org.wso2.carbon.analytics.hive.annotation;
 
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
 

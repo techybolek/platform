@@ -49,4 +49,11 @@ public class HiveConstants {
     public static final String HIVE_RSS_CONFIG_DEFAULT_PASSWORD = "admin";
     public static final String HIVE_RSS_CONFIG_DEFAULT_SERVER_URL = "services/RSSAdmin";
     public static final String DEFAULT_SERVER_URL = "https://127.0.0.1:9443/";
+
+    public static final String ANNOTATION_CONFIG_XML = "repository/annotation-config.xml";
+    public static final String ANALYTICS_NAMESPACE = "http://wso2.org/carbon/analytics";
+    public static final String ANNOTATIONS__ELEMENT = "annotations";
+    public static final String ANNOTATION_ELEMENT = "annotation";
+    public static final String ANNOTATION_NAME__ELEMENT = "name";
+    public static final String ANNOTATION_CLASS_ELEMENT = "class";
 }

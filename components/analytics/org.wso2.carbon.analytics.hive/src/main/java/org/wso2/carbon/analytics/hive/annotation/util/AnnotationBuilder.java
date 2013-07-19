@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.carbon.analytics.core.common;
+package org.wso2.carbon.analytics.hive.annotation.util;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.analytics.core.AnalyticsConstants;
-import org.wso2.carbon.analytics.core.exception.AnalyticsConfigurationException;
+import org.wso2.carbon.analytics.hive.HiveConstants;
+import org.wso2.carbon.analytics.hive.exception.AnnotationConfigException;
 import org.wso2.carbon.utils.ServerConstants;
 
 import javax.xml.namespace.QName;
@@ -35,15 +35,29 @@ import java.util.Map;
 /**
  *Build annotations from annotation-config.xml
  */
-public class AnnotationFactory {
-    private static final Log log = LogFactory.getLog(AnnotationFactory.class);
+public class AnnotationBuilder {
+    private static final Log log = LogFactory.getLog(AnnotationBuilder.class);
 
 
+    private static Map<String, String> annotations = new HashMap<String, String>();
 
-    public OMElement loadConfigXML() throws AnalyticsConfigurationException {
+   static {
+        try {
+            OMElement config= loadConfigXML();
+
+            populateAnnotations(config);
+
+        } catch (AnnotationConfigException e) {
+            log.error("The Analytics config was not found.");
+        }
+
+
+    }
+
+    private static OMElement loadConfigXML() throws AnnotationConfigException {
 
         String carbonHome = System.getProperty(ServerConstants.CARBON_CONFIG_DIR_PATH);
-        String path = carbonHome + File.separator + AnalyticsConstants.ANALYTICS_DIR + File.separator + AnalyticsConstants.ANNOTATION_CONFIG_XML;
+        String path = carbonHome + File.separator + HiveConstants.ANNOTATION_CONFIG_XML;
 
         BufferedInputStream inputStream = null;
         try {
@@ -55,15 +69,15 @@ public class AnnotationFactory {
             omElement.build();
             return omElement;
         } catch (FileNotFoundException e) {
-            String errorMessage = AnalyticsConstants.ANNOTATION_CONFIG_XML
+            String errorMessage = HiveConstants.ANNOTATION_CONFIG_XML
                     + "cannot be found in the path : " + path;
             log.error(errorMessage, e);
-            throw new AnalyticsConfigurationException(errorMessage, e);
+            throw new AnnotationConfigException(errorMessage, e);
         } catch (XMLStreamException e) {
-            String errorMessage = "Invalid XML for " + AnalyticsConstants.ANNOTATION_CONFIG_XML
+            String errorMessage = "Invalid XML for " + HiveConstants.ANNOTATION_CONFIG_XML
                     + " located in the path : " + path;
             log.error(errorMessage, e);
-            throw new AnalyticsConfigurationException(errorMessage, e);
+            throw new AnnotationConfigException(errorMessage, e);
         } finally {
             try {
                 if (inputStream != null) {
@@ -77,27 +91,35 @@ public class AnnotationFactory {
     }
 
 
-    public Map populateAnnotations(OMElement config
-    ) {
+    private static void populateAnnotations(OMElement config) {
 
-        Map<String, String> annotations = new HashMap<String, String>();
+
 
         OMElement annotationElems = config.getFirstChildWithName(
-                new QName(AnalyticsConstants.ANALYTICS_NAMESPACE,
-                        AnalyticsConstants.ANNOTATIONS__ELEMENT));
+                new QName(HiveConstants.ANALYTICS_NAMESPACE,
+                        HiveConstants.ANNOTATIONS__ELEMENT));
 
         if (annotationElems != null) {
-            for (Iterator annotationIterator = annotationElems.getChildElements();
+            for (Iterator annotationIterator = annotationElems.getChildrenWithName(new QName(HiveConstants.ANNOTATION_ELEMENT));
                  annotationIterator.hasNext(); ) {
                 OMElement annotation = (OMElement) annotationIterator.next();
-                OMElement nameElem = annotation.getFirstChildWithName(new QName(AnalyticsConstants.ANNOTATION_NAME__ELEMENT));
-                OMElement classElem = annotation.getFirstChildWithName(new QName(AnalyticsConstants.ANNOTATION_CLASS_ELEMENT));
+                OMElement nameElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANNOTATION_NAME__ELEMENT));
+                OMElement classElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANNOTATION_CLASS_ELEMENT));
 
                 annotations.put(nameElem.getText(), classElem.getText());
             }
         }
 
+
+    }
+
+
+    public static Map<String, String> getAnnotations() {
         return annotations;
+    }
+
+    public void setAnnotations(Map<String, String> annotations) {
+        this.annotations = annotations;
     }
 
 

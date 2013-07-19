@@ -150,7 +150,6 @@
                         <Import-Package>
                             !org.wso2.carbon.analytics.hive.*,
                             org.apache.commons.logging.*,
-                            org.wso2.carbon.analytics.core.*,
                             org.apache.hadoop.hive.*;version=0.0.0,
                             org.apache.thrift.*;version=0.0.0,
                             com.facebook.fb303,*,

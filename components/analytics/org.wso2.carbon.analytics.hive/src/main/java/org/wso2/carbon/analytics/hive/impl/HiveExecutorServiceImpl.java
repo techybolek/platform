@@ -28,7 +28,7 @@ import org.wso2.carbon.analytics.hive.dto.ScriptResult;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.exception.RegistryAccessException;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
-import org.wso2.carbon.analytics.hive.extension.annotation.AbstractHiveAnnotation;
+import org.wso2.carbon.analytics.hive.annotation.AbstractHiveAnnotation;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveMultitenantUtil;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
