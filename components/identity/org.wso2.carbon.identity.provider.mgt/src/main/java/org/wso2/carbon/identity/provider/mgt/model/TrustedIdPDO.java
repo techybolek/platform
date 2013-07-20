@@ -55,6 +55,11 @@ public class TrustedIdPDO {
          */
         private Map<String,String> roleMappings;
 
+        /**
+         * TId the IdP is the primary IdP for this tenant.
+         */
+        private boolean isPrimary;
+
         //////////////////// Getters and Setters //////////////////////////
 
         public String getTenantDomain() {
@@ -106,6 +111,14 @@ public class TrustedIdPDO {
 
         public void setRoles(List<String> roles) {
             this.roles = roles;
+        }
+
+        public boolean isPrimary() {
+            return isPrimary;
+        }
+
+        public void setPrimary(boolean primary) {
+            isPrimary = primary;
         }
 
 }

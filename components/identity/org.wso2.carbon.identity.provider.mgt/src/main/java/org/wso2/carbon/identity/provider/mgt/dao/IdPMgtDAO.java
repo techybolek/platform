@@ -38,13 +38,14 @@ public class IdPMgtDAO {
 
     private static final Log log = LogFactory.getLog(IdPMgtDAO.class);
 
-    public List<String> getTenantIdPs(int tenantId, String tenantDomain) throws IdentityProviderMgtException {
-        Connection dbConnection = null;
+    public List<String> getTenantIdPs(Connection dbConnection, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         List<String> tenantIdPs = new ArrayList<String>();
         try {
-            dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            if(dbConnection == null){
+                dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            }
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDPS_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
@@ -59,7 +60,7 @@ public class IdPMgtDAO {
             IdentityDatabaseUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            IdentityDatabaseUtil.closeConnection(dbConnection);
+            IdentityDatabaseUtil.closeStatement(prepStmt);
         }
     }
 
@@ -81,6 +82,7 @@ public class IdPMgtDAO {
                 trustedIdPDO.setIdPIssuerId(issuer);
                 trustedIdPDO.setIdPUrl(rs.getString(2));
                 trustedIdPDO.setPublicCertThumbPrint(rs.getString(3));
+                trustedIdPDO.setPrimary(rs.getBoolean(4));
 
                 Map<String, Integer> roleIdMap = new HashMap<String, Integer>();
                 sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDP_ROLES_SQL;
@@ -122,18 +124,21 @@ public class IdPMgtDAO {
 
     public void addTenantIdP(TrustedIdPDO trustedIdP, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
         Connection dbConnection = null;
-        PreparedStatement prepStmt = null;
         try {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
             String issuerId = trustedIdP.getIdPIssuerId();
+            boolean isPrimary = trustedIdP.isPrimary();
             String trustedIdPUrl = trustedIdP.getIdPUrl();
             String thumbPrint = trustedIdP.getPublicCertThumbPrint();
             List<String> roles = trustedIdP.getRoles();
             Map<String,String> roleMappings = trustedIdP.getRoleMappings();
-            doAddIdP(dbConnection, tenantId, issuerId, trustedIdPUrl, thumbPrint);
+            if(isPrimary){
+                doSwitchPrimary(dbConnection, tenantId);
+            }
+            doAddIdP(dbConnection, tenantId, issuerId, trustedIdPUrl, thumbPrint, isPrimary);
             int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(idPId <= 0){
-                String msg = "Cannot find registered IdP for tenant";
+                String msg = "Error adding trusted IdP for tenant";
                 log.error(msg + " " + tenantId);
                 throw new IdentityProviderMgtException(msg);
             }
@@ -157,15 +162,16 @@ public class IdPMgtDAO {
     public void updateTenantIdP(TrustedIdPDO trustedIdPDO1, TrustedIdPDO trustedIdPDO2, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
         Connection dbConnection = null;
-        PreparedStatement prepStmt = null;
 
         String issuerId1 = trustedIdPDO1.getIdPIssuerId();
+        boolean isPrimary1 = trustedIdPDO1.isPrimary();
         String trustedIdPUrl1 = trustedIdPDO1.getIdPUrl();
         String thumbPrint1 = trustedIdPDO1.getPublicCertThumbPrint();
         List<String> roles1 = trustedIdPDO1.getRoles();
         Map<String,String> roleMappings1 = trustedIdPDO1.getRoleMappings();
 
         String issuerId2 = trustedIdPDO2.getIdPIssuerId();
+        boolean isPrimary2 = trustedIdPDO2.isPrimary();
         String trustedIdPUrl2 = trustedIdPDO2.getIdPUrl();
         String thumbPrint2 = trustedIdPDO2.getPublicCertThumbPrint();
         List<String> roles2 = trustedIdPDO2.getRoles();
@@ -211,7 +217,7 @@ public class IdPMgtDAO {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
             int idPId = isTenantIdPExisting(dbConnection, trustedIdPDO1, tenantId, tenantDomain);
             if(idPId <= 0){
-                String msg = "Cannot find registered IdP for tenant";
+                String msg = "Trying to update non-existent IdP for tenant";
                 log.error(msg + " " + tenantDomain);
                 throw new IdentityProviderMgtException(msg);
             }
@@ -221,8 +227,12 @@ public class IdPMgtDAO {
                             trustedIdPUrl1 == null && trustedIdPUrl2 != null) ||
                     (thumbPrint1 != null && thumbPrint2 != null && !thumbPrint1.equals(thumbPrint2) ||
                             thumbPrint1 != null && thumbPrint2 == null ||
-                            thumbPrint1 == null && thumbPrint2 != null)){
-                doUpdateIdP(dbConnection, tenantId, issuerId1, issuerId2, trustedIdPUrl2, thumbPrint2);
+                            thumbPrint1 == null && thumbPrint2 != null) ||
+                    isPrimary1 != isPrimary2){
+                if(isPrimary1 != isPrimary2){
+                    doSwitchPrimary(dbConnection, tenantId);
+                }
+                doUpdateIdP(dbConnection, tenantId, issuerId1, issuerId2, trustedIdPUrl2, thumbPrint2, isPrimary2);
             }
             if(!addedRoles.isEmpty() || !deletedRoles.isEmpty() || !renamedOldRoles.isEmpty()){
                 doUpdateIdPRoles(dbConnection, idPId, addedRoles, deletedRoles, renamedOldRoles, renamedNewRoles);
@@ -244,16 +254,29 @@ public class IdPMgtDAO {
 
     public void deleteTenantIdP(TrustedIdPDO trustedIdP, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
         Connection dbConnection = null;
-        PreparedStatement prepStmt = null;
         try {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
             String issuerId = trustedIdP.getIdPIssuerId();
-            if(isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain) <= 0){
-                String msg = "Cannot find registered IdP for tenant";
+            int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
+            if(idPId <= 0){
+                String msg = "Trying to delete non-existent IdP for tenant";
                 log.error(msg + " " + tenantDomain);
-                throw new IdentityProviderMgtException(msg);
+                return;
             }
+
+            trustedIdP.setPrimary(true);
+            int primaryIdPId = isPrimaryTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
+            if(primaryIdPId <= 0){
+                String msg = "Cannot find primary IdP for tenant";
+                log.warn(msg + " " + tenantDomain);
+            }
+
             doDeleteIdP(dbConnection, tenantId, issuerId);
+
+            if(idPId == primaryIdPId){
+                doAppointPrimary(dbConnection, tenantId, tenantDomain);
+            }
+
             dbConnection.commit();
         } catch (SQLException e){
             String msg = "Error occurred while deleting IdP of tenant";
@@ -265,7 +288,34 @@ public class IdPMgtDAO {
         }
     }
 
-    private void doAddIdP(Connection conn, int tenantId, String issuer, String idpUrl, String thumbPrint) throws SQLException {
+    private void doSwitchPrimary(Connection conn, int tenantId) throws SQLException {
+        PreparedStatement prepStmt = null;
+        String sqlStmt = IdentityProviderMgtConstants.SQLQueries.SWITCH_TENANT_IDP_PRIMARY_SQL;
+        prepStmt = conn.prepareStatement(sqlStmt);
+        prepStmt.setBoolean(1, false);
+        prepStmt.setInt(2, tenantId);
+        prepStmt.setBoolean(3, true);
+        prepStmt.executeUpdate();
+    }
+
+    private void doAppointPrimary(Connection conn, int tenantId, String tenantDomain) throws SQLException, IdentityProviderMgtException {
+        List<String> tenantIdPs = getTenantIdPs(conn, tenantId, tenantDomain);
+        if(!tenantIdPs.isEmpty()){
+            PreparedStatement prepStmt = null;
+            String sqlStmt = IdentityProviderMgtConstants.SQLQueries.SWITCH_TENANT_IDP_PRIMARY_ON_DELETE_SQL;
+            prepStmt = conn.prepareStatement(sqlStmt);
+            prepStmt.setBoolean(1, true);
+            prepStmt.setInt(2, tenantId);
+            prepStmt.setString(3, tenantIdPs.get(0));
+            prepStmt.setBoolean(4, false);
+            prepStmt.executeUpdate();
+        } else {
+            String msg = "No IdPs registered for tenant";
+            log.warn(msg + " " + tenantDomain);
+        }
+    }
+
+    private void doAddIdP(Connection conn, int tenantId, String issuer, String idpUrl, String thumbPrint, boolean isPrimary) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
@@ -273,10 +323,11 @@ public class IdPMgtDAO {
         prepStmt.setString(2, issuer);
         prepStmt.setString(3, idpUrl);
         prepStmt.setString(4, thumbPrint);
+        prepStmt.setBoolean(5, isPrimary);
         prepStmt.executeUpdate();
     }
 
-    private void doAddIdPRoles(Connection conn, int idPId, List<String> roles) throws SQLException, IdentityProviderMgtException {
+    private void doAddIdPRoles(Connection conn, int idPId, List<String> roles) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLES_SQL;
         for(String role:roles){
@@ -323,21 +374,22 @@ public class IdPMgtDAO {
     }
     
     private void doUpdateIdP(Connection conn, int tenantId, String issuerOld, String issuerNew, String idpUrl,
-                             String thumbPrint) throws SQLException {
+                             String thumbPrint, boolean isPrimary) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.UPDATE_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
         prepStmt.setString(1, issuerNew);
         prepStmt.setString(2, idpUrl);
         prepStmt.setString(3, thumbPrint);
-        prepStmt.setInt(4, tenantId);
-        prepStmt.setString(5, issuerOld);
+        prepStmt.setBoolean(4, isPrimary);
+        prepStmt.setInt(5, tenantId);
+        prepStmt.setString(6, issuerOld);
         prepStmt.executeUpdate();
     }
 
     private void doUpdateIdPRoles(Connection conn, int idPId, List<String> addedRoles, List<String> deletedRoles,
                                   List<String> renamedOldRoles, List<String> renamedNewRoles)
-            throws SQLException, IdentityProviderMgtException {
+            throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = null;
         for(String deletedRole:deletedRoles){
@@ -457,7 +509,27 @@ public class IdPMgtDAO {
             }
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving IdP information for tenant";
-            log.error(msg + " " + tenantId, e);
+            log.error(msg + " " + tenantDomain, e);
+            throw new IdentityProviderMgtException(msg);
+        }
+        return 0;
+    }
+
+    public int isPrimaryTenantIdPExisting(Connection dbConnection, TrustedIdPDO trustedIdPDO, int tenantId, String tenantDomain)
+            throws IdentityProviderMgtException {
+        PreparedStatement prepStmt = null;
+        try {
+            String sqlStmt = IdentityProviderMgtConstants.SQLQueries.IS_EXISTING_PRIMARY_TENANT_IDP_SQL;
+            prepStmt = dbConnection.prepareStatement(sqlStmt);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setBoolean(2, true);
+            ResultSet rs = prepStmt.executeQuery();
+            if(rs.next()){
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving IdP information for tenant";
+            log.error(msg + " " + tenantDomain, e);
             throw new IdentityProviderMgtException(msg);
         }
         return 0;

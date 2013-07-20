@@ -47,6 +47,11 @@ public class TrustedIdPDTO {
      */
     private String[] roleMappings;
 
+    /**
+     * If the IdP is the primary IdP for this tenant
+     */
+    private boolean isPrimary;
+
     //////////////////// Getters and Setters //////////////////////////
 
 
@@ -91,6 +96,14 @@ public class TrustedIdPDTO {
 
     public void setRoleMappings(String[] roleMappings) {
         this.roleMappings = roleMappings;
+    }
+
+    public boolean isPrimary() {
+        return isPrimary;
+    }
+
+    public void setPrimary(boolean primary) {
+        isPrimary = primary;
     }
 
 }

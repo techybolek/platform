@@ -42,7 +42,7 @@ public class IdentityProviderMgtService {
     public String[] getTenantIdPs() throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        List<String> tenantIdPs = dao.getTenantIdPs(tenantId, tenantDomain);
+        List<String> tenantIdPs = dao.getTenantIdPs(null, tenantId, tenantDomain);
         return tenantIdPs.toArray(new String[tenantIdPs.size()]);
     }
 
@@ -61,7 +61,7 @@ public class IdentityProviderMgtService {
             trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
             trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
             if(trustedIdPDO.getPublicCertThumbPrint() != null){
-                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(tenantId, tenantDomain));
+                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(trustedIdPDO.getIdPUrl(), tenantId, tenantDomain));
             }
             trustedIdPDTO.setRoles(trustedIdPDO.getRoles().toArray(new String[trustedIdPDO.getRoles().size()]));
             List<String> appendedRoleMappings = new ArrayList<String>();
@@ -71,6 +71,7 @@ public class IdentityProviderMgtService {
                 appendedRoleMappings.add(idpRole+":"+tenantRole);
             }
             trustedIdPDTO.setRoleMappings(appendedRoleMappings.toArray(new String[appendedRoleMappings.size()]));
+            trustedIdPDTO.setPrimary(trustedIdPDO.isPrimary());
         }
         return trustedIdPDTO;
     }
@@ -106,7 +107,13 @@ public class IdentityProviderMgtService {
             log.error(msg);
             throw new IdentityProviderMgtException(msg);
         }
+        if(oldTrustedIdP.isPrimary() == true && newTrustedIdP.isPrimary() == false){
+            String msg = "Invalid arguments: Cannot unset IdP from primary. Alternatively set new IdP to primary";
+            log.error(msg);
+            throw new IdentityProviderMgtException(msg);
+        }
         oldTrustedIdPDO.setIdPIssuerId(oldTrustedIdP.getIdPIssuerId());
+        oldTrustedIdPDO.setPrimary(oldTrustedIdP.isPrimary());
         oldTrustedIdPDO.setIdPUrl(oldTrustedIdP.getIdPUrl());
         if(oldTrustedIdP.getPublicCert() != null){
             oldTrustedIdPDO.setPublicCertThumbPrint(IdentityProviderMgtUtil.generatedThumbPrint(oldTrustedIdP.getPublicCert()));
@@ -142,6 +149,7 @@ public class IdentityProviderMgtService {
             throw new IdentityProviderMgtException(msg);
         }
         newTrustedIdPDO.setIdPIssuerId(newTrustedIdP.getIdPIssuerId());
+        newTrustedIdPDO.setPrimary(newTrustedIdP.isPrimary());
         newTrustedIdPDO.setIdPUrl(newTrustedIdP.getIdPUrl());
         if(newTrustedIdP.getPublicCert() != null){
             newTrustedIdPDO.setPublicCertThumbPrint(IdentityProviderMgtUtil.generatedThumbPrint(newTrustedIdP.getPublicCert()));
@@ -176,11 +184,11 @@ public class IdentityProviderMgtService {
         if(oldTrustedIdPDO.getPublicCertThumbPrint() != null &&
                 newTrustedIdPDO.getPublicCertThumbPrint() != null &&
                 !oldTrustedIdPDO.getPublicCertThumbPrint().equals(newTrustedIdPDO.getPublicCertThumbPrint())){
-            IdentityProviderMgtUtil.updateCertToStore(newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
+            IdentityProviderMgtUtil.updateCertToStore(oldTrustedIdP.getIdPIssuerId(), newTrustedIdP.getIdPIssuerId(), newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
         } else if(oldTrustedIdPDO.getPublicCertThumbPrint() == null && newTrustedIdPDO.getPublicCertThumbPrint() != null){
-            IdentityProviderMgtUtil.importCertToStore(newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
+            IdentityProviderMgtUtil.importCertToStore(newTrustedIdP.getIdPIssuerId(), newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
         } else if(oldTrustedIdPDO.getPublicCertThumbPrint() != null && newTrustedIdPDO.getPublicCertThumbPrint() == null){
-            IdentityProviderMgtUtil.deleteCertFromStore(tenantId, tenantDomain);
+            IdentityProviderMgtUtil.deleteCertFromStore(oldTrustedIdP.getIdPIssuerId(), tenantId, tenantDomain);
         }
     }
 
@@ -193,6 +201,7 @@ public class IdentityProviderMgtService {
             throw new IdentityProviderMgtException(msg);
         }
         trustedIdPDO.setIdPIssuerId(trustedIdP.getIdPIssuerId());
+        trustedIdPDO.setPrimary(trustedIdP.isPrimary());
         trustedIdPDO.setIdPUrl(trustedIdP.getIdPUrl());
         if(trustedIdP.getPublicCert() != null){
             trustedIdPDO.setPublicCertThumbPrint(IdentityProviderMgtUtil.generatedThumbPrint(trustedIdP.getPublicCert()));
@@ -221,7 +230,7 @@ public class IdentityProviderMgtService {
         dao.addTenantIdP(trustedIdPDO, tenantId, tenantDomain);
 
         if(trustedIdP.getPublicCert() != null){
-            IdentityProviderMgtUtil.importCertToStore(trustedIdP.getPublicCert(), tenantId, tenantDomain);
+            IdentityProviderMgtUtil.importCertToStore(trustedIdP.getIdPIssuerId(), trustedIdP.getPublicCert(), tenantId, tenantDomain);
         }
     }
 
@@ -239,7 +248,7 @@ public class IdentityProviderMgtService {
         dao.deleteTenantIdP(trustedIdPDO, tenantId, tenantDomain);
 
         if(trustedIdP.getPublicCert() != null){
-            IdentityProviderMgtUtil.deleteCertFromStore(tenantId, tenantDomain);
+            IdentityProviderMgtUtil.deleteCertFromStore(trustedIdP.getIdPIssuerId(), tenantId, tenantDomain);
         }
     }
 

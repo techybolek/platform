@@ -40,7 +40,7 @@ public class IdPMetadataService {
     public String[] getTenantIdPs() throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        List<String> tenantIdPs = dao.getTenantIdPs(tenantId, tenantDomain);
+        List<String> tenantIdPs = dao.getTenantIdPs(null, tenantId, tenantDomain);
         return tenantIdPs.toArray(new String[tenantIdPs.size()]);
     }
 
@@ -59,7 +59,7 @@ public class IdPMetadataService {
             trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
             trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
             if(trustedIdPDO.getPublicCertThumbPrint() != null){
-                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(tenantId, tenantDomain));
+                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(issuer, tenantId, tenantDomain));
             }
             trustedIdPDTO.setRoles(trustedIdPDO.getRoles().toArray(new String[trustedIdPDO.getRoles().size()]));
             List<String> appendedRoleMappings = new ArrayList<String>();
