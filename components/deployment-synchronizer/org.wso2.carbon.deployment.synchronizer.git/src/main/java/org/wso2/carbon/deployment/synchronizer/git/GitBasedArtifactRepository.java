@@ -60,10 +60,6 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
     * */
     public GitBasedArtifactRepository () {
 
-        if(!isGitDeploymentSynchronizationEnabled()) {
-            return;
-        }
-
         readConfiguration();
 
         if(gitDepsyncConfig.isStandardDeployment()) {
@@ -72,32 +68,6 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         else {
             repositoryManager = new S2GitRepositoryManager();
         }
-    }
-
-    /**
-     * Checks if git based deployment synchronization is enabled
-     *
-     * @return true if deployment synchronization is enabled, else false
-     */
-    private boolean isGitDeploymentSynchronizationEnabled() {
-
-        String enableParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.ENABLED);
-        if (enableParam == null) {
-            return false;
-        }
-
-        if (enableParam.equalsIgnoreCase("false")) {
-            return  false;
-        }
-
-        if (enableParam.equalsIgnoreCase("true")) {
-            String repoTypeParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.REPOSITORY_TYPE);
-            if(repoTypeParam != null && (repoTypeParam.equalsIgnoreCase(getRepositoryType()))) {
-                 return true;
-            }
-        }
-
-        return false;
     }
 
     /**
