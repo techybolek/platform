@@ -12,6 +12,7 @@
                 <xs:sequence>
                     <xs:element minOccurs="0" name="idPIssuerId" nillable="true" type="xs:string"></xs:element>
                     <xs:element minOccurs="0" name="idPUrl" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="primary" type="xs:boolean"></xs:element>
                     <xs:element minOccurs="0" name="publicCert" nillable="true" type="xs:string"></xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="roleMappings" nillable="true" type="xs:string"></xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="roles" nillable="true" type="xs:string"></xs:element>
@@ -30,13 +31,27 @@
             </xs:element>
             <xs:element name="getTenantIdP">
                 <xs:complexType>
-                    <xs:sequence></xs:sequence>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="issuer" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getTenantIdPResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" nillable="true" type="ax2328:TrustedIdPDTO"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTenantIdPs">
+                <xs:complexType>
+                    <xs:sequence></xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTenantIdPsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -59,6 +74,12 @@
     <wsdl:message name="IdentityProviderMgtServiceIdentityProviderMgtException">
         <wsdl:part name="parameters" element="ns:IdentityProviderMgtServiceIdentityProviderMgtException"></wsdl:part>
     </wsdl:message>
+    <wsdl:message name="getTenantIdPsRequest">
+        <wsdl:part name="parameters" element="ns:getTenantIdPs"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getTenantIdPsResponse">
+        <wsdl:part name="parameters" element="ns:getTenantIdPsResponse"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="updateTenantIdPRequest">
         <wsdl:part name="parameters" element="ns:updateTenantIdP"></wsdl:part>
     </wsdl:message>
@@ -67,6 +88,11 @@
             <wsdl:input message="ns:getTenantIdPRequest" wsaw:Action="urn:getTenantIdP"></wsdl:input>
             <wsdl:output message="ns:getTenantIdPResponse" wsaw:Action="urn:getTenantIdPResponse"></wsdl:output>
             <wsdl:fault message="ns:IdentityProviderMgtServiceIdentityProviderMgtException" name="IdentityProviderMgtServiceIdentityProviderMgtException" wsaw:Action="urn:getTenantIdPIdentityProviderMgtServiceIdentityProviderMgtException"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getTenantIdPs">
+            <wsdl:input message="ns:getTenantIdPsRequest" wsaw:Action="urn:getTenantIdPs"></wsdl:input>
+            <wsdl:output message="ns:getTenantIdPsResponse" wsaw:Action="urn:getTenantIdPsResponse"></wsdl:output>
+            <wsdl:fault message="ns:IdentityProviderMgtServiceIdentityProviderMgtException" name="IdentityProviderMgtServiceIdentityProviderMgtException" wsaw:Action="urn:getTenantIdPsIdentityProviderMgtServiceIdentityProviderMgtException"></wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="updateTenantIdP">
             <wsdl:input message="ns:updateTenantIdPRequest" wsaw:Action="urn:updateTenantIdP"></wsdl:input>
@@ -77,6 +103,18 @@
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap:binding>
         <wsdl:operation name="getTenantIdP">
             <soap:operation soapAction="urn:getTenantIdP" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"></soap:body>
+            </wsdl:output>
+            <wsdl:fault name="IdentityProviderMgtServiceIdentityProviderMgtException">
+                <soap:fault use="literal" name="IdentityProviderMgtServiceIdentityProviderMgtException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getTenantIdPs">
+            <soap:operation soapAction="urn:getTenantIdPs" style="document"></soap:operation>
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
@@ -111,6 +149,18 @@
                 <soap12:fault use="literal" name="IdentityProviderMgtServiceIdentityProviderMgtException"></soap12:fault>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getTenantIdPs">
+            <soap12:operation soapAction="urn:getTenantIdPs" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:output>
+            <wsdl:fault name="IdentityProviderMgtServiceIdentityProviderMgtException">
+                <soap12:fault use="literal" name="IdentityProviderMgtServiceIdentityProviderMgtException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="updateTenantIdP">
             <soap12:operation soapAction="urn:updateTenantIdP" style="document"></soap12:operation>
             <wsdl:input>
@@ -125,6 +175,15 @@
         <http:binding verb="POST"></http:binding>
         <wsdl:operation name="getTenantIdP">
             <http:operation location="getTenantIdP"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTenantIdPs">
+            <http:operation location="getTenantIdPs"></http:operation>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
