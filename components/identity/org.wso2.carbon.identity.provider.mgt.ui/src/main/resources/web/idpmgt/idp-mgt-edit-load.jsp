@@ -42,6 +42,7 @@
             if(trustedIdPDTO != null){
                 TrustedIdPBean trustedIdPBean = new TrustedIdPBean();
                 trustedIdPBean.setIdPIssuerId(trustedIdPDTO.getIdPIssuerId());
+                trustedIdPBean.setPrimary(trustedIdPDTO.getPrimary());
                 trustedIdPBean.setIdPUrl(trustedIdPDTO.getIdPUrl());
                 if(trustedIdPDTO.getPublicCert() != null){
                     trustedIdPBean.setCertData(IdentityProviderMgtUIUtil.getCertData(trustedIdPDTO.getPublicCert()));
@@ -61,6 +62,9 @@
                 session.setAttribute("trustedIdPDTO", trustedIdPDTO);
                 session.setAttribute("trustedIdPBean", trustedIdPBean);
             }
+        } else if(session.getAttribute("tenantIdPList") == null){
+            response.sendRedirect("idp-mgt-list-load.jsp");
+            return;
         }
     } catch (Exception e) {
 
@@ -72,7 +76,7 @@
     }
 %>
 <script type="text/javascript">
-    location.href = "idp-mgt-edit.jsp";
+    location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>";
 </script>
 
 

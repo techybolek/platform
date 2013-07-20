@@ -75,6 +75,7 @@ public class IdentityProviderMgtUIUtil {
             ServletFileUpload upload = new ServletFileUpload(factory);
             List items =  upload.parseRequest(servletContext);
             String issuer = null;
+            boolean primary = false;
             String url = null;
             String publicCert = null;
             String[] roleMappings = null;
@@ -108,6 +109,17 @@ public class IdentityProviderMgtUIUtil {
                     byte[] issuerArray = fileItem.get();
                     if(issuerArray != null && issuerArray.length > 0){
                         issuer = new String(issuerArray);
+                    }
+                } else if(name.equals("primary")){
+                    FileItem fileItem = diskFileItem;
+                    byte[] primaryArray = fileItem.get();
+                    if(primaryArray != null && primaryArray.length > 0){
+                        String primaryString = new String(primaryArray);
+                        if(primaryString.equals("on")){
+                            primary = true;
+                        } else {
+                            primary = false;
+                        }
                     }
                 } else if(name.equals("url")){
                     FileItem fileItem = diskFileItem;
@@ -163,6 +175,7 @@ public class IdentityProviderMgtUIUtil {
             }
             newRoles.addAll(tempList);
             trustedIdPDTO.setIdPIssuerId(issuer);
+            trustedIdPDTO.setPrimary(primary);
             trustedIdPDTO.setIdPUrl(url);
             if(deletePublicCert != null && deletePublicCert.equals("true")){
                 trustedIdPDTO.setPublicCert(null);

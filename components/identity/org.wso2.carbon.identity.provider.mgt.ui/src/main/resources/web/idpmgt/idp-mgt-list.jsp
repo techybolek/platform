@@ -26,7 +26,14 @@
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <%
-    String[] issuers = (String[])session.getAttribute("tenantIdPList");
+    String[] trustedIdPs = (String[])session.getAttribute("tenantIdPList");
+    if(trustedIdPs == null){
+%>
+        <script type="text/javascript">
+            location.href = "idp-mgt-list-load.jsp";
+        </script>
+<%
+    }
 %>
 
 <script>
@@ -64,10 +71,10 @@
             <table class="styledLeft" id="issuersListTable">
                 <thead><tr><th class="leftCol-big"><fmt:message key='registered.idps'/></th><th><fmt:message key='idp.actions'/></th></tr></thead>
                 <tbody>
-                    <% if(issuers != null && issuers.length > 0){ %>
-                        <% for(int i = 0; i < issuers.length; i++){ %>
+                    <% if(trustedIdPs != null && trustedIdPs.length > 0){ %>
+                        <% for(int i = 0; i < trustedIdPs.length; i++){ %>
                             <tr>
-                                <td><%=issuers[i]%></td>
+                                <td><%=trustedIdPs[i]%></td>
                                 <td>
                                     <a title="<fmt:message key='idp.issuer.edit'/>"
                                        onclick="editIssuer(this);return false;"

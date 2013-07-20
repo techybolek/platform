@@ -30,18 +30,29 @@
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <%
-    String issuer = null;
+    String issuer = request.getParameter("issuer");
     String url = null;
     CertData certData = null;
     List<String> roles = null;
     Map<String,String> roleMappings = null;
+    boolean primary = false;
     TrustedIdPBean bean = (TrustedIdPBean)session.getAttribute("trustedIdPBean");
-    if(bean != null){
+    String[] tenantIdPList = (String[])session.getAttribute("tenantIdPList");
+    if(tenantIdPList == null){
+    %>
+        <script type="text/javascript">
+            location.href = "idp-mgt-list-load.jsp";
+        </script>
+    <%
+        return;
+    }
+    if(issuer != null && !issuer.equals("") && bean != null){
         issuer = bean.getIdPIssuerId();
         url = bean.getIdPUrl();
         certData = bean.getCertData();
         roles = bean.getRoles();
         roleMappings = bean.getRoleMappings();
+        primary = bean.isPrimary();
     }
     if(issuer == null){
         issuer = "";
@@ -49,6 +60,24 @@
     if(url == null){
         url = "";
     }
+    String disabled = "", checked = "";
+    if(bean != null){
+        if(primary){
+            checked = "checked";
+            disabled = "disabled=\'disabled\'";
+        }
+    } else {
+        if(tenantIdPList.length > 0){
+            if(primary){
+                disabled = "disabled=\'disabled\'";
+                checked = "checked=\'checked\'";
+            }
+        } else {
+            disabled = "disabled=\'disabled\'";
+            checked = "checked=\'checked\'";
+        }
+    }
+
 %>
 
 <script>
@@ -123,24 +152,24 @@
                                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                                                         jQuery('#issuer').val() + '?',
                                                         function (){
-                                                            jQuery('#idp-mgt-edit-form').submit();
+                                                            doEditFinish();
                                                         },
                                                         function(){
-                                                            location.href = "idp-mgt-edit.jsp"
+                                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
                                                         });
                                             } else {
-                                                jQuery('#idp-mgt-edit-form').submit();
+                                                doEditFinish();
                                             }
                                         },
                                         function(){
-                                            location.href = "idp-mgt-edit.jsp"
+                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
                                         });
                             } else {
-                                jQuery('#idp-mgt-edit-form').submit();
+                                doEditFinish();
                             }
                         },
                         function(){
-                            location.href = "idp-mgt-edit.jsp"
+                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
                         });
             } else if(jQuery('#deleteRoleMappings').val() == 'true'){
                 CARBON.showConfirmationDialog('Are you sure you want to delete all the role mappings?',
@@ -149,31 +178,38 @@
                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                                         jQuery('#issuer').val() + '?',
                                         function (){
-                                            jQuery('#idp-mgt-edit-form').submit();
+                                            doEditFinish();
                                         },
                                         function(){
-                                            location.href = "idp-mgt-edit.jsp"
+                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
                                         });
                             } else {
-                                jQuery('#idp-mgt-edit-form').submit();
+                                doEditFinish();
                             }
                         },
                         function(){
-                            location.href = "idp-mgt-edit.jsp"
+                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
                         });
             } else if(jQuery('#deletePublicCert').val() == 'true'){
                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                         jQuery('#issuer').val() + '?',
                         function (){
-                            jQuery('#idp-mgt-edit-form').submit();
+                            doEditFinish();
                         },
                         function(){
-                            location.href = "idp-mgt-edit.jsp"
+                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
                         });
             } else {
-                jQuery('#idp-mgt-edit-form').submit();
+                doEditFinish();
             }
         }
+    }
+    function doEditFinish(){
+        jQuery('#primary').removeAttr('disabled');
+        <% if(issuer == null || issuer.equals("")){ %>
+            jQuery('#idp-mgt-edit-form').attr('action','idp-mgt-add-finish.jsp');
+        <% } %>
+        jQuery('#idp-mgt-edit-form').submit();
     }
     function idpMgtCancel(){
         location.href = "idp-mgt-list.jsp"
@@ -219,9 +255,21 @@
                         <td class="leftCol-med labelField"><fmt:message key='idp.issuer'/>:<span class="required">*</span></td>
                         <td>
                             <input id="issuer" name="issuer" type="text" value="<%=issuer%>" autofocus/>
-
                             <div class="sectionHelp">
                                 <fmt:message key='idp.issuer.help'/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="leftCol-med labelField">
+                            <label for="primary"><fmt:message key='idp.primary'/></label>
+                        </td>
+                        <td>
+                            <div class="sectionCheckbox">
+                                <input id="primary" name="primary" type="checkbox" <%=disabled%> <%=checked%>/>
+                                <div class="sectionHelp">
+                                    <fmt:message key='idp.primary.help'/>
+                                </div>
                             </div>
                         </td>
                     </tr>

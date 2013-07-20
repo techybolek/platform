@@ -48,6 +48,11 @@ public class TrustedIdPBean {
      */
     private Map<String,String> roleMappings;
 
+    /**
+     * Id this IdP is the primary IdP for this tenant.
+     */
+    private boolean primary;
+
     //////////////////// Getters and Setters //////////////////////////
 
 
@@ -94,4 +99,11 @@ public class TrustedIdPBean {
         this.roles = roles;
     }
 
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
+    }
 }
