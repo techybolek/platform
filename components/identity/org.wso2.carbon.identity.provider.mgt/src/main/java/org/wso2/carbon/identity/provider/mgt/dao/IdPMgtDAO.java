@@ -302,7 +302,7 @@ public class IdPMgtDAO {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.SWITCH_TENANT_IDP_PRIMARY_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
-        prepStmt.setBoolean(1, false);
+        prepStmt.setByte(1, new Integer(0).byteValue());
         prepStmt.setInt(2, tenantId);
         prepStmt.setByte(3, new Integer(1).byteValue());
         prepStmt.executeUpdate();
@@ -314,7 +314,7 @@ public class IdPMgtDAO {
             PreparedStatement prepStmt = null;
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.SWITCH_TENANT_IDP_PRIMARY_ON_DELETE_SQL;
             prepStmt = conn.prepareStatement(sqlStmt);
-            prepStmt.setBoolean(1, true);
+            prepStmt.setByte(1, new Integer(1).byteValue());
             prepStmt.setInt(2, tenantId);
             prepStmt.setString(3, tenantIdPs.get(0));
             prepStmt.setByte(4, new Integer(0).byteValue());

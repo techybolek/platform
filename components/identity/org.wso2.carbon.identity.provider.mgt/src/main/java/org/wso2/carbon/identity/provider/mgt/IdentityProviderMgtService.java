@@ -59,9 +59,10 @@ public class IdentityProviderMgtService {
         if(trustedIdPDO != null){
             trustedIdPDTO = new TrustedIdPDTO();
             trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
+            trustedIdPDTO.setPrimary(trustedIdPDO.isPrimary());
             trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
             if(trustedIdPDO.getPublicCertThumbPrint() != null){
-                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(trustedIdPDO.getIdPUrl(), tenantId, tenantDomain));
+                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(trustedIdPDO.getIdPIssuerId(), tenantId, tenantDomain));
             }
             trustedIdPDTO.setRoles(trustedIdPDO.getRoles().toArray(new String[trustedIdPDO.getRoles().size()]));
             List<String> appendedRoleMappings = new ArrayList<String>();
@@ -71,7 +72,6 @@ public class IdentityProviderMgtService {
                 appendedRoleMappings.add(idpRole+":"+tenantRole);
             }
             trustedIdPDTO.setRoleMappings(appendedRoleMappings.toArray(new String[appendedRoleMappings.size()]));
-            trustedIdPDTO.setPrimary(trustedIdPDO.isPrimary());
         }
         return trustedIdPDTO;
     }
