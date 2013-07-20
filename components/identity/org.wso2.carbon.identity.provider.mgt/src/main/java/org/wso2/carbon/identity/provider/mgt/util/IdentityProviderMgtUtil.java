@@ -219,7 +219,7 @@ public class IdentityProviderMgtUtil {
                 String ksName = tenantDomain.trim().replace(".", "-");
                 keyStoreName = ksName + "-truststore.jks";
             }
-            KeyStore ks = keyMan.getTrustStore(keyStoreName);
+            KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
             Certificate cert = ks.getCertificate(alias);
             if(cert != null){
@@ -247,7 +247,7 @@ public class IdentityProviderMgtUtil {
                 String ksName = tenantDomain.trim().replace(".", "-");
                 keyStoreName = ksName + "-truststore.jks";
             }
-            KeyStore ks = keyMan.getTrustStore(keyStoreName);
+            KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
             byte[] bytes = Base64.decode(certData);
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
@@ -284,7 +284,7 @@ public class IdentityProviderMgtUtil {
                 keyStoreName = ksName + "-truststore.jks";
 
             }
-            KeyStore ks = keyMan.getTrustStore(keyStoreName);
+            KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
             byte[] bytes = Base64.decode(certData);
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
@@ -324,7 +324,7 @@ public class IdentityProviderMgtUtil {
                 String ksName = tenantDomain.trim().replace(".", "-");
                 keyStoreName = ksName + "-truststore.jks";
             }
-            KeyStore ks = keyMan.getTrustStore(keyStoreName);
+            KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
             if (ks.getCertificate(alias) == null) {
                 log.warn("Certificate with alias " + alias + " does not exist in tenant key store " + keyStoreName);
