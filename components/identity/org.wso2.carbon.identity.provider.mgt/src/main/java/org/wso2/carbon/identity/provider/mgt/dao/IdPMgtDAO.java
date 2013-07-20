@@ -82,7 +82,11 @@ public class IdPMgtDAO {
                 trustedIdPDO.setIdPIssuerId(issuer);
                 trustedIdPDO.setIdPUrl(rs.getString(2));
                 trustedIdPDO.setPublicCertThumbPrint(rs.getString(3));
-                trustedIdPDO.setPrimary(rs.getBoolean(4));
+                if(rs.getByte(4) == 1){
+                    trustedIdPDO.setPrimary(true);
+                } else {
+                    trustedIdPDO.setPrimary(false);
+                }
 
                 Map<String, Integer> roleIdMap = new HashMap<String, Integer>();
                 sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDP_ROLES_SQL;
@@ -164,14 +168,20 @@ public class IdPMgtDAO {
         Connection dbConnection = null;
 
         String issuerId1 = trustedIdPDO1.getIdPIssuerId();
-        boolean isPrimary1 = trustedIdPDO1.isPrimary();
+        byte isPrimary1 = 0;
+        if(trustedIdPDO1.isPrimary()){
+            isPrimary1 = 1;
+        }
         String trustedIdPUrl1 = trustedIdPDO1.getIdPUrl();
         String thumbPrint1 = trustedIdPDO1.getPublicCertThumbPrint();
         List<String> roles1 = trustedIdPDO1.getRoles();
         Map<String,String> roleMappings1 = trustedIdPDO1.getRoleMappings();
 
         String issuerId2 = trustedIdPDO2.getIdPIssuerId();
-        boolean isPrimary2 = trustedIdPDO2.isPrimary();
+        byte isPrimary2 = 0;
+        if(trustedIdPDO2.isPrimary()){
+            isPrimary2 = 1;
+        }
         String trustedIdPUrl2 = trustedIdPDO2.getIdPUrl();
         String thumbPrint2 = trustedIdPDO2.getPublicCertThumbPrint();
         List<String> roles2 = trustedIdPDO2.getRoles();
@@ -294,7 +304,7 @@ public class IdPMgtDAO {
         prepStmt = conn.prepareStatement(sqlStmt);
         prepStmt.setBoolean(1, false);
         prepStmt.setInt(2, tenantId);
-        prepStmt.setBoolean(3, true);
+        prepStmt.setByte(3, new Integer(1).byteValue());
         prepStmt.executeUpdate();
     }
 
@@ -307,7 +317,7 @@ public class IdPMgtDAO {
             prepStmt.setBoolean(1, true);
             prepStmt.setInt(2, tenantId);
             prepStmt.setString(3, tenantIdPs.get(0));
-            prepStmt.setBoolean(4, false);
+            prepStmt.setByte(4, new Integer(0).byteValue());
             prepStmt.executeUpdate();
         } else {
             String msg = "No IdPs registered for tenant";
@@ -323,7 +333,12 @@ public class IdPMgtDAO {
         prepStmt.setString(2, issuer);
         prepStmt.setString(3, idpUrl);
         prepStmt.setString(4, thumbPrint);
-        prepStmt.setBoolean(5, isPrimary);
+        if(isPrimary){
+            prepStmt.setByte(5, new Integer(1).byteValue());
+        } else {
+            prepStmt.setByte(5, new Integer(0).byteValue());
+        }
+
         prepStmt.executeUpdate();
     }
 
@@ -374,14 +389,14 @@ public class IdPMgtDAO {
     }
     
     private void doUpdateIdP(Connection conn, int tenantId, String issuerOld, String issuerNew, String idpUrl,
-                             String thumbPrint, boolean isPrimary) throws SQLException {
+                             String thumbPrint, byte isPrimary) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.UPDATE_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
         prepStmt.setString(1, issuerNew);
         prepStmt.setString(2, idpUrl);
         prepStmt.setString(3, thumbPrint);
-        prepStmt.setBoolean(4, isPrimary);
+        prepStmt.setByte(4, isPrimary);
         prepStmt.setInt(5, tenantId);
         prepStmt.setString(6, issuerOld);
         prepStmt.executeUpdate();
@@ -522,7 +537,7 @@ public class IdPMgtDAO {
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.IS_EXISTING_PRIMARY_TENANT_IDP_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setBoolean(2, true);
+            prepStmt.setByte(2, new Integer(1).byteValue());
             ResultSet rs = prepStmt.executeQuery();
             if(rs.next()){
                 return rs.getInt(1);
