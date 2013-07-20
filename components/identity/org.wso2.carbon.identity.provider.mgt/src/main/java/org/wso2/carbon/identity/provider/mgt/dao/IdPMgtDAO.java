@@ -110,7 +110,11 @@ public class IdPMgtDAO {
                     rs = prepStmt.executeQuery();
                     while(rs.next()){
                         String tenantRole = rs.getString(1);
-                        roleMapping.put(idPRole, tenantRole);
+                        if(roleMapping.containsKey(idPRole)){
+                            roleMapping.put(idPRole, roleMapping.get(idPRole)+ "," +tenantRole);
+                        } else {
+                            roleMapping.put(idPRole, tenantRole);
+                        }
                     }
                 }
                 trustedIdPDO.setRoleMappings(roleMapping);
@@ -569,4 +573,5 @@ public class IdPMgtDAO {
             IdentityDatabaseUtil.closeConnection(dbConnection);
         }
     }
+
 }

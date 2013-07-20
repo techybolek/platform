@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.provider.mgt.model.TrustedIdPDO;
 import org.wso2.carbon.identity.provider.mgt.util.IdentityProviderMgtUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +58,7 @@ public class IdPMetadataService {
         if(trustedIdPDO != null){
             trustedIdPDTO = new TrustedIdPDTO();
             trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
+            trustedIdPDO.setPrimary(trustedIdPDO.isPrimary());
             trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
             if(trustedIdPDO.getPublicCertThumbPrint() != null){
                 trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(issuer, tenantId, tenantDomain));
@@ -74,17 +76,75 @@ public class IdPMetadataService {
     }
 
     /**
-     * Retrieves trusted IdP URL for a given tenant
+     * Retrieves trusted IdP information about a given tenant
      *
-     * @param tenantDomain Tenant domain whose information is requested
-     * @throws IdentityProviderMgtException
+     * @param issuer Issuer Id of the IdP whose roles need to be mapped
+     * @param tenantDomain The tenant domain of of roles to be mapped
+     * @param idPRoles IdP Roles which need to be mapped to tenant's roles
+     * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
      */
-    public String getTenantIdPUrl(String issuer, String tenantDomain) throws IdentityProviderMgtException{
+    public String[] getMappedTenantRoles(String issuer, String tenantDomain, String[] idPRoles) throws IdentityProviderMgtException {
+        List<String> mappedRoles = new ArrayList<String>();
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
         TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
-        if(trustedIdPDO != null){
-            return trustedIdPDO.getIdPUrl();
+        Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
+        if(roleMappings != null && !roleMappings.isEmpty()){
+            if(idPRoles == null){
+                for(Map.Entry<String,String> roleMapping: roleMappings.entrySet()){
+                    mappedRoles.add(roleMapping.getKey() + ":" + roleMapping.getValue());
+                }
+            } else {
+                for(String idPRole : idPRoles){
+                    if(roleMappings.containsKey(idPRole)){
+                        mappedRoles.add(idPRole + ":" + roleMappings.get(idPRole));
+                    } else {
+                        mappedRoles.add(idPRole+":");
+                    }
+                }
+            }
         }
-        return null;
+        return mappedRoles.toArray(new String[mappedRoles.size()]);
+    }
+
+    /**
+     * Retrieves trusted IdP information about a given tenant
+     *
+     * @param issuer Issuer Id of the IdP to which the given tenant roles need to be mapped
+     * @param tenantDomain The tenant domain of of roles to be mapped
+     * @param tenantRoles Tenant Roles which need to be mapped to trusted IdP's roles
+     * @throws org.wso2.carbon.identity.provider.mgt.exception.IdentityProviderMgtException
+     */
+    public String[] getMappedIdPRoles(String issuer, String tenantDomain, String[] tenantRoles) throws IdentityProviderMgtException {
+        List<String> mappedRoles = new ArrayList<String>();
+        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+        Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
+        Map<String,String> mirrorMap = new HashMap<String,String>();
+        if(roleMappings != null && !roleMappings.isEmpty()){
+            for(Map.Entry<String,String> roleMapping : roleMappings.entrySet()){
+                String key = roleMapping.getKey();
+                String value = roleMapping.getValue();
+                if(mirrorMap.containsKey(value)){
+                    mirrorMap.put(value, mirrorMap.get(value) + "," + key);
+                } else {
+                    mirrorMap.put(value, key);
+                }
+            }
+            if(tenantRoles == null){
+                for(Map.Entry<String,String> mirrorRole: mirrorMap.entrySet()){
+                    mappedRoles.add(mirrorRole.getKey() + ":" + mirrorRole.getValue());
+                }
+            } else {
+                for(String tenantRole : tenantRoles){
+                    if(mirrorMap.containsKey(tenantRole)){
+                        mappedRoles.add(tenantRole + ":" + mirrorMap.get(tenantRole));
+                    } else {
+                        mappedRoles.add(tenantRole + ":");
+                    }
+
+                }
+            }
+        }
+        return mappedRoles.toArray(new String[mappedRoles.size()]);
     }
 }
