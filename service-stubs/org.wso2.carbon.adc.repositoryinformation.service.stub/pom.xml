@@ -89,7 +89,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             org.wso2.carbon.adc.repository.information.service.*; version=0.0.0,
-                            org.wso2.carbon.adc.repository.information.*; version=0.0.0
+                            org.wso2.carbon.adc.repository.information.*; version=0.0.0,
                             org.wso2.carbon.adc.mgt.dao.xsd.*; version=0.0.0,
                             axis2.apache.org.xsd.*; version=0.0.0
                         </Export-Package>
