@@ -26,7 +26,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>1.0.0-SNAPSHOT</version>
     <artifactId>org.wso2.carbon.adc.repositoryinformation.service.stub</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Repository Information Service Stub</name>
@@ -91,6 +90,8 @@
                         <Export-Package>
                             org.wso2.carbon.adc.repository.information.service.*; version=0.0.0,
                             org.wso2.carbon.adc.repository.information.*; version=0.0.0
+                            org.wso2.carbon.adc.mgt.dao.xsd.*; version=0.0.0,
+                            axis2.apache.org.xsd.*; version=0.0.0
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
