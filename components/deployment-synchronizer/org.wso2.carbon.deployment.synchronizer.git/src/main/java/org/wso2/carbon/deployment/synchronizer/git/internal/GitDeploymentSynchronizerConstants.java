@@ -16,16 +16,6 @@ public class GitDeploymentSynchronizerConstants {
     public static final String GIT_REPO_SSH_URL_PREFIX = "ssh://";
     public static final String GIT_REPO_SSH_URL_SUBSTRING = "@";
 
-    //SSH related constants
-    public static final String SSH_KEY_DIRECTORY = ".ssh";
-    public static final String SSH_KEY = "wso2";
-
-    //super tenant Id
-    public static final int SUPER_TENANT_ID = -1234;
-
-    //ServerKey property name from carbon.xml, for the cartridge short name --> not used. CARTRIDGE_ALIAS is used instead.
-    //public static final String SERVER_KEY = "ServerKey";
-
     public static final String ENABLED = DEPLOYMENT_SYNCHRONIZER + ".Enabled";
 
     //EPR for the repository Information Service
@@ -34,10 +24,6 @@ public class GitDeploymentSynchronizerConstants {
     //CartridgeAlias property name from carbon.xml
     public static final String CARTRIDGE_ALIAS = "CartridgeAlias";
 
-    //key name and path for ssh based authentication
-    public static final String SSH_PRIVATE_KEY_NAME = DEPLOYMENT_SYNCHRONIZER + ".SshPrivateKeyName";
-    public static final String SSH_PRIVATE_KEY_PATH = DEPLOYMENT_SYNCHRONIZER + ".SshPrivateKeyPath";
-
     //regular expressions for extracting username and password form json string
     public static final String USERNAME_REGEX = "username:(.*?),";
     public static final String PASSWORD_REGEX = "password:(.*?)}";
@@ -45,18 +31,17 @@ public class GitDeploymentSynchronizerConstants {
     //Configuration parameter names read from carbon.xml
     public static final String REPOSITORY_TYPE = DEPLOYMENT_SYNCHRONIZER + ".RepositoryType";
     public static final String DEPLOYMENT_METHOD = DEPLOYMENT_SYNCHRONIZER + ".StandardDeployment";
+    public static final String GIT_SERVER = DEPLOYMENT_SYNCHRONIZER + ".GitServer";
     public static final String GIT_REPO_BASE_URL = DEPLOYMENT_SYNCHRONIZER + ".GitBaseUrl";
     public static final String GIT_USERNAME = DEPLOYMENT_SYNCHRONIZER + ".GitUserName";
     public static final String GIT_PASSWORD = DEPLOYMENT_SYNCHRONIZER + ".GitPassword";
 
     //Git based constants
     public static final String GIT_REFS_HEADS_MASTER = "refs/heads/master";
-    public static final String GIT_REFS_HEADS = "refs/heads/";
-    public static final String GIT_MASTER = "master";
-    public static final String GIT_ORIGIN = "origin";
-    public static final String GIT_REMOTE = "remote";
-    public static final String GIT_BRANCH = "branch";
-    public static final String GIT_MERGE = "merge";
+
+    //Git server implementations
+    public static final String GITBLIT = "gitblit";
+    public static final String SCM = "scm";
 
     //Gitblit based constants
     public static final String GITBLIT_ADMIN_USERNAME = "admin";

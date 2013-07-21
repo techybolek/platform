@@ -33,6 +33,7 @@ import org.wso2.carbon.deployment.synchronizer.RepositoryManager;
 import org.wso2.carbon.deployment.synchronizer.git.internal.GitDeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.git.internal.GitDeploymentSyncronizerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.git.repository_creator.GitBlitBasedRepositoryCreator;
+import org.wso2.carbon.deployment.synchronizer.git.repository_creator.SCMBasedRepositoryCreator;
 import org.wso2.carbon.deployment.synchronizer.git.stratos2.S2GitRepositoryManager;
 import org.wso2.carbon.deployment.synchronizer.git.util.Utilities;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
@@ -62,9 +63,18 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
 
         readConfiguration();
 
+        //standard worker manager separated deployment
         if(gitDepsyncConfig.isStandardDeployment()) {
-            repositoryManager = new DefaultGitRepositoryManager(new GitBlitBasedRepositoryCreator());
+            //GitBlit git server
+            if(gitDepsyncConfig.getGitServer().equals(GitDeploymentSynchronizerConstants.GITBLIT)){
+                repositoryManager = new DefaultGitRepositoryManager(new GitBlitBasedRepositoryCreator());
+            }
+            //SCM git server
+            else if (gitDepsyncConfig.getGitServer().equals(GitDeploymentSynchronizerConstants.SCM)) {
+                repositoryManager = new DefaultGitRepositoryManager(new SCMBasedRepositoryCreator());
+            }
         }
+        //Stratos 2 specific deployment
         else {
             repositoryManager = new S2GitRepositoryManager();
         }
@@ -80,6 +90,11 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         String standardDeploymentParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.DEPLOYMENT_METHOD);
         if (standardDeploymentParam != null && (standardDeploymentParam.equalsIgnoreCase("true") || standardDeploymentParam.equalsIgnoreCase("false"))) {
             gitDepsyncConfig.setStandardDeployment(Boolean.parseBoolean(standardDeploymentParam));
+        }
+
+        String gitServerParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.GIT_SERVER);
+        if (gitServerParam != null) {
+            gitDepsyncConfig.setGitServer(gitServerParam);
         }
 
     }

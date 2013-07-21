@@ -50,6 +50,8 @@
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.carbon.deployment.synchronizer.git.*,
+                            !org.wso2.carbon.adc.mgt.*,
+                            !org.wso2.carbon.adc.repository.information.*,
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
@@ -75,6 +77,16 @@
             <artifactId>jsch</artifactId>
             <version>0.1.49.wso2v1</version>
         </dependency>
+        <!--dependency>
+            <groupId>sonia.scm.clients</groupId>
+            <artifactId>scm-client-api</artifactId>
+            <version>1.32</version>
+        </dependency>
+        <dependency>
+            <groupId>sonia.scm.clients</groupId>
+            <artifactId>scm-client-impl</artifactId>
+            <version>1.32</version>
+        </dependency-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.adc.repositoryinformation.service.stub</artifactId>

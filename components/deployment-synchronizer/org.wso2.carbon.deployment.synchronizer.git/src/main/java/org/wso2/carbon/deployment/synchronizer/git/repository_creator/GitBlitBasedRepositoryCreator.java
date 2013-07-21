@@ -43,13 +43,12 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
 
     private static final Log log = LogFactory.getLog(GitBlitBasedRepositoryCreator.class);
 
-    @Override
     public RepositoryInformation createRepository(int tenantId, String baseUrl, String username, String password)
             throws DeploymentSynchronizerException {
 
         RepositoryInformation repoInfo = null;
         baseUrl = (baseUrl.endsWith("/")) ? baseUrl : baseUrl + "/";
-        String repositoryName = Integer.toString(tenantId) + ".git";
+        String repositoryName = "tenant_" + Integer.toString(tenantId) + ".git";
         String repoUrl = baseUrl + "git/" + repositoryName;
 
         UserModel userModel = getUserModel(baseUrl, username);

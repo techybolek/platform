@@ -6,6 +6,7 @@ package org.wso2.carbon.deployment.synchronizer.git.internal;
 public class GitDeploymentSyncronizerConfiguration {
 
     private boolean isStandardDeployment;
+    private String gitServer;
 
     public GitDeploymentSyncronizerConfiguration() {
         isStandardDeployment = true;
@@ -19,4 +20,11 @@ public class GitDeploymentSyncronizerConfiguration {
         this.isStandardDeployment = isStandardDeployment;
     }
 
+    public String getGitServer() {
+        return gitServer;
+    }
+
+    public void setGitServer(String gitServer) {
+        this.gitServer = gitServer;
+    }
 }
