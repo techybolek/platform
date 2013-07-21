@@ -31,13 +31,10 @@ import org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappsWrapper;
 import javax.activation.DataHandler;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.ResourceBundle;
 
 /**
@@ -63,48 +60,6 @@ public class WebappAdminClient {
         option.setManageSession(true);
         option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
         option.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
-    }
-
-    private enum ArtifactType {
-        AXIS2SERVICE("servicemetafiles"),
-        MODULE("modulemetafiles"),
-        WEBAPP("webappmetafiles"),
-        GHOST("ghostmetafiles");
-
-        final String artifactFolder;
-        ArtifactType(String artifactFolder) {
-            this.artifactFolder = artifactFolder;
-        }
-
-        private String artifactFolder() { return artifactFolder; }
-
-
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(
-                ArtifactType.AXIS2SERVICE.artifactFolder() );
-
-        Properties prop = new Properties();
-        prop.setProperty("one-two", "buckle my shoe");
-        prop.setProperty("three-four", "shut the door");
-        prop.setProperty("five-six", "pick up sticks");
-        prop.setProperty("seven-eight", "lay them straight");
-        prop.setProperty("nine-ten", "a big, fat hen");
-
-        prop.setProperty("ssss", "<sssss>vvv</sssss>");
-        FileOutputStream fos =
-                new FileOutputStream("rhyme.xml");
-        prop.storeToXML(fos, "Rhyme");
-        fos.close();
-
-        FileInputStream fis = new FileInputStream("rhyme.xml");
-        Properties prop2 = new Properties();
-        prop2.loadFromXML(fis);
-        System.out.println(prop2);
-        System.out.println(prop2.get("ssss"));
-        System.out.println(prop2.get("null222"));
-
     }
 
     public WebappsWrapper getPagedWebappsSummary(String webappSearchString,
