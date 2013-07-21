@@ -15,7 +15,13 @@
  */
 package org.wso2.carbon.webapp.mgt;
 
-import org.apache.catalina.*;
+import org.apache.catalina.Container;
+import org.apache.catalina.Context;
+import org.apache.catalina.Engine;
+import org.apache.catalina.Host;
+import org.apache.catalina.LifecycleState;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
@@ -23,7 +29,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
-import org.wso2.carbon.webapp.mgt.utils.GhostWebappDeployerUtils;
 
 import java.io.File;
 import java.io.IOException;

@@ -427,7 +427,7 @@ public class GhostWebappDeployerUtils {
     }
 
     /**
-     * Creates the ghost file for the current webapplication. This file will contain basid meadata
+     * Creates the ghost file for the current web application. This file will contain basic meadata
      * such as Webapp name, context name, display name, war file name, last modified time and
      * noOf active sessions. These information for a webapp is enough to show it in the
      * webapp info page
