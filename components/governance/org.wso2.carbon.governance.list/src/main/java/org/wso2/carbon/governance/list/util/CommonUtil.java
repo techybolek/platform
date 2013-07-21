@@ -336,8 +336,7 @@ public class CommonUtil {
 
         for (GovernanceArtifactConfiguration configuration : configurations) {
             for (ManagementPermission uiPermission : configuration.getUIPermissions()) {
-                String resourceId = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                        uiPermission.getResourceId();
+                String resourceId =  uiPermission.getResourceId();
                 if (systemRegistry.resourceExists(resourceId)) {
                     continue;
                 }

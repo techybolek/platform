@@ -71,7 +71,7 @@ public class GovernanceMgtUIListMetadataServiceComponent {
         final RegistryService registryService = CommonUtil.getRegistryService();
         try {
             UserRegistry registry =
-                    registryService.getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+                    registryService.getGovernanceUserRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
             CommonUtil.configureGovernanceArtifacts(registry,
                     CommonUtil.getConfigurationContext().getAxisConfiguration());
 

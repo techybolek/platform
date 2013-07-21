@@ -52,8 +52,7 @@ public class GovernanceMgtUIListMetadataAxis2ConfigContextObserver implements
         try {
             int tenantId =
                     PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
-            CommonUtil.configureGovernanceArtifacts(registryService.getRegistry(
-                    CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId),
+            CommonUtil.configureGovernanceArtifacts(registryService.getGovernanceSystemRegistry(tenantId),
                     configurationContext.getAxisConfiguration());
             ArtifactCache cache = ArtifactCacheManager.getCacheManager().getTenantArtifactCache(tenantId);
             if (cache == null) {
