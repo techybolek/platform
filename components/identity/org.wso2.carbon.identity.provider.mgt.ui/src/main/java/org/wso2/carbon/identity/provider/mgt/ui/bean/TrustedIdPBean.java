@@ -53,6 +53,11 @@ public class TrustedIdPBean {
      */
     private boolean primary;
 
+    /**
+     * Unique identifiers of the SPs
+     */
+    private List<String> audience;
+
     //////////////////// Getters and Setters //////////////////////////
 
 
@@ -106,4 +111,13 @@ public class TrustedIdPBean {
     public void setPrimary(boolean primary) {
         this.primary = primary;
     }
+
+    public List<String> getAudience() {
+        return audience;
+    }
+
+    public void setAudience(List<String> audience) {
+        this.audience = audience;
+    }
+
 }

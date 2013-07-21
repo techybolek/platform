@@ -69,7 +69,6 @@ public class IdentityProviderMgtUIUtil {
 
     public static TrustedIdPDTO getFormData(HttpServletRequest request) throws FileUploadException, Exception {
         if (ServletFileUpload.isMultipartContent(request)) {
-            Object[] objects = new Object[2];
             ServletRequestContext servletContext = new ServletRequestContext(request);
             FileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
@@ -83,6 +82,7 @@ public class IdentityProviderMgtUIUtil {
             String[] oldRoleMappings = null;
             String oldPublicCert = null;
             List<String> newRoles = new ArrayList<String>();
+            List<String> audienceList = new ArrayList<String>();
             TrustedIdPBean oldBean = (TrustedIdPBean)request.getSession().getAttribute("trustedIdPBean");
             TrustedIdPDTO oldDTO = (TrustedIdPDTO)request.getSession().getAttribute("trustedIdPDTO");
             if(oldBean != null){
@@ -171,6 +171,12 @@ public class IdentityProviderMgtUIUtil {
                     if(deletePublicCertArray != null && deletePublicCertArray.length > 0){
                         deletePublicCert = new String(deletePublicCertArray);
                     }
+                } else if(name.equals("audience")){
+                    FileItem fileItem = diskFileItem;
+                    byte[] audienceArray = fileItem.get();
+                    if(audienceArray != null && audienceArray.length > 0){
+                        audienceList.add(new String(audienceArray));
+                    }
                 }
             }
             newRoles.addAll(tempList);
@@ -188,6 +194,7 @@ public class IdentityProviderMgtUIUtil {
             } else {
                 trustedIdPDTO.setRoleMappings(roleMappings);
             }
+            trustedIdPDTO.setAudience(audienceList.toArray(new String[audienceList.size()]));
             return trustedIdPDTO;
         } else {
             throw new Exception("Invalid Content Type: Not multipart/form-data");

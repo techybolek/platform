@@ -36,6 +36,7 @@
     List<String> roles = null;
     Map<String,String> roleMappings = null;
     boolean primary = false;
+    List<String> audience = null;
     TrustedIdPBean bean = (TrustedIdPBean)session.getAttribute("trustedIdPBean");
     String[] tenantIdPList = (String[])session.getAttribute("tenantIdPList");
     if(tenantIdPList == null){
@@ -53,6 +54,7 @@
         roles = bean.getRoles();
         roleMappings = bean.getRoleMappings();
         primary = bean.isPrimary();
+        audience = bean.getAudience();
     }
     if(issuer == null){
         issuer = "";
@@ -98,14 +100,24 @@
             document.forms['idp-mgt-edit-form'].appendChild(input);
         })
     })
-    var deletedRows = [];
+    var deletedRoleRows = [];
     function deleteRoleRow(obj){
        if(jQuery(obj).parent().prev().children()[0].value != ''){
-            deletedRows.push(jQuery(obj).parent().prev().children()[0].value);
+            deletedRoleRows.push(jQuery(obj).parent().prev().children()[0].value);
         }
         jQuery(obj).parent().parent().remove();
         if($(jQuery('#roleAddTable tr')).length == 1){
             $(jQuery('#roleAddTable')).toggle();
+        }
+    }
+    var deletedAudienceRows = [];
+    function deleteAudienceRow(obj){
+        if(jQuery(obj).parent().prev().children()[0].value != ''){
+            deletedAudienceRows.push(jQuery(obj).parent().prev().children()[0].value);
+        }
+        jQuery(obj).parent().parent().remove();
+        if($(jQuery('#audienceAddTable tr')).length == 1){
+            $(jQuery('#audienceAddTable')).toggle();
         }
     }
     jQuery(document).ready(function(){
@@ -122,6 +134,18 @@
         })
     })
     jQuery(document).ready(function(){
+        jQuery('#audienceAddLink').click(function(){
+            jQuery('#audienceAddTable').append(jQuery('<tr><td><input type="text" id="audience" name="audience"/></td>' +
+                    '<td><a onclick="deleteAudienceRow(this)" class="icon-link" '+
+                    'style="background-image: url(images/delete.gif)">'+
+                    'Delete'+
+                    '</a></td></tr>'));
+            if($(jQuery('#audienceAddTable tr')).length == 2){
+                $(jQuery('#audienceAddTable')).toggle();
+            }
+        })
+    })
+    jQuery(document).ready(function(){
         jQuery('#roleMappingDeleteLink').click(function(){
             $(jQuery('#roleMappingDiv')).toggle();
             var input = document.createElement('input');
@@ -134,16 +158,24 @@
     })
     function idpMgtUpdate(){
         if(doValidation()){
-            var allDeletedStr = "";
-            for(var i = 0;i<deletedRows.length;i++){
-                if(i < deletedRows.length-1){
-                    allDeletedStr += deletedRows[i] + ", ";
+            var allDeletedRoleStr = "";
+            for(var i = 0;i<deletedRoleRows.length;i++){
+                if(i < deletedRoleRows.length-1){
+                    allDeletedRoleStr += deletedRoleRows[i] + ", ";
                 } else {
-                    allDeletedStr += deletedRows[i] + "?";
+                    allDeletedRoleStr += deletedRoleRows[i] + "?";
                 }
             }
-            if(allDeletedStr != "") {
-                CARBON.showConfirmationDialog('Are you sure you want to delete the role(s) ' + allDeletedStr,
+            var allDeletedAudienceStr = "";
+            for(var i = 0;i<deletedAudienceRows.length;i++){
+                if(i < deletedAudienceRows.length-1){
+                    allDeletedAudienceStr += deletedAudienceRows[i] + ", ";
+                } else {
+                    allDeletedAudienceStr += deletedAudienceRows[i] + "?";
+                }
+            }
+            if(allDeletedRoleStr != "") {
+                CARBON.showConfirmationDialog('Are you sure you want to delete the role(s) ' + allDeletedRoleStr,
                         function(){
                             if(jQuery('#deleteRoleMappings').val() == 'true'){
                                 CARBON.showConfirmationDialog('Are you sure you want to delete all the role mappings?',
@@ -152,7 +184,17 @@
                                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                                                         jQuery('#issuer').val() + '?',
                                                         function (){
-                                                            doEditFinish();
+                                                            if(allDeletedAudienceStr != ""){
+                                                                CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
+                                                                        function(){
+                                                                            doEditFinish();
+                                                                        },
+                                                                        function(){
+                                                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                                                        });
+                                                            } else {
+                                                                doEditFinish();
+                                                            }
                                                         },
                                                         function(){
                                                             location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
@@ -178,7 +220,17 @@
                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                                         jQuery('#issuer').val() + '?',
                                         function (){
-                                            doEditFinish();
+                                            if(allDeletedAudienceStr != ""){
+                                                CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
+                                                        function(){
+                                                            doEditFinish();
+                                                        },
+                                                        function(){
+                                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                                        });
+                                            } else {
+                                                doEditFinish();
+                                            }
                                         },
                                         function(){
                                             location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
@@ -194,11 +246,29 @@
                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
                         jQuery('#issuer').val() + '?',
                         function (){
-                            doEditFinish();
+                            if(allDeletedAudienceStr != ""){
+                                CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
+                                        function(){
+                                            doEditFinish();
+                                        },
+                                        function(){
+                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                        });
+                            } else {
+                                doEditFinish();
+                            }
                         },
                         function(){
                             location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
                         });
+            } else if (allDeletedAudienceStr != "") {
+                CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
+                    function(){
+                        doEditFinish();
+                    },
+                    function(){
+                        location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                    });
             } else {
                 doEditFinish();
             }
@@ -225,7 +295,16 @@
             if(document.getElementsByName('rowname_'+i)[0] != null){
                 reason = validateEmpty('rowname_'+i);
                 if(reason != ""){
-                    CARBON.showWarningDialog("Role name strings cannot be zero length");
+                    CARBON.showWarningDialog("Role name strings cannot be of zero length");
+                    return false;
+                }
+            }
+        }
+        if(document.getElementsByName('audience') != null && document.getElementsByName('audience').length > 0){
+            var audienceLength = document.getElementsByName('audience').length;
+            for(var i = 0; i < audienceLength; i++){
+                if(document.getElementsByName('audience')[i].value == ''){
+                    CARBON.showWarningDialog("Audience strings cannot be of zero length");
                     return false;
                 }
             }
@@ -325,7 +404,7 @@
                             <table class="styledLeft" id="roleAddTable" style="display:none">
                                 <thead><tr><th class="leftCol-big"><fmt:message key='idp.role'/></th><th><fmt:message key='idp.actions'/></th></tr></thead>
                                 <tbody>
-                                <% if(roles != null && roles.size() > 0){ %>
+                                <% if(roles != null && !roles.isEmpty()){ %>
                                     <script>
                                         $(jQuery('#roleAddTable')).toggle();
                                     </script>
@@ -338,7 +417,7 @@
                                                    href="#"
                                                    class="icon-link"
                                                    style="background-image: url(images/delete.gif)">
-                                                    <fmt:message key='delete.role'/>
+                                                    <fmt:message key='delete.icon'/>
                                                 </a>
                                             </td>
                                         </tr>
@@ -355,7 +434,7 @@
                             <div class="sectionHelp">
                                 <fmt:message key='role.mappings.help'/>
                             </div>
-                            <% if(roleMappings != null && roleMappings.size()>0){ %>
+                            <% if(roleMappings != null && !roleMappings.isEmpty()){ %>
                                 <div id="roleMappingDiv">
                                     <a id="roleMappingDeleteLink" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key='role.mapping.delete'/></a>
                                     <table class="styledLeft">
@@ -368,6 +447,40 @@
                                     </table>
                                 </div>
                             <% } %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="leftCol-med labelField"><fmt:message key='idp.audience'/>:</td>
+                        <td>
+                            <a id="audienceAddLink" class="icon-link" style="background-image:url(images/add.gif);"><fmt:message key='add.audience'/></a>
+                            <div style="clear:both"/>
+                            <div class="sectionHelp">
+                                <fmt:message key='idp.audience.help'/>
+                            </div>
+                            <table class="styledLeft" id="audienceAddTable" style="display:none">
+                                <thead><tr><th class="leftCol-big"><fmt:message key='idp.allowed.audience'/></th><th><fmt:message key='idp.actions'/></th></tr></thead>
+                                <tbody>
+                                <% if(audience != null && !audience.isEmpty()){ %>
+                                <script>
+                                    $(jQuery('#audienceAddTable')).toggle();
+                                </script>
+                                <% for(int i = 0; i < audience.size(); i++){ %>
+                                <tr>
+                                    <td><input type="text" value="<%=audience.get(i)%>" id="audience" name="audience"/></td>
+                                    <td>
+                                        <a title="<fmt:message key='delete.audience'/>"
+                                           onclick="deleteAudienceRow(this);return false;"
+                                           href="#"
+                                           class="icon-link"
+                                           style="background-image: url(images/delete.gif)">
+                                            <fmt:message key='delete.icon'/>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <% } %>
+                                <% } %>
+                                </tbody>
+                            </table>
                         </td>
                     </tr>
                 </table>

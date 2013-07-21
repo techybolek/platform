@@ -25,7 +25,10 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.text.MessageFormat" %>
-<%@ page import="java.util.*" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.ResourceBundle" %>
 
 <%
     String BUNDLE = "org.wso2.carbon.identity.provider.mgt.ui.i18n.Resources";
@@ -58,6 +61,11 @@
                 } else {
                     trustedIdPDTO.setRoleMappings(new String[0]);
                     trustedIdPBean.setRoleMappings(new HashMap<String, String>());
+                }
+                if(trustedIdPDTO.getAudience() != null){
+                    trustedIdPBean.setAudience(new ArrayList<String>(Arrays.asList(trustedIdPDTO.getAudience())));
+                } else {
+                    trustedIdPBean.setAudience(new ArrayList<String>());
                 }
                 session.setAttribute("trustedIdPDTO", trustedIdPDTO);
                 session.setAttribute("trustedIdPBean", trustedIdPBean);
