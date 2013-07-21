@@ -138,6 +138,34 @@ public class WebApplication {
         return properties.get(key);
     }
 
+    public boolean getDistributable() {
+        return context.getDistributable();
+    }
+
+    public void setDistributable(boolean distributable) {
+        context.setDistributable(distributable);
+    }
+
+    public String getDocBase() {
+        return context.getDocBase();
+    }
+
+    public void setDocBase(String docBase) {
+        context.setDocBase(docBase);
+    }
+
+    public void addParameter(String name, String value) {
+        context.addParameter(name, value);
+    }
+
+    public String findParameter(String contextParamName) {
+        return context.findParameter(contextParamName);
+    }
+
+    public String[] findParameters() {
+        return context.findParameters();
+    }
+
     public TomcatGenericWebappsDeployer getTomcatGenericWebappsDeployer() {
         return tomcatGenericWebappsDeployer;
     }
