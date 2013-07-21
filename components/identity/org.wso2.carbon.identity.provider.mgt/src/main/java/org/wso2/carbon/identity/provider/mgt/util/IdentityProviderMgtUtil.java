@@ -45,6 +45,7 @@ import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 
 public class IdentityProviderMgtUtil {
@@ -337,5 +338,22 @@ public class IdentityProviderMgtUtil {
             log.error(msg + " " + tenantDomain, e);
             throw new IdentityProviderMgtException(msg);
         }
+    }
+
+    public static String convertListToString(List<String> list){
+        String returnString = null;
+        if(list != null && !list.isEmpty()){
+            returnString = "";
+            for(int i=0; i < list.size(); i++){
+                if(list.get(i) != null && !list.get(i).equals("")){
+                    if(i != list.size()-1){
+                        returnString += list.get(i) + " ";
+                    } else {
+                        returnString += list.get(i);
+                    }
+                }
+            }
+        }
+        return returnString;
     }
 }

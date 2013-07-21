@@ -72,6 +72,7 @@ public class IdentityProviderMgtService {
                 appendedRoleMappings.add(idpRole+":"+tenantRole);
             }
             trustedIdPDTO.setRoleMappings(appendedRoleMappings.toArray(new String[appendedRoleMappings.size()]));
+            trustedIdPDTO.setAudience(trustedIdPDO.getAudience().toArray(new String[trustedIdPDO.getAudience().size()]));
         }
         return trustedIdPDTO;
     }
@@ -142,6 +143,12 @@ public class IdentityProviderMgtService {
             }
         }
         oldTrustedIdPDO.setRoleMappings(mappings);
+        if(oldTrustedIdP.getAudience() != null){
+            oldTrustedIdPDO.setAudience(new ArrayList<String>(Arrays.asList(oldTrustedIdP.getAudience())));
+        } else {
+            oldTrustedIdPDO.setAudience(new ArrayList<String>());
+        }
+
 
         if(newTrustedIdP.getIdPIssuerId() == null || newTrustedIdP.getIdPIssuerId().equals("")){
             String msg = "Invalid arguments: IssuerId value is empty";
@@ -178,6 +185,11 @@ public class IdentityProviderMgtService {
             }
         }
         newTrustedIdPDO.setRoleMappings(mappings);
+        if(newTrustedIdP.getAudience() != null){
+            newTrustedIdPDO.setAudience(new ArrayList<String>(Arrays.asList(newTrustedIdP.getAudience())));
+        } else {
+            newTrustedIdPDO.setAudience(new ArrayList<String>());
+        }
 
         dao.updateTenantIdP(oldTrustedIdPDO, newTrustedIdPDO, tenantId, tenantDomain);
 
@@ -226,6 +238,11 @@ public class IdentityProviderMgtService {
             }
         }
         trustedIdPDO.setRoleMappings(mappings);
+        if(trustedIdP.getAudience() != null){
+            trustedIdPDO.setAudience(new ArrayList<String>(Arrays.asList(trustedIdP.getAudience())));
+        } else {
+            trustedIdPDO.setAudience(new ArrayList<String>());
+        }
 
         dao.addTenantIdP(trustedIdPDO, tenantId, tenantDomain);
 

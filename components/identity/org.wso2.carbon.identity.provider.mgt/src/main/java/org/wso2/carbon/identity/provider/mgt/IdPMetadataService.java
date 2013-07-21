@@ -71,6 +71,7 @@ public class IdPMetadataService {
                 appendedRoleMappings.add(idpRole+":"+tenantRole);
             }
             trustedIdPDTO.setRoleMappings(appendedRoleMappings.toArray(new String[appendedRoleMappings.size()]));
+            trustedIdPDTO.setAudience(trustedIdPDO.getAudience().toArray(new String[trustedIdPDO.getAudience().size()]));
         }
         return trustedIdPDTO;
     }

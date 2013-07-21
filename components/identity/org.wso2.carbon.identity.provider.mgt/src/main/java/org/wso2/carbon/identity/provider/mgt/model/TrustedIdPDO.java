@@ -28,97 +28,110 @@ public class TrustedIdPDO {
     /**
      * The tenant domain used when retrieving IdP information.
      */
-        private String tenantDomain;
+    private String tenantDomain;
 
-        /**
-         * The trusted IDP's Issuer ID for this tenant.
-         */
-        private String idPIssuerId;
+    /**
+     * The trusted IDP's Issuer ID for this tenant.
+     */
+    private String idPIssuerId;
 
-        /**
-         * The trusted IDP's URL for this tenant.
-         */
-        private String idPUrl;
+    /**
+     * The trusted IDP's URL for this tenant.
+     */
+    private String idPUrl;
 
-        /**
-         * The trusted IDP's Certificate for this tenant.
-         */
-        private String publicCertThumbPrint;
+    /**
+     * The trusted IDP's Certificate for this tenant.
+     */
+    private String publicCertThumbPrint;
 
-        /**
-         * The trusted IDP's roles for this tenant.
-         */
-        private List<String> roles;
+    /**
+     * The trusted IDP's roles for this tenant.
+     */
+    private List<String> roles;
 
-        /**
-         * The trusted IDP's role mapping for this tenant.
-         */
-        private Map<String,String> roleMappings;
+    /**
+     * The trusted IDP's role mapping for this tenant.
+     */
+    private Map<String,String> roleMappings;
 
-        /**
-         * TId the IdP is the primary IdP for this tenant.
-         */
-        private boolean isPrimary;
+    /**
+     * If the IdP is the primary IdP for this tenant.
+     */
+    private boolean isPrimary;
 
-        //////////////////// Getters and Setters //////////////////////////
+    /**
+     * Unique identifiers of the SPs.
+     */
+    private List<String> audience;
 
-        public String getTenantDomain() {
-            return tenantDomain;
+    //////////////////// Getters and Setters //////////////////////////
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
+    }
+
+    public String getIdPIssuerId() {
+        return idPIssuerId;
+    }
+
+    public void setIdPIssuerId(String idPIssuerId) {
+        this.idPIssuerId = idPIssuerId;
+    }
+
+    public String getIdPUrl() {
+        return idPUrl;
+    }
+
+    public void setIdPUrl(String idPUrl) throws IdentityProviderMgtException {
+        if(idPUrl != null && !idPUrl.equals("")){
+            IdentityProviderMgtUtil.validateURI(idPUrl);
         }
+        this.idPUrl = idPUrl;
+    }
 
-        public void setTenantDomain(String tenantDomain) {
-            this.tenantDomain = tenantDomain;
-        }
+    public String getPublicCertThumbPrint() {
+        return publicCertThumbPrint;
+    }
 
-        public String getIdPIssuerId() {
-            return idPIssuerId;
-        }
+    public void setPublicCertThumbPrint(String publicCertThumbPrint) {
+        this.publicCertThumbPrint = publicCertThumbPrint;
+    }
 
-        public void setIdPIssuerId(String idPIssuerId) {
-            this.idPIssuerId = idPIssuerId;
-        }
+    public Map<String, String> getRoleMappings() {
+        return roleMappings;
+    }
 
-        public String getIdPUrl() {
-            return idPUrl;
-        }
+    public void setRoleMappings(Map<String, String> roleMappings) {
+        this.roleMappings = roleMappings;
+    }
 
-        public void setIdPUrl(String idPUrl) throws IdentityProviderMgtException {
-            if(idPUrl != null && !idPUrl.equals("")){
-                IdentityProviderMgtUtil.validateURI(idPUrl);
-            }
-            this.idPUrl = idPUrl;
-        }
+    public List<String> getRoles() {
+        return roles;
+    }
 
-        public String getPublicCertThumbPrint() {
-            return publicCertThumbPrint;
-        }
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
 
-        public void setPublicCertThumbPrint(String publicCertThumbPrint) {
-            this.publicCertThumbPrint = publicCertThumbPrint;
-        }
+    public boolean isPrimary() {
+        return isPrimary;
+    }
 
-        public Map<String, String> getRoleMappings() {
-            return roleMappings;
-        }
+    public void setPrimary(boolean primary) {
+        isPrimary = primary;
+    }
 
-        public void setRoleMappings(Map<String, String> roleMappings) {
-            this.roleMappings = roleMappings;
-        }
+    public List<String> getAudience() {
+        return audience;
+    }
 
-        public List<String> getRoles() {
-            return roles;
-        }
-
-        public void setRoles(List<String> roles) {
-            this.roles = roles;
-        }
-
-        public boolean isPrimary() {
-            return isPrimary;
-        }
-
-        public void setPrimary(boolean primary) {
-            isPrimary = primary;
-        }
+    public void setAudience(List<String> audience) {
+        this.audience = audience;
+    }
 
 }

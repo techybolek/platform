@@ -29,10 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IdPMgtDAO {
 
@@ -86,6 +83,12 @@ public class IdPMgtDAO {
                     trustedIdPDO.setPrimary(true);
                 } else {
                     trustedIdPDO.setPrimary(false);
+                }
+                String audience = rs.getString(5);
+                if(audience != null){
+                    trustedIdPDO.setAudience(new ArrayList<String>(Arrays.asList(rs.getString(5).split("\\s"))));
+                } else {
+                    trustedIdPDO.setAudience(new ArrayList<String>());
                 }
 
                 Map<String, Integer> roleIdMap = new HashMap<String, Integer>();
@@ -143,7 +146,9 @@ public class IdPMgtDAO {
             if(isPrimary){
                 doSwitchPrimary(dbConnection, tenantId);
             }
-            doAddIdP(dbConnection, tenantId, issuerId, trustedIdPUrl, thumbPrint, isPrimary);
+            String audience = IdentityProviderMgtUtil.convertListToString(trustedIdP.getAudience());
+
+            doAddIdP(dbConnection, tenantId, issuerId, trustedIdPUrl, thumbPrint, isPrimary, audience);
             int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(idPId <= 0){
                 String msg = "Error adding trusted IdP for tenant";
@@ -180,6 +185,7 @@ public class IdPMgtDAO {
         String thumbPrint1 = trustedIdPDO1.getPublicCertThumbPrint();
         List<String> roles1 = trustedIdPDO1.getRoles();
         Map<String,String> roleMappings1 = trustedIdPDO1.getRoleMappings();
+        String audience1 = IdentityProviderMgtUtil.convertListToString(trustedIdPDO1.getAudience());
 
         String issuerId2 = trustedIdPDO2.getIdPIssuerId();
         byte isPrimary2 = 0;
@@ -190,6 +196,7 @@ public class IdPMgtDAO {
         String thumbPrint2 = trustedIdPDO2.getPublicCertThumbPrint();
         List<String> roles2 = trustedIdPDO2.getRoles();
         Map<String,String> roleMappings2 = trustedIdPDO2.getRoleMappings();
+        String audience2 = IdentityProviderMgtUtil.convertListToString(trustedIdPDO2.getAudience());
 
         if(roles2.size() < roles1.size()){
             String msg = "Input error: new set of roles cannot be smaller than old set of roles. " + roles2.size() +
@@ -242,11 +249,14 @@ public class IdPMgtDAO {
                     (thumbPrint1 != null && thumbPrint2 != null && !thumbPrint1.equals(thumbPrint2) ||
                             thumbPrint1 != null && thumbPrint2 == null ||
                             thumbPrint1 == null && thumbPrint2 != null) ||
-                    isPrimary1 != isPrimary2){
+                    isPrimary1 != isPrimary2 ||
+                    audience1 != null && audience2 != null && !audience1.equals(audience2) ||
+                    audience1!= null && audience2 == null ||
+                    audience1 == null && audience2 != null){
                 if(isPrimary1 != isPrimary2){
                     doSwitchPrimary(dbConnection, tenantId);
                 }
-                doUpdateIdP(dbConnection, tenantId, issuerId1, issuerId2, trustedIdPUrl2, thumbPrint2, isPrimary2);
+                doUpdateIdP(dbConnection, tenantId, issuerId1, issuerId2, trustedIdPUrl2, thumbPrint2, isPrimary2, audience2);
             }
             if(!addedRoles.isEmpty() || !deletedRoles.isEmpty() || !renamedOldRoles.isEmpty()){
                 doUpdateIdPRoles(dbConnection, idPId, addedRoles, deletedRoles, renamedOldRoles, renamedNewRoles);
@@ -329,7 +339,7 @@ public class IdPMgtDAO {
         }
     }
 
-    private void doAddIdP(Connection conn, int tenantId, String issuer, String idpUrl, String thumbPrint, boolean isPrimary) throws SQLException {
+    private void doAddIdP(Connection conn, int tenantId, String issuer, String idpUrl, String thumbPrint, boolean isPrimary, String audience) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
@@ -342,6 +352,7 @@ public class IdPMgtDAO {
         } else {
             prepStmt.setByte(5, new Integer(0).byteValue());
         }
+        prepStmt.setString(6, audience);
 
         prepStmt.executeUpdate();
     }
@@ -393,7 +404,7 @@ public class IdPMgtDAO {
     }
     
     private void doUpdateIdP(Connection conn, int tenantId, String issuerOld, String issuerNew, String idpUrl,
-                             String thumbPrint, byte isPrimary) throws SQLException {
+                             String thumbPrint, byte isPrimary, String audience) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.UPDATE_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
@@ -401,8 +412,9 @@ public class IdPMgtDAO {
         prepStmt.setString(2, idpUrl);
         prepStmt.setString(3, thumbPrint);
         prepStmt.setByte(4, isPrimary);
-        prepStmt.setInt(5, tenantId);
-        prepStmt.setString(6, issuerOld);
+        prepStmt.setString(5, audience);
+        prepStmt.setInt(6, tenantId);
+        prepStmt.setString(7, issuerOld);
         prepStmt.executeUpdate();
     }
 

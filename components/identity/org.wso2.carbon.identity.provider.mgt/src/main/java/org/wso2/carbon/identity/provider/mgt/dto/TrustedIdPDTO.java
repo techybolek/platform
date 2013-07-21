@@ -52,6 +52,11 @@ public class TrustedIdPDTO {
      */
     private boolean isPrimary;
 
+    /**
+     * Unique identifiers of the SPs
+     */
+    private String[] audience;
+
     //////////////////// Getters and Setters //////////////////////////
 
 
@@ -104,6 +109,14 @@ public class TrustedIdPDTO {
 
     public void setPrimary(boolean primary) {
         isPrimary = primary;
+    }
+
+    public String[] getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String[] audience) {
+        this.audience = audience;
     }
 
 }
