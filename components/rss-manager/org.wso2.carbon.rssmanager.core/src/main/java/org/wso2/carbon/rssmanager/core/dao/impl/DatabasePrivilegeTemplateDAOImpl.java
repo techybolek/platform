@@ -22,6 +22,7 @@ package org.wso2.carbon.rssmanager.core.dao.impl;
 import org.wso2.carbon.rssmanager.core.dao.DatabasePrivilegeTemplateDAO;
 import org.wso2.carbon.rssmanager.core.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
+import org.wso2.carbon.rssmanager.core.dao.util.RSSDAOUtil;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeTemplate;
 
@@ -56,7 +57,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred while creating database privilege " +
                     "template '" + template.getName() + "' : " + e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
 
@@ -76,7 +77,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred while dropping the database privilege " +
                     "template '" + templateName + "' : " + e.getMessage(), e);
         } finally {
-            cleanupResources(null, stmt, conn);
+            RSSDAOUtil.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -116,7 +117,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred while editing the database privilege " +
                     "template '" + template.getName() + "' : " + e.getMessage(), e);
         } finally {
-            cleanupResources(null, stmt, conn);
+            RSSDAOUtil.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -142,7 +143,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred while retrieving database privilege " +
                     "template information : " + e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
 
@@ -167,7 +168,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred while retrieving database privilege " +
                     "templates : " + e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
 
@@ -206,7 +207,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred setting database privilege template " +
                     "properties : " + e.getMessage(), e);
         } finally {
-            cleanupResources(null, stmt, conn);
+            RSSDAOUtil.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -226,7 +227,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred while removing database privilege " +
                     "template entries : " + e.getMessage(), e);
         } finally {
-            cleanupResources(null, stmt, conn);
+            RSSDAOUtil.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -255,7 +256,7 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
             throw new RSSDAOException("Error occurred while checking the existence " +
                     "of database privilege template '" + templateName + "' : " + e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
 
@@ -286,30 +287,5 @@ public class DatabasePrivilegeTemplateDAOImpl implements DatabasePrivilegeTempla
 
         return new DatabasePrivilegeTemplate(id, templateName, privileges);
     }
-
-    private void cleanupResources(ResultSet rs, PreparedStatement stmt, Connection conn) {
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (SQLException ignore) {
-                //ignore
-            }
-        }
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException ignore) {
-                //ignore
-            }
-        }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException ignore) {
-                //ignore
-            }
-        }
-    }
-
 
 }

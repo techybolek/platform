@@ -22,7 +22,8 @@ package org.wso2.carbon.rssmanager.core.internal;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.coordination.core.services.CoordinationService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
+import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -39,6 +40,10 @@ public class RSSManagerDataHolder {
     private CoordinationService coordinationService;
 
     private TransactionManager transactionManager;
+
+    private SecretCallbackHandlerService secretCallbackHandlerService;
+
+    private TenantManager tenantManager;
 
     private static RSSManagerDataHolder thisInstance = new RSSManagerDataHolder();
 
@@ -81,15 +86,28 @@ public class RSSManagerDataHolder {
         this.transactionManager = transactionManager;
     }
 
-    public TenantManager getTenantManager() throws RSSManagerException {
+    public SecretCallbackHandlerService getSecretCallbackHandlerService() {
+        return secretCallbackHandlerService;
+    }
+
+    public void setSecretCallbackHandlerService(
+            SecretCallbackHandlerService secretCallbackHandlerService) {
+        this.secretCallbackHandlerService = secretCallbackHandlerService;
+    }
+    
+    public static void setThisInstance(RSSManagerDataHolder thisInstance) {
+        RSSManagerDataHolder.thisInstance = thisInstance;
+    }
+
+    public TenantManager getTenantManager() throws RSSManagerCommonException {
         RealmService realmService = getRealmService();
         if (realmService == null) {
-            throw new RSSManagerException("Realm service is not initialized properly");
+            throw new RSSManagerCommonException("Realm service is not initialized properly");
         }
         return realmService.getTenantManager();
     }
 
-    public int getTenantId() throws RSSManagerException {
+    public int getTenantId() throws RSSManagerCommonException {
         CarbonContext context = CarbonContext.getThreadLocalCarbonContext();
         int tenantId = context.getTenantId();
         if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
@@ -98,7 +116,7 @@ public class RSSManagerDataHolder {
         String tenantDomain = context.getTenantDomain();
         if (tenantDomain == null) {
             String msg = "Tenant domain is not properly set and thus, is null";
-            throw new RSSManagerException(msg);
+            throw new RSSManagerCommonException(msg);
         }
         TenantManager tenantManager = getTenantManager();
         try {
@@ -106,7 +124,7 @@ public class RSSManagerDataHolder {
         } catch (UserStoreException e) {
             String msg = "Error occurred while retrieving id from the domain of tenant " +
                     tenantDomain;
-            throw new RSSManagerException(msg);
+            throw new RSSManagerCommonException(msg);
         }
 
         return tenantId;

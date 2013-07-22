@@ -103,6 +103,11 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             if (inTx && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
+            try {
+                conn.rollback();
+            } catch (Exception e1) {
+                log.error(e1);
+            }
             throw new RSSManagerException("Error while creating the database '" +
                     qualifiedDatabaseName + "' on RSS instance '" + rssInstance.getName() + "' : " +
                     e.getMessage(), e);
@@ -161,7 +166,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
             }
             conn.commit();
         } catch (SQLException e) {
-            if (this.isInTransaction()) {
+            if (inTx && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -257,7 +262,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
                     }
                     conn.commit();
                 } catch (SQLException e) {
-                    if (this.isInTransaction()) {
+                    if (inTx && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                         this.rollbackTransaction();
                     }
                     if (conn != null) {
@@ -306,11 +311,11 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
     }
 
     @Override
-    public void dropDatabaseUser(String rssInstanceName, String username) throws
-            RSSManagerException {
+    public void dropDatabaseUser(String rssInstanceName,
+                                 String username) throws RSSManagerException {
         Connection conn = null;
         PreparedStatement stmt = null;
-        boolean inTransaction = false;
+        boolean inTx = false;
         try {
             for (RSSInstanceDSWrapper wrapper :
                     getDSWrapperRepository().getAllRSSInstanceDSWrappers()) {
@@ -334,12 +339,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
                     stmt.setString(2, "%");
 
                     /* Initiating the transaction */
-                    if (!this.isInTransaction()) {
-                        if (!this.getRSSTransactionManager().hasNoActiveTransaction()) {
-                            this.beginTransaction();
-                            inTransaction = true;
-                        }
-                    }
+                    inTx = this.beginTransaction();
                     int tenantId = RSSManagerUtil.getTenantId();
                     this.getRSSDAO().getDatabaseUserDAO().removeDatabasePrivileges(
                             rssInstance.getName(), username, tenantId);
@@ -355,12 +355,12 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
                     stmt.execute();
 
                     /* committing the distributed transaction */
-                    if (inTransaction) {
+                    if (inTx) {
                         this.endTransaction();
                     }
                     conn.commit();
                 } catch (RSSManagerException e) {
-                    if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+                    if (inTx && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                         this.rollbackTransaction();
                     }
                     if (conn != null) {
@@ -376,7 +376,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
                 this.flushPrivileges(wrapper.getRssInstance());
             }
         } catch (SQLException e) {
-            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+            if (inTx && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {
@@ -390,7 +390,7 @@ public class MySQLSystemRSSManager extends SystemRSSManager {
                     "' on RSS instances : " + e.getMessage();
             throw new RSSManagerException(msg, e);
         } catch (RSSDAOException e) {
-            if (inTransaction && this.getRSSTransactionManager().hasNoActiveTransaction()) {
+            if (inTx && this.getRSSTransactionManager().hasNoActiveTransaction()) {
                 this.rollbackTransaction();
             }
             if (conn != null) {

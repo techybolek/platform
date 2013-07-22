@@ -27,11 +27,9 @@ import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
-import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.transaction.manager.TransactionManagerDummyService;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -71,12 +69,6 @@ public class RSSManagerServiceComponent {
 
     private static Log log = LogFactory.getLog(RSSManagerServiceComponent.class);
 
-    private static DataSourceService dataSourceService;
-
-    private static RealmService realmService;
-
-    private static SecretCallbackHandlerService secretCallbackHandlerService;
-
     /**
      * Activates the RSS Manager Core bundle.
      *
@@ -100,13 +92,12 @@ public class RSSManagerServiceComponent {
             bundleContext.registerService(TransactionManagerDummyService.class.getName(),
                     new TransactionManagerDummyService(), null);
             /* Looks up for the JNDI registered transaction manager */
-            RSSManagerUtil.setTransactionManager(this.lookupTransactionManager());
+            RSSManagerDataHolder.getInstance().setTransactionManager(this.lookupTransactionManager());
             /* Initializes the RSS configuration */
-            RSSConfig.init();
+            RSSConfig.getInstance().init();
             /* Initializing RSSDAO Factory */
             //RSSDAOFactory.init(RSSConfig.getInstance().getRSSManagementRepository());
-            /* Initializing RSS environments */
-            RSSConfig.getInstance().initRSSEnvironments();
+
         } catch (Throwable e) {
             String msg = "Error occurred while initializing RSS Manager core bundle";
             log.error(msg, e);
@@ -122,39 +113,21 @@ public class RSSManagerServiceComponent {
      * @param componentContext ComponentContext
      */
     protected void deactivate(ComponentContext componentContext) {
-        //intentionally left blank
+        /* intentionally left blank */
     }
 
     protected void setDataSourceService(DataSourceService dataSourceService) {
         if (log.isDebugEnabled()) {
-            log.debug("Setting the Data Sources Service");
+            log.debug("Setting Data Sources Service");
         }
-        RSSManagerServiceComponent.dataSourceService = dataSourceService;
+        RSSManagerDataHolder.getInstance().setDataSourceService(dataSourceService);
     }
 
     protected void unsetDataSourceService(DataSourceService dataSourceService) {
         if (log.isDebugEnabled()) {
-            log.debug("Unsetting the Data Sources Service");
+            log.debug("Unsetting Data Sources Service");
         }
-        RSSManagerServiceComponent.dataSourceService = null;
-    }
-
-    /**
-     * Provides access to DataSource service
-     *
-     * @return DataSourceService instance
-     */
-    public static DataSourceService getDataSourceService() {
-        return dataSourceService;
-    }
-
-    /**
-     * Exposes the current realm service
-     *
-     * @return realmService
-     */
-    private static RealmService getRealmService() {
-        return realmService;
+        RSSManagerDataHolder.getInstance().setDataSourceService(null);
     }
 
     /**
@@ -163,7 +136,10 @@ public class RSSManagerServiceComponent {
      * @param realmService associated realm service
      */
     protected void setRealmService(RealmService realmService) {
-        RSSManagerServiceComponent.realmService = realmService;
+        if (log.isDebugEnabled()) {
+			log.debug("Setting Realm Service");
+		}
+        RSSManagerDataHolder.getInstance().setRealmService(realmService);
     }
 
     /**
@@ -172,16 +148,10 @@ public class RSSManagerServiceComponent {
      * @param realmService associated realm service
      */
     protected void unsetRealmService(RealmService realmService) {
-        setRealmService(null);
-    }
-
-    /**
-     * Retrieves the associated TenantManager
-     *
-     * @return TenantManager
-     */
-    public static TenantManager getTenantManager() {
-        return getRealmService().getTenantManager();
+        if (log.isDebugEnabled()) {
+			log.debug("Unsetting Realm Service");
+		}
+        RSSManagerDataHolder.getInstance().setRealmService(null);
     }
 
     private TransactionManager lookupTransactionManager() {
@@ -215,11 +185,11 @@ public class RSSManagerServiceComponent {
     }
 
     protected void setTransactionManagerDummyService(TransactionManagerDummyService dummyService) {
-        //do nothing
+        /* do nothing */
     }
 
     protected void unsetTransactionManagerDummyService(TransactionManagerDummyService dummyService) {
-        //do nothing
+        /* do nothing */
     }
 
     protected void setSecretCallbackHandlerService(
@@ -227,7 +197,8 @@ public class RSSManagerServiceComponent {
 		if (log.isDebugEnabled()) {
 			log.debug("Setting SecretCallbackHandlerService");
 		}
-		RSSManagerServiceComponent.secretCallbackHandlerService = secretCallbackHandlerService;
+		RSSManagerDataHolder.getInstance().setSecretCallbackHandlerService(
+                secretCallbackHandlerService);
 	}
 
 	protected void unsetSecretCallbackHandlerService(
@@ -235,11 +206,7 @@ public class RSSManagerServiceComponent {
         if (log.isDebugEnabled()) {
 			log.debug("Unsetting SecretCallbackHandlerService");
 		}
-		RSSManagerServiceComponent.secretCallbackHandlerService = null;
-	}
-	
-	public static SecretCallbackHandlerService getSecretCallbackHandlerService(){
-		return secretCallbackHandlerService;
+		RSSManagerDataHolder.getInstance().setSecretCallbackHandlerService(null);
 	}
 
 }

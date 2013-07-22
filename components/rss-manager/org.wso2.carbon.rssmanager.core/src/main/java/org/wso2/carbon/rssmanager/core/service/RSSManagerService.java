@@ -22,11 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerDataHolder;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 
@@ -83,19 +83,11 @@ public class RSSManagerService {
 
     public RSSInstance[] getRSSInstances(
             RSSEnvironmentContext ctx) throws RSSManagerException {
-        int tenantId = RSSManagerUtil.getTenantId();
         RSSInstance[] rssInstances = new RSSInstance[0];
         try {
             rssInstances = getRSSManager(ctx).getRSSInstances();
         } catch (RSSManagerException e) {
-            String tenantDomain = null;
-            try {
-                tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
-            } catch (RSSManagerException e1) {
-                log.error(e1);
-            }
-            String msg = "Error occurred in retrieving the RSS instance list of the tenant '" +
-                    tenantDomain + "'";
+            String msg = "Error occurred in retrieving the RSS instance list";
             handleException(msg, e);
         }
         return rssInstances;
@@ -123,19 +115,11 @@ public class RSSManagerService {
     }
 
     public Database[] getDatabases(RSSEnvironmentContext ctx) throws RSSManagerException {
-        int tenantId = RSSManagerUtil.getTenantId();
         Database[] databases = new Database[0];
         try {
             databases = getRSSManager(ctx).getDatabases();
         } catch (RSSManagerException e) {
-            String tenantDomain = null;
-            try {
-                tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
-            } catch (RSSManagerException e1) {
-                log.error(e1);
-            }
-            String msg = "Error occurred while retrieving the database list of the tenant '" +
-                    tenantDomain + "'";
+            String msg = "Error occurred while retrieving the database list of the tenant";
             handleException(msg, e);
         }
         return databases;
@@ -378,7 +362,7 @@ public class RSSManagerService {
         DataSourceMetaInfo metaInfo =
                 RSSManagerUtil.createDSMetaInfo(database, entry.getUsername());
         try {
-            RSSManagerServiceComponent.getDataSourceService().addDataSource(metaInfo);
+            RSSManagerDataHolder.getInstance().getDataSourceService().addDataSource(metaInfo);
         } catch (DataSourceException e) {
             String msg = "Error occurred while creating carbon datasource for the database '" +
                     entry.getDatabaseName() + "'";

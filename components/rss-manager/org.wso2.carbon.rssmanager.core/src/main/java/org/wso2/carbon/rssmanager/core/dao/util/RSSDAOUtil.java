@@ -19,12 +19,10 @@
 
 package org.wso2.carbon.rssmanager.core.dao.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerDataHolder;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
@@ -34,8 +32,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class RSSDAOUtil {
-
-    private static final Log log = LogFactory.getLog(RSSDAOUtil.class);
 
     public static synchronized void cleanupResources(ResultSet rs, PreparedStatement stmt,
                                                      Connection conn) {
@@ -70,8 +66,8 @@ public class RSSDAOUtil {
         }
         String tenantDomain = ctx.getTenantDomain();
         if (null != tenantDomain) {
-            TenantManager tenantManager = RSSManagerServiceComponent.getTenantManager();
             try {
+                TenantManager tenantManager = RSSManagerDataHolder.getInstance().getTenantManager();
                 tenantId = tenantManager.getTenantId(tenantDomain);
             } catch (UserStoreException e) {
                 throw new RSSManagerCommonException("Error while retrieving the tenant Id for " +
@@ -84,8 +80,8 @@ public class RSSDAOUtil {
     public static synchronized int getTenantId(String tenantDomain) throws RSSManagerCommonException {
         int tenantId = MultitenantConstants.INVALID_TENANT_ID;
         if (null != tenantDomain) {
-            TenantManager tenantManager = RSSManagerServiceComponent.getTenantManager();
             try {
+                TenantManager tenantManager = RSSManagerDataHolder.getInstance().getTenantManager();
                 tenantId = tenantManager.getTenantId(tenantDomain);
             } catch (UserStoreException e) {
                 throw new RSSManagerCommonException("Error while retrieving the tenant Id for " +

@@ -20,9 +20,9 @@ package org.wso2.carbon.rssmanager.core.config;
 
 import org.w3c.dom.Document;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -34,6 +34,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a WSO2 RSS configuration.
@@ -41,12 +43,14 @@ import java.io.File;
 @XmlRootElement(name = "rss-configuration")
 public final class RSSConfig {
 
+    private static RSSConfig currentRSSConfig;
+
     private RSSEnvironment[] rssEnvironments;
 
     private RSSManagementRepository rssMgtRepository;
 
-    private static RSSConfig currentRSSConfig;
-    
+    private Map<String, RSSEnvironment> rssEnvironmentMap = new HashMap<String, RSSEnvironment>();
+
     /**
      * Retrieves the RSS config reading the rss-instance configuration file.
      *
@@ -60,7 +64,7 @@ public final class RSSConfig {
         return currentRSSConfig;
     }
 
-    public static void init() throws RSSManagerException {
+    public void init() throws RSSManagerException {
         String rssConfigXMLPath = CarbonUtils.getCarbonConfigDirPath() +
                 File.separator + "etc" + File.separator + RSSManagerConstants.RSS_CONFIG_XML_NAME;
         try {
@@ -75,6 +79,11 @@ public final class RSSConfig {
                 throw new RSSManagerException("Error occurred while creating JAXB Context to " +
                         "parse RSSConfig : " + e.getMessage(), e);
             }
+
+            /* Populating a map with environment information to be able to lookup efficiently */
+            this.populateRSSEnvironmentMap();
+            /* Initializing environment configurations */
+            this.initRSSEnvironments();
         } catch (Exception e) {
             throw new RSSManagerException("Error occurred while initializing RSS config", e);
         }
@@ -85,38 +94,52 @@ public final class RSSConfig {
         return rssMgtRepository;
     }
 
+    public void setRSSManagementRepository(RSSManagementRepository rssMgtRepository) {
+        this.rssMgtRepository = rssMgtRepository;
+    }
+
     @XmlElementWrapper(name = "rss-environments", nillable = false)
     @XmlElement(name = "rss-environment", nillable = false)
     public RSSEnvironment[] getRSSEnvironments() {
         return rssEnvironments;
     }
 
-    public void setRSSManagementRepository(RSSManagementRepository rssMgtRepository) {
-        this.rssMgtRepository = rssMgtRepository;
-    }
-
     public void setRSSEnvironments(RSSEnvironment[] rssEnvironments) {
         this.rssEnvironments = rssEnvironments;
     }
 
-    public RSSManager getRSSManager(RSSEnvironmentContext ctx) {
-        for (RSSEnvironment rssEnvironment : getRSSEnvironments()) {
-            if (rssEnvironment.getName().equals(ctx.getEnvironmentName())) {
-                return rssEnvironment.getRSSManager();
-            }
+    private Map<String, RSSEnvironment> getEnvironmentMap() {
+        return rssEnvironmentMap;
+    }
+
+    public RSSManager getRSSManager(RSSEnvironmentContext ctx) throws RSSManagerException {
+        String envName = ctx.getEnvironmentName();
+        RSSEnvironment env = getEnvironmentMap().get(envName);
+        if (env == null) {
+            throw new RSSManagerException("RSS Environment '" + envName + "' does not exist");
         }
-        return null;
+        return env.getRSSManager(ctx.getRssInstanceName());
     }
 
     /**
-     * Initializes RSS environments
+     * Initializes all RSS environments.
      *
-     * @throws org.wso2.carbon.rssmanager.core.exception.RSSManagerException If the flow is interrupted by some erroneous condition
+     * @throws RSSManagerException If the flow is interrupted by some erroneous condition
      */
-    public void initRSSEnvironments() throws RSSManagerException {
-        RSSEnvironment[] rssEnvironments = getRSSEnvironments();
-        for (RSSEnvironment rssEnvironment : rssEnvironments) {
-            rssEnvironment.init();
+    private void initRSSEnvironments() throws RSSManagerException {
+        RSSEnvironment[] envs = getRSSEnvironments();
+        for (RSSEnvironment env : envs) {
+            env.init();
+        }
+    }
+
+    /**
+     * Populates a map with all environment information to be able to lookup environments with its
+     * name efficiently for later operations.
+     */
+    private void populateRSSEnvironmentMap() {
+        for (RSSEnvironment env : getRSSEnvironments()) {
+            getEnvironmentMap().put(env.getName(), env);
         }
     }
 

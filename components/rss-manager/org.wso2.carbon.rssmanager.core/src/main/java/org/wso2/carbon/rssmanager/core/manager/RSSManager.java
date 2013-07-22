@@ -13,6 +13,7 @@ import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.internal.RSSManagerDataHolder;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.sql.XAConnection;
@@ -39,7 +40,7 @@ public abstract class RSSManager {
     private RSSInstanceDSWrapperRepository repository;
 
     private static final Log log = LogFactory.getLog(RSSManager.class);
-
+    
     public RSSManager(RSSEnvironment rssEnvironment) {
         this.rssEnvironment = rssEnvironment;
         this.rssEnvironmentName = getRSSEnvironment().getName();
@@ -153,7 +154,7 @@ public abstract class RSSManager {
     public void dropRSSInstance(String rssInstanceName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             getDSWrapperRepository().removeRSSInstanceDSWrapper(rssInstanceName);
             getRSSDAO().getRSSInstanceDAO().removeRSSInstance(rssInstanceName, tenantId);
             //TODO : Drop dependent databases etc.
@@ -174,7 +175,7 @@ public abstract class RSSManager {
     public void editRSSInstanceConfiguration(RSSInstance rssInstance) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             getRSSDAO().getRSSInstanceDAO().updateRSSInstance(rssInstance, tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -193,7 +194,7 @@ public abstract class RSSManager {
     public RSSInstance[] getRSSInstances() throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance[] rssInstances = getRSSDAO().getRSSInstanceDAO().getRSSInstances(tenantId);
 
             if (!(tenantId == MultitenantConstants.SUPER_TENANT_ID)) {
@@ -218,7 +219,7 @@ public abstract class RSSManager {
     public Database[] getDatabases() throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseDAO().getDatabases(tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -237,7 +238,7 @@ public abstract class RSSManager {
     public DatabaseUser[] getDatabaseUsers() throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseUserDAO().getDatabaseUsers(tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -295,7 +296,7 @@ public abstract class RSSManager {
                 throw new RSSManagerException("Database privilege template information " +
                         "cannot be null");
             }
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             boolean isExist =
                     getRSSDAO().getDatabasePrivilegeTemplateDAO().isDatabasePrivilegeTemplateExist(
                             template.getName(), tenantId);
@@ -331,7 +332,7 @@ public abstract class RSSManager {
                 throw new RSSManagerException("Database privilege template information " +
                         "cannot be null");
             }
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             getRSSDAO().getDatabasePrivilegeTemplateDAO().updateDatabasePrivilegesTemplate(template,
                     tenantId);
         } catch (RSSDAOException e) {
@@ -351,7 +352,7 @@ public abstract class RSSManager {
     public RSSInstance getRSSInstance(String rssInstanceName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -400,7 +401,7 @@ public abstract class RSSManager {
                                    String databaseName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseDAO().isDatabaseExist(rssInstanceName, databaseName,
                     tenantId);
         } catch (RSSDAOException e) {
@@ -421,7 +422,7 @@ public abstract class RSSManager {
                                        String databaseUsername) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseUserDAO().isDatabaseUserExist(rssInstanceName,
                     databaseUsername, tenantId);
         } catch (RSSDAOException e) {
@@ -441,7 +442,7 @@ public abstract class RSSManager {
     public boolean isDatabasePrivilegeTemplateExist(String templateName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabasePrivilegeTemplateDAO().isDatabasePrivilegeTemplateExist(
                     templateName, tenantId);
         } catch (RSSDAOException e) {
@@ -497,7 +498,7 @@ public abstract class RSSManager {
     public void dropDatabasePrivilegesTemplate(String templateName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             getRSSDAO().getDatabasePrivilegeTemplateDAO().
                     removeDatabasePrivilegesTemplateEntries(templateName, tenantId);
             getRSSDAO().getDatabasePrivilegeTemplateDAO().removeDatabasePrivilegesTemplate(
@@ -520,7 +521,7 @@ public abstract class RSSManager {
             RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabasePrivilegeTemplateDAO().getDatabasePrivilegesTemplates(
                     tenantId);
         } catch (RSSDAOException e) {
@@ -540,7 +541,7 @@ public abstract class RSSManager {
             String templateName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerDataHolder.getInstance().getTenantId();
+            int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabasePrivilegeTemplateDAO().getDatabasePrivilegesTemplate(
                     templateName, tenantId);
         } catch (RSSDAOException e) {

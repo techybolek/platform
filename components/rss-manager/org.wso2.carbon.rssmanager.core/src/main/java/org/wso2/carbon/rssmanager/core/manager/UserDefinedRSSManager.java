@@ -20,89 +20,189 @@
 package org.wso2.carbon.rssmanager.core.manager;
 
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
-import org.wso2.carbon.rssmanager.core.entity.*;
+import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
+import org.wso2.carbon.rssmanager.core.entity.Database;
+import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeSet;
+import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
+import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 
-public class UserDefinedRSSManager extends RSSManager {
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public abstract class UserDefinedRSSManager extends RSSManager {
 
     public UserDefinedRSSManager(RSSEnvironment rssEnvironment) {
         super(rssEnvironment);
     }
 
-    @Override
-    public Database createDatabase(Database database) throws RSSManagerException {
-        return null;  
-    }
-
-    @Override
-    public void dropDatabase(String rssInstanceName,
-                             String databaseName) throws RSSManagerException {
-        
-    }
-
-    @Override
-    public DatabaseUser createDatabaseUser(DatabaseUser user) throws RSSManagerException {
-        return null;  
-    }
-
-    @Override
-    public void dropDatabaseUser(String rssInstanceName,
-                                 String username) throws RSSManagerException {
-        
-    }
-
-    @Override
-    public void editDatabaseUserPrivileges(DatabasePrivilegeSet privileges,
-                                           DatabaseUser databaseUser,
-                                           String databaseName) throws RSSManagerException {
-        
-    }
-
-    @Override
-    public void attachUserToDatabase(UserDatabaseEntry ude,
-                                     String templateName) throws RSSManagerException {
-        
-    }
-
-    @Override
-    public void detachUserFromDatabase(UserDatabaseEntry ude) throws RSSManagerException {
-        
-    }
-
-    @Override
-    public RSSInstance resolveRSSInstance(String rssInstanceName,
-                                          String databaseName) throws RSSManagerException {
-        return null;  
-    }
-
-    @Override
     public DatabaseUser getDatabaseUser(String rssInstanceName,
                                         String username) throws RSSManagerException {
-        return null;  
+        boolean inTx = beginTransaction();
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            boolean isExist = getRSSDAO().getDatabaseUserDAO().isDatabaseUserExist(
+                    rssInstanceName, username, tenantId);
+            if (isExist) {
+                rollbackTransaction();
+                throw new RSSManagerException("Database user '" + username + "' already exists " +
+                        "in the RSS instance '" + rssInstanceName + "'");
+            }
+            RSSInstance rssInstance = getRSSInstance(rssInstanceName);
+            if (rssInstance == null) {
+                rollbackTransaction();
+                throw new RSSManagerException("Database user '" + username + "' does not exist " +
+                        "in RSS instance '" + rssInstanceName + "'");
+            }
+            return getRSSDAO().getDatabaseUserDAO().getDatabaseUser(rssInstance.getName(),
+                    username, tenantId);
+        } catch (RSSDAOException e) {
+            if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
+                rollbackTransaction();
+            }
+            throw new RSSManagerException("Error occurred while retrieving metadata related to " +
+                    "database user '" + username + "' belongs to the RSS instance '" +
+                    rssInstanceName + ", from RSS metadata repository : " + e.getMessage(), e);
+        } finally {
+            if (inTx) {
+                endTransaction();
+            }
+        }
+
     }
 
-    @Override
     public Database getDatabase(String rssInstanceName,
                                 String databaseName) throws RSSManagerException {
-        return null;  
+        boolean inTx = beginTransaction();
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            RSSInstance rssInstance =
+                    getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
+            if (rssInstance == null) {
+                if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
+                    rollbackTransaction();
+                }
+                throw new RSSManagerException("Database '" + databaseName + "' does not exist " +
+                        "in RSS instance '" + rssInstanceName + "'");
+            }
+            return getRSSDAO().getDatabaseDAO().getDatabase(rssInstance.getName(), databaseName,
+                    RSSManagerUtil.getTenantId());
+        } catch (RSSDAOException e) {
+            if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
+                rollbackTransaction();
+            }
+            throw new RSSManagerException("Error occurred while retrieving metadata related to " +
+                    "database '" + databaseName + "' belongs to the RSS instance '" +
+                    rssInstanceName + ", from RSS metadata repository : " + e.getMessage(), e);
+        } finally {
+            if (inTx) {
+                endTransaction();
+            }
+        }
     }
 
-    @Override
-    public DatabaseUser[] getUsersAttachedToDatabase(
-            String rssInstanceName, String databaseName) throws RSSManagerException {
-        return new DatabaseUser[0];  
+    public DatabaseUser[] getUsersAttachedToDatabase(String rssInstanceName,
+                                                     String databaseName) throws RSSManagerException {
+        boolean inTx = beginTransaction();
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            RSSInstance rssInstance =
+                    getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
+            if (rssInstance == null) {
+                rollbackTransaction();
+                throw new RSSManagerException("Database '" + databaseName
+                        + "' does not exist " + "in RSS instance '"
+                        + rssInstanceName + "'");
+            }
+            return getRSSDAO().getDatabaseUserDAO().getDatabaseUsersByDatabase(rssInstanceName,
+                    databaseName, tenantId);
+        } catch (RSSDAOException e) {
+            if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
+                rollbackTransaction();
+            }
+            throw new RSSManagerException("Error occurred while retrieving metadata related to " +
+                    "database users already attached to database '" + databaseName + "' which " +
+                    "belongs to the RSS instance '" + rssInstanceName + ", from RSS metadata " +
+                    "repository : " + e.getMessage(), e);
+        } finally {
+            if (inTx) {
+                endTransaction();
+            }
+        }
     }
 
-    @Override
     public DatabaseUser[] getAvailableUsersToAttachToDatabase(
             String rssInstanceName, String databaseName) throws RSSManagerException {
-        return new DatabaseUser[0];  
+        boolean inTx = beginTransaction();
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            DatabaseUser[] existingUsers =
+                    getRSSDAO().getDatabaseUserDAO().getDatabaseUsersByDatabase(rssInstanceName,
+                            databaseName, tenantId);
+            Set<String> usernames = new HashSet<String>();
+            for (DatabaseUser user : existingUsers) {
+                usernames.add(user.getName());
+            }
+            DatabaseUser[] tmp =
+                    getRSSDAO().getDatabaseUserDAO().getDatabaseUsersByRSSInstance(rssInstanceName,
+                            tenantId);
+            List<DatabaseUser> availableUsers = new ArrayList<DatabaseUser>();
+            for (DatabaseUser user : tmp) {
+                String username = user.getName();
+                if (!usernames.contains(username)) {
+                    availableUsers.add(user);
+                }
+            }
+            return availableUsers.toArray(new DatabaseUser[availableUsers.size()]);
+        } catch (RSSDAOException e) {
+            if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
+                rollbackTransaction();
+            }
+            throw new RSSManagerException("Error occurred while retrieving metadata related to " +
+                    "database users available to be attached to database '" + databaseName +
+                    "' which belongs to the RSS instance '" + rssInstanceName + ", from RSS " +
+                    "metadata repository : " + e.getMessage(), e);
+        } finally {
+            if (inTx) {
+                endTransaction();
+            }
+        }
     }
 
-    @Override
-    public DatabasePrivilegeSet getUserDatabasePrivileges(
-            String rssInstanceName, String databaseName,
-            String username) throws RSSManagerException {
-        return null;  
+    public DatabasePrivilegeSet getUserDatabasePrivileges(String rssInstanceName,
+                                                          String databaseName,
+                                                          String username) throws RSSManagerException {
+        boolean inTx = beginTransaction();
+        try {
+            int tenantId = RSSManagerUtil.getTenantId();
+            RSSInstance rssInstance =
+                    getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
+            if (rssInstance == null) {
+                if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
+                    rollbackTransaction();
+                }
+                throw new RSSManagerException("Database '" + databaseName + "' does not exist " +
+                        "in RSS instance '" + rssInstanceName + "'");
+            }
+            return getRSSDAO().getDatabaseUserDAO().getUserDatabasePrivileges(rssInstanceName,
+                    databaseName, username, tenantId);
+        } catch (RSSDAOException e) {
+            if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
+                rollbackTransaction();
+            }
+            throw new RSSManagerException("Error occurred while retrieving metadata related to " +
+                    "the privileges assigned to database user '" + username + "' which " +
+                    "belongs to the RSS instance '" + rssInstanceName + " upon the database '" +
+                    databaseName + "', from RSS metadata " +
+                    "repository : " + e.getMessage(), e);
+        } finally {
+            if (inTx) {
+                endTransaction();
+            }
+        }
     }
+
 }

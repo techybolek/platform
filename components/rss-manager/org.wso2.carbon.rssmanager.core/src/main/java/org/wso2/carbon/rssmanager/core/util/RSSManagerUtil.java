@@ -20,8 +20,6 @@ package org.wso2.carbon.rssmanager.core.util;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.*;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -32,12 +30,13 @@ import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration;
 import org.wso2.carbon.ndatasource.rdbms.RDBMSDataSource;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironment;
-import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
-import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.rssmanager.core.entity.Database;
+import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerDataHolder;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.securevault.SecretResolver;
@@ -72,40 +71,7 @@ public final class RSSManagerUtil {
     private static SecretResolver secretResolver;
 
     public static TransactionManager transactionManager;
-
-    private static final Log log = LogFactory.getLog(RSSManagerUtil.class);
-
-    public static TransactionManager getTransactionManager() {
-        return transactionManager;
-    }
-
-    public static void setTransactionManager(TransactionManager transactionManager) {
-        RSSManagerUtil.transactionManager = transactionManager;
-    }
-
-    /**
-     * Retrieves the list of tenantIDs of the currently loaded tenants
-     *
-     * @return Tenant ID list
-     * @throws RSSManagerException Thrown when an error occurs while retrieving the list of
-     *                             tenants via the Tenant Tanag.
-     */
-    public static List<Integer> getAllTenants() throws RSSManagerException {
-        List<Integer> tenantIds = new ArrayList<Integer>();
-        TenantManager tenantMgr = RSSManagerServiceComponent.getTenantManager();
-        if (tenantMgr != null) {
-            try {
-                for (Tenant tenant : tenantMgr.getAllTenants()) {
-                    tenantIds.add(tenant.getId());
-                }
-                tenantIds.add(MultitenantConstants.SUPER_TENANT_ID);
-            } catch (UserStoreException e) {
-                throw new RSSManagerException("Error while retrieving tenant data", e);
-            }
-        }
-        return tenantIds;
-    }
-
+    
     /**
      * Retrieves the tenant domain name for a given tenant ID
      *
@@ -115,10 +81,13 @@ public final class RSSManagerUtil {
      *                             domain for the provided tenant ID
      */
     public static String getTenantDomainFromTenantId(int tenantId) throws RSSManagerException {
-        TenantManager tenantMgr = RSSManagerServiceComponent.getTenantManager();
         try {
+            TenantManager tenantMgr = RSSManagerDataHolder.getInstance().getTenantManager();
             return tenantMgr.getDomain(tenantId);
         } catch (UserStoreException e) {
+            throw new RSSManagerException("Error occurred while retrieving tenant domain for " +
+                    "the given tenant ID");
+        } catch (RSSManagerCommonException e) {
             throw new RSSManagerException("Error occurred while retrieving tenant domain for " +
                     "the given tenant ID");
         }
@@ -132,13 +101,16 @@ public final class RSSManagerUtil {
      * @param databaseName Name of the database
      * @return Fully qualified name of the database
      */
-    public static String getFullyQualifiedDatabaseName(String databaseName) {
-        String tenantDomain = null;
+    public static String getFullyQualifiedDatabaseName(
+            String databaseName) throws RSSManagerException {
+        String tenantDomain;
         try {
             tenantDomain =
-                    RSSManagerServiceComponent.getTenantManager().getDomain(
+                    RSSManagerDataHolder.getInstance().getTenantManager().getDomain(
                             CarbonContext.getCurrentContext().getTenantId());
-        } catch (UserStoreException ignore) {
+        } catch (Exception e) {
+            throw new RSSManagerException("Error occurred while composing fully qualified name " +
+                    "of the database '" + databaseName + "'", e);
         }
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             return databaseName + "_" + RSSManagerHelper.processDomainName(tenantDomain);
@@ -168,35 +140,6 @@ public final class RSSManagerUtil {
         return username;
     }
 
-    /**
-     * Util method to prepare JDBC url of a particular RSS instance to be a valid url to be stored
-     * in the metadata repository.
-     *
-     * @param url    JDBC url.
-     * @param dbName Name of the database instance.
-     * @return Processed JDBC url.
-     */
-    public static String processJdbcUrl(String url, String dbName) {
-        if (url != null && !"".equals(url)) {
-            return url.endsWith("/") ? (url + dbName) : (url + "/" + dbName);
-        }
-        return "";
-    }
-
-//    public static DatabaseMetaData convertToDatabaseMetaData(
-//            Database database, int tenantId) throws RSSManagerException {
-//        DatabaseMetaData metadata = new DatabaseMetaData();
-//        String fullyQualifiedDatabaseName =
-//                RSSManagerUtil.getFullyQualifiedDatabaseName(database.getName());
-//        metadata.setName(fullyQualifiedDatabaseName);
-//        metadata.setRssInstanceName(metadata.getRssInstanceName());
-//        metadata.setUrl(database.getUrl());
-//        String tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
-//        metadata.setRssTenantDomain(tenantDomain);
-//
-//        return metadata;
-//    }
-
     public static DataSource createDataSource(RDBMSConfiguration config) {
         try {
             RDBMSDataSource dataSource = new RDBMSDataSource(config);
@@ -220,6 +163,20 @@ public final class RSSManagerUtil {
         config.setDataSourceProps(dsProps);
         return createDataSource(config);
     }
+
+//    public static DatabaseMetaData convertToDatabaseMetaData(
+//            Database database, int tenantId) throws RSSManagerException {
+//        DatabaseMetaData metadata = new DatabaseMetaData();
+//        String fullyQualifiedDatabaseName =
+//                RSSManagerUtil.getFullyQualifiedDatabaseName(database.getName());
+//        metadata.setName(fullyQualifiedDatabaseName);
+//        metadata.setRssInstanceName(metadata.getRssInstanceName());
+//        metadata.setUrl(database.getUrl());
+//        String tenantDomain = RSSManagerUtil.getTenantDomainFromTenantId(tenantId);
+//        metadata.setRssTenantDomain(tenantDomain);
+//
+//        return metadata;
+//    }
 
 //    public static RSSInstanceMetaData convertToRSSInstanceMetadata(
 //            RSSInstance rssInstance, int tenantId) throws RSSManagerException {
@@ -335,39 +292,6 @@ public final class RSSManagerUtil {
         }
     }
 
-    public synchronized static int getTenantId() {
-        CarbonContext ctx = CarbonContext.getCurrentContext();
-        int tenantId = ctx.getTenantId();
-        if (tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-            return tenantId;
-        }
-        String tenantDomain = ctx.getTenantDomain();
-        if (null != tenantDomain) {
-            TenantManager tenantManager = RSSManagerServiceComponent.getTenantManager();
-            try {
-                tenantId = tenantManager.getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
-                log.error("Error while retrieving the tenant Id for tenant domain:" +
-                        tenantDomain, e);
-            }
-        }
-        return tenantId;
-    }
-
-    public static synchronized int getTenantId(String tenantDomain) {
-        int tenantId = MultitenantConstants.INVALID_TENANT_ID;
-        if (null != tenantDomain) {
-            TenantManager tenantManager = RSSManagerServiceComponent.getTenantManager();
-            try {
-                tenantId = tenantManager.getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
-                log.error("Error while retrieving the tenant Id for tenant domain:" +
-                        tenantDomain, e);
-            }
-        }
-        return tenantId;
-    }
-
     public static Document convertToDocument(File file) throws RSSManagerException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -408,7 +332,7 @@ public final class RSSManagerUtil {
     private static synchronized String loadFromSecureVault(String alias) {
         if (secretResolver == null) {
             secretResolver = SecretResolverFactory.create((OMElement) null, false);
-            secretResolver.init(RSSManagerServiceComponent.getSecretCallbackHandlerService().
+            secretResolver.init(RSSManagerDataHolder.getInstance().getSecretCallbackHandlerService().
                     getSecretCallbackHandler());
         }
         return secretResolver.resolve(alias);
@@ -465,6 +389,28 @@ public final class RSSManagerUtil {
                 //ignore
             }
         }
+    }
+
+    public synchronized static int getTenantId() throws RSSManagerException {
+        try {
+            return RSSManagerDataHolder.getInstance().getTenantId();
+        } catch (RSSManagerCommonException e) {
+            throw new RSSManagerException("Error occurred while determining the tenant id", e);
+        }
+    }
+
+    public static synchronized int getTenantId(String tenantDomain) throws RSSManagerCommonException {
+        int tenantId = MultitenantConstants.INVALID_TENANT_ID;
+        if (null != tenantDomain) {
+            try {
+                TenantManager tenantManager = RSSManagerDataHolder.getInstance().getTenantManager();
+                tenantId = tenantManager.getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                throw new RSSManagerCommonException("Error while retrieving the tenant Id for " +
+                        "tenant domain : " + tenantDomain, e);
+            }
+        }
+        return tenantId;
     }
 
 }

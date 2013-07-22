@@ -19,23 +19,16 @@
 
 package org.wso2.carbon.rssmanager.core.config.environment;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.rssmanager.core.dao.exception.RSSDAOException;
+import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.manager.AbstractRSSManagerFactory;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.manager.RSSManagerFactory;
-import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.HashMap;
-import java.util.Map;
 
 @XmlRootElement(name = "rss-environment")
 public class RSSEnvironment {
@@ -46,16 +39,17 @@ public class RSSEnvironment {
 
     private String rssProvider;
 
-    private RSSManager rssManager;
+    private RSSManager systemRSSManager;
+
+    private RSSManager userDefinedRSSManager;
 
     private RSSInstance[] rssInstances;
-
-    private static final Log log = LogFactory.getLog(RSSEnvironment.class);
 
     public void init() throws RSSManagerException {
         RSSManagerFactory factory =
                 AbstractRSSManagerFactory.getRSSManagerFactory(getRSSProvider());
-        this.rssManager = factory.getSystemRSSManager();
+        this.systemRSSManager = factory.getSystemRSSManager();
+        this.userDefinedRSSManager = factory.getUserDefinedRSSManager();
         this.initRSSEnvironment();
         //this.initSystemRSSInstances();
     }
@@ -78,10 +72,6 @@ public class RSSEnvironment {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public RSSManager getRSSManager() {
-        return rssManager;
     }
 
     public void setRSSProvider(String rssProvider) {
@@ -115,8 +105,30 @@ public class RSSEnvironment {
         return -1;
     }
 
+    private RSSManager getSystemRSSManager() {
+        return systemRSSManager;
+    }
+
+    private RSSManager getUserDefinedRSSManager() {
+        return userDefinedRSSManager;
+    }
+
+    public RSSManager getRSSManager(String type) throws RSSManagerException {
+        if (type == null || "".equals(type)) {
+            throw new IllegalArgumentException("RSS Manager type '" + type + "' is not allowed");
+        }
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(type)) {
+            return getSystemRSSManager();
+        }
+        if (RSSManagerConstants.USER_DEFINED_INSTANCE_TYPE.equals(type)) {
+            return getUserDefinedRSSManager();
+        }
+        throw new RSSManagerException("Error occurred while retrieving RSS Manager attached to " +
+                "the RSS environment '" + getName() + "'. Invalid RSS manager type '" + type + "'");
+    }
+
     private void initRSSEnvironment() throws RSSManagerException {
-        getRSSManager().createRSSEnvironment();
+        getSystemRSSManager().createRSSEnvironment();
     }
 
     /**
@@ -125,44 +137,44 @@ public class RSSEnvironment {
      * @throws org.wso2.carbon.rssmanager.core.exception.RSSManagerException
      *          rssDaoException
      */
-    private void initSystemRSSInstances() throws RSSManagerException {
-        try {
-            /* adds the rss instances listed in the configuration file,
-             * if any of them are already existing in the database, they will be updated */
-            Map<String, RSSInstance> rssInstances = new HashMap<String, RSSInstance>();
-            for (RSSInstance tmpInst : getRSSInstances()) {
-                rssInstances.put(tmpInst.getName(), tmpInst);
-            }
-            int tenantId = RSSManagerUtil.getTenantId();
-            getRSSManager().beginTransaction();
-
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
-                    MultitenantConstants.SUPER_TENANT_ID);
-
-            RSSInstance[] systemRSSInstances = new RSSInstance[0];
-
-            for (RSSInstance tmpInst : systemRSSInstances) {
-                RSSInstance reloadedRssInst = rssInstances.get(tmpInst.getName());
-                RSSInstance prevKey = rssInstances.remove(tmpInst.getName());
-                if (prevKey == null) {
-                    log.warn("Configuration corresponding to RSS instance named '" + tmpInst.getName() +
-                            "' is missing in the rss-config.xml");
-                    continue;
-                }
-                getRSSManager().getRSSDAO().getRSSInstanceDAO().updateRSSInstance(reloadedRssInst, tenantId);
-            }
-            for (RSSInstance inst : rssInstances.values()) {
-                getRSSManager().getRSSDAO().getRSSInstanceDAO().addRSSInstance(inst, tenantId);
-            }
-            getRSSManager().endTransaction();
-        } catch (RSSDAOException e) {
-            if (getRSSManager().isInTransaction()) {
-                getRSSManager().rollbackTransaction();
-            }
-            throw new RSSManagerException("Error occurred while initializing RSS environment '" +
-                    getName() + "' : " + e.getMessage(), e);
-        }
-    }
+//    private void initSystemRSSInstances() throws RSSManagerException {
+//        try {
+//            /* adds the rss instances listed in the configuration file,
+//             * if any of them are already existing in the database, they will be updated */
+//            Map<String, RSSInstance> rssInstances = new HashMap<String, RSSInstance>();
+//            for (RSSInstance tmpInst : getRSSInstances()) {
+//                rssInstances.put(tmpInst.getName(), tmpInst);
+//            }
+//            int tenantId = RSSManagerUtil.getTenantId();
+//            getRSSManager().beginTransaction();
+//
+//            PrivilegedCarbonContext.startTenantFlow();
+//            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+//                    MultitenantConstants.SUPER_TENANT_ID);
+//
+//            RSSInstance[] systemRSSInstances = new RSSInstance[0];
+//
+//            for (RSSInstance tmpInst : systemRSSInstances) {
+//                RSSInstance reloadedRssInst = rssInstances.get(tmpInst.getName());
+//                RSSInstance prevKey = rssInstances.remove(tmpInst.getName());
+//                if (prevKey == null) {
+//                    log.warn("Configuration corresponding to RSS instance named '" + tmpInst.getName() +
+//                            "' is missing in the rss-config.xml");
+//                    continue;
+//                }
+//                getRSSManager().getRSSDAO().getRSSInstanceDAO().updateRSSInstance(reloadedRssInst, tenantId);
+//            }
+//            for (RSSInstance inst : rssInstances.values()) {
+//                getRSSManager().getRSSDAO().getRSSInstanceDAO().addRSSInstance(inst, tenantId);
+//            }
+//            getRSSManager().endTransaction();
+//        } catch (RSSDAOException e) {
+//            if (getRSSManager().isInTransaction()) {
+//                getRSSManager().rollbackTransaction();
+//            }
+//            throw new RSSManagerException("Error occurred while initializing RSS environment '" +
+//                    getName() + "' : " + e.getMessage(), e);
+//        }
+//    }
 
 }

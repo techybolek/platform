@@ -31,7 +31,7 @@ public class OracleRSSManagerFactory implements RSSManagerFactory {
     }
 
     public UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException {
-        return null;
+        return new OracleUserDefinedRSSManager(null);
     }
     
 }

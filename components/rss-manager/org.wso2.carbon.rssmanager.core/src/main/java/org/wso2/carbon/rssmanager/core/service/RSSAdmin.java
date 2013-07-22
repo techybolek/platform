@@ -25,14 +25,14 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
-import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.common.exception.RSSManagerCommonException;
 import org.wso2.carbon.rssmanager.core.config.RSSConfig;
 import org.wso2.carbon.rssmanager.core.config.environment.RSSEnvironmentContext;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
+import org.wso2.carbon.rssmanager.core.exception.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerDataHolder;
 import org.wso2.carbon.rssmanager.core.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.sql.Connection;
@@ -276,7 +276,7 @@ public class RSSAdmin extends AbstractAdmin {
         DataSourceMetaInfo metaInfo =
                 RSSManagerUtil.createDSMetaInfo(database, entry.getUsername());
         try {
-            RSSManagerServiceComponent.getDataSourceService().addDataSource(metaInfo);
+            RSSManagerDataHolder.getInstance().getDataSourceService().addDataSource(metaInfo);
         } catch (DataSourceException e) {
             String msg = "Error occurred while creating carbon datasource for the database '" +
                     entry.getDatabaseName() + "'";
@@ -291,46 +291,25 @@ public class RSSAdmin extends AbstractAdmin {
                 databaseName, username);
     }
 
-    public boolean isInitializedTenant(String tenantDomain) throws RSSManagerException {
-        if (!isSuperTenantUser()) {
-            String msg = "Unauthorized operation, only super tenant is authorized to perform " +
-                    "this operation permission denied";
-            throw new RSSManagerException(msg);
-        }
-        int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-        boolean initialized = false;
-
-        return initialized;
-    }
-
-    public void initializeTenant(String tenantDomain) throws RSSManagerException {
-        if (!isSuperTenantUser()) {
-            String msg = "Unauthorized operation, only super tenant is authorized. " +
-                    "Tenant domain :" + CarbonContext.getThreadLocalCarbonContext().getTenantDomain() +
-                    " permission denied";
-            throw new RSSManagerException(msg);
-        }
-        int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-    }
-
     public Database[] getDatabasesForTenant(RSSEnvironmentContext ctx,
-                                                    String tenantDomain) throws RSSManagerException {
+                                            String tenantDomain) throws RSSManagerException {
+        int tenantId = -1;
+        Database[] databases = null;
         if (!isSuperTenantUser()) {
             String msg = "Unauthorized operation, only super tenant is authorized. " +
                     "Tenant domain :" + CarbonContext.getThreadLocalCarbonContext().getTenantDomain() +
                     " permission denied";
             throw new RSSManagerException(msg);
         }
-        int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-        Database[] databases = null;
         try {
+            tenantId = RSSManagerUtil.getTenantId(tenantDomain);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
             databases = this.getDatabases(ctx);
+        } catch (RSSManagerCommonException e) {
+            String msg = "Error occurred while retrieving database list of tenant '" +
+                    tenantDomain + "'";
+            throw new RSSManagerException(msg, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -349,32 +328,38 @@ public class RSSAdmin extends AbstractAdmin {
             int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-            try {
-                createDatabase(ctx, database);
-            } finally {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+            createDatabase(ctx, database);
         } catch (RSSManagerException e) {
             log.error("Error occurred while creating database for tenant : " + e.getMessage(), e);
             throw e;
+        } catch (RSSManagerCommonException e) {
+            String msg = "Error occurred while creating database '" + database.getName() +
+                    "' for tenant '" + tenantDomain + "' on RSS instance '" +
+                    database.getRssInstanceName() + "'";
+            throw new RSSManagerException(msg, e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
-    public Database getDatabaseForTenant(
-            RSSEnvironmentContext ctx, String databaseName,
+    public Database getDatabaseForTenant(RSSEnvironmentContext ctx, String databaseName,
             String tenantDomain) throws RSSManagerException {
+        Database metaData = null;
         if (!isSuperTenantUser()) {
             String msg = "Unauthorized operation, only super tenant is authorized to perform " +
                     "this operation permission denied";
             log.error(msg);
             throw new RSSManagerException(msg);
         }
-        int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
+        try {
+            int tenantId = RSSManagerUtil.getTenantId(tenantDomain);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-        Database metaData = null;
-        try {
             metaData = this.getDatabase(ctx, databaseName);
+        } catch (RSSManagerCommonException e) {
+            String msg = "Error occurred while retrieving metadata of the database '" +
+                    databaseName + "' belonging to tenant '" + tenantDomain + "'";
+            throw new RSSManagerException(msg, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -387,15 +372,12 @@ public class RSSAdmin extends AbstractAdmin {
     }
 
     private boolean isSuperTenantUser() throws RSSManagerException {
-        return (getCurrentTenantId() == MultitenantConstants.SUPER_TENANT_ID);
-    }
-
-    private int getCurrentTenantId() throws RSSManagerException {
         try {
-            return RSSManagerServiceComponent.getTenantManager().getTenantId(getTenantDomain());
-        } catch (UserStoreException e) {
-            throw new RSSManagerException("Error occurred while retrieving tenant id from the " +
-                    "current tenant domain : " + e.getMessage(), e);
+            return (RSSManagerUtil.getTenantId(getTenantDomain()) ==
+                    MultitenantConstants.SUPER_TENANT_ID);
+        } catch (RSSManagerCommonException e) {
+            throw new RSSManagerException("Error occurred while checking if the current tenant " +
+                    "is super tenant", e);
         }
     }
 

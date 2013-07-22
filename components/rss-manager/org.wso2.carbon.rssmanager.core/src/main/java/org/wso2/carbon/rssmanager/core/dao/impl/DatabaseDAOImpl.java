@@ -57,7 +57,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
             throw new RSSDAOException("Error occurred while creating the database " +
                     database.getName() + "' : " + e.getMessage(), e);
         } finally {
-            cleanupResources(null, stmt, conn);
+            RSSDAOUtil.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -79,7 +79,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
             throw new RSSDAOException("Error occurred while dropping the database '" +
                     databaseName + "' : " + e.getMessage(), e);
         } finally {
-            cleanupResources(null, stmt, conn);
+            RSSDAOUtil.cleanupResources(null, stmt, conn);
         }
     }
 
@@ -113,7 +113,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
                 throw new RSSDAOException("Error occurred while retrieving tenant id of the " +
                         "current tenant", e);
             } finally {
-                cleanupResources(rs, stmt, conn);
+                RSSDAOUtil.cleanupResources(rs, stmt, conn);
             }
         } else {
             String sql = "SELECT d.ID AS DATABASE_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND s.NAME = ? AND d.TYPE = ? AND d.TENANT_ID = ? AND d.NAME = ?";
@@ -139,7 +139,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
                 throw new RSSDAOException("Error occurred while retrieving tenant id of the " +
                         "current tenant", e);
             } finally {
-                cleanupResources(rs, stmt, conn);
+                RSSDAOUtil.cleanupResources(rs, stmt, conn);
             }
         }
     }
@@ -168,7 +168,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
             throw new RSSDAOException("Error occurred while retrieving the configuration of " +
                     "database '" + databaseName + "' : " + e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
 
@@ -195,7 +195,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
             throw new RSSDAOException("Error occurred while retrieving all databases : " +
                     e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
 
@@ -222,7 +222,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
             throw new RSSDAOException("Error occurred while incrementing system RSS " +
                     "database count : " + e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
     
@@ -244,7 +244,7 @@ public class DatabaseDAOImpl implements DatabaseDAO {
             throw new RSSDAOException("Error occurred while retrieving system RSS database " +
                     "count : " + e.getMessage(), e);
         } finally {
-            cleanupResources(rs, stmt, conn);
+            RSSDAOUtil.cleanupResources(rs, stmt, conn);
         }
     }
 
@@ -272,28 +272,5 @@ public class DatabaseDAOImpl implements DatabaseDAO {
         return new Database(id, dbName, rssName, url, type);
     }
 
-    private void cleanupResources(ResultSet rs, PreparedStatement stmt, Connection conn) {
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (SQLException ignore) {
-                //ignore
-            }
-        }
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException ignore) {
-                //ignore
-            }
-        }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException ignore) {
-                //ignore
-            }
-        }
-    }
     
 }

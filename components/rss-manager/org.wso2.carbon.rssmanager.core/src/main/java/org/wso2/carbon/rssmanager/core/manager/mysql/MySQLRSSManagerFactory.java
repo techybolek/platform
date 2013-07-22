@@ -31,7 +31,7 @@ public class MySQLRSSManagerFactory implements RSSManagerFactory {
     }
 
     public UserDefinedRSSManager getUserDefinedRSSManager() throws RSSManagerException {
-        return null;
+        return new MySQLUserDefinedRSSManager(null);
     }
     
 }
