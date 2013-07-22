@@ -12,7 +12,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.caching.core</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Caching Module - Core</name>
+    <name>WSO2 Caching - Core</name>
 
     <dependencies>
         <dependency>
@@ -71,53 +71,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution>
-                        <id>mar</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <tasks>
-                                <copy file="target/${project.artifactId}-${project.version}.jar"
-                                      tofile="target/wso2caching-${project.version}.mar"/>
-				<!--<copy file="target/${project.artifactId}-${wso2caching.version}.jar"-->
-                                      <!--tofile="target/wso2caching.mar"/>-->
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>mar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>target/wso2caching-${wso2caching.version}.mar</file>
-                                    <!--<file>target/${project.artifactId}-${wso2caching.version}.mar</file>-->
-                                    <type>mar</type>
-                                </artifact>
-                            </artifacts>
-                            <finalName>wso2caching-${project.version}</finalName>                            
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -129,10 +82,11 @@
                             ${pom.description}
                         </Bundle-Description>
                         <Export-Package>
-                            org.wso2.caching.core.*,
+                            org.wso2.carbon.caching.core.*,
+                            org.wso2.carbon.caching.module.*,
                         </Export-Package>
                         <Import-Package>
-                            !org.wso2.caching.core.*,
+                            !org.wso2.carbon.caching.core.*,
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
