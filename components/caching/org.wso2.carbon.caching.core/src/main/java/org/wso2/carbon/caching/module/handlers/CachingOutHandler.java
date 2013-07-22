@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.module.handlers;
+package org.wso2.carbon.caching.module.handlers;
 
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisModule;
-import org.wso2.caching.core.CachableResponse;
-import org.wso2.caching.core.CachingConstants;
-import org.wso2.caching.core.RequestHash;
-import org.wso2.caching.core.util.CachingUtils;
-import org.wso2.caching.core.util.SOAPMessageHelper;
+import org.wso2.carbon.caching.core.CachableResponse;
+import org.wso2.carbon.caching.core.CachingConstants;
+import org.wso2.carbon.caching.core.util.CachingUtils;
+import org.wso2.carbon.caching.core.util.SOAPMessageHelper;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayOutputStream;

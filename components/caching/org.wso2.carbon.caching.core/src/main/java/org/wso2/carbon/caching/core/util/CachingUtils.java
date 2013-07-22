@@ -1,4 +1,4 @@
-package org.wso2.caching.core.util;/*
+package org.wso2.carbon.caching.core.util;/*
 *  Copyright (c) 2005-2012, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
@@ -18,8 +18,7 @@ package org.wso2.caching.core.util;/*
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.caching.core.CachableResponse;
-import org.wso2.caching.core.RequestHash;
+import org.wso2.carbon.caching.core.CachableResponse;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.core.transport;
+package org.wso2.carbon.caching.core.transport;
 
 import org.apache.axis2.context.MessageContext;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.core;
+package org.wso2.carbon.caching.core;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

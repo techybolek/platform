@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.core.policy;
+package org.wso2.carbon.caching.core.policy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,10 +24,10 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.builders.xml.XmlPrimtiveAssertion;
 import org.apache.axis2.description.PolicySubject;
-import org.wso2.caching.core.CacheConfiguration;
-import org.wso2.caching.core.CachingConstants;
-import org.wso2.caching.core.CachingException;
-import org.wso2.caching.core.digest.DigestGenerator;
+import org.wso2.carbon.caching.core.CacheConfiguration;
+import org.wso2.carbon.caching.core.CachingConstants;
+import org.wso2.carbon.caching.core.CachingException;
+import org.wso2.carbon.caching.core.digest.DigestGenerator;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;
@@ -47,7 +47,7 @@ public class CachingPolicyProcessor {
      *
      * @param policySubject- Policy object from the EffectivePolicy
      * @return CacheManager object initialized and returned
-     * @throws org.wso2.caching.core.CachingException
+     * @throws CachingException
      *          - If an error occured in processing the policy
      *          or if there is a problem in loading the DigestGenerator
      */

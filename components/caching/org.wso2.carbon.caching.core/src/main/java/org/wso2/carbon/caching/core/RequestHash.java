@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.caching.core;
+package org.wso2.carbon.caching.core;
 
 import java.io.Serializable;
 

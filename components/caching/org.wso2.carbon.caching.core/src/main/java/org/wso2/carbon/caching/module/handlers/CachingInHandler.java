@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.module.handlers;
+package org.wso2.carbon.caching.module.handlers;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -23,10 +23,13 @@ import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
-import org.wso2.caching.core.*;
-import org.wso2.caching.core.digest.DigestGenerator;
-import org.wso2.caching.core.util.CachingUtils;
-import org.wso2.caching.core.util.FixedByteArrayOutputStream;
+import org.wso2.carbon.caching.core.CachableResponse;
+import org.wso2.carbon.caching.core.CacheConfiguration;
+import org.wso2.carbon.caching.core.CachingConstants;
+import org.wso2.carbon.caching.core.CachingException;
+import org.wso2.carbon.caching.core.digest.DigestGenerator;
+import org.wso2.carbon.caching.core.util.CachingUtils;
+import org.wso2.carbon.caching.core.util.FixedByteArrayOutputStream;
 
 import javax.xml.stream.XMLStreamException;
 

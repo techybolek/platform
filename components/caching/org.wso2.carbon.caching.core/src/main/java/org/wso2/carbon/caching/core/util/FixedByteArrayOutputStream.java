@@ -1,7 +1,8 @@
-package org.wso2.caching.core.util;
+package org.wso2.carbon.caching.core.util;
 
 
-import org.wso2.caching.core.CachingException;
+
+import org.wso2.carbon.caching.core.CachingException;
 
 import java.io.ByteArrayOutputStream;
 

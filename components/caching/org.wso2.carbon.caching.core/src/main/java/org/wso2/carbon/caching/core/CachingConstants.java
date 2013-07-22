@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.core;
+package org.wso2.carbon.caching.core;
 
-import org.wso2.caching.core.digest.DOMHASHGenerator;
-import org.wso2.caching.core.digest.DigestGenerator;
+
+import org.wso2.carbon.caching.core.digest.DOMHASHGenerator;
+import org.wso2.carbon.caching.core.digest.DigestGenerator;
 
 import javax.xml.namespace.QName;
 

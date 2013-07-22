@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.wso2.caching.module.handlers;
+package org.wso2.carbon.caching.module.handlers;
 
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.caching.core.CachingException;
+import org.wso2.carbon.caching.core.CachingException;
 
 public abstract class CachingHandler extends AbstractHandler {
 
