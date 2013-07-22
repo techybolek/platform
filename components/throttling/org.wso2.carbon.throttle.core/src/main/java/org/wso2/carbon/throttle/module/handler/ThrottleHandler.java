@@ -157,17 +157,6 @@ public abstract class ThrottleHandler extends AbstractHandler {
         String throttleId = throttle.getId();
         ConfigurationContext cc = messageContext.getConfigurationContext();
 
-        //check the env - whether clustered  or not
-        boolean isClusteringEnable = false;
-        ClusteringAgent clusteringAgent = null;
-        if (cc!=null) {
-            clusteringAgent = cc.getAxisConfiguration().getClusteringAgent();
-        }
-        if (clusteringAgent != null &&
-                clusteringAgent.getStateManager() != null) {
-            isClusteringEnable = true;
-        }
-
         // acquiring  cache manager.
         Cache<String, ConcurrentAccessController> cache;
         CacheManager cacheManager = Caching.getCacheManagerFactory().getCacheManager(THROTTLING_CACHE_MANAGER);
@@ -182,16 +171,9 @@ public abstract class ThrottleHandler extends AbstractHandler {
         // Get the concurrent access controller
         ConcurrentAccessController cac;
         String key = null;
-        if (isClusteringEnable) {
-            // for clustered  env.,gets it from axis configuration context
-            key = ThrottleConstants.THROTTLE_PROPERTY_PREFIX + throttleId
-                    + ThrottleConstants.CAC_SUFFIX;
-            //cac = (ConcurrentAccessController) cc.getProperty(key);
-            cac = cache.get(key);
-        } else {
-            // for non-clustered  env.,gets it from axis configuration context
-            cac = throttle.getConcurrentAccessController();
-        }
+        key = ThrottleConstants.THROTTLE_PROPERTY_PREFIX + throttleId
+                + ThrottleConstants.CAC_SUFFIX;
+        cac = cache.get(key);
 
         // check for concurrent access
         boolean canAccess = doConcurrentThrottling(cac, messageContext);
@@ -215,22 +197,19 @@ public abstract class ThrottleHandler extends AbstractHandler {
                 String callerId = null;
                 if (domain != null) {
                     //loads the ThrottleContext
-                    ThrottleContext context =
+                    ThrottleContext throttleCtxt =
                             throttle.getThrottleContext(ThrottleConstants.DOMAIN_BASED_THROTTLE_KEY);
-                    if (context != null) {
+                    if (throttleCtxt != null) {
                         //Loads the ThrottleConfiguration
-                        ThrottleConfiguration config = context.getThrottleConfiguration();
-                        if (config != null) {
+                        ThrottleConfiguration throttleConfig = throttleCtxt.getThrottleConfiguration();
+                        if (throttleConfig != null) {
                             //check for configuration for this caller
-                            callerId = config.getConfigurationKeyOfCaller(domain);
+                            callerId = throttleConfig.getConfigurationKeyOfCaller(domain);
                             if (callerId != null) {
                                 // If this is a clustered env.
-                                if (isClusteringEnable) {
-                                    context.setConfigurationContext(cc);
-                                    context.setThrottleId(throttleId);
-                                }
+                                throttleCtxt.setThrottleId(throttleId);
                                 AccessInformation infor =
-                                        accessRateController.canAccess(context, callerId,
+                                        accessRateController.canAccess(throttleCtxt, callerId,
                                                 ThrottleConstants.DOMAIN_BASE);
                                 StatCollector.collect(infor, domain, ThrottleConstants.DOMAIN_BASE);
 
@@ -244,26 +223,10 @@ public abstract class ThrottleHandler extends AbstractHandler {
                                     //if the access has denied by rate based throttling
                                     if (cac != null) {
                                         cac.incrementAndGet();
-                                        // set back if this is a clustered env
-                                        if (isClusteringEnable) {
-                                            /*cc.setProperty(key, cac);
-                                            //replicate the current state of ConcurrentAccessController
-                                            try {
-                                                if (debugOn) {
-                                                    log.debug("Going to replicates the " +
-                                                            "states of the ConcurrentAccessController" +
-                                                            " with key : " + key);
-                                                }
-                                                Replicator.replicate(cc, new String[]{key});
-                                            } catch (ClusteringFault clusteringFault) {
-                                                log.error("Error during replicating states ",
-                                                        clusteringFault);
-                                            }*/
-                                            cache.put(key, cac);
-                                            if(debugOn) {
-                                                log.debug("Added the state of ConcurrentAccessController " +
-                                                        "to cache with key : " + key);
-                                            }
+                                        cache.put(key, cac);
+                                        if (debugOn) {
+                                            log.debug("Added the state of ConcurrentAccessController " +
+                                                    "to cache with key : " + key);
                                         }
                                     }
                                     throw new AxisFault(" Access deny for a " +
@@ -300,11 +263,7 @@ public abstract class ThrottleHandler extends AbstractHandler {
                                 // check for configuration for this ip
                                 callerId = config.getConfigurationKeyOfCaller(ip);
                                 if (callerId != null) {
-                                    // for clustered env.
-                                    if (isClusteringEnable) {
-                                        context.setConfigurationContext(cc);
                                         context.setThrottleId(throttleId);
-                                    }
                                     AccessInformation infor =
                                             accessRateController.canAccess(context, callerId,
                                                     ThrottleConstants.IP_BASE);
@@ -320,12 +279,10 @@ public abstract class ThrottleHandler extends AbstractHandler {
                                         if (cac != null) {
                                             cac.incrementAndGet();
                                             // set back if this is a clustered env
-                                            if (isClusteringEnable) {
                                                 cache.put(key, cac);
                                                 if(debugOn) {
                                                     log.debug("Added the state of ConcurrentAccessController " +
                                                             "to cache with key : " + key);
-                                                }
                                             }
                                         }
                                         throw new AxisFault(" Access deny for a " +
@@ -349,7 +306,7 @@ public abstract class ThrottleHandler extends AbstractHandler {
             }
             // all the replication functionality of the access rate based throttling handles by itself
             // just replicate the current state of ConcurrentAccessController
-            if (isClusteringEnable && cac != null) {
+            if (cac != null) {
                 cache.put(key, cac);
                 if(debugOn) {
                     log.debug("Added the state of ConcurrentAccessController " +
@@ -358,10 +315,10 @@ public abstract class ThrottleHandler extends AbstractHandler {
             }
 
             //finally engage rolebased access throttling if available
-            doRoleBasedAccessThrottling(throttle, messageContext, isClusteringEnable);
+            doRoleBasedAccessThrottling(throttle, messageContext);
         } else {
             //replicate the current state of ConcurrentAccessController
-            if (isClusteringEnable) {
+            if (cac != null) {
                 cache.put(key, cac);
                 if(debugOn) {
                     log.debug("Added the state of ConcurrentAccessController " +
@@ -420,9 +377,8 @@ public abstract class ThrottleHandler extends AbstractHandler {
      * @param messageContext             MessageContext - message level states
      * @return true if access is allowed through concurrent throttling ,o.w false
      */
-    private boolean doRoleBasedAccessThrottling(Throttle throttle, MessageContext messageContext,
-                                                boolean isClusteringEnable) throws AxisFault,
-            ThrottleException {
+    private boolean doRoleBasedAccessThrottling(Throttle throttle, MessageContext messageContext) throws
+            AxisFault,ThrottleException {
 
         boolean canAccess = true;
         if (throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY) == null) {
@@ -445,12 +401,9 @@ public abstract class ThrottleHandler extends AbstractHandler {
         }
         String key = null;
         ConcurrentAccessController cac = null;
-        if (isClusteringEnable) {
-            // for clustered  env.,gets it from axis configuration context
-            key = ThrottleConstants.THROTTLE_PROPERTY_PREFIX + throttleId
-                    + ThrottleConstants.CAC_SUFFIX;
-            cac = cache.get(key);
-        }
+        key = ThrottleConstants.THROTTLE_PROPERTY_PREFIX + throttleId
+                + ThrottleConstants.CAC_SUFFIX;
+        cac = cache.get(key);
 
         if (messageContext.getFLOW() == MessageContext.IN_FLOW) {
             //gets the remote caller role name
@@ -491,11 +444,7 @@ public abstract class ThrottleHandler extends AbstractHandler {
                         //check for configuration for this caller
                         consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
                         if (consumerRoleID != null) {
-                            // If this is a clustered env.
-                            if (isClusteringEnable) {
-                                context.setConfigurationContext(cc);
-                                context.setThrottleId(throttleId);
-                            }
+                            context.setThrottleId(throttleId);
                             AccessInformation infor =
                                     roleBasedAccessController.canAccess(context, consumerKey,
                                             consumerRoleID);
@@ -510,16 +459,12 @@ public abstract class ThrottleHandler extends AbstractHandler {
                                 //if the access has denied by rate based throttling
                                 if (cac != null) {
                                     cac.incrementAndGet();
-                                    // set back if this is a clustered env
-                                    if (isClusteringEnable) {
-                                        if (isClusteringEnable) {
+
                                             cache.put(key, cac);
                                             if(debugOn) {
                                                 log.debug("Added the state of ConcurrentAccessController " +
                                                         "to cache with key : " + key);
                                             }
-                                        }
-                                    }
                                 }
                                 throw new AxisFault(" Access deny for a " +
                                         "caller with Domain " + consumerKey + " " +

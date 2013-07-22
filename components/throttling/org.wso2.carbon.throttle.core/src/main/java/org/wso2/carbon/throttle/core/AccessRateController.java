@@ -115,6 +115,7 @@ public class AccessRateController {
                     if (!caller.canAccess(throttleContext, configuration, currentTime)) {
                         //if current caller cannot access , then perform cleaning
                         log.info(ACCESS_DENIED_TEMPORALLY);
+                        throttleContext.processCleanList(currentTime);
                         accessInformation.setAccessAllowed(false);
                         accessInformation.setFaultReason(ACCESS_DENIED_TEMPORALLY);
                         return accessInformation;

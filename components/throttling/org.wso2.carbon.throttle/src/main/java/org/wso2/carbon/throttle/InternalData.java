@@ -16,7 +16,8 @@
 
 package org.wso2.carbon.throttle;
 
-import org.wso2.throttle.ThrottleConstants;
+
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 /**
  * A Bean class to keep configs for a particular IP range. Corresponds to a single

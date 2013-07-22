@@ -12,7 +12,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.throttle.mar</artifactId>
     <packaging>jar</packaging>
-    <version>3.3.0</version>
     <name>WSO2 Throttling module - Mar</name>
 
     <build>

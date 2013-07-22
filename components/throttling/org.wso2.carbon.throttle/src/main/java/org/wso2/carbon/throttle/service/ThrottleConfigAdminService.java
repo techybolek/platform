@@ -46,7 +46,7 @@ import org.wso2.carbon.throttle.InternalData;
 import org.wso2.carbon.throttle.ThrottleComponentConstants;
 import org.wso2.carbon.throttle.ThrottleComponentException;
 import org.wso2.carbon.throttle.ThrottlePolicy;
-import org.wso2.throttle.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
