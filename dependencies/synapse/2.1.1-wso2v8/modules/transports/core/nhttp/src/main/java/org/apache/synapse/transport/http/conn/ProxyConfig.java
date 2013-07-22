@@ -60,14 +60,16 @@ public class ProxyConfig {
     public Set<String> getProxyBypass() {
         return proxyBypass;
     }
-    
+
     public HttpHost selectProxy(final HttpHost target) {
         if (this.proxy != null) {
-            if (!this.proxyBypass.contains(target.getHostName().toLowerCase(Locale.US))) {
-                return this.proxy;
+            for (String proxyByPassEntry : this.proxyBypass) {
+                if (target.getHostName().toLowerCase(Locale.US).matches(proxyByPassEntry)) {
+                    return null;
+                }
             }
         }
-        return null;
+        return this.proxy;
     }
 
     @Override
