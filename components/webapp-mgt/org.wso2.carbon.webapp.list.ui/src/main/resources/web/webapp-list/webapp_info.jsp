@@ -52,6 +52,7 @@
     WebAppDataExtractor webAppDataExtractor =new WebAppDataExtractor();
     List wsdlURLS=null;
     List wadlURLS=null;
+    String serviceListPath = null;
 
     String servletContext = "/";
 
@@ -79,6 +80,7 @@
                     webAppDataExtractor.getServletXML(client.getWarFileInputStream(webapp.getWebappFile(),webappType));
                     wsdlURLS= webAppDataExtractor.getWSDLs(urlPrefix + webapp.getContext() + servletContext);
                     wadlURLS= webAppDataExtractor.getWADLs(urlPrefix + webapp.getContext() + servletContext);
+                    serviceListPath = webAppDataExtractor.getServiceListPath();
                 }
             }
             else if (webappState.equalsIgnoreCase("started")) {
@@ -268,9 +270,9 @@
                                     if (webappType.equalsIgnoreCase("JaxWebapp")) {
                                      servletContext = webapp.getServletContext();
                                 %>
-                                <a href="<%= urlPrefix + webapp.getContext() + servletContext%>"
+                                <a href="<%= urlPrefix + webapp.getContext() + servletContext + serviceListPath%>"
                                    target="_blank">
-                                    <%=webapp.getContext() + servletContext%>
+                                    <%=webapp.getContext() + servletContext + serviceListPath%>
                                 </a>
                                 <%
                                     }

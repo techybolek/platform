@@ -18,18 +18,33 @@ package org.wso2.carbon.webapp.list.ui;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.xml.sax.InputSource;
 
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.*;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.xml.namespace.QName;
 
 public class WebAppDataExtractor {
 
     private Map<String, String> jaxWSMap = new HashMap<String, String>();
     private Map<String, String> jaxRSMap = new HashMap<String, String>();
+    private String serviceListPath = "";
+
+    private static final Log log = LogFactory.getLog(WebAppDataExtractor.class);
 
     public Map<String, String> getJaxWSMap() {
         return jaxWSMap;
@@ -42,20 +57,19 @@ public class WebAppDataExtractor {
     public void getServletXML(InputStream inputStream) throws Exception {
         jaxWSMap.clear();
         jaxRSMap.clear();
-        String cxfConfigeFileName = "";
-        ZipInputStream stream = new ZipInputStream(inputStream);
+        ZipInputStream zipInputStream = new ZipInputStream(inputStream);
 
         try {
 
             ZipEntry entry;
 
             HashMap<String, byte[]> map = new HashMap<String, byte[]>();
-            while ((entry = stream.getNextEntry()) != null) {
+            while ((entry = zipInputStream.getNextEntry()) != null) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] buff = new byte[1024];
                 int count;
 
-                while ((count = stream.read(buff)) != -1) {
+                while ((count = zipInputStream.read(buff)) != -1) {
                     baos.write(buff, 0, count);
                 }
 
@@ -64,15 +78,13 @@ public class WebAppDataExtractor {
                 map.put(filename, bytes);
             }
 
-            String retVal = getConfigurationSourceName(new String(map.get("WEB-INF/web.xml")));
-            cxfConfigeFileName = (!retVal.equalsIgnoreCase("") && !retVal.equalsIgnoreCase(null)) ? retVal : "WEB-INF/cxf-servlet.xml";
+            String webXmlString = stripNonValidXMLCharacters(new String(map.get("WEB-INF/web.xml")));
 
-            String configFile = new String(map.get(cxfConfigeFileName));
-            map = null;
+            String cxfConfigFileLocation = processCxfConfigFileLocation(webXmlString);
+            String configFile = new String(map.get(cxfConfigFileLocation));
 
             configFile = stripNonValidXMLCharacters(configFile);
             OMElement element = AXIOMUtil.stringToOM(configFile);
-
 
             Iterator<OMElement> iterator = element.getChildrenWithName(new QName(
                     "http://cxf.apache.org/jaxws", "endpoint"));
@@ -107,15 +119,17 @@ public class WebAppDataExtractor {
 
             }
 
+            setServiceListPath(processServiceListPathWebXml(webXmlString));
+
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            stream.close();
+            zipInputStream.close();
         }
     }
 
     private static String stripNonValidXMLCharacters(String in) {
-        StringBuffer out = new StringBuffer(); // Used to hold the output.
+        StringBuilder out = new StringBuilder(); // Used to hold the output.
         char current; // Used to reference the current character.
 
         if (in == null || ("".equals(in)))
@@ -156,43 +170,94 @@ public class WebAppDataExtractor {
         return list;
     }
 
+    public String getServiceListPath() {
+        return serviceListPath;
+    }
+    
+    private void setServiceListPath(String serviceListPathInitParam) {
+        boolean emptyAddress = false;
+        for(String address : jaxRSMap.values()) {
+            if ("/".equals(address)) {
+                emptyAddress = true;
+            }
+        }
+
+        for(String address : jaxWSMap.values()) {
+            if ("/".equals(address)) {
+                emptyAddress = true;
+            }
+        }
+
+        if(emptyAddress) {
+            serviceListPath = !"".equals(serviceListPathInitParam) ? serviceListPathInitParam : "/services";
+        } else {
+            serviceListPath = serviceListPathInitParam;
+        }
+    }
+
     /**
      * This method reads the web.xml file and seach for whether cxf configuration file is included
      *
-     * @param String
+     * @param stream stream
      * @return cxf file localtion
      */
 
-    private String getConfigurationSourceName(String stream) {
-        String configName = "";
+    private String processCxfConfigFileLocation(String stream) {
 
         try {
-            stream = stripNonValidXMLCharacters(stream);
-            OMElement ome = AXIOMUtil.stringToOM(stream);
+            InputSource is = new InputSource();
+            is.setCharacterStream(new StringReader(stream));
 
-            Iterator<OMElement> omElementIterator = ome.getChildElements();
-            while (omElementIterator.hasNext()) {
-                OMElement levelOne = omElementIterator.next();
-                Iterator<OMElement> levelTwo = (Iterator<OMElement>) levelOne.getChildElements();
+            DocumentBuilder b = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            org.w3c.dom.Document doc = b.parse(is);
 
-                while (levelTwo.hasNext()) {
-                    OMElement levelThree = levelTwo.next();
-                    Iterator<OMElement> levelFour = levelThree.getChildrenWithNamespaceURI("http://java.sun.com/xml/ns/javaee");
-                    while (levelFour.hasNext()) {
-                        OMElement ConfigurationName = levelFour.next();
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            String configLocationParam = xPath.evaluate(
+                    "/web-app/servlet/init-param[param-name/text()=\"config-location\"]/param-value/text()",
+                    doc.getDocumentElement());
 
-                        if (ConfigurationName.getText().toString().equalsIgnoreCase("config-location")) {
-                            configName = levelFour.next().getText();
-                            return configName.substring(1);
-                        }
-                    }
-                }
-
+            if (!"".equals(configLocationParam) && configLocationParam != null ) {
+                return configLocationParam;
+            } else {
+                return "WEB-INF/cxf-servlet.xml";
             }
-            return configName;
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
+            log.error(ex.getMessage(), ex);
+            return "WEB-INF/cxf-servlet.xml";
         }
     }
+
+    /**
+     * This method reads the web.xml file and seach for whether service-list-path init param is set
+     *
+     * @param stream stream
+     * @return cxf file localtion
+     */
+
+    private String processServiceListPathWebXml(String stream) {
+
+        try {
+            InputSource is = new InputSource();
+            is.setCharacterStream(new StringReader(stream));
+
+            DocumentBuilder b = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            org.w3c.dom.Document doc = b.parse(is);
+
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            String serviceListPathParam = xPath.evaluate(
+                    "/web-app/servlet/init-param[param-name/text()=\"service-list-path\"]/param-value/text()",
+                    doc.getDocumentElement());
+
+            if (!"".equals(serviceListPathParam) && serviceListPathParam != null ) {
+                return serviceListPathParam;
+            } else {
+                return "";
+            }
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            return "";
+        }
+    }
+
+
 }
