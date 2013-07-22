@@ -28,6 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ public class WebAppDataExtractor {
     private Map<String, String> jaxWSMap = new HashMap<String, String>();
     private Map<String, String> jaxRSMap = new HashMap<String, String>();
     private String serviceListPath = "";
+    private String cxfConfigFileLocation = "WEB-INF/cxf-servlet.xml";
+    private String jaxservletUrlPattern = "services";
 
     private static final Log log = LogFactory.getLog(WebAppDataExtractor.class);
 
@@ -54,13 +57,12 @@ public class WebAppDataExtractor {
         this.jaxWSMap = jaxWSMap;
     }
 
-    public void getServletXML(InputStream inputStream) throws Exception {
+    public void getServletXML(InputStream inputStream) {
         jaxWSMap.clear();
         jaxRSMap.clear();
         ZipInputStream zipInputStream = new ZipInputStream(inputStream);
 
         try {
-
             ZipEntry entry;
 
             HashMap<String, byte[]> map = new HashMap<String, byte[]>();
@@ -80,7 +82,7 @@ public class WebAppDataExtractor {
 
             String webXmlString = stripNonValidXMLCharacters(new String(map.get("WEB-INF/web.xml")));
 
-            String cxfConfigFileLocation = processCxfConfigFileLocation(webXmlString);
+            processWebXml(webXmlString);
             String configFile = new String(map.get(cxfConfigFileLocation));
 
             configFile = stripNonValidXMLCharacters(configFile);
@@ -122,9 +124,13 @@ public class WebAppDataExtractor {
             setServiceListPath(processServiceListPathWebXml(webXmlString));
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.getMessage(), ex);
         } finally {
-            zipInputStream.close();
+            try {
+                zipInputStream.close();
+            } catch (IOException e) {
+                //ignore
+            }
         }
     }
 
@@ -150,7 +156,7 @@ public class WebAppDataExtractor {
         List<String> list = new ArrayList<String>();
         Iterator<String> iterator = jaxWSMap.keySet().iterator();
         while (iterator.hasNext()) {
-            list.add(serverURL + "services" + jaxWSMap.get(iterator.next()) + "?wsdl");
+            list.add(serverURL + jaxservletUrlPattern + jaxWSMap.get(iterator.next()) + "?wsdl");
         }
         if (list.size() == 0) {
             return null;
@@ -162,7 +168,7 @@ public class WebAppDataExtractor {
         List<String> list = new ArrayList<String>();
         Iterator<String> iterator = jaxRSMap.keySet().iterator();
         while (iterator.hasNext()) {
-            list.add(serverURL + "services" + jaxRSMap.get(iterator.next()) + "?_wadl");
+            list.add(serverURL + jaxservletUrlPattern + jaxRSMap.get(iterator.next()) + "?_wadl");
         }
         if (list.size() == 0) {
             return null;
@@ -202,28 +208,45 @@ public class WebAppDataExtractor {
      * @return cxf file localtion
      */
 
-    private String processCxfConfigFileLocation(String stream) {
+    private void processWebXml(String stream) {
 
         try {
             InputSource is = new InputSource();
             is.setCharacterStream(new StringReader(stream));
 
             DocumentBuilder b = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            org.w3c.dom.Document doc = b.parse(is);
+            org.w3c.dom.Document doc = b.parse(is); //doc.getDomConfig().setParameter();
 
             XPath xPath = XPathFactory.newInstance().newXPath();
             String configLocationParam = xPath.evaluate(
-                    "/web-app/servlet/init-param[param-name/text()=\"config-location\"]/param-value/text()",
+                    "/web-app/servlet/init-param[param-name[contains(text(),'config-location')]]/param-value/text()",
+                    doc.getDocumentElement());
+            String cxfServletName = xPath.evaluate(
+                    "/web-app/servlet[servlet-class[contains(text(),'org.apache.cxf.transport.servlet.CXFServlet')]]/servlet-name/text()",
+                    doc.getDocumentElement());
+            String jaxservletUrlPattern = xPath.evaluate(
+                    "/web-app/servlet-mapping[servlet-name/text()=\"" + cxfServletName + "\"]/url-pattern/text()",
                     doc.getDocumentElement());
 
             if (!"".equals(configLocationParam) && configLocationParam != null ) {
-                return configLocationParam;
+                cxfConfigFileLocation = configLocationParam;
             } else {
-                return "WEB-INF/cxf-servlet.xml";
+                cxfConfigFileLocation = "WEB-INF/cxf-servlet.xml";
             }
+            if (!"".equals(jaxservletUrlPattern) && jaxservletUrlPattern != null ) {
+                if (jaxservletUrlPattern.endsWith("/*")) {
+                    jaxservletUrlPattern = jaxservletUrlPattern.substring(0, jaxservletUrlPattern.length() - 2);
+                }
+                if (jaxservletUrlPattern.startsWith("/")) {
+                    jaxservletUrlPattern = jaxservletUrlPattern.substring(1);
+                }
+                this.jaxservletUrlPattern = jaxservletUrlPattern;
+            } else {
+                this.jaxservletUrlPattern = "services";
+            }
+
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            return "WEB-INF/cxf-servlet.xml";
         }
     }
 
@@ -245,7 +268,7 @@ public class WebAppDataExtractor {
 
             XPath xPath = XPathFactory.newInstance().newXPath();
             String serviceListPathParam = xPath.evaluate(
-                    "/web-app/servlet/init-param[param-name/text()=\"service-list-path\"]/param-value/text()",
+                    "/web-app/servlet/init-param[param-name[contains(text(), 'service-list-path')]]/param-value/text()",
                     doc.getDocumentElement());
 
             if (!"".equals(serviceListPathParam) && serviceListPathParam != null ) {
