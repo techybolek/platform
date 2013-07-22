@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.webapp.mgt;
 
+import java.io.File;
+
 /**
  * Web Application Constants
  */
@@ -38,6 +40,10 @@ public final class WebappsConstants {
     public static final String TOMCAT_GENERIC_WEBAPP_DEPLOYER = "tomcatGenericWebappsDeplyer";
     public static final String TOMCAT_JAGGERY_WEBAPP_DEPLOYER = "tomcatJaggeryWebappsDeplyer";
 //    public static final String TOMCAT_JAX_WEBAPP_DEPLOYER = "tomcatJaxWebappsDeplyer";
+
+    public static final String WEBAPP_METADATA_DIR = "artifactMetafiles" + File.separator + "webapp";
+
+    public static final String ENABLE_BAM_STATISTICS = "enable.statistics";
 
     /**
      * This is to filter out custom webapp types. If a custom webapp deployer is added, it should

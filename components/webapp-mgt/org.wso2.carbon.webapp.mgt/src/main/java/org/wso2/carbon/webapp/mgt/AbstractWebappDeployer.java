@@ -1,5 +1,6 @@
 package org.wso2.carbon.webapp.mgt;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.AbstractDeployer;
 import org.apache.axis2.deployment.DeploymentException;
@@ -11,7 +12,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.deployment.DeploymentSynchronizer;
+import org.wso2.carbon.core.persistence.metadata.ArtifactMetadataException;
+import org.wso2.carbon.core.persistence.metadata.ArtifactMetadataManager;
+import org.wso2.carbon.core.persistence.metadata.ArtifactType;
+import org.wso2.carbon.core.persistence.metadata.DeploymentArtifactMetadataFactory;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -141,6 +145,8 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                     webappType = WebappsConstants.JAX_WEBAPP_FILTER_PROP;
                 }
                 webApplication.setProperty(WebappsConstants.WEBAPP_FILTER, webappType);
+
+                persistWebappMetadata(webApplication, axisConfig);
             }
 
         } catch (Exception e) {
@@ -179,6 +185,21 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
                 }
             }
         }
+    }
+
+    private void persistWebappMetadata(WebApplication webApplication, AxisConfiguration axisConfig) throws
+            ArtifactMetadataException, AxisFault {
+        String bamStatsEnabled = webApplication.findParameter(WebappsConstants.ENABLE_BAM_STATISTICS);
+        if (bamStatsEnabled == null) {
+                webApplication.addParameter(WebappsConstants.ENABLE_BAM_STATISTICS, Boolean.FALSE.toString());
+        }
+        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
+
+        ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
+                getMetadataManager();
+        manager.setParameter(webApplication.getContextName(), type,
+                WebappsConstants.ENABLE_BAM_STATISTICS, Boolean.FALSE.toString());
+
     }
 
     private boolean isSkippedWebapp(File webappFile) {
