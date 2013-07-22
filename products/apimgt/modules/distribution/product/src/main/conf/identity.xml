@@ -90,7 +90,7 @@
         <!-- Supported Response Types -->
         <SupportedResponseTypes>code,token</SupportedResponseTypes>
         <!-- Supported Grant Types -->
-        <SupportedGrantTypes>password,refresh_token,client_credentials,authorization_code</SupportedGrantTypes>
+        <SupportedGrantTypes>password,refresh_token,client_credentials,authorization_code,urn:ietf:params:oauth:grant-type:saml2-bearer</SupportedGrantTypes>
         <OAuthCallbackHandlers>
             <OAuthCallbackHandler Class="org.wso2.carbon.apimgt.keymgt.util.APIManagerOAuthCallbackHandler"/>
         </OAuthCallbackHandlers>
@@ -130,10 +130,13 @@
 	</AuthorizationContextTokenGeneration>
 
     	<SAML2Grant>
-		<Issuers>https://localhost:9443/samlsso</Issuers>
-		<TokenEndPoint>https://localhost:9443/oauth2endpoints/token</TokenEndPoint>
-		<TokenEndPointAliases>tokenEP</TokenEndPointAliases>
-		<Audience>https://localhost:9443/oauth2endpoints/token</Audience>
+			<Issuers>
+				<Issuer trustEntityId="wso2carbon">https://localhost:9443/samlsso</Issuer>
+			</Issuers>
+			<TokenEndPoint>https://localhost:9443/oauth2endpoints/token</TokenEndPoint>
+			<TokenEndPointAliases>tokenEP</TokenEndPointAliases>
+			<Audience>https://localhost:9443/oauth2endpoints/token</Audience>
+			<!--SAML2TokenHandler></SAML2TokenHandler-->
 	</SAML2Grant>
 		<!-- Primary/secondary login configuration for APIstore. If user likes to keep two login attributes in a distributed setup, to login the APIstore, 
 		he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
