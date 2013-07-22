@@ -176,20 +176,19 @@
         <carbon.version>4.2.0-SNAPSHOT</carbon.version>
         <carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
         <carbon.platform.version>4.2.0-SNAPSHOT</carbon.platform.version>
-        <log4j.version>1.2.13</log4j.version>
         <commons.logging.version>1.1</commons.logging.version>
         <opencsv.version>1.8</opencsv.version>
-        <poi.version>3.0-FINAL</poi.version>
-        <axis2.transport.version>1.1.0-wso2v6</axis2.transport.version>
-        <axis2.wso2.version>1.6.1.wso2v1</axis2.wso2.version>
-        <axiom.wso2.version>1.2.11.wso2v2</axiom.wso2.version>
-        <servlet-api.version>2.4</servlet-api.version>
-        <log4j.version>1.2.13</log4j.version>
-        <commons.logging.version>1.1</commons.logging.version>
+        <!--poi.version>3.0-FINAL</poi.version-->
+        <!--axis2.transport.version>1.1.0-wso2v6</axis2.transport.version-->
+        <axis2.wso2.version>${orbit.version.axis2}</axis2.wso2.version>
+        <axiom.wso2.version>${orbit.version.axiom}</axiom.wso2.version>
+        <servlet-api.version>${version.javax.servlet}</servlet-api.version>
+        <log4j.version>${version.log4j}</log4j.version>
+        <commons.logging.version>1.1.1</commons.logging.version>
         <jline.version>0.9.94</jline.version>
         <commons-cli.version>1.2.0.wso2v1</commons-cli.version>
         <commons-daemon.version>1.0.7</commons-daemon.version>
-        <version.h2.engine>1.2.140.wso2v3</version.h2.engine>
+        <!--version.h2.engine>1.2.140.wso2v3</version.h2.engine-->
         <ss.version>1.1.0-SNAPSHOT</ss.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
