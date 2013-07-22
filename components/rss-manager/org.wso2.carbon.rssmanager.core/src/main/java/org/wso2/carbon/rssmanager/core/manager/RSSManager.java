@@ -17,13 +17,10 @@ import org.wso2.carbon.rssmanager.core.util.RSSManagerUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.sql.XAConnection;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -154,7 +151,7 @@ public abstract class RSSManager {
     public void dropRSSInstance(String rssInstanceName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             getDSWrapperRepository().removeRSSInstanceDSWrapper(rssInstanceName);
             getRSSDAO().getRSSInstanceDAO().removeRSSInstance(rssInstanceName, tenantId);
             //TODO : Drop dependent databases etc.
@@ -175,7 +172,7 @@ public abstract class RSSManager {
     public void editRSSInstanceConfiguration(RSSInstance rssInstance) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             getRSSDAO().getRSSInstanceDAO().updateRSSInstance(rssInstance, tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -194,7 +191,7 @@ public abstract class RSSManager {
     public RSSInstance[] getRSSInstances() throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance[] rssInstances = getRSSDAO().getRSSInstanceDAO().getRSSInstances(tenantId);
 
             if (!(tenantId == MultitenantConstants.SUPER_TENANT_ID)) {
@@ -219,7 +216,7 @@ public abstract class RSSManager {
     public Database[] getDatabases() throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseDAO().getDatabases(tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -238,7 +235,7 @@ public abstract class RSSManager {
     public DatabaseUser[] getDatabaseUsers() throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseUserDAO().getDatabaseUsers(tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -296,7 +293,7 @@ public abstract class RSSManager {
                 throw new RSSManagerException("Database privilege template information " +
                         "cannot be null");
             }
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             boolean isExist =
                     getRSSDAO().getDatabasePrivilegeTemplateDAO().isDatabasePrivilegeTemplateExist(
                             template.getName(), tenantId);
@@ -332,7 +329,7 @@ public abstract class RSSManager {
                 throw new RSSManagerException("Database privilege template information " +
                         "cannot be null");
             }
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             getRSSDAO().getDatabasePrivilegeTemplateDAO().updateDatabasePrivilegesTemplate(template,
                     tenantId);
         } catch (RSSDAOException e) {
@@ -352,7 +349,7 @@ public abstract class RSSManager {
     public RSSInstance getRSSInstance(String rssInstanceName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
         } catch (RSSDAOException e) {
             if (inTx && getRSSTransactionManager().hasNoActiveTransaction()) {
@@ -401,7 +398,7 @@ public abstract class RSSManager {
                                    String databaseName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseDAO().isDatabaseExist(rssInstanceName, databaseName,
                     tenantId);
         } catch (RSSDAOException e) {
@@ -422,7 +419,7 @@ public abstract class RSSManager {
                                        String databaseUsername) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabaseUserDAO().isDatabaseUserExist(rssInstanceName,
                     databaseUsername, tenantId);
         } catch (RSSDAOException e) {
@@ -442,7 +439,7 @@ public abstract class RSSManager {
     public boolean isDatabasePrivilegeTemplateExist(String templateName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabasePrivilegeTemplateDAO().isDatabasePrivilegeTemplateExist(
                     templateName, tenantId);
         } catch (RSSDAOException e) {
@@ -498,7 +495,7 @@ public abstract class RSSManager {
     public void dropDatabasePrivilegesTemplate(String templateName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             getRSSDAO().getDatabasePrivilegeTemplateDAO().
                     removeDatabasePrivilegesTemplateEntries(templateName, tenantId);
             getRSSDAO().getDatabasePrivilegeTemplateDAO().removeDatabasePrivilegesTemplate(
@@ -521,7 +518,7 @@ public abstract class RSSManager {
             RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabasePrivilegeTemplateDAO().getDatabasePrivilegesTemplates(
                     tenantId);
         } catch (RSSDAOException e) {
@@ -541,7 +538,7 @@ public abstract class RSSManager {
             String templateName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             return getRSSDAO().getDatabasePrivilegeTemplateDAO().getDatabasePrivilegesTemplate(
                     templateName, tenantId);
         } catch (RSSDAOException e) {
@@ -773,13 +770,7 @@ public abstract class RSSManager {
                 }
             }
             return conn;
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while creating datasource connection : " +
-                    e.getMessage(), e);
-        } catch (SystemException e) {
-            throw new RSSManagerException("Error occurred while creating datasource connection : " +
-                    e.getMessage(), e);
-        } catch (RollbackException e) {
+        } catch (Exception e) {
             throw new RSSManagerException("Error occurred while creating datasource connection : " +
                     e.getMessage(), e);
         }

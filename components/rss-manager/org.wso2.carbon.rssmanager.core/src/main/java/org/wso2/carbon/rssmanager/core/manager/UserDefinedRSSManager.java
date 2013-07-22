@@ -43,7 +43,7 @@ public abstract class UserDefinedRSSManager extends RSSManager {
                                         String username) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             boolean isExist = getRSSDAO().getDatabaseUserDAO().isDatabaseUserExist(
                     rssInstanceName, username, tenantId);
             if (isExist) {
@@ -78,7 +78,7 @@ public abstract class UserDefinedRSSManager extends RSSManager {
                                 String databaseName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance rssInstance =
                     getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
             if (rssInstance == null) {
@@ -108,7 +108,7 @@ public abstract class UserDefinedRSSManager extends RSSManager {
                                                      String databaseName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance rssInstance =
                     getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
             if (rssInstance == null) {
@@ -138,7 +138,7 @@ public abstract class UserDefinedRSSManager extends RSSManager {
             String rssInstanceName, String databaseName) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             DatabaseUser[] existingUsers =
                     getRSSDAO().getDatabaseUserDAO().getDatabaseUsersByDatabase(rssInstanceName,
                             databaseName, tenantId);
@@ -177,7 +177,7 @@ public abstract class UserDefinedRSSManager extends RSSManager {
                                                           String username) throws RSSManagerException {
         boolean inTx = beginTransaction();
         try {
-            int tenantId = RSSManagerUtil.getTenantId();
+            final int tenantId = RSSManagerUtil.getTenantId();
             RSSInstance rssInstance =
                     getRSSDAO().getRSSInstanceDAO().getRSSInstance(rssInstanceName, tenantId);
             if (rssInstance == null) {
