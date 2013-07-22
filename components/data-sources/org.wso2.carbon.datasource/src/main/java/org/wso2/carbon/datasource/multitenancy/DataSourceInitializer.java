@@ -45,11 +45,14 @@ public class DataSourceInitializer extends AbstractAxis2ConfigurationContextObse
             new HashMap<Integer, List<DataSourceRepositoryListener>>();
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
-    	int tenantId = CarbonContext.getCurrentContext().getTenantId();
-	String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain(); 	
-    	PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
-	PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
+
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+        try {
+            String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
+            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
 
         //creating a separate datasource repository for the tenant
         DataSourceInformationRepository repository = new DataSourceInformationRepository();
@@ -83,7 +86,10 @@ public class DataSourceInitializer extends AbstractAxis2ConfigurationContextObse
         	}
         	dsrListenerMap.remove(tenantId);
         }
-        PrivilegedCarbonContext.endTenantFlow();
+
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
     
     public static void addDataSourceRepositoryListener(int tenantId,
