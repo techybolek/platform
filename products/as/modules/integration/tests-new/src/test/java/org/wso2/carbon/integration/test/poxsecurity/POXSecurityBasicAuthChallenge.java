@@ -33,7 +33,9 @@ import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
 
-
+/**
+ * https://wso2.org/jira/browse/IDENTITY-1161
+ */
 public class POXSecurityBasicAuthChallenge extends ASIntegrationTest {
     private static final String SERVICE_NAME = "Axis2Service";
 
