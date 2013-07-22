@@ -255,7 +255,7 @@
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
-        <file>
+        <!--file>
             <source>../../INSTALL.txt</source>
             <outputDirectory>wso2ss-${pom.version}</outputDirectory>
             <filtered>true</filtered>
@@ -266,7 +266,7 @@
             <outputDirectory>wso2ss-${pom.version}</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
-        </file>
+        </file-->
 
         <!--file>
             <source>../../docs/xdoc/release-notes.xml</source>
