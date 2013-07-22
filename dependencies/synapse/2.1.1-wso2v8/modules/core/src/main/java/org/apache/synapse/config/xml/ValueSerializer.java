@@ -59,5 +59,33 @@ public class ValueSerializer {
         }
         return elem;
     }
+    
+    /**
+     * Serialize the Value object to an OMElement representing the entry
+     *
+     * @param key  Value to serialize
+     * @param elem OMElement
+     * @return OMElement
+     */
+	public OMElement serializeTextValue(Value key, String name, OMElement elem) {
+		if (key != null) {
+			if (key.getExpression() == null) {
+				// static key
+				elem.setText(key.getKeyValue());
+			} else {
+				String startChar = "{", endChar = "}";
+				// if this is an expr type key we add an additional opening and
+				// closing brace
+				if (key.hasExprTypeKey()) {
+					startChar = startChar + "{";
+					endChar = endChar + "}";
+				}
+				// dynamic key
+				SynapseXPathSerializer.serializeTextXPath(key.getExpression(), startChar
+						+ key.getExpression().toString() + endChar, elem, name);
+			}
+		}
+		return elem;
+	}
 
 }

@@ -73,6 +73,38 @@ public class ValueFactory {
         }
         return key;
     }
+    
+    /**
+     * Create a key instance
+     *
+     * @param elem OMElement
+     * @return Key
+     */
+    public Value createTextValue(OMElement elem) {
+
+        Value key = null;
+
+        //OMAttribute attKey = elem.getAttribute(new QName(name));
+        String textValue = elem.getText();
+        if (textValue != null) {
+            boolean hasEscape = isEscapedExpression(textValue);
+            if (!hasEscape && isDynamicKey(textValue)) {
+                /** dynamic key */
+                SynapseXPath synXpath = createSynXpath(elem, textValue);
+                key = new Value(synXpath);
+            } else if (hasEscape) {
+                /** escaped expr */
+                key = new Value(getEscapedExpression(textValue));
+                key.setNamespaces(elem);
+            } else {
+                /** static key */
+                key = new Value(textValue);
+            }
+        } else {
+            handleException("The 'key' attribute is required for the XSLT mediator");
+        }
+        return key;
+    }
 
 
     /**

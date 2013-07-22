@@ -313,23 +313,27 @@ public class MediatorFactoryFinder implements XMLToObjectMapper {
             invokeMediator.setTargetTemplate(libraryName + "." + connectorElem.getLocalName());
         }
 
-        Iterator parameters = connectorElem.getChildrenWithLocalName("parameter");
-        while (parameters.hasNext()) {
-            OMNode paramNode = (OMNode) parameters.next();
-            if (paramNode instanceof OMElement) {
-                String paramName =  ((OMElement) paramNode).getAttributeValue(new QName("name"));
-                String paramValueStr = ((OMElement) paramNode).getAttributeValue(new QName("value"));
-                if (paramName != null && !paramName.equals("")
-                        && paramValueStr != null
-                        && !paramValueStr.equals("")) {
-                    Value paramValue = new ValueFactory().createValue("value", (OMElement) paramNode);
-                    invokeMediator.addExpressionForParamName(paramName, paramValue);
-                }
-            }
-        }
+        buildParamteres(connectorElem, invokeMediator);
 
         invokeMediator.setDynamicMediator(true);
         return invokeMediator;
 
     }
+
+	private void buildParamteres(OMElement connectorElem, InvokeMediator invokeMediator) {
+		Iterator parameters = connectorElem.getChildElements();
+        while (parameters.hasNext()) {
+            OMNode paramNode = (OMNode) parameters.next();
+            if (paramNode instanceof OMElement) {
+                String paramName = ((OMElement) paramNode).getLocalName(); //((OMElement) paramNode).getAttributeValue(new QName("name"));
+                String paramValueStr = ((OMElement) paramNode).getText();//((OMElement) paramNode).getAttributeValue(new QName("value"));
+                if (paramName != null && !paramName.equals("")
+                        && paramValueStr != null
+                        && !paramValueStr.equals("")) {
+                    Value paramValue = new ValueFactory().createTextValue((OMElement) paramNode);
+                    invokeMediator.addExpressionForParamName(paramName, paramValue);
+                }
+            }
+        }
+	}
 }

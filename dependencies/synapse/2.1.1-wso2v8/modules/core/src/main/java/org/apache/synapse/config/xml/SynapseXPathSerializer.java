@@ -71,6 +71,25 @@ public class SynapseXPathSerializer {
 
         return elem;
     }
+    
+	public static OMElement serializeTextXPath(SynapseXPath xpath, String expression,
+			OMElement elem, String attribName) {
+
+		if (xpath != null && expression != null) {
+
+			elem.setText(expression);
+
+			serializeNamespaces(elem, xpath);
+
+		} else {
+			handleException("Couldn't find the xpath in the SynapseXPath");
+		}
+
+		return elem;
+	}
+
+    
+    
 
     private static void serializeNamespaces(OMElement elem, SynapseXPath xpath) {
 
