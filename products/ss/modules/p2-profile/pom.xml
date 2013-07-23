@@ -226,6 +226,12 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature:${carbon.platform.version}
                                 </featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.claim.mgt.feature:${carbon.platform.version}
+				</featureArtifactDef>
+				<featureArtifactDef>
+				    org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.platform.version}
+				</featureArtifactDef>
                             </featureArtifacts>
                         </configuration>
                     </execution>
@@ -445,6 +451,15 @@
                                     <id>org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+				<feature>
+                                   <id>org.wso2.carbon.claim.mgt.feature.group</id>
+                                   <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                   <id>org.wso2.carbon.user.mgt.feature.group</id>
+                                   <version>${carbon.platform.version}</version>
+                                </feature>
+
                             </features>
                         </configuration>
                     </execution>
