@@ -76,7 +76,15 @@
             oCell.className = "formRow";
 
             oCell = newRow.insertCell(-1);
-            oCell.innerHTML = "<input type='file' name='warFileName' size='50'/>&nbsp;&nbsp;<input type='button' width='20px' class='button' value='  -  ' onclick=\"deleteRow('file"+ rows +"');\" />";
+            oCell.innerHTML = "<input type='file' name='warFileName' size='50'/>";
+            oCell.className = "formRow";
+
+            oCell = newRow.insertCell(-1);
+            oCell.innerHTML = "<label>Version</label>";
+            oCell.className = "formRow";
+
+            oCell = newRow.insertCell(-1);
+            oCell.innerHTML = "<input type='text' name='version' value=''><input type='button' width='20px' class='button' value='  -  ' onclick=\"deleteRow('file"+ rows +"');\" />";
             oCell.className = "formRow";
 
             alternateTableRows('webappTbl', 'tableEvenRow', 'tableOddRow');
@@ -109,6 +117,12 @@
                         </td>
                         <td class="formRow">
                             <input type="file" name="warFileName" size="50"/>&nbsp;
+                        </td>
+                        <td class="formRow">
+                            <label>Version</label>
+                        </td>
+                        <td class="formRow">
+                            <input type="text" name="version" value="">
                             <input type="button"  width='20px' class="button" onclick="addRow();" value=" + "/>
                         </td>
                     </tr>

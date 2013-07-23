@@ -60,13 +60,18 @@ public class WarFileUploadExecutor extends AbstractFileUploadExecutor {
         List<FileItemData> tempDataList = fileItemsMap.get("warFileName");
         List<WebappUploadData> webappUploadDataList = new ArrayList<WebappUploadData>();
 
+        Map<String, ArrayList<java.lang.String>> formFieldsMap = getFormFieldsMap();
+        List<String> versions = formFieldsMap.get("version");
+         int i = 0;
         try {
             for (FileItemData filedata : tempDataList) {
                 WebappUploadData tempData = new WebappUploadData();
                 checkServiceFileExtensionValidity(getFileName(filedata.getFileItem().getName()), ALLOWED_FILE_EXTENSIONS);
                 tempData.setFileName(getFileName(filedata.getFileItem().getName()));
                 tempData.setDataHandler(filedata.getDataHandler());
+                tempData.setVersion(versions.get(i));
                 webappUploadDataList.add(tempData);
+                i++;
             }
 
             client.uploadWebapp(webappUploadDataList.toArray(new WebappUploadData[webappUploadDataList.size()]));
