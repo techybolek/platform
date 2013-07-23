@@ -26,8 +26,6 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreator" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.*" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreationException" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyCreatorUtil" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.PolicyEditorUtil" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
@@ -49,57 +47,45 @@
 	String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
-    String policy = "";
-    PolicyElementDTO policyElement = new PolicyElementDTO();
-    EntitlementPolicyCreator policyCreator = new EntitlementPolicyCreator();
-    PolicyDTO policyDTO = null;
+    org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO policy = null;
+    String policyName = entitlementPolicyBean.getPolicyName();
+    String algorithmName = entitlementPolicyBean.getAlgorithmName();
+    String policyDescription = entitlementPolicyBean.getPolicyDescription();
 
-    List<SubElementDTO> subElementDTOs = entitlementPolicyBean.getTargetElementDTOs();
-    List<RuleElementDTO> ruleElementDTOs = entitlementPolicyBean.getRuleElements();
-
-    //new
     List<RuleDTO> ruleDTOs = entitlementPolicyBean.getRuleDTOs();
     TargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();
     List<ObligationDTO> obligationDTOs = entitlementPolicyBean.getObligationDTOs();
 
-    ///////////////////////////////////////////////////
-    
-    List<BasicRuleDTO> basicRuleDTOs = entitlementPolicyBean.getBasicRuleDTOs();
-    BasicTargetDTO basicTargetDTO = entitlementPolicyBean.getBasicTargetDTO();
-    
-    ///////////////////////////////////////////////
 
-    String policyName = entitlementPolicyBean.getPolicyName();
-    String algorithmName = entitlementPolicyBean.getAlgorithmName();
-    String policyDescription = entitlementPolicyBean.getPolicyDescription();
-    ruleElementOrder = entitlementPolicyBean.getRuleElementOrder();
-    String[] policyMetaData = null;
 
-    if(policyName != null && !policyName.equals("") && algorithmName !=null
-            && !algorithmName.equals("")) {
-        policyElement.setPolicyName(policyName);
-        policyElement.setRuleCombiningAlgorithms(algorithmName);
-        policyElement.setPolicyDescription(policyDescription);
-        policyElement.setRuleElementOrder(ruleElementOrder);
+    PolicyDTO  policyDTO = new PolicyDTO();
+    if(policyName != null && policyName.trim().length() > 0 && algorithmName != null
+            && algorithmName.trim().length() > 0) {
+        policyDTO.setPolicyId(policyName);
+        policyDTO.setRuleAlgorithm(algorithmName);
+        policyDTO.setDescription(policyDescription);
+        policyDTO.setRuleOrder(ruleElementOrder);
     }
+
+    policyDTO.setRuleDTOs(ruleDTOs);
+    policyDTO.setTargetDTO(targetDTO);
+    policyDTO.setObligationDTOs(obligationDTOs);
 
     try {
 
         EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                 serverURL, configContext);
         try{
-            policyDTO = client.getPolicy(policyName);
+            policy = client.getPolicy(policyName);
         } catch (Exception e){
             //ignore
         }
 
-        if(policyDTO == null){
-            policyDTO = new PolicyDTO();
+        if(policy == null){
+            policy = new  org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO();
         }
 
-        if(basicRuleDTOs != null && basicTargetDTO != null){
-            policy = policyCreator.createBasicPolicy(policyElement, basicRuleDTOs, basicTargetDTO);
-        } else if (ruleDTOs != null && ruleDTOs.size() > 0 || targetDTO != null){
+
             policyMetaData = PolicyEditorUtil.processPolicyData(targetDTO, ruleDTOs, obligationDTOs,
                                                             ruleElementOrder, entitlementPolicyBean);
             policy = policyCreator.createBasicPolicy(policyElement, ruleDTOs, targetDTO, obligationDTOs);
@@ -108,13 +94,6 @@
                 policyDTO.setBasicPolicyEditorMetaData(policyMetaData);
             }
 
-            //create policy meta data that helps to edit the policy using basic editor
-//            policyMetaData = PolicyCreatorUtil.generateBasicPolicyEditorData(basicTargetDTO,
-//                                                                    basicRuleDTOs, ruleElementOrder);
-//            policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
-//            if(policyMetaData != null){
-//                policyDTO.setBasicPolicyEditorMetaData(policyMetaData);
-//            }
         } else {
             policy = policyCreator.createPolicy(policyElement, subElementDTOs, ruleElementDTOs);
         }

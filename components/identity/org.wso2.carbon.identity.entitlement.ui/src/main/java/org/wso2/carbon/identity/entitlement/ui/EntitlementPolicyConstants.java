@@ -229,7 +229,7 @@ public class EntitlementPolicyConstants {
 
     public static final int BASIC_POLICY_EDITOR_RULE_DATA_AMOUNT = 23;
 
-    public static final int BASIC_POLICY_EDITOR_TARGET_DATA_AMOUNT = 16;
+    public static final int BASIC_POLICY_EDITOR_TARGET_DATA_AMOUNT = 20;
 
     public static final String ENTITLEMENT_PUBLISHER_PROPERTY = "entitlementPublisherPropertyDTO";
 

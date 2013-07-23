@@ -65,20 +65,19 @@ public class ClientUtil {
         return "Invalid Status";
     }
 
-    public static String[] doPaging(int pageNumber, String[] subscriberNameSet) {
+    public static String[] doPagingForStrings(int pageNumber, int itemsPerPageInt, String[] names) {
 
-              int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
            String[] returnedSubscriberNameSet;
 
            int startIndex = pageNumber * itemsPerPageInt;
            int endIndex = (pageNumber + 1) * itemsPerPageInt;
-           if (itemsPerPageInt < subscriberNameSet.length) {
+           if (itemsPerPageInt < names.length) {
                returnedSubscriberNameSet = new String[itemsPerPageInt];
            } else {
-               returnedSubscriberNameSet = new String[subscriberNameSet.length];
+               returnedSubscriberNameSet = new String[names.length];
            }
-           for (int i = startIndex, j = 0; i < endIndex && i < subscriberNameSet.length; i++, j++) {
-               returnedSubscriberNameSet[j] = subscriberNameSet[i];
+           for (int i = startIndex, j = 0; i < endIndex && i < names.length; i++, j++) {
+               returnedSubscriberNameSet[j] = names[i];
            }
 
            return returnedSubscriberNameSet;

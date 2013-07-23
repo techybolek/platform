@@ -31,8 +31,10 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.entitlement.stub.EntitlementPolicyAdminServiceEntitlementException;
 import org.wso2.carbon.identity.entitlement.stub.EntitlementPolicyAdminServiceStub;
 import org.wso2.carbon.identity.entitlement.stub.dto.*;
+import org.wso2.carbon.identity.entitlement.stub.types.EntitlementException;
 
 
 public class EntitlementPolicyAdminServiceClient {
@@ -75,7 +77,7 @@ public class EntitlementPolicyAdminServiceClient {
             return stub.getAllPolicies(policyTypeFilter, policySearchString, pageNumber);
         } catch (Exception e) {
             String message = "Error while loading all policies from backend service";
-            handleException(message, e);
+            handleException(e);
         }
         PaginatedPolicySetDTO paginatedPolicySetDTO =  new PaginatedPolicySetDTO();
         paginatedPolicySetDTO.setPolicySet(new PolicyDTO[0]);
@@ -97,8 +99,7 @@ public class EntitlementPolicyAdminServiceClient {
                 dto.setPolicy(dto.getPolicy().trim().replaceAll("><", ">\n<"));     
             }
         } catch (Exception e) {
-            String message = "Error while loading the policy from backend service";
-            handleException(message, e);
+            handleException(e);
         }
         return dto;
     }
@@ -116,8 +117,7 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             dto = stub.getLightPolicy(policyId);
         } catch (Exception e) {
-            String message = "Error while loading the policy from backend service";
-            handleException(message, e);
+            handleException(e);
         }
         return dto;
     }
@@ -149,8 +149,7 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             stub.removePolicy(policyId);
         } catch (Exception e) {
-            String message = "Error while removing the policy from backend service";
-            handleException(message, e);
+            handleException(e);
         }
     }
 
@@ -166,7 +165,7 @@ public class EntitlementPolicyAdminServiceClient {
             }
             stub.updatePolicy(policy);
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
     }
 
@@ -180,7 +179,7 @@ public class EntitlementPolicyAdminServiceClient {
             policy.setPolicy(policy.getPolicy().trim().replaceAll(">\\s+<", "><"));            
             stub.addPolicy(policy);
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
     }
 
@@ -197,8 +196,7 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             stub.addPolicy(dto);
         } catch (Exception e) {
-            String message = e.getMessage();
-            handleException(message, e);
+            handleException(e);
         }
     }
 
@@ -212,8 +210,7 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             stub.importPolicyFromRegistry(policyRegistryPath);
         } catch (Exception e) {
-            String message = e.getMessage();
-            handleException(message, e);            
+            handleException(e);
         }
     }
     
@@ -225,10 +222,9 @@ public class EntitlementPolicyAdminServiceClient {
     public String[] getAllPolicyIds() throws AxisFault {
 
         try {
-            return stub.getAllPolicyIds();
+            return stub.getAllPolicyIds("*");
         } catch (Exception e) {
-            String message = e.getMessage();
-            handleException(message, e);
+            handleException(e);
         }
         return null;
     }
@@ -256,7 +252,7 @@ public class EntitlementPolicyAdminServiceClient {
         try {
            return  stub.getEntitlementData(dataModule, category, regexp, dataLevel, limit);
         } catch (Exception e) {
-           handleException(e.getMessage(), e);
+           handleException(e);
         }
 
         return null;
@@ -267,7 +263,7 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             return  stub.getEntitlementDataModules();
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
 
         return null;
@@ -291,15 +287,16 @@ public class EntitlementPolicyAdminServiceClient {
     /**
      * Gets all subscriber ids
      *
+     * @param subscriberSearchString subscriberSearchString
      * @return subscriber ids as String array
      * @throws AxisFault throws
      */
-    public String[] getSubscriberIds() throws AxisFault {
+    public String[] getSubscriberIds(String subscriberSearchString) throws AxisFault {
 
         try {
-            return stub.getSubscriberIds();
+            return stub.getSubscriberIds(subscriberSearchString);
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
 
         return null;
@@ -317,7 +314,7 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             return stub.getSubscriber(id);
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
 
         return null;
@@ -339,7 +336,7 @@ public class EntitlementPolicyAdminServiceClient {
                 stub.addSubscriber(holder);
             }
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
     }
 
@@ -354,23 +351,27 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             stub.deleteSubscriber(id);
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
     }
 
     /**
      * Publishes given set of policies to given set of subscribers
      *
+     *
      * @param policies policy ids as String array, if null or empty, all policies are published
+     * @param version
+     * @param action
      * @param subscriberId subscriber ids as String array, if null or empty, publish to all subscribers
      * @throws AxisFault throws
      */
-    public void publishAll(String[] policies, String[] subscriberId) throws AxisFault {
+    public void publishAll(String[] policies, String version, String action,
+                                                        String[] subscriberId) throws AxisFault {
 
         try {
-            stub.publishPolicies(policies, 0, null, subscriberId);
+            stub.publishPolicies(policies, version, action, subscriberId);
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
     }
 
@@ -385,22 +386,52 @@ public class EntitlementPolicyAdminServiceClient {
         try {
             return stub.getPublisherModuleData();
         } catch (Exception e) {
-            handleException(e.getMessage(), e);
+            handleException(e);
         }
 
-        return null;
+        return new PublisherDataHolder[0];
     }
 
+    public String[] getPolicyVersions(String policyId) throws AxisFault {
+        try {
+            return stub.getPolicyVersions(policyId);
+        } catch (Exception e) {
+            handleException(e);
+        }
 
+        return new String[0];
+    }
+
+    public PaginatedStatusHolder getStatusData(String about, String key, String type,
+                                           String searchString, int pageNumber) throws AxisFault {
+        try {
+            return stub.getStatusData(about, key, type, searchString, pageNumber);
+        } catch (Exception e) {
+            handleException(e);
+        }
+        return  null;
+    }
+    
     /**
      * Logs and wraps the given exception.
-     * 
-     * @param msg Error message
+     *
      * @param e Exception
      * @throws AxisFault
      */
-    private void handleException(String msg, Exception e) throws AxisFault {
-        throw new AxisFault(msg, e);
-    }
+    private void handleException(Exception e) throws AxisFault {
 
+        String errorMessage = "Unknown";
+
+        if(e instanceof EntitlementPolicyAdminServiceEntitlementException){
+            EntitlementPolicyAdminServiceEntitlementException entitlementException =
+                                            (EntitlementPolicyAdminServiceEntitlementException) e;
+            if (entitlementException.getFaultMessage().getEntitlementException()!=null) {
+                errorMessage = entitlementException.getFaultMessage().getEntitlementException().getMessage();
+            }
+        } else {
+            errorMessage = e.getMessage();
+        }
+
+        throw new AxisFault(errorMessage, e);
+    }
 }

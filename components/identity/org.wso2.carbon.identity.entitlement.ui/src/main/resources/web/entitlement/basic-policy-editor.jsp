@@ -393,7 +393,7 @@
         for (var j = 0; j < tmp.length; j++) {
             ruleElementOrder.push(tmp[j].value);
         }
-        jQuery('#dataForm > tbody:last').append('<tr><td><input type="hidden" name="ruleElementOrder" id="ruleElementOrder" value="' + ruleElementOrder +'"/></td></tr>') ;
+        jQuery('#mainTable > tbody:last').append('<tr><td><input type="hidden" name="ruleElementOrder" id="ruleElementOrder" value="' + ruleElementOrder +'"/></td></tr>') ;
     }
 
 
@@ -455,7 +455,8 @@
 
     function deleteRule(ruleId) {
         preSubmit();
-        document.dataForm.action = "basic-policy-update.jsp?nextPage=delete-rule-entry&ruleId=" + ruleId;
+        document.dataForm.action = "basic-policy-update.jsp?nextPage=delete-rule-entry&ruleId="
+                + ruleId + "&returnPage=basic-policy-editor";
         document.dataForm.submit();
     }
 
@@ -531,7 +532,7 @@
 <h2><fmt:message key="create.entitlement.policy"/></h2>
 <div id="workArea">
 <form id="dataForm" name="dataForm" method="post" action="">
-<table class="styledLeft noBorders">
+<table  id="mainTable"  class="styledLeft noBorders">
 
     <tr>
         <td class="leftCol-med"><fmt:message key='policy.name'/><span class="required">*</span></td>
@@ -599,7 +600,8 @@
             This policy is based on
         </td>
         <td>
-            <select id="policyApplied" name="policyApplied" onchange="getCategoryType();">
+            <select id="policyApplied" name="policyApplied" <%if(entitlementPolicyBean.isEditPolicy()){%> disabled="disabled" <%}%>
+                    onchange="getCategoryType();">
                 <%
                     for (String availableCategory : availableCategories) {
                         if(availableCategory != null && availableCategory.equals(selectedCategory)){
@@ -1309,7 +1311,7 @@
 
     <tr>
     <td>
-        <table class="normal" cellspacing="0">
+        <table id="dataTable" style="width: 100%;margin-top:10px;">
             <thead>
             <tr>
                 <th><fmt:message key="rule.id"/></th>

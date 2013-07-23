@@ -36,7 +36,7 @@
     String updateRule = request.getParameter("updateRule");
     String nextPage = request.getParameter("nextPage");
     String returnPage = request.getParameter("returnPage");
-
+    System.out.println("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL"   + ruleElementOrder);
     // rules
     String ruleId = request.getParameter("ruleId");
     String ruleEffect = request.getParameter("ruleEffect");
@@ -275,7 +275,7 @@
     
     String forwardTo;
 
-    if(ruleElementOrder != null && !ruleElementOrder.equals("")){
+    if(ruleElementOrder != null && ruleElementOrder.trim().length() > 0){
         if(basicRuleDTO.isCompletedRule() && !"true".equals(updateRule)){
             entitlementPolicyBean.setRuleElementOrder(ruleElementOrder.trim() + ", " +
                                                       basicRuleDTO.getRuleId());

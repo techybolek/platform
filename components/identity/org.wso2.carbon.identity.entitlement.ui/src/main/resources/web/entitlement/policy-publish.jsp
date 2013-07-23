@@ -32,17 +32,19 @@
 <%
 
     String[] subscriberIds = null;
-    boolean fromIndexPage = false;
     session.removeAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_MODULE);
 
     EntitlementPolicyAdminServiceClient client = null;
 
     int numberOfPages = 0;
-    String isPaginatedString = request.getParameter("isPaginated");
-    if (isPaginatedString != null && isPaginatedString.equals("true")) {
-        client = (EntitlementPolicyAdminServiceClient) session.getAttribute(EntitlementPolicyConstants.ENTITLEMENT_ADMIN_CLIENT);
+    boolean isPaginated = Boolean.parseBoolean(request.getParameter("isPaginated"));
+    String subscriberSearchString = request.getParameter("subscriberSearchString");
+    if (subscriberSearchString == null) {
+        subscriberSearchString = "";
+    } else {
+        subscriberSearchString = subscriberSearchString.trim();
     }
-    String paginationValue = "isPaginated=true";
+    String paginationValue = "isPaginated=true&subscriberSearchString=" + subscriberSearchString;
 
     String pageNumber = request.getParameter("pageNumber");
     if (pageNumber == null) {
@@ -52,21 +54,15 @@
     try {
         pageNumberInt = Integer.parseInt(pageNumber);
     } catch (NumberFormatException ignored) {
+        // ignore
     }
 
-    String publishAll = request.getParameter("publishAllPolicies");
-    String policyId = request.getParameter("policyid");
-    String fromIndex = request.getParameter("fromIndexPage");
-    String[] selectedPolicies = request.getParameterValues("policies");
     String selectedModule = request.getParameter("selectedModule");
     boolean update = Boolean.parseBoolean(request.getParameter("update"));
     PublisherPropertyDTO[] propertyDTOs = (PublisherPropertyDTO[]) session.
             getAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_PROPERTY);
 
     session.removeAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_PROPERTY);
-    if (fromIndex != null) {
-        fromIndexPage = Boolean.parseBoolean(fromIndex);
-    }
 
     if (propertyDTOs != null) {
         for (PublisherPropertyDTO dto : propertyDTOs) {
@@ -77,19 +73,6 @@
         }
     }
 
-    if (policyId != null && policyId.trim().length() > 0) {
-        selectedPolicies = new String[]{policyId};
-    }
-
-    if (selectedPolicies != null && selectedPolicies.length > 0) {
-        session.setAttribute("selectedPolicies", selectedPolicies);
-        fromIndexPage = true;
-    }
-
-    if (publishAll != null && "true".equals(publishAll.trim())) {
-        session.setAttribute("publishAllPolicies", true);
-        fromIndexPage = true;
-    }
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.
@@ -114,9 +97,15 @@
 
         }
         int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
-        if (client != null && client.getSubscriberIds() != null) {
-            numberOfPages = (int) Math.ceil((double) client.getSubscriberIds().length / itemsPerPageInt);
-            subscriberIds = ClientUtil.doPaging(pageNumberInt, client.getSubscriberIds());
+        // as these are just strings, get all values in to UI and the do the pagination
+        String[] allSubscriberIds = (String[])session.getAttribute("subscriberIds");
+        if(allSubscriberIds == null || !isPaginated){
+            allSubscriberIds = client.getSubscriberIds(subscriberSearchString);
+            session.setAttribute("subscriberIds", allSubscriberIds);
+        }
+        if (allSubscriberIds != null) {
+            numberOfPages = (int) Math.ceil((double) allSubscriberIds.length / itemsPerPageInt);
+            subscriberIds = ClientUtil.doPagingForStrings(pageNumberInt, itemsPerPageInt, allSubscriberIds);
         }
     } catch (Exception e) {
 %>
@@ -149,7 +138,7 @@
     var allSubscribersSelected = false;
 
     function doCancel() {
-        location.href = 'index.jsp?';
+        location.href = 'index.jsp';
     }
 
     function editSubscriber(subscriber) {
@@ -157,8 +146,7 @@
     }
 
     function viewSubscriber(subscriber) {
-        location.href = "add-subscriber.jsp?view=true&subscriberId=" + subscriber +
-                        "&fromIndexPage=" + '<%=fromIndexPage%>';
+        location.href = "add-subscriber.jsp?view=true&subscriberId=" + subscriber;
     }
 
     function deleteSubscriber(subscriber) {
@@ -278,42 +266,10 @@
 </script>
 
 <div id="middle">
+
     <h2><fmt:message key="policy.publisher"/></h2>
 
     <div id="workArea">
-        <%
-            if (fromIndexPage) {
-
-        %>
-        <table style="border:none; margin-bottom:10px">
-            <tr>
-                <td>
-                    <a style="cursor: pointer;" onclick="selectAllInThisPage(true);return false;"
-                       href="#"><fmt:message key="selectAllInPage"/></a>
-                    &nbsp;<b>|</b>&nbsp;</td>
-                <td><a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;"
-                       href="#"><fmt:message key="selectNone"/></a>
-                </td>
-                <td width="20%">&nbsp;</td>
-                <td>
-                    <div style="height:30px;">
-                        <a onclick="publishToSubscriber(); return false;" href="#" class="icon-link"
-                           style="background-image:url(images/publish.gif);"><fmt:message
-                                key='publish.selected'/></a>
-                    </div>
-                </td>
-                <td>
-                    <div style="height:30px;">
-                        <a onclick="publishToAll(); return false;" href="#" class="icon-link"
-                           style="background-image:url(images/publish-all.gif);"><fmt:message
-                                key='publish.to.all'/></a>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        <%
-        } else {
-        %>
         <table style="border:none; margin-bottom:10px">
             <tr>
                 <td>
@@ -323,6 +279,38 @@
                            style="background-image:url(images/add.gif);"><fmt:message
                                 key='add.subscriber'/></a>
                     </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <form action="start-publish.jsp" name="searchForm" method="post">
+                        <table class="styledLeft" style="border:0;
+                                                    !important margin-top:10px;margin-bottom:10px;">
+                            <tr>
+                                <td>
+                                    <table style="border:0; !important">
+                                        <tbody>
+                                        <tr style="border:0; !important">
+                                            <td style="border:0; !important">
+                                                <nobr>
+                                                    <fmt:message key="search"/>
+                                                    <input type="text" name="subscriberSearchString"
+                                                           value="<%= subscriberSearchString != null? subscriberSearchString :""%>"/>&nbsp;
+                                                </nobr>
+                                            </td>
+                                            <td style="border:0; !important">
+                                                <a class="icon-link" href="#" style="background-image: url(images/search.gif);"
+                                                   onclick="searchService(); return false;"
+                                                   alt="<fmt:message key="search"/>"></a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
                 </td>
             </tr>
             <tr>
@@ -342,64 +330,62 @@
             </tr>
 
         </table>
-        <%
-            }
-        %>
+
         <form action="" name="policyForm" method="post">
-            <table class="styledLeft" style="width: 100%;margin-top:10px;">
-                <thead>
-                <tr>
-                    <th colspan='2'><fmt:message key='subscriber.name'/></th>
-                    <th><fmt:message key='action'/></th>
-                </tr>
-                </thead>
-                <tbody>
-                <%
-                    if (subscriberIds != null && subscriberIds.length > 0) {
-                        for (String subscriber : subscriberIds) {
-                            if (subscriber != null && !subscriber.equals("")) {
-                %>
-                <tr>
-                    <td width="10px" style="text-align:center; !important">
-                        <input type="checkbox" name="subscribers"
-                               value="<%=subscriber%>"
-                               onclick="resetVars()" class="chkBox"/>
-                    </td>
-                    <td><%=subscriber%>
-                    </td>
-                    <td>
-                        <a onclick="viewSubscriber('<%=subscriber%>');return false;"
-                           href="#" style="background-image: url(images/edit.gif);"
-                           class="icon-link">
-                            <fmt:message key='view'/></a>
-                        <%
-                            if (!fromIndexPage) {
-                        %>
-                        <a onclick="editSubscriber('<%=subscriber%>');return false;"
-                           href="#" style="background-image: url(images/edit.gif);"
-                           class="icon-link">
-                            <fmt:message key='edit'/></a>
-                        <%
-                            }
-                        %>
-                    </td>
-                </tr>
-                <%
-                            }
+        <table class="styledLeft">
+            <thead>
+            <tr>
+                <th colspan='2'><fmt:message key='subscriber.name'/></th>
+                <th><fmt:message key='action'/></th>
+            </tr>
+            </thead>
+            <%
+                if (subscriberIds != null && subscriberIds.length > 0) {
+                    for (String subscriber : subscriberIds) {
+                        if (subscriber != null && subscriber.trim().length() > 0 ) {
+            %>
+            <tr>
+                <td>
+                    <table class="normal">
+                        <tr>
+                            <td width="10px" style="text-align:center; !important">
+                                <input type="checkbox" name="subscribers"
+                                       value="<%=subscriber%>"
+                                       onclick="resetVars()" class="chkBox"/>
+                            </td>
+                            <td><%=subscriber%>
+                            </td>
+                            <td>
+                                <a onclick="viewSubscriber('<%=subscriber%>');return false;"
+                                   href="#" style="background-image: url(images/edit.gif);"
+                                   class="icon-link">
+                                    <fmt:message key='view'/></a>
+
+                                <a onclick="editSubscriber('<%=subscriber%>');return false;"
+                                   href="#" style="background-image: url(images/edit.gif);"
+                                   class="icon-link">
+                                    <fmt:message key='edit'/></a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <%
                         }
                     }
-                %>
-                </tbody>
-                <tr>
-                    <carbon:paginator pageNumber="<%=pageNumberInt%>"
-                                      numberOfPages="<%=numberOfPages%>"
-                                      page="policy-publish.jsp"
-                                      pageNumberParameterName="pageNumber"
-                                      parameters="<%=paginationValue%>"
-                                      resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
-                                      prevKey="prev" nextKey="next"/>
-                </tr>
-            </table>
+            %>
+            <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                              numberOfPages="<%=numberOfPages%>"
+                              page="policy-publish.jsp"
+                              pageNumberParameterName="pageNumber"
+                              parameters="<%=paginationValue%>"
+                              resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                              prevKey="prev" nextKey="next"/>
+            <%
+                }
+            %>
+        </table>
+
         </form>
     </div>
 </div>

@@ -41,7 +41,6 @@
     PublisherPropertyDTO[] propertyDTOs = null;
     String selectedModule = null;
     String forwardTo = null;
-    boolean fromIndexPage = false;
     boolean view = false;
     String paginationValue = "" ;
 
@@ -70,16 +69,11 @@
     selectedModule = request.getParameter("selectedModule");
     String viewString = request.getParameter("view");
     subscriberId = request.getParameter("subscriberId");
-    String fromIndex = request.getParameter("fromIndexPage");
     dataHolders = (PublisherDataHolder[]) session.
                     getAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_MODULE);
 
     if((viewString != null)){
         view = Boolean.parseBoolean(viewString);
-    }
-    
-    if(fromIndex != null){
-        fromIndexPage = Boolean.parseBoolean(fromIndex);
     }
 
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -127,7 +121,7 @@
             java.util.Arrays.sort(propertyDTOs , new PropertyDTOComparator());
         }
 
-        paginationValue = "isPaginated=true&view="+viewString+"&subscriberId="+subscriberId+"&fromIndexPage="+fromIndex;
+        paginationValue = "isPaginated=true&view="+viewString+"&subscriberId="+subscriberId;
     } catch (Exception e) {
     	String message = resourceBundle.getString("error.while.performing.advance.search");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
@@ -189,7 +183,7 @@
     }
 
     function doCancel(){
-        location.href = 'policy-publish.jsp?fromIndexPage=' + '<%=fromIndexPage%>';
+        location.href = 'policy-publish.jsp';
     }
 
     function getSelectedSubjectType() {

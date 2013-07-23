@@ -22,6 +22,9 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.balana.utils.policy.dto.BasicRuleDTO;
+import org.wso2.balana.utils.policy.dto.BasicTargetDTO;
+import org.wso2.balana.utils.policy.dto.PolicyElementDTO;
 import org.wso2.carbon.identity.entitlement.common.PolicyEditorEngine;
 import org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder;
 import org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants;
@@ -1517,47 +1520,47 @@ public class PolicyCreatorUtil {
 //        return requestElement;
 //    }
 //
-//    public static PolicyElementDTO createPolicyElementDTO(String policy)
-//            throws EntitlementPolicyCreationException {
-//
-//        PolicyElementDTO policyElementDTO = new PolicyElementDTO();
-//        OMElement omElement;
-//        try {
-//            omElement = AXIOMUtil.stringToOM(policy);
-//        } catch (XMLStreamException e) {
-//            throw new EntitlementPolicyCreationException("Policy can not be converted to OMElement");
-//        }
-//
-//        if (omElement != null) {
-//
-//            policyElementDTO.setPolicyName(omElement.
-//                    getAttributeValue(new QName(EntitlementPolicyConstants.POLICY_ID)));
-//
-//            String ruleCombiningAlgorithm = omElement.
-//                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_ALGORITHM));
-//
-//            try{
-//                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
-//                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_3)[1]);
-//            } catch (Exception ignore){
-//                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
-//                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_1)[1]);
-//                // if this is also fails, can not edit the policy
-//            }
-//
-//            Iterator iterator = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
-//                    DESCRIPTION_ELEMENT);
-//
-//            if(iterator.hasNext()){
-//                OMElement descriptionElement = (OMElement) iterator.next();
-//                if(descriptionElement != null && descriptionElement.getText() != null){
-//                    policyElementDTO.setPolicyDescription(descriptionElement.getText().trim());
-//                }
-//            }
-//
-//        }
-//        return policyElementDTO;
-//    }
+    public static PolicyElementDTO createPolicyElementDTO(String policy)
+            throws EntitlementPolicyCreationException {
+
+        PolicyElementDTO policyElementDTO = new PolicyElementDTO();
+        OMElement omElement;
+        try {
+            omElement = AXIOMUtil.stringToOM(policy);
+        } catch (XMLStreamException e) {
+            throw new EntitlementPolicyCreationException("Policy can not be converted to OMElement");
+        }
+
+        if (omElement != null) {
+
+            policyElementDTO.setPolicyName(omElement.
+                    getAttributeValue(new QName(EntitlementPolicyConstants.POLICY_ID)));
+
+            String ruleCombiningAlgorithm = omElement.
+                    getAttributeValue(new QName(EntitlementPolicyConstants.RULE_ALGORITHM));
+
+            try{
+                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
+                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_3)[1]);
+            } catch (Exception ignore){
+                policyElementDTO.setRuleCombiningAlgorithms(ruleCombiningAlgorithm.
+                        split(PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_1)[1]);
+                // if this is also fails, can not edit the policy
+            }
+
+            Iterator iterator = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
+                    DESCRIPTION_ELEMENT);
+
+            if(iterator.hasNext()){
+                OMElement descriptionElement = (OMElement) iterator.next();
+                if(descriptionElement != null && descriptionElement.getText() != null){
+                    policyElementDTO.setPolicyDescription(descriptionElement.getText().trim());
+                }
+            }
+
+        }
+        return policyElementDTO;
+    }
 //
 //    public static List<RuleElementDTO> createRuleElementDTOs(String policy)
 //            throws EntitlementPolicyCreationException {
@@ -1603,213 +1606,9 @@ public class PolicyCreatorUtil {
 ////        return targetElementDTO;
 ////    }
 //
-//    public static BasicTargetDTO createBasicTargetDTO(String[] policyMetaData){
-//
-//        BasicTargetDTO basicTargetDTO = new BasicTargetDTO();
-//        int i = 0;
-//
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setFunctionOnResources(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setResourceList(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setResourceId(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setResourceDataType(policyMetaData[i]);
-//        }
-//        i++;
-//
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setFunctionOnSubjects(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setSubjectList(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setSubjectId(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setSubjectDataType(policyMetaData[i]);
-//        }
-//        i++;
-//
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setFunctionOnActions(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setActionList(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setActionId(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setActionDataType(policyMetaData[i]);
-//        }
-//        i++;
-//
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setFunctionOnEnvironment(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setEnvironmentList(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setEnvironmentId(policyMetaData[i]);
-//        }
-//        i++;
-//        if(policyMetaData[i] != null){
-//            basicTargetDTO.setEnvironmentDataType(policyMetaData[i]);
-//        }
-//
-//        return basicTargetDTO;
-//    }
-//
-//    public static BasicRuleDTO createBasicRuleDTO(BasicRuleDTO basicRuleDTO,
-//                                                  String[] policyMetaDataForRule){
-//        int i = 0;
-//
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setRuleId(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setRuleEffect(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setRuleDescription(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setPreFunctionOnResources(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setFunctionOnResources(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setResourceList(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setResourceId(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setResourceDataType(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setPreFunctionOnSubjects(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setFunctionOnSubjects(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setSubjectList(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setSubjectId(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setSubjectDataType(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//
-//
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setPreFunctionOnActions(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setFunctionOnActions(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setActionList(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setActionId(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setActionDataType(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setPreFunctionOnEnvironment(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setFunctionOnEnvironment(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setEnvironmentList(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setEnvironmentId(policyMetaDataForRule[i]);
-//        }
-//        i++;
-//        if(policyMetaDataForRule[i] != null){
-//            basicRuleDTO.setEnvironmentDataType(policyMetaDataForRule[i]);
-//        }
-//
-//        return basicRuleDTO;
-//    }
-//
-//    public static List<BasicRuleDTO> createBasicRuleDTOs(String[] policyMetaData){
-//
-//        int metaDataRuleConstant = EntitlementPolicyConstants.BASIC_POLICY_EDITOR_RULE_DATA_AMOUNT;
-//        int metaDataTargetConstant = EntitlementPolicyConstants.BASIC_POLICY_EDITOR_TARGET_DATA_AMOUNT;
-//
-//        List<BasicRuleDTO> basicRuleDTOs = new ArrayList<BasicRuleDTO>();
-//        int i = metaDataTargetConstant;
-//
-//        BasicRuleDTO basicRuleDTO = new BasicRuleDTO();
-//        String[]  policyMetaDataForRule = new String[metaDataRuleConstant];
-//        int j = 0;
-//        if(policyMetaData != null){
-//            while(true){
-//                if(policyMetaData.length == i){
-//                    break;
-//                }
-//                policyMetaDataForRule[j++] =  policyMetaData[i++];
-//                if(j == metaDataRuleConstant){
-//                    basicRuleDTO = createBasicRuleDTO(basicRuleDTO, policyMetaDataForRule);
-//                    basicRuleDTO.setCompletedRule(true);
-//                    basicRuleDTOs.add(basicRuleDTO);
-//                    j = 0;
-//                }
-//            }
-//        }
-//
-//        return basicRuleDTOs;
-//    }
+
+
+
 //
 //
 //

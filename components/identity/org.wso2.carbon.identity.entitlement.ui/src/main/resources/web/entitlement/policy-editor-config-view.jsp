@@ -28,13 +28,16 @@
     String editorConfig = PolicyEditorEngine.getInstance().getConfig();
 %>
 
+<fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
+<div id="middle">
+<h2><fmt:message key='policy.editor.config'/></h2>
 <div id="workArea">
     <form method="post" name="configForm" id="configForm" action="add-policy.jsp">
         <table class="styledLeft" style="width:100%">
             <thead>
             <tr>
                 <th>
-                    Policy Editor Configuration
+                    <fmt:message key='policy.editor.config'/>
                 </th>
             </tr>
             </thead>
@@ -42,14 +45,15 @@
             <tr>
                 <td class="formRow">
                     <table class="normal" style="width:100%">
-                        <tbody><tr>
+                        <tbody>
+                        <tr>
+                            <td><input type="hidden" name="editorConfig" id="editorConfig"></td>
                             <td>
-                                <textarea name="editorConfigText"  id="editorConfigText"
+                                <textarea name="editorConfigText"  id="editorConfigText"  rows="50" cols="50"
                                           style="border: 1px solid rgb(204, 204, 204); width: 99%;
                                           height: 400px; margin-top: 5px; display: none;"><%=editorConfig%>
                                 </textarea>
                             </td>
-                            <td><input type="hidden" name="editorConfig" id="editorConfig"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -57,14 +61,16 @@
             </tr>
             <tr>
                 <td class="buttonRow">
-                    <button class="button" onclick="submitForm(); return false;">Update</button>
-                    <button class="button" onclick="resetConfiguration(); return false;">Reset</button>
+                    <button class="button" onclick="submitForm(); return false;"><fmt:message key="update"/></button>
+                    <button class="button" onclick="resetConfiguration(); return false;"><fmt:message key="reset"/></button>
                 </td>
             </tr>
             </tbody>
         </table>
     </form>
 </div>
+</div>
+</fmt:bundle>
 
 <script src="../editarea/edit_area_full.js" type="text/javascript"></script>
 

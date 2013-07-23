@@ -24,9 +24,8 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants"%>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.ResourceBundle" %>
-<%@page import="java.lang.Exception"%>
-<%@ page
-        import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient" %>
+<%@ page import="java.lang.Exception"%>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient" %>
 <%
 
     boolean publishToAllSubscribers = false;
@@ -42,9 +41,16 @@
     }
     String[] selectedSubscribers = request.getParameterValues("subscribers");
     String allSubscribers = request.getParameter("publishToAllSubscribers");
+
     if(allSubscribers != null && "true".equals(allSubscribers.trim())){
         publishToAllSubscribers = true;
     }
+
+    String publishAction = request.getParameter("publishAction");
+    String publishVersion = request.getParameter("policyVersion");
+
+    session.removeAttribute("selectedPolicies");
+    session.removeAttribute("publishAllPolicies");
 
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -55,23 +61,23 @@
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     try {
         EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
-                serverURL, configContext); 
+                serverURL, configContext);
         if(publishAllPolicies && publishToAllSubscribers){
-            client.publishAll(null, null);
+            client.publishAll(null, null, publishAction, null);
         } else if(publishAllPolicies && selectedSubscribers != null && selectedSubscribers.length > 0){
-            client.publishAll(null, selectedSubscribers);
+            client.publishAll(null, null, publishAction, selectedSubscribers);
         } else if(selectedPolicies != null && selectedPolicies.length > 0 && publishToAllSubscribers){
-            client.publishAll(selectedPolicies, null);
+            client.publishAll(selectedPolicies, null, publishAction, null);
         } else if(selectedPolicies != null && selectedPolicies.length > 0 && selectedSubscribers != null &&
                             selectedSubscribers.length > 0){
-            client.publishAll(selectedPolicies, selectedSubscribers);
+            client.publishAll(selectedPolicies, publishVersion, publishAction, selectedSubscribers);
         }
         
-        forwardTo = "policy-publish.jsp";
+        forwardTo = "index.jsp";
 
     } catch (Exception e) {
         e.printStackTrace();
-    	String message = resourceBundle.getString("error.while.performing.advance.search");
+    	String message = resourceBundle.getString("error.while.publishing.policies");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "../admin/error.jsp";
     }

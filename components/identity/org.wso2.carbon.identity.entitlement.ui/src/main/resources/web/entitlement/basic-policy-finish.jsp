@@ -76,35 +76,43 @@
 
     try {
 
-        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
-                serverURL, configContext);
-        try{
-            policyDTO = client.getPolicy(policyName);
-        } catch (Exception e){
-            //ignore
-        }
-
-        if(policyDTO == null){
-            policyDTO = new PolicyDTO();
-        }
-
         if(basicRuleDTOs != null && basicTargetDTO != null){
+
             policyMetaData = PolicyEditorUtil.generateBasicPolicyEditorData(basicPolicyDTO, ruleElementOrder);
             policy = policyCreator.createBasicPolicy(basicPolicyDTO);
+        }
+
+        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
+                serverURL, configContext);
+
+        if(entitlementPolicyBean.isEditPolicy()){
+            try{
+                policyDTO = client.getPolicy(policyName);
+            } catch (Exception e){
+                //ignore
+            }
+
+            if(policyDTO == null){
+                policyDTO = new PolicyDTO();
+            }
+
+            policyDTO.setPolicy(policy);
             policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
             if(policyMetaData != null){
                 policyDTO.setPolicyEditorData(policyMetaData);
             }
-        }
-
-        policyDTO.setPolicyId(policyName);
-        policyDTO.setPolicy(policy);
-
-        if(entitlementPolicyBean.isEditPolicy()){
-            client.updatePolicy(policyDTO);    
+            client.updatePolicy(policyDTO);
         } else {
+            policyDTO = new PolicyDTO();
+            policyDTO.setPolicyId(policyName);
+            policyDTO.setPolicy(policy);
+            policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
+            if(policyMetaData != null){
+                policyDTO.setPolicyEditorData(policyMetaData);
+            }
             client.addPolicy(policyDTO);
         }
+
         entitlementPolicyBean.cleanEntitlementPolicyBean();
         String message = resourceBundle.getString("ent.policy.added.successfully");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);

@@ -24,6 +24,8 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.PolicyEditorEngine" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.dto.PolicyEditorDataHolder" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <jsp:useBean id="entitlementPolicyBean"
@@ -33,6 +35,9 @@
 
 
 <%
+
+    PolicyEditorDataHolder holder = PolicyEditorEngine.getInstance().getPolicyEditorData();
+
     String ruleId = null;
     RuleDTO ruleDTO = null;
     String currentCategory = null;
@@ -132,12 +137,11 @@
         ruleDTO = entitlementPolicyBean.getRuleDTO(ruleId);
     }
     
-    Set<String> categories = entitlementPolicyBean.getCategorySet();
-    Set<String> rulePreFunctions = entitlementPolicyBean.getPreFunctions();
-    rulePreFunctions.add("is");      // TODO
+    Set<String> categories = holder.getCategoryMap().keySet();
+    Set<String> rulePreFunctions = holder.getPreFunctionMap().keySet();
     String[] targetPreFunctions = new String[]{"is"};
-    Set<String>  targetFunctions = entitlementPolicyBean.getTargetFunctionMap().keySet();
-    Set<String>  ruleFunctions = entitlementPolicyBean.getRuleFunctionMap().keySet();
+    Set<String> targetFunctions = holder.getTargetFunctions();
+    Set<String> ruleFunctions = holder.getRuleFunctions();
 
     List<RuleDTO> ruleDTOs = entitlementPolicyBean.getRuleDTOs();
     TargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();

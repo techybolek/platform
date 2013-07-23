@@ -32,14 +32,20 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.EntitlementFinderDataHolder" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.common.PolicyEditorEngine" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
 
 <%
-
+    // remove session attributes
     entitlementPolicyBean.cleanEntitlementPolicyBean();
+    session.removeAttribute("publishAction");
+    session.removeAttribute("policyVersion");
+    session.removeAttribute("policyOrder");
+    session.removeAttribute("publishAllPolicies");
+    session.removeAttribute("selectedPolicies");
+    session.removeAttribute("subscriberIds");
+
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
@@ -150,7 +156,11 @@
     function enable(policy) {
         location.href = "enable-disable-policy.jsp?policyid=" + policy +"&action=enable";
     }
-    
+
+    function viewStatus(policy) {
+        location.href = "show-policy-status.jsp?policyid=" + policy;
+    }
+
     function disable(policy) {
         location.href = "enable-disable-policy.jsp?policyid=" + policy +"&action=disable";
     }
@@ -217,12 +227,12 @@
         }
         if (allPolicesSelected) {
             CARBON.showConfirmationDialog("<fmt:message key="publish.all.policies.prompt"/>",function() {
-                document.policyForm.action = "policy-publish.jsp";
+                document.policyForm.action = "start-publish.jsp";
                 document.policyForm.submit();
             });
         } else {
             CARBON.showConfirmationDialog("<fmt:message key="publish.services.on.page.prompt"/>",function() {
-                document.policyForm.action = "policy-publish.jsp";
+                document.policyForm.action = "start-publish.jsp";
                 document.policyForm.submit();
             });
         }
@@ -230,12 +240,12 @@
 
     function publishAllPolicies() {
         CARBON.showConfirmationDialog("<fmt:message key="publish.all.policies.prompt"/>",function() {
-            location.href = "policy-publish.jsp?publishAllPolicies=true";
+            location.href = "start-publish.jsp?publishAllPolicies=true";
         });                
     }
 
       function publishPolicy(policy) {
-        location.href = "policy-publish.jsp?policyid=" + policy;
+        location.href = "start-publish.jsp?policyId=" + policy;
     }
 
     function selectAllInThisPage(isSelected) {
@@ -582,6 +592,14 @@
                     href="#" style="background-image: url(images/enable.gif);" class="icon-link">
                     <fmt:message key='enable.policy'/></a>
                     <%} %>
+                    <a title="<fmt:message key='publish'/>"   id="publish"
+                       onclick="publishPolicy('<%=policies[i].getPolicyId()%>');return false;"
+                       href="#" style="background-image: url(images/publish.gif);" class="icon-link">
+                        <fmt:message key='publish'/></a>
+                    <a title="<fmt:message key='view'/>"
+                       onclick="viewStatus('<%=policies[i].getPolicyId()%>');return false;"
+                       href="#" style="background-image: url(images/view.png);" class="icon-link">
+                        <fmt:message key='view'/></a>
                 </td>
             </tr>
             <%} }
