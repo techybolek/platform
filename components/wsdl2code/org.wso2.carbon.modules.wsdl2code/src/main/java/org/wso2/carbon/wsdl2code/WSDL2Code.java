@@ -83,9 +83,9 @@ public class WSDL2Code extends AbstractAdmin {
         HashMap<String, String> projOptionsList = new HashMap<String, String>();
         // adding default configurations
         
-        projOptionsList.put("-gid", "WSO2");
+        projOptionsList.put("-gid", "org.wso2.carbon");
         projOptionsList.put("-vn", "0.0.1-SNAPSHOT");
-        projOptionsList.put("-aid", "WSO2-Axis2-Client");
+        projOptionsList.put("-aid", "wso2-axis2-client");
         for (int j = 0; j < options.length; j++) {
             String option = options[j];
             if (option.equalsIgnoreCase("-gid") || option.equalsIgnoreCase("-vn") || option.equalsIgnoreCase("-aid")) {
