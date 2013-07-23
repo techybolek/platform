@@ -16,10 +16,10 @@
 
 package org.wso2.carbon.registry.governance.api.test;
 
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,7 +28,7 @@ import org.wso2.carbon.automation.core.utils.UserInfo;
 import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.fileutils.FileManager;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
@@ -43,7 +43,6 @@ import javax.xml.namespace.QName;
 import java.io.File;
 
 import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNull;
 
 /**
  * Generic artifact test class - contain test cases for generic artifacts.
@@ -142,6 +141,33 @@ public class GenericArtifactTestCase {
         assertTrue(description.contains("0123456789012345678901234567890123456789012345678901234567890120123456789012 More") &&
         		description.contains("last"),
                 "Artifact rule description not found");
+    }
+
+    @Test(groups = {"wso2.greg"}, description = "add an artefact with multiple longer lines",
+            enabled = true, dependsOnMethods = "testAddNewGenericArtifactWithMultilineTextForTextField")
+    public void testGetDependencies() throws RegistryException {
+        GenericArtifactManager artifactManager = new GenericArtifactManager(governance, "events");
+        GenericArtifact artifact1 = artifactManager.getAllGenericArtifacts()[0];
+
+        GenericArtifact artifact2 = artifactManager.newGovernanceArtifact(new QName
+                ("multiLineEvent2"));
+        artifact2.setAttribute("details_venue", "Colombo");
+        artifact2.setAttribute("details_date", "12/12/2012");
+        artifact2.setAttribute("details_name", "code");
+        artifact2.setAttribute("details_author", "testAuthor");
+        artifactManager.addGenericArtifact(artifact2);
+
+        governance.addAssociation(artifact1.getPath(), artifact2.getPath(), "depends");
+
+        GovernanceArtifact[] dependencies = artifact1.getDependencies();
+        Assert.assertEquals(dependencies.length, 1, "Number of dependencies expected was incorrect");
+        GovernanceArtifact dependency = dependencies[0];
+        Assert.assertEquals(dependency.getQName().getLocalPart(), "multiLineEvent2", "Expected dependency artifact not found");
+
+        GovernanceArtifact[] dependents = artifact2.getDependents();
+        Assert.assertEquals(dependents.length, 1, "Number of dependencies expected was incorrect");
+        GovernanceArtifact dependent = dependencies[0];
+        Assert.assertEquals(dependent.getQName().getLocalPart(), "multiLineEvent1", "Expected dependent artifact not found");
     }
 
 
