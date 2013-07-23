@@ -30,6 +30,7 @@ import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 
+import javax.servlet.ServletRegistration;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class WebApplication {
     private long lastModifiedTime;
     private Exception faultReason;
     private String state;
+    private String serviceListPath;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private TomcatGenericWebappsDeployer tomcatGenericWebappsDeployer;
 
@@ -65,6 +67,22 @@ public class WebApplication {
         this.context = context;
         setWebappFile(webappFile);
         setLastModifiedTime(webappFile.lastModified());
+        
+        String serviceListPathParamName = "service-list-path";                                                                                    
+        String serviceListPathParam = context.getServletContext().getInitParameter(serviceListPathParamName);
+        if ("".equals(serviceListPathParam) || serviceListPathParam == null) {
+            Map<String, ? extends ServletRegistration> servletRegs = context.getServletContext().getServletRegistrations();
+            for(ServletRegistration servletReg : servletRegs.values()) {
+                serviceListPathParam = servletReg.getInitParameter(serviceListPathParamName);
+                if (!"".equals(serviceListPathParam) || serviceListPathParam != null) {
+                    break;
+                }
+            }
+        }
+        if ("".equals(serviceListPathParam) || serviceListPathParam == null) {
+            serviceListPathParam = "/services";
+        }
+        setServiceListPath(serviceListPathParam);
     }
 
     /*public WebApplication(File webappFile) {
@@ -155,7 +173,12 @@ public class WebApplication {
     }
 
     public void addParameter(String name, String value) {
+        removeParameter(name);
         context.addParameter(name, value);
+    }
+
+    public void removeParameter(String name) {
+        context.removeParameter(name);
     }
 
     public String findParameter(String contextParamName) {
@@ -534,6 +557,14 @@ public class WebApplication {
     @Override
     public String toString() {
         return context + ".File[" + webappFile.getAbsolutePath() + "]";
+    }
+
+    public String getServiceListPath() {
+        return serviceListPath;
+    }
+
+    public void setServiceListPath(String serviceListPath) {
+        this.serviceListPath = serviceListPath;
     }
 
     /**

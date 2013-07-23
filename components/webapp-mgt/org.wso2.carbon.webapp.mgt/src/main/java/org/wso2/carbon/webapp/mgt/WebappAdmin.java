@@ -22,8 +22,6 @@ import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.catalina.Container;
-import org.apache.catalina.core.StandardWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -34,9 +32,8 @@ import org.wso2.carbon.utils.ArchiveManipulator;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.DataPaginator;
 import org.wso2.carbon.utils.NetworkUtils;
-import org.wso2.carbon.webapp.mgt.conf.WebappBamConfiguration;
-import org.wso2.carbon.webapp.mgt.sync.ApplicationSynchronizeRequest;
 import org.wso2.carbon.webapp.mgt.WebappsConstants.ApplicationOpType;
+import org.wso2.carbon.webapp.mgt.sync.ApplicationSynchronizeRequest;
 import org.wso2.carbon.webapp.mgt.utils.WebAppUtils;
 
 import javax.activation.DataHandler;
@@ -47,7 +44,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.SocketException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,6 +152,7 @@ public class WebappAdmin extends AbstractAdmin {
         webappMetadata.setLastModifiedTime(webApplication.getLastModifiedTime());
         webappMetadata.setWebappFile(webApplication.getWebappFile().getName());
         webappMetadata.setState(webApplication.getState());
+        webappMetadata.setServiceListPath(webApplication.getServiceListPath());
 
         WebApplication.Statistics statistics = webApplication.getStatistics();
         WebappStatistics stats = new WebappStatistics();
@@ -238,29 +243,14 @@ public class WebappAdmin extends AbstractAdmin {
             if (!doesWebappSatisfySearchString(webapp, webappsSearchString)) {
                 continue;
             }
+
             // Check whether this is a generic webapp, if not ignore..
             if (!isWebappRelevant(webapp, webappType)) {
                 continue;
             }
+            WebappMetadata webappMetadata = getWebapp(webapp);
+            WebappStatistics stats = webappMetadata.getStatistics();
 
-            String appContext = WebAppUtils.checkJaxApplication(webapp);
-            if (appContext == null) {
-                appContext = "/";
-            } else if(appContext.endsWith("/*")) {
-                appContext = appContext.substring(0, appContext.indexOf("/*"));
-            }
-
-            WebappMetadata webappMetadata = new WebappMetadata();
-            webappMetadata.setDisplayName(webapp.getDisplayName());
-            webappMetadata.setContext(webapp.getContextName());
-            webappMetadata.setServletContext(appContext);
-            webappMetadata.setLastModifiedTime(webapp.getLastModifiedTime());
-            webappMetadata.setWebappFile(webapp.getWebappFile().getName());
-            webappMetadata.setState(webapp.getState());
-            WebappStatistics statistics = new WebappStatistics();
-            statistics.setActiveSessions(webapp.getStatistics().getActiveSessions());
-            webappMetadata.setStatistics(statistics);
-            webappMetadata.setWebappType((String) webapp.getProperty(WebappsConstants.WEBAPP_FILTER));
             webapps.add(webappMetadata);
         }
         return webapps;

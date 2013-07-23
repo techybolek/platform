@@ -31,6 +31,7 @@ public class WebappMetadata {
     private String state;
     private String webappType;
     private String servletContext;
+    private String serviceListPath;
 
     public String getContext() {
         return context;
@@ -127,4 +128,13 @@ public class WebappMetadata {
     public void setServletContext(String servletContext) {
         this.servletContext = servletContext;
     }
+
+    public String getServiceListPath() {
+        return serviceListPath;
+    }
+
+    public void setServiceListPath(String serviceListPath) {
+        this.serviceListPath = serviceListPath;
+    }
+
 }
