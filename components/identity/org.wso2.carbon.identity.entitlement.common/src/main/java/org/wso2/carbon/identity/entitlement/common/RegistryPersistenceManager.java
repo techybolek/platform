@@ -24,6 +24,8 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.Registry;
 
+import java.nio.charset.Charset;
+
 /**
  *
  */
@@ -54,14 +56,14 @@ public class RegistryPersistenceManager extends InMemoryPersistenceManager{
                 Resource resource = registry.
                         get(EntitlementConstants.ENTITLEMENT_POLICY_EDITOR_CONFIG_FILE_REGISTRY_PATH);
                 if(resource != null && resource.getContent() != null){
-                    config =  (String) resource.getContent();
+                    config =  new String((byte[]) resource.getContent(), Charset.forName("UTF-8"));
                 }
             } catch (RegistryException e) {
                 // ignore and load default config
             }
         }
 
-        if(config == null){
+        if(config == null || config.trim().length() == 0){
             config = getDefaultConfig();
         }
         return config;

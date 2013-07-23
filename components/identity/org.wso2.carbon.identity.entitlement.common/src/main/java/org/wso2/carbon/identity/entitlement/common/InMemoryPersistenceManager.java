@@ -534,8 +534,8 @@ public class InMemoryPersistenceManager implements DataPersistenceManager{
                 "            <targetFunction>true</targetFunction>\n" +
                 "        </function>\n" +
                 "        <function>\n" +
-                "            <name>equal-matching-regexp</name>\n" +
-                "            <uri>equal-matching-regexp</uri>\n" +
+                "            <name>equals-with-regexp-match</name>\n" +
+                "            <uri>regexp-match</uri>\n" +
                 "\t    <targetFunction>true</targetFunction>\n" +
                 "        </function>\n" +
                 "        <function>\n" +
@@ -543,24 +543,12 @@ public class InMemoryPersistenceManager implements DataPersistenceManager{
                 "            <uri>at-least-one-member-of</uri>\n" +
                 "        </function>\n" +
                 "        <function>\n" +
-                "            <name>at-least-one-matching-regexp-member-of</name>\n" +
-                "            <uri>at-least-one-matching-regexp-member-of</uri>\n" +
-                "        </function>\n" +
-                "        <function>\n" +
                 "            <name>is-in</name>\n" +
                 "            <uri>is-in</uri>\n" +
                 "        </function>\n" +
                 "        <function>\n" +
-                "            <name>is-in-matching-regexp</name>\n" +
-                "            <uri>is-in-matching-regexp</uri>\n" +
-                "        </function>\n" +
-                "        <function>\n" +
                 "            <name>set-equals</name>\n" +
                 "            <uri>set-equals</uri>\n" +
-                "        </function>\n" +
-                "        <function>\n" +
-                "            <name>set-equals-matching-regexp</name>\n" +
-                "            <uri>set-equals-matching-regexp</uri>\n" +
                 "        </function>\n" +
                 "    </functions>\n" +
                 "    <preFunctions>\n" +
@@ -582,7 +570,7 @@ public class InMemoryPersistenceManager implements DataPersistenceManager{
                 "            <display>true</display>\n" +
                 "            <defaultEffect>Permit</defaultEffect>\n" +
                 "\t    \t<effect>\n" +
-                "            \t\t<name>Pemit</name>\n" +
+                "            \t\t<name>Permit</name>\n" +
                 "            \t\t<uri>Permit</uri>\n" +
                 "\t\t</effect>\n" +
                 "\t    \t<effect>\n" +

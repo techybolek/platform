@@ -31,4 +31,43 @@ public class EntitlementConstants {
     public static final String ENTITLEMENT_POLICY_EDITOR_CONFIG_FILE_REGISTRY_PATH =
             ENTITLEMENT_REGISTRY_PATH + "/policyEditor/config.xml";
 
+    public static final String PDP_SUBSCRIBER_ID = "PDP Subscriber";
+
+    public static final class PolicyPublish {
+
+        public static final String ACTION_CREATE = "CREATE";
+
+        public static final String ACTION_UPDATE = "UPDATE";
+
+        public static final String ACTION_DELETE = "DELETE";
+
+        public static final String ACTION_ENABLE = "ENABLE";
+
+        public static final String ACTION_PROMOTE = "PROMOTE";
+    }
+
+    public static final class StatusTypes {
+
+        public static final String ADD_POLICY = "ADD_POLICY";
+
+        public static final String UPDATE_POLICY = "UPDATE_POLICY";
+
+        public static final String GET_POLICY = "GET_POLICY";
+
+        public static final String DELETE_POLICY = "DELETE_POLICY";
+
+        public static final String ENABLE_POLICY = "ENABLE_POLICY";
+
+        public static final String PUBLISH_POLICY = "PUBLISH_POLICY";
+
+        public static final String ROLLBACK_POLICY = "ROLLBACK_POLICY";
+    }
+
+    public static final class Status {
+
+        public static final String ABOUT_POLICY = "POLICY";
+
+        public static final String ABOUT_SUBSCRIBER = "SUBSCRIBER";
+
+    }
 }
