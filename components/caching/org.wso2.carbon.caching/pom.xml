@@ -36,24 +36,15 @@
             <artifactId>org.wso2.carbon.core</artifactId>
             <version>${carbon.platform.version}</version>
         </dependency>
-        
         <dependency>
-            <groupId>org.wso2.caching</groupId>
-            <artifactId>wso2caching-core</artifactId>
-	    <version>${wso2caching.version}</version>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.caching.core</artifactId>
+            <version>${carbon.platform.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.wso2.caching</groupId>
-            <artifactId>wso2caching-mar</artifactId>
-	    <version>${wso2caching.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-saaj_1.3_spec</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-saaj</artifactId>
@@ -76,9 +67,10 @@
                         <Export-Package>
                             org.wso2.carbon.caching.service; version=1.0.0,
                             org.wso2.carbon.caching; version=1.0.0,
-                            org.wso2.caching.*;-split-package:=merge-first
                         </Export-Package>
                         <Import-Package>
+                            org.wso2.carbon.caching.core.*,
+                            org.wso2.carbon.caching.module.*,
                             org.apache.axiom.*; version="${axiom.osgi.version.range.caching}",
                             org.apache.neethi.*; version="${neethi.osgi.version.range.caching}",
                             javax.xml.stream.*; version="1.0.1",

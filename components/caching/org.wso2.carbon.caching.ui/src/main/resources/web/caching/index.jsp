@@ -34,7 +34,7 @@
 
 <%
     // values for default caching policy
-    final String DEF_XML_IDENTIFIER = "org.wso2.caching.digest.DOMHASHGenerator";
+    final String DEF_XML_IDENTIFIER = "org.wso2.carbon.caching.core.digest.DOMHASHGenerator";
     final String DEF_EXP_TIME = "60000";
     final String DEF_MAX_CACHE_SIZE = "1000";
     final String DEF_MAX_MSG_SIZE = "1000";
