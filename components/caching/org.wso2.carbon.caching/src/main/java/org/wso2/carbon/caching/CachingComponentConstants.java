@@ -23,7 +23,7 @@ public class CachingComponentConstants {
     /** Default configurations for caching */
 
     /** Default XML identifier. */
-    public static final String DEF_XML_IDENTIFIER = "org.wso2.caching.digest.DOMHASHGenerator";
+    public static final String DEF_XML_IDENTIFIER = "org.wso2.carbon.caching.core.digest.DOMHASHGenerator";
     /** Default expiration time, 60ms. */
     public static final long DEF_EXP_TIME = 60000;
     /** Default maximum possible number of cached messages in the system. */

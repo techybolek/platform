@@ -19,22 +19,15 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
-        <!-- Axis2 Jars -->
         <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-kernel</artifactId>
-            <version>${axis2.version}</version>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-saaj_1.3_spec</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-saaj</artifactId>
-            <version>${axis2.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-clustering</artifactId>
-            <version>${axis2.version}</version>
-        </dependency>
+
         <!-- AXIOM Dependencies -->
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
@@ -87,8 +80,16 @@
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.carbon.caching.core.*,
+                            org.apache.axiom.*; version="${axiom.osgi.version.range.caching}",
+                            org.apache.neethi.*; version="${neethi.osgi.version.range.caching}",
+                            javax.xml.stream.*; version="1.0.1",
                             *;resolution:=optional
                         </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
+                        <Embed-Dependency>
+                            geronimo-saaj_1.3_spec;scope=compile|runtime;inline=true;
+                            axis2-saaj;scope=compile|runtime;inline=true;
+                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>

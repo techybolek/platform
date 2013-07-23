@@ -71,16 +71,9 @@
                         <Import-Package>
                             org.wso2.carbon.caching.core.*,
                             org.wso2.carbon.caching.module.*,
-                            org.apache.axiom.*; version="${axiom.osgi.version.range.caching}",
-                            org.apache.neethi.*; version="${neethi.osgi.version.range.caching}",
-                            javax.xml.stream.*; version="1.0.1",
+
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
-                        <Embed-Dependency>
-                            geronimo-saaj_1.3_spec;scope=compile|runtime;inline=true;
-                            axis2-saaj;scope=compile|runtime;inline=true;
-                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
