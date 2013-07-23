@@ -407,7 +407,8 @@ public class WSDL2Code extends AbstractAdmin {
 
     private String getProjectName(String url) {
         String fileName = url.substring(url.lastIndexOf('/') + 1, url.length());
-        String fileNameWithoutExtn = fileName.substring(0, fileName.lastIndexOf('?'));
+        String fileNameWithoutExtn = fileName.lastIndexOf('?') > -1 ? 
+            fileName.substring(0, fileName.lastIndexOf('?')) : fileName;
         return fileNameWithoutExtn;
     }
 
