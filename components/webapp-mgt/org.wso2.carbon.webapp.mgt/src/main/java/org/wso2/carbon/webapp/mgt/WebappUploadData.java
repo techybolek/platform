@@ -8,7 +8,16 @@ import javax.activation.DataHandler;
 public class WebappUploadData {
 
     private String fileName;
+    private String version;
     private DataHandler dataHandler;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
     public String getFileName() {
         return fileName;

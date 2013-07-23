@@ -34,6 +34,7 @@ import org.wso2.carbon.utils.ArchiveManipulator;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.DataPaginator;
 import org.wso2.carbon.utils.NetworkUtils;
+import org.wso2.carbon.webapp.mgt.conf.WebappBamConfiguration;
 import org.wso2.carbon.webapp.mgt.sync.ApplicationSynchronizeRequest;
 import org.wso2.carbon.webapp.mgt.WebappsConstants.ApplicationOpType;
 import org.wso2.carbon.webapp.mgt.utils.WebAppUtils;
@@ -735,6 +736,14 @@ public class WebappAdmin extends AbstractAdmin {
 
         for (WebappUploadData uploadData : webappUploadDataList) {
             String fileName = uploadData.getFileName();
+            String version = uploadData.getVersion();
+            if(version != "" && version != null){
+                if(fileName.contains(".war")){
+                    fileName = fileName.replace(".war", "#" + version + ".war");
+                } else if(fileName.contains(".zip")) {
+                    fileName = fileName.replace(".zip", "#" + version + ".zip");
+                }
+            }
             fileName = fileName.substring(fileName.lastIndexOf(System.getProperty("file.separator"))+1);
             File destFile = new File(webappsDir, fileName);
             FileOutputStream fos = null;
