@@ -233,7 +233,7 @@ public class BasicPolicyHelper {
                         actionDataType, actionNames, designatorDTO);   //TODO
             } else if(Arrays.asList(PolicyConstants.Functions.simpleBagRuleFunctions).contains(functionOnActions)){
                 actionApplyElementDTO = createApplyElementForBagFunctions(functionOnActions,
-                        PolicyConstants.ACTION_ELEMENT, actionId, actions, actionDataType);
+                        PolicyConstants.ACTION_CATEGORY_URI, actionId, actions, actionDataType);
             } else if(Arrays.asList(PolicyConstants.Functions.simpleRuleFunctions).contains(functionOnActions)){
                 actionApplyElementDTO = createApplyElementForNonBagFunctions(functionOnActions,
                         PolicyConstants.ACTION_CATEGORY_URI, actionId, actions[0].trim(), actionDataType);
