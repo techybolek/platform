@@ -567,7 +567,7 @@
 
             String webappURL = urlPrefix + vWebapp.getContext();
             if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
-                webappURL += vWebapp.getServletContext();
+                webappURL += vWebapp.getServletContext() + vWebapp.getServiceListPath();
             } else {
                 webappURL = webappURL + "/";
             }
