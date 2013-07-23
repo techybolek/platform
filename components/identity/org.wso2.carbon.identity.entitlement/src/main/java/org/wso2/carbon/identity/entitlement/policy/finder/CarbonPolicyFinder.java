@@ -22,15 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.balana.*;
 import org.wso2.balana.combine.PolicyCombiningAlgorithm;
-import org.wso2.balana.combine.xacml3.DenyOverridesPolicyAlg;
 import org.wso2.balana.ctx.EvaluationCtx;
+import org.wso2.balana.ctx.Status;
 import org.wso2.balana.finder.*;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementAdminService;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
-import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
@@ -63,7 +60,7 @@ public class CarbonPolicyFinder extends org.wso2.balana.finder.PolicyFinderModul
 
     private LinkedHashMap<URI, AbstractPolicy> policyReferenceCache = null;
 
-    private int maxReferenceCacheEntries = EntitlementConstants.MAX_NO_OF_IN_MEMORY_POLICIES;    
+    private int maxReferenceCacheEntries = PDPConstants.MAX_NO_OF_IN_MEMORY_POLICIES;
 
     public PolicyReader policyReader;
 
@@ -85,7 +82,7 @@ public class CarbonPolicyFinder extends org.wso2.balana.finder.PolicyFinderModul
         log.info("Initializing of policy store is started at :  " + new Date());
 
         String maxEntries = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties().
-                getProperty(EntitlementConstants.MAX_POLICY_REFERENCE_ENTRIES);
+                getProperty(PDPConstants.MAX_POLICY_REFERENCE_ENTRIES);
 
         if(maxEntries != null){
             try{
@@ -198,7 +195,10 @@ public class CarbonPolicyFinder extends org.wso2.balana.finder.PolicyFinderModul
                 return new PolicyFinderResult(policy);
             }
         } catch (EntitlementException e) {
-            return new PolicyFinderResult(e.getStatus());
+            ArrayList<String> code = new ArrayList<String>();
+            code.add(Status.STATUS_PROCESSING_ERROR);
+            Status status = new Status(code, e.getMessage());
+            return new PolicyFinderResult(status);
         }
     }
 

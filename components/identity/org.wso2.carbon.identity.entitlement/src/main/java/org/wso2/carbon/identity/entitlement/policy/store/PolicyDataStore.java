@@ -19,7 +19,7 @@
 package org.wso2.carbon.identity.entitlement.policy.store;
 
 import org.wso2.balana.combine.PolicyCombiningAlgorithm;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 
 import java.util.Properties;
 
@@ -34,17 +34,17 @@ public interface PolicyDataStore {
      * initializes the PolicyDataStore
      *
      * @param properties properties, that need to initialize the module.
-     * @throws IdentityException throws when initialization is failed
+     * @throws EntitlementException throws when initialization is failed
      */
-    public void init(Properties properties) throws IdentityException;
+    public void init(Properties properties) throws EntitlementException;
     
     /**
      * Persist the policy combining algorithm in to data store
      *
      * @param policyCombiningAlgorithm   policy combining algorithm name to persist
-     * @throws IdentityException throws if fails
+     * @throws EntitlementException throws if fails
      */
-    public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws IdentityException;
+    public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws EntitlementException;
 
     /**
      * Gets the policy combining algorithm of the PDP

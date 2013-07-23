@@ -26,7 +26,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.xml.sax.SAXException;
 
 public class SchemaBuilder implements Runnable {
@@ -64,20 +64,20 @@ public class SchemaBuilder implements Runnable {
             return;
         }
 
-        String[] schemaNSs = new String[] { EntitlementConstants.XACML_1_POLICY_XMLNS,
-                EntitlementConstants.XACML_2_POLICY_XMLNS,
-                EntitlementConstants.XACML_3_POLICY_XMLNS };
+        String[] schemaNSs = new String[] { PDPConstants.XACML_1_POLICY_XMLNS,
+                PDPConstants.XACML_2_POLICY_XMLNS,
+                PDPConstants.XACML_3_POLICY_XMLNS };
 
         for (String schemaNS : schemaNSs) {
 
             String schemaFile;
 
-            if (EntitlementConstants.XACML_1_POLICY_XMLNS.equals(schemaNS)) {
-                schemaFile = EntitlementConstants.XACML_1_POLICY_SCHEMA_FILE;
-            } else if (EntitlementConstants.XACML_2_POLICY_XMLNS.equals(schemaNS)) {
-                schemaFile = EntitlementConstants.XACML_2_POLICY_SCHEMA_FILE;
+            if (PDPConstants.XACML_1_POLICY_XMLNS.equals(schemaNS)) {
+                schemaFile = PDPConstants.XACML_1_POLICY_SCHEMA_FILE;
+            } else if (PDPConstants.XACML_2_POLICY_XMLNS.equals(schemaNS)) {
+                schemaFile = PDPConstants.XACML_2_POLICY_SCHEMA_FILE;
             } else {
-                schemaFile = EntitlementConstants.XACML_3_POLICY_SCHEMA_FILE;
+                schemaFile = PDPConstants.XACML_3_POLICY_SCHEMA_FILE;
             }
 
             InputStream schemaFileStream = EntitlementExtensionBuilder.class

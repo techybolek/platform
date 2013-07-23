@@ -24,7 +24,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 
 import java.util.Set;
 
@@ -65,8 +65,8 @@ public class PIPAttributeCache {
 	 * This logic handles by javax.cache implementation
 	 */
 	private Cache<IdentityCacheKey,IdentityCacheEntry> getPIPAttributeCache() {
-		CacheManager cacheManager = Caching.getCacheManagerFactory().getCacheManager(EntitlementConstants.ENTITLEMENT_CACHE_MANAGER);
-		Cache<IdentityCacheKey,IdentityCacheEntry> cache = cacheManager.getCache(EntitlementConstants.PIP_ABSTRACT_ATTRIBUTE_CACHE);
+		CacheManager cacheManager = Caching.getCacheManagerFactory().getCacheManager(PDPConstants.ENTITLEMENT_CACHE_MANAGER);
+		Cache<IdentityCacheKey,IdentityCacheEntry> cache = cacheManager.getCache(PDPConstants.PIP_ABSTRACT_ATTRIBUTE_CACHE);
 		return cache;
 	}
 	
@@ -125,7 +125,7 @@ public class PIPAttributeCache {
 //            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
 //            try {
 //                if (invalidator != null) {
-//                    invalidator.invalidateCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE, cacheKey);
+//                    invalidator.invalidateCache(PDPConstants.PIP_ATTRIBUTE_CACHE, cacheKey);
 //                    if (log.isDebugEnabled()) {
 //                        log.debug("Calling invalidation cache");
 //                    }
@@ -160,7 +160,7 @@ public class PIPAttributeCache {
 //        CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
 //        try {
 //            if (invalidator != null) {
-//                invalidator.invalidateCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE, tenantId);
+//                invalidator.invalidateCache(PDPConstants.PIP_ATTRIBUTE_CACHE, tenantId);
 //                if (log.isDebugEnabled()) {
 //                    log.debug("Calling invalidation cache");
 //                }

@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.policy.publisher;
 
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 
 import java.util.Properties;
@@ -42,7 +42,7 @@ public abstract class PublisherVerificationModule {
      *
      * @param holder
      */
-    public abstract String  getVerificationCode(PublisherDataHolder holder) throws IdentityException;
+    public abstract String  getVerificationCode(PublisherDataHolder holder) throws EntitlementException;
 
     public abstract boolean doVerify(String code);
 

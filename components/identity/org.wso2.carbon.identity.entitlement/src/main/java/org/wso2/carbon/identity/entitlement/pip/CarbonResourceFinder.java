@@ -25,8 +25,8 @@ import org.wso2.balana.finder.ResourceFinderResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.EntitlementBaseCache;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
@@ -77,9 +77,9 @@ public class CarbonResourceFinder extends ResourceFinderModule{
             resourceFinders = resourceConfigs.keySet();    
         }
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
-		if ("true".equals(properties.getProperty(EntitlementConstants.RESOURCE_CACHING))) {
+		if ("true".equals(properties.getProperty(PDPConstants.RESOURCE_CACHING))) {
 			resourceCache = EntitlementUtil
-					.getCommonCache(EntitlementConstants.PIP_RESOURCE_CACHE);
+					.getCommonCache(PDPConstants.PIP_RESOURCE_CACHE);
 			isResourceCachingEnabled = true;
 		}
     }
@@ -107,7 +107,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                 Set<String> resourceNames = null;
                 if(isResourceCachingEnabled && !finder.overrideDefaultCache()) {
 				    IdentityCacheKey cacheKey = null;
-                    String key = EntitlementConstants.RESOURCE_DESCENDANTS + parentResourceId.encode() +
+                    String key = PDPConstants.RESOURCE_DESCENDANTS + parentResourceId.encode() +
                             domToString(context.getRequestRoot());
                     cacheKey = new IdentityCacheKey(tenantId, key);
                     IdentityCacheEntry cacheEntry = (IdentityCacheEntry) resourceCache.getValueFromCache(cacheKey);
@@ -137,7 +137,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                         resources.add(EntitlementUtil.getAttributeValue(resourceName, dataType));
                     }
                 }
-            } catch (IdentityException e) {
+            } catch (EntitlementException e) {
                 log.error("Error while finding descendant resources", e);
             } catch (TransformerException e) {
                 log.error("Error while finding descendant resources", e);
@@ -167,13 +167,13 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                 Set<String> resourceNames = null;
                 if(isResourceCachingEnabled && !finder.overrideDefaultCache()) {
 				    IdentityCacheKey cacheKey = null;
-                    String key = EntitlementConstants.RESOURCE_CHILDREN + parentResourceId.encode() +
+                    String key = PDPConstants.RESOURCE_CHILDREN + parentResourceId.encode() +
                             domToString(context.getRequestRoot());
                     cacheKey = new IdentityCacheKey(tenantId, key);
                     IdentityCacheEntry cacheEntry = (IdentityCacheEntry) resourceCache.getValueFromCache(cacheKey);
                     if(cacheEntry != null){
                         String cacheEntryString= cacheEntry.getCacheEntry();
-                        String[] attributes = cacheEntryString.split(EntitlementConstants.ATTRIBUTE_SEPARATOR);
+                        String[] attributes = cacheEntryString.split(PDPConstants.ATTRIBUTE_SEPARATOR);
                         if(attributes != null && attributes.length > 0){
                             List<String> list  = Arrays.asList(attributes);
                             resourceNames =  new HashSet<String>(list);
@@ -192,7 +192,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                                 if(cacheEntryString.equals("")){
                                     cacheEntryString = attribute;
                                 }else {
-                                    cacheEntryString = cacheEntryString + EntitlementConstants.ATTRIBUTE_SEPARATOR + attribute;
+                                    cacheEntryString = cacheEntryString + PDPConstants.ATTRIBUTE_SEPARATOR + attribute;
                                 }
                             }
                         }
@@ -209,7 +209,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
                         resources.add(EntitlementUtil.getAttributeValue(resourceName, dataType));
                     }
                 }
-            } catch (IdentityException e) {
+            } catch (EntitlementException e) {
                 log.error("Error while finding child resources", e);
             } catch (TransformerException e) {
                 log.error("Error while finding child resources", e);
@@ -239,7 +239,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
 	 */
 	public void enableAttributeCache() {
 		resourceCache = EntitlementUtil
-				.getCommonCache(EntitlementConstants.PIP_RESOURCE_CACHE);
+				.getCommonCache(PDPConstants.PIP_RESOURCE_CACHE);
 	}
 
 	/**

@@ -27,10 +27,6 @@ import java.util.Date;
  */
 public class StatusHolder {
 
-    public static final String TYPE_PUBLISH = "PUBLISH";
-
-    public static final String TYPE_POLICY = "POLICY";
-
     /**
      * Status type
      */
@@ -39,6 +35,11 @@ public class StatusHolder {
      * key to identify status. basically policy Id
      */
     private String key;
+
+    /**
+     *basically policy version
+     */
+    private String version;
     
     /**
      * whether this is success status or not
@@ -49,6 +50,16 @@ public class StatusHolder {
      * the user who is involved with this
      */
     private String user;
+
+    /**
+     * target
+     */
+    private String target;
+
+    /**
+     * target action
+     */
+    private String targetAction;
 
     /**
      * time instance
@@ -62,18 +73,25 @@ public class StatusHolder {
 
     public static final String STATUS_HOLDER_NAME = "status_holder";
 
-    public StatusHolder(String type, String key, String message) {
+    public StatusHolder(String type, String key, String version, String target,
+                                            String targetAction, boolean success, String message) {
         this.type = type;
         this.key = key;
         this.user = CarbonContext.getCurrentContext().getUsername();
         this.message = message;
-        this.success = false;
+        this.version = version;
+        this.target = target;
+        this.targetAction = targetAction;
+        this.success = success;
         this.timeInstance = (new Date()).toString();
     }
 
-    public StatusHolder(String type, String key) {
+    public StatusHolder(String type, String key, String version, String target, String targetAction) {
         this.type = type;
         this.key = key;
+        this.version = version;
+        this.target = target;
+        this.targetAction = targetAction;
         this.user = CarbonContext.getCurrentContext().getUsername();
         this.success = true;
         this.timeInstance = (new Date()).toString();
@@ -129,5 +147,29 @@ public class StatusHolder {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public String getTargetAction() {
+        return targetAction;
+    }
+
+    public void setTargetAction(String targetAction) {
+        this.targetAction = targetAction;
     }
 }

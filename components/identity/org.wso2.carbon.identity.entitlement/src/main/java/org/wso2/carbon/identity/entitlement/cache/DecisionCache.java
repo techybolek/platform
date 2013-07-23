@@ -22,7 +22,7 @@ package org.wso2.carbon.identity.entitlement.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.pdp.PolicyDecision;
 
 
@@ -35,7 +35,7 @@ public class DecisionCache extends EntitlementBaseCache<IdentityCacheKey, Policy
     private static final Object lock = new Object();
 
     private DecisionCache() {
-    	super(EntitlementConstants.PDP_DECISION_CACHE);
+    	super(PDPConstants.PDP_DECISION_CACHE);
     }
 
     /**

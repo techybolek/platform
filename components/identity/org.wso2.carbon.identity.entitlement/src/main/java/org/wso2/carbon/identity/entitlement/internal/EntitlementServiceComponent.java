@@ -34,7 +34,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.*;
 import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
@@ -114,14 +114,14 @@ public class EntitlementServiceComponent {
                     registryService.getGovernanceSystemRegistry());
 
             String startUpPolicyAdding = entitlementConfig.getEngineProperties().getProperty(
-                                                        EntitlementConstants.START_UP_POLICY_ADDING);
+                                                        PDPConstants.START_UP_POLICY_ADDING);
 
             if(startUpPolicyAdding != null && Boolean.parseBoolean(startUpPolicyAdding)){                
                 if (papPolicyStore.getAllPolicyIds() == null
                         || papPolicyStore.getAllPolicyIds().length == 0) {
                     File policyFolder = null;
                     String policyPathFromConfig = entitlementConfig.getEngineProperties().getProperty(
-                            EntitlementConstants.FILESYSTEM_POLICY_PATH);
+                            PDPConstants.FILESYSTEM_POLICY_PATH);
 
                     if (policyPathFromConfig != null && policyPathFromConfig.trim().length() > 0) {
                         policyFolder = new File(policyPathFromConfig);

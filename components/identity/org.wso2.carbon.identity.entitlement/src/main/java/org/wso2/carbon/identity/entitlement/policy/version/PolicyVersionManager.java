@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.policy.version;
 
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 
 import java.util.Properties;
@@ -40,22 +40,30 @@ public interface PolicyVersionManager {
      * @param policyId
      * @param version
      * @return
-     * @throws IdentityException
+     * @throws EntitlementException
      */
-    public PolicyDTO getPolicy(String policyId, int version) throws IdentityException;
+    public PolicyDTO getPolicy(String policyId, String version) throws EntitlementException;
 
     /**
      *
      * @param policyDTO
      * @return
-     * @throws IdentityException
+     * @throws EntitlementException
      */
-    public int createVersion(PolicyDTO policyDTO) throws IdentityException;
+    public String createVersion(PolicyDTO policyDTO) throws EntitlementException;
 
     /**
      *
      * @param policyId
-     * @throws IdentityException
+     * @throws EntitlementException
      */
-    public void deletePolicy(String policyId) throws IdentityException;
+    public void deletePolicy(String policyId) throws EntitlementException;
+
+    /**
+     *
+     * @param policyId
+     * @return
+     * @throws EntitlementException
+     */
+    public String[] getVersions(String policyId) throws EntitlementException;
 }

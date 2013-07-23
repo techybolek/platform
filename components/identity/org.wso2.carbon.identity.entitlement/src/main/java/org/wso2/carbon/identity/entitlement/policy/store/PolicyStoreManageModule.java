@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.policy.store;
 
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
 import org.wso2.carbon.identity.entitlement.policy.finder.PolicyFinderModule;
 
@@ -43,7 +43,7 @@ public interface PolicyStoreManageModule extends PolicyFinderModule {
      *
      * @param policy
      */
-    public void addPolicy(PolicyStoreDTO policy) throws IdentityException;
+    public void addPolicy(PolicyStoreDTO policy) throws EntitlementException;
 
 
     /**
@@ -51,13 +51,13 @@ public interface PolicyStoreManageModule extends PolicyFinderModule {
      *
      * @param policy
      */
-    public void updatePolicy(PolicyStoreDTO policy) throws IdentityException;
+    public void updatePolicy(PolicyStoreDTO policy) throws EntitlementException;
 
     /**
      * delete policy from the store
      *
      * @param policyIdentifier
      */
-    public boolean deletePolicy(String policyIdentifier) throws IdentityException;
+    public boolean deletePolicy(String policyIdentifier) throws EntitlementException;
 
 }

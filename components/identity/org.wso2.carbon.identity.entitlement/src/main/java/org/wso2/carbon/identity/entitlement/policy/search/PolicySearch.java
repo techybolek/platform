@@ -22,8 +22,8 @@ import org.wso2.balana.ctx.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.PolicySearchCache;
 import org.wso2.carbon.identity.entitlement.dto.*;
@@ -75,11 +75,11 @@ public class PolicySearch {
      * @param action  Action Name
      * @param enableChildSearch   whether search is done for the child resources under the given  resource name
      * @return entitled resource id set
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
 	 */
 	public EntitledResultSetDTO getEntitledAttributes(String subjectName, String resourceName,
                                     String subjectId, String action, boolean enableChildSearch)
-                                                                        throws IdentityException {
+                                                                        throws EntitlementException {
         String cacheKey = "";
 
         if(pdpDecisionCachingInterval > 0){
@@ -106,16 +106,16 @@ public class PolicySearch {
 
         if(subjectName != null && subjectName.trim().length() > 0){
             subjectAttributeDTO = new AttributeDTO();
-            subjectAttributeDTO.setCategory(EntitlementConstants.SUBJECT_CATEGORY_URI);
+            subjectAttributeDTO.setCategory(PDPConstants.SUBJECT_CATEGORY_URI);
             subjectAttributeDTO.setAttributeValue(subjectName);
-            subjectAttributeDTO.setAttributeDataType(EntitlementConstants.STRING_DATA_TYPE);
+            subjectAttributeDTO.setAttributeDataType(PDPConstants.STRING_DATA_TYPE);
             if(subjectId != null && subjectId.trim().length() > 0){
                 subjectAttributeDTO.setAttributeId(subjectId);
             } else {
-                subjectAttributeDTO.setAttributeId(EntitlementConstants.SUBJECT_ID_DEFAULT);
+                subjectAttributeDTO.setAttributeId(PDPConstants.SUBJECT_ID_DEFAULT);
             }
         } else {
-            throw new IdentityException("Error : subject value can not be null");
+            throw new EntitlementException("Error : subject value can not be null");
         }
 
         if(getResponse(Arrays.asList(subjectAttributeDTO))){
@@ -143,36 +143,36 @@ public class PolicySearch {
                         if(resourceName != null && resourceName.trim().length() > 0){
                             AttributeDTO resourceAttribute = new AttributeDTO();
                             resourceAttribute.setAttributeValue(resourceName);
-                            resourceAttribute.setAttributeDataType(EntitlementConstants.STRING_DATA_TYPE);
-                            resourceAttribute.setAttributeId(EntitlementConstants.RESOURCE_ID_DEFAULT);
-                            resourceAttribute.setCategory(EntitlementConstants.RESOURCE_CATEGORY_URI);
+                            resourceAttribute.setAttributeDataType(PDPConstants.STRING_DATA_TYPE);
+                            resourceAttribute.setAttributeId(PDPConstants.RESOURCE_ID_DEFAULT);
+                            resourceAttribute.setCategory(PDPConstants.RESOURCE_CATEGORY_URI);
                             resources.add(resourceAttribute);
                             hierarchicalResource = true;
                         }
 
                         AttributeDTO resourceScopeAttribute = new AttributeDTO();
-                        resourceScopeAttribute.setAttributeValue(EntitlementConstants.RESOURCE_DESCENDANTS);
-                        resourceScopeAttribute.setAttributeDataType(EntitlementConstants.STRING_DATA_TYPE);
-                        resourceScopeAttribute.setAttributeId(EntitlementConstants.RESOURCE_SCOPE_ID);
-                        resourceScopeAttribute.setCategory(EntitlementConstants.RESOURCE_CATEGORY_URI);
+                        resourceScopeAttribute.setAttributeValue(PDPConstants.RESOURCE_DESCENDANTS);
+                        resourceScopeAttribute.setAttributeDataType(PDPConstants.STRING_DATA_TYPE);
+                        resourceScopeAttribute.setAttributeId(PDPConstants.RESOURCE_SCOPE_ID);
+                        resourceScopeAttribute.setCategory(PDPConstants.RESOURCE_CATEGORY_URI);
 
                         for(AttributeDTO attributeDTO : attributeDTOs){
-                            if (EntitlementConstants.ENVIRONMENT_CATEGORY_URI.equals(attributeDTO
+                            if (PDPConstants.ENVIRONMENT_CATEGORY_URI.equals(attributeDTO
                                                     .getCategory())) {
                                 requestAttributes.add(attributeDTO);
-                                attributeDTO.setAttributeId(EntitlementConstants.ENVIRONMENT_ID_DEFAULT);
+                                attributeDTO.setAttributeId(PDPConstants.ENVIRONMENT_ID_DEFAULT);
                                 requestAttributes.add(attributeDTO);
-                            } else if (EntitlementConstants.ACTION_CATEGORY_URI.equals(attributeDTO
+                            } else if (PDPConstants.ACTION_CATEGORY_URI.equals(attributeDTO
                                                     .getCategory())) {
                                 if(action != null && action.trim().length() > 0){
                                     attributeDTO.setAttributeValue(action);
                                 }
                                 actions.add(attributeDTO);
-                                attributeDTO.setAttributeId(EntitlementConstants.ACTION_ID_DEFAULT);
+                                attributeDTO.setAttributeId(PDPConstants.ACTION_ID_DEFAULT);
                                 actions.add(attributeDTO);
-                            } else if (EntitlementConstants.RESOURCE_CATEGORY_URI.equals(attributeDTO
+                            } else if (PDPConstants.RESOURCE_CATEGORY_URI.equals(attributeDTO
                                                     .getCategory()) && !hierarchicalResource){
-                                attributeDTO.setAttributeId(EntitlementConstants.RESOURCE_ID_DEFAULT);
+                                attributeDTO.setAttributeId(PDPConstants.RESOURCE_ID_DEFAULT);
                                 resources.add(attributeDTO);
                             }
                         }
@@ -194,7 +194,7 @@ public class PolicySearch {
                             }
 
                             for (AttributeDTO resource : resources) {
-                                if (EntitlementConstants.RESOURCE_CATEGORY_URI.equals(resource.getCategory())){
+                                if (PDPConstants.RESOURCE_CATEGORY_URI.equals(resource.getCategory())){
 
                                     boolean allActionsAllowed = false;
 

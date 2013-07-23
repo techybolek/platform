@@ -50,7 +50,7 @@ import org.wso2.balana.ctx.Attribute;
 import org.wso2.balana.ctx.xacml2.RequestCtx;
 import org.wso2.balana.ctx.xacml2.Subject;
 import org.wso2.balana.xacml3.Attributes;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.cache.EntitlementBaseCache;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheKey;
@@ -120,10 +120,10 @@ public class EntitlementUtil {
      * @param value attribute value as a String object
      * @param type  attribute data type name as String object
      * @return Attribute Value Object
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
 	public static AttributeValue getAttributeValue(final String value, String type)
-                        throws IdentityException {
+                        throws EntitlementException {
 
         try {
             if (StringAttribute.identifier.equals(type)) {
@@ -159,13 +159,13 @@ public class EntitlementUtil {
             };
 
         } catch (ParsingException e) {
-            throw new IdentityException("Error while creating AttributeValue object for given " +
+            throw new EntitlementException("Error while creating AttributeValue object for given " +
                                         "string value and data type");
         } catch (ParseException e) {
-            throw new IdentityException("Error while creating AttributeValue object for given " +
+            throw new EntitlementException("Error while creating AttributeValue object for given " +
                                         "string value and data type");
         } catch (URISyntaxException e) {
-            throw new IdentityException("Error while creating AttributeValue object for given " +
+            throw new EntitlementException("Error while creating AttributeValue object for given " +
                                         "string value and data type");
         }
 	}
@@ -174,7 +174,7 @@ public class EntitlementUtil {
      * This creates the XACML 3.0 Request context from AttributeDTO object model
      * @param attributeDTOs  AttributeDTO objects as List
      * @return DOM element as XACML request
-     * @throws IdentityException  throws, if fails
+     * @throws EntitlementException  throws, if fails
      */
     public static AbstractRequestCtx createRequestContext(List<AttributeDTO> attributeDTOs){
 
@@ -291,10 +291,10 @@ public class EntitlementUtil {
 	 *
 	 * @param uri policy combining url as String
 	 * @return PolicyCombiningAlgorithm object
-	 * @throws IdentityException throws if unsupported algorithm
+	 * @throws EntitlementException throws if unsupported algorithm
 	 */
 	public static PolicyCombiningAlgorithm getPolicyCombiningAlgorithm(String uri)
-			throws IdentityException {
+			throws EntitlementException {
 
 		if (FirstApplicablePolicyAlg.algId.equals(uri)) {
 			return new FirstApplicablePolicyAlg();
@@ -314,7 +314,7 @@ public class EntitlementUtil {
             return new PermitUnlessDenyPolicyAlg();
         }
 
-		throw new IdentityException("Unsupported policy algorithm " + uri);
+		throw new EntitlementException("Unsupported policy algorithm " + uri);
 	}
 
 	/**
@@ -375,12 +375,12 @@ public class EntitlementUtil {
      * @param registry Registry
      * @param promote where policy must be promote PDP or not
      * @return returns whether True/False
-     * @throws org.wso2.carbon.identity.base.IdentityException
+     * @throws org.wso2.carbon.identity.entitlement.EntitlementException
      *             throws if policy with same id is exist
      */
     public static boolean addFilesystemPolicy(PolicyDTO policyDTO,
                                               Registry registry, boolean promote)
-            throws IdentityException {
+            throws EntitlementException {
 
         PAPPolicyStoreManager policyAdmin;
         AbstractPolicy policyObj;
@@ -398,7 +398,7 @@ public class EntitlementUtil {
             policyDTO.setActive(true);
 
             if (getPolicy(policyDTO.getPolicyId(), registry) != null) {
-                throw new IdentityException(
+                throw new EntitlementException(
                         "An Entitlement Policy with the given ID already exists");
             }
 
@@ -422,7 +422,7 @@ public class EntitlementUtil {
             
             return true;
         } else {
-            throw new IdentityException("Invalid Entitlement Policy");
+            throw new EntitlementException("Invalid Entitlement Policy");
         }
     }
 
@@ -469,9 +469,9 @@ public class EntitlementUtil {
 	 * @param policyId policy id
 	 * @param registry Registry
 	 * @return returns policy
-	 * @throws org.wso2.carbon.identity.base.IdentityException
+	 * @throws org.wso2.carbon.identity.entitlement.EntitlementException
 	 */
-    public static PolicyDTO getPolicy(String policyId, Registry registry) throws IdentityException {
+    public static PolicyDTO getPolicy(String policyId, Registry registry) throws EntitlementException {
         PAPPolicyStoreReader policyReader = null;
         policyReader = new PAPPolicyStoreReader(new PAPPolicyStore(registry));
         return policyReader.readPolicyDTO(policyId);
@@ -481,7 +481,7 @@ public class EntitlementUtil {
      * @param policyStoreDTO
      * @return
      */
-    public static void addPolicyToPDP(PolicyStoreDTO policyStoreDTO) throws IdentityException {
+    public static void addPolicyToPDP(PolicyStoreDTO policyStoreDTO) throws EntitlementException {
 
         Registry registry;
         String policyPath;
@@ -532,7 +532,7 @@ public class EntitlementUtil {
             registry.put(policyPath, resource);
         } catch (RegistryException e) {
             log.error(e);
-            throw new IdentityException("Error while adding policy to PDP" ,e);
+            throw new EntitlementException("Error while adding policy to PDP" ,e);
         }
     }
     

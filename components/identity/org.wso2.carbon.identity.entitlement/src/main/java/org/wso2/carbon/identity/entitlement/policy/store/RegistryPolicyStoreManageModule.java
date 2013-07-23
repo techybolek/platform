@@ -21,7 +21,7 @@ package org.wso2.carbon.identity.entitlement.policy.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
@@ -53,7 +53,7 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
     private static final String PROPERTY_ATTRIBUTE_SEPARATOR = "attributeValueSeparator";
 
     private static final String DEFAULT_POLICY_STORE_PATH = "/repository/identity/entitlement" +
-            "/policy/pdp";
+            "/policy/pdp/";
 
     private static final String KEY_VALUE_POLICY_ODER = "policyOrder";
 
@@ -72,7 +72,7 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
     }
 
     @Override
-    public void addPolicy(PolicyStoreDTO policy) throws IdentityException{
+    public void addPolicy(PolicyStoreDTO policy) throws EntitlementException{
 
         Registry registry;
         String policyPath;
@@ -82,7 +82,7 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
 
         if(policy == null || policy.getPolicy() == null || policy.getPolicy().trim().length() == 0
                  || policy.getPolicyId() == null || policy.getPolicyId().trim().length() == 0){
-            throw new IdentityException("Policy can not be null");
+            throw new EntitlementException("Policy can not be null");
         }
 
         try {
@@ -115,7 +115,7 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
             registry.put(policyPath, resource);
         } catch (RegistryException e) {
             log.error("Error while persisting policy",e);
-            throw new IdentityException("Error while persisting policy" , e);
+            throw new EntitlementException("Error while persisting policy" , e);
         }
     }
 
@@ -209,7 +209,7 @@ public class RegistryPolicyStoreManageModule extends AbstractPolicyFinderModule
             if(dto != null && dto.getPolicy() != null && dto.isActive()){
                 return dto.getPolicy();
             }
-        } catch (IdentityException e) {
+        } catch (EntitlementException e) {
             log.error("Error while retrieving reference policy " + policyId);
             // ignore
         }

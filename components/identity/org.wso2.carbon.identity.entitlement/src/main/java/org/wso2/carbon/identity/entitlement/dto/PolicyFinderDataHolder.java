@@ -29,7 +29,7 @@ public class PolicyFinderDataHolder {
 
     private String className;
 
-    private String[] policyIdentifiers;
+    private String[] policyIdentifiers = new String[0];
 
     private String combiningAlgorithm;
 

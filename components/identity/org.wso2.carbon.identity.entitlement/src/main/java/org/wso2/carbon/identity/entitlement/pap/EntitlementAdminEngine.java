@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.entitlement.pap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.entitlement.PAPStatusDataHandler;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
 import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
@@ -32,6 +33,7 @@ import org.wso2.carbon.identity.entitlement.policy.version.PolicyVersionManager;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -52,6 +54,8 @@ public class EntitlementAdminEngine {
     private PolicyStoreManager policyStoreManager;
 
     private PAPPolicyStoreManager papPolicyStoreManager;
+
+    private Set<PAPStatusDataHandler> papStatusDataHandlers;
 
     private static ConcurrentHashMap<String, EntitlementAdminEngine> entitlementAdminEngines =
                                                 new ConcurrentHashMap<String, EntitlementAdminEngine>();
@@ -99,6 +103,12 @@ public class EntitlementAdminEngine {
             //init without init()
             this.policyDataStore = new DefaultPolicyDataStore();
         }
+
+        Map<PAPStatusDataHandler, Properties> statusDataHandlers  = EntitlementServiceComponent.
+                getEntitlementConfig().getPapStatusDataHandlers();
+        papStatusDataHandlers = statusDataHandlers.keySet();
+        this.policyPublisher.setPapStatusDataHandlers(papStatusDataHandlers);
+
     }
 
     /**
@@ -150,5 +160,9 @@ public class EntitlementAdminEngine {
      */
     public PAPPolicyStoreManager getPapPolicyStoreManager() {
         return papPolicyStoreManager;
+    }
+
+    public Set<PAPStatusDataHandler> getPapStatusDataHandlers() {
+        return papStatusDataHandlers;
     }
 }

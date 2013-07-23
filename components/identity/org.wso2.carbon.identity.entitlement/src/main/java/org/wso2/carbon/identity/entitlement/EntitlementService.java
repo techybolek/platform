@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
 import org.wso2.carbon.identity.entitlement.dto.EntitledResultSetDTO;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
@@ -41,9 +41,9 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
 	 * EntitlementEngine
 	 * @param request XACML request as a String Object
 	 * @return XACML response as a String Object
-	 * @throws Exception throws
+	 * @throws EntitlementException throws
 	 */
-	public String getDecision(String request) throws Exception {
+	public String getDecision(String request) throws EntitlementException {
 
         String response;
 		try {
@@ -58,7 +58,7 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
 			return response;
 		} catch (Exception e) {
 			log.error("Error occurred while evaluating XACML request", e);
-			throw new Exception("Error occurred while evaluating XACML request");
+			throw new EntitlementException("Error occurred while evaluating XACML request");
 		}
 	}
 
@@ -72,10 +72,10 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
 	 * @param action  action
 	 * @param environment environment
 	 * @return  XACML response as a String Object
-	 * @throws Exception throws
+	 * @throws EntitlementException throws
 	 */
 	public String getDecisionByAttributes(String subject, String resource, String action,
-                                          String[] environment) throws Exception {
+                                          String[] environment) throws EntitlementException {
 
         String realEnvironment = null;    // TODO remove  environment array for API
         if(environment != null && environment.length > 0){
@@ -86,7 +86,7 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
             return entitlementEngine.evaluate(subject, resource, action, realEnvironment);
 		} catch (Exception e) {
 			log.error("Error occurred while evaluating XACML request", e);
-			throw new Exception("Error occurred while evaluating XACML request");
+			throw new EntitlementException("Error occurred while evaluating XACML request");
 		}
 	}
 
@@ -129,14 +129,14 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
      * @param action action name
      * @param enableChildSearch whether search is done for the child resources under the given  resource name
      * @return entitled resources as String array
-     * @throws org.wso2.carbon.identity.base.IdentityException throws if invalid data is provided
+     * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws if invalid data is provided
      */
     public EntitledResultSetDTO getEntitledAttributes(String subjectName, String resourceName,
                                       String subjectId, String action, boolean enableChildSearch)
-                                                                        throws IdentityException {
+                                                                        throws EntitlementException {
 
         if (subjectName == null) {
-            throw new IdentityException(
+            throw new EntitlementException(
                     "Invalid input data - either the user name or role name should be non-null");
         }
 
@@ -156,10 +156,10 @@ public class EntitlementService extends AbstractAdmin implements XACMLHandler {
      * @param givenAttributes user provided attributes
      * @return all the attributes that is entitled
      *
-     * @throws IdentityException if fails
+     * @throws EntitlementException if fails
      */
     public EntitledResultSetDTO getAllEntitlements(String identifier, AttributeDTO[] givenAttributes)
-                                                                        throws IdentityException {
+                                                                        throws EntitlementException {
 
         EntitlementEngine engine = EntitlementEngine.getInstance();
 

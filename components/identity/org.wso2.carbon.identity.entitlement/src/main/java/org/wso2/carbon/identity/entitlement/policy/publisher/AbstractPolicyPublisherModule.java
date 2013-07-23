@@ -20,8 +20,9 @@ package org.wso2.carbon.identity.entitlement.policy.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
+import org.wso2.carbon.identity.entitlement.common.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PublisherPropertyDTO;
@@ -113,7 +114,7 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
     }
 
     @Override
-    public void publish(PolicyDTO policyDTO, String action) throws IdentityException {
+    public void publish(PolicyDTO policyDTO, String action) throws EntitlementException {
 
         if(EntitlementConstants.PolicyPublish.ACTION_CREATE.equals(action)){
             publishNew(policyDTO);
@@ -132,11 +133,11 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
      * @param propertyHolder publisher module data as PublisherDataHolder
      * @throws Exception throws if init fails
      */
-    public abstract void init(PublisherDataHolder propertyHolder) throws IdentityException;
+    public abstract void init(PublisherDataHolder propertyHolder) throws EntitlementException;
 
-    public abstract void publishNew(PolicyDTO policyDTO) throws IdentityException;
+    public abstract void publishNew(PolicyDTO policyDTO) throws EntitlementException;
 
-    public abstract void update(PolicyDTO policyDTO) throws IdentityException;
+    public abstract void update(PolicyDTO policyDTO) throws EntitlementException;
 
-    public abstract void delete(PolicyDTO policyDTO) throws IdentityException;
+    public abstract void delete(PolicyDTO policyDTO) throws EntitlementException;
 }

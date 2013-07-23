@@ -21,7 +21,6 @@ import org.apache.thrift.TException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,7 +96,7 @@ public class ThriftEntitlementServiceImpl extends AbstractAdmin implements Entit
                     } catch (Exception e) {
                         String error = "Error while evaluating XACML decision from thrift service";
                         log.error(error);
-                        throw new IdentityException(error, e);
+                        throw new EntitlementException(error);
                     } finally {
                         if (newTenantFlowStarted) {
                             carbonContextHolder.endTenantFlow();

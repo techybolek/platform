@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.entitlement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
 import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
 import org.wso2.carbon.identity.entitlement.dto.PDPDataHolder;
@@ -46,30 +45,40 @@ public class EntitlementAdminService extends AbstractAdmin {
     /**
      * Clears the decision cache.
      *
-     * @throws org.wso2.carbon.identity.base.IdentityException throws
+     * @throws EntitlementException throws
      */
-    public void clearDecisionCache() throws IdentityException {
+    public void clearDecisionCache() throws EntitlementException {
         EntitlementEngine.getInstance().clearDecisionCache(true);
         if (log.isDebugEnabled()) {
             log.debug("Decision Caching is cleared by using admin service");
         }
     }
 
+    /**
+     * Clears the policy cache.
+     *
+     * @throws EntitlementException throws
+     */
+    public void clearPolicyCache() throws EntitlementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Decision Caching is cleared by using admin service");
+        }
+    }
 
     /**
      * Clears Carbon attribute finder cache and All the attribute cache implementations in each
      * PIP attribute finder level
      *
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
-    public void clearAllAttributeCaches() throws IdentityException {
+    public void clearAllAttributeCaches() throws EntitlementException {
         CarbonAttributeFinder finder = EntitlementEngine.getInstance().getCarbonAttributeFinder();
         if (finder != null) {
             finder.clearAttributeCache();
             // we need invalidate decision cache as well.
             clearDecisionCache();
         } else {
-            throw new IdentityException("Can not clear all attribute caches - Carbon Attribute Finder "
+            throw new EntitlementException("Can not clear all attribute caches - Carbon Attribute Finder "
                     + "is not initialized");
         }
 
@@ -87,9 +96,9 @@ public class EntitlementAdminService extends AbstractAdmin {
     /**
      * Clears the carbon attribute cache
      *
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
-    public void clearCarbonAttributeCache() throws IdentityException {
+    public void clearCarbonAttributeCache() throws EntitlementException {
         
         CarbonAttributeFinder finder = EntitlementEngine.getInstance().getCarbonAttributeFinder();
         if (finder != null) {
@@ -97,7 +106,7 @@ public class EntitlementAdminService extends AbstractAdmin {
             // we need invalidate decision cache as well.
             clearDecisionCache();
         } else {
-            throw new IdentityException("Can not clear attribute cache - Carbon Attribute Finder "
+            throw new EntitlementException("Can not clear attribute cache - Carbon Attribute Finder "
                     + "is not initialized");
         }
 
@@ -160,16 +169,16 @@ public class EntitlementAdminService extends AbstractAdmin {
      * Clears Carbon resource finder cache and All the resource cache implementations in each
      * PIP resource finder level
      *
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
-    public void clearAllResourceCaches() throws IdentityException {
+    public void clearAllResourceCaches() throws EntitlementException {
         CarbonResourceFinder finder = EntitlementEngine.getInstance().getCarbonResourceFinder();
         if (finder != null) {
             finder.clearAttributeCache();
             // we need invalidate decision cache as well.
             clearDecisionCache();
         } else {
-            throw new IdentityException("Can not clear attribute cache - Carbon Attribute Finder "
+            throw new EntitlementException("Can not clear attribute cache - Carbon Attribute Finder "
                     + "is not initialized");
         }
     }
@@ -177,16 +186,16 @@ public class EntitlementAdminService extends AbstractAdmin {
     /**
      * Clears the carbon resource cache
      *
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
-    public void clearCarbonResourceCache() throws IdentityException {
+    public void clearCarbonResourceCache() throws EntitlementException {
         CarbonResourceFinder finder = EntitlementEngine.getInstance().getCarbonResourceFinder();
         if (finder != null) {
             finder.clearAttributeCache();
             // we need invalidate decision cache as well.
             clearDecisionCache();
         } else {
-            throw new IdentityException("Can not clear attribute cache - Carbon Attribute Finder "
+            throw new EntitlementException("Can not clear attribute cache - Carbon Attribute Finder "
                     + "is not initialized");
         }
 
@@ -225,9 +234,9 @@ public class EntitlementAdminService extends AbstractAdmin {
      * Refreshes the supported Attribute ids of a given attribute finder module
      *
      * @param attributeFinder Canonical name of the attribute finder class.
-     * @throws IdentityException throws if fails to  refresh
+     * @throws EntitlementException throws if fails to  refresh
      */
-    public void refreshAttributeFinder(String attributeFinder) throws IdentityException {
+    public void refreshAttributeFinder(String attributeFinder) throws EntitlementException {
 
         Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
                 .getDesignators();
@@ -243,7 +252,7 @@ public class EntitlementAdminService extends AbstractAdmin {
                                                         getInstance().getCarbonAttributeFinder();
                         carbonAttributeFinder.init();
                     } catch (Exception e) {
-                        throw new IdentityException("Error while refreshing attribute finder - " +
+                        throw new EntitlementException("Error while refreshing attribute finder - " +
                                                     attributeFinder);
                     }
                     break;
@@ -256,9 +265,9 @@ public class EntitlementAdminService extends AbstractAdmin {
      * Refreshes the supported resource id of a given resource finder module
      *
      * @param resourceFinder Canonical name of the resource finder class.
-     * @throws IdentityException throws if fails to  refresh
+     * @throws EntitlementException throws if fails to  refresh
      */
-    public void refreshResourceFinder(String resourceFinder) throws IdentityException {
+    public void refreshResourceFinder(String resourceFinder) throws EntitlementException {
 
         Map<PIPResourceFinder, Properties> resourceFinders = EntitlementServiceComponent.getEntitlementConfig()
                 .getResourceFinders();
@@ -273,7 +282,7 @@ public class EntitlementAdminService extends AbstractAdmin {
                                                         getInstance().getCarbonAttributeFinder();
                         carbonAttributeFinder.init();
                     } catch (Exception e) {
-                        throw new IdentityException("Error while refreshing attribute finder - " +
+                        throw new EntitlementException("Error while refreshing attribute finder - " +
                                                     resourceFinder);
                     }
                     break;
@@ -286,9 +295,9 @@ public class EntitlementAdminService extends AbstractAdmin {
      * Refreshes the supported resource id of a given resource finder module
      *
      * @param policyFinder Canonical name of the resource finder class.
-     * @throws IdentityException throws if fails to  refresh
+     * @throws EntitlementException throws if fails to  refresh
      */
-    public void refreshPolicyFinders(String policyFinder) throws IdentityException {
+    public void refreshPolicyFinders(String policyFinder) throws EntitlementException {
 
         Map<PolicyFinderModule, Properties> policyFinders = EntitlementServiceComponent.getEntitlementConfig()
                 .getPolicyFinderModules();
@@ -305,7 +314,7 @@ public class EntitlementAdminService extends AbstractAdmin {
                         EntitlementPolicyClearingCache.getInstance().invalidateCache();
                         EntitlementPolicyClearingCache.getInstance().addToCache(1);
                     } catch (Exception e) {
-                        throw new IdentityException("Error while refreshing attribute finder - " +
+                        throw new EntitlementException("Error while refreshing attribute finder - " +
                                                     policyFinder);
                     }
                     break;
@@ -320,9 +329,9 @@ public class EntitlementAdminService extends AbstractAdmin {
      *
      * @param xacmlRequest
      * @return
-     * @throws IdentityException
+     * @throws EntitlementException
      */
-    public String doTestRequest(String xacmlRequest) throws IdentityException {
+    public String doTestRequest(String xacmlRequest) throws EntitlementException {
         return EntitlementEngine.getInstance().test(xacmlRequest);
     }
     /**
@@ -331,10 +340,10 @@ public class EntitlementAdminService extends AbstractAdmin {
      * @param xacmlRequest
      * @param policies policy ids that is evaluated
      * @return
-     * @throws IdentityException
+     * @throws EntitlementException
      */
     public String doTestRequestForGivenPolicies(String xacmlRequest, String[] policies)
-                                                                        throws IdentityException {
+                                                                        throws EntitlementException {
         EntitlementEngine engine = EntitlementEngine.getInstance();
         Iterator iterator = engine.getPapPolicyFinder().getModules().iterator();
         if(iterator.hasNext()){
@@ -512,9 +521,9 @@ public class EntitlementAdminService extends AbstractAdmin {
      * Gets globally defined policy combining algorithm
      *
      * @return policy combining algorithm as a String
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
-    public String getGlobalPolicyAlgorithm() throws IdentityException {
+    public String getGlobalPolicyAlgorithm() throws EntitlementException {
 
         return EntitlementAdminEngine.getInstance().
                                             getPolicyDataStore().getGlobalPolicyAlgorithmName();
@@ -524,9 +533,9 @@ public class EntitlementAdminService extends AbstractAdmin {
      * Sets policy combining algorithm globally
      *
      * @param policyCombiningAlgorithm policy combining algorithm as a String
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
-    public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws IdentityException {
+    public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws EntitlementException {
 
         EntitlementAdminEngine.getInstance().
                         getPolicyDataStore().setGlobalPolicyAlgorithm(policyCombiningAlgorithm);

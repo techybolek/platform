@@ -17,9 +17,11 @@
 */
 package org.wso2.carbon.identity.entitlement.policy.publisher;
 
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.common.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
+import org.wso2.carbon.identity.entitlement.policy.store.PolicyStoreManager;
 
 import java.util.Properties;
 
@@ -44,14 +46,16 @@ public class CarbonPDPPublisher implements PolicyPublisherModule{
     }
 
     @Override
-    public void publish(PolicyDTO policyDTO, String action) throws IdentityException {
+    public void publish(PolicyDTO policyDTO, String action) throws EntitlementException {
+
+        PolicyStoreManager manager = EntitlementAdminEngine.getInstance().getPolicyStoreManager();
 
         if(EntitlementConstants.PolicyPublish.ACTION_CREATE.equals(action)){
-
+            manager.addPolicy(policyDTO);
         } else if(EntitlementConstants.PolicyPublish.ACTION_DELETE.equals(action)){
-
+            manager.removePolicy(policyDTO);
         } else if(EntitlementConstants.PolicyPublish.ACTION_UPDATE.equals(action)){
-
+            manager.updatePolicy(policyDTO);
         } else if(EntitlementConstants.PolicyPublish.ACTION_ENABLE.equals(action)){
 
         }

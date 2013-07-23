@@ -178,9 +178,8 @@ public class DefaultPolicyCollection implements PolicyCollection{
 
             // if there was an error, we stop right away
             if (result == MatchResult.INDETERMINATE) {
-                log.error("Error occurred while processing the XACML policy "
-                        + policy.getId().toString());
-                throw new EntitlementException(match.getStatus());  
+                log.error(match.getStatus().getMessage());
+                throw new EntitlementException(match.getStatus().getMessage());
             }
 
             // if we matched, we keep track of the matching policy...
@@ -259,10 +258,8 @@ public class DefaultPolicyCollection implements PolicyCollection{
     public AbstractPolicy getEffectivePolicy(ArrayList<AbstractPolicy> policies) throws EntitlementException {
 
         if ((combiningAlg == null) && (policies.size() > 0)) {
-            ArrayList<String> code = new ArrayList<String>();
-            code.add(Status.STATUS_PROCESSING_ERROR);
-            Status status = new Status(code, "too many applicable top-level policies");
-            throw new EntitlementException(status);
+            log.error("Too many applicable top-level policies");
+            throw new EntitlementException("Too many applicable top-level policies");
         }
 
         switch (policies.size()) {

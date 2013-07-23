@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.policy.publisher;
 
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 
 import java.util.Properties;
@@ -62,8 +62,8 @@ public interface PolicyPublisherModule {
      *
      * @param policyDTO policy as PolicyDTO
      * @param action
-     * @throws IdentityException throws, if any error is occurred.
+     * @throws EntitlementException throws, if any error is occurred.
      */
-    public void publish(PolicyDTO policyDTO , String action) throws IdentityException;
+    public void publish(PolicyDTO policyDTO , String action) throws EntitlementException;
 
 }

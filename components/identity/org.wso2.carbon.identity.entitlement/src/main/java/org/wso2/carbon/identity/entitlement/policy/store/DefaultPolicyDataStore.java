@@ -22,8 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.balana.combine.PolicyCombiningAlgorithm;
 import org.wso2.balana.combine.xacml3.DenyOverridesPolicyAlg;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.registry.core.Collection;
@@ -37,7 +37,7 @@ import java.util.Properties;
  */
 public class DefaultPolicyDataStore implements PolicyDataStore{
     
-    private String policyDataCollection = EntitlementConstants.ENTITLEMENT_POLICY_DATA;
+    private String policyDataCollection = PDPConstants.ENTITLEMENT_POLICY_DATA;
 
     public static final String POLICY_COMBINING_PREFIX_1 =
                             "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:";
@@ -48,12 +48,12 @@ public class DefaultPolicyDataStore implements PolicyDataStore{
     private static Log log = LogFactory.getLog(DefaultPolicyDataStore.class);
 
     @Override
-    public void init(Properties properties) throws IdentityException {
+    public void init(Properties properties) throws EntitlementException {
         
     }
 
     @Override
-    public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws IdentityException{
+    public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws EntitlementException{
 
         Registry registry = EntitlementServiceComponent.
                 getGovernanceRegistry(CarbonContext.getCurrentContext().getTenantId());
@@ -68,7 +68,7 @@ public class DefaultPolicyDataStore implements PolicyDataStore{
             registry.put(policyDataCollection, policyCollection);
         } catch (RegistryException e) {
             log.error("Error while updating Global combing algorithm in policy store ", e);
-            throw new IdentityException("Error while updating combing algorithm in policy store");
+            throw new EntitlementException("Error while updating combing algorithm in policy store");
         }
     }
 
@@ -98,7 +98,7 @@ public class DefaultPolicyDataStore implements PolicyDataStore{
             if(log.isDebugEnabled()){
                 log.debug(e);
             }
-        } catch (IdentityException e) {
+        } catch (EntitlementException e) {
             if(log.isDebugEnabled()){
                 log.debug(e);
             }

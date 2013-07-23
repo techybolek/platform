@@ -32,7 +32,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PublisherPropertyDTO;
@@ -60,7 +60,7 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
     private String serverPassword;
 
     @Override
-    public void init(PublisherDataHolder propertyHolder) throws IdentityException {
+    public void init(PublisherDataHolder propertyHolder) throws EntitlementException {
 
         PublisherPropertyDTO[] propertyDTOs = propertyHolder.getPropertyDTOs();
         for(PublisherPropertyDTO dto : propertyDTOs){
@@ -77,7 +77,7 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
             configCtx  = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
         } catch (AxisFault axisFault) {
             log.error("Error while initializing module", axisFault);
-            throw new IdentityException("Error while initializing module", axisFault);
+            throw new EntitlementException("Error while initializing module", axisFault);
         }
     }
 
@@ -113,7 +113,7 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
         return properties;
     }
 
-    public void publishNew(PolicyDTO policyDTO) throws IdentityException {
+    public void publishNew(PolicyDTO policyDTO) throws EntitlementException {
 
         String policy = policyDTO.getPolicy();
 
@@ -151,14 +151,14 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
                 success = Boolean.parseBoolean(omElement.getFirstElement().getText());
             }
             if(!success){
-                throw new IdentityException("Policy publish fails due : Unexpected error has occurred");
+                throw new EntitlementException("Policy publish fails due : Unexpected error has occurred");
             }
         } catch (AxisFault axisFault) {
             log.error("Policy publish fails due : " + axisFault.getMessage(), axisFault);
-            throw new IdentityException("Policy publish fails due : " + axisFault.getMessage());
+            throw new EntitlementException("Policy publish fails due : " + axisFault.getMessage());
         } catch (XMLStreamException e) {
             log.error("Policy publish fails due : " + e.getMessage(), e);
-            throw new IdentityException("Policy publish fails due : " + e.getMessage());
+            throw new EntitlementException("Policy publish fails due : " + e.getMessage());
         } finally {
             if(client != null){
                 try{
@@ -172,12 +172,12 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
     }
 
     @Override
-    public void update(PolicyDTO policyDTO) throws IdentityException {
+    public void update(PolicyDTO policyDTO) throws EntitlementException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void delete(PolicyDTO policyDTO) throws IdentityException {
+    public void delete(PolicyDTO policyDTO) throws EntitlementException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

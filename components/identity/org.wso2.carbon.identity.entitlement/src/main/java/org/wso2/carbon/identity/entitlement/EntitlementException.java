@@ -17,38 +17,25 @@
  */
 package org.wso2.carbon.identity.entitlement;
 
-import org.wso2.balana.ctx.Status;
-
 public class EntitlementException extends Exception {
 
-	/**
-     * 
-     */
-	private static final long serialVersionUID = 7135561943206586153L;
-	// status explaining the error
-	private Status status;
+    private String message;
 
-	public EntitlementException(Status status) {
-		this.status = status;
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	public EntitlementException(Status status, String message) {
-		super(message);
-		this.status = status;
-	}
+    public EntitlementException(String message, Throwable cause) {
+        super(message, cause);
+        this.message = message;
+    }
 
-	public EntitlementException(Status status, Throwable cause) {
-		super(cause);
-		this.status = status;
-	}
+    public EntitlementException(String message) {
+        super(message);
+        this.message = message;
+    }
 
-	public EntitlementException(Status status, String message, Throwable cause) {
-		super(message, cause);
-		this.status = status;
-	}
-
-	public Status getStatus() {
-		return status;
-	}
-
+    public EntitlementException(Throwable cause) {
+        super(cause);
+    }
 }

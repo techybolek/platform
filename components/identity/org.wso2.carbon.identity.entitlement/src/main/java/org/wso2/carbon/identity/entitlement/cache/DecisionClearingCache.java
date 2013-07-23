@@ -22,7 +22,7 @@ package org.wso2.carbon.identity.entitlement.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 
 /**
  *
@@ -33,7 +33,7 @@ public class DecisionClearingCache extends EntitlementBaseCache<IdentityCacheKey
     private static final Object lock = new Object(); 
 
     private DecisionClearingCache() {
-    	super(EntitlementConstants.PDP_DECISION_CLEARING_CACHE);
+    	super(PDPConstants.PDP_DECISION_CLEARING_CACHE);
     }
 
     /**
@@ -98,7 +98,7 @@ public class DecisionClearingCache extends EntitlementBaseCache<IdentityCacheKey
 //            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
 //            try {
 //                if (invalidator != null) {
-//                    invalidator.invalidateCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE, cacheKey);
+//                    invalidator.invalidateCache(PDPConstants.PDP_DECISION_CLEARING_CACHE, cacheKey);
 //                    if (log.isDebugEnabled()) {
 //                        log.debug("Calling invalidation cache");
 //                    }

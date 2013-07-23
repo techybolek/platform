@@ -25,8 +25,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.EntitlementNotificationHandler;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
+import org.wso2.carbon.identity.entitlement.PAPStatusDataHandler;
 import org.wso2.carbon.identity.entitlement.pap.EntitlementDataFinderModule;
 import org.wso2.carbon.identity.entitlement.pip.PIPAttributeFinder;
 import org.wso2.carbon.identity.entitlement.pip.PIPExtension;
@@ -189,21 +189,21 @@ public class EntitlementExtensionBuilder {
 
         Properties pdpProperties = new Properties();
         
-        setProperty(properties,pdpProperties, EntitlementConstants.ON_DEMAND_POLICY_LOADING);
-        setProperty(properties,pdpProperties, EntitlementConstants.ON_DEMAND_POLICY_MAX_POLICY_ENTRIES);
-        setProperty(properties,pdpProperties, EntitlementConstants.DECISION_CACHING);
-        setProperty(properties,pdpProperties, EntitlementConstants.DECISION_CACHING_INTERVAL);
-        setProperty(properties,pdpProperties, EntitlementConstants.ATTRIBUTE_CACHING);
-        setProperty(properties,pdpProperties, EntitlementConstants.ATTRIBUTE_CACHING_INTERVAL);
-        setProperty(properties,pdpProperties, EntitlementConstants.RESOURCE_CACHING);
-        setProperty(properties,pdpProperties, EntitlementConstants.RESOURCE_CACHING_INTERVAL);
-        setProperty(properties,pdpProperties, EntitlementConstants.PDP_ENABLE);
-        setProperty(properties,pdpProperties, EntitlementConstants.PAP_ENABLE);
-        setProperty(properties,pdpProperties, EntitlementConstants.BALANA_CONFIG_ENABLE);
-        setProperty(properties,pdpProperties, EntitlementConstants.MULTIPLE_DECISION_PROFILE_ENABLE);
-        setProperty(properties,pdpProperties, EntitlementConstants.MAX_POLICY_REFERENCE_ENTRIES);
-        setProperty(properties,pdpProperties, EntitlementConstants.FILESYSTEM_POLICY_PATH);
-        setProperty(properties,pdpProperties, EntitlementConstants.START_UP_POLICY_ADDING);
+        setProperty(properties,pdpProperties, PDPConstants.ON_DEMAND_POLICY_LOADING);
+        setProperty(properties,pdpProperties, PDPConstants.ON_DEMAND_POLICY_MAX_POLICY_ENTRIES);
+        setProperty(properties,pdpProperties, PDPConstants.DECISION_CACHING);
+        setProperty(properties,pdpProperties, PDPConstants.DECISION_CACHING_INTERVAL);
+        setProperty(properties,pdpProperties, PDPConstants.ATTRIBUTE_CACHING);
+        setProperty(properties,pdpProperties, PDPConstants.ATTRIBUTE_CACHING_INTERVAL);
+        setProperty(properties,pdpProperties, PDPConstants.RESOURCE_CACHING);
+        setProperty(properties,pdpProperties, PDPConstants.RESOURCE_CACHING_INTERVAL);
+        setProperty(properties,pdpProperties, PDPConstants.PDP_ENABLE);
+        setProperty(properties,pdpProperties, PDPConstants.PAP_ENABLE);
+        setProperty(properties,pdpProperties, PDPConstants.BALANA_CONFIG_ENABLE);
+        setProperty(properties,pdpProperties, PDPConstants.MULTIPLE_DECISION_PROFILE_ENABLE);
+        setProperty(properties,pdpProperties, PDPConstants.MAX_POLICY_REFERENCE_ENTRIES);
+        setProperty(properties,pdpProperties, PDPConstants.FILESYSTEM_POLICY_PATH);
+        setProperty(properties,pdpProperties, PDPConstants.START_UP_POLICY_ADDING);
         setProperty(properties,pdpProperties, PDP_SCHEMA_VALIDATION);
 
         holder.setEngineProperties(pdpProperties);
@@ -573,12 +573,12 @@ public class EntitlementExtensionBuilder {
             throws Exception {
 
         int i = 1;
-        EntitlementNotificationHandler handler = null;
+        PAPStatusDataHandler handler = null;
 
-        while (properties.getProperty("PAP.Policy.Admin.Notification.Handler." + i) != null) {
-            String className = properties.getProperty("PAP.Policy.Admin.Notification.Handler." + i++);
+        while (properties.getProperty("PAP.Status.Data.Handler." + i) != null) {
+            String className = properties.getProperty("PAP.Status.Data.Handler." + i++);
             Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            handler = (EntitlementNotificationHandler) clazz.newInstance();
+            handler = (PAPStatusDataHandler) clazz.newInstance();
 
             int j = 1;
             Properties publisherProps = new Properties();

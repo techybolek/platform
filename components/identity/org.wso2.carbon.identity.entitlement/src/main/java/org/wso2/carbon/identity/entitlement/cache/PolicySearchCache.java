@@ -21,7 +21,7 @@ package org.wso2.carbon.identity.entitlement.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.policy.search.SearchResult;
 
 /**
@@ -33,7 +33,7 @@ public class PolicySearchCache extends EntitlementBaseCache<IdentityCacheKey,Sea
     private static final Object lock = new Object();  
 
     private PolicySearchCache() {
-    	super(EntitlementConstants.POLICY_SEARCH_CACHE);
+    	super(PDPConstants.POLICY_SEARCH_CACHE);
     }
 
     /**

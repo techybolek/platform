@@ -26,7 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.xml.sax.SAXException;
 
 /**
@@ -40,9 +40,9 @@ public class PolicyRequestBuilder {
      * creates DOM representation of the XACML request
      * @param request  XACML request as a String object
      * @return  XACML request as a DOM element
-     * @throws IdentityException throws, if fails
+     * @throws EntitlementException throws, if fails
      */
-    public Element getXacmlRequest(String request) throws IdentityException {
+    public Element getXacmlRequest(String request) throws EntitlementException {
 
         ByteArrayInputStream inputStream;
         DocumentBuilderFactory dbf;
@@ -54,11 +54,11 @@ public class PolicyRequestBuilder {
         try {
             doc = dbf.newDocumentBuilder().parse(inputStream);
         } catch (SAXException e) {
-            throw new IdentityException("Error while creating DOM from XACML request");
+            throw new EntitlementException("Error while creating DOM from XACML request");
         } catch (IOException e) {
-            throw new IdentityException("Error while creating DOM from XACML request");
+            throw new EntitlementException("Error while creating DOM from XACML request");
         } catch (ParserConfigurationException e) {
-            throw new IdentityException("Error while creating DOM from XACML request");
+            throw new EntitlementException("Error while creating DOM from XACML request");
         } finally {
             try {
                 inputStream.close();

@@ -24,12 +24,10 @@ import org.wso2.balana.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.wso2.balana.combine.xacml3.DenyOverridesPolicyAlg;
 import org.wso2.balana.ctx.EvaluationCtx;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.balana.ctx.Status;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
-import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
@@ -111,16 +109,16 @@ public class PAPPolicyFinder extends PolicyFinderModule {
             }
 
             // this is only supporting for on demand loading
-            maxInMemoryPolicies = EntitlementConstants.MAX_NO_OF_IN_MEMORY_POLICIES;
+            maxInMemoryPolicies = PDPConstants.MAX_NO_OF_IN_MEMORY_POLICIES;
             String maxInMemoryPoliciesValue = EntitlementServiceComponent.getEntitlementConfig().
-                    getEngineProperties().getProperty(EntitlementConstants.ON_DEMAND_POLICY_MAX_POLICY_ENTRIES);
+                    getEngineProperties().getProperty(PDPConstants.ON_DEMAND_POLICY_MAX_POLICY_ENTRIES);
             if (maxInMemoryPoliciesValue != null && !"".equals(maxInMemoryPoliciesValue)) {
                 maxInMemoryPolicies = Integer.parseInt(maxInMemoryPoliciesValue);
             }
             
             this.policies = new DefaultPolicyCollection(algorithm, 0);
 
-		} catch (IdentityException e) {
+		} catch (EntitlementException e) {
 			log.error("Error while initializing PAPPolicyFinder", e);
 		}
 	}
@@ -154,7 +152,7 @@ public class PAPPolicyFinder extends PolicyFinderModule {
                         }
                     }
                 }
-            } catch (IdentityException e) {
+            } catch (EntitlementException e) {
                 // ignore and just log the error.
                 log.error(e);
             }
@@ -189,7 +187,7 @@ public class PAPPolicyFinder extends PolicyFinderModule {
                 if(policy == null){
                     try {
                         policy = policyReader.readActivePolicy(policyId, this.policyFinder);
-                    } catch (IdentityException e) {
+                    } catch (EntitlementException e) {
                         //log and ignore
                         log.error(e);
                     }
@@ -205,9 +203,8 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 
                 // if there was an error, we stop right away
                 if (result == MatchResult.INDETERMINATE) {
-                    log.error("Error occurred while processing the XACML policy "
-                            + policy.getId().toString());
-                    throw new EntitlementException(match.getStatus()); 
+                    log.error(match.getStatus().getMessage());
+                    throw new EntitlementException(match.getStatus().getMessage());
                 }
 
                 // if we matched, we keep track of the matching policy...
@@ -226,7 +223,10 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 				return new PolicyFinderResult(policy);
 			}
         } catch (EntitlementException e) {
-            return new PolicyFinderResult(e.getStatus());
+            ArrayList<String> code = new ArrayList<String>();
+            code.add(Status.STATUS_PROCESSING_ERROR);
+            Status status = new Status(code, e.getMessage());
+            return new PolicyFinderResult(status);
         }
 	}
 

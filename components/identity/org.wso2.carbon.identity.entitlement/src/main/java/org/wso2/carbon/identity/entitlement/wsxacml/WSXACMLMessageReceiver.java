@@ -72,7 +72,7 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -213,10 +213,10 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
      * Constructing the SAML or XACML Objects from a String
      * @param xmlString Decoded SAML or XACML String
      * @return SAML or XACML Object
-     * @throws org.wso2.carbon.identity.base.IdentityException
+     * @throws org.wso2.carbon.identity.entitlement.EntitlementException
      *
      */
-    public XMLObject unmarshall(String xmlString) throws IdentityException {
+    public XMLObject unmarshall(String xmlString) throws EntitlementException {
         Unmarshaller unmarshaller;
         try {
             doBootstrap();
@@ -230,7 +230,7 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
             return unmarshaller.unmarshall(element);
         } catch (Exception e) {
             log.error("Error in constructing XML(SAML or XACML) Object from the encoded String", e);
-            throw new IdentityException("Error in constructing XML(SAML or XACML) from the encoded String ", e);
+            throw new EntitlementException("Error in constructing XML(SAML or XACML) from the encoded String ", e);
         }
     }
 
@@ -253,9 +253,9 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
         * Serialize XML objects
         * @param xmlObject : XACML or SAML objects to be serialized
         * @return serialized XACML or SAML objects
-        * @throws IdentityException
+        * @throws EntitlementException
         */
-       private String marshall(XMLObject xmlObject) throws IdentityException {
+       private String marshall(XMLObject xmlObject) throws EntitlementException {
            try {
                doBootstrap();
                System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
@@ -276,7 +276,7 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
                return byteArrayOutputStream.toString();
            } catch (Exception e) {
                log.error("Error Serializing the SAML Response");
-               throw new IdentityException("Error Serializing the SAML Response", e);
+               throw new EntitlementException("Error Serializing the SAML Response", e);
            }
        }
 
@@ -337,7 +337,7 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
             responseType = (ResponseType) unmarshall(formatResponse(xacmlResponse));
         } catch (Exception e) {
             log.error("Error while unmarshalling the formatted XACML response.",e);
-            throw new IdentityException("Error while unmarshalling the formatted XACML response.", e);
+            throw new EntitlementException("Error while unmarshalling the formatted XACML response.", e);
         }
         XACMLAuthzDecisionStatementTypeImplBuilder xacmlauthz = (XACMLAuthzDecisionStatementTypeImplBuilder)
                 org.opensaml.xml.Configuration.getBuilderFactory().
@@ -365,7 +365,7 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
             responseString = marshall(response);
             responseString = responseString.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", "");
             return responseString;
-        } catch (IdentityException e) {
+        } catch (EntitlementException e) {
             log.error("Error occurred while marshalling the SAML Response.", e);
             throw new Exception("Error occurred while marshalling the SAML Response.", e);
         }
@@ -391,10 +391,10 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
      * @param signatureAlgorithm : algorithm to be used in signing
      * @param cred   : signing credentials
      * @return signed SAML response
-     * @throws IdentityException
+     * @throws EntitlementException
      */
     private static Response setSignature(Response response, String signatureAlgorithm,
-                                         X509Credential cred) throws IdentityException {
+                                         X509Credential cred) throws EntitlementException {
         doBootstrap();
         try {
             Signature signature = (Signature) buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
@@ -412,7 +412,7 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
                 keyInfo.getX509Datas().add(data);
                 signature.setKeyInfo(keyInfo);
             } catch (CertificateEncodingException e) {
-                throw new IdentityException("errorGettingCert");
+                throw new EntitlementException("errorGettingCert");
             }
             response.setSignature(signature);
             List<Signature> signatureList = new ArrayList<Signature>();
@@ -425,7 +425,7 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
             Signer.signObjects(signatureList);
             return response;
         } catch (Exception e) {
-            throw new IdentityException("Error When signing the assertion.", e);
+            throw new EntitlementException("Error When signing the assertion.", e);
         }
     }
 
@@ -433,12 +433,12 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
      * Create XMLObject from a given QName
      * @param objectQName: QName of the object to be built into a XMLObject
      * @return built xmlObject
-     * @throws IdentityException
+     * @throws EntitlementException
      */
-    private static XMLObject buildXMLObject(QName objectQName) throws IdentityException {
+    private static XMLObject buildXMLObject(QName objectQName) throws EntitlementException {
         XMLObjectBuilder builder = org.opensaml.xml.Configuration.getBuilderFactory().getBuilder(objectQName);
         if (builder == null) {
-            throw new IdentityException("Unable to retrieve builder for object QName "
+            throw new EntitlementException("Unable to retrieve builder for object QName "
                     + objectQName);
         }
         return builder.buildObject(objectQName.getNamespaceURI(), objectQName.getLocalPart(),

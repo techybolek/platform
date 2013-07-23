@@ -32,7 +32,7 @@ public class PolicyStoreDTO {
 
     private int policyOrder;
 
-    private AttributeDTO[] attributeDTOs;
+    private AttributeDTO[] attributeDTOs = new AttributeDTO[0];
 
     public String getPolicyId() {
         return policyId;

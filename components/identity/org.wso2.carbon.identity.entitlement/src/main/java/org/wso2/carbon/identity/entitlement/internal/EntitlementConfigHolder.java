@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.internal;
 
-import org.wso2.carbon.identity.entitlement.EntitlementNotificationHandler;
+import org.wso2.carbon.identity.entitlement.PAPStatusDataHandler;
 import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 import org.wso2.carbon.identity.entitlement.pap.EntitlementDataFinderModule;
 import org.wso2.carbon.identity.entitlement.pip.PIPAttributeFinder;
@@ -31,7 +31,6 @@ import org.wso2.carbon.identity.entitlement.policy.store.PolicyStoreManageModule
 import org.wso2.carbon.identity.entitlement.policy.publisher.PostPublisherModule;
 import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisherModule;
 import org.wso2.carbon.identity.entitlement.policy.publisher.PublisherVerificationModule;
-import org.wso2.carbon.identity.entitlement.policy.store.PolicyStoreManager;
 import org.wso2.carbon.identity.entitlement.policy.version.PolicyVersionManager;
 
 import javax.xml.validation.Schema;
@@ -100,8 +99,8 @@ public class EntitlementConfigHolder {
     /**
      * Will be fired by admin services, whenever it wants send notifications
      */
-    private Map<EntitlementNotificationHandler, Properties> notificationHandlers =
-            new HashMap<EntitlementNotificationHandler, Properties>();
+    private Map<PAPStatusDataHandler, Properties> papStatusDataHandlers =
+            new HashMap<PAPStatusDataHandler, Properties>();
 
     /**
      * This holds all the policy storing logic of entitlement engine
@@ -139,11 +138,6 @@ public class EntitlementConfigHolder {
     private Map<String ,List<PublisherDataHolder>> modulePropertyHolderMap =
                                                 new HashMap<String, List<PublisherDataHolder>>();
 
-    /**
-     * Policy store manager
-     */
-    private PolicyStoreManager policyStoreManager = null;
-    
     public Map<PIPExtension, Properties> getExtensions() {
         return extensions;
     }
@@ -258,13 +252,13 @@ public class EntitlementConfigHolder {
         this.publisherVerificationModule.put(publisherVerificationModule, properties);
     }
 
-    public Map<EntitlementNotificationHandler, Properties> getNotificationHandlers() {
-        return notificationHandlers;
+    public Map<PAPStatusDataHandler, Properties> getPapStatusDataHandlers() {
+        return papStatusDataHandlers;
     }
 
-    public void addNotificationHandler(EntitlementNotificationHandler notificationHandler,
+    public void addNotificationHandler(PAPStatusDataHandler notificationHandler,
                                                                             Properties properties) {
-        this.notificationHandlers.put(notificationHandler, properties);
+        this.papStatusDataHandlers.put(notificationHandler, properties);
     }
 
     public Map<PolicyVersionManager, Properties> getPolicyVersionModule() {
@@ -273,14 +267,6 @@ public class EntitlementConfigHolder {
 
     public void addPolicyVersionModule(PolicyVersionManager policyVersionModule, Properties properties) {
         this.policyVersionModule.put(policyVersionModule, properties);
-    }
-
-    public PolicyStoreManager getPolicyStoreManager() {
-        return policyStoreManager;
-    }
-
-    public void setPolicyStoreManager(PolicyStoreManager policyStoreManager) {
-        this.policyStoreManager = policyStoreManager;
     }
 
     public Map<PolicyDataStore, Properties> getPolicyDataStore() {

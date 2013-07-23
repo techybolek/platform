@@ -35,14 +35,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.DecisionCache;
 import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
 import org.wso2.carbon.identity.entitlement.cache.SimpleDecisionCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.identity.entitlement.pap.EntitlementDataFinder;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
@@ -58,8 +57,6 @@ import org.wso2.balana.ctx.ResponseCtx;
 import org.wso2.balana.finder.impl.CurrentEnvModule;
 import org.wso2.balana.finder.impl.SelectorModule;
 import org.wso2.carbon.identity.entitlement.pip.CarbonResourceFinder;
-import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
-import org.wso2.carbon.identity.entitlement.policy.store.PolicyStoreManager;
 import org.wso2.carbon.utils.CarbonUtils;
 
 public class EntitlementEngine {
@@ -106,19 +103,19 @@ public class EntitlementEngine {
 	private EntitlementEngine(int tenantId) {
 
         boolean isPDP = Boolean.parseBoolean((String)EntitlementServiceComponent.getEntitlementConfig().
-                        getEngineProperties().get(EntitlementConstants.PDP_ENABLE));
+                        getEngineProperties().get(PDPConstants.PDP_ENABLE));
         boolean isPAP = Boolean.parseBoolean((String)EntitlementServiceComponent.getEntitlementConfig().
-                        getEngineProperties().get(EntitlementConstants.PAP_ENABLE));
+                        getEngineProperties().get(PDPConstants.PAP_ENABLE));
 
         boolean pdpMultipleDecision = Boolean.parseBoolean((String)EntitlementServiceComponent.
-            getEntitlementConfig().getEngineProperties().get(EntitlementConstants.MULTIPLE_DECISION_PROFILE_ENABLE));
+            getEntitlementConfig().getEngineProperties().get(PDPConstants.MULTIPLE_DECISION_PROFILE_ENABLE));
 
         if(!isPAP && !isPDP){
             isPAP = true;
         }
 
         boolean balanaConfig = Boolean.parseBoolean((String)EntitlementServiceComponent.getEntitlementConfig().
-                                getEngineProperties().get(EntitlementConstants.BALANA_CONFIG_ENABLE));
+                                getEngineProperties().get(PDPConstants.BALANA_CONFIG_ENABLE));
 
 
         if(balanaConfig){
@@ -140,9 +137,9 @@ public class EntitlementEngine {
         simpleDecisionCache = SimpleDecisionCache.getInstance();
 
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
-		String cacheEnable = properties.getProperty(EntitlementConstants.DECISION_CACHING);
+		String cacheEnable = properties.getProperty(PDPConstants.DECISION_CACHING);
 		if (cacheEnable != null && "true".equals(cacheEnable.trim())) {
-			String cacheInterval = properties.getProperty(EntitlementConstants.DECISION_CACHING_INTERVAL);
+			String cacheInterval = properties.getProperty(PDPConstants.DECISION_CACHING_INTERVAL);
 			if (cacheInterval != null) {
 				pdpDecisionCachingInterval = Integer.parseInt(cacheInterval.trim());
 			}
@@ -214,10 +211,10 @@ public class EntitlementEngine {
      * @param xacmlRequest  XACML request as String
      * @return XACML response as String
      * @throws org.wso2.balana.ParsingException throws
-     * @throws org.wso2.carbon.identity.base.IdentityException throws
+     * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws
      */
 
-	public String evaluate(String xacmlRequest) throws IdentityException, ParsingException {
+	public String evaluate(String xacmlRequest) throws EntitlementException, ParsingException {
 
         if(log.isDebugEnabled()){
             log.debug("XACML Request : " + xacmlRequest);

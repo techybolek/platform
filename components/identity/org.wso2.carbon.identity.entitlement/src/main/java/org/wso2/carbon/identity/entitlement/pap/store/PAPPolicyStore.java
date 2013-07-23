@@ -27,10 +27,11 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.core.IdentityRegistryResources;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+import org.wso2.carbon.identity.entitlement.dto.StatusHolder;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.policy.PolicyAttributeBuilder;
 import org.wso2.carbon.registry.core.Collection;
@@ -57,10 +58,10 @@ public class PAPPolicyStore {
         registry = EntitlementServiceComponent.getGovernanceRegistry(tenantId);
     }
 
-    public PAPPolicyStore(Registry registry) throws IdentityException {
+    public PAPPolicyStore(Registry registry) throws EntitlementException {
         if (registry == null) {
             log.error("Registry reference not set");
-            throw new IdentityException("Registry reference not set");
+            throw new EntitlementException("Registry reference not set");
         }        
         this.registry = registry;
     }
@@ -70,9 +71,9 @@ public class PAPPolicyStore {
      * This returns all the policy ids as String list. Here we assume registry resource name as
      * the policy id.
      * @return policy ids as String[]
-     * @throws IdentityException throws if fails
+     * @throws EntitlementException throws if fails
      */
-    public String[] getAllPolicyIds() throws IdentityException {
+    public String[] getAllPolicyIds() throws EntitlementException {
         String path = null;
         Collection collection = null;
         List<String> resources = new ArrayList<String>();
@@ -102,7 +103,7 @@ public class PAPPolicyStore {
 
         } catch (RegistryException e) {
             log.error("Error while retrieving all entitlement policy identifiers from PAP policy store", e);
-            throw new IdentityException("Error while retrieving entitlement policy " +
+            throw new EntitlementException("Error while retrieving entitlement policy " +
                                                             "identifiers from PAP policy store");
         }
 
@@ -115,9 +116,9 @@ public class PAPPolicyStore {
      * @param policyId policy id
      * @param collection
      * @return policy as Registry resource
-     * @throws IdentityException throws, if fails
+     * @throws EntitlementException throws, if fails
      */
-    public Resource getPolicy(String policyId, String collection) throws IdentityException {
+    public Resource getPolicy(String policyId, String collection) throws EntitlementException {
         String path = null;
 
         if (log.isDebugEnabled()) {
@@ -136,18 +137,21 @@ public class PAPPolicyStore {
             return registry.get(path);
         } catch (RegistryException e) {
             log.error("Error while retrieving entitlement policy " + policyId + " PAP policy store", e);
-            throw new IdentityException("Error while retrieving entitlement policy " + policyId
+            throw new EntitlementException("Error while retrieving entitlement policy " + policyId
                     + " PAP policy store");
         }
     }
 
-
+    public void addOrUpdatePolicy(PolicyDTO policy, String policyPath) throws EntitlementException {
+        addOrUpdatePolicy(policy, policy.getPolicyId(), policyPath);
+    }
     /**
      *
      * @param policy
-     * @throws IdentityException
+     * @throws EntitlementException
      */
-    public void addOrUpdatePolicy(PolicyDTO policy, String policyPath) throws IdentityException {
+    public void addOrUpdatePolicy(PolicyDTO policy, String policyId, String policyPath)
+                                                                        throws EntitlementException {
 
         String path = null;
         Resource resource = null;
@@ -162,21 +166,21 @@ public class PAPPolicyStore {
             log.debug("Creating or updating entitlement policy");
         }
 
-        if(policy == null || policy.getPolicyId() == null){
+        if(policy == null || policyId == null){
             log.error("Error while creating or updating entitlement policy: " +
                       "Policy DTO or Policy Id can not be null");
-            throw new IdentityException("Invalid Entitlement Policy. Policy or policyId can not be Null");
+            throw new EntitlementException("Invalid Entitlement Policy. Policy or policyId can not be Null");
         }
 
         try {
-            path = policyPath + policy.getPolicyId();
+            path = policyPath + policyId;
             int tenantId = ((UserRegistry)registry).getTenantId();
             if(realmService != null){
                 authorizationManager = realmService.
                         getTenantUserRealm(tenantId).getAuthorizationManager();
                 if(authorizationManager != null){
                     if(authorizationManager.isUserAuthorized(userName,
-                                                          EntitlementConstants.AUTHORIZATION_PERMISSION,
+                                                          PDPConstants.AUTHORIZATION_PERMISSION,
                                                           "ui.execute" )){
                         authorizationManager.authorizeUser(userName,
                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
@@ -184,17 +188,17 @@ public class PAPPolicyStore {
                                                            "write");
                     } else {
                         log.error("User is not authorize to create or update entitlement policy");
-                        throw new IdentityException("User is not authorize to create or update entitlement policy");
+                        throw new EntitlementException("User is not authorize to create or update entitlement policy");
                     }
                 } else {
                     log.error("Error while creating or updating entitlement policy: " +
                               "Authorization Manager can not be null");
-                    throw new IdentityException("Error while creating or updating entitlement policy");
+                    throw new EntitlementException("Error while creating or updating entitlement policy");
                 }
             } else {
                 log.error("Error while creating or updating entitlement policy: " +
                           "Realm Service can not be null");
-                throw new IdentityException("Error while creating or updating entitlement policy");
+                throw new EntitlementException("Error while creating or updating entitlement policy");
             }
 
             if (registry.resourceExists(path)) {
@@ -204,19 +208,19 @@ public class PAPPolicyStore {
                 newResource = true;
             }
 
-            Collection policyCollection;
-            if(registry.resourceExists(policyPath)){
-                policyCollection = (Collection) registry.get(policyPath);
-            } else {
-                policyCollection = registry.newCollection();
-            }
+//            Collection policyCollection;
+//            if(registry.resourceExists(policyPath)){
+//                policyCollection = (Collection) registry.get(policyPath);
+//            } else {
+//                policyCollection = registry.newCollection();
+//            }
 
             if(policy.getNeighborId() != null && policy.getNeighborId().trim().length() > 0){
                 String neighborPath = policyPath + policy.getNeighborId();
                 if (registry.resourceExists(neighborPath)) {
                     Resource neighborPolicy = registry.get(neighborPath);
                     String neighborPolicyOrder = neighborPolicy.
-                            getProperty(EntitlementConstants.POLICY_ORDER);
+                            getProperty(PDPConstants.POLICY_ORDER);
                     if(neighborPolicyOrder != null){
                         policy.setPolicyOrder(Integer.parseInt(neighborPolicyOrder));
                     }
@@ -227,33 +231,33 @@ public class PAPPolicyStore {
                 }
             }
 
-            if(policy.getPolicyOrder() > 0){
-                String noOfPolicies = policyCollection.getProperty(EntitlementConstants.MAX_POLICY_ORDER);
-                if(noOfPolicies != null &&  Integer.parseInt(noOfPolicies) < policy.getPolicyOrder()){
-                    policyCollection.setProperty(EntitlementConstants.MAX_POLICY_ORDER,
-                                                 Integer.toString(policy.getPolicyOrder()));
-                    registry.put(policyPath, policyCollection);
-                } else {
-                    reOrderPolicy(policyCollection,policy.getPolicyOrder());
-                }
-                resource.setProperty(EntitlementConstants.POLICY_ORDER,
-                                     Integer.toString(policy.getPolicyOrder()));                
-            } else {
-                String previousOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
-                if(previousOrder == null){
-                    if(policyCollection != null){
-                        int policyOrder = 1;
-                        String noOfPolicies = policyCollection.getProperty(EntitlementConstants.MAX_POLICY_ORDER);
-                        if(noOfPolicies != null){
-                            policyOrder = policyOrder + Integer.parseInt(noOfPolicies);
-                        }
-                        policyCollection.setProperty(EntitlementConstants.MAX_POLICY_ORDER,
-                                                     Integer.toString(policyOrder));
-                        resource.setProperty(EntitlementConstants.POLICY_ORDER, Integer.toString(policyOrder));
-                    }
-                    registry.put(policyPath, policyCollection);
-                }
-            }
+//            if(policy.getPolicyOrder() > 0){
+//                String noOfPolicies = policyCollection.getProperty(PDPConstants.MAX_POLICY_ORDER);
+//                if(noOfPolicies != null &&  Integer.parseInt(noOfPolicies) < policy.getPolicyOrder()){
+//                    policyCollection.setProperty(PDPConstants.MAX_POLICY_ORDER,
+//                                                 Integer.toString(policy.getPolicyOrder()));
+//                    registry.put(policyPath, policyCollection);
+//                } else {
+//                    reOrderPolicy(policyCollection,policy.getPolicyOrder());
+//                }
+//                resource.setProperty(PDPConstants.POLICY_ORDER,
+//                                     Integer.toString(policy.getPolicyOrder()));
+//            } else {
+//                String previousOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
+//                if(previousOrder == null){
+//                    if(policyCollection != null){
+//                        int policyOrder = 1;
+//                        String noOfPolicies = policyCollection.getProperty(PDPConstants.MAX_POLICY_ORDER);
+//                        if(noOfPolicies != null){
+//                            policyOrder = policyOrder + Integer.parseInt(noOfPolicies);
+//                        }
+//                        policyCollection.setProperty(PDPConstants.MAX_POLICY_ORDER,
+//                                                     Integer.toString(policyOrder));
+//                        resource.setProperty(PDPConstants.POLICY_ORDER, Integer.toString(policyOrder));
+//                    }
+//                    registry.put(policyPath, policyCollection);
+//                }
+//            }
 
             // Cleat authorization after re-ordering of policies
             if(!newResource){
@@ -274,90 +278,94 @@ public class PAPPolicyStore {
                 }                                
             }
 
-            resource.setProperty(EntitlementConstants.ACTIVE_POLICY, Boolean.toString(policy.isActive()));
-            resource.setProperty(EntitlementConstants.PROMOTED_POLICY, Boolean.toString(policy.isPromote()));
+            resource.setProperty(PDPConstants.ACTIVE_POLICY, Boolean.toString(policy.isActive()));
+            resource.setProperty(PDPConstants.PROMOTED_POLICY, Boolean.toString(policy.isPromote()));
 
             if(policy.getPolicyType() != null && policy.getPolicyType().trim().length() > 0){
-                resource.setProperty(EntitlementConstants.POLICY_TYPE, policy.getPolicyType());
+                resource.setProperty(PDPConstants.POLICY_TYPE, policy.getPolicyType());
             } else {
                 try {
                     if(newPolicy){
                         omElement = AXIOMUtil.stringToOM(policy.getPolicy());
-                        resource.setProperty(EntitlementConstants.POLICY_TYPE, omElement.getLocalName());
+                        resource.setProperty(PDPConstants.POLICY_TYPE, omElement.getLocalName());
                     }
                 } catch (XMLStreamException e) {
-                    policy.setPolicyType(EntitlementConstants.POLICY_ELEMENT);
+                    policy.setPolicyType(PDPConstants.POLICY_ELEMENT);
                     log.warn("Policy Type can not be found. Default type is set");
                 }                
             }
 
             if(omElement != null){
-                Iterator iterator1 = omElement.getChildrenWithLocalName(EntitlementConstants.
+                Iterator iterator1 = omElement.getChildrenWithLocalName(PDPConstants.
                         POLICY_REFERENCE);
                 if(iterator1 != null){
                     String policyReferences = "";
                     while(iterator1.hasNext()){
                         OMElement policyReference = (OMElement) iterator1.next();
                         if(!"".equals(policyReferences)){
-                            policyReferences = policyReferences + EntitlementConstants.ATTRIBUTE_SEPARATOR
+                            policyReferences = policyReferences + PDPConstants.ATTRIBUTE_SEPARATOR
                                                + policyReference.getText();
                         } else {
                             policyReferences =  policyReference.getText();
                         }
                     }
-                    resource.setProperty(EntitlementConstants.POLICY_REFERENCE, policyReferences);
+                    resource.setProperty(PDPConstants.POLICY_REFERENCE, policyReferences);
                 }
 
-                Iterator iterator2 = omElement.getChildrenWithLocalName(EntitlementConstants.
+                Iterator iterator2 = omElement.getChildrenWithLocalName(PDPConstants.
                         POLICY_SET_REFERENCE);
                 if(iterator2 != null){
                     String policySetReferences = "";
                     while(iterator1.hasNext()){
                         OMElement policySetReference = (OMElement) iterator2.next();
                         if(!"".equals(policySetReferences)){
-                            policySetReferences = policySetReferences + EntitlementConstants.ATTRIBUTE_SEPARATOR
+                            policySetReferences = policySetReferences + PDPConstants.ATTRIBUTE_SEPARATOR
                                                   + policySetReference.getText();
                         } else {
                             policySetReferences =  policySetReference.getText();
                         }
                     }
-                    resource.setProperty(EntitlementConstants.POLICY_SET_REFERENCE, policySetReferences);
+                    resource.setProperty(PDPConstants.POLICY_SET_REFERENCE, policySetReferences);
                 }
             }
 
             //before writing basic policy editor meta data as properties,
             //delete any properties related to them
-            String policyEditor = resource.getProperty(EntitlementConstants.POLICY_EDITOR_TYPE);
+            String policyEditor = resource.getProperty(PDPConstants.POLICY_EDITOR_TYPE);
             if(newPolicy && policyEditor != null){
-                resource.removeProperty(EntitlementConstants.POLICY_EDITOR_TYPE);
+                resource.removeProperty(PDPConstants.POLICY_EDITOR_TYPE);
             }
 
             //write policy meta data that is used for basic policy editor
             if(policy.getPolicyEditor() != null && policy.getPolicyEditor().trim().length() > 0){
-                resource.setProperty(EntitlementConstants.POLICY_EDITOR_TYPE, policy.getPolicyEditor().trim());
+                resource.setProperty(PDPConstants.POLICY_EDITOR_TYPE, policy.getPolicyEditor().trim());
             }
             String[] policyMetaData = policy.getPolicyEditorData();
             if(policyMetaData != null && policyMetaData.length > 0){
-                String BasicPolicyEditorMetaDataAmount = resource.getProperty(EntitlementConstants.
+                String BasicPolicyEditorMetaDataAmount = resource.getProperty(PDPConstants.
                         BASIC_POLICY_EDITOR_META_DATA_AMOUNT);
                 if(newPolicy && BasicPolicyEditorMetaDataAmount != null){
                     int amount = Integer.parseInt(BasicPolicyEditorMetaDataAmount);
                     for(int i = 0; i < amount; i++){
-                        resource.removeProperty(EntitlementConstants.BASIC_POLICY_EDITOR_META_DATA + i);
+                        resource.removeProperty(PDPConstants.BASIC_POLICY_EDITOR_META_DATA + i);
                     }
-                    resource.removeProperty(EntitlementConstants.BASIC_POLICY_EDITOR_META_DATA_AMOUNT);
+                    resource.removeProperty(PDPConstants.BASIC_POLICY_EDITOR_META_DATA_AMOUNT);
                 }
 
                 int i = 0;
                 for(String policyData : policyMetaData){
                     if(policyData != null && !"".equals(policyData)){
-                        resource.setProperty(EntitlementConstants.BASIC_POLICY_EDITOR_META_DATA + i,
+                        resource.setProperty(PDPConstants.BASIC_POLICY_EDITOR_META_DATA + i,
                                              policyData);
                     }
                     i++;
                 }
-                resource.setProperty(EntitlementConstants.BASIC_POLICY_EDITOR_META_DATA_AMOUNT,
+                resource.setProperty(PDPConstants.BASIC_POLICY_EDITOR_META_DATA_AMOUNT,
                                      Integer.toString(i));
+            }
+
+            if(policy.getPolicyStatusHolders() != null){
+                populateStatusProperties(policy.getPolicyStatusHolders(), resource);
             }
 
             registry.put(path, resource);
@@ -373,13 +381,13 @@ public class PAPPolicyStore {
                                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
                                                path , "delete");
         } catch (RegistryException e) {
-            log.error("Error while adding or updating entitlement policy " + policy.getPolicyId() +
-                    " in PAP policy store", e);
-            throw new IdentityException("Error while adding or updating entitlement policy in PAP policy store");
+            log.error("Error while adding or updating entitlement policy " + policyId+
+                    " in policy store", e);
+            throw new EntitlementException("Error while adding or updating entitlement policy in policy store");
         } catch (UserStoreException e) {
-            log.error("Error while adding or updating entitlement policy " + policy.getPolicyId()
-                    + " in PAP policy store ", e);
-            throw new IdentityException("Error while adding or updating entitlement policy in PAP policy store");
+            log.error("Error while adding or updating entitlement policy " + policyId
+                    + " in policy store ", e);
+            throw new EntitlementException("Error while adding or updating entitlement policy in policy store");
         }
     }
 
@@ -388,26 +396,26 @@ public class PAPPolicyStore {
      * when new policy is added or updated
      * @param collection Collection that contains all policies
      * @param orderNo new order number
-     * @throws org.wso2.carbon.identity.base.IdentityException throws
+     * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws
      */
     private void reOrderPolicy(Collection collection, int orderNo)
-            throws IdentityException {
+            throws EntitlementException {
 
         try {
             String[] resources = collection.getChildren();
             for(int i = 0; i < resources.length; i++){
                 Resource resource = registry.get(resources[i]);
-                String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
+                String policyOrder = resource.getProperty(PDPConstants.POLICY_ORDER);
                 if(policyOrder != null){
                     int currentOrder = Integer.parseInt(policyOrder);
                     if(orderNo <= currentOrder){
                         currentOrder = currentOrder + 1;
-                        resource.setProperty(EntitlementConstants.POLICY_ORDER,
+                        resource.setProperty(PDPConstants.POLICY_ORDER,
                                              Integer.toString(currentOrder));
                         registry.put(resources[i], resource);
-                        String maxPolicyOrder = collection.getProperty(EntitlementConstants.MAX_POLICY_ORDER);
+                        String maxPolicyOrder = collection.getProperty(PDPConstants.MAX_POLICY_ORDER);
                         if(maxPolicyOrder != null &&  Integer.parseInt(maxPolicyOrder) < currentOrder){
-                            collection.setProperty(EntitlementConstants.MAX_POLICY_ORDER,
+                            collection.setProperty(PDPConstants.MAX_POLICY_ORDER,
                                                          Integer.toString(currentOrder));
                             registry.put(IdentityRegistryResources.ENTITLEMENT, collection);
                         }
@@ -416,7 +424,7 @@ public class PAPPolicyStore {
             }
         } catch (RegistryException e) {
             log.error("Error while re-ordering entitlement policy in PAP policy store", e);
-            throw new IdentityException("Error while re-ordering entitlement policy in PAP policy store", e);
+            throw new EntitlementException("Error while re-ordering entitlement policy in PAP policy store", e);
         }
 
     }
@@ -424,9 +432,9 @@ public class PAPPolicyStore {
     /**
      *
      * @param policyId
-     * @throws IdentityException
+     * @throws EntitlementException
      */
-    public void removePolicy(String policyId) throws IdentityException {
+    public void removePolicy(String policyId) throws EntitlementException {
         String path = null;
 
         if (log.isDebugEnabled()) {
@@ -444,7 +452,7 @@ public class PAPPolicyStore {
             registry.delete(path);
         } catch (RegistryException e) {
             log.error("Error while removing entitlement policy " + policyId + " from PAP policy store" , e);
-            throw new IdentityException("Error while removing policy " + policyId + " from PAP policy store");
+            throw new EntitlementException("Error while removing policy " + policyId + " from PAP policy store");
         }
     }
 
@@ -460,4 +468,41 @@ public class PAPPolicyStore {
         }
         return null;
     }
+
+    /**
+     *
+     * @param statusHolders
+     * @param resource
+     */
+    private void populateStatusProperties(StatusHolder[] statusHolders, Resource resource){
+
+        int num = 0;
+        if(statusHolders != null){
+            for(StatusHolder statusHolder : statusHolders){
+                if(statusHolder != null){
+                    List<String>  list = new ArrayList<String>();
+                    list.add(statusHolder.getType());
+                    list.add(statusHolder.getTimeInstance());
+                    list.add(statusHolder.getUser());
+                    list.add(statusHolder.getKey());
+                    list.add(Boolean.toString(statusHolder.isSuccess()));
+                    if(statusHolder.getMessage() != null){
+                        list.add(statusHolder.getMessage());
+                    }
+                    if(statusHolder.getTarget() != null){
+                        list.add(statusHolder.getTarget());
+                    }
+                    if(statusHolder.getTargetAction() != null){
+                        list.add(statusHolder.getTargetAction());
+                    }
+                    if(statusHolder.getVersion() != null){
+                        list.add(statusHolder.getVersion());
+                    }
+                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + num, list);
+                    num ++;
+                }
+            }
+        }
+    }
+
 }

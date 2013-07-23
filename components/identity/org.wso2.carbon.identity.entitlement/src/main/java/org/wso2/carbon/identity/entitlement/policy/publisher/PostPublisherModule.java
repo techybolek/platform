@@ -17,7 +17,7 @@
 */
 package org.wso2.carbon.identity.entitlement.policy.publisher;
 
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.StatusHolder;
 
@@ -44,9 +44,9 @@ public interface PostPublisherModule {
      * @param holder
      * @param statusHolders
      * @return if true, this would skip calling to other modules
-     * @throws IdentityException
+     * @throws EntitlementException
      */
     public boolean postPublish(PublisherDataHolder holder,
-                               List<StatusHolder> statusHolders) throws IdentityException;
+                               List<StatusHolder> statusHolders) throws EntitlementException;
     
 }

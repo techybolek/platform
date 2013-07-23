@@ -26,11 +26,11 @@ import java.util.Arrays;
  */
 public class PDPDataHolder {
 
-    private String[] policyFinders;
+    private String[] policyFinders = new String[0];
 
-    private String[] pipAttributeFinders;
+    private String[] pipAttributeFinders = new String[0];
 
-    private String[] pipResourceFinders;
+    private String[] pipResourceFinders = new String[0];
 
     private boolean decisionCacheEnable;
 

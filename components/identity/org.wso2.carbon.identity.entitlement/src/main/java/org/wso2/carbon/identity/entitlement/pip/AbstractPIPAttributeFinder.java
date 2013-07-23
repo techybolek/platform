@@ -27,7 +27,7 @@ import org.wso2.balana.cond.EvaluationResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.cache.PIPAbstractAttributeCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 
@@ -83,7 +83,7 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
         tenantId =  CarbonContext.getCurrentContext().getTenantId();
 
         subject = evaluationCtx.getAttribute(new URI(StringAttribute.identifier), new URI(
-                EntitlementConstants.SUBJECT_ID_DEFAULT), issuer, new URI(XACMLConstants.SUBJECT_CATEGORY));
+                PDPConstants.SUBJECT_ID_DEFAULT), issuer, new URI(XACMLConstants.SUBJECT_CATEGORY));
         if (subject != null && subject.getAttributeValue() != null &&
                                                         subject.getAttributeValue().isBag()) {
             BagAttribute bagAttribute =  (BagAttribute)subject.getAttributeValue();
@@ -97,7 +97,7 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
         }
 
         resource = evaluationCtx.getAttribute(new URI(StringAttribute.identifier), new URI(
-                EntitlementConstants.RESOURCE_ID_DEFAULT), issuer, new URI(XACMLConstants.RESOURCE_CATEGORY));
+                PDPConstants.RESOURCE_ID_DEFAULT), issuer, new URI(XACMLConstants.RESOURCE_CATEGORY));
         if (resource != null && resource.getAttributeValue() != null &&
                                             resource.getAttributeValue().isBag()) {
             BagAttribute bagAttribute = (BagAttribute) resource.getAttributeValue();
@@ -111,7 +111,7 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
         }
 
         action = evaluationCtx.getAttribute(new URI(StringAttribute.identifier), new URI(
-                EntitlementConstants.ACTION_ID_DEFAULT), issuer, new URI(XACMLConstants.ACTION_CATEGORY));
+                PDPConstants.ACTION_ID_DEFAULT), issuer, new URI(XACMLConstants.ACTION_CATEGORY));
         if (action != null &&  action.getAttributeValue() != null &&
                                                     action.getAttributeValue().isBag()) {
             BagAttribute bagAttribute = (BagAttribute) action.getAttributeValue();
@@ -125,7 +125,7 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
         }
 
         environment = evaluationCtx.getAttribute(new URI(StringAttribute.identifier), new URI(
-                EntitlementConstants.ENVIRONMENT_ID_DEFAULT), issuer, new URI(XACMLConstants.ENT_CATEGORY));
+                PDPConstants.ENVIRONMENT_ID_DEFAULT), issuer, new URI(XACMLConstants.ENT_CATEGORY));
         if (environment != null && environment.getAttributeValue() != null &&
                                                 environment.getAttributeValue().isBag()) {
             BagAttribute bagAttribute = (BagAttribute) environment.getAttributeValue();
@@ -173,7 +173,7 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
 	@Override
 	public boolean overrideDefaultCache() {
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
-        if ("true".equals(properties.getProperty(EntitlementConstants.ATTRIBUTE_CACHING))) {
+        if ("true".equals(properties.getProperty(PDPConstants.ATTRIBUTE_CACHING))) {
             abstractAttributeFinderCache = PIPAbstractAttributeCache.getInstance();
             isAbstractAttributeCachingEnabled = true;
             return true;

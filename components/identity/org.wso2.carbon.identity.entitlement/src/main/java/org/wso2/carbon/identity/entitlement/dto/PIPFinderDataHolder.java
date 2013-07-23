@@ -29,7 +29,7 @@ public class PIPFinderDataHolder {
 
     private String className;
 
-    private String[] supportedAttributeIds;
+    private String[] supportedAttributeIds = new String[0];
 
     public String getClassName() {
         return className;

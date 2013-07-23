@@ -34,7 +34,7 @@ import java.util.Set;
 import org.wso2.balana.ctx.Status;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.PIPAttributeCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
@@ -77,7 +77,7 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 		Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
 				.getDesignators();
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
-		if ("true".equals(properties.getProperty(EntitlementConstants.ATTRIBUTE_CACHING))) {
+		if ("true".equals(properties.getProperty(PDPConstants.ATTRIBUTE_CACHING))) {
             attributeFinderCache = PIPAttributeCache.getInstance();
             attributeFinderCache.clearCache(tenantId);
 		}

@@ -24,7 +24,7 @@ import java.util.Arrays;
  */
 public class EntitledResultSetDTO {
 
-    private EntitledAttributesDTO[] entitledAttributesDTOs;
+    private EntitledAttributesDTO[] entitledAttributesDTOs = new EntitledAttributesDTO[0];
 
     private boolean advanceResult;
 

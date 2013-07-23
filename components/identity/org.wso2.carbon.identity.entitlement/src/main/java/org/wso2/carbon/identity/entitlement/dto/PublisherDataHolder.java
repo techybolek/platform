@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.entitlement.dto;
 
+import org.wso2.carbon.identity.entitlement.common.EntitlementConstants;
 import org.wso2.carbon.registry.core.Resource;
 
 import java.util.*;
@@ -31,9 +32,9 @@ public class PublisherDataHolder {
 
     private String moduleName;
 
-    private PublisherPropertyDTO[] propertyDTOs;
+    private PublisherPropertyDTO[] propertyDTOs = new PublisherPropertyDTO[0];
 
-    private StatusHolder[] statusHolders;
+    private StatusHolder[] statusHolders = new StatusHolder[0];
 
     private StatusHolder latestStatus;
 
@@ -50,7 +51,6 @@ public class PublisherDataHolder {
         List<StatusHolder> statusHolders = new ArrayList<StatusHolder>();
         if(resource != null && resource.getProperties() != null){
             Properties properties = resource.getProperties();
-            int i = 0;
             for(Map.Entry<Object, Object> entry : properties.entrySet()){
                 PublisherPropertyDTO dto = new PublisherPropertyDTO();
                 dto.setId((String)entry.getKey());
@@ -58,25 +58,36 @@ public class PublisherDataHolder {
                 if(value instanceof ArrayList){
                     List list = (ArrayList) entry.getValue();
                     if(list != null && list.size() > 0 && list.get(0) != null){
-                        if(((String)entry.getKey()).equals(StatusHolder.STATUS_HOLDER_NAME + i)){
-                            StatusHolder statusHolder = new StatusHolder(StatusHolder.TYPE_PUBLISH);
+                        if(((String)entry.getKey()).startsWith(StatusHolder.STATUS_HOLDER_NAME)){
+                            StatusHolder statusHolder = new StatusHolder(EntitlementConstants.Status.ABOUT_SUBSCRIBER);
                             if(list.size() > 0  && list.get(0) != null){
-                                statusHolder.setTimeInstance((String)list.get(0));
+                                statusHolder.setType((String)list.get(0));
                             }
                             if(list.size() > 1  && list.get(1) != null){
-                                statusHolder.setKey((String)list.get(1));
+                                statusHolder.setTimeInstance((String)list.get(1));
                             }
                             if(list.size() > 2  && list.get(2) != null){
-                                statusHolder.setKey((String)list.get(2));
+                                statusHolder.setUser((String)list.get(2));
                             }
                             if(list.size() > 3  && list.get(3) != null){
-                                statusHolder.setMessage((String)list.get(3));
-                                statusHolder.setSuccess(false);
-                            } else {
-                                statusHolder.setSuccess(true);
+                                statusHolder.setKey((String)list.get(3));
+                            }
+                            if(list.size() > 4  && list.get(4) != null){
+                                statusHolder.setSuccess(Boolean.parseBoolean((String)list.get(4)));
+                            }
+                            if(list.size() > 5  && list.get(5) != null){
+                                statusHolder.setMessage((String)list.get(5));
+                            }
+                            if(list.size() > 6  && list.get(6) != null){
+                                statusHolder.setTarget((String)list.get(6));
+                            }
+                            if(list.size() > 7  && list.get(7) != null){
+                                statusHolder.setTargetAction((String)list.get(7));
+                            }
+                            if(list.size() > 8  && list.get(8) != null){
+                                statusHolder.setVersion((String)list.get(8));
                             }
                             statusHolders.add(statusHolder);
-                            i++;
                             continue;
                         }
 
@@ -143,8 +154,17 @@ public class PublisherDataHolder {
     }
 
     public void addStatusHolders(List<StatusHolder> statusHolders) {
-        for(int i =0; i < 10 ; i ++){
-            this.statusHolders[i] = statusHolders.get(i);
+        List<StatusHolder> list = new ArrayList<StatusHolder>(Arrays.asList(this.statusHolders));
+        for(StatusHolder holder : statusHolders){
+            list.add(holder);
         }
+
+        StatusHolder[] array = new StatusHolder[10];
+
+        for(int i = 0; i < list.size() ; i++ ){
+            array[i] = list.get((i));
+        }
+
+        this.statusHolders  = array;
     }
 }

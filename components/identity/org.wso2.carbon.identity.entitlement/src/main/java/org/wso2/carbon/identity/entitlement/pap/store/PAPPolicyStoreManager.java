@@ -19,7 +19,7 @@ package org.wso2.carbon.identity.entitlement.pap.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.core.IdentityRegistryResources;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.registry.core.Resource;
@@ -37,35 +37,35 @@ public class PAPPolicyStoreManager {
         storeReader = new PAPPolicyStoreReader(store);
     }
 
-    public void addOrUpdatePolicy(PolicyDTO policy) throws IdentityException {
+    public void addOrUpdatePolicy(PolicyDTO policy) throws EntitlementException {
         store.addOrUpdatePolicy(policy, IdentityRegistryResources.ENTITLEMENT);
     }
 
-    public void removePolicy(PolicyDTO policy) throws IdentityException {
+    public void removePolicy(PolicyDTO policy) throws EntitlementException {
         store.removePolicy(policy.getPolicyId());
     }
     
-    public String[] getPolicyIds() throws IdentityException {
+    public String[] getPolicyIds() throws EntitlementException {
         return store.getAllPolicyIds();
     }
     
-    public PolicyDTO getPolicy(String policyId) throws IdentityException {
+    public PolicyDTO getPolicy(String policyId) throws EntitlementException {
         return storeReader.readPolicyDTO(policyId);
     }
 
-    public PolicyDTO getLightPolicy(String policyId) throws IdentityException {
+    public PolicyDTO getLightPolicy(String policyId) throws EntitlementException {
         return storeReader.readLightPolicyDTO(policyId);
     }
 
-    public PolicyDTO getMetaDataPolicy(String policyId) throws IdentityException {
+    public PolicyDTO getMetaDataPolicy(String policyId) throws EntitlementException {
         return storeReader.readMetaDataPolicyDTO(policyId);
     }
 
-    public PolicyDTO getPolicy(Resource resource) throws IdentityException {
+    public PolicyDTO getPolicy(Resource resource) throws EntitlementException {
         return storeReader.readPolicyDTO(resource);
     }
 
-    public PolicyDTO[] getAllLightPolicyDTOs() throws IdentityException {
+    public PolicyDTO[] getAllLightPolicyDTOs() throws EntitlementException {
         return storeReader.readAllLightPolicyDTOs();
     }
 }

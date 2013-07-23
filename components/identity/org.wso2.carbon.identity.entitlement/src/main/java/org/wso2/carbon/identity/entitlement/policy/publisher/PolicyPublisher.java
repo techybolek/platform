@@ -21,8 +21,11 @@ package org.wso2.carbon.identity.entitlement.policy.publisher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.PAPStatusDataHandler;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
+import org.wso2.carbon.identity.entitlement.common.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PublisherPropertyDTO;
 import org.wso2.carbon.identity.entitlement.dto.StatusHolder;
@@ -59,7 +62,7 @@ public class PolicyPublisher{
     /**
      * set of post publisher modules
      */
-    Set<PostPublisherModule> postPublisherModules = new HashSet<PostPublisherModule>();
+    Set<PAPStatusDataHandler>  papStatusDataHandlers = new HashSet<PAPStatusDataHandler>();
 
     /**
      * Verification publisher modules
@@ -78,20 +81,38 @@ public class PolicyPublisher{
         Map<PolicyPublisherModule, Properties> publisherModules = EntitlementServiceComponent.
                 getEntitlementConfig().getPolicyPublisherModules();
         if(publisherModules != null && !publisherModules.isEmpty()){
-            this.publisherModules = publisherModules.keySet();
-        }
-
-        Map<PostPublisherModule, Properties> postPublisherModules = EntitlementServiceComponent.
-                getEntitlementConfig().getPolicyPostPublisherModules();
-        if(postPublisherModules != null && !postPublisherModules.isEmpty()){
-            this.postPublisherModules = postPublisherModules.keySet();
+            this.publisherModules.addAll(publisherModules.keySet());
         }
 
         Map<PublisherVerificationModule, Properties> prePublisherModules = EntitlementServiceComponent.
                 getEntitlementConfig().getPublisherVerificationModule();
         if(prePublisherModules != null && !prePublisherModules.isEmpty()){
             this.verificationModule = prePublisherModules.keySet().iterator().next();
-        }        
+        }
+
+        //  creating default subscriber to publish policies to PDP
+        CarbonPDPPublisher publisher = new CarbonPDPPublisher();
+        this.publisherModules.add(publisher);
+
+        PublisherDataHolder holder = new PublisherDataHolder(publisher.getModuleName());
+        PublisherPropertyDTO dto = new PublisherPropertyDTO();
+        dto.setId(SUBSCRIBER_ID);
+        dto.setDisplayName(SUBSCRIBER_DISPLAY_NAME);
+        dto.setValue(EntitlementConstants.PDP_SUBSCRIBER_ID);
+        holder.setPropertyDTOs(new PublisherPropertyDTO[]{dto});
+        try {
+            PublisherDataHolder pdpDataHolder = null;
+            try{
+                pdpDataHolder = retrieveSubscriber(EntitlementConstants.PDP_SUBSCRIBER_ID);
+            }catch (Exception e){
+                // ignore
+            }
+            if(pdpDataHolder == null){
+                persistSubscriber(holder, false);
+            }
+        } catch (EntitlementException e) {
+            // ignore
+        }
     }
 
     /**
@@ -103,10 +124,10 @@ public class PolicyPublisher{
      * @param action
      * @param subscriberIds subscriber ids to publish,
      * @param verificationCode verificationCode as String
-     * @throws IdentityException throws if can not be created PolicyPublishExecutor instant
+     * @throws EntitlementException throws if can not be created PolicyPublishExecutor instant
      */
-    public void publishPolicy(String[] policyIds, int version, String action, String[] subscriberIds,
-                                            String verificationCode) throws IdentityException {
+    public void publishPolicy(String[] policyIds, String version, String action, String[] subscriberIds,
+                                            String verificationCode) throws EntitlementException {
 
         boolean toPDP = false;
         
@@ -116,18 +137,23 @@ public class PolicyPublisher{
         
         PolicyPublishExecutor executor = new PolicyPublishExecutor(policyIds, version, action,
                         subscriberIds, this, toPDP, verificationCode);
+        executor.setTenantDomain(CarbonContext.getCurrentContext().getTenantDomain());
+        executor.setTenantId(CarbonContext.getCurrentContext().getTenantId());
+        executor.setUserName(CarbonContext.getCurrentContext().getUsername());
+
         threadPool.execute(executor);
     }
 
 
-    public void persistSubscriber(PublisherDataHolder holder, boolean update) throws IdentityException {
+    public void persistSubscriber(PublisherDataHolder holder, boolean update) throws EntitlementException {
 
         Collection policyCollection;
         String subscriberPath;
         String subscriberId = null;
 
         if(holder == null || holder.getPropertyDTOs() == null){
-            return;
+            log.error("Publisher data can not be null");
+            throw new EntitlementException("Publisher data can not be null");
         }
 
         for(PublisherPropertyDTO dto  : holder.getPropertyDTOs()){
@@ -137,16 +163,17 @@ public class PolicyPublisher{
         }
 
         if(subscriberId == null){
-            return;
+            log.error("Subscriber Id can not be null");
+            throw new EntitlementException("Subscriber Id can not be null");
         }
 
         try{
-            if(registry.resourceExists(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER)){
+            if(registry.resourceExists(PDPConstants.ENTITLEMENT_POLICY_PUBLISHER)){
                 policyCollection = registry.newCollection();
-                registry.put(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER, policyCollection);
+                registry.put(PDPConstants.ENTITLEMENT_POLICY_PUBLISHER, policyCollection);
             }
 
-            subscriberPath =  EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
+            subscriberPath =  PDPConstants.ENTITLEMENT_POLICY_PUBLISHER +
                         RegistryConstants.PATH_SEPARATOR + subscriberId;
 
             Resource resource;
@@ -155,7 +182,7 @@ public class PolicyPublisher{
                 if(update){
                     resource = registry.get(subscriberPath);
                 } else {
-                    throw new IdentityException("Subscriber ID already exists");
+                    throw new EntitlementException("Subscriber ID already exists");
                 }
             } else {
                 resource = registry.newResource();
@@ -166,56 +193,62 @@ public class PolicyPublisher{
             
         } catch (RegistryException e) {
             log.error("Error while persisting subscriber details", e);
-            throw new IdentityException("Error while persisting subscriber details", e);
+            throw new EntitlementException("Error while persisting subscriber details", e);
         }
     }
 
 
-    public void deleteSubscriber(String subscriberId) throws IdentityException {
+    public void deleteSubscriber(String subscriberId) throws EntitlementException {
 
         String subscriberPath;
         
         if(subscriberId == null){
-            return;
+            log.error("Subscriber Id can not be null");
+            throw new EntitlementException("Subscriber Id can not be null");
+        }
+
+        if(EntitlementConstants.PDP_SUBSCRIBER_ID.equals(subscriberId.trim())){
+            log.error("Can not delete PDP publisher");
+            throw new EntitlementException("Can not delete PDP publisher");
         }
 
         try{
-            subscriberPath =  EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
-                        RegistryConstants.PATH_SEPARATOR + subscriberId;
+            subscriberPath =  PDPConstants.ENTITLEMENT_POLICY_PUBLISHER +
+                                                    RegistryConstants.PATH_SEPARATOR + subscriberId;
 
             if(registry.resourceExists(subscriberPath)){
                 registry.delete(subscriberPath);
             }
         } catch (RegistryException e) {
             log.error("Error while deleting subscriber details", e);
-            throw new IdentityException("Error while deleting subscriber details", e);
+            throw new EntitlementException("Error while deleting subscriber details", e);
         }
     }
 
-    public PublisherDataHolder retrieveSubscriber(String id) throws IdentityException {
+    public PublisherDataHolder retrieveSubscriber(String id) throws EntitlementException {
 
         try{
-            if(registry.resourceExists(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
+            if(registry.resourceExists(PDPConstants.ENTITLEMENT_POLICY_PUBLISHER +
                                                         RegistryConstants.PATH_SEPARATOR + id)){
-                Resource resource = registry.get(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
+                Resource resource = registry.get(PDPConstants.ENTITLEMENT_POLICY_PUBLISHER +
                                                         RegistryConstants.PATH_SEPARATOR + id);
 
                 return new PublisherDataHolder(resource);
             }
         } catch (RegistryException e) {
             log.error("Error while retrieving subscriber detail of id : " + id, e);
-            throw new IdentityException("Error while retrieving subscriber detail of id : " + id, e);
+            throw new EntitlementException("Error while retrieving subscriber detail of id : " + id, e);
         }
 
-        return null;
+        throw new EntitlementException("No Subscriber is defined for given Id");
     }
 
-    public String[] retrieveSubscriberIds() throws IdentityException {
+    public String[] retrieveSubscriberIds() throws EntitlementException {
 
         try{
-            if(registry.resourceExists(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
+            if(registry.resourceExists(PDPConstants.ENTITLEMENT_POLICY_PUBLISHER +
                                                         RegistryConstants.PATH_SEPARATOR)){
-                Resource resource = registry.get(EntitlementConstants.ENTITLEMENT_POLICY_PUBLISHER +
+                Resource resource = registry.get(PDPConstants.ENTITLEMENT_POLICY_PUBLISHER +
                                                         RegistryConstants.PATH_SEPARATOR);
                 Collection collection = (Collection) resource;
                 List<String> list = new ArrayList<String>();
@@ -231,7 +264,7 @@ public class PolicyPublisher{
             }
         } catch (RegistryException e) {
             log.error("Error while retrieving subscriber of ids" , e);
-            throw new IdentityException("Error while retrieving subscriber ids", e);
+            throw new EntitlementException("Error while retrieving subscriber ids", e);
 
         }
 
@@ -261,15 +294,28 @@ public class PolicyPublisher{
         int num = 0;
         if(statusHolders != null){
             for(StatusHolder statusHolder : statusHolders){
-                List<String>  list = new ArrayList<String>();
-                list.add(statusHolder.getTimeInstance());
-                list.add(statusHolder.getUser());
-                list.add(statusHolder.getKey());
-                if(statusHolder.getMessage() != null){
-                    list.add(statusHolder.getMessage());
+                if(statusHolder != null){
+                    List<String>  list = new ArrayList<String>();
+                    list.add(statusHolder.getType());
+                    list.add(statusHolder.getTimeInstance());
+                    list.add(statusHolder.getUser());
+                    list.add(statusHolder.getKey());
+                    list.add(Boolean.toString(statusHolder.isSuccess()));
+                    if(statusHolder.getMessage() != null){
+                        list.add(statusHolder.getMessage());
+                    }
+                    if(statusHolder.getTarget() != null){
+                        list.add(statusHolder.getTarget());
+                    }
+                    if(statusHolder.getTargetAction() != null){
+                        list.add(statusHolder.getTargetAction());
+                    }
+                    if(statusHolder.getVersion() != null){
+                        list.add(statusHolder.getVersion());
+                    }
+                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + num, list);
+                    num ++;
                 }
-                resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + num, list);
-                num ++;
             }
         }
 
@@ -280,8 +326,12 @@ public class PolicyPublisher{
         return publisherModules;
     }
 
-    public Set<PostPublisherModule> getPostPublisherModules() {
-        return postPublisherModules;
+    public Set<PAPStatusDataHandler> getPapStatusDataHandlers() {
+        return papStatusDataHandlers;
+    }
+
+    public void setPapStatusDataHandlers(Set<PAPStatusDataHandler> papStatusDataHandlers) {
+        this.papStatusDataHandlers = papStatusDataHandlers;
     }
 
     public PublisherVerificationModule getVerificationModule() {

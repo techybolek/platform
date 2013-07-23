@@ -20,7 +20,7 @@ package org.wso2.carbon.identity.entitlement.policy.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
@@ -55,7 +55,7 @@ public class PolicyStoreManager {
         }
     }
 
-    public void addPolicy(PolicyDTO policyDTO) throws IdentityException {
+    public void addPolicy(PolicyDTO policyDTO) throws EntitlementException {
 
         PolicyStoreDTO dto = new PolicyStoreDTO();
         dto.setPolicyId(policyDTO.getPolicyId());
@@ -65,7 +65,7 @@ public class PolicyStoreManager {
         policyStoreStore.addPolicy(dto);
     }
 
-    public void updatePolicy(PolicyDTO policyDTO) throws IdentityException {
+    public void updatePolicy(PolicyDTO policyDTO) throws EntitlementException {
 
         PolicyStoreDTO dto = new PolicyStoreDTO();
         dto.setPolicyId(policyDTO.getPolicyId());
@@ -75,8 +75,7 @@ public class PolicyStoreManager {
         policyStoreStore.updatePolicy(dto);
     }
 
-    public void removePolicy(PolicyDTO policyDTO) throws IdentityException {
-
+    public void removePolicy(PolicyDTO policyDTO) throws EntitlementException {
         policyStoreStore.deletePolicy(policyDTO.getPolicyId());
     }
 }

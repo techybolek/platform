@@ -17,8 +17,7 @@
 */
 package org.wso2.carbon.identity.entitlement.dto;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class encapsulate the XACML policy related the data
@@ -45,7 +44,7 @@ public class PolicyDTO {
 
     private int policyOrder;
 
-    private int version;
+    private String version;
 
     private String neighborId;    
 
@@ -55,15 +54,7 @@ public class PolicyDTO {
 
     private String[] policyIdReferences = new String[0];
 
-    private StatusHolder[] publishStatusHolders = new StatusHolder[0];
-
     private StatusHolder[] policyStatusHolders = new StatusHolder[0];
-
-    private StatusHolder lastPublishStatus;
-
-    private StatusHolder firstPolicyStatus;
-
-    private StatusHolder lastPolicyStatus;
 
     public String getPolicyId() {
         return policyId;
@@ -179,17 +170,14 @@ public class PolicyDTO {
         this.promote = promote;
     }
 
-    public int getVersion() {
+    public String getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(String version) {
         this.version = version;
     }
 
-    public StatusHolder[] getPublishStatusHolders() {
-        return publishStatusHolders;
-    }
 
     public StatusHolder[] getPolicyStatusHolders() {
         return Arrays.copyOf(policyStatusHolders, policyStatusHolders.length);
@@ -199,33 +187,19 @@ public class PolicyDTO {
         this.policyStatusHolders = Arrays.copyOf(policyStatusHolders, policyStatusHolders.length);
     }
 
-    public StatusHolder getLastPublishStatus() {
-        return lastPublishStatus;
-    }
+    public void addPolicyStatusHolder(List<StatusHolder> publishStatusHolders)  {
 
-    public void setLastPublishStatus(StatusHolder lastPublishStatus) {
-        this.lastPublishStatus = lastPublishStatus;
-    }
-
-    public StatusHolder getLastPolicyStatus() {
-        return lastPolicyStatus;
-    }
-
-    public void setLastPolicyStatus(StatusHolder lastPolicyStatus) {
-        this.lastPolicyStatus = lastPolicyStatus;
-    }
-
-    public StatusHolder getFirstPolicyStatus() {
-        return firstPolicyStatus;
-    }
-
-    public void setFirstPolicyStatus(StatusHolder firstPolicyStatus) {
-        this.firstPolicyStatus = firstPolicyStatus;
-    }
-
-    public void addPublishStatusHolders(List<StatusHolder> statusHolders) {
-        for(int i = 0; i < 10 ; i ++){
-            this.publishStatusHolders[i] = statusHolders.get(i);
+        List<StatusHolder> list = new ArrayList<StatusHolder>(Arrays.asList(this.policyStatusHolders));
+        for(StatusHolder holder : publishStatusHolders){
+            list.add(holder);
         }
+
+        StatusHolder[] array = new StatusHolder[10];
+
+        for(int i = 0; i < list.size() ; i++ ){
+            array[i] = list.get((i));
+        }
+
+        this.policyStatusHolders  = array;
     }
 }

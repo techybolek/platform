@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 public class PaginatedPolicySetDTO {
 
-    private PolicyDTO[] policySet;
+    private PolicyDTO[] policySet = new PolicyDTO[0];
     
     private int numberOfPages;
 

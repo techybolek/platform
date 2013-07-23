@@ -27,9 +27,9 @@ public class EntitlementFinderDataHolder {
     
     private String name;
     
-    private String[] applicationIds;
+    private String[] applicationIds = new String[0];
     
-    private String[] supportedCategory;
+    private String[] supportedCategory = new String[0];
 
     private int hierarchicalLevels;
 

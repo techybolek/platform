@@ -21,7 +21,7 @@ package org.wso2.carbon.identity.entitlement.policy.finder.registry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.balana.AbstractPolicy;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.policy.PolicyAttributeBuilder;
 import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
@@ -71,9 +71,9 @@ public class RegistryPolicyReader {
      *
      * @param policyId policy id
      * @return PolicyDTO
-     * @throws IdentityException throws, if fails
+     * @throws EntitlementException throws, if fails
      */
-    public PolicyDTO readPolicy(String policyId) throws IdentityException {
+    public PolicyDTO readPolicy(String policyId) throws EntitlementException {
 
         Resource resource = null;
         
@@ -90,9 +90,9 @@ public class RegistryPolicyReader {
      * Reads All policies as PolicyDTO
      * 
      * @return Array of PolicyDTO
-     * @throws IdentityException throws, if fails
+     * @throws EntitlementException throws, if fails
      */
-    public PolicyDTO[] readAllPolicies() throws IdentityException {
+    public PolicyDTO[] readAllPolicies() throws EntitlementException {
         
         Resource[] resources = null;
         PolicyDTO[] policies = null;
@@ -137,9 +137,9 @@ public class RegistryPolicyReader {
      * the policy id.
      * 
      * @return policy ids as String[]
-     * @throws IdentityException throws if fails
+     * @throws EntitlementException throws if fails
      */
-    public String[] getAllPolicyIds() throws IdentityException {
+    public String[] getAllPolicyIds() throws EntitlementException {
         
         String path = null;
         Collection collection = null;
@@ -170,7 +170,7 @@ public class RegistryPolicyReader {
 
         } catch (RegistryException e) {
             log.error("Error while retrieving entitlement policy resources", e);
-            throw new IdentityException("Error while retrieving entitlement policy resources", e);
+            throw new EntitlementException("Error while retrieving entitlement policy resources", e);
         }
 
         return resources.toArray(new String[resources.size()]);
@@ -181,9 +181,9 @@ public class RegistryPolicyReader {
      * 
      * @param resource Registry resource
      * @return  PolicyDTO
-     * @throws IdentityException throws, if fails
+     * @throws EntitlementException throws, if fails
      */
-    private PolicyDTO readPolicy(Resource resource) throws IdentityException {
+    private PolicyDTO readPolicy(Resource resource) throws EntitlementException {
         
         String policy = null;
         AbstractPolicy absPolicy = null;
@@ -208,16 +208,16 @@ public class RegistryPolicyReader {
             return dto;
         } catch (RegistryException e) {
             log.error("Error while loading entitlement policy", e);
-            throw new IdentityException("Error while loading entitlement policy", e);
+            throw new EntitlementException("Error while loading entitlement policy", e);
         }
     }
 
     /**
      * This reads the policy combining algorithm from registry resource property
      * @return policy combining algorithm as String
-     * @throws IdentityException throws
+     * @throws EntitlementException throws
      */
-    public String readPolicyCombiningAlgorithm() throws IdentityException {
+    public String readPolicyCombiningAlgorithm() throws EntitlementException {
         try {
             Collection policyCollection = null;
             if(registry.resourceExists(policyStorePath)){
@@ -229,7 +229,7 @@ public class RegistryPolicyReader {
             return null;
         } catch (RegistryException e) {
             log.error("Error while reading policy combining algorithm", e);
-            throw new IdentityException("Error while reading policy combining algorithm", e);
+            throw new EntitlementException("Error while reading policy combining algorithm", e);
         }
     }
 
@@ -238,9 +238,9 @@ public class RegistryPolicyReader {
      * 
      * @param policyId policy id
      * @return policy as Registry resource
-     * @throws IdentityException throws, if fails
+     * @throws EntitlementException throws, if fails
      */
-    private Resource getPolicyResource(String policyId) throws IdentityException {
+    private Resource getPolicyResource(String policyId) throws EntitlementException {
         String path = null;
 
         if (log.isDebugEnabled()) {
@@ -259,7 +259,7 @@ public class RegistryPolicyReader {
             return registry.get(path);
         } catch (RegistryException e) {
             log.error("Error while retrieving entitlement policy : " + policyId, e);
-            throw new IdentityException("Error while retrieving entitlement policy : " + policyId, e);
+            throw new EntitlementException("Error while retrieving entitlement policy : " + policyId, e);
         }
     }
 
@@ -267,9 +267,9 @@ public class RegistryPolicyReader {
      * This returns all the policies as Registry resources.
      *
      * @return policies as Resource[]
-     * @throws org.wso2.carbon.identity.base.IdentityException throws if fails
+     * @throws org.wso2.carbon.identity.entitlement.EntitlementException throws if fails
      */
-    private Resource[] getAllPolicyResource() throws IdentityException {
+    private Resource[] getAllPolicyResource() throws EntitlementException {
 
         String path = null;
         Collection collection = null;
@@ -298,7 +298,7 @@ public class RegistryPolicyReader {
 
         } catch (RegistryException e) {
             log.error("Error while retrieving entitlement policy", e);
-            throw new IdentityException("Error while retrieving entitlement policies", e);
+            throw new EntitlementException("Error while retrieving entitlement policies", e);
         }
 
         return resources.toArray(new Resource[resources.size()]);

@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
 import org.wso2.carbon.identity.entitlement.cache.EntitlementBaseCache;
 import org.wso2.carbon.identity.entitlement.cache.IdentityCacheEntry;
@@ -78,10 +78,10 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
         for(int i = 0; i < children.getLength(); i++){
             Node child = children.item(i);
             if(child != null){
-                if(EntitlementConstants.ENVIRONMENT_ELEMENT.equals(child.getLocalName())){
+                if(PDPConstants.ENVIRONMENT_ELEMENT.equals(child.getLocalName())){
                     if(child.getChildNodes() != null && child.getChildNodes().getLength() > 0){
                         environment = context.getAttribute(new URI(StringAttribute.identifier),
-                                    new URI(EntitlementConstants.ENVIRONMENT_ID_DEFAULT), null, 
+                                    new URI(PDPConstants.ENVIRONMENT_ID_DEFAULT), null,
                                                         new URI(XACMLConstants.ENT_CATEGORY));
                         if (environment != null && environment.getAttributeValue() != null &&
                                                                 environment.getAttributeValue().isBag()) {
@@ -95,7 +95,7 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
 
         if(isAbstractResourceCacheEnabled) {
             IdentityCacheKey cacheKey;
-            String key = EntitlementConstants.RESOURCE_DESCENDANTS + parentResourceId +
+            String key = PDPConstants.RESOURCE_DESCENDANTS + parentResourceId +
                                         (environmentId != null ? environmentId:"");
             tenantId = CarbonContext.getCurrentContext().getTenantId();
             cacheKey = new IdentityCacheKey(tenantId, key);
@@ -128,9 +128,9 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
     @Override
     public boolean overrideDefaultCache() {
         Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
-        if ("true".equals(properties.getProperty(EntitlementConstants.RESOURCE_CACHING))) {
+        if ("true".equals(properties.getProperty(PDPConstants.RESOURCE_CACHING))) {
             abstractResourceCache = EntitlementUtil
-                    .getCommonCache(EntitlementConstants.PIP_ABSTRACT_RESOURCE_CACHE);
+                    .getCommonCache(PDPConstants.PIP_ABSTRACT_RESOURCE_CACHE);
             isAbstractResourceCacheEnabled = true;
             return true;
         } else {
