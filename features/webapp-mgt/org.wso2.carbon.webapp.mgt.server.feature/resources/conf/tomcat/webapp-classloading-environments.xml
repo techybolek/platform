@@ -33,7 +33,7 @@
 
         <DelegatedEnvironment>
             <Name>Tomcat</Name>
-            <DelegatedPackages>javax.annotation.*,javax.ejb,javax.el,javax.persistence,javax.servlet.*,javax.xml,javax.xml.ws,org.apache.catalina.*,org.apache.coyote.*,org.apache.el.*,com.sun.el.*,org.apache.jasper.*,org.apache.naming.*,org.apache.tomcat.*</DelegatedPackages>
+            <DelegatedPackages>javax.annotation.*,javax.ejb,javax.el,javax.persistence,javax.servlet.*,javax.xml,javax.xml.ws,org.apache.catalina.*,org.apache.coyote.*,org.apache.el.*,com.sun.el.*,org.apache.jasper.*,org.apache.naming.*,org.apache.tomcat.*,org.wso2.carbon.tomcat.jndi.*</DelegatedPackages>
         </DelegatedEnvironment>
 
         <DelegatedEnvironment>
