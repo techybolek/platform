@@ -157,9 +157,11 @@ public class SecurityServiceAdmin {
             AxisBinding binding = point.getBinding();
             String bindingName = binding.getName().getLocalPart();
 
-            if (bindingName.endsWith("HttpBinding")) {
-                continue;
-            }
+            //only UTOverTransport is allowed for HTTP
+            if (bindingName.endsWith("HttpBinding") &&
+                (!policy.getAttributes().containsValue("UTOverTransport"))){
+                    continue;
+             }
 
             binding.getPolicySubject().attachPolicy(policy);
             if (lst.contains(bindingName)) {
@@ -172,7 +174,10 @@ public class SecurityServiceAdmin {
         Iterator<String> ite = lst.iterator();
         while (ite.hasNext()) {
             String bindingName = ite.next();
-            if (bindingName.endsWith("HttpBinding")) { //we should not add ws-sec policies to http binding
+
+            //only UTOverTransport is allowed for HTTP
+            if (bindingName.endsWith("HttpBinding") &&
+                    (!policy.getAttributes().containsValue("UTOverTransport"))){
                 continue;
             }
 
