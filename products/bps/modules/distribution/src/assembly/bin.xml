@@ -69,15 +69,6 @@
             </includes>
         </fileSet>
 
-	<!-- WSO2-CARBON-PATCH-4.1.0-0001 files-->
-	<fileSet>
-             <directory>target/WSO2-CARBON-PATCH-4.1.0-0001</directory>
-             <outputDirectory>wso2bps-${pom.version}/repository/components/patches/</outputDirectory>
-             <includes>
-                  <include>**/patch0001/*.*</include>
-             </includes>
-        </fileSet>
-
         <!--copying registry dbscripts-->
         <fileSet>
             <directory>target/wso2carbon-core-${carbon.version}/dbscripts</directory>
