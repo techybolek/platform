@@ -252,9 +252,9 @@ public class SamplesInvoker {
 
     private static void addRoles() throws Exception {
         userAdminStub.addRole("regionalClerksRole", null, new String[]{"/permission/admin/login",
-                                                                       "/permission/admin/manage/humantask/viewtasks"});
+                                                                       "/permission/admin/manage/humantask/viewtasks"},false);
         userAdminStub.addRole("regionalManagerRole", null, new String[]{"/permission/admin/login",
-                                                                        "/permission/admin/manage/humantask/viewtasks"});
+                                                                        "/permission/admin/manage/humantask/viewtasks"},false);
     }
 
 
