@@ -18,11 +18,11 @@
 
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
-<%@page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.wsdl2code.ui.WSDL2CodeClient" %>
-<%@ page import="java.io.File" %>
 <%
     WSDL2CodeClient wsdl2CodeClient;
     String codegenOptions = CharacterEncoder.getSafeText(request.getParameter("optionsString"));
@@ -37,23 +37,38 @@
     out.clear();
     out = pageContext.pushBody();
     out.clearBuffer();
-    wsdl2CodeClient = new WSDL2CodeClient(configContext, backendServerURL, cookie);
+    
+    try {
+        wsdl2CodeClient = new WSDL2CodeClient(configContext, backendServerURL, cookie);
 
-    String[] options = codegenOptions.split(",");
+        String[] options = codegenOptions.split(",");
 
-    String workDir = (String) configContext.getProperty(ServerConstants.WORK_DIR);
-    for(int i=0; i < options.length ; i++) {
-        if ( "-uri".equals(options[i]) && i+1 < options.length ) {
-            if (options[i+1] != null && options[i+1].startsWith("/extra/")) {
-                options[i+1] = workDir + options[i+1];
+        String workDir = (String) configContext.getProperty(ServerConstants.WORK_DIR);
+        for(int i=0; i < options.length ; i++) {
+            if ( "-uri".equals(options[i]) && i+1 < options.length ) {
+                if (options[i+1] != null && options[i+1].startsWith("/extra/")) {
+                    options[i+1] = workDir + options[i+1];
+                }
             }
         }
-    }
 
-    if(type!=null && type.equalsIgnoreCase("cxf")){
-        wsdl2CodeClient.codeGenForCXF(options,response);
-    }else{
-        wsdl2CodeClient.codeGen(options, response);
+        if(type!=null && type.equalsIgnoreCase("cxf")){
+            wsdl2CodeClient.codeGenForCXF(options,response);
+        }else{
+            wsdl2CodeClient.codeGen(options, response);
+        }
+        out.close();
+    } catch (Exception e) {
+        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+        session.setAttribute(CarbonUIMessage.ID, uiMsg);
+        CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
+        response.setStatus(302);
+        response.setHeader("Location", "../admin/error.jsp");
+
+%>
+<script type="text/javascript">
+    location.href = "../admin/error.jsp";
+</script>
+<%
     }
-    out.close();
 %>
