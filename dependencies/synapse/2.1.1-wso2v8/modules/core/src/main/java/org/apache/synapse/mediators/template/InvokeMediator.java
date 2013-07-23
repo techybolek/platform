@@ -51,6 +51,10 @@ public class InvokeMediator extends AbstractMediator {
     private Map<String, Value> pName2ExpressionMap;
     
     private boolean dynamicMediator =false;
+    
+    
+    /** The local registry key which is used to pick a sequence definition*/
+    private Value key = null;
 
     public InvokeMediator() {
         //LinkedHashMap is used to preserve tag order
@@ -70,6 +74,26 @@ public class InvokeMediator extends AbstractMediator {
         //get the target function template and invoke by passing populated parameters
         Mediator mediator = synCtx.getSequenceTemplate(targetTemplate);
 
+        //executing key reference if found defined at configuration.
+		if (key != null) {
+			String sequenceKey = key.evaluateValue(synCtx);
+			Mediator m = synCtx.getSequence(sequenceKey);
+			if (m == null) {
+				handleException("Sequence named " + key + " cannot be found", synCtx);
+
+			} else {
+				if (synLog.isTraceOrDebugEnabled()) {
+					synLog.traceOrDebug("Executing with key " + key);
+				}
+
+				boolean result = m.mediate(synCtx);
+
+				if(!result){
+					handleException("Error while executig target reference  " + key, synCtx);
+				}
+			}
+		}
+        
         
         if (mediator != null && mediator instanceof TemplateMediator) {
             populateParameters(synCtx, ((TemplateMediator) mediator).getName());
@@ -119,6 +143,15 @@ public class InvokeMediator extends AbstractMediator {
 	public void setDynamicMediator(boolean dynamicMediator) {
     	this.dynamicMediator = dynamicMediator;
     }
+
+	public Value getKey() {
+		return key;
+	}
+
+	public void setKey(Value key) {
+		this.key = key;
+	}
     
+	
     
 }

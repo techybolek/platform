@@ -51,6 +51,12 @@ public class InvokeMediatorSerializer extends AbstractMediatorSerializer{
         OMElement invokeElem = null;
         if(mediator.isDynamicMediator()){
         	invokeElem=fac.createOMElement(mediator.getTargetTemplate().substring(DYNAMIC_CONNECTOR_PREFIX.length()+1,mediator.getTargetTemplate().length()), synNS);
+        	 if (mediator.getKey() != null) {
+                 // Serialize Value using ValueSerializer
+                 ValueSerializer keySerializer = new ValueSerializer();
+                 keySerializer.serializeValue(mediator.getKey(), XMLConfigConstants.CONFIG_REF, invokeElem);
+                 
+             } 
         }else{
         	invokeElem=fac.createOMElement(INVOKE_N, synNS);
         }

@@ -20,6 +20,7 @@
 
 package org.apache.synapse.config.xml;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -52,7 +53,7 @@ import java.util.Properties;
 
 public class MediatorFactoryFinder implements XMLToObjectMapper {
 
-    private Map<String, Library> synapseLibraryMap;
+ 	private Map<String, Library> synapseLibraryMap;
     private Map<String, SynapseImport> synapseImportMap;
 
 	private static final Log log = LogFactory.getLog(MediatorFactoryFinder.class);
@@ -312,6 +313,17 @@ public class MediatorFactoryFinder implements XMLToObjectMapper {
                 && !libraryName.equals("")) {
             invokeMediator.setTargetTemplate(libraryName + "." + connectorElem.getLocalName());
         }
+        
+		// load configuration based references for the given connector
+		OMAttribute config_key = connectorElem.getAttribute(new QName(XMLConfigConstants.CONFIG_REF));
+		if (config_key != null) {
+			// ValueFactory for creating dynamic or static Value
+			ValueFactory keyFac = new ValueFactory();
+			// create dynamic or static key based on OMElement
+			Value generatedKey = keyFac.createValue(XMLConfigConstants.CONFIG_REF, connectorElem);
+			// setKey
+			invokeMediator.setKey(generatedKey);
+		}
 
         buildParamteres(connectorElem, invokeMediator);
 
