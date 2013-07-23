@@ -520,7 +520,7 @@
                     tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
         } else {
             String tmpContext = webapp.getContext().substring(tenantContext.length());
-            contextPrefix = tmpContext.lastIndexOf('/') > 0 ?             //todo not last index of
+            contextPrefix = tmpContext.lastIndexOf('/') > 0 ?
                     tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
             contextPrefix = tenantContext + contextPrefix;
         }
@@ -537,7 +537,7 @@
                             tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
                 } else {
                     String tmpContext = webapp2.getContext().substring(tenantContext.length());
-                    contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?             //todo not last index of
+                    contextPrefix2 = tmpContext.lastIndexOf('/') > 0 ?
                             tmpContext.substring(0, tmpContext.substring(1).indexOf('/') + 1).trim() : tmpContext;
                     contextPrefix2 = tenantContext + contextPrefix2;
                 }
