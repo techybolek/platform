@@ -40,6 +40,7 @@ public class ApiTestCase extends GregUiIntegrationTest{
         String versionApi = "1.2.3";
         String lifeCycle="ServiceLifeCycle";
         addApi.uploadApi(provider, name, context, versionApi);
+        Thread.sleep(6000);
         ApiListPage apiListPage = new ApiListPage(driver);
         apiListPage.checkOnUploadApi(provider);
         apiListPage.promoteApiLifecycle(provider,lifeCycle);
