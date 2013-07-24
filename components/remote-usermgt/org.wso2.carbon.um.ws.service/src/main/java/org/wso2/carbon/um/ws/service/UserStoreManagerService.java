@@ -176,7 +176,7 @@ public class UserStoreManagerService extends AbstractAdmin {
     }
 
     public boolean isExistingRole(String roleName) throws UserStoreException {
-        return getUserStoreManager().isExistingRole(roleName, false);
+        return getUserStoreManager().isExistingRole(roleName);
     }
 
     public boolean isExistingUser(String userName) throws UserStoreException {
