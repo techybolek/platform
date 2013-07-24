@@ -512,10 +512,13 @@ public class SCIMUserManager implements UserManager {
                 //returning null will send a resource not found error to client by Charon.
                 return null;
             }
-        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            throw new CharonException("Error in filtering group with filter: " + filterAttribute +
-                                      filterOperation + attributeValue);
-        } catch (IdentitySCIMException e) {
+		} catch (org.wso2.carbon.user.core.UserStoreException e) {
+			throw new CharonException("Error in filtering group with filter: "
+					+ filterAttribute + filterOperation + attributeValue);
+		} catch (org.wso2.carbon.user.api.UserStoreException e) {
+			throw new CharonException("Error in filtering group with filter: "
+					+ filterAttribute + filterOperation + attributeValue);
+		} catch (IdentitySCIMException e) {
             throw new CharonException("Error in retrieving SCIM Group information from database.");
         }
         return filteredGroups;
