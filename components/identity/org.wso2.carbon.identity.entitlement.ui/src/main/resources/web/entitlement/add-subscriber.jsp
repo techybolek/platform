@@ -261,53 +261,47 @@
             <thead>
                 <tr>
                     <th><fmt:message key="time.stamp"/></th>
-                    <th><fmt:message key="policy.id"/></th>
+                    <th><fmt:message key="action"/></th>
+                    <th><fmt:message key="policy.user"/></th>
+                    <th><fmt:message key="target"/></th>
+                    <th><fmt:message key="target.action"/></th>
                     <th><fmt:message key="status"/></th>
                     <th><fmt:message key="details"/></th>
                 </tr>
             </thead>
             <%
-                if(subscriber != null && subscriber.getStatusHolders() != null){
-
-                    StatusHolder[] dtos = subscriber.getStatusHolders();
-                    int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
-                           numberOfPages = (int) Math.ceil((double) dtos.length / itemsPerPageInt);
-                    StatusHolder[] paginatedDTOs = ClientUtil.doModuleStatusHoldersPaging(pageNumberInt, dtos);
-
-                    for(StatusHolder dto : paginatedDTOs){
-                        if(dto != null && dto.getTimeInstance() != null &&
-                                                                dto.getKey() != null){
+            if(subscriber != null && subscriber.getStatusHolders() != null){
+                StatusHolder[] dtos = subscriber.getStatusHolders();
+                int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
+                       numberOfPages = (int) Math.ceil((double) dtos.length / itemsPerPageInt);
+                StatusHolder[] paginatedDTOs = ClientUtil.doModuleStatusHoldersPaging(pageNumberInt, dtos);
+                for(StatusHolder dto : paginatedDTOs){
+                    if(dto != null && dto.getTimeInstance() != null && dto.getKey() != null){
             %>
-                    <tr>
-                        <td><%=dto.getTimeInstance()%></td>
-                        <td><%=dto.getKey()%></td>
-                        <td><%if(dto.getSuccess()){%>Succeed<%} else {%> Failed <%} %></td>
-                        <td>
-                            <%
-                              if(dto.getMessage() != null){
-                            %>
-                            <%=dto.getMessage()%>
-                            <%
-                                }
-                            %>
-                        </td>
-                    </tr>
-            <%
-                        }
-                    }
-
-                    %>
                 <tr>
-                                    <carbon:paginator pageNumber="<%=pageNumberInt%>"
-                                                      numberOfPages="<%=numberOfPages%>"
-                                                      page="add-subscriber.jsp"
-                                                      pageNumberParameterName="pageNumber"
-                                                      parameters="<%=paginationValue%>"
-                                                      resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
-                                                      prevKey="prev" nextKey="next"/>
-                                </tr>
-                <%
-
+                    <td><%=dto.getTimeInstance()%></td>
+                    <td><% if(dto.getType() != null){%> <%=dto.getType()%><%}%></td>
+                    <td><% if(dto.getUser() != null){%> <%=dto.getUser()%><%}%></td>
+                    <td><% if(dto.getTarget() != null){%> <%=dto.getTarget()%><%}%></td>
+                    <td><% if(dto.getTargetAction() != null){%> <%=dto.getTargetAction()%><%}%></td>
+                    <td><% if(dto.getSuccess()){%> <fmt:message key="status.success"/> <%}
+                    else {%> <fmt:message key="status.fail"/> <%} %></td>
+                    <td><% if(dto.getMessage() != null){%> <%=dto.getMessage()%><%}%></td>
+                </tr>
+            <%
+                    }
+                }
+            %>
+            <tr>
+            <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                              numberOfPages="<%=numberOfPages%>"
+                              page="add-subscriber.jsp"
+                              pageNumberParameterName="pageNumber"
+                              parameters="<%=paginationValue%>"
+                              resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                              prevKey="prev" nextKey="next"/>
+            </tr>
+            <%
                 }
             %>
             </table>

@@ -24,7 +24,7 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.RequestElementDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.RequestDTO" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
@@ -37,6 +37,7 @@
     boolean showResponse = false;
     String requestString = (String)session.getAttribute("txtRequest");
     String responseString = (String)session.getAttribute("txtResponse");
+    String policyId = (String)session.getAttribute("policyId");
     String isResponse = request.getParameter("isResponse");
     if(isResponse != null && isResponse.trim().length() > 0){
         showResponse = true;
@@ -44,6 +45,8 @@
 
     if(!showResponse){
         List<RowDTO> rowDTOs = new ArrayList<RowDTO>();
+        String multipleRequest = CharacterEncoder.getSafeText(request.getParameter("multipleRequest"));
+        String returnPolicyList = CharacterEncoder.getSafeText(request.getParameter("returnPolicyList"));
         String resourceNames = CharacterEncoder.getSafeText(request.getParameter("resourceNames"));
         String subjectNames = CharacterEncoder.getSafeText(request.getParameter("subjectNames"));
         String actionNames = CharacterEncoder.getSafeText(request.getParameter("actionNames"));
@@ -55,6 +58,11 @@
             rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
             rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:resource:resource-id");
             rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:resource");
+            String resourceNamesInclude = CharacterEncoder.getSafeText(request.getParameter("resourceNamesInclude"));
+            if(resourceNamesInclude != null){
+                rowDTO.setNotCompleted(Boolean.parseBoolean(resourceNamesInclude));
+                session.setAttribute("resourceNamesInclude",resourceNamesInclude);
+            }
             rowDTOs.add(rowDTO);
             session.setAttribute("resourceNames",resourceNames);
         }
@@ -64,6 +72,11 @@
             rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
             rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:subject:subject-id");
             rowDTO.setCategory("urn:oasis:names:tc:xacml:1.0:subject-category:access-subject");
+            String subjectNamesInclude = CharacterEncoder.getSafeText(request.getParameter("subjectNamesInclude"));
+            if(subjectNamesInclude != null){
+                rowDTO.setNotCompleted(Boolean.parseBoolean(subjectNamesInclude));
+                session.setAttribute("subjectNamesInclude",subjectNamesInclude);
+            }
             rowDTOs.add(rowDTO);
             session.setAttribute("subjectNames",subjectNames);
         }
@@ -73,6 +86,11 @@
             rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
             rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:action:action-id");
             rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:action");
+            String actionNamesInclude = CharacterEncoder.getSafeText(request.getParameter("actionNamesInclude"));
+            if(actionNamesInclude != null){
+                rowDTO.setNotCompleted(Boolean.parseBoolean(actionNamesInclude));
+                session.setAttribute("actionNamesInclude",actionNamesInclude);
+            }
             rowDTOs.add(rowDTO);
             session.setAttribute("actionNames",actionNames);
         }
@@ -82,20 +100,33 @@
             rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
             rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:environment:environment-id");
             rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:environment");
+            String environmentNamesInclude = CharacterEncoder.getSafeText(request.getParameter("environmentNamesInclude"));
+            if(environmentNamesInclude != null){
+                rowDTO.setNotCompleted(Boolean.parseBoolean(environmentNamesInclude));
+                session.setAttribute("actionNamesInclude",environmentNamesInclude);
+            }
             rowDTOs.add(rowDTO);
             session.setAttribute("environmentNames",environmentNames);
         }
 
-        RequestElementDTO requestElementDTO = new RequestElementDTO();
-        requestElementDTO.setRowDTOs(rowDTOs);
+        RequestDTO requestDTO = new RequestDTO();
+        if(multipleRequest != null){
+            requestDTO.setMultipleRequest(Boolean.parseBoolean(multipleRequest));
+            session.setAttribute("multipleRequest", multipleRequest);
+        }
+        if(returnPolicyList != null){
+            requestDTO.setReturnPolicyIdList(Boolean.parseBoolean(returnPolicyList));
+            session.setAttribute("returnPolicyList", returnPolicyList);
+        }
+        requestDTO.setRowDTOs(rowDTOs);
 
         EntitlementPolicyCreator entitlementPolicyCreator = new EntitlementPolicyCreator();
 
         try {
             if(requestString != null && requestString.trim().length() > 0){
                 requestString = requestString.trim().replaceAll("><", ">\n<");
-            } else if(!requestElementDTO.getRowDTOs().isEmpty()){
-                String createdRequest = entitlementPolicyCreator.createBasicRequest(requestElementDTO);
+            } else if(!requestDTO.getRowDTOs().isEmpty()){
+                String createdRequest = entitlementPolicyCreator.createBasicRequest(requestDTO);
                 if(createdRequest != null && createdRequest.trim().length() > 0){
                     requestString = createdRequest.trim().replaceAll("><", ">\n<");
                 }
@@ -116,7 +147,7 @@
 <fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
 	<carbon:breadcrumb label="eval.policy"
 		resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
-		topPage="false" request="<%=request%>" />
+		topPage="true" request="<%=request%>" />
 
 	<script type="text/javascript" src="../carbon/admin/js/breadcrumbs.js"></script>
 	<script type="text/javascript" src="../carbon/admin/js/cookies.js"></script>
@@ -213,8 +244,17 @@
                 <%
                     } else {
                 %>
+                    <%
+                        if(policyId != null){
+                    %>
                 <input type="button" value="<fmt:message key='test.evaluate'/>" class="button" onclick="evaluateXACMLRequest(false);"/>
+                <%
+                    }else {
+                %>
                 <input type="button" value="<fmt:message key='pdp.evaluate'/>" class="button" onclick="evaluateXACMLRequest(true);"/>
+                <%
+                    }
+                %>
                 <input class="button" type="reset" value="<fmt:message key='cancel'/>"
                        onclick="javascript:document.location.href='create-evaluation-request.jsp'"/>
 

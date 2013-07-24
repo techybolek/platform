@@ -31,6 +31,12 @@
     String subjectNames;
     String actionNames;
     String environmentNames;
+    String multipleRequest;
+    String returnPolicyList;
+    String resourceNamesInclude;
+    String subjectNamesInclude;
+    String actionNamesInclude;
+    String environmentNamesInclude;
 
     String clearAttributes = request.getParameter("clearAttributes");
     if("true".equals(clearAttributes)){
@@ -39,17 +45,38 @@
         session.removeAttribute("attributeId");
         session.removeAttribute("environmentNames");
         session.removeAttribute("actionNames");
+        session.removeAttribute("resourceNamesInclude");
+        session.removeAttribute("subjectNamesInclude");
+        session.removeAttribute("actionNamesInclude");
+        session.removeAttribute("environmentNamesInclude");
+        session.removeAttribute("multipleRequest");
+        session.removeAttribute("returnPolicyList");
     }
 
     // remove request and response from session
     session.removeAttribute("txtRequest");
-    session.removeAttribute("txtResponse");    
+    session.removeAttribute("txtResponse");
+
+
+    String policyId = request.getParameter("policyId");
+    if(policyId != null && policyId.trim().length() > 0){
+        session.setAttribute("policyId", policyId);
+    } else {
+        policyId = (String)session.getAttribute("policyId");
+    }
 
     resourceNames = (String)session.getAttribute("resourceNames");
     subjectNames = (String)session.getAttribute("subjectNames");
     actionNames = (String)session.getAttribute("actionNames");
     environmentNames = (String)session.getAttribute("environmentNames");
 
+    multipleRequest = (String)session.getAttribute("multipleRequest");
+    returnPolicyList = (String)session.getAttribute("returnPolicyList");
+
+    resourceNamesInclude = (String)session.getAttribute("resourceNamesInclude");
+    subjectNamesInclude = (String)session.getAttribute("subjectNamesInclude");
+    actionNamesInclude = (String)session.getAttribute("actionNamesInclude");
+    environmentNamesInclude = (String)session.getAttribute("environmentNamesInclude");
 %>
 
 
@@ -57,7 +84,7 @@
 <carbon:breadcrumb
 		label="create.evaluation.request"
 		resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
-		topPage="false"
+		topPage="true"
 		request="<%=request%>" />
 
     <script type="text/javascript" src="../carbon/admin/js/breadcrumbs.js"></script>
@@ -96,7 +123,7 @@
     }
 
     function doCancel(){
-        location.href = 'index.jsp?';
+        location.href = 'index.jsp';
     }
 
     function createRequest(){
@@ -115,8 +142,27 @@
         </div>
         <form id="requestForm" name="requestForm" method="post" action="">
         <table class="styledLeft noBorders">
+
+        <%
+            if(policyId != null){
+        %>
         <tr>
-            
+            <td colspan="3"><fmt:message key="eval.ent.policy.for.policyId"/> <b><%=policyId%></b></td>
+        </tr>
+        <%
+            }
+        %>
+        <tr>
+            <td>
+                <label><input type="checkbox" id="multipleRequest"
+                              name="multipleRequest" value="true"
+                              <%if(multipleRequest != null){%>checked="checked" <%}%> >Multiple Request</label>
+            </td>
+            <td>
+                <label><input type="checkbox" id="returnPolicyList"
+                              name="returnPolicyList" value="true"
+                              <%if(returnPolicyList != null){%>checked="checked" <%}%> >Return Policy List</label>
+            </td>
         </tr>
         <tr>
             <td><fmt:message key='resource.names.are'/></td>
@@ -134,6 +180,11 @@
             <%
                 }
             %>
+            </td>
+            <td>
+                <label><input type="checkbox" id="resourceNamesInclude"
+                              name="resourceNamesInclude" value="true"
+                              <%if(resourceNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>
             </td>
         </tr>
 
@@ -153,10 +204,11 @@
                 }
             %>
             </td>
-            <%--<td>--%>
-                <%--<input id="subjectIncludeResult" name="subjectIncludeResult"--%>
-                       <%--class="text-box-big" type="checkbox" value="true" checked="checked"/>--%>
-            <%--</td>--%>
+            <td>
+                <label><input type="checkbox" id="subjectNamesInclude"
+                              name="subjectNamesInclude" value="true"
+                              <%if(subjectNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>
+            </td>
         </tr>
 
         <tr>
@@ -174,6 +226,11 @@
             <%
                 }
             %>
+            </td>
+            <td>
+                <label><input type="checkbox" id="actionNamesInclude"
+                              name="actionNamesInclude" value="true"
+                              <%if(actionNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>
             </td>
         </tr>            
 
@@ -193,15 +250,38 @@
                 }
             %>
             </td>
+            <td>
+                <label><input type="checkbox" id="environmentNamesInclude"
+                              name="environmentNamesInclude" value="true"
+                              <%if(environmentNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>
+            </td>
         </tr>
 
 
         <tr>
             <td class="buttonRow" colspan="3">
+                <%
+                    if(policyId != null){
+                %>
                 <input type="button" onclick="submitForm(false);" value="<fmt:message key="test.evaluate"/>"  class="button"/>
+                <%
+                    } else {
+                %>
                 <input type="button" onclick="submitForm(true);" value="<fmt:message key="pdp.evaluate"/>"  class="button"/>
+                <%
+                    }
+                %>
                 <input type="button" onclick="createRequest();" value="<fmt:message key="create.request"/>"  class="button"/>
                 <input type="button" onclick="clearForm();" value="<fmt:message key="clear"/>"  class="button"/>
+
+                <%
+                    if(policyId != null){
+                %>
+                <input type="button" onclick="doCancel()" value="<fmt:message key="cancel"/>"  class="button"/>
+                <%
+                }
+                %>
+
             </td>
         </tr>
         </table>

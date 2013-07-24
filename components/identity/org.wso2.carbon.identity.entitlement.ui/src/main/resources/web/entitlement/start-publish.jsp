@@ -38,6 +38,7 @@
     String[] subscriberIds = null;
     String publishAll = request.getParameter("publishAllPolicies");
     String policyId = request.getParameter("policyId");
+    String toPDP = request.getParameter("toPDP");
     String[] selectedPolicies = request.getParameterValues("policies");
 
     String publishAction = request.getParameter("publishAction");
@@ -153,7 +154,7 @@
 %>
 <fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
 <carbon:breadcrumb
-        label="select.publish.actions"
+        label="publish.policy"
         resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
         topPage="true"
         request="<%=request%>"/>
@@ -217,25 +218,30 @@
         location.href = "add-subscriber.jsp?view=true&subscriberId=" + subscriber;
     }
 
-    function publishToSubscriber() {
+    function publishToSubscriber(toPDP) {
         var selected = false;
 
-        if (document.publishForm.subscribers == null) {
-            CARBON.showWarningDialog('<fmt:message key="no.subscriber.to.be.published"/>');
-            return;
-        }
-
-        if (document.publishForm.subscribers[0] != null) { // there is more than 1 policy
-            for (var j = 0; j < document.publishForm.subscribers.length; j++) {
-                selected = document.publishForm.subscribers[j].checked;
-                if (selected) break;
+        if(!toPDP){
+            if (document.publishForm.subscribers == null) {
+                CARBON.showWarningDialog('<fmt:message key="no.subscriber.to.be.published"/>');
+                return;
             }
-        } else if (document.publishForm.subscribers != null) { // only 1 policy
-            selected = document.publishForm.subscribers.checked;
-        }
-        if (!selected) {
-            CARBON.showInfoDialog('<fmt:message key="select.subscriber.to.be.published"/>');
-            return;
+
+            if (document.publishForm.subscribers[0] != null) { // there is more than 1 policy
+                for (var j = 0; j < document.publishForm.subscribers.length; j++) {
+                    selected = document.publishForm.subscribers[j].checked;
+                    if (selected) break;
+                }
+            } else if (document.publishForm.subscribers != null) { // only 1 policy
+                selected = document.publishForm.subscribers.checked;
+            }
+
+
+
+            if (!selected) {
+                CARBON.showInfoDialog('<fmt:message key="select.subscriber.to.be.published"/>');
+                return;
+            }
         }
         if (allSubscribersSelected) {
             CARBON.showConfirmationDialog("<fmt:message key="publish.to.all.subscribers.prompt"/>", function () {
@@ -248,7 +254,6 @@
                 document.publishForm.submit();
             });
         }
-
     }
 
     function publishToAll() {
@@ -265,219 +270,194 @@
 </script>
 
 <div id="middle">
-    <h2><fmt:message key="select.publish.data"/></h2>
+    <h2><fmt:message key="publish.policy"/></h2>
     <div id="workArea">
         <form action="policy-publish.jsp" name="publishForm" method="post">
-        <table>
-        <tr>
-            <td>
-            <table class="styledLeft"  style="border:none; margin-bottom:10px">
-                <thead>
-                <tr>
-                    <th> <fmt:message key="select.publish.actions"/></th>
-                </tr>
-                </thead>
-                <tr>
-                    <td>
-                    <table class="normal">
-                        <tr>
-                            <td>
-                                <label>
-                                    <input name="publishAction" type="radio" 
-                                    <% if(EntitlementConstants.PolicyPublish.ACTION_CREATE.equals(publishAction)){%> checked="checked" <% }%>
-                                           value="<%=EntitlementConstants.PolicyPublish.ACTION_CREATE%>">
-                                    <fmt:message key="select.publish.actions.add"/>
-                                </label>
-                            </td>
-                        <%--</tr>--%>
-                        <%--<tr>--%>
-                            <td>
-                                <label>
-                                    <input name="publishAction" type="radio"
-                                    <% if(EntitlementConstants.PolicyPublish.ACTION_UPDATE.equals(publishAction)){%> checked="checked" <% }%>
-                                           value="<%=EntitlementConstants.PolicyPublish.ACTION_UPDATE%>">
-                                    <fmt:message key="select.publish.actions.update"/>
-                                </label>
-                            </td>
-                        <%--</tr>--%>
-                        <%--<tr>--%>
-                            <td>
-                                <label>
-                                    <input name="publishAction" type="radio"
-                                    <% if(EntitlementConstants.PolicyPublish.ACTION_DELETE.equals(publishAction)){%> checked="checked" <% }%>
-                                           value="<%=EntitlementConstants.PolicyPublish.ACTION_DELETE%>">
-                                    <fmt:message key="select.publish.actions.delete"/>
-                                </label>
-                            </td>
-                        <%--</tr>--%>
-                        <%--<tr>--%>
-                            <%--<td>--%>
-                                <%--<label>--%>
-                                    <%--<input name="publishAction" type="radio"--%>
-                                    <%--<% if(EntitlementConstants.PolicyPublish.ACTION_PROMOTE.equals(publishAction)){%> checked="checked" <% }%>--%>
-                                           <%--value="<%=EntitlementConstants.PolicyPublish.ACTION_PROMOTE%>">--%>
-                                    <%--<fmt:message key="select.publish.actions.promote"/>--%>
-                                <%--</label>--%>
-                            <%--</td>--%>
-                        </tr>
-                    </table>
-                    </td>
-                </tr>
-            </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-            <%
-                if(policyId != null && tmp.trim().length() > 0){
-            %>
-            <table class="styledLeft"  style="border:none; margin-bottom:10px">
-                <thead>
-                    <tr>
-                        <th><fmt:message key="select.publish.version"/></th>
-                    </tr>
-                </thead>
-                <tr>
-                    <td>
-                    <table class="normal">
-                        <tr>
-                            <td>
-                                <label>
-                                    <input name="versionSelector" type="radio" value="versionSelector"
-                                    <%if(policyVersion == null || policyVersion.trim().length() == 0) { %>
-                                           checked="checked"
-                                    <% } %>
-                                           onclick="disableVersion();">
-                                    <fmt:message key="select.publish.version.current"/>
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input name="versionSelector" type="radio"
-                                    <%if(policyVersion != null && policyVersion.trim().length() > 0) { %>
-                                           checked="checked"
-                                    <% } %>
-                                           onclick="showVersion();">
-                                    <fmt:message key="select.publish.version.older"/>
-                                </label>
-                            </td>
-                            <td id="policyVersionSelect" >
-                            </td>
-                        </tr>
-                    </table>
-               </td>
+            <table class="styledLeft" style="width: 100%;margin-top:10px;">
+            <thead>
+            <tr>
+                <th  colspan="3"> <fmt:message key="select.publish.actions"/></th>
             </tr>
-            </table>
-            <%
-                }
-            %>
-            </td>
-        </tr>
+            </thead>
+            <tr>
+                <td>
+                    <label>
+                        <input name="publishAction" type="radio"
+                        <% if(EntitlementConstants.PolicyPublish.ACTION_CREATE.equals(publishAction)){%> checked="checked" <% }%>
+                               value="<%=EntitlementConstants.PolicyPublish.ACTION_CREATE%>">
+                        <fmt:message key="select.publish.actions.add"/>
+                    </label>
+                </td>
+                <td>
+                    <label>
+                        <input name="publishAction" type="radio"
+                        <% if(EntitlementConstants.PolicyPublish.ACTION_UPDATE.equals(publishAction)){%> checked="checked" <% }%>
+                               value="<%=EntitlementConstants.PolicyPublish.ACTION_UPDATE%>">
+                        <fmt:message key="select.publish.actions.update"/>
+                    </label>
+                </td>
+                <td>
+                    <label>
+                        <input name="publishAction" type="radio"
+                        <% if(EntitlementConstants.PolicyPublish.ACTION_DELETE.equals(publishAction)){%> checked="checked" <% }%>
+                               value="<%=EntitlementConstants.PolicyPublish.ACTION_DELETE%>">
+                        <fmt:message key="select.publish.actions.delete"/>
+                    </label>
+                </td>
+            </tr>
+        </table>
 
-        <tr>
-            <td>
-            <table style="border:none; margin-bottom:10px">
+        <%
+            if(policyId != null && tmp.trim().length() > 0){
+        %>
+            <table class="styledLeft" style="width: 100%;margin-top:10px;">
+            <thead>
+                <tr>
+                    <th colspan="3"><fmt:message key="select.publish.version"/></th>
+                </tr>
+            </thead>
+            <tr>
+                <td>
+                    <label>
+                        <input name="versionSelector" type="radio" value="versionSelector"
+                        <%if(policyVersion == null || policyVersion.trim().length() == 0) { %>
+                               checked="checked"
+                        <% } %>
+                               onclick="disableVersion();">
+                        <fmt:message key="select.publish.version.current"/>
+                    </label>
+                </td>
+                <td>
+                    <label>
+                        <input name="versionSelector" type="radio"
+                        <%if(policyVersion != null && policyVersion.trim().length() > 0) { %>
+                               checked="checked"
+                        <% } %>
+                               onclick="showVersion();">
+                        <fmt:message key="select.publish.version.older"/>
+                    </label>
+                </td>
+                <td id="policyVersionSelect" >
+                </td>
+            </tr>
+        </table>
+        <%
+            }
+        %>
+
+    <%
+        if(!"true".equals(toPDP)){
+    %>
+
+            <table class="styledLeft noBorders">
                 <thead>
                 <tr>
                     <th><fmt:message key='select.subscriber'/></th>
                 </tr>
                 </thead>
-                <%
-                    if (subscriberIds != null && subscriberIds.length > 0) {
-                %>
-                <tr>
-                    <td>
-                        <form action="start-publish.jsp" name="searchForm" method="post">
-                            <table class="styledLeft" style="border:0;
-                                                    !important margin-top:10px;margin-bottom:10px;">
-                                <tr>
-                                    <td>
-                                        <table style="border:0; !important">
-                                            <tbody>
-                                            <tr style="border:0; !important">
-                                                <td style="border:0; !important">
-                                                    <nobr>
-                                                        <fmt:message key="search"/>
-                                                        <input type="text" name="subscriberSearchString"
-                                                               value="<%= subscriberSearchString != null? subscriberSearchString :""%>"/>&nbsp;
-                                                    </nobr>
-                                                </td>
-                                                <td style="border:0; !important">
-                                                    <a class="icon-link" href="#" style="background-image: url(images/search.gif);"
-                                                       onclick="searchService(); return false;"
-                                                       alt="<fmt:message key="search"/>"></a>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </form>
-                    </td>
-                </tr>
-                 <%
-                        for (String subscriber : subscriberIds) {
-                            if (subscriber != null && subscriber.trim().length() > 0 ) {
-                %>
+            </table>
 
-                <tr>
-                    <td>
-                        <table class="normal">
-                            <tr>
-                                <td width="10px" style="text-align:center; !important">
-                                    <input type="checkbox" name="subscribers"
-                                           value="<%=subscriber%>"
-                                           onclick="resetVars()" class="chkBox"/>
-                                </td>
-                                <td><%=subscriber%>
-                                </td>
-                                <td>
-                                    <a onclick="viewSubscriber('<%=subscriber%>');return false;"
-                                       href="#" style="background-image: url(images/edit.gif);"
-                                       class="icon-link">
-                                        <fmt:message key='view'/></a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <%
-                            }
-                        }
-                %>
+            <form action="start-publish.jsp" name="searchForm" method="post">
+                <table class="styledLeft noBorders">
+                    <tbody>
+                    <tr style="border:0; !important">
+                        <td style="border:0; !important">
+                            <nobr>
+                                <fmt:message key="search"/>
+                                <input type="text" name="subscriberSearchString"
+                                       value="<%= subscriberSearchString != null? subscriberSearchString :""%>"/>&nbsp;
+                            </nobr>
+                        </td>
+                        <td style="border:0; !important">
+                            <a class="icon-link" href="#" style="background-image: url(images/search.gif);"
+                               onclick="searchService(); return false;"
+                               alt="<fmt:message key="search"/>"></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+
+            <table class="styledLeft" style="width: 100%;margin-top:10px;">
+            <%
+                if (subscriberIds != null && subscriberIds.length > 0) {
+                    for (String subscriber : subscriberIds) {
+                        if (subscriber != null && subscriber.trim().length() > 0 ) {
+            %>
+
+            <tr>
+                <td width="10px" style="text-align:center; !important">
+                    <input type="checkbox" name="subscribers"
+                           value="<%=subscriber%>"
+                           onclick="resetVars()" class="chkBox"/>
+                </td>
+                <td><%=subscriber%>
+                </td>
+                <td>
+                    <a onclick="viewSubscriber('<%=subscriber%>');return false;"
+                       href="#" style="background-image: url(images/edit.gif);"
+                       class="icon-link">
+                        <fmt:message key='view'/></a>
+                </td>
+            </tr>
+            <%
+                    }
+                }
+            %>
 
 
 <%if(policyVersion != null && policyVersion.trim().length() > 0) { %>
 <script type="text/javascript">
-    showVersion()
+showVersion()
 </script>
- <%}%>
-                <carbon:paginator pageNumber="<%=pageNumberInt%>"
-                                  numberOfPages="<%=numberOfPages%>"
-                                  action="post"
-                                  page="start-publish.jsp"
-                                  pageNumberParameterName="pageNumber"
-                                  parameters="<%=paginationValue%>"
-                                  resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
-                                  prevKey="prev" nextKey="next"/>
+<%}%>
+            <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                              numberOfPages="<%=numberOfPages%>"
+                              action="post"
+                              page="start-publish.jsp"
+                              pageNumberParameterName="pageNumber"
+                              parameters="<%=paginationValue%>"
+                              resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                              prevKey="prev" nextKey="next"/>
+            <%
+                } else {
+            %>
+            <tr class="noRuleBox">
+                <td colspan="3"><fmt:message key="no.subscribers.defined"/><br/></td>
+            </tr>
+            <%
+                }
+            %>
+
+        </table>
+
+    <%
+        }
+    %>
+
+        <%--<tr>--%>
+            <%--<td>--%>
+                <%--<input name="subscribers" type="hidden" value="<%=EntitlementConstants.PDP_SUBSCRIBER_ID%>" />--%>
+            <%--</td>--%>
+        <%--</tr>--%>
+        <%--<%--%>
+            <%--}--%>
+        <%--%>--%>
+        <table class="styledLeft noBorders">
+        <tr>
+            <td class="buttonRow">
                 <%
-                    } else {
+                    if("true".equals(toPDP)){
                 %>
-                <tr class="noRuleBox">
-                    <td colspan="3"><fmt:message key="no.rule.defined"/><br/></td>
-                </tr>
+                <input type="button" class="button" value="Publish" onclick="publishToSubscriber(true);">
+                <%
+                    }  else {
+                %>
+                <input type="button" class="button" value="Publish" onclick="publishToSubscriber(false);">
+                <input type="button" class="button" value="PublishToAll" onclick="publishToAll();">
                 <%
                     }
                 %>
-
-            </table>
-            </td>
-        </tr>
-        <tr>
-            <td class="buttonRow">
-                <input type="button" class="button" value="Publish" onclick="publishToSubscriber();">
-                <input type="button" class="button" value="PublishToAll" onclick="publishToAll();">
                 <input type="button" class="button" value="Cancel" onclick="doCancel();">
             </td>
         </tr>

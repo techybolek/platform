@@ -285,8 +285,8 @@
             <tr>
                 <td>
                     <form action="start-publish.jsp" name="searchForm" method="post">
-                        <table class="styledLeft" style="border:0;
-                                                    !important margin-top:10px;margin-bottom:10px;">
+                        <table style="border:0;
+                                                !important margin-top:10px;margin-bottom:10px;">
                             <tr>
                                 <td>
                                     <table style="border:0; !important">
@@ -294,7 +294,7 @@
                                         <tr style="border:0; !important">
                                             <td style="border:0; !important">
                                                 <nobr>
-                                                    <fmt:message key="search"/>
+                                                    <fmt:message key="enter.subscriber.search"/>
                                                     <input type="text" name="subscriberSearchString"
                                                            value="<%= subscriberSearchString != null? subscriberSearchString :""%>"/>&nbsp;
                                                 </nobr>
@@ -332,7 +332,7 @@
         </table>
 
         <form action="" name="policyForm" method="post">
-        <table class="styledLeft">
+        <table style="width: 100%" id="dataTable" class="styledLeft">
             <thead>
             <tr>
                 <th colspan='2'><fmt:message key='subscriber.name'/></th>
@@ -345,29 +345,22 @@
                         if (subscriber != null && subscriber.trim().length() > 0 ) {
             %>
             <tr>
+                <td width="10px" style="text-align:center; !important">
+                    <input type="checkbox" name="subscribers"
+                           value="<%=subscriber%>"
+                           onclick="resetVars()" class="chkBox"/>
+                </td>
+                <td><%=subscriber%></td>
                 <td>
-                    <table class="normal">
-                        <tr>
-                            <td width="10px" style="text-align:center; !important">
-                                <input type="checkbox" name="subscribers"
-                                       value="<%=subscriber%>"
-                                       onclick="resetVars()" class="chkBox"/>
-                            </td>
-                            <td><%=subscriber%>
-                            </td>
-                            <td>
-                                <a onclick="viewSubscriber('<%=subscriber%>');return false;"
-                                   href="#" style="background-image: url(images/edit.gif);"
-                                   class="icon-link">
-                                    <fmt:message key='view'/></a>
+                    <a onclick="viewSubscriber('<%=subscriber%>');return false;"
+                       href="#" style="background-image: url(images/edit.gif);"
+                       class="icon-link">
+                        <fmt:message key='view'/></a>
 
-                                <a onclick="editSubscriber('<%=subscriber%>');return false;"
-                                   href="#" style="background-image: url(images/edit.gif);"
-                                   class="icon-link">
-                                    <fmt:message key='edit'/></a>
-                            </td>
-                        </tr>
-                    </table>
+                    <a onclick="editSubscriber('<%=subscriber%>');return false;"
+                       href="#" style="background-image: url(images/edit.gif);"
+                       class="icon-link">
+                        <fmt:message key='edit'/></a>
                 </td>
             </tr>
             <%

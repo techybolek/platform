@@ -33,8 +33,7 @@
         try {
             PolicyEditorEngine.getInstance().persistConfig(request.getParameter("editorConfig"));
         } catch (PolicyEditorException e) {
-            String message = "Config can not be updated. " + e.getMessage(); 
-            //session.setAttribute("entitlementpolicy", dto.getPolicy());
+            String message = "Config can not be updated. " + e.getMessage();
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
             forwardTo = "policy-editor-config-view.jsp";
             %>
@@ -50,17 +49,16 @@
         }
     }
 %>
+<fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
 
+<div id="middle">
+    <h2><fmt:message key="add.new.policy"/></h2>
 <div id="workArea">
-    <p>
-        Create new policy using following ways
-    </p>
+    <%--<p> <fmt:message key="add.new.policy.description"/> </p>--%>
     <table class="styledLeft" style="width:100%">
         <thead>
         <tr>
-            <th>
-                Select policy creation method
-            </th>
+            <th><fmt:message key="add.new.policy.method"/></th>
         </tr>
         </thead>
         <tbody>
@@ -70,35 +68,35 @@
                     <tbody>
                         <tr class="tableOddRow">
                             <td width="20%">
-                                <a href="rbac-policy-editor.jsp">RBAC Policy</a>
+                                <a href="rbac-policy-editor.jsp"><fmt:message key="add.new.policy.rbac"/></a>
                             </td>
-                            <td>This is role base access control policy</td>
+                            <td><fmt:message key="add.new.policy.rbac.description"/></td>
                         </tr>
                         <tr class="tableEvenRow">
                             <td width="20%">
-                                <a href="basic-policy-editor.jsp">Basic XACML Policy</a>
+                                <a href="basic-policy-editor.jsp"><fmt:message key="add.new.policy.basic"/></a>
                             </td>
-                            <td>You can configure Basic policy editor from
+                            <td><fmt:message key="add.new.policy.basic.description"/>
                                                     <a href="policy-editor-config-view.jsp"> here</a></td>
                         </tr>
                         <tr class="tableOddRow">
                             <td width="20%">
-                                <a href="policy-editor.jsp">Advance XACML Policy</a>
+                                <a href="policy-editor.jsp"><fmt:message key="add.new.policy.editor"/></a>
                             </td>
-                            <td>You can configure Basic policy editor from
-                                                    <a href="policy-editor-config-view.jsp"> here</a></td>
+                            <td><fmt:message key="add.new.policy.editor.description"/>
+                                            <a href="policy-editor-config-view.jsp"> here</a></td>
                         </tr>
                         <tr class="tableEvenRow">
                             <td width="20%">
-                                <a href="import-policy.jsp">Import Existing XACML Policy</a>
+                                <a href="import-policy.jsp"><fmt:message key="add.new.policy.import"/></a>
                             </td>
-                            <td>This is role base access control policy</td>
+                            <td><fmt:message key="add.new.policy.import.description"/></td>
                         </tr>
                         <tr class="tableOddRow">
                             <td width="20%">
-                                <a href="policy-view.jsp">Write XACML Policy</a>
+                                <a href="policy-view.jsp"><fmt:message key="add.new.policy.write"/></a>
                             </td>
-                            <td>This is role base access control policy</td>
+                            <td><fmt:message key="add.new.policy.write.description"/></td>
                         </tr>
                     </tbody>
                 </table>
@@ -107,3 +105,5 @@
         </tbody>
     </table>
 </div>
+/<div>
+</fmt:bundle>

@@ -2373,13 +2373,6 @@ public class PolicyEditorUtil {
         PolicyEditorDataHolder holder = PolicyEditorEngine.getInstance().getPolicyEditorData();
         List<BasicRuleDTO> arrangedRules = new ArrayList<BasicRuleDTO>();
 
-        String algorithm = basicPolicyDTO.getRuleAlgorithm();
-        if(algorithm != null && algorithm.trim().length() > 0) {
-            basicPolicyDTO.setRuleAlgorithm(holder.getRuleAlgorithmUri(algorithm));
-        } else {
-            basicPolicyDTO.setRuleAlgorithm(holder.getDefaultRuleAlgorithm());
-        }
-
         if(ruleElementOrder != null && ruleElementOrder.trim().length() > 0){
             String[] ruleIds = ruleElementOrder.
                     split(EntitlementPolicyConstants.ATTRIBUTE_SEPARATOR);
@@ -2408,6 +2401,12 @@ public class PolicyEditorUtil {
 
         policyEditorData[i++] = basicPolicyDTO.getPolicyId();
         policyEditorData[i++] = basicPolicyDTO.getRuleAlgorithm();
+        String algorithm = basicPolicyDTO.getRuleAlgorithm();
+        if(algorithm != null && algorithm.trim().length() > 0) {
+            basicPolicyDTO.setRuleAlgorithm(holder.getRuleAlgorithmUri(algorithm));
+        } else {
+            basicPolicyDTO.setRuleAlgorithm(holder.getDefaultRuleAlgorithm());
+        }
         policyEditorData[i++] = basicPolicyDTO.getVersion();
         policyEditorData[i++] = basicPolicyDTO.getDescription();
 

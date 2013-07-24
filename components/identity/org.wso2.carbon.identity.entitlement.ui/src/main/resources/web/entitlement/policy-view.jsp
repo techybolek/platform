@@ -41,7 +41,7 @@
                                         getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 	String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 	String forwardTo = null;
-	PolicyDTO dto = null;
+    String policy = "";
 	String policyId = null;
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
@@ -50,21 +50,22 @@
 		EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(
 				cookie, serverURL, configContext);
 		policyId = request.getParameter("policyid");
-		dto = client.getPolicy(policyId);
 
-		String policy = null;
-		policy = (String) session.getAttribute("entitlementpolicy");
+        if(policyId != null && policyId.trim().length() > 0){
+            PolicyDTO dto = client.getPolicy(policyId);
+            if(dto != null){
+                policy = dto.getPolicy();
+            }
+        }
 
 		if (policy != null) {
-			dto.setPolicy(policy.trim().replaceAll("><", ">\n<"));
+			policy = policy.trim().replaceAll("><", ">\n<");
 		}
-
-		session.removeAttribute("entitlementpolicy");
-
 	} catch (Exception e) {
-		String message = resourceBundle.getString("error.while.retreiving.policies");
+		String message = resourceBundle.getString("error.while.retreiving.policies"
+                + " " + e.getMessage());
 		CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
-		forwardTo = "../admin/error.jsp";
+		forwardTo = "index.jsp";
 	}
 %>
 
@@ -72,7 +73,7 @@
        <form name="frmPolicyData" action="../policyeditor/index.jsp" method="post">
         <input type="hidden" name="policy" id="policy">
         <input type="hidden" name="visited" id="visited">
-        <textarea id="txtPolicy" rows="50" cols="50"><%=dto.getPolicy()%>
+        <textarea id="txtPolicy" rows="50" cols="50"><%=policy%>
         </textarea>
         <input type="hidden" name="callbackURL"
                value="../entitlement/update-policy-submit.jsp?policyid=<%=policyId%>"/>

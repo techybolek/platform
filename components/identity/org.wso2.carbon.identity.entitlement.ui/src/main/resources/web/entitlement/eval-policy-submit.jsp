@@ -43,6 +43,8 @@
     String subjectNames = CharacterEncoder.getSafeText(request.getParameter("subjectNames"));
     String actionNames = CharacterEncoder.getSafeText(request.getParameter("actionNames"));
     String environmentNames = CharacterEncoder.getSafeText(request.getParameter("environmentNames"));
+    String multipleRequest = CharacterEncoder.getSafeText(request.getParameter("multipleRequest"));
+    String returnPolicyList = CharacterEncoder.getSafeText(request.getParameter("returnPolicyList"));
 
     if (resourceNames != null  && resourceNames.trim().length() > 0){
         RowDTO rowDTO = new RowDTO();
@@ -50,6 +52,11 @@
         rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
         rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:resource:resource-id");
         rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:resource");
+        String resourceNamesInclude = CharacterEncoder.getSafeText(request.getParameter("resourceNamesInclude"));
+        if(resourceNamesInclude != null){
+            rowDTO.setNotCompleted(Boolean.parseBoolean(resourceNamesInclude));
+            session.setAttribute("resourceNamesInclude",resourceNamesInclude);
+        }
         rowDTOs.add(rowDTO);
         session.setAttribute("resourceNames",resourceNames);
     }
@@ -59,6 +66,11 @@
         rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
         rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:subject:subject-id");
         rowDTO.setCategory("urn:oasis:names:tc:xacml:1.0:subject-category:access-subject");
+        String subjectNamesInclude = CharacterEncoder.getSafeText(request.getParameter("subjectNamesInclude"));
+        if(subjectNamesInclude != null){
+            rowDTO.setNotCompleted(Boolean.parseBoolean(subjectNamesInclude));
+            session.setAttribute("subjectNamesInclude",subjectNamesInclude);
+        }
         rowDTOs.add(rowDTO);
         session.setAttribute("subjectNames",subjectNames);
     }
@@ -68,6 +80,11 @@
         rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
         rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:action:action-id");
         rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:action");
+        String actionNamesInclude = CharacterEncoder.getSafeText(request.getParameter("actionNamesInclude"));
+        if(actionNamesInclude != null){
+            rowDTO.setNotCompleted(Boolean.parseBoolean(actionNamesInclude));
+            session.setAttribute("actionNamesInclude",actionNamesInclude);
+        }
         rowDTOs.add(rowDTO);
         session.setAttribute("actionNames",actionNames);
     }
@@ -78,11 +95,24 @@
         rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:environment:environment-id");
         rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:environment");
         rowDTOs.add(rowDTO);
+        String environmentNamesInclude = CharacterEncoder.getSafeText(request.getParameter("environmentNamesInclude"));
+        if(environmentNamesInclude != null){
+            rowDTO.setNotCompleted(Boolean.parseBoolean(environmentNamesInclude));
+            session.setAttribute("actionNamesInclude",environmentNamesInclude);
+        }
         session.setAttribute("environmentNames", environmentNames);
     }
 
-    RequestElementDTO requestElementDTO = new RequestElementDTO();
-    requestElementDTO.setRowDTOs(rowDTOs);
+    RequestDTO requestDTO = new RequestDTO();
+    if(multipleRequest != null){
+        requestDTO.setMultipleRequest(Boolean.parseBoolean(multipleRequest));
+        session.setAttribute("multipleRequest", multipleRequest);
+    }
+    if(returnPolicyList != null){
+        requestDTO.setReturnPolicyIdList(Boolean.parseBoolean(returnPolicyList));
+        session.setAttribute("returnPolicyList", returnPolicyList);
+    }
+    requestDTO.setRowDTOs(rowDTOs);
 
     EntitlementPolicyCreator entitlementPolicyCreator = new EntitlementPolicyCreator();
 
@@ -91,15 +121,20 @@
                                 new EntitlementAdminServiceClient(cookie, serverURL, configContext);
     	EntitlementServiceClient client = new EntitlementServiceClient(cookie, serverURL, configContext);
         if(requestString == null || requestString.trim().length() < 1){
-            String createdRequest = entitlementPolicyCreator.createBasicRequest(requestElementDTO);
+            String createdRequest = entitlementPolicyCreator.createBasicRequest(requestDTO);
             if(createdRequest != null && createdRequest.trim().length() > 0){
                 requestString = createdRequest.trim().replaceAll("><", ">\n<");
             }
         }
         if(evaluatedWithPDP){
             resp = client.getDecision(requestString);
-        } else {
-            resp = adminClient.getDecision(requestString);
+        } else { 
+            String policyId = (String) session.getAttribute("policyId");
+            if(policyId != null){
+                resp = adminClient.getDecision(requestString, new String[]{policyId});
+            } else {
+                resp = adminClient.getDecision(requestString);
+            }
         }
 
         String responseValue = ClientUtil.getStatus(resp);
@@ -129,7 +164,7 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.RequestElementDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.RequestDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.util.ClientUtil" %>
 <script

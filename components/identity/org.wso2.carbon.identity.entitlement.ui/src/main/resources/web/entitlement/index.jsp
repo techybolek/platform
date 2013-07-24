@@ -32,6 +32,7 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.EntitlementFinderDataHolder" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.common.EntitlementConstants" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
@@ -45,6 +46,7 @@
     session.removeAttribute("publishAllPolicies");
     session.removeAttribute("selectedPolicies");
     session.removeAttribute("subscriberIds");
+    session.removeAttribute("policyId");
 
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -244,8 +246,17 @@
         });                
     }
 
-      function publishPolicy(policy) {
+    function publishPolicy(policy) {
         location.href = "start-publish.jsp?policyId=" + policy;
+    }
+
+    function publishPolicyToPDP(policy) {
+        location.href = "start-publish.jsp?toPDP=true&policyId=" + policy;
+    }
+
+
+    function tryPolicy(policy) {
+        location.href = "create-evaluation-request.jsp?policyId=" + policy;
     }
 
     function selectAllInThisPage(isSelected) {
@@ -576,7 +587,7 @@
                     </nobr>
                 </td>
                 
-                <td width="40%">
+                <td width="50%">
                     <a title="<fmt:message key='edit.policy'/>"
                     <% if(edit){%> onclick="edit('<%=policies[i].getPolicyId()%>');return false;" <%}%>
                     href="#" style="background-image: url(images/edit.gif);" class="icon-link">
@@ -592,14 +603,18 @@
                     href="#" style="background-image: url(images/enable.gif);" class="icon-link">
                     <fmt:message key='enable.policy'/></a>
                     <%} %>
-                    <a title="<fmt:message key='publish'/>"   id="publish"
-                       onclick="publishPolicy('<%=policies[i].getPolicyId()%>');return false;"
+                    <a title="<fmt:message key='publish.to.pdp'/>"   id="publish"
+                       onclick="publishPolicyToPDP('<%=policies[i].getPolicyId()%>');return false;"
                        href="#" style="background-image: url(images/publish.gif);" class="icon-link">
-                        <fmt:message key='publish'/></a>
+                        <fmt:message key='publish.to.pdp'/></a>
+                    <a title="<fmt:message key='try.this'/>"
+                       onclick="tryPolicy('<%=policies[i].getPolicyId()%>');return false;"
+                       href="#" style="background-image: url(images/evaluate.png);" class="icon-link">
+                        <fmt:message key='try.this'/></a>
                     <a title="<fmt:message key='view'/>"
                        onclick="viewStatus('<%=policies[i].getPolicyId()%>');return false;"
                        href="#" style="background-image: url(images/view.png);" class="icon-link">
-                        <fmt:message key='view'/></a>
+                        <fmt:message key='view.status'/></a>
                 </td>
             </tr>
             <%} }

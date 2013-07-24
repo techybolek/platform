@@ -64,7 +64,7 @@
         EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                 serverURL, configContext);
         PaginatedStatusHolder holder = client.getStatusData(EntitlementConstants.Status.ABOUT_POLICY,
-                            "*", policyId, statusSearchString, pageNumberInt);
+                            policyId,  "*", statusSearchString, pageNumberInt);
         statusHolders = holder.getStatusHolders();
         numberOfPages = holder.getNumberOfPages();
     } catch (Exception e) {
@@ -89,9 +89,11 @@
 </script>
 
 <fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
+<div id="middle">
+    <h2><fmt:message key="policy.status"/></h2>
 <div id="workArea">
     <form action="show-policy-status.jsp" name="searchForm" method="post">
-        <table class="styledLeft" style="border:0;
+        <table style="border:0;
                                                 !important margin-top:10px;margin-bottom:10px;">
             <tr>
                 <td>
@@ -117,8 +119,6 @@
             </tr>
         </table>
     </form>
-
-
     <table  class="styledLeft"  style="width: 100%;margin-top:10px;">
         <thead>
         <tr>
@@ -138,58 +138,13 @@
         %>
         <tr>
             <td><%=dto.getTimeInstance()%></td>
-            <%--<%--%>
-                <%--if(dto.getVersion() != null){--%>
-            <%--%>--%>
-            <%--<td><%=dto.getVersion()%></td>--%>
-            <%--<%--%>
-                <%--}--%>
-            <%--%>--%>
-            <%
-                if(dto.getType() != null){
-            %>
-            <td><%=dto.getType()%></td>
-            <%
-                }
-            %>
-            <%
-                if(dto.getUser() != null){
-            %>
-            <td><%=dto.getUser()%></td>
-            <%
-                }
-            %>
-            <%
-                if(dto.getTarget() != null) {
-            %>
-            <td><%=dto.getTarget()%></td>
-            <%
-                }
-            %>
-            <%
-                if(dto.getTargetAction() != null) {
-            %>
-            <td><%=dto.getTargetAction()%></td>
-            <%
-                }
-            %>
-            <%
-                if(dto.getKey() != null){
-            %>
-            <td><%=dto.getKey()%></td>
-            <%
-                }
-            %>
-            <td><%if(dto.getSuccess()){%>Succeed<%} else {%> Failed <%} %></td>
-            <td>
-                <%
-                    if(dto.getMessage() != null){
-                %>
-                <%=dto.getMessage()%>
-                <%
-                    }
-                %>
-            </td>
+            <td><% if(dto.getType() != null){%> <%=dto.getType()%><%}%></td>
+            <td><% if(dto.getUser() != null){%> <%=dto.getUser()%><%}%></td>
+            <td><% if(dto.getTarget() != null){%> <%=dto.getTarget()%><%}%></td>
+            <td><% if(dto.getTargetAction() != null){%> <%=dto.getTargetAction()%><%}%></td>
+            <td><% if(dto.getSuccess()){%> <fmt:message key="status.success"/> <%}
+                                            else {%> <fmt:message key="status.fail"/> <%} %></td>
+            <td><% if(dto.getMessage() != null){%> <%=dto.getMessage()%><%}%></td>
         </tr>
         <%
                 }
@@ -212,5 +167,6 @@
 <div class="buttonRow">
     <a onclick="doCancel()" class="icon-link" style="background-image:none;">
         <fmt:message key="back.to.subscribers"/></a><div style="clear:both"></div>
+</div>
 </div>
 </fmt:bundle>

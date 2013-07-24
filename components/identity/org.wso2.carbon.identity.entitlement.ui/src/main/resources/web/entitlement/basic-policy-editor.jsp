@@ -1310,7 +1310,7 @@
     </tr>
 
     <tr>
-    <td>
+    <td colspan="2">
         <table id="dataTable" style="width: 100%;margin-top:10px;">
             <thead>
             <tr>
@@ -1371,12 +1371,6 @@
             %>
         </table>
     </td>
-    </tr>
-
-    <tr>
-        <td colspan="2">
-
-        </td>
     </tr>
     <tr>
         <td class="buttonRow" colspan="2">

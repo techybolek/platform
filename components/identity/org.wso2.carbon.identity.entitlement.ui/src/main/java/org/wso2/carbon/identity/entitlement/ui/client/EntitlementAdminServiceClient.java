@@ -106,6 +106,26 @@ public class EntitlementAdminServiceClient {
         return null;
     }
 
+    /**
+     * Evaluate XACML request with PDP
+     *
+     * @param policies
+     * @param request  XACML request as String
+     * @return XACML response as String
+     * @throws AxisFault if fails
+     */
+    public String getDecision(String request, String[] policies) throws AxisFault {
+        try {
+            if(request != null){
+                request = request.trim().replaceAll("&lt;", "<"); //TODO should be properly fixed
+                request = request.trim().replaceAll("&gt;", ">");
+            }
+            return stub.doTestRequestForGivenPolicies(request, policies);
+        } catch (Exception e) {
+            handleException("Error occurred while test policy evaluation", e);
+        }
+        return null;
+    }    
     
     public PDPDataHolder getPDPData() throws AxisFault {
 

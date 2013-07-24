@@ -36,7 +36,6 @@
     String updateRule = request.getParameter("updateRule");
     String nextPage = request.getParameter("nextPage");
     String returnPage = request.getParameter("returnPage");
-    System.out.println("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL"   + ruleElementOrder);
     // rules
     String ruleId = request.getParameter("ruleId");
     String ruleEffect = request.getParameter("ruleEffect");

@@ -24,12 +24,15 @@
     String forwardTo = null;
     String ruleId = CharacterEncoder.getSafeText(request.getParameter("ruleId"));
     String returnPage = CharacterEncoder.getSafeText(request.getParameter("returnPage"));
-    if(ruleId != null && ruleId.trim().length() > 0){
-        entitlementPolicyBean.removeRuleDTO(ruleId);
-    }
     if(returnPage != null && returnPage.trim().length() > 0){
+        if(ruleId != null && ruleId.trim().length() > 0){
+            entitlementPolicyBean.removeBasicRuleElement(ruleId);
+        }
         forwardTo = "basic-policy-editor.jsp";
     } else {
+        if(ruleId != null && ruleId.trim().length() > 0){
+            entitlementPolicyBean.removeRuleDTO(ruleId);
+        }
         forwardTo = "policy-editor.jsp";
     }
 %>

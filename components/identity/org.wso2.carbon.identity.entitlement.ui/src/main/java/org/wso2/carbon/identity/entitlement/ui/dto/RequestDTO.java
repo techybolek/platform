@@ -23,7 +23,7 @@ import java.util.List;
 /**
  *
  */
-public class RequestElementDTO {
+public class RequestDTO {
 
     private boolean multipleRequest;
 

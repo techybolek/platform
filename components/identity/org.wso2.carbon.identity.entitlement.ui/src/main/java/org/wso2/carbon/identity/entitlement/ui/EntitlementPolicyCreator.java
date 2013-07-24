@@ -25,6 +25,7 @@ import org.wso2.balana.utils.policy.PolicyBuilder;
 import org.wso2.balana.utils.policy.dto.*;
 import org.wso2.carbon.identity.entitlement.common.PolicyEditorException;
 import org.wso2.carbon.identity.entitlement.ui.dto.*;
+import org.wso2.carbon.identity.entitlement.ui.util.PolicyCreatorUtil;
 import org.wso2.carbon.identity.entitlement.ui.util.PolicyEditorUtil;
 
 import java.lang.*;
@@ -149,21 +150,19 @@ public class EntitlementPolicyCreator {
     /**
      * Create basic XACML request
      *
-     * @param requestElementDTO  request element
+     * @param requestDTO  request element
      * @return String object of the XACML request
      * @throws EntitlementPolicyCreationException  throws
      */
-//    public String createBasicRequest(RequestElementDTO requestElementDTO)
-//            throws EntitlementPolicyCreationException {
-//        try {
-//            Document doc = createNewDocument();
-//            if(doc != null) {
-//                doc.appendChild(PolicyCreatorUtil.createBasicRequestElement(requestElementDTO, doc));
-//                return PolicyCreatorUtil.getStringFromDocument(doc);
-//            }
-//        } catch (EntitlementPolicyCreationException e) {
-//            throw new EntitlementPolicyCreationException("Error While Creating XACML Request", e);
-//        }
-//        return null;
-//    }
+    public String createBasicRequest(RequestDTO requestDTO)
+            throws EntitlementPolicyCreationException, PolicyEditorException {
+        try {
+
+            RequestElementDTO requestElementDTO = PolicyCreatorUtil.createRequestElementDTO(requestDTO);
+            return PolicyBuilder.getInstance().buildRequest(requestElementDTO);
+        } catch (PolicyBuilderException e) {
+            throw new PolicyEditorException("Error while building XACML Request");
+        }
+
+    }
 }

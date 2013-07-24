@@ -49,7 +49,7 @@ public class PolicyEditorConstants {
 
     public static final String  ISSUER = "Issuer";
 
-    public static final String  SOA_CATEGORY_USER = "User";
+    public static final String  SOA_CATEGORY_USER = "Subject";
 
     public static final String  SOA_CATEGORY_SUBJECT = "Subject";
 
