@@ -22,13 +22,10 @@ import org.apache.axis2.AxisFault;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
-import org.wso2.carbon.identity.entitlement.stub.EntitlementPolicyAdminServiceIdentityException;
+import org.wso2.carbon.identity.entitlement.stub.EntitlementPolicyAdminServiceEntitlementException;
 import org.wso2.carbon.identity.entitlement.stub.EntitlementPolicyAdminServiceStub;
 import org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO;
-import org.wso2.carbon.statistics.stub.types.axis2.context.ConfigurationContext;
-import org.wso2.carbon.ui.util.CharacterEncoder;
 import org.xml.sax.SAXException;
 
 import javax.activation.DataHandler;
@@ -36,13 +33,11 @@ import javax.activation.FileDataSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.rmi.RemoteException;
 
 public class EntitlementPolicyServiceClient {
     private static final Log log = LogFactory.getLog(EntitlementPolicyServiceClient.class);
@@ -66,8 +61,9 @@ public class EntitlementPolicyServiceClient {
     }
 
     public void addPolicies(File policyFile)
-            throws IOException, EntitlementPolicyAdminServiceIdentityException,
-                   ParserConfigurationException, TransformerException, SAXException {
+            throws IOException,
+                   ParserConfigurationException, TransformerException, SAXException,
+                   EntitlementPolicyAdminServiceEntitlementException {
 
         DataHandler policydh =
                 new DataHandler(new FileDataSource(policyFile));
@@ -80,7 +76,7 @@ public class EntitlementPolicyServiceClient {
     }
 
     public void removePolicy(String policyId)
-            throws IOException, EntitlementPolicyAdminServiceIdentityException {
+            throws IOException, EntitlementPolicyAdminServiceEntitlementException {
         entitlementPolicyAdminServiceStub.removePolicy(policyId);
     }
 
