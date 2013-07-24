@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.identity.oauth.util;
 
-import java.util.List;
-
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.wso2.carbon.identity.base.IdentityException;

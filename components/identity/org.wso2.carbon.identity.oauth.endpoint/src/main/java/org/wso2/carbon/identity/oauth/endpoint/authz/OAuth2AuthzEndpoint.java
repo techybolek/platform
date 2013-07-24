@@ -17,19 +17,6 @@
  */
 package org.wso2.carbon.identity.oauth.endpoint.authz;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-
 import org.apache.amber.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
@@ -52,6 +39,15 @@ import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.util.CharacterEncoder;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 @Path("/authorize")
 public class OAuth2AuthzEndpoint {
 
@@ -60,7 +56,7 @@ public class OAuth2AuthzEndpoint {
     @GET
     @Path("/")
     @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
+    @Produces("text/html")
     public Response authorize(@Context HttpServletRequest request, MultivaluedMap<String, String> paramMap) throws URISyntaxException {
 
 
@@ -102,6 +98,14 @@ public class OAuth2AuthzEndpoint {
 			               .location(new URI(EndpointUtil.getErrorPageURL(request, oauth2Params, OAuth2ErrorCodes.INVALID_REQUEST,
 			                                                              e.getMessage()))).build();
 		}
+    }
+
+    @POST
+    @Path("/")
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces("text/html")
+    public Response authorizePost(@Context HttpServletRequest request, MultivaluedMap<String, String> paramMap) throws URISyntaxException {
+        return authorize(request, paramMap);
     }
 
 	/**
