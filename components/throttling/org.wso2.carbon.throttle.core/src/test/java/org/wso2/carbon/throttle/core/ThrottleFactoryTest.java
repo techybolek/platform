@@ -16,7 +16,7 @@
 *  specific language governing permissions and limitations
 *  under the License.
 */
-package org.wso2.throttle;
+package org.wso2.carbon.throttle.core;
 
 import junit.framework.TestCase;
 import org.apache.axiom.om.OMElement;

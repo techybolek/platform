@@ -15,11 +15,12 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.throttle;
+package org.wso2.carbon.throttle.module;
 
-import org.wso2.throttle.module.handler.ThrottleHandler;
 
-public class TestThrottleHandler extends ThrottleHandler{
+import org.wso2.carbon.throttle.module.handler.ThrottleHandler;
+
+public class TestThrottleHandler extends ThrottleHandler {
     @Override
     protected int getThrottleType() {
         return 0;
