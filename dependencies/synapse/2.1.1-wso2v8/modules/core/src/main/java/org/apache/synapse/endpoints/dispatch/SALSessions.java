@@ -631,27 +631,9 @@ public class SALSessions {
                     + currentMember.getPort());
         }
 
-        long expireTimeWindow = -1;
-        List<Endpoint> endpoints = (List<Endpoint>)synCtx.getProperty(
-                SynapseConstants.PROP_SAL_ENDPOINT_ENDPOINT_LIST);
-
-        assert endpoints != null;
-        for (Endpoint endpoint : endpoints) {
-            if (endpoint instanceof DynamicLoadbalanceEndpoint) {
-                long sessionsTimeout = ((DynamicLoadbalanceEndpoint) endpoint).getSessionTimeout();
-                if (expireTimeWindow == -1) {
-                    expireTimeWindow = sessionsTimeout;
-                } else if (expireTimeWindow > sessionsTimeout) {
-                    expireTimeWindow = sessionsTimeout;
-                }
-            }
-        }
-
-        if (expireTimeWindow == -1) {
-            expireTimeWindow = synCtx.getConfiguration().getProperty(
+        long expireTimeWindow = synCtx.getConfiguration().getProperty(
                     SynapseConstants.PROP_SAL_ENDPOINT_DEFAULT_SESSION_TIMEOUT,
                     SynapseConstants.SAL_ENDPOINTS_DEFAULT_SESSION_TIMEOUT);
-        }
 
         if (log.isDebugEnabled()) {
             log.debug("For session with id " + id +
@@ -660,14 +642,7 @@ public class SALSessions {
 
         long expiryTime = System.currentTimeMillis() + expireTimeWindow;
 
-        Endpoint rootEndpoint = endpoints.get(0);
-
-        SessionInformation information = new SessionInformation(id,
+        return new SessionInformation(id,
                 currentMember, expiryTime, expireTimeWindow);
-
-        if (isClustered) {
-            information.setRootEndpointName(getEndpointName(rootEndpoint));
-        }
-        return information;
     }
 }
