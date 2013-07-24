@@ -12,6 +12,7 @@
             <class name="org.wso2.jmeter.tests.JmeterLoginTestCase"/>
             <class name="org.wso2.jmeter.tests.JmeterSuperTenantTestCase"/>
             <class name="org.wso2.jmeter.tests.JmeterDomainRestrictionTestCase"/>
+            <class name="org.wso2.jmeter.tests.PassthroughTestCase"/>
         </classes>
     </test>
     <test name="Rest Test" preserve-order="true" verbose="2">
