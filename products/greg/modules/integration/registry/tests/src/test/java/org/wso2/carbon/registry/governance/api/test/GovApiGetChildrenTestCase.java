@@ -108,7 +108,7 @@ public class GovApiGetChildrenTestCase {
     }
 
 
-    @AfterClass(alwaysRun = true, groups = {"wso2.bps", "wso2.bps.bpelactivities"})
+    @AfterClass(alwaysRun = true, groups = {"wso2.greg"})
     public void removeArtifacts() throws GovernanceException {
         serviceManager.removeService(service.getId());
     }
