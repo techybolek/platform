@@ -25,10 +25,9 @@ import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.tribes.TribesClusteringAgent;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.wso2.carbon.core.clustering.hazelcast.HazelcastGroupManagementAgent;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration.ServiceConfiguration;
-import org.wso2.carbon.lb.common.group.mgt.SubDomainAwareGroupManagementAgent;
-import org.wso2.carbon.mediator.autoscale.lbautoscale.context.AppDomainContext;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleUtil;
 
 import junit.framework.Assert;
@@ -45,14 +44,11 @@ public class AppDomainContextsTest extends TestCase {
         super.setUp();
         configCtx = ConfigurationContextFactory.createEmptyConfigurationContext();
         clusteringAgent = new TribesClusteringAgent();
-        clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(
-                    "worker"),
+        clusteringAgent.addGroupManagementAgent(new HazelcastGroupManagementAgent(),
                     "wso2.as1.domain", "worker", -1);
-        clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(
-                "mgt"),
+        clusteringAgent.addGroupManagementAgent(new HazelcastGroupManagementAgent(),
                 "wso2.as1.domain", "mgt", -1);
-        clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(
-                "mgt"),
+        clusteringAgent.addGroupManagementAgent(new HazelcastGroupManagementAgent(),
                 "wso2.as2.domain", "mgt", -1);
         configCtx.getAxisConfiguration().setClusteringAgent(clusteringAgent);
         
@@ -86,8 +82,7 @@ public class AppDomainContextsTest extends TestCase {
         config1.setDomain("wso2.as3.domain");
         config1.setSub_domain("mgt");
         lbConfig.addServiceConfiguration(config1);
-        clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(
-                "mgt"),
+        clusteringAgent.addGroupManagementAgent(new HazelcastGroupManagementAgent(),
                 "wso2.as3.domain", "mgt", -1);
         map = AutoscaleUtil.getAppDomainContexts(configCtx, lbConfig);
         

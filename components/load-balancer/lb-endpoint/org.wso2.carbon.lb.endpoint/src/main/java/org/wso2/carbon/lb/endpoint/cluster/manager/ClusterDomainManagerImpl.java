@@ -25,12 +25,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.wso2.carbon.cartridge.messages.ClusterDomainManager;
 import org.wso2.carbon.cartridge.messages.ClusterDomain;
+import org.wso2.carbon.core.clustering.hazelcast.HazelcastGroupManagementAgent;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration.ServiceConfiguration;
 import org.wso2.carbon.lb.common.conf.util.Constants;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
 import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
-import org.wso2.carbon.lb.common.group.mgt.SubDomainAwareGroupManagementAgent;
 import org.wso2.carbon.lb.endpoint.TenantLoadBalanceMembershipHandler;
 import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
 
@@ -174,7 +174,7 @@ public class ClusterDomainManagerImpl implements ClusterDomainManager {
          */
 
         if (clusteringAgent.getGroupManagementAgent(domain, subDomain) == null) {
-            clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(subDomain),
+            clusteringAgent.addGroupManagementAgent(new HazelcastGroupManagementAgent(),
                                                     domain, subDomain,-1);
 
             if (log.isDebugEnabled()) {

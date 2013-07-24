@@ -31,6 +31,7 @@ import org.apache.synapse.endpoints.dispatch.SALSessions;
 import org.apache.synapse.endpoints.dispatch.SessionInformation;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.core.clustering.hazelcast.HazelcastGroupManagementAgent;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
 import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
@@ -134,7 +135,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                                     throw new TenantAwareLoadBalanceEndpointException(msg, e);
                                 }
                             } else {
-                                groupManagementAgent = new SubDomainAwareGroupManagementAgent(subDomain);
+                                groupManagementAgent = new HazelcastGroupManagementAgent();
                             }
                             clusteringAgent.addGroupManagementAgent(groupManagementAgent,
                                                                     domain, subDomain,tenantCtxt.getGroupMgtPort());
