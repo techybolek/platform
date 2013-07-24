@@ -23,6 +23,7 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
+<%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
@@ -40,7 +41,8 @@
     int defaultProperties = Integer.parseInt(CharacterEncoder.getSafeText(request.getParameter("defaultProperties")).replaceAll("[\\D]", ""));    //number of default properties
 
     UserStoreConfigAdminServiceClient userStoreConfigAdminServiceClient = null;
-    try{if (session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE) != null) {
+    try{
+    	if (session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE) != null) {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext =
@@ -90,6 +92,10 @@
             userStoreDTO.setDisabled(true);
             userStoreDTO.setProperties(propertyList.toArray(new PropertyDTO[propertyList.size()]));
             userStoreConfigAdminServiceClient.saveConfigurationToFile(userStoreDTO);
+
+            // Session need to be update according to new user store info 
+            session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
+            
         String message = resourceBundle.getString("successful.update");
         CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
     } catch (Exception e) {
