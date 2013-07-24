@@ -250,6 +250,12 @@
             </includes>
         </dependencySet>
         <dependencySet>
+            <outputDirectory>wso2am-${pom.version}/repository/components/lib</outputDirectory>
+            <includes>
+                <include>bouncycastle:bcprov-jdk15:jar</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
             <outputDirectory>wso2am-${pom.version}/lib/core/WEB-INF/lib/</outputDirectory>
             <includes><include>org.apache.qpid.wso2:qpid-client:jar</include>
             </includes>
