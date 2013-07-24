@@ -68,6 +68,11 @@ public class WebApplication {
         setWebappFile(webappFile);
         setLastModifiedTime(webappFile.lastModified());
         
+        boolean isFaulty = checkFaultyWebappParam(context);
+        if (isFaulty) {
+            return;
+        }
+        
         String serviceListPathParamName = "service-list-path";                                                                                    
         String serviceListPathParam = context.getServletContext().getInitParameter(serviceListPathParamName);
         if ("".equals(serviceListPathParam) || serviceListPathParam == null) {
@@ -83,6 +88,15 @@ public class WebApplication {
             serviceListPathParam = "/services";
         }
         setServiceListPath(serviceListPathParam);
+    }
+
+    private boolean checkFaultyWebappParam(Context context) {
+        String param = context.findParameter(WebappsConstants.FAULTY_WEBAPP);
+        if(param != null && !"".equals(param)) {
+            return Boolean.parseBoolean(param);
+        }
+
+        return false;
     }
 
     /*public WebApplication(File webappFile) {

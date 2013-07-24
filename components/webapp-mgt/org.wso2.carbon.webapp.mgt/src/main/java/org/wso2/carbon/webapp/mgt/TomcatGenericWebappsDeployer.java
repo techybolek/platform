@@ -256,6 +256,7 @@ public class TomcatGenericWebappsDeployer {
             //catching a Throwable here to avoid web-apps crashing the server during startup
             StandardContext context = new StandardContext();
             context.setName(webappFile.getName());
+            context.addParameter(WebappsConstants.FAULTY_WEBAPP, "true");
             WebApplication webapp = new WebApplication(this, context, webappFile);
             String msg = "Error while deploying webapp: " + webapp;
             log.error(msg, e);

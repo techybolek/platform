@@ -191,14 +191,17 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
             ArtifactMetadataException, AxisFault {
         String bamStatsEnabled = webApplication.findParameter(WebappsConstants.ENABLE_BAM_STATISTICS);
         if (bamStatsEnabled == null) {
-                webApplication.addParameter(WebappsConstants.ENABLE_BAM_STATISTICS, Boolean.FALSE.toString());
+            webApplication.addParameter(WebappsConstants.ENABLE_BAM_STATISTICS, Boolean.FALSE.toString());
+            bamStatsEnabled = "false";
         }
-        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
 
+        String webappName = webApplication.getWebappFile().getName();
+        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
         ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
                 getMetadataManager();
-        manager.setParameter(webApplication.getContextName(), type,
-                WebappsConstants.ENABLE_BAM_STATISTICS, Boolean.FALSE.toString());
+
+        manager.setParameter(webApplication.getWebappFile().getName(), type,
+                WebappsConstants.ENABLE_BAM_STATISTICS, bamStatsEnabled, false);
 
     }
 

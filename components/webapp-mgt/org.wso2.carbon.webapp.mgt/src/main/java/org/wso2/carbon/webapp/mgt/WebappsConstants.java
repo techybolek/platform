@@ -44,6 +44,8 @@ public final class WebappsConstants {
     public static final String WEBAPP_METADATA_DIR = "artifactMetafiles" + File.separator + "webapp";
 
     public static final String ENABLE_BAM_STATISTICS = "enable.statistics";
+    public static final String FAULTY_WEBAPP = "faulty.webapp";
+
 
     /**
      * This is to filter out custom webapp types. If a custom webapp deployer is added, it should

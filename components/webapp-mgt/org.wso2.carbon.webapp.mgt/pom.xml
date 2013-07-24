@@ -115,6 +115,7 @@
                             org.wso2.carbon.webapp.mgt.sync
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
+                        <Axis2Deployer>WebappMetadataDeployer</Axis2Deployer>
                         <!--<Require-CarbonUIComponents>
                             ${project.artifactId}.ui-${project.version}
                         </Require-CarbonUIComponents>-->
