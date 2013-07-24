@@ -16,22 +16,35 @@
 
 package org.wso2.carbon.user.mgt;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.catalina.startup.UserConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.core.init.CarbonServerManager;
-import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.user.api.*;
-import org.wso2.carbon.user.core.*;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
+import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.AuthorizationManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -41,18 +54,16 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.user.mgt.bulkimport.BulkImportConfig;
 import org.wso2.carbon.user.mgt.bulkimport.CSVUserBulkImport;
 import org.wso2.carbon.user.mgt.bulkimport.ExcelUserBulkImport;
-import org.wso2.carbon.user.mgt.common.*;
+import org.wso2.carbon.user.mgt.common.ClaimValue;
+import org.wso2.carbon.user.mgt.common.FlaggedName;
+import org.wso2.carbon.user.mgt.common.UIPermissionNode;
+import org.wso2.carbon.user.mgt.common.UserAdminException;
+import org.wso2.carbon.user.mgt.common.UserRealmInfo;
+import org.wso2.carbon.user.mgt.common.UserStoreInfo;
 import org.wso2.carbon.user.mgt.internal.UserMgtDSComponent;
 import org.wso2.carbon.user.mgt.permission.ManagementPermissionUtil;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.io.InputStream;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class UserRealmProxy {
 
@@ -211,6 +222,113 @@ public class UserRealmProxy {
         return flaggedNames;
     }
 
+	public FlaggedName[] getAllSharedRoleNames(String filter, int maxLimit)
+	                                                                       throws UserAdminException {
+		try {
+
+			UserStoreManager userStoreMan = realm.getUserStoreManager();
+			// get all roles without hybrid roles
+			String[] externalRoles;
+			if (userStoreMan instanceof AbstractUserStoreManager) {
+				externalRoles =
+				                ((AbstractUserStoreManager) userStoreMan).getSharedRoleNames(filter,
+				                                                                             maxLimit);
+			} else {
+				throw new UserAdminException(
+				                             "Initialized User Store Magaer is not capable of getting the shared roles");
+			}
+
+			List<FlaggedName> flaggedNames = new ArrayList<FlaggedName>();
+			Map<String, Integer> userCount = new HashMap<String, Integer>();
+
+			for (String externalRole : externalRoles) {
+				FlaggedName fName = new FlaggedName();
+				mapEntityName(externalRole, fName, userStoreMan);
+				fName.setRoleType(UserMgtConstants.EXTERNAL_ROLE);
+
+				// setting read only or writable
+				int index = externalRole != null ? externalRole.indexOf("/") : -1;
+				boolean domainProvided = index > 0;
+				String domain = domainProvided ? externalRole.substring(0, index) : null;
+				UserStoreManager secManager =
+				                              realm.getUserStoreManager()
+				                                   .getSecondaryUserStoreManager(domain);
+
+				if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
+					if (secManager != null &&
+					    (secManager.isReadOnly() || (secManager.getRealmConfiguration()
+					                                           .getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null && secManager.getRealmConfiguration()
+					                                                                                                                          .getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES)
+					                                                                                                                          .equals("false")))) {
+						fName.setEditable(false);
+					} else {
+						fName.setEditable(true);
+					}
+				}
+				if (domain != null) {
+					if (userCount.containsKey(domain)) {
+						userCount.put(domain, userCount.get(domain) + 1);
+					} else {
+						userCount.put(domain, 1);
+					}
+				} else {
+					if (userCount.containsKey(null)) {
+						userCount.put(null, userCount.get(null) + 1);
+					} else {
+						userCount.put(null, 1);
+					}
+				}
+				flaggedNames.add(fName);
+			}
+
+			String exceededDomains = "";
+			boolean isPrimaryExceeding = false;
+			Map<String, Integer> maxUserListCount =
+			                                        ((AbstractUserStoreManager) realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_ROLE_LIST);
+			String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
+			for (int i = 0; i < domains.length; i++) {
+				if (domains[i] == null) {
+					if (userCount.get(null) == maxUserListCount.get(null)) {
+						isPrimaryExceeding = true;
+					}
+					continue;
+				}
+				if (userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())) {
+					exceededDomains += domains[i];
+					if (i != domains.length - 1) {
+						exceededDomains += ":";
+					}
+				}
+			}
+			FlaggedName[] roleNames =
+			                          flaggedNames.toArray(new FlaggedName[flaggedNames.size() + 1]);
+			Arrays.sort(roleNames, new Comparator<FlaggedName>() {
+				public int compare(FlaggedName o1, FlaggedName o2) {
+					if (o1 == null || o2 == null) {
+						return 0;
+					}
+					return o1.getItemName().toLowerCase().compareTo(o2.getItemName().toLowerCase());
+				}
+			});
+			FlaggedName flaggedName = new FlaggedName();
+			if (isPrimaryExceeding) {
+				flaggedName.setItemName("true");
+			} else {
+				flaggedName.setItemName("false");
+			}
+			flaggedName.setItemDisplayName(exceededDomains);
+			roleNames[roleNames.length - 1] = flaggedName;
+			return roleNames;
+
+		} catch (UserStoreException e) {
+			// previously logged so logging not needed
+			throw new UserAdminException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new UserAdminException(e.getMessage(), e);
+		}
+	} 
+    
     public FlaggedName[] getAllRolesNames(String filter, int maxLimit) throws UserAdminException {
         try {
 
@@ -982,7 +1100,7 @@ public class UserRealmProxy {
             }
 
             UserStoreManager admin = realm.getUserStoreManager();
-            String[] userRoles = admin.getRoleListOfUser(userName);
+            String[] userRoles = ((AbstractUserStoreManager)admin).getRoleListOfUser(userName);
             Map<String,Integer> userCount = new HashMap<String,Integer>();
 
             if(limit == 0){
@@ -1744,6 +1862,10 @@ public class UserRealmProxy {
     public void setRoleUIPermission(String roleName, String[] rawResources)
             throws UserAdminException {
         try {
+			if (((AbstractUserStoreManager) realm.getUserStoreManager()).isOthersSharedRole(roleName)) {
+				throw new UserAdminException(
+				                             "Logged in user is not authorized to assign permissions to a role belong to another tenant");
+			}
             if (realm.getRealmConfiguration().getAdminRoleName().equals(roleName)) {
                 String msg = "UI permissions of Admin is not allowed to change";
                 log.error(msg);
@@ -1933,11 +2055,12 @@ public class UserRealmProxy {
 			fName.setItemName(nameAndDn[0]);
 			fName.setDn(nameAndDn[1]);
 
-			fName.setShared(((AbstractUserStoreManager)userStoreManager).  // TODO remove abstract user store
-                    isOthersSharedRole(fName.getItemName(), fName.getDn()));
+			// TODO remove abstract user store
+			fName.setShared(((AbstractUserStoreManager) userStoreManager).isOthersSharedRole(entityName));
 			if (fName.isShared()) {
 				fName.setItemDisplayName(UserCoreConstants.SHARED_DOMAIN_NAME +
-				                         UserCoreConstants.SHARED_ROLE_TENANT_SEPERATOR + fName.getItemName());
+				                         UserCoreConstants.SHARED_ROLE_TENANT_SEPERATOR +
+				                         fName.getItemName());
 			}
 
 		} else {

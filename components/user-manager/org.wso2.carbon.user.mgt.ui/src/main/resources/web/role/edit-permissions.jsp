@@ -15,6 +15,10 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
+<%@page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants"%>
+<%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page import="org.apache.axis2.context.ConfigurationContext"%>
@@ -87,6 +91,18 @@
         UIPermissionNode rootNode = null;
         String roleName = request.getParameter("roleName");
         try {
+        	
+            String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
+            int roleIndex = Integer.parseInt(rIndex);
+            
+            FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
+            String roleNameWithDn = roleName + UserCoreConstants.DN_COMBINER;
+            if(datas != null && roleIndex < datas.length){
+            	roleNameWithDn += datas[roleIndex].getDn();
+            }
+            
+            roleName = roleNameWithDn;
+
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext =

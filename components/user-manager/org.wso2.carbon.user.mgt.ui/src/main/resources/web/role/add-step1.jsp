@@ -197,6 +197,16 @@ try{
             }
         }
         
+        
+        function changeBasedOnDomain(){
+        	var val = $("select[id='domain']").val();
+        	if(val !== 'PRIMARY'){
+        		$("#sharedRoleTd").hide();
+        	}else{
+        		$("#sharedRoleTd").show();
+        	}
+        }
+        
        
     </script>
    
@@ -246,7 +256,7 @@ try{
                                 %>
                                 <tr>
                                     <td><fmt:message key="select.domain"/></td>
-                                    <td colspan="2"><select id="domain" name="domain">
+                                    <td colspan="2"><select onchange="changeBasedOnDomain()" id="domain" name="domain">
                                         <%
                                             for(String domainName : domainNames) {
                                                 if( selectedDomain.equals(domainName)) {
@@ -270,7 +280,7 @@ try{
                                     <td><fmt:message key="role.name"/><font color="red">*</font>
                                     </td>
                                     <td><input type="text" name="roleName" value=""/></td>
-									<td><c:if test="<%=sharedRoleEnabled%>">
+									<td id="sharedRoleTd"><c:if test="<%=sharedRoleEnabled%>">
 											<input type="checkbox" value="true" name="sharedRole"
 												id="sharedRoleBox" />
 											<label for="sharedRoleBox">&nbsp;<fmt:message

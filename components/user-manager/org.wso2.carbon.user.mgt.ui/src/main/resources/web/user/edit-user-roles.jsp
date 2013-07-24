@@ -78,6 +78,8 @@
     }
     filter = filter.trim();
     session.setAttribute(UserAdminUIConstants.USER_LIST_UNASSIGNED_ROLE_FILTER, filter);
+    
+    // System.out.println(filter);
 
     // check page number
     String pageNumberStr = request.getParameter("pageNumber");
@@ -385,7 +387,8 @@
                                                             ((Map<String, Boolean>) session.getAttribute("checkedRolesMap")).get(name.getItemName()) != null &&
                                                             ((Map<String, Boolean>) session.getAttribute("checkedRolesMap")).get(name.getItemName()) == true){
                                                         doCheck = "checked=\"checked\"";
-                                                    }
+                                                    }                                                    
+                                                    
                                     %>
                                       <tr>
                                           <td>

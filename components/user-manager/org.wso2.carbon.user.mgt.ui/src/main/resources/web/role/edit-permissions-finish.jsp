@@ -15,6 +15,9 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
+<%@page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants"%>
+<%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
 <%@page import="org.apache.axis2.context.ConfigurationContext"%>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIMessage"%>
@@ -32,6 +35,8 @@
 
     String forwardTo = "role-mgt.jsp?ordinal=1";
     String roleName = request.getParameter("roleName");
+    
+
     if(request.getParameter("prevPage")!=null && request.getParameter("prevUser")!=null){
         String prevPage = request.getParameter("prevPage");
         String prevUser = request.getParameter("prevUser");
@@ -42,6 +47,8 @@
             forwardTo = "../user/edit-user-roles.jsp?username="+prevUser + "&pageNumber=" +prevPageNumber ;
         }
     }
+    
+    String roleNameWithoutDN = roleName.split(UserCoreConstants.DN_COMBINER)[0];
 
     try {
         String[] selectedPermissions = request.getParameterValues("selectedPermissions");
@@ -50,7 +57,7 @@
         ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
-        String message = MessageFormat.format(resourceBundle.getString("role.update"), roleName);
+        String message = MessageFormat.format(resourceBundle.getString("role.update"), roleNameWithoutDN);
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
 //        if("external".equals(userType)){
 //            proxy.updateSystemPermissionsOfExternalRole(roleBeanEditPermission.getRoleName(),
@@ -69,7 +76,7 @@
         CarbonUIMessage.sendCarbonUIMessage("Your session has timed out. Please try again.", CarbonUIMessage.ERROR, request);
         //forwardTo = "role-mgt.jsp?ordinal=1";
     } catch (Exception e) {
-	    String message = MessageFormat.format(resourceBundle.getString("role.cannot.update"),CharacterEncoder.getSafeText(roleName), e.getMessage());
+	    String message = MessageFormat.format(resourceBundle.getString("role.cannot.update"),CharacterEncoder.getSafeText(roleNameWithoutDN), e.getMessage());
 	    CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         //forwardTo = "role-mgt.jsp?ordinal=1";
     }

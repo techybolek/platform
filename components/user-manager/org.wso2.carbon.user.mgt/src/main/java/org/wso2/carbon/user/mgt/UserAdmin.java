@@ -86,7 +86,13 @@ public class UserAdmin {
      */
     public FlaggedName[] getAllRolesNames(String filter, int limit) throws UserAdminException {
         return  getUserAdminProxy().getAllRolesNames(filter, limit);
-    }   
+    }  
+    
+    
+    public FlaggedName[] getAllSharedRoleNames(String filter, int limit) throws UserAdminException {
+        return  getUserAdminProxy().getAllRolesNames(filter, limit);
+    }  
+    
 
     /*
      * (non-Javadoc)
