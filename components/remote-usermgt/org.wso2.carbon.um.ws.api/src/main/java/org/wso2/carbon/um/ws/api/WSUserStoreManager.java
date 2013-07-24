@@ -527,7 +527,6 @@ public class WSUserStoreManager implements UserStoreManager {
 	    return isExistingRole(roleName, false);
     }
 
-	@Override
     public boolean isSharedGroupEnabled() {
 	    return false;
     }
