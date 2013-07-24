@@ -26,6 +26,7 @@ import org.wso2.balana.utils.Utils;
 import org.wso2.balana.utils.exception.PolicyBuilderException;
 import org.wso2.balana.utils.policy.dto.BasicPolicyDTO;
 import org.wso2.balana.utils.policy.dto.PolicyElementDTO;
+import org.wso2.balana.utils.policy.dto.RequestElementDTO;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -100,7 +101,32 @@ public class PolicyBuilder {
         }
         return null;
     }
-    
+
+    /**
+     *
+     * @param requestElementDTO
+     * @return
+     * @throws PolicyBuilderException
+     */
+    public String buildRequest(RequestElementDTO requestElementDTO) throws PolicyBuilderException {
+
+        Document doc = null;
+        try {
+            doc = Utils.createNewDocument();
+        } catch (ParserConfigurationException e) {
+            throw new PolicyBuilderException("While creating Document Object", e);
+        }
+        if(doc != null) {
+            doc.appendChild(PolicyUtils.createRequestElement(requestElementDTO, doc));
+            try {
+                return Utils.getStringFromDocument(doc);
+            } catch (TransformerException e) {
+                throw new PolicyBuilderException("Error while converting request element to String", e);
+            }
+        }
+        return null;
+    }
+
     public String[] getFunctions(){
         return new String[0];
     }

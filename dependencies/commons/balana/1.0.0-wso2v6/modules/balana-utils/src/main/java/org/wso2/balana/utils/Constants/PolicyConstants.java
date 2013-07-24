@@ -141,6 +141,16 @@ public class PolicyConstants {
     public static final String ENVIRONMENT_CATEGORY_URI = "urn:oasis:names:tc:xacml:3.0:" +
             "attribute-category:environment";
 
+    public static final class Request {
+
+        public static final String RETURN_POLICY_LIST = "ReturnPolicyIdList";
+
+        public static final String COMBINED_DECISION = "CombinedDecision";
+
+        public static final String REQUEST_ELEMENT = "Request";
+
+        public static final String REQ_RES_CONTEXT_XACML3 = "urn:oasis:names:tc:xacml:3.0:core:schema:wd-17";
+    }
 
     public static final class Functions {
 
@@ -175,8 +185,7 @@ public class PolicyConstants {
         public static final String FUNCTION_EQUAL = "equal";
 
         public static final String FUNCTION_EQUAL_MATCH_REGEXP = "regexp-match";
-        
-        
+
         public static final String[] targetFunctions =
                                         new String[] {FUNCTION_EQUAL, FUNCTION_EQUAL_MATCH_REGEXP};
 

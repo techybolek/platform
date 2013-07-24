@@ -131,6 +131,26 @@ public class PolicyUtils {
     }
 
 
+
+    public static Element createRequestElement(RequestElementDTO requestElementDTO, Document doc)
+            throws PolicyBuilderException {
+
+        Element requestElement = doc.createElement(PolicyConstants.Request.REQUEST_ELEMENT);
+        requestElement.setAttribute("xmlns", PolicyConstants.Request.REQ_RES_CONTEXT_XACML3);
+        requestElement.setAttribute(PolicyConstants.Request.RETURN_POLICY_LIST ,
+                Boolean.toString(requestElementDTO.isReturnPolicyIdList()));
+        requestElement.setAttribute(PolicyConstants.Request.COMBINED_DECISION ,
+                Boolean.toString(requestElementDTO.isCombinedDecision()));
+        
+        List<AttributesElementDTO>  attributesElementDTOs = requestElementDTO.getAttributesElementDTOs();
+        if(attributesElementDTOs != null && attributesElementDTOs.size() > 0){
+            for(AttributesElementDTO dto : attributesElementDTOs){
+                requestElement.appendChild(createAttributesElement(dto,doc));
+            }
+        }
+        return requestElement;
+    }
+
     /**
      * This method creates a match elementof the XACML policy
      * @param matchElementDTO match element data object
