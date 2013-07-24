@@ -79,7 +79,7 @@ public class IdPMgtDAO {
                 trustedIdPDO.setIdPIssuerId(issuer);
                 trustedIdPDO.setIdPUrl(rs.getString(2));
                 trustedIdPDO.setPublicCertThumbPrint(rs.getString(3));
-                if(rs.getByte(4) == 1){
+                if(rs.getString(4).equals("1")){
                     trustedIdPDO.setPrimary(true);
                 } else {
                     trustedIdPDO.setPrimary(false);
@@ -177,9 +177,9 @@ public class IdPMgtDAO {
         Connection dbConnection = null;
 
         String issuerId1 = trustedIdPDO1.getIdPIssuerId();
-        byte isPrimary1 = 0;
+        boolean isPrimary1 = false;
         if(trustedIdPDO1.isPrimary()){
-            isPrimary1 = 1;
+            isPrimary1 = true;
         }
         String trustedIdPUrl1 = trustedIdPDO1.getIdPUrl();
         String thumbPrint1 = trustedIdPDO1.getPublicCertThumbPrint();
@@ -188,9 +188,9 @@ public class IdPMgtDAO {
         String audience1 = IdentityProviderMgtUtil.convertListToString(trustedIdPDO1.getAudience());
 
         String issuerId2 = trustedIdPDO2.getIdPIssuerId();
-        byte isPrimary2 = 0;
+        boolean isPrimary2 = false;
         if(trustedIdPDO2.isPrimary()){
-            isPrimary2 = 1;
+            isPrimary2 =true;
         }
         String trustedIdPUrl2 = trustedIdPDO2.getIdPUrl();
         String thumbPrint2 = trustedIdPDO2.getPublicCertThumbPrint();
@@ -348,9 +348,9 @@ public class IdPMgtDAO {
         prepStmt.setString(3, idpUrl);
         prepStmt.setString(4, thumbPrint);
         if(isPrimary){
-            prepStmt.setByte(5, new Integer(1).byteValue());
+            prepStmt.setString(5, "1");
         } else {
-            prepStmt.setByte(5, new Integer(0).byteValue());
+            prepStmt.setString(5, "0");
         }
         prepStmt.setString(6, audience);
 
@@ -404,14 +404,18 @@ public class IdPMgtDAO {
     }
     
     private void doUpdateIdP(Connection conn, int tenantId, String issuerOld, String issuerNew, String idpUrl,
-                             String thumbPrint, byte isPrimary, String audience) throws SQLException {
+                             String thumbPrint, boolean isPrimary, String audience) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.UPDATE_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
         prepStmt.setString(1, issuerNew);
         prepStmt.setString(2, idpUrl);
         prepStmt.setString(3, thumbPrint);
-        prepStmt.setByte(4, isPrimary);
+        if(isPrimary){
+            prepStmt.setString(4, "1");
+        } else {
+            prepStmt.setString(4, "0");
+        }
         prepStmt.setString(5, audience);
         prepStmt.setInt(6, tenantId);
         prepStmt.setString(7, issuerOld);
