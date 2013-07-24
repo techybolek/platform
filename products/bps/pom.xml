@@ -219,10 +219,10 @@
         <spring.version>2.5.1.wso2v1</spring.version>
         <h2.engine.version>${version.h2.engine}</h2.engine.version>
         <wso2.h2.orbit.version>${h2.engine.version}</wso2.h2.orbit.version>
-        <carbon.core.patch.version>4.1.0</carbon.core.patch.version>
-        <rampart.version>1.6.1-wso2v8</rampart.version>
-        <rampart.mar.version>1.6.1-wso2v8</rampart.mar.version>
-        <rampart.osgi.version>1.6.1.wso2v8</rampart.osgi.version>
+        <!--carbon.core.patch.version>4.1.0</carbon.core.patch.version-->
+        <!--rampart.version>1.6.1-wso2v8</rampart.version-->
+        <!--rampart.mar.version>1.6.1-wso2v8</rampart.mar.version-->
+        <!--rampart.osgi.version>1.6.1.wso2v8</rampart.osgi.version-->
     </properties>
 
     <mailingLists>
