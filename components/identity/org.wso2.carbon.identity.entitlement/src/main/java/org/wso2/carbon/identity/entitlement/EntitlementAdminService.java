@@ -343,14 +343,14 @@ public class EntitlementAdminService extends AbstractAdmin {
      * @throws EntitlementException
      */
     public String doTestRequestForGivenPolicies(String xacmlRequest, String[] policies)
-                                                                        throws EntitlementException {
+                                                                    throws EntitlementException{
         EntitlementEngine engine = EntitlementEngine.getInstance();
-        Iterator iterator = engine.getPapPolicyFinder().getModules().iterator();
-        if(iterator.hasNext()){
-            ((PAPPolicyFinder)iterator.next()).setPolicyIds(Arrays.asList(policies));
-        }
+        PAPPolicyFinder papPolicyFinder = (PAPPolicyFinder)engine.getPapPolicyFinder().
+                                                                    getModules().iterator().next();
+        papPolicyFinder.setPolicyIds(Arrays.asList(policies));
         String response = EntitlementEngine.getInstance().test(xacmlRequest);
-        engine.getPapPolicyFinder().init();
+        papPolicyFinder.initPolicyIds();
+
         return response;
     }
 

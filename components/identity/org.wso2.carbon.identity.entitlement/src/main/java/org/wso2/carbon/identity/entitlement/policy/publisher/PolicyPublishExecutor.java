@@ -131,9 +131,9 @@ public class PolicyPublishExecutor implements Runnable {
                                     ((AbstractPolicyPublisherModule)policyPublisherModule).init(holder);
                                 } catch (Exception e) {
                                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                                            subscriberId, version, subscriberId, action,false, e.getMessage()));
+                                        "More than one Policy", version, subscriberId, action,false, e.getMessage()));
                                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                                            subscriberId, version, subscriberId, action,false, e.getMessage()));
+                                        "More than one Policy", version, subscriberId, action,false, e.getMessage()));
                                     continue;
                                 }
                             }
@@ -145,10 +145,10 @@ public class PolicyPublishExecutor implements Runnable {
 
             if(policyPublisherModule == null){
                 subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                        subscriberId, version, subscriberId, action, false,
+                    "More than one Policy", version, subscriberId, action, false,
                         "No policy publish module is defined for subscriber : " + subscriberId));
                 policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                        subscriberId, version, subscriberId, action, false,
+                    "More than one Policy", version, subscriberId, action, false,
                         "No policy publish module is defined for subscriber : " + subscriberId));
                 continue;
             }
@@ -186,7 +186,7 @@ public class PolicyPublishExecutor implements Runnable {
                             policyId, version, subscriberId, action, false,
                             "Can not found policy under policy id : " + policyId));
                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                            subscriberId, version, subscriberId, action, false,
+                            policyId, version, subscriberId, action, false,
                             "Can not found policy under policy id : " + policyId));
                     continue;
                 }
@@ -197,14 +197,13 @@ public class PolicyPublishExecutor implements Runnable {
                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                             policyId, version, subscriberId, action, false, e.getMessage()));
                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                            subscriberId, version, subscriberId, action, false, e.getMessage()));
+                            policyId, version, subscriberId, action, false, e.getMessage()));
                     continue;
                 }
                 subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                         policyId, version, subscriberId, action));
                 policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                        subscriberId, version, subscriberId, action));
-                policyDTO.addPolicyStatusHolder(policyHolders);
+                        policyId, version, subscriberId, action));
 
                 for(PAPStatusDataHandler module : papStatusDataHandler){
                     try {
@@ -219,7 +218,7 @@ public class PolicyPublishExecutor implements Runnable {
 
             for(PAPStatusDataHandler module : papStatusDataHandler){
                 try {
-                    module.handle(EntitlementConstants.Status.ABOUT_POLICY, subscriberId, subscriberHolders);
+                    module.handle(EntitlementConstants.Status.ABOUT_SUBSCRIBER, subscriberId, subscriberHolders);
                 } catch (EntitlementException e) {
                     // ignore
                     log.error("Error while calling post publishers" , e);

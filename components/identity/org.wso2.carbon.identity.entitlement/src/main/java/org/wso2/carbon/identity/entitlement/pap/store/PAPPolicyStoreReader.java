@@ -65,19 +65,17 @@ public class PAPPolicyStoreReader {
      * @return
      * @throws EntitlementException
      */
-    public synchronized AbstractPolicy readActivePolicy(String policyId, PolicyFinder finder)
+    public synchronized AbstractPolicy readPolicy(String policyId, PolicyFinder finder)
                                                                         throws EntitlementException {
         Resource resource = store.getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
         if(resource != null){
-            if ("true".equals(resource.getProperty(PDPConstants.ACTIVE_POLICY))) {
-                try {
-                    String policy = new String((byte[]) resource.getContent(),  Charset.forName("UTF-8"));
-                    return PolicyReader.getInstance(null).getPolicy(policy);
-                } catch (RegistryException e) {
-                    log.error("Error while parsing entitlement policy", e);
-                    throw new EntitlementException("Error while loading entitlement policy");
-                }
-            }                       
+            try {
+                String policy = new String((byte[]) resource.getContent(),  Charset.forName("UTF-8"));
+                return PolicyReader.getInstance(null).getPolicy(policy);
+            } catch (RegistryException e) {
+                log.error("Error while parsing entitlement policy", e);
+                throw new EntitlementException("Error while loading entitlement policy");
+            }
         }
         return null;
     }

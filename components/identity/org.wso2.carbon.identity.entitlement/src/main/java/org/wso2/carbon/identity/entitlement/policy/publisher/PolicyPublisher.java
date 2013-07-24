@@ -291,7 +291,6 @@ public class PolicyPublisher{
         }
 
         StatusHolder[] statusHolders = holder.getStatusHolders();
-        int num = 0;
         if(statusHolders != null){
             for(StatusHolder statusHolder : statusHolders){
                 if(statusHolder != null){
@@ -303,18 +302,25 @@ public class PolicyPublisher{
                     list.add(Boolean.toString(statusHolder.isSuccess()));
                     if(statusHolder.getMessage() != null){
                         list.add(statusHolder.getMessage());
+                    } else {
+                        list.add("");
                     }
                     if(statusHolder.getTarget() != null){
                         list.add(statusHolder.getTarget());
+                    } else {
+                        list.add("");
                     }
                     if(statusHolder.getTargetAction() != null){
                         list.add(statusHolder.getTargetAction());
+                    } else {
+                        list.add("");
                     }
                     if(statusHolder.getVersion() != null){
                         list.add(statusHolder.getVersion());
+                    } else {
+                        list.add("");
                     }
-                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + num, list);
-                    num ++;
+                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME +  UUID.randomUUID(), list);
                 }
             }
         }

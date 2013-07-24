@@ -17,10 +17,7 @@
  */
 package org.wso2.carbon.identity.entitlement.pap.store;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -364,10 +361,6 @@ public class PAPPolicyStore {
                                      Integer.toString(i));
             }
 
-            if(policy.getPolicyStatusHolders() != null){
-                populateStatusProperties(policy.getPolicyStatusHolders(), resource);
-            }
-
             registry.put(path, resource);
 
             authorizationManager.clearUserAuthorization(userName,
@@ -469,14 +462,27 @@ public class PAPPolicyStore {
         return null;
     }
 
+    public void  persistStatus(String policyId, List<StatusHolder> statusHolders)
+                                                                    throws EntitlementException {
+        Resource resource = getPolicy(policyId, IdentityRegistryResources.ENTITLEMENT);
+        if(resource != null && statusHolders != null && statusHolders.size() > 0){
+            populateStatusProperties(statusHolders.toArray(new StatusHolder[statusHolders.size()]), resource);
+            try {
+                registry.put(IdentityRegistryResources.ENTITLEMENT + policyId, resource);
+            } catch (RegistryException e) {
+                log.error(e);
+                throw new EntitlementException("Error while persisting policy status", e);
+            }
+        }
+        
+    }
+    
     /**
      *
      * @param statusHolders
      * @param resource
      */
     private void populateStatusProperties(StatusHolder[] statusHolders, Resource resource){
-
-        int num = 0;
         if(statusHolders != null){
             for(StatusHolder statusHolder : statusHolders){
                 if(statusHolder != null){
@@ -488,18 +494,25 @@ public class PAPPolicyStore {
                     list.add(Boolean.toString(statusHolder.isSuccess()));
                     if(statusHolder.getMessage() != null){
                         list.add(statusHolder.getMessage());
+                    } else {
+                        list.add("");
                     }
                     if(statusHolder.getTarget() != null){
                         list.add(statusHolder.getTarget());
+                    } else {
+                        list.add("");
                     }
                     if(statusHolder.getTargetAction() != null){
                         list.add(statusHolder.getTargetAction());
+                    } else {
+                        list.add("");
                     }
                     if(statusHolder.getVersion() != null){
                         list.add(statusHolder.getVersion());
+                    } else {
+                        list.add("");
                     }
-                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + num, list);
-                    num ++;
+                    resource.setProperty(StatusHolder.STATUS_HOLDER_NAME + UUID.randomUUID(), list);
                 }
             }
         }

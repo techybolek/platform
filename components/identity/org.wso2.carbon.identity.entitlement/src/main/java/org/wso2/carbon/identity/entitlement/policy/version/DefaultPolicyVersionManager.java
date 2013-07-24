@@ -111,11 +111,17 @@ public class DefaultPolicyVersionManager implements PolicyVersionManager {
                                                             policyDTO.getPolicyId(), collection);
             }
 
+            //new version
+            version = Integer.toString((Integer.parseInt(version)) + 1);
+
             String policyPath = PDPConstants.ENTITLEMENT_POLICY_VERSION +
                     policyDTO.getPolicyId() + RegistryConstants.PATH_SEPARATOR;
-            policyStore.addOrUpdatePolicy(policyDTO,
-                    Integer.toString((Integer.parseInt(version)) + 1), policyPath);
+            policyStore.addOrUpdatePolicy(policyDTO, version, policyPath);
 
+            // set new version
+            collection.setProperty("version", version);
+            registry.put(PDPConstants.ENTITLEMENT_POLICY_VERSION +
+                    policyDTO.getPolicyId(), collection);
         } catch (RegistryException e) {
             log.error("Error while creating new version of policy", e);
         }

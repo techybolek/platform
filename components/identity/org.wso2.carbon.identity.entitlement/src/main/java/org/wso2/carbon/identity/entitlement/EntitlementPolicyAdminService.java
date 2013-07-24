@@ -732,7 +732,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
         if(handlers != null){
            for(PAPStatusDataHandler handler : handlers){
                try {
-                   handler.handle(holder);
+                   handler.handle(EntitlementConstants.Status.ABOUT_POLICY, holder);
                } catch (EntitlementException e) {
                     log.error(e);
                }

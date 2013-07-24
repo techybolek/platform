@@ -43,7 +43,7 @@ public interface PAPStatusDataHandler {
      */
     public void handle(String about, String key, List<StatusHolder> statusHolder) throws EntitlementException;
 
-    public void handle(StatusHolder statusHolder) throws EntitlementException;
+    public void handle(String about, StatusHolder statusHolder) throws EntitlementException;
 
     /**
      *

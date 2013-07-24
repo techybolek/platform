@@ -27,6 +27,7 @@ import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
 import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -45,10 +46,8 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
                                                                     throws EntitlementException {
 
         if(EntitlementConstants.Status.ABOUT_POLICY.equals(about)){
-            PAPPolicyStoreManager manager = EntitlementAdminEngine.getInstance().getPapPolicyStoreManager();
-            PolicyDTO policyDTO = manager.getPolicy(key);
-            policyDTO.addPolicyStatusHolder(statusHolder);
-            manager.addOrUpdatePolicy(policyDTO);
+            PAPPolicyStore policyStore = new PAPPolicyStore();
+            policyStore.persistStatus(key, statusHolder);
         } else {
             PolicyPublisher publisher =  EntitlementAdminEngine.getInstance().getPolicyPublisher();
             PublisherDataHolder holder =  publisher.retrieveSubscriber(key);
@@ -58,8 +57,10 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
     }
 
     @Override
-    public void handle(StatusHolder statusHolder) throws EntitlementException {
-
+    public void handle(String about, StatusHolder statusHolder) throws EntitlementException {
+        List<StatusHolder> list = new ArrayList<StatusHolder>();
+        list.add(statusHolder);
+        handle(about, statusHolder.getKey(), list);
     }
 
     @Override

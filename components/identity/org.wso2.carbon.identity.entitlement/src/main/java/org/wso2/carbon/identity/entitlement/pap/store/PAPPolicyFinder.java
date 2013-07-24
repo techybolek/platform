@@ -27,9 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.ctx.Status;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
-import org.wso2.carbon.identity.entitlement.PDPConstants;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
-import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.EntitlementAdminEngine;
 import org.wso2.carbon.identity.entitlement.policy.collection.DefaultPolicyCollection;
 import org.wso2.balana.combine.PolicyCombiningAlgorithm;
@@ -50,7 +48,8 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 
     private PolicyFinder policyFinder;
 
-    private int maxInMemoryPolicies;
+    // only five policies are allowed
+    private int maxInMemoryPolicies = 5;
 
 	// the logger we'll use for all messages
 	private static Log log = LogFactory.getLog(PAPPolicyFinder.class);
@@ -96,28 +95,12 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 
 		PolicyCombiningAlgorithm algorithm;
         this.policyFinder = finder;
-        
-		try {
 
+		try {
 			algorithm = EntitlementAdminEngine.getInstance().
                                                     getPolicyDataStore().getGlobalPolicyAlgorithm();
-            policyIds = new ArrayList<String>();
-
-            PolicyDTO[] policyDTOs = policyReader.readAllLightPolicyDTOs();
-            for(PolicyDTO dto : policyDTOs){
-                policyIds.add(dto.getPolicyId());
-            }
-
-            // this is only supporting for on demand loading
-            maxInMemoryPolicies = PDPConstants.MAX_NO_OF_IN_MEMORY_POLICIES;
-            String maxInMemoryPoliciesValue = EntitlementServiceComponent.getEntitlementConfig().
-                    getEngineProperties().getProperty(PDPConstants.ON_DEMAND_POLICY_MAX_POLICY_ENTRIES);
-            if (maxInMemoryPoliciesValue != null && !"".equals(maxInMemoryPoliciesValue)) {
-                maxInMemoryPolicies = Integer.parseInt(maxInMemoryPoliciesValue);
-            }
-            
+            initPolicyIds();
             this.policies = new DefaultPolicyCollection(algorithm, 0);
-
 		} catch (EntitlementException e) {
 			log.error("Error while initializing PAPPolicyFinder", e);
 		}
@@ -132,30 +115,31 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 	public PolicyFinderResult findPolicy(URI idReference, int type, VersionConstraints constraints,
 			PolicyMetaData parentMetaData) {
 
-		AbstractPolicy policy = policies.getPolicy(idReference, type, constraints);
+        // clear all current policies
+        policies.getPolicies().clear();
 
-        if(policy == null){
-            try {
-                AbstractPolicy policyFromStore = policyReader.readActivePolicy(idReference.toString(),
-                                                                                    this.policyFinder);
+        AbstractPolicy policy = null;
 
-                if(policyFromStore != null){
-                    if (type == PolicyReference.POLICY_REFERENCE) {
-                        if (policyFromStore instanceof Policy){
-                            policy = policyFromStore;
-                            policies.addPolicy(policy);
-                        }
-                    } else {
-                        if (policyFromStore instanceof PolicySet){
-                            policy = policyFromStore;
-                            policies.addPolicy(policy);
-                        }
+        try {
+            AbstractPolicy policyFromStore = policyReader.readPolicy(idReference.toString(),
+                    this.policyFinder);
+
+            if(policyFromStore != null){
+                if (type == PolicyReference.POLICY_REFERENCE) {
+                    if (policyFromStore instanceof Policy){
+                        policy = policyFromStore;
+                        policies.addPolicy(policy);
+                    }
+                } else {
+                    if (policyFromStore instanceof PolicySet){
+                        policy = policyFromStore;
+                        policies.addPolicy(policy);
                     }
                 }
-            } catch (EntitlementException e) {
-                // ignore and just log the error.
-                log.error(e);
             }
+        } catch (EntitlementException e) {
+            // ignore and just log the error.
+            log.error(e);
         }
 
 		if (policy == null) {
@@ -172,6 +156,9 @@ public class PAPPolicyFinder extends PolicyFinderModule {
 	 */
 	public PolicyFinderResult findPolicy(EvaluationCtx context) {
 
+        // clear all current policies
+        policies.getPolicies().clear();
+
         ArrayList<AbstractPolicy> list = new ArrayList<AbstractPolicy>();
 
         try {
@@ -180,22 +167,18 @@ public class PAPPolicyFinder extends PolicyFinderModule {
                 if(list.size() == maxInMemoryPolicies){
                     break;
                 }
+                AbstractPolicy policy = null;
 
-                // for each identifier, get only the most recent policy
-                AbstractPolicy policy = policies.getPolicy(policyId);
-
+                try {
+                    policy = policyReader.readPolicy(policyId, this.policyFinder);
+                } catch (EntitlementException e) {
+                    //log and ignore
+                    log.error(e);
+                }
                 if(policy == null){
-                    try {
-                        policy = policyReader.readActivePolicy(policyId, this.policyFinder);
-                    } catch (EntitlementException e) {
-                        //log and ignore
-                        log.error(e);
-                    }
-                    if(policy == null){
-                        continue;
-                    } else {
-                        policies.addPolicy(policy);
-                    }
+                    continue;
+                } else {
+                    policies.addPolicy(policy);
                 }
                 // see if we match
                 MatchResult match = policy.match(context);
@@ -238,5 +221,15 @@ public class PAPPolicyFinder extends PolicyFinderModule {
      */
     public void setPolicyIds(List<String> policyIds) {
         this.policyIds = policyIds;
+    }
+
+    public void initPolicyIds() throws EntitlementException {
+        this.policyIds = new ArrayList<String>();
+        PolicyDTO[] policyDTOs = policyReader.readAllLightPolicyDTOs();
+        for(PolicyDTO dto : policyDTOs){
+            if(dto.isActive()){
+                policyIds.add(dto.getPolicyId());
+            }
+        }
     }
 }
