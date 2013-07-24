@@ -22,7 +22,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.server.admin.common.IServerAdmin;
-import org.wso2.carbon.server.admin.common.ServerData;
 import org.wso2.carbon.server.admin.ui.ServerAdminClient;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.clients.RegistryAdminServiceClient;
@@ -37,9 +36,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 
 public class UIUtil {
@@ -116,24 +113,7 @@ public class UIUtil {
                     (IServerAdmin) CarbonUIUtil.
                             getServerProxy(new ServerAdminClient(configContext,
                                     serverURL, cookie, session), IServerAdmin.class, session);
-            ServerData data = client.getServerData();
-            if (data != null && data.getRegistryType() != null
-                    && data.getRegistryType().equals("remote")) {
-                remoteRegistryURL = data.getRemoteRegistryURL();
-                if (data.getRemoteRegistryChroot() != null &&
-                        !data.getRemoteRegistryChroot().equals(RegistryConstants.PATH_SEPARATOR)) {
-                    chroot = data.getRemoteRegistryChroot();
-                    if (!chroot.startsWith(RegistryConstants.PATH_SEPARATOR)) {
-                        chroot = RegistryConstants.PATH_SEPARATOR + chroot;
-                    }
-                    if (chroot.endsWith(RegistryConstants.PATH_SEPARATOR)) {
-                        chroot = chroot.substring(0, chroot.length() - RegistryConstants.PATH_SEPARATOR.length());
-                    }
-                }
-            } else {
-                remoteRegistryURL = null;
-            }
-            if (remoteRegistryURL == null) {
+
                 RegistryAdminServiceClient registryAdminServiceClient =
                         new RegistryAdminServiceClient(cookie, config, session);
                 remoteRegistryURL = registryAdminServiceClient.getRegistryHTTPSURL();
@@ -142,7 +122,7 @@ public class UIUtil {
                 } else {
                     remoteRegistryURL = remoteRegistryURL.substring(0, remoteRegistryURL.indexOf("/resource"));
                 }
-            }
+
 
         } catch (Exception e) {
             remoteRegistryURL = null;
