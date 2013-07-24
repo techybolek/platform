@@ -37,8 +37,6 @@ public class ApiListPage {
 
 
         log.info(apiName);
-        Thread.sleep(5000);
-        
         String firstElementXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/" +
                                    "form[4]/table/tbody/tr/td/a";
         String apiNameOnServer = driver.findElement(By.xpath(firstElementXpath)).getText();
@@ -134,11 +132,10 @@ public class ApiListPage {
                 driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
                 Thread.sleep(1000);
 
-                String FinalLifeCycleStage= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
-
-                if(FinalLifeCycleStage.contains("production")){
+                String FinalLifeCycleStage = driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle" +
+                        ".stage"))).getText();
+                if(FinalLifeCycleStage.contains("Production")){
                     log.info("lifecycle is at the production stage");
-
                     driver.findElement(By.id(uiElementMapper.getElement("life.cycle.publish"))).click();
                     driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
 
