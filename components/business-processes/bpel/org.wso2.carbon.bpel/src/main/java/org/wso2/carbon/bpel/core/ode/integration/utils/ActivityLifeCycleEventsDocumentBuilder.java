@@ -69,9 +69,12 @@ public class ActivityLifeCycleEventsDocumentBuilder implements BpelEventListener
      * @return Class name
      */
     private String getClassName(String reflectionName) {
+       if (reflectionName.contains("$"))
+        {
         String[] splitter = reflectionName.split("\\$");
-
         return splitter[splitter.length-3];
+        }
+        else return reflectionName; 
     }
 
     private Calendar convertDatetoCalendar(Date date) {
