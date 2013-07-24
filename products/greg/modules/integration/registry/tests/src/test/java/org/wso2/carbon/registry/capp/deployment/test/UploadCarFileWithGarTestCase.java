@@ -47,7 +47,7 @@ public class UploadCarFileWithGarTestCase {
     private CarbonAppUploaderClient cAppUploader;
     private ApplicationAdminClient adminServiceApplicationAdmin;
 
-    private String cAppName = "GarTestCApp";
+    private String cAppName = "GarTestCApp_1.0.0";
     private final String wsdlPath = "/_system/governance/trunk/wsdls/org/wso2/carbon/service/Axis2Service.wsdl";
     private final String wsdlUploadedPath = "/_system/config/gar/Axis2Service.wsdl";
     private final String servicePath = "/_system/governance/trunk/services/org/wso2/carbon/service/Axis2Service";

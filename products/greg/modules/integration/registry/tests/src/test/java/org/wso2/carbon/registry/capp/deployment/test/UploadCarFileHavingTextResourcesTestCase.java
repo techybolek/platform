@@ -44,7 +44,7 @@ public class UploadCarFileHavingTextResourcesTestCase {
     private CarbonAppUploaderClient cAppUploader;
     private ApplicationAdminClient adminServiceApplicationAdmin;
 
-    private final String cAppName = "text_resources";
+    private final String cAppName = "text_resources_1.0.0";
     private final String txtPath = "/_system/capps/buggggg.txt";
     private final String xmlPath = "/_system/capps/text_files.xml";
 
