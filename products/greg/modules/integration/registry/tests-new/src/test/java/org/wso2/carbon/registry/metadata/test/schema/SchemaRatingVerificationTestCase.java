@@ -84,7 +84,7 @@ public class SchemaRatingVerificationTestCase {
 
         schema = schemaManager
                 .newSchema("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/"
-                           + "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/"
+                           + "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/"
                            + "resources/artifacts/GREG/schema/books.xsd");
 
         schema.addAttribute("version", "1.0.0");

@@ -86,7 +86,7 @@ public class SchemaMetadataVerificationTestCase {
 
         schema = schemaManager
                 .newSchema("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-                           + "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/"
+                           + "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/"
                            + "src/main/resources/artifacts/GREG/schema/calculator.xsd");
 
         schema.addAttribute("version", "1.0.0");

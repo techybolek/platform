@@ -76,7 +76,7 @@ public class NegativeSchemaAdditionTestCase {
 
         Schema schema = schemaManager
                 .newSchema("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/"
-                        + "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/"
+                        + "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/"
                         + "schema/XmlInvalidSchema.xsd");
 
         schema.addAttribute("version", "1.0.0");
@@ -97,8 +97,8 @@ public class NegativeSchemaAdditionTestCase {
 
 
         Schema schema = schemaManager
-                .newSchema("hhttps://svn.wso2.org/repos/wso2/carbon/platform/"
-                        + "branches/4.0.0/platform-integration/clarity-tests/1.0.1/"
+                .newSchema("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
+                        + "platform-integration/platform-automated-test-suite/"
                         + "org.wso2.carbon.automation.test.repo/src/main/resources/"
                         + "artifacts/GREG/schema/books_withoutName.xsd");
 
@@ -143,7 +143,7 @@ public class NegativeSchemaAdditionTestCase {
 
 
         resourceAdminServiceClient.addSchema("", "adding schema without a name", "https://svn.wso2.org/repos/wso2/" +
-                "carbon/platform/branches/4.0.0/platform-integration/clarity-tests/1.0.1/org.wso2.carbon.automation.test.repo/" +
+                "carbon/platform/trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                 "src/main/resources/artifacts/GREG/schema/books_withoutName.xsd");                                           //AxisFault Error
 
     }
