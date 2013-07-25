@@ -101,7 +101,7 @@
         </filter>
 
         <!-- Send the messages where they have been sent (i.e. implicit To EPR) -->
-        <property name="messageType" value="text/html" scope="axis2"/>
+        <!--property name="messageType" value="text/html" scope="axis2"/-->
         <send/>
         <drop/>
     </out>

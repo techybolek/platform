@@ -59,7 +59,7 @@
                 <exclude>**/*.aar</exclude>
                 <exclude>**/webapp-mode/**</exclude>
                 <exclude>**/repository/components/plugins/*.ui*</exclude>
-                <!--exclude>**/samples/*</exclude-->
+                <exclude>**/samples/*</exclude>
             </excludes>
         </fileSet>
         <!-- get axis2_1.6.1.wso2v9.jar from carbon kernel patch 0002 -->
