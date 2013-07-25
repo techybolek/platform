@@ -865,6 +865,7 @@
             </plugin>
 
 
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -903,6 +904,33 @@
                     </execution>
                 </executions>
             </plugin>
+
+ 	<plugin>
+           <groupId>com.google.code.maven-replacer-plugin</groupId>
+           <artifactId>replacer</artifactId>
+           <version>1.5.2</version>
+           <executions>
+               <execution>
+                   <phase>prepare-package</phase>
+                   <goals>
+                       <goal>replace</goal>
+                   </goals>                   
+               </execution>
+           </executions>
+           <configuration>
+               <file>${basedir}/src/main/resources/carbon-home/conf/api-manager.xml</file>
+               <replacements>
+                   <replacement>
+			<xpath>/APIManager/APIKeyManager/EnableThriftServer</xpath>
+                       <token>(true)</token>
+                       <value>false</value>
+                   </replacement>         
+               </replacements>
+           </configuration>
+       </plugin>
+
+
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
