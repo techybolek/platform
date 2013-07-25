@@ -50,8 +50,6 @@
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.carbon.deployment.synchronizer.git.*,
-                            !org.wso2.carbon.adc.mgt.*,
-                            !org.wso2.carbon.adc.repository.information.*,
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
