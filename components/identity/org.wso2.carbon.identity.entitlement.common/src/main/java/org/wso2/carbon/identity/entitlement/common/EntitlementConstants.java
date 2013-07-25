@@ -61,6 +61,9 @@ public class EntitlementConstants {
         public static final String PUBLISH_POLICY = "PUBLISH_POLICY";
 
         public static final String ROLLBACK_POLICY = "ROLLBACK_POLICY";
+        
+        public static final String[] ALL_TYPES = new String[]{ADD_POLICY, UPDATE_POLICY, GET_POLICY,
+                                DELETE_POLICY, ENABLE_POLICY, PUBLISH_POLICY, ROLLBACK_POLICY};
     }
 
     public static final class Status {
