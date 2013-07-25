@@ -1146,7 +1146,7 @@ function loadConfigView() {
             	}
             	dsProvider = escape(dsProvider);
                 var url = 'validateconnection-ajaxprocessor.jsp?&dsName=' + document.getElementById('dsName').value+'&driver='+driver+
-           	'&url='+url+'&username='+username+'&password='+password+'&dsType=' + datasourceType+'&customDsType='+datasourceCustomType+'&dsProviderType='+dsProvider+
+           	'&url='+encodeURIComponent(url)+'&username='+username+'&password='+password+'&dsType=' + datasourceType+'&customDsType='+datasourceCustomType+'&dsProviderType='+dsProvider+
     	'&dsclassname='+dsclassname+'&dsclassname='+dsclassname+'&dsproviderProperties='+dsproviderProperties;
                 jQuery('#connectionTestMsgDiv').load(url, displayMsg);
                 return false;

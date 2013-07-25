@@ -154,7 +154,7 @@ function doTestConnection(successmsg) {
 	}
 	var requestUrl = '../ndatasource/validateconnection-ajaxprocessor.jsp?&dsName=' + document.getElementById('dsName').value+'&dsProviderType='+dsProvider+
     	'&dsclassname='+dsclassname+'&dsclassname='+dsclassname+'&dsproviderProperties='+dsproviderProperties+'&driver='+driver+
-    	'&url='+url+'&username='+username+'&password='+password+'&dsType='+datasourceType+'&customDsType='+datasourceCustomType;
+    	'&url='+encodeURIComponent(url)+'&username='+username+'&password='+password+'&dsType='+datasourceType+'&customDsType='+datasourceCustomType;
     jQuery.post(requestUrl, ({}),
             function(data, status) {
                 if (status != "success") {
