@@ -95,7 +95,7 @@ public class PolicyMetadataVerificationTestCase {
 
         policy = policyManager
                 .newPolicy("https://svn.wso2.org/repos/wso2/carbon/platform/"
-                        + "branches/4.0.0/platform-integration/clarity-tests/1.0.1/"
+                        + "trunk/platform-integration/platform-automated-test-suite/"
                         + "org.wso2.carbon.automation.test.repo/src/main/resources/"
                         + "artifacts/GREG/policy/UTPolicy.xml");
 
