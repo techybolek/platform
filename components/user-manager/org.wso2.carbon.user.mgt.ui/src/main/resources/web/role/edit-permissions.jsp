@@ -90,16 +90,25 @@
 
         UIPermissionNode rootNode = null;
         String roleName = request.getParameter("roleName");
+        String roleNameWithoutDn = roleName.split(UserCoreConstants.DN_COMBINER)[0];
         try {
         	
             String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
-            int roleIndex = Integer.parseInt(rIndex);
-            
-            FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
             String roleNameWithDn = roleName + UserCoreConstants.DN_COMBINER;
-            if(datas != null && roleIndex < datas.length){
-            	roleNameWithDn += datas[roleIndex].getDn();
-            }
+            if(rIndex != null){
+            	try{
+	            	int roleIndex = Integer.parseInt(rIndex);
+		            FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
+		            
+		            if(datas != null && roleIndex < datas.length){
+		            	roleNameWithDn += datas[roleIndex].getDn();
+		            }
+
+            	}catch(NumberFormatException e){
+            		e.printStackTrace();
+            		throw e;
+            	}
+	        }
             
             roleName = roleNameWithDn;
 
@@ -127,7 +136,7 @@
         topPage="false" request="<%=request%>" />
         
 <div id="middle">
-    <h2><fmt:message key="permissions.of.the.role"/> <%=roleName%></h2>
+    <h2><fmt:message key="permissions.of.the.role"/> <%=roleNameWithoutDn%></h2>
 
     <div id="workArea">
       
