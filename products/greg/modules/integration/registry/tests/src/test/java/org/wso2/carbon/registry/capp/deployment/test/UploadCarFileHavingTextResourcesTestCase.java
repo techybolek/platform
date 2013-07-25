@@ -73,10 +73,10 @@ public class UploadCarFileHavingTextResourcesTestCase {
                 , "Deployed CApplication not in CApp List");
     }
 
-    @Test(description = "Search whether CApp is in /_system/config/repository/applications", dependsOnMethods = {"uploadCApplicationWithTextResource"})
-    public void isCApplicationInRegistry() throws RegistryException {
-        registry.get("/_system/config/repository/applications/" + cAppName);
-    }
+//    @Test(description = "Search whether CApp is in /_system/config/repository/applications", dependsOnMethods = {"uploadCApplicationWithTextResource"})
+//    public void isCApplicationInRegistry() throws RegistryException {
+//        registry.get("/_system/config/repository/applications/" + cAppName);
+//    }
 
     @Test(description = "Verify Uploaded Resources", dependsOnMethods = {"uploadCApplicationWithTextResource"})
     public void isResourcesExist() throws RegistryException {
@@ -101,7 +101,7 @@ public class UploadCarFileHavingTextResourcesTestCase {
 
         Assert.assertFalse(registry.resourceExists(xmlPath), "Resource not deleted");
         Assert.assertFalse(registry.resourceExists(txtPath), "Resource not deleted");
-        Assert.assertFalse(registry.resourceExists("/_system/config/repository/applications/" + cAppName), "Resource not deleted");
+//        Assert.assertFalse(registry.resourceExists("/_system/config/repository/applications/" + cAppName), "Resource not deleted");
 
     }
 

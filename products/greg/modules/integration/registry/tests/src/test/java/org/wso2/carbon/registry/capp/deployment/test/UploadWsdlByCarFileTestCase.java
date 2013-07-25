@@ -73,10 +73,10 @@ public class UploadWsdlByCarFileTestCase {
                 , "Deployed CApplication not in CApp List");
     }
 
-    @Test(description = "Search whether CApp is in /_system/config/repository/applications", dependsOnMethods = {"uploadCApplicationWithWsdl"})
-    public void isCApplicationInRegistry() throws RegistryException {
-        registry.get("/_system/config/repository/applications/" + cAppName);
-    }
+//    @Test(description = "Search whether CApp is in /_system/config/repository/applications", dependsOnMethods = {"uploadCApplicationWithWsdl"})
+//    public void isCApplicationInRegistry() throws RegistryException {
+//        registry.get("/_system/config/repository/applications/" + cAppName);
+//    }
 
     @Test(description = "Verify Uploaded Resources", dependsOnMethods = {"uploadCApplicationWithWsdl"})
     public void isResourcesExist() throws RegistryException {
