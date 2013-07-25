@@ -22,6 +22,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.webapp.stat.publisher.data.WebappStatEvent;
+import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappStatisticsPublisherConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Attribute;
@@ -58,6 +60,8 @@ public class GlobalWebappEventPublisher {
         SecretResolver secretResolver = SecretResolverFactory.create(bamConfig, false);
         String username = "";
         String password = "";
+        String url = ServerConfiguration.getInstance().
+                        getProperties(WebappStatisticsPublisherConstants.SERVER_CONFIG_BAM_URL)[0];
 
         for (Iterator childElements = bamConfig.getChildElements(); childElements.hasNext();) {
             OMElement element = (OMElement) childElements.next();
