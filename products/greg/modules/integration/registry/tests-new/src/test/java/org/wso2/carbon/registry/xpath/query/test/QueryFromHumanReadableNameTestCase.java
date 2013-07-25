@@ -36,10 +36,12 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.info.stub.RegistryExceptionException;
 import org.wso2.carbon.registry.properties.stub.PropertiesAdminServiceRegistryExceptionException;
 import org.wso2.carbon.registry.relations.stub.AddAssociationRegistryExceptionException;
@@ -79,6 +81,7 @@ public class QueryFromHumanReadableNameTestCase {
     private String policy = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                             File.separator + "GREG" + File.separator +
                             "policy" + File.separator + "policy.xml";
+    private Registry governance;
 
     @BeforeClass(groups = {"wso2.greg"})
     public void init()
@@ -111,7 +114,7 @@ public class QueryFromHumanReadableNameTestCase {
         WSRegistryServiceClient wsRegistry =
                 new RegistryProviderUtil().getWSRegistry(userId,
                                                          ProductConstant.GREG_SERVER_NAME);
-        Registry governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
+        governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
         serviceManager = new ServiceManager(governance);
         wsdlManager = new WsdlManager(governance);
 
@@ -448,7 +451,7 @@ public class QueryFromHumanReadableNameTestCase {
         for (Endpoint path : endpoints) {
             resourceAdminServiceClient.deleteResource("_system/governance/" + path.getPath());
         }
-
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
             if (service.getQName().getLocalPart().equals("Info")) {
