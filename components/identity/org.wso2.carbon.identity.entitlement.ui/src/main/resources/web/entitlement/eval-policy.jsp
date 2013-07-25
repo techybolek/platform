@@ -42,7 +42,11 @@
     if(isResponse != null && isResponse.trim().length() > 0){
         showResponse = true;
     }
-
+    if(responseString != null){
+        responseString = responseString.trim().replaceAll("><", ">\n<");
+    } else {
+        responseString = "";
+    }
     if(!showResponse){
         List<RowDTO> rowDTOs = new ArrayList<RowDTO>();
         String multipleRequest = CharacterEncoder.getSafeText(request.getParameter("multipleRequest"));
@@ -121,7 +125,6 @@
         requestDTO.setRowDTOs(rowDTOs);
 
         EntitlementPolicyCreator entitlementPolicyCreator = new EntitlementPolicyCreator();
-
         try {
             if(requestString != null && requestString.trim().length() > 0){
                 requestString = requestString.trim().replaceAll("><", ">\n<");

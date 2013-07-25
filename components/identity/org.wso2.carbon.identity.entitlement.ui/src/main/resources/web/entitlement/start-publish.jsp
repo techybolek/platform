@@ -193,7 +193,7 @@
     }
 
     function searchService() {
-        document.searchForm.submit();
+        document.publishForm.submit();
     }
 
     function resetVars() {
@@ -357,26 +357,24 @@
                 </thead>
             </table>
 
-            <form action="start-publish.jsp" name="searchForm" method="post">
-                <table class="styledLeft noBorders">
-                    <tbody>
-                    <tr style="border:0; !important">
-                        <td style="border:0; !important">
-                            <nobr>
-                                <fmt:message key="search"/>
-                                <input type="text" name="subscriberSearchString"
-                                       value="<%= subscriberSearchString != null? subscriberSearchString :""%>"/>&nbsp;
-                            </nobr>
-                        </td>
-                        <td style="border:0; !important">
-                            <a class="icon-link" href="#" style="background-image: url(images/search.gif);"
-                               onclick="searchService(); return false;"
-                               alt="<fmt:message key="search"/>"></a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </form>
+            <table class="styledLeft noBorders">
+                <tbody>
+                <tr style="border:0; !important">
+                    <td style="border:0; !important">
+                        <nobr>
+                            <fmt:message key="search"/>
+                            <input type="text" name="subscriberSearchString"
+                                   value="<%= subscriberSearchString != null? subscriberSearchString :""%>"/>&nbsp;
+                        </nobr>
+                    </td>
+                    <td style="border:0; !important">
+                        <a class="icon-link" href="#" style="background-image: url(images/search.gif);"
+                           onclick="searchService(); return false;"
+                           alt="<fmt:message key="search"/>"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
             <table class="styledLeft" style="width: 100%;margin-top:10px;">
             <%
