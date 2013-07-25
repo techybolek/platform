@@ -236,6 +236,7 @@
     var notificationMethod = "<%=request.getParameter("notificationMethod")%>";
     var digestType = "<%=(request.getParameter("digestType") != null) ?
                             request.getParameter("digestType") : "" %>";
+    var hierarchicalsubscriptionmethod = "<%=request.getParameter("hierarchicalsubscriptionmethod")%>";
     document.getElementById('subscriptionDataInputRecord').style.display = "";
     if (notificationMethod =="email") {
         document.getElementById('notificationMethodList').value = 1;
@@ -267,6 +268,14 @@
         document.getElementById('subscriptionDigestTypeInput').value = 0;
     }
     document.getElementById('subscriptionInput').value = "<%=request.getParameter("input")%>";
+    
+    if (hierarchicalsubscriptionmethod == "none") {
+        document.getElementById('hierarchicalSubscriptionList').value = "none";
+    } else if (hierarchicalsubscriptionmethod == "star") {
+        document.getElementById('hierarchicalSubscriptionList').value = "*";
+    }else {
+    	 document.getElementById('hierarchicalSubscriptionList').value = "#";
+    }
 </script>
 <% } %>
 </fmt:bundle>

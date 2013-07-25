@@ -177,7 +177,9 @@
             String eventName = subscription.getEventName();
             String owner = subscription.getOwner();
             String path = subscription.getTopic();
+            String hierarchicalSubscriptionMethod = "none";
             if(path.contains("#")||path.contains("*")){
+            	hierarchicalSubscriptionMethod = (path.contains("#"))?"hash":"star"; 
                 String tempPath=path.substring(RegistryEvent.TOPIC_PREFIX.length()+1, path.lastIndexOf("/"));
                 if(tempPath.contains("/")){
                     path = tempPath.split("/",2)[1];
@@ -253,7 +255,7 @@
 
 %>
             <td>
-                <a href="registrysubscription.jsp?edit=edit&notificationMethod=<%=subscription.getNotificationMethod() + (isDigest ? "&digestType=" + subscription.getDigestType() : "")%>&path=<%=encodedPath%>&input=<%=address%>&id=<%=subscription.getId()%>&event=<%=eventName%>" class="icon-link registryWriteOperation" style="background-image: url(../admin/images/edit.gif);"><fmt:message key="edit"/></a>
+                <a href="registrysubscription.jsp?edit=edit&hierarchicalsubscriptionmethod=<%=hierarchicalSubscriptionMethod%>&notificationMethod=<%=subscription.getNotificationMethod() + (isDigest ? "&digestType=" + subscription.getDigestType() : "")%>&path=<%=encodedPath%>&input=<%=address%>&id=<%=subscription.getId()%>&event=<%=eventName%>" class="icon-link registryWriteOperation" style="background-image: url(../admin/images/edit.gif);"><fmt:message key="edit"/></a>
                 <a href="javascript:void(0)" onclick="unsubscribe('<%=path%>','<%=subscription.getId()%>');" class="icon-link registryWriteOperation" style="background-image: url(../admin/images/delete.gif);"><fmt:message key="delete"/></a>
             </td>
 <%

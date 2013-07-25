@@ -126,7 +126,7 @@ border:none !important;
     $('subscriptionPath').title = path;
     new Ajax.Updater('subscription-area-div', '../notifications/registrysubscription-ajaxprocessor.jsp', {
         evalScripts: true,
-        parameters: {path: path, digestType: "<%=(request.getParameter("digestType") != null) ? request.getParameter("digestType") : "none"%>", notificationMethod: "<%=request.getParameter("notificationMethod")%>", input: "<%=request.getParameter("input")%>", event: "<%=request.getParameter("event")%>"}
+        parameters: {path: path, hierarchicalsubscriptionmethod:"<%=request.getParameter("hierarchicalsubscriptionmethod")%>", digestType: "<%=(request.getParameter("digestType") != null) ? request.getParameter("digestType") : "none"%>", notificationMethod: "<%=request.getParameter("notificationMethod")%>", input: "<%=request.getParameter("input")%>", event: "<%=request.getParameter("event")%>"}
     });
 </script>
 <% } else { %>
