@@ -214,7 +214,6 @@
                                     <id>org.wso2.carbon.mediation.initializer.feature.group</id>
                                     <version>${carbon.version}</version>
                                 </feature>
-<!--
                                 <feature>
                                     <id>org.wso2.carbon.service.mgt.server.feature.group</id>
                                     <version>${carbon.version}</version>
@@ -227,7 +226,6 @@
                                     <id>org.wso2.carbon.transport.nhttp.feature.group</id>
                                     <version>${carbon.version}</version>
                                 </feature>
--->
                                 <feature>
                                     <id>org.wso2.carbon.stratos.cloud.controller.feature.group</id>
                                     <version>2.2.0-SNAPSHOT</version>
