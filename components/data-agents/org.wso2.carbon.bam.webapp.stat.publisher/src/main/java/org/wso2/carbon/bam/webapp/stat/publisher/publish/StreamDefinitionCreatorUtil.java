@@ -80,7 +80,7 @@ public class StreamDefinitionCreatorUtil {
         return metaDataAttributeList;
     }
 
-    private static List<Attribute> addCommonPayLoadData(List<Attribute> payLoadData) {
+    public static List<Attribute> addCommonPayLoadData(List<Attribute> payLoadData) {
 
         payLoadData.add(new Attribute("webappName" , AttributeType.STRING));
         payLoadData.add(new Attribute("webappVersion" , AttributeType.STRING));
@@ -110,13 +110,15 @@ public class StreamDefinitionCreatorUtil {
         payLoadData.add(new Attribute("requestCount" , AttributeType.INT));
         payLoadData.add(new Attribute("responceCount" , AttributeType.INT));
         payLoadData.add(new Attribute("faultCount" , AttributeType.INT));
+        payLoadData.add(new Attribute("requestSizeBytes" , AttributeType.LONG));
+        payLoadData.add(new Attribute("responseSizeBytes" , AttributeType.LONG));
 
         return payLoadData;
     }
 
 
 
-    private static List<Attribute> setUserAgentMetadata(List<Attribute> attributeList) {
+    public static List<Attribute> setUserAgentMetadata(List<Attribute> attributeList) {
         attributeList.add(new Attribute("serverAddess",
                 AttributeType.STRING));
         attributeList.add(new Attribute("serverName",

@@ -27,6 +27,7 @@ import org.wso2.carbon.bam.webapp.stat.publisher.data.CarbonDataHolder;
 import org.wso2.carbon.bam.webapp.stat.publisher.data.WebappStatEvent;
 import org.wso2.carbon.bam.webapp.stat.publisher.data.WebappStatEventData;
 import org.wso2.carbon.bam.webapp.stat.publisher.publish.EventPublisher;
+import org.wso2.carbon.bam.webapp.stat.publisher.publish.GlobalWebappEventPublisher;
 import org.wso2.carbon.bam.webapp.stat.publisher.publish.WebappAgentUtil;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.BrowserInfoUtils;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.TenantEventConfigData;
@@ -130,7 +131,8 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         * Checks weather requested url contains favicon.ico
         * if any of those becomes false next valve is invoked and exit from executing further.
         */
-        if ((!WebappAgentUtil.getPublishingEnabled()) || !webappStatsEnable || (requestURI.contains("favicon.ico"))) {
+        boolean isTenantPublishingEnabled = WebappAgentUtil.getPublishingEnabled() && webappStatsEnable;
+        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico"))) {
             return;
         }
 
@@ -153,7 +155,8 @@ public class WebAppStatisticPublisherValve extends ValveBase {
             InternalEventingConfigData eventingConfigData = tenantSpecificEventConfig.get(tenantID);
 
             // Validate BAM configuration data and check weather enabled from the back end. if enabled set the data to stream definition and publish.
-            if (eventingConfigData != null && eventingConfigData.isWebappStatsEnabled()) {
+            //if (eventingConfigData != null && eventingConfigData.isWebappStatsEnabled()) {
+            if (eventingConfigData != null) {
 
                 //Extracting the data from request and response and setting them to bean class
                 WebappStatEventData webappStatEventData = prepareWebappStatEventData(request, response);
@@ -162,12 +165,21 @@ public class WebAppStatisticPublisherValve extends ValveBase {
                 webappStatEventData.setTimestamp(startTime);
 
                 WebappStatEvent event = WebappAgentUtil.makeEventList(webappStatEventData, eventingConfigData);
-                EventPublisher publisher = new EventPublisher();
-                publisher.publish(event, eventingConfigData);
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Web app stats are successfully published to bam for tenant " + tenantID);
+                // publish stats to ST space
+                if (WebappAgentUtil.isGlobalPublishingEnabled()) {
+                    GlobalWebappEventPublisher.publish(event);
                 }
+
+                // publish stats to tenant space
+                if (isTenantPublishingEnabled && eventingConfigData.isWebappStatsEnabled()) {
+                    EventPublisher publisher = new EventPublisher();
+                    publisher.publish(event, eventingConfigData);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Web app stats are successfully published to bam for tenant " + tenantID);
+                    }
+                }
+
             }
         } catch (Exception e) {
             log.error("Failed to publish web app stat events to bam.", e);
@@ -200,6 +212,11 @@ public class WebAppStatisticPublisherValve extends ValveBase {
 
         webappStatEventData.setUserId(consumerName);
         webappStatEventData.setUserTenant(consumerTenantDomain);
+
+        // set request / response size
+        long requestSize = request.getCoyoteRequest().getContentLengthLong();
+        webappStatEventData.setRequestSizeBytes(requestSize > 0 ? requestSize : 0);
+        webappStatEventData.setResponseSizeBytes(response.getBytesWritten(true));
 
         String requestedURI = request.getRequestURI();
 

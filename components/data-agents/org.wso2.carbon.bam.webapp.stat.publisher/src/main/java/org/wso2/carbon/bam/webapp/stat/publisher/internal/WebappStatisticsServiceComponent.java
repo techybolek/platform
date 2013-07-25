@@ -10,6 +10,7 @@ import org.wso2.carbon.bam.webapp.stat.publisher.conf.EventPublisherConfig;
 import org.wso2.carbon.bam.webapp.stat.publisher.conf.InternalEventingConfigData;
 import org.wso2.carbon.bam.webapp.stat.publisher.conf.RegistryPersistenceManager;
 import org.wso2.carbon.bam.webapp.stat.publisher.data.CarbonDataHolder;
+import org.wso2.carbon.bam.webapp.stat.publisher.publish.GlobalWebappEventPublisher;
 import org.wso2.carbon.bam.webapp.stat.publisher.publish.WebappAgentUtil;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.TenantEventConfigData;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappStatisticsPublisherConstants;
@@ -49,6 +50,11 @@ public class WebappStatisticsServiceComponent {
     private static Log log = LogFactory.getLog(WebappStatisticsServiceComponent.class);
 
     protected void activate(ComponentContext context) {
+        if("true".equals(System.getProperty("metering.enabled"))){
+            GlobalWebappEventPublisher.createGlobalEventStream(getPublishingConfig());
+            WebappAgentUtil.setGlobalPublishingEnabled(true);
+        }
+
         checkPublishingEnabled();
 
         WebappAgentUtil.setPublishingEnabled(publishingEnabled);

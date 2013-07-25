@@ -28,6 +28,8 @@ public class WebappAgentUtil {
 
     private static boolean isPublishingEnabled = false;
 
+    private static boolean isGlobalPublishingEnabled = false;
+
     public static void setPublishingEnabled(boolean isPublishingEnabled) {
         WebappAgentUtil.isPublishingEnabled = isPublishingEnabled;
     }
@@ -120,6 +122,8 @@ public class WebappAgentUtil {
         eventData.add(event.getRequestCount());
         eventData.add(event.getResponceCount());
         eventData.add(event.getFaultCount());
+        eventData.add(event.getRequestSizeBytes());
+        eventData.add(event.getResponseSizeBytes());
 
 
       return eventData;
@@ -156,4 +160,11 @@ public class WebappAgentUtil {
         return bamServerInfo;
     }
 
+    public static boolean isGlobalPublishingEnabled() {
+        return isGlobalPublishingEnabled;
+    }
+
+    public static void setGlobalPublishingEnabled(boolean globalPublishingEnabled) {
+        isGlobalPublishingEnabled = globalPublishingEnabled;
+    }
 }

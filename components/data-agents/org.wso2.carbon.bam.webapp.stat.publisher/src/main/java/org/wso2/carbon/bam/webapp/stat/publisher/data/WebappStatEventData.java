@@ -15,9 +15,6 @@
 */
 package org.wso2.carbon.bam.webapp.stat.publisher.data;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-
 public class WebappStatEventData {
     private String webappName;
     private String webappOwnerTenant;
@@ -52,6 +49,8 @@ public class WebappStatEventData {
     private int requestCount;
     private int responceCount;
     private int faultCount;
+    private long requestSizeBytes;
+    private long responseSizeBytes;
 
     public int getRequestCount() {
         return requestCount;
@@ -318,4 +317,21 @@ public class WebappStatEventData {
     public void setOperatingSystemVersion(String operatingSystemVersion) {
         this.operatingSystemVersion = operatingSystemVersion;
     }
+
+    public long getRequestSizeBytes() {
+        return requestSizeBytes;
+    }
+
+    public void setRequestSizeBytes(long requestSizeBytes) {
+        this.requestSizeBytes = requestSizeBytes;
+    }
+
+    public long getResponseSizeBytes() {
+        return responseSizeBytes;
+    }
+
+    public void setResponseSizeBytes(long responseSizeBytes) {
+        this.responseSizeBytes = responseSizeBytes;
+    }
+
 }
