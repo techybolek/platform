@@ -24,7 +24,8 @@ public class CarbonContextConfigurator extends AbstractHandler {
         }
 
         //for non-http we assume that it's for ST
-        if (!messageContext.getTransportIn().getName().contains("http")) {
+        if (messageContext.getTransportIn() != null && messageContext.getTransportIn().getName() != null &&
+                !messageContext.getTransportIn().getName().contains("http")) {
             cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             return InvocationResponse.CONTINUE;
