@@ -725,9 +725,21 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 
         Set<PAPStatusDataHandler> handlers = EntitlementServiceComponent.
                                         getEntitlementConfig().getPapStatusDataHandlers().keySet();
+        
+        String target = "PAP POLICY STORE";
+        String targetAction = "";
+        if(EntitlementConstants.StatusTypes.ADD_POLICY.equals(action) ||
+                EntitlementConstants.StatusTypes.UPDATE_POLICY.equals(action)){
+            targetAction = "PERSIST";
+        } else if(EntitlementConstants.StatusTypes.DELETE_POLICY.equals(action)){
+            targetAction = "REMOVE";
+        } else if(EntitlementConstants.StatusTypes.GET_POLICY.equals(action)){
+            targetAction = "LOAD";
+        }
+
         StatusHolder holder =
                 new StatusHolder(action, policyDTO.getPolicyId(), policyDTO.getVersion(),
-                                                    "Policy Store", "PERSIST", success, message);
+                        target, targetAction, success, message);
 
         if(handlers != null){
            for(PAPStatusDataHandler handler : handlers){

@@ -155,16 +155,7 @@ public class PublisherDataHolder {
 
     public void addStatusHolders(List<StatusHolder> statusHolders) {
         List<StatusHolder> list = new ArrayList<StatusHolder>(Arrays.asList(this.statusHolders));
-        for(StatusHolder holder : statusHolders){
-            list.add(holder);
-        }
-
-        StatusHolder[] array = new StatusHolder[10];
-
-        for(int i = 0; i < list.size() ; i++ ){
-            array[i] = list.get((i));
-        }
-
-        this.statusHolders  = array;
+        list.addAll(statusHolders);
+        this.statusHolders = list.toArray(new StatusHolder[list.size()]);
     }
 }

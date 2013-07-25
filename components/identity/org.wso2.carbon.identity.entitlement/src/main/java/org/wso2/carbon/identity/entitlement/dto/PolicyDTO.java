@@ -188,18 +188,20 @@ public class PolicyDTO {
     }
 
     public void addPolicyStatusHolder(List<StatusHolder> publishStatusHolders)  {
-
         List<StatusHolder> list = new ArrayList<StatusHolder>(Arrays.asList(this.policyStatusHolders));
-        for(StatusHolder holder : publishStatusHolders){
-            list.add(holder);
-        }
-
-        StatusHolder[] array = new StatusHolder[10];
-
-        for(int i = 0; i < list.size() ; i++ ){
-            array[i] = list.get((i));
-        }
-
-        this.policyStatusHolders  = array;
+        list.addAll(publishStatusHolders);
+        this.policyStatusHolders = list.toArray(new StatusHolder[list.size()]);
+//        List<StatusHolder> list = new ArrayList<StatusHolder>(Arrays.asList(this.policyStatusHolders));
+//        for(StatusHolder holder : publishStatusHolders){
+//            list.add(holder);
+//        }
+//
+//        StatusHolder[] array = new StatusHolder[10];
+//
+//        for(int i = 0; i < list.size() ; i++ ){
+//            array[i] = list.get((i));
+//        }
+//
+//        this.policyStatusHolders  = array;
     }
 }

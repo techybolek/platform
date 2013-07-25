@@ -38,7 +38,7 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
 
     @Override
     public void init(Properties properties) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     @Override
@@ -70,10 +70,17 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
         if(EntitlementConstants.Status.ABOUT_POLICY.equals(about)){
             PAPPolicyStoreReader reader = new PAPPolicyStoreReader(new PAPPolicyStore());
             List<StatusHolder> holders = reader.readStatus(key);
+            List<StatusHolder> filteredHolders = new ArrayList<StatusHolder>();
             if(holders != null){
-                return holders.toArray(new StatusHolder[holders.size()]);
+                for(StatusHolder holder : holders){
+                    if(type != null && type.equals(holder.getType())){
+                        filteredHolders.add(holder);
+                    } else if(type == null){
+                        filteredHolders.add(holder);
+                    }
+                }
             }
-            return null;
+            return filteredHolders.toArray(new StatusHolder[filteredHolders.size()]);
         } else {
             PolicyPublisher publisher =  EntitlementAdminEngine.getInstance().getPolicyPublisher();
             PublisherDataHolder holder =  publisher.retrieveSubscriber(key);
