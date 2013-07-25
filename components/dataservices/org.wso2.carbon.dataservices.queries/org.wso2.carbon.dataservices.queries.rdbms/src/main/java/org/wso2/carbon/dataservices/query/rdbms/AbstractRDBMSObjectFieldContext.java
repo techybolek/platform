@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Struct;
 
 import org.wso2.carbon.com.core.fieldcontext.AbstractObjectFieldContext;
+import org.wso2.carbon.com.core.model.ContainerType;
 import org.wso2.carbon.com.core.model.DataFormat;
 import org.wso2.carbon.com.core.fieldcontext.FieldContext;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextException;
@@ -31,6 +32,9 @@ import org.wso2.carbon.com.core.fieldcontext.PrimitiveTypeFieldContext;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
 import org.wso2.carbon.com.core.model.DataType;
 
+/**
+ * This class represents an abstract RDBMS field context implementation.
+ */
 public abstract class AbstractRDBMSObjectFieldContext extends AbstractObjectFieldContext {
 
 	@Override
@@ -54,6 +58,13 @@ public abstract class AbstractRDBMSObjectFieldContext extends AbstractObjectFiel
 				throw new FieldContextException("Unrecognized object type: " + objResult.getClass());
 			}
             return fieldCtx;
+		} else if (ContainerType.LIST.equals(format.getContainerType())) {
+			if (objResult instanceof Array) {
+            	return new RDBMSArrayContext((Array) objResult);
+			} else {
+				throw new FieldContextException("Unsupported type to be used as a primitive " +
+						"type list: " + objResult.getClass());
+			}
 		} else {
 			return new PrimitiveTypeFieldContext(objResult);
 		}

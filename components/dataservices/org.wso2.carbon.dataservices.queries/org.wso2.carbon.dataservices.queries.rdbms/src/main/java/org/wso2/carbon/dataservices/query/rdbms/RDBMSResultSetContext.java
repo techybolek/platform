@@ -25,14 +25,14 @@ import org.wso2.carbon.com.core.model.DataFormat;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextException;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
 
+/**
+ * This class represents an RDBMS result set based field context implementation. 
+ */
 public class RDBMSResultSetContext extends AbstractRDBMSObjectFieldContext {
 	
 	private ResultSet resultSet;
 		
 	public RDBMSResultSetContext(ResultSet resultSet) throws FieldContextException {
-		if (resultSet == null) {
-			throw new FieldContextException("The RDBMS result set cannot be null");
-		}
 		this.resultSet = resultSet;
 	}
 	
