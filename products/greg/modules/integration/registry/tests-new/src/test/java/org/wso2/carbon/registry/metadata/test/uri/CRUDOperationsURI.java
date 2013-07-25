@@ -123,7 +123,7 @@ public class CRUDOperationsURI {
                                                         "xmlns:ser=\"http://services.add.uri.governance.carbon.wso2.org\">" +
                                                         "<ser:info>&lt;metadata xmlns=\"http://www.wso2.org/governance/metadata\">" +
                                                         "&lt;overview>&lt;type>WSDL&lt;/type>&lt;name>Axis2Service_Wsdl_With_Wsdl_Imports.wsdl&lt;/name>" +
-                                                        "&lt;uri>https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/clarity-tests/" +
+                                                        "&lt;uri>https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/platform-automated-test-suite/" +
                                                         "org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/Axis2Service_Wsdl_With_Wsdl_Imports.wsdl&lt;" +
                                                         "/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
 
@@ -176,7 +176,7 @@ public class CRUDOperationsURI {
                                                                                "xmlns:ser=\"http://services.add.uri.governance.carbon.wso2.org\"><ser:info>&lt;metadata " +
                                                                                "xmlns=\"http://www.wso2.org/governance/metadata\">&lt;overview>&lt;type>XSD&lt;/type>&lt;" +
                                                                                "name>SchemaImportSample.xsd&lt;/name>&lt;uri>https://svn.wso2" +
-                                                                               ".org/repos/wso2/carbon/platform/trunk/platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/schema/SchemaImportSample.xsd&lt;/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
+                                                                               ".org/repos/wso2/carbon/platform/trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/schema/SchemaImportSample.xsd&lt;/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
 
 
         expression.addNamespace("ns", omElementAddSchema.getNamespace().getNamespaceURI());
@@ -228,7 +228,7 @@ public class CRUDOperationsURI {
                                                                                "xmlns:ser=\"http://services.add.uri.governance.carbon.wso2.org\"><ser:info>&lt;metadata " +
                                                                                "xmlns=\"http://www.wso2.org/governance/metadata\">&lt;overview>&lt;type>Policy&lt;/type>&lt;" +
                                                                                "name>policy.xml&lt;/name>&lt;uri>https://svn.wso2" +
-                                                                               ".org/repos/wso2/carbon/platform/trunk/platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/policy/policy.xml&lt;/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
+                                                                               ".org/repos/wso2/carbon/platform/trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/policy/policy.xml&lt;/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
 
 
         expression.addNamespace("ns", omElementAddPolicy.getNamespace().getNamespaceURI());
@@ -279,7 +279,7 @@ public class CRUDOperationsURI {
         OMElement omElementAddGeneric = client.sendReceive(AXIOMUtil.stringToOM("<ser:addURI " +
                                                                                 "xmlns:ser=\"http://services.add.uri.governance.carbon.wso2.org\"><ser:info>&lt;metadata " +
                                                                                 "xmlns=\"http://www.wso2.org/governance/metadata\">&lt;overview>&lt;type>Generic&lt;/type>&lt;" +
-                                                                                "name>resource.txtl&lt;/name>&lt;uri>https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/resource.txt&lt;/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
+                                                                                "name>resource.txtl&lt;/name>&lt;uri>https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/resource.txt&lt;/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
 
 
         expression.addNamespace("ns", omElementAddGeneric.getNamespace().getNamespaceURI());
@@ -351,7 +351,7 @@ public class CRUDOperationsURI {
                                                         "<ser:info>&lt;metadata xmlns=\"http://www.wso2.org/governance/metadata\">" +
                                                         "&lt;overview>&lt;type>WSDL&lt;/type>&lt;name>Axis2Service_Wsdl_With_Wsdl_Imports2.wsdl&lt;" +
                                                         "/name>" +
-                                                        "&lt;uri>https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/clarity-tests/" +
+                                                        "&lt;uri>https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/platform-automated-test-suite/" +
                                                         "org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/Axis2Service_Wsdl_With_Wsdl_Imports.wsdl&lt;" +
                                                         "/uri>&lt;/overview>&lt;/metadata></ser:info></ser:addURI>"));
 

@@ -70,14 +70,14 @@ public class AddUriTest {
                                                                              ("AmazonWebServices"));
 
         artifactWsdl.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                  "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo" +
+                                                  "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo" +
                                                   "/src/main/resources/artifacts/GREG/wsdl/AmazonWebServices.wsdl");
 
         artifactWsdl.setAttribute("overview_type", "WSDL");
         artifactManager.addGenericArtifact(artifactWsdl);
 
         assertTrue(artifactWsdl.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                                    "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo" +
+                                                                    "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo" +
                                                                     "/src/main/resources/artifacts/GREG/" +
                                                                     "wsdl/AmazonWebServices.wsdl"), "artifact URI not found");
         assertTrue(artifactWsdl.getAttribute("overview_name").equals("AmazonWebServices"), "artifact name not found");
@@ -89,14 +89,14 @@ public class AddUriTest {
                                                                                ("purchasing"));
 
         artifactSchema.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                    "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo" +
+                                                    "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo" +
                                                     "/src/main/resources/artifacts/GREG/xsd/purchasing.xsd");
 
         artifactSchema.setAttribute("overview_type", "XSD");
         artifactManager.addGenericArtifact(artifactSchema);
 
         assertTrue(artifactSchema.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/platform/" +
-                                                                      "trunk/platform-integration/clarity-tests/" +
+                                                                      "trunk/platform-integration/platform-automated-test-suite/" +
                                                                       "org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/" +
                                                                       "GREG/xsd/purchasing.xsd"), "artifact URI not found");
         assertTrue(artifactSchema.getAttribute("overview_name").equals("purchasing"), "artifact name not found");
@@ -108,13 +108,13 @@ public class AddUriTest {
                                                                                ("policy"));
 
         artifactPolicy.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                    "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo" +
+                                                    "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo" +
                                                     "/src/main/resources/artifacts/GREG/policy/policy.xml");
         artifactPolicy.setAttribute("overview_type", "Policy");
         artifactManager.addGenericArtifact(artifactPolicy);
 
         assertTrue(artifactPolicy.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/platform/" +
-                                                                      "trunk/platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/" +
+                                                                      "trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                                                                       "src/main/resources/artifacts/" +
                                                                       "GREG/policy/policy.xml"), "artifact URI not found");
         assertTrue(artifactPolicy.getAttribute("overview_name").equals("policy"), "artifact name not found");
@@ -126,13 +126,13 @@ public class AddUriTest {
                                                                                 ("resource.txt"));
 
         artifactGeneric.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                     "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/" +
+                                                     "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/" +
                                                      "artifacts/GREG/resource.txt");
         artifactGeneric.setAttribute("overview_type", "Generic");
         artifactManager.addGenericArtifact(artifactGeneric);
 
         assertTrue(artifactGeneric.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/platform/" +
-                                                                       "trunk/platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/" +
+                                                                       "trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/" +
                                                                        "GREG/resource.txt"), "artifact URI not found");
         assertTrue(artifactGeneric.getAttribute("overview_name").equals("resource.txt"), "artifact name not found");
         assertTrue(artifactGeneric.getAttribute("overview_type").equals("Generic"), "artifact Generic not found");
@@ -150,13 +150,13 @@ public class AddUriTest {
                                                                                      ("Axis2Service_Wsdl_With_Wsdl_Imports"));
 
         artifactWsdlWithWsdl.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                          "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/" +
+                                                          "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/" +
                                                           "Axis2Service_Wsdl_With_Wsdl_Imports.wsdl");
         artifactWsdlWithWsdl.setAttribute("overview_type", "WSDL");
         artifactManager.addGenericArtifact(artifactWsdlWithWsdl);
 
         assertTrue(artifactWsdlWithWsdl.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/platform/" +
-                                                                            "trunk/platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/" +
+                                                                            "trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/" +
                                                                             "GREG/wsdl/Axis2Service_Wsdl_With_Wsdl_Imports.wsdl"), "artifact URI not found");
         assertTrue(artifactWsdlWithWsdl.getAttribute("overview_name").equals("Axis2Service_Wsdl_With_Wsdl_Imports"), "artifact name not found");
         assertTrue(artifactWsdlWithWsdl.getAttribute("overview_type").equals("WSDL"), "artifact type not found");
@@ -174,12 +174,12 @@ public class AddUriTest {
                                                                                        ("wsdl_with_EncrOnlyAnonymous"));
 
         artifactWsdlWithSchema.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                            "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/wsdl_with_EncrOnlyAnonymous.wsdl");
+                                                            "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/wsdl_with_EncrOnlyAnonymous.wsdl");
         artifactWsdlWithSchema.setAttribute("overview_type", "WSDL");
         artifactManager.addGenericArtifact(artifactWsdlWithSchema);
 
         assertTrue(artifactWsdlWithSchema.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/platform/" +
-                                                                              "trunk/platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/" +
+                                                                              "trunk/platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/" +
                                                                               "wsdl_with_EncrOnlyAnonymous.wsdl"), "artifact URI not found");
         assertTrue(artifactWsdlWithSchema.getAttribute("overview_name").equals("wsdl_with_EncrOnlyAnonymous"), "artifact name not found");
         assertTrue(artifactWsdlWithSchema.getAttribute("overview_type").equals("WSDL"), "artifact type not found");
@@ -191,12 +191,12 @@ public class AddUriTest {
                                                                                       ("wsdl_with_SigEncr"));
 
         artifactWsdlWitPolicy.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                           "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/wsdl_with_SigEncr.wsdl");
+                                                           "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/wsdl_with_SigEncr.wsdl");
         artifactWsdlWitPolicy.setAttribute("overview_type", "WSDL");
         artifactManager.addGenericArtifact(artifactWsdlWitPolicy);
 
         assertTrue(artifactWsdlWitPolicy.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                                             "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/" +
+                                                                             "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/" +
                                                                              "wsdl_with_SigEncr.wsdl"), "artifact URI not found");
         assertTrue(artifactWsdlWitPolicy.getAttribute("overview_name").equals("wsdl_with_SigEncr"), "artifact name not found");
         assertTrue(artifactWsdlWitPolicy.getAttribute("overview_type").equals("WSDL"), "artifact type not found");
@@ -221,13 +221,13 @@ public class AddUriTest {
                                                                                          ("SchemaImportSample"));
 
         artifactSchemaWithSchema.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                                              "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/" +
+                                                              "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                                                               "src/main/resources/artifacts/GREG/schema/SchemaImportSample.xsd");
         artifactSchemaWithSchema.setAttribute("overview_type", "XSD");
         artifactManager.addGenericArtifact(artifactSchemaWithSchema);
 
         assertTrue(artifactSchemaWithSchema.getAttribute("overview_uri").equals("https://svn.wso2.org/repos/wso2/carbon/" +
-                                                                                "platform/trunk/platform-integration/clarity-tests/" +
+                                                                                "platform/trunk/platform-integration/platform-automated-test-suite/" +
                                                                                 "org.wso2.carbon.automation.test.repo/src/main/resources/" +
                                                                                 "artifacts/" + "GREG/schema/SchemaImportSample.xsd"),
                    "artifact URI not found");
@@ -254,7 +254,7 @@ public class AddUriTest {
                                                                          ("AutomatedInvalidWSDL"));
 
         artifact.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                              "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/" +
+                                              "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                                               "src/main/resources/artifacts/GREG/wsdl/AutomatedInvalidWSDL.wsdl");
         artifact.setAttribute("overview_type", "WSDL");
         artifactManager.addGenericArtifact(artifact);
@@ -272,7 +272,7 @@ public class AddUriTest {
                                                                          ("XmlInvalidSchema"));
 
         artifact.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                              "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/" +
+                                              "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                                               "src/main/resources/artifacts/GREG/schema/XmlInvalidSchema.xsd");
         artifact.setAttribute("overview_type", "XSD");
         artifactManager.addGenericArtifact(artifact);
@@ -290,7 +290,7 @@ public class AddUriTest {
                                                                          ("invlidPolicy"));
 
         artifact.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                              "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/" +
+                                              "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                                               "src/main/resources/artifacts/GREG/policy/invlidPolicy.xml");
         artifact.setAttribute("overview_type", "Policy");
         artifactManager.addGenericArtifact(artifact);
@@ -307,7 +307,7 @@ public class AddUriTest {
                                                                          ("nonExistingUrl"));
 
         artifact.setAttribute("overview_uri", "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/" +
-                                              "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/" +
+                                              "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/" +
                                               "src/main/resources/artifacts/wsdl/AmazonWebServices.wsdl");
         artifact.setAttribute("overview_type", "WSDL");
         artifactManager.addGenericArtifact(artifact);
