@@ -161,7 +161,7 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
             }
                         
     		synapseConfiguration.removeAPI(apiName);
-            synapseConfiguration.addAPI(apiElement.getAttribute(new QName("name")).getAttributeValue().trim(),api);
+            synapseConfiguration.addAPI(api.getName(),api);
             api.init(getSynapseEnvironment());
     		
     		MediationPersistenceManager pm = getMediationPersistenceManager();
