@@ -153,8 +153,8 @@ public class SCIMGroupHandler {
     public Group getGroupWithAttributes(Group group, String groupName)
             throws IdentitySCIMException, CharonException {
         if (!isGroupExisting(groupName)) {
-            throw new IdentitySCIMException("Group being queried: " + groupName + " doesn't exist " +
-                                            "in the SCIM DB.");
+            logger.debug("The group " + groupName + " is not a SCIM group. Skipping..");
+            return null;
         }
         GroupDAO groupDAO = new GroupDAO();
         Map<String, String> attributes = groupDAO.getSCIMGroupAttributes(tenantId, groupName);

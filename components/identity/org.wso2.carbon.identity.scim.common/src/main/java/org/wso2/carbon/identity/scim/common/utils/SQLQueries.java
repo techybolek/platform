@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.identity.scim.common.utils;
 
-import org.wso2.charon.core.schema.SCIMConstants;
 
 public class SQLQueries {
     /*SQL Queries for SCIM_IDENTITY_TABLE which persists SCIM_GROUP info*/
