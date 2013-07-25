@@ -321,18 +321,22 @@ public class EventingServiceImpl implements EventingService, SubscriptionEmailVe
         private String userName;
         private String remoteURL;
         private int tenantId;
+        private String tenantDomain;
+
 
         public EmailVerifier(Subscription subscription, String userName, String remoteURL,
                              int tenantId) {
             this.subscription = subscription;
             this.userName = userName;
             this.remoteURL = remoteURL;
-            this.tenantId = tenantId;
+            this.tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            this.tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
         @SuppressWarnings("unchecked")
         public void run() {
-            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
             if (Utils.getEmailVerificationSubscriber() == null) {
                 return;
             }
