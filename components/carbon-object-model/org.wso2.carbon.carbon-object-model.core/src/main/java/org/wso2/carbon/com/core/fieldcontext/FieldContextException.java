@@ -20,6 +20,10 @@ package org.wso2.carbon.com.core.fieldcontext;
 
 import org.wso2.carbon.com.core.model.COMException;
 
+/**
+ * This class represents the Exception class used to show error conditions
+ * related to field contexts.
+ */
 public class FieldContextException extends COMException {
 
 	private static final long serialVersionUID = 8359217188633670411L;

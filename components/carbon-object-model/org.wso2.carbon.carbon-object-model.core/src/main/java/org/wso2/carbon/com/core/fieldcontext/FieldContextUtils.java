@@ -20,6 +20,9 @@ package org.wso2.carbon.com.core.fieldcontext;
 
 import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
 
+/**
+ * This class contains utility methods required for field contexts.
+ */
 public class FieldContextUtils {
 
 	public static FieldContextPath parseFieldContextPath(String path) throws FieldContextException {

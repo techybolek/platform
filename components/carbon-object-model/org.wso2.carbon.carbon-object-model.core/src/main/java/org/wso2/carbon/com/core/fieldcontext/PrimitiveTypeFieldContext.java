@@ -20,6 +20,9 @@ package org.wso2.carbon.com.core.fieldcontext;
 
 import org.wso2.carbon.com.core.model.DataFormat;
 
+/**
+ * This class represents a primitive type field context.
+ */
 public class PrimitiveTypeFieldContext implements FieldContext {
 
 	private Object object;

@@ -18,6 +18,9 @@
  */
 package org.wso2.carbon.com.core.fieldcontext;
 
+/**
+ * This class represents a field context path.
+ */
 public class FieldContextPath {
 	
 	private PathComponent[] components;
