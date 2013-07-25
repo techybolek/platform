@@ -26,7 +26,6 @@ import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
-import org.wso2.caching.CachingException;
 import org.wso2.carbon.relay.module.policy.PolicyProcessor;
 import org.wso2.carbon.relay.RelayConstants;
 
@@ -40,17 +39,17 @@ public class RelayModule implements Module {
         RelayConfiguration configuration = null;
         if (policy != null) {
             try {
-                configuration = PolicyProcessor.processCachingPolicy(policy);
-            } catch (CachingException e) {
-                handleException("Unable to initialize the caching module : " +
-                        "Error in processing caching policy", e);
+                configuration = PolicyProcessor.processPolicy(policy);
+            } catch (AxisFault e) {
+                handleException("Unable to initialize the relay module : " +
+                        "Error in processing relay policy", e);
             }
         }
 
         // it is a must to have a gloabl configuration
         if (configuration == null) {
             if (log.isDebugEnabled()) {
-                log.debug("Using the default initializer for the CacheConfiguration");
+                log.debug("Using the default initializer for the RelayConfiguration");
             }
             configuration = new RelayConfiguration();
         }

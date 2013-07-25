@@ -39,7 +39,7 @@ public class PolicyProcessor {
 
     private static Log log = LogFactory.getLog(PolicyProcessor.class);
 
-    public static RelayConfiguration processCachingPolicy(PolicySubject policySubject) throws AxisFault {
+    public static RelayConfiguration processPolicy(PolicySubject policySubject) throws AxisFault {
 
         if (policySubject.getAttachedPolicyComponents().size() != 0) {
             RelayConfiguration relayConfig = new RelayConfiguration();
