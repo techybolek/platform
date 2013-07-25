@@ -41,20 +41,7 @@ public class AnnotationBuilder {
 
     private static Map<String, String> annotations = new HashMap<String, String>();
 
-   static {
-        try {
-            OMElement config= loadConfigXML();
-
-            populateAnnotations(config);
-
-        } catch (AnnotationConfigException e) {
-            log.error("The Analytics config was not found.");
-        }
-
-
-    }
-
-    private static OMElement loadConfigXML() throws AnnotationConfigException {
+    public static OMElement loadConfigXML() throws AnnotationConfigException {
 
         String carbonHome = System.getProperty(ServerConstants.CARBON_CONFIG_DIR_PATH);
         String path = carbonHome + File.separator + HiveConstants.ANNOTATION_CONFIG_XML;
@@ -91,7 +78,7 @@ public class AnnotationBuilder {
     }
 
 
-    private static void populateAnnotations(OMElement config) {
+    public static void populateAnnotations(OMElement config) {
 
 
 
@@ -103,8 +90,8 @@ public class AnnotationBuilder {
             for (Iterator annotationIterator = annotationElems.getChildrenWithName(new QName(HiveConstants.ANNOTATION_ELEMENT));
                  annotationIterator.hasNext(); ) {
                 OMElement annotation = (OMElement) annotationIterator.next();
-                OMElement nameElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANNOTATION_NAME__ELEMENT));
-                OMElement classElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANNOTATION_CLASS_ELEMENT));
+                OMElement nameElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANALYTICS_NAMESPACE,HiveConstants.ANNOTATION_NAME__ELEMENT));
+                OMElement classElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANALYTICS_NAMESPACE,HiveConstants.ANNOTATION_CLASS_ELEMENT));
 
                 annotations.put(nameElem.getText(), classElem.getText());
             }
@@ -114,8 +101,14 @@ public class AnnotationBuilder {
     }
 
 
-    public static Map<String, String> getAnnotations() {
-        return annotations;
+    public static String getAnnotationClass(String name) {
+
+        if(annotations != null){
+            return annotations.get(name);
+        }else{
+          return null;
+        }
+
     }
 
     public void setAnnotations(Map<String, String> annotations) {

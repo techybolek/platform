@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.analytics.hive.internal;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.common.ServerUtils;
@@ -31,6 +32,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.analytics.hive.ServiceHolder;
 import org.wso2.carbon.analytics.hive.Utils;
+import org.wso2.carbon.analytics.hive.annotation.util.AnnotationBuilder;
+import org.wso2.carbon.analytics.hive.exception.AnnotationConfigException;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.impl.HiveExecutorServiceImpl;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
@@ -109,6 +112,15 @@ public class HiveServiceComponent {
         System.setProperty(LOG4J_PROPERTY, log4jFile);
 
         hiveServerPool.submit(new HiveRunnable());
+
+        try {
+             OMElement config= AnnotationBuilder.loadConfigXML();
+             AnnotationBuilder.populateAnnotations(config);
+        } catch (AnnotationConfigException e) {
+            String errorMessage = "Error loading annotation-config.xml";
+            log.error(errorMessage, e);
+        }
+
 
         // Set and register HiveExecutorService
         ServiceHolder.setHiveExecutorService(new HiveExecutorServiceImpl());

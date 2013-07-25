@@ -22,13 +22,14 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveContext;
 import org.wso2.carbon.analytics.hive.HiveConstants;
 import org.wso2.carbon.analytics.hive.Utils;
+import org.wso2.carbon.analytics.hive.annotation.AbstractHiveAnnotation;
+import org.wso2.carbon.analytics.hive.annotation.util.AnnotationBuilder;
 import org.wso2.carbon.analytics.hive.dto.QueryResult;
 import org.wso2.carbon.analytics.hive.dto.QueryResultRow;
 import org.wso2.carbon.analytics.hive.dto.ScriptResult;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.exception.RegistryAccessException;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
-import org.wso2.carbon.analytics.hive.annotation.AbstractHiveAnnotation;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveMultitenantUtil;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
@@ -289,9 +290,10 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             }
 
             try {
+                String newScript= resolveGlobalAnnotations(script);
 
                 Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-                Matcher regexMatcher = regex.matcher(script);
+                Matcher regexMatcher = regex.matcher(newScript);
                 String formattedScript = "";
                 while (regexMatcher.find()) {
                     String temp = "";
@@ -377,58 +379,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                         }
                     } else if (trimmedCmdLine.startsWith("@script.") ||
                             trimmedCmdLine.startsWith("@SCRIPT.")) {
-                        HashMap<String, String> annotations = new HashMap<String, String>(); // annotation execution
-                        String[] contentSet = trimmedCmdLine.split("@script.");
-                        String txt = contentSet[1];
-
-                        String re1 = ".*?";    // Non-greedy match on filler
-                        String re2 = "(\\(.*\\))";    // Round Braces 1
-
-                        Pattern p = Pattern.compile(re1 + re2, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-                        Matcher m = p.matcher(txt);
-                        if (m.find()) {
-                            String rbraces1 = m.group(1);
-                            int temp = rbraces1.trim().length();
-
-                            String s = rbraces1.substring(1, temp - 1);
-
-                            String[] variables = s.split(";");
-
-                            for (String g : variables) {
-                                String[] values = g.split("=");
-                                String key = values[0];
-                                String value = values[1].substring(1, values[1].length() - 1);
-                                annotations.put(key, value);
-                            }
-                        }
-                        String className = "org.wso2.carbon.analytics.hive.extension.annotation.testAnnotation";
-
-                        Class clazz = null;
-                        try {
-                            clazz = Class.forName(className, true,
-                                    this.getClass().getClassLoader());
-                        } catch (ClassNotFoundException e) {
-                            log.error("Unable to find custom annotation class..", e);
-                        }
-
-                        if (clazz != null) {
-                            Object annotation = null;
-                            try {
-                                annotation = clazz.newInstance();
-                            } catch (InstantiationException e) {
-                                log.error("Unable to instantiate custom annotation class..", e);
-                            } catch (IllegalAccessException e) {
-                                log.error("Unable to instantiate custom annotation class..", e);
-                            }
-
-                            if (annotation instanceof AbstractHiveAnnotation) {
-                                AbstractHiveAnnotation hiveAnnotation =
-                                        (AbstractHiveAnnotation) annotation;
-                                hiveAnnotation.init();
-                            } else {
-                                log.error("Custom annotations should extend AbstractHiveAnnotation..");
-                            }
-                        }
+                              executeAnnotation(trimmedCmdLine);
                     } else { // Normal hive query
                         QueryResult queryResult = new QueryResult();
 
@@ -551,6 +502,144 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 }
             }
 
+        }
+
+        private String resolveGlobalAnnotations(String script){
+             String newScript=script;
+             String regex="((Global)\\{.*?\\})";
+            String globalConf= null;
+
+
+            Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+             Matcher m = p.matcher(newScript);
+             if (m.find())
+             {
+                 globalConf=m.group(1);
+
+              }
+
+            if (globalConf != null){
+                 String a=globalConf.trim();
+                String[] contentSet = a.split("Global");
+                String txt = contentSet[1];
+
+                String s = txt.substring(1, txt.length() - 1);
+
+                Pattern regex1 = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
+                Matcher regexMatcher = regex1.matcher(s);
+                String formattedScript = "";
+                while (regexMatcher.find()) {
+                    String temp = "";
+                    if (regexMatcher.group(1) != null) {
+                        // Add double-quoted string without the quotes
+                        temp = regexMatcher.group(1).replaceAll(";", "%%");
+                        if (temp.contains("%%")) {
+                            temp = temp.replaceAll(" ", "");
+                            temp = temp.replaceAll("\n", "");
+                        }
+                        temp = "\"" + temp + "\"";
+                    } else if (regexMatcher.group(2) != null) {
+                        // Add single-quoted string without the quotes
+                        temp = regexMatcher.group(2).replaceAll(";", "%%");
+                        if (temp.contains("%%")) {
+                            temp = temp.replaceAll(" ", "");
+                            temp = temp.replaceAll("\n", "");
+                        }
+                        temp = "\'" + temp + "\'";
+                    } else {
+                        temp = regexMatcher.group();
+                    }
+                    formattedScript += temp + " ";
+                }
+
+
+                String[] cmdLines1 = formattedScript.split(";\\r?\\n|;"); // Tokenize with ;[new-line]
+
+
+                for (String cmdLine : cmdLines1) {
+
+                    String trimmedCmdLine = cmdLine.trim();
+                    trimmedCmdLine = trimmedCmdLine.replaceAll(";", "");
+                    trimmedCmdLine = trimmedCmdLine.replaceAll("%%", ";");
+                    //Fixing some issues in the hive query due to /n/t
+                    trimmedCmdLine = trimmedCmdLine.replaceAll("\n", " ");
+                    trimmedCmdLine = trimmedCmdLine.replaceAll("\t", " ");
+
+                    if ("".equals(trimmedCmdLine)) {
+                        continue;
+                    }
+
+                    executeAnnotation(trimmedCmdLine);
+                }
+                    String[] newScript1=newScript.split(regex);
+                return newScript1[1];
+            }else{
+                return newScript;
+            }
+
+        }
+
+        private void executeAnnotation(String trimmedCmdLine){
+
+        HashMap<String, String> annotations = new HashMap<String, String>(); // annotation execution
+        String[] contentSet = trimmedCmdLine.split("@");
+        String txt = contentSet[1];
+
+
+        String re2 = "(\\(.*\\))";    // Round Braces 1
+
+        Pattern p = Pattern.compile(re2, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher m = p.matcher(txt);
+        if (m.find()) {
+            String rbraces1 = m.group(1);
+            int temp = rbraces1.trim().length();
+
+            String s = rbraces1.substring(1, temp - 1);
+
+            String[] variables = s.split(",");
+
+            for (String g : variables) {
+                String[] values = g.split("=");
+                String key = values[0];
+                String value = values[1].substring(1, values[1].length() - 1);
+                annotations.put(key, value);
+            }
+        }
+
+        String[] txt1=txt.split(re2);
+         String txt2 = txt1[0];
+
+
+        String className = AnnotationBuilder.getAnnotationClass(txt2);
+
+        Class clazz = null;
+        try {
+            clazz = Class.forName(className, true,
+                    this.getClass().getClassLoader());
+        } catch (ClassNotFoundException e) {
+            log.error("Unable to find custom annotation class..", e);
+        }
+
+        if (clazz != null) {
+            Object annotation = null;
+            try {
+                annotation = clazz.newInstance();
+            } catch (InstantiationException e) {
+                log.error("Unable to instantiate custom annotation class..", e);
+            } catch (IllegalAccessException e) {
+                log.error("Unable to instantiate custom annotation class..", e);
+            }
+
+            if (annotation instanceof AbstractHiveAnnotation) {
+                AbstractHiveAnnotation hiveAnnotation =
+                        (AbstractHiveAnnotation) annotation;
+                hiveAnnotation.init();
+                hiveAnnotation.validate(annotations.keySet());
+                hiveAnnotation.execute();
+            } else {
+                log.error("Custom annotations should extend AbstractHiveAnnotation..");
+            }
+        }
         }
 
         private Connection getConnection() throws SQLException {
