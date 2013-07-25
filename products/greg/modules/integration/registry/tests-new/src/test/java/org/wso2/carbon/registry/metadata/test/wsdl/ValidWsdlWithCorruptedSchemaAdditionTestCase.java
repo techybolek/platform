@@ -61,7 +61,7 @@ public class ValidWsdlWithCorruptedSchemaAdditionTestCase {
 
         Wsdl wsdl = wsdlManager
                 .newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/"
-                        + "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/"
+                        + "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/"
                         + "GREG/wsdl/wsdlWithCorruptedSchema.wsdl");
 
         wsdl.addAttribute("version", "1.0.0");

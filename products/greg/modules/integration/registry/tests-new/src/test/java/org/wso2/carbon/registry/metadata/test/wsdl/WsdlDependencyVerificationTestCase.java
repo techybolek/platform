@@ -83,7 +83,7 @@ public class WsdlDependencyVerificationTestCase {
                         "AmazonWebServices",
                         "for the dependency verification",
                         "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-                        + "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/"
+                        + "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/"
                         + "src/main/resources/artifacts/GREG/wsdl/AmazonWebServices.wsdl");
 
         resourceAdminServiceClient
@@ -91,16 +91,15 @@ public class WsdlDependencyVerificationTestCase {
                         "Automated",
                         "a dependency of AmazonWebServices",
                         "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/"
-                        + "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts"
+                        + "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts"
                         + "/GREG/wsdl/Automated.wsdl");
 
         resourceAdminServiceClient
                 .addWSDL(
                         "BizService",
                         "a dependency of AmazonWebServices",
-                        "https://svn.wso2.org/repos/wso2/carbon/platform/branches/"
-                        + "4.0.0/platform-integration/clarity-tests/"
-                        + "1.0.1/org.wso2.carbon.automation.test.repo/"
+                        "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
+                        + "platform-integration/platform-automated-test-suite/org.wso2.carbon.automation.test.repo/"                        
                         + "src/main/resources/artifacts/GREG/wsdl/BizService.wsdl");
 
 

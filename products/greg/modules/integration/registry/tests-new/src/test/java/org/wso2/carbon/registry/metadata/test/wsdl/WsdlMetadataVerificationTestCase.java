@@ -89,9 +89,9 @@ public class WsdlMetadataVerificationTestCase {
             throws GovernanceException, ResourceAdminServiceExceptionException, RemoteException {
 
         wsdl = wsdlManager
-                .newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/branches/4.0.0/"
-                         + "platform-integration/clarity-tests/"
-                         + "1.0.1/org.wso2.carbon.automation.test.repo/"
+                .newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
+                         + "platform-integration/platform-automated-test-suite/"
+                         + "org.wso2.carbon.automation.test.repo/"
                          + "src/main/resources/artifacts/GREG/wsdl/echo.wsdl");
 
         wsdl.addAttribute("version", "1.0.0");

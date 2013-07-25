@@ -76,7 +76,7 @@ public class InvalidGARAdditionTestCase {
 
         Wsdl wsdl = wsdlManager
                 .newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-                        + "platform-integration/clarity-tests/"
+                        + "platform-integration/platform-automated-test-suite/"
                         + "org.wso2.carbon.automation.test.repo/src/main/resources/"
                         + "artifacts/GREG/gar/Invalidopps.gar");
 
