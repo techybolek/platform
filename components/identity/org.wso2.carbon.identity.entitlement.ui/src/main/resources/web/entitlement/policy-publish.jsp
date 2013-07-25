@@ -317,8 +317,8 @@
                 <td>
                     <a style="cursor: pointer;" onclick="selectAllInThisPage(true);return false;"
                        href="#"><fmt:message key="selectAllInPage"/></a>
-                    &nbsp;<b>|</b>&nbsp;</td>
-                <td><a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;"
+                    &nbsp;<b>|</b>&nbsp;
+                 <a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;"
                        href="#"><fmt:message key="selectNone"/></a>
                 </td>
                 <td width="20%">&nbsp;</td>

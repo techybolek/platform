@@ -26,6 +26,10 @@
 
 <%
     String editorConfig = PolicyEditorEngine.getInstance().getConfig();
+    if(editorConfig == null){
+        editorConfig = "";
+    }
+    editorConfig = editorConfig.trim();
 %>
 
 <fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
@@ -47,11 +51,12 @@
                     <table class="normal" style="width:100%">
                         <tbody>
                         <tr>
-                            <td><input type="hidden" name="editorConfig" id="editorConfig"></td>
                             <td>
+                                <input type="hidden" name="editorConfig" id="editorConfig">
                                 <textarea name="editorConfigText"  id="editorConfigText"  rows="50" cols="50"
-                                          style="border: 1px solid rgb(204, 204, 204); width: 99%;
-                                          height: 400px; margin-top: 5px; display: none;"><%=editorConfig%>
+                                          style="border: 1px solid rgb(204, 204, 204); width: 90%;">
+                                          <%--height: 1000px; margin-top: 5px; display: none;"--%>
+                                          <%=editorConfig%>
                                 </textarea>
                             </td>
                         </tr>
@@ -62,7 +67,7 @@
             <tr>
                 <td class="buttonRow">
                     <button class="button" onclick="submitForm(); return false;"><fmt:message key="update"/></button>
-                    <button class="button" onclick="resetConfiguration(); return false;"><fmt:message key="reset"/></button>
+                    <button class="button" onclick="cancel(); return false;"><fmt:message key="cancel"/></button>
                 </td>
             </tr>
             </tbody>
@@ -76,15 +81,21 @@
 
     <script type="text/javascript">
 
+    jQuery(document).ready(function(){
+        editAreaLoader.init({
+            id : "editorConfigText"		// text area id
+            ,syntax: "xml"			// syntax to be uses for highlighting
+            ,start_highlight: true  // to display with highlight mode on start-up
+        });
+    })
+
     function submitForm() {
-        document.getElementById("editorConfig").value = document.getElementById("editorConfigText").value;
+        document.getElementById("editorConfig").value = editAreaLoader.getValue("editorConfigText");
         document.configForm.submit();
     }
 
-    editAreaLoader.init({
-        id : "editorConfigText"		// text area id
-        ,syntax: "xml"			// syntax to be uses for highlighting
-        ,start_highlight: true  // to display with highlight mode on start-up
-    });
+    function cancel() {
+        location.href = "add-policy.jsp";
+    }
 
 </script>

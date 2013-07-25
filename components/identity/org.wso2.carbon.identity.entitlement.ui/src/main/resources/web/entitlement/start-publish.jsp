@@ -280,7 +280,7 @@
             </tr>
             </thead>
             <tr>
-                <td>
+                <td style="width: 33%;margin-top:10px;">
                     <label>
                         <input name="publishAction" type="radio"
                         <% if(EntitlementConstants.PolicyPublish.ACTION_CREATE.equals(publishAction)){%> checked="checked" <% }%>
@@ -288,7 +288,7 @@
                         <fmt:message key="select.publish.actions.add"/>
                     </label>
                 </td>
-                <td>
+                <td style="width: 33%;margin-top:10px;">
                     <label>
                         <input name="publishAction" type="radio"
                         <% if(EntitlementConstants.PolicyPublish.ACTION_UPDATE.equals(publishAction)){%> checked="checked" <% }%>
@@ -296,7 +296,7 @@
                         <fmt:message key="select.publish.actions.update"/>
                     </label>
                 </td>
-                <td>
+                <td style="width: 33%;margin-top:10px;">
                     <label>
                         <input name="publishAction" type="radio"
                         <% if(EntitlementConstants.PolicyPublish.ACTION_DELETE.equals(publishAction)){%> checked="checked" <% }%>
@@ -317,7 +317,7 @@
                 </tr>
             </thead>
             <tr>
-                <td>
+                <td style="width: 33%;margin-top:10px;">
                     <label>
                         <input name="versionSelector" type="radio" value="versionSelector"
                         <%if(policyVersion == null || policyVersion.trim().length() == 0) { %>
@@ -327,7 +327,7 @@
                         <fmt:message key="select.publish.version.current"/>
                     </label>
                 </td>
-                <td>
+                <td style="width: 33%;margin-top:10px;">
                     <label>
                         <input name="versionSelector" type="radio"
                         <%if(policyVersion != null && policyVersion.trim().length() > 0) { %>
@@ -337,7 +337,7 @@
                         <fmt:message key="select.publish.version.older"/>
                     </label>
                 </td>
-                <td id="policyVersionSelect" >
+                <td style="width: 33%;margin-top:10px;" id="policyVersionSelect" >
                 </td>
             </tr>
         </table>
@@ -349,7 +349,7 @@
         if(!"true".equals(toPDP)){
     %>
 
-            <table class="styledLeft noBorders">
+            <table class="styledLeft noBorders" style="width: 100%;margin-top:10px;">
                 <thead>
                 <tr>
                     <th><fmt:message key='select.subscriber'/></th>
@@ -432,20 +432,21 @@ showVersion()
         </table>
 
     <%
+        } else {
+    %>
+            <tr>
+                <td>
+                    <input name="subscribers" type="hidden" value="<%=EntitlementConstants.PDP_SUBSCRIBER_ID%>" />
+                </td>
+            </tr>
+    <%
         }
     %>
 
-        <%--<tr>--%>
-            <%--<td>--%>
-                <%--<input name="subscribers" type="hidden" value="<%=EntitlementConstants.PDP_SUBSCRIBER_ID%>" />--%>
-            <%--</td>--%>
-        <%--</tr>--%>
-        <%--<%--%>
-            <%--}--%>
-        <%--%>--%>
+        <div class="buttonRow">
         <table class="styledLeft noBorders">
         <tr>
-            <td class="buttonRow">
+            <td>
                 <%
                     if("true".equals(toPDP)){
                 %>
@@ -462,6 +463,7 @@ showVersion()
             </td>
         </tr>
         </table>
+        </div>
         </form>
     </div>
 </div>

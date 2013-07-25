@@ -28,7 +28,6 @@
     String forwardTo = null;
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
-    System.out.println(request.getParameter("editorConfig"));
     if(request.getParameter("editorConfig") != null){
         try {
             PolicyEditorEngine.getInstance().persistConfig(request.getParameter("editorConfig"));
@@ -105,5 +104,5 @@
         </tbody>
     </table>
 </div>
-/<div>
+<div>
 </fmt:bundle>

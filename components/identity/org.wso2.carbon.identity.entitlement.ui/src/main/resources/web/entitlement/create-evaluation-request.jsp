@@ -165,8 +165,8 @@
             </td>
         </tr>
         <tr>
-            <td><fmt:message key='resource.names.are'/></td>
-            <td colspan="2">
+            <td style="width: 20%;margin-top:10px;"><fmt:message key='resource.names.are'/></td>
+            <td style="width: 40%;margin-top:10px;">
             <%
                 if (resourceNames != null && resourceNames.trim().length() > 0) {
             %>
@@ -181,7 +181,7 @@
                 }
             %>
             </td>
-            <td>
+            <td style="width: 40%;margin-top:10px;">
                 <label><input type="checkbox" id="resourceNamesInclude"
                               name="resourceNamesInclude" value="true"
                               <%if(resourceNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>
@@ -189,8 +189,8 @@
         </tr>
 
         <tr>
-            <td class="leftCol-small"><fmt:message key='subject.name'/></td>
-            <td colspan="2">
+            <td style="width: 20%;margin-top:10px;"><fmt:message key='subject.name'/></td>
+            <td  style="width: 40%;margin-top:10px;">
             <%
                 if (subjectNames != null && subjectNames.trim().length() > 0) {
             %>
@@ -204,7 +204,7 @@
                 }
             %>
             </td>
-            <td>
+            <td  style="width: 40%;margin-top:10px;">
                 <label><input type="checkbox" id="subjectNamesInclude"
                               name="subjectNamesInclude" value="true"
                               <%if(subjectNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>
@@ -212,8 +212,8 @@
         </tr>
 
         <tr>
-            <td class="leftCol-small"><fmt:message key='action.names'/></td>
-            <td colspan="2">
+            <td  style="width: 20%;margin-top:10px;"><fmt:message key='action.names'/></td>
+            <td  style="width: 40%;margin-top:10px;">
             <%
                 if (actionNames != null && actionNames.trim().length() > 0) {
             %>
@@ -227,7 +227,7 @@
                 }
             %>
             </td>
-            <td>
+            <td  style="width: 40%;margin-top:10px;">
                 <label><input type="checkbox" id="actionNamesInclude"
                               name="actionNamesInclude" value="true"
                               <%if(actionNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>
@@ -235,8 +235,8 @@
         </tr>            
 
         <tr>
-            <td class="leftCol-small"><fmt:message key='environment.names'/></td>
-            <td colspan="2">
+            <td style="width: 20%;margin-top:10px;"><fmt:message key='environment.names'/></td>
+            <td style="width: 40%;margin-top:10px;">
             <%
                 if (environmentNames != null && environmentNames.trim().length() > 0) {
             %>
@@ -250,7 +250,7 @@
                 }
             %>
             </td>
-            <td>
+            <td style="width: 40%;margin-top:10px;">
                 <label><input type="checkbox" id="environmentNamesInclude"
                               name="environmentNamesInclude" value="true"
                               <%if(environmentNamesInclude != null){%>checked="checked" <%}%> >Include In Result</label>

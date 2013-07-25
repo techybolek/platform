@@ -65,8 +65,7 @@
 
     String[] policyMetaData = null;
 
-    if(policyName != null && policyName.trim().length() > 0 && algorithmName != null
-            && algorithmName.trim().length() > 0) {
+    if(policyName != null && policyName.trim().length() > 0) {
         basicPolicyDTO.setPolicyId(policyName);
         basicPolicyDTO.setRuleAlgorithm(algorithmName);
         basicPolicyDTO.setDescription(policyDescription);

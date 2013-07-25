@@ -2405,7 +2405,7 @@ public class PolicyEditorUtil {
         if(algorithm != null && algorithm.trim().length() > 0) {
             basicPolicyDTO.setRuleAlgorithm(holder.getRuleAlgorithmUri(algorithm));
         } else {
-            basicPolicyDTO.setRuleAlgorithm(holder.getDefaultRuleAlgorithm());
+            basicPolicyDTO.setRuleAlgorithm(holder.getRuleAlgorithmUri(holder.getDefaultRuleAlgorithm()));
         }
         policyEditorData[i++] = basicPolicyDTO.getVersion();
         policyEditorData[i++] = basicPolicyDTO.getDescription();

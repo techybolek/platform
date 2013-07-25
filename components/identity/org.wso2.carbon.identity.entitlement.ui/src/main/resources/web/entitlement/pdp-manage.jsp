@@ -54,19 +54,11 @@
             policyFinders = pdpDataHolder.getPolicyFinders();
         }
     } catch (Exception e) {
-        e.printStackTrace();
-    	String message = resourceBundle.getString("error.while.performing.advance.search");
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
-        forwardTo = "../admin/error.jsp";
 %>
 <script type="text/javascript">
-    function forward() {
-        location.href = "<%=forwardTo%>";
-    }
-</script>
-
-<script type="text/javascript">
-    forward();
+    CARBON.showErrorDialog('<%=e.getMessage()%>', function () {
+        location.href = "index.jsp";
+    });
 </script>
 <%
     }

@@ -49,12 +49,15 @@
         statusSearchString = statusSearchString.trim();
     }
 
-    String paginationValue = "statusSearchString=" + statusSearchString;
+    String typeFilter = request.getParameter("typeFilter");
+    if (typeFilter == null || "".equals(typeFilter)) {
+        typeFilter = "ALL";
+    }
 
     String policyId = request.getParameter("policyid");
-
+    String paginationValue = "policyid=" + policyId +"&typeFilter=" + typeFilter +
+            "&statusSearchString=" + statusSearchString;
     StatusHolder[] statusHolders = new StatusHolder[0];
-
 
     try {
         String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -63,15 +66,19 @@
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                 serverURL, configContext);
+        String type = typeFilter;
+        if("ALL".equals(type)){
+            type = null;
+        }
         PaginatedStatusHolder holder = client.getStatusData(EntitlementConstants.Status.ABOUT_POLICY,
-                            policyId,  "*", statusSearchString, pageNumberInt);
+                            policyId,  type, statusSearchString, pageNumberInt);
         statusHolders = holder.getStatusHolders();
         numberOfPages = holder.getNumberOfPages();
     } catch (Exception e) {
 %>
 <script type="text/javascript">
     CARBON.showErrorDialog('<%=e.getMessage()%>', function () {
-        location.href = "policy-publish.jsp";
+        location.href = "index.jsp";
     });
 </script>
 <%
@@ -85,6 +92,12 @@
 
     function doCancel(){
         location.href = 'index.jsp';
+    }
+
+    function getSelectedType() {
+        var comboBox = document.getElementById("typeFilter");
+        var typeFilter = comboBox[comboBox.selectedIndex].value;
+        location.href = 'show-policy-status.jsp?typeFilter=' + typeFilter + "&policyid=" +  "<%=policyId%>";
     }
 </script>
 
@@ -102,6 +115,34 @@
                         <tr style="border:0; !important">
                             <td style="border:0; !important">
                                 <nobr>
+                                    <fmt:message key="policy.status.type"/>
+                                    <select name= "typeFilter" id="typeFilter"  onchange="getSelectedType();">
+                                        <%
+                                            if (typeFilter.equals("ALL")) {
+                                        %>
+                                        <option value="ALL" selected="selected"><fmt:message key="all"/></option>
+                                        <%
+                                        } else {
+                                        %>
+                                        <option value="ALL"><fmt:message key="all"/></option>
+                                        <%
+                                            }
+                                            for (String type : EntitlementConstants.StatusTypes.ALL_TYPES) {
+                                                if (typeFilter.equals(type)) {
+                                        %>
+                                        <option value="<%= type%>" selected="selected"><%= type%>
+                                        </option>
+                                        <%
+                                        } else {
+                                        %>
+                                        <option value="<%= type%>"><%= type%>
+                                        </option>
+                                        <%
+                                                }
+                                            }
+                                        %>
+                                    </select>
+                                    &nbsp;&nbsp;&nbsp;
                                 <fmt:message key="search.status"/>
                                 <input type="text" name="statusSearchString"
                                        value="<%= statusSearchString != null? statusSearchString :""%>"/>&nbsp;
@@ -149,8 +190,13 @@
         <%
                 }
             }
-        }
-
+        } else {
+        %>
+        <tr class="noRuleBox">
+            <td colspan="7"><fmt:message key="no.status.defined"/><br/></td>
+        </tr>
+        <%
+            }
         %>
         <tr>
             <carbon:paginator pageNumber="<%=pageNumberInt%>"
@@ -166,7 +212,7 @@
 </div>
 <div class="buttonRow">
     <a onclick="doCancel()" class="icon-link" style="background-image:none;">
-        <fmt:message key="back.to.subscribers"/></a><div style="clear:both"></div>
+        <fmt:message key="back.to.policies"/></a><div style="clear:both"></div>
 </div>
 </div>
 </fmt:bundle>
