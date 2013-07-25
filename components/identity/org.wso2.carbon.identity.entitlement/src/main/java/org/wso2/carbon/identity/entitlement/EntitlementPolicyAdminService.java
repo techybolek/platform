@@ -457,7 +457,8 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
     public void publishToPDP(String[] policyIds, String version, String action) throws EntitlementException {
 
         PolicyPublisher publisher = EntitlementAdminEngine.getInstance().getPolicyPublisher();
-        publisher.publishPolicy(policyIds, version, action, null, null);
+        String[] subscribers = new String[]{EntitlementConstants.PDP_SUBSCRIBER_ID};
+        publisher.publishPolicy(policyIds, version, action, subscribers, null);
     }
 
     /**

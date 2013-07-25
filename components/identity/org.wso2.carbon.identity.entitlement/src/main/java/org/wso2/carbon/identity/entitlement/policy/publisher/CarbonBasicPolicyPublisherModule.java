@@ -147,14 +147,7 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
             option.setProperty(Constants.Configuration.TRANSPORT_URL, serverEndPoint);
             option.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, Constants.VALUE_TRUE);
             option.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
-            OMElement omElement = client.sendReceive(AXIOMUtil.stringToOM(body));
-            boolean success = false;
-            if(omElement != null){
-                success = Boolean.parseBoolean(omElement.getFirstElement().getText());
-            }
-            if(!success){
-                throw new EntitlementException("Policy publish fails due : Unexpected error has occurred");
-            }
+            client.fireAndForget(AXIOMUtil.stringToOM(body));
         } catch (AxisFault axisFault) {
             log.error("Policy publish fails due : " + axisFault.getMessage(), axisFault);
             throw new EntitlementException("Policy publish fails due : " + axisFault.getMessage());
@@ -189,6 +182,7 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
                 "         <xsd:policyDTO>" +
                 "            <xsd1:active>false</xsd1:active>" +
                 "             <xsd1:policy><![CDATA[" + policy + "]]>  </xsd1:policy>" +
+                "            <xsd1:promote>true</xsd1:promote>" +
                 "          </xsd:policyDTO>" +
                 "      </xsd:addPolicy>";
     }
