@@ -36,6 +36,8 @@
 
 	<properties>
 		<platform.version>4.2.0-SNAPSHOT</platform.version>
+		<is.product.version>4.5.0-SNAPSHOT</is.product.version>
+		<stratos.version>2.2.0-SNAPSHOT</stratos.version>
 	</properties>
 
     <build>
@@ -82,7 +84,6 @@
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.feature:${platform.version}</featureArtifactDef>
 
 				<!-- Identity related features -->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.core.feature:${platform.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.provider.feature:${platform.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.relying.party.feature:${platform.version}</featureArtifactDef>
 				<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:${platform.version}</featureArtifactDef-->
@@ -93,8 +94,8 @@
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.feature:${platform.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.feature:${platform.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.identity:org.wso2.identity.styles.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.identity:org.wso2.identity.utils.feature:${platform.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.identity:org.wso2.identity.styles.feature:${is.product.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.identity:org.wso2.identity.utils.feature:${is.product.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.oauth.feature:${platform.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.iwa.feature:${platform.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sts.passive.feature:${platform.version}</featureArtifactDef>
@@ -103,132 +104,18 @@
 				<!-- featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:${platform.version}</featureArtifactDef -->
 				
 				<!-- Features related to Cloud Identity -->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.identity:org.wso2.identity.ui.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature:${platform.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.identity:org.wso2.identity.ui.feature:${is.product.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.feature:${stratos.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature:${stratos.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:${stratos.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature:${stratos.version}</featureArtifactDef>
 				<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}</featureArtifactDef-->
                                 
-				<!-- IS specific composite features -->
-				<featureArtifactDef>org.wso2.is:org.wso2.is.authenticators.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.claim.mgt.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.cloud.identity.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.directory.server.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.core.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.mgt.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.provider.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.mandatory.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.oauth.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.passive.sts.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.registry.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.remote.usermgt.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.scim.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.self.registration.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.sso.saml.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.user.profiles.feature:${platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.xacml.feature:${platform.version}</featureArtifactDef>
+				
                             </featureArtifacts>
 
-                            <categories>
-
-                                <!--Start of IS feature categories-->
-                                <category>
-                                    <id>org.wso2.carbon.is.category</id>
-                                    <label>Identity Server</label>
-                                    <description>This category contains features required for WSO2
-                                        IS
-                                    </description>
-                                    <features>                                       
-                                        <catFeature>
-                                            <id>org.wso2.is.mandatory</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                        <catFeature>
-                                            <id>org.wso2.is.identity.core</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                        <catFeature>
-                                            <id>org.wso2.is.identity.mgt</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                        <catFeature>
-                                            <id>org.wso2.is.identity.provider</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.registry</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.oauth</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                        <catFeature>
-                                            <id>org.wso2.is.passive.sts</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                        <catFeature>
-                                            <id>org.wso2.is.relying.party</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.scim</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                        <catFeature>
-                                            <id>org.wso2.is.sso.saml</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                        <catFeature>
-                                            <id>org.wso2.is.user.profiles</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.xacml</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.directory.server</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.cloud.identity</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.self.registration</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.authenticators</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-					<catFeature>
-                                            <id>org.wso2.is.claim.mgt</id>
-                                            <version>4.2.0-SNAPSHOT</version>
-                                        </catFeature>
-                                    </features>
-                                </category>
-                                <!--End of IS feature categories-->
-
-
-                               
-                                <!--add the product styles features here-->
-                                <category>
-                                    <id>org.wso2.styles.category</id>
-                                    <label>Product Styles</label>
-                                    <description>This category contains WSO2 product styles</description>
-                                    <features>
-                                        <catFeature>
-                                            <id>org.wso2.is.styles</id>
-                                            <version>4.1.0</version>
-                                        </catFeature>
-                                    </features>
-                                </category>
-
-                            </categories>
+                            
                         </configuration>
                     </execution>
                 </executions>
