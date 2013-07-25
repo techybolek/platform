@@ -123,14 +123,12 @@ public class UTFSupportForMetadataTestCase {
     @Test(groups = {"wso2.greg"}, description = "add resource", dependsOnMethods = "testreadFile")
     public void testAddResource() throws ResourceAdminServiceExceptionException,
                                          IOException, RegistryException {
-        String POLICY_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
-                            "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/" +
-                            "GREG/policy/EncrOnlyAnonymous.xml";
+        String POLICY_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules/integration/" +
+                "registry/tests-new/src/test/resources/artifacts/GREG/policy/EncrOnlyAnonymous.xml";
         policyPath = addPolicy("policy" + utfString, "desc", POLICY_URL);
         wsdlPath = addWSDL();
-        String WSDL_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
-                          "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/" +
-                          "GREG/wsdl/Axis2ImportedWsdl.wsdl";
+        String WSDL_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules/integration/registry" +
+                "/tests-new/src/test/resources/artifacts/GREG/wsdl/Axis2ImportedWsdl.wsdl";
         associatePath = addWSDL("wsdl_" + utfString, "desc", WSDL_URL);
 
     }

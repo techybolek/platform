@@ -44,10 +44,12 @@ public class UTFSupportForPolicyTestCase {
     private PolicyManager policyManager;
     private String wsdlPath;
     private RelationAdminServiceClient relationAdminServiceClient;
-    private final String WSDL_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
-                                    "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/AmazonWebServices.wsdl";
-    private final String POLICY_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
-                                      "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/policy/EncrOnlyAnonymous.xml";
+    private final String WSDL_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules" +
+            "/integration/registry/tests-new/src/test/resources/artifacts/GREG/wsdl/AmazonWebServices.wsdl";
+
+    private final String POLICY_URL = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules" +
+            "/integration/registry/tests-new/src/test/resources/artifacts/GREG/policy/EncrOnlyAnonymous.xml";
+
     private final String LC_NAME = "ÀÁÂÃÄÅÆÇÈÉ";
     private String pathPrefix = "/_system/governance";
     private LifeCycleManagementClient lifeCycleManagementClient;

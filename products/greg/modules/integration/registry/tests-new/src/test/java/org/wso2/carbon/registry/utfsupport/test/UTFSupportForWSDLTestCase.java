@@ -40,10 +40,12 @@ public class UTFSupportForWSDLTestCase {
     private String wsdl1;
     private String wsdl2;
     private RelationAdminServiceClient relationAdminServiceClient;
-    private final String WSDL_URL1 = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
-                                     "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/AmazonWebServices.wsdl";
-    private final String WSDL_URL2 = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
-                                     "clarity-tests/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/BizService.wsdl";
+    private final String WSDL_URL1 = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules" +
+            "/integration/registry/tests-new/src/test/resources/artifacts/GREG/wsdl/AmazonWebServices.wsdl";
+
+    private final String WSDL_URL2 = "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules" +
+            "/integration/registry/tests-new/src/test/resources/artifacts/GREG/wsdl/BizService.wsdl";
+
     private final String LC_NAME = "ÀÁÂÃÄÅÆÇÈÉ";
     private String pathPrefix = "/_system/governance";
     private LifeCycleManagementClient lifeCycleManagementClient;
