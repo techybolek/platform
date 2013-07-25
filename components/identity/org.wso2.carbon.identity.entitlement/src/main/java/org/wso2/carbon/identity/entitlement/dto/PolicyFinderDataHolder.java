@@ -46,7 +46,9 @@ public class PolicyFinderDataHolder {
     }
 
     public void setPolicyIdentifiers(String[] policyIdentifiers) {
-        this.policyIdentifiers = Arrays.copyOf(policyIdentifiers, policyIdentifiers.length);
+        if(policyIdentifiers != null){
+            this.policyIdentifiers = Arrays.copyOf(policyIdentifiers, policyIdentifiers.length);
+        }
     }
 
     public String getClassName() {

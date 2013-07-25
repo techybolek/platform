@@ -33,6 +33,7 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
+import org.wso2.carbon.identity.entitlement.EntitlementPolicyAdminService;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.dto.PublisherDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PublisherPropertyDTO;
@@ -133,6 +134,7 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
         ServiceClient client = null;
 
         try{
+
             client = new ServiceClient(configCtx, null);
             Options option = client.getOptions();
             option.setManageSession(true);
@@ -184,10 +186,10 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
     private String createBody(String policy){
 
         return "      <xsd:addPolicy xmlns:xsd=\"http://org.apache.axis2/xsd\" xmlns:xsd1=\"http://dto.entitlement.identity.carbon.wso2.org/xsd\">" +
-                "         <xsd:policy>" +
+                "         <xsd:policyDTO>" +
                 "            <xsd1:active>false</xsd1:active>" +
                 "             <xsd1:policy><![CDATA[" + policy + "]]>  </xsd1:policy>" +
-                "          </xsd:policy>" +
+                "          </xsd:policyDTO>" +
                 "      </xsd:addPolicy>";
     }
 }
