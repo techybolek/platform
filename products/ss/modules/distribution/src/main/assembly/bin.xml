@@ -183,12 +183,12 @@
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
-        <!--file>
+        <file>
             <source>src/main/conf/embedded-ldap.xml</source>
             <outputDirectory>wso2ss-${pom.version}/repository/conf</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
-        </file-->
+        </file>
         <!--file>
             <source>src/main/conf/tenant-mgt.xml</source>
             <outputDirectory>wso2ss-${pom.version}/repository/conf</outputDirectory>
@@ -350,12 +350,12 @@
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/data</outputDirectory>
         </file>
-        <file>
+        <!--file>
             <source>
                 ../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/embedded-ldap.xml
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf</outputDirectory>
-        </file>
+        </file-->
 	<file>
             <source>
                 ../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/claim-config.xml

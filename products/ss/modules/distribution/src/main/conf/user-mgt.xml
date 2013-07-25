@@ -229,7 +229,7 @@
 	<UserStoreManager class="org.wso2.carbon.user.core.ldap.ReadWriteLDAPUserStoreManager">
             <Property name="TenantManager">org.wso2.carbon.user.core.tenant.CommonHybridLDAPTenantManager</Property>
             <Property name="defaultRealmName">WSO2.ORG</Property>
-            <Property name="kdcEnabled">false</Property>
+            <Property name="kdcEnabled">true</Property>
             <Property name="Disabled">false</Property>                                   
             <Property name="ConnectionURL">ldap://localhost:${Ports.EmbeddedLDAP.LDAPServerPort}</Property>
             <Property name="ConnectionName">uid=admin,ou=system</Property>
