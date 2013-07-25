@@ -58,6 +58,7 @@ public class RegistrySpecialSearchTestCase {
     private ManageEnvironment environment;
     private ApplicationAdminClient applicationAdminClient;
     private WSRegistryServiceClient wsRegistryServiceClient;
+    private String CAppName = "text_resources_1.0.0";
 
     @BeforeClass
     public void init() throws Exception {
@@ -105,8 +106,8 @@ public class RegistrySpecialSearchTestCase {
             throws SearchAdminServiceRegistryExceptionException, RemoteException,
                    ResourceAdminServiceExceptionException, InterruptedException,
                    ApplicationAdminExceptionException {
-        Assert.assertTrue(CAppTestUtils.isCAppDeployed(environment.getGreg().getSessionCookie(),
-                                                       "text_resources", applicationAdminClient));
+        Assert.assertTrue(CAppTestUtils.isCAppDeployed(environment.getGreg().getSessionCookie(),CAppName
+                                                       , applicationAdminClient));
         Assert.assertTrue(searchResource("text_files.xml"));
         Assert.assertTrue(searchResource("buggggg.txt"));
     }
@@ -141,7 +142,7 @@ public class RegistrySpecialSearchTestCase {
     @AfterClass
     public void clean() throws ApplicationAdminExceptionException, RemoteException,
                                ResourceAdminServiceExceptionException, RegistryException {
-        applicationAdminClient.deleteApplication("text_resources");
+        applicationAdminClient.deleteApplication(CAppName);
         delete("/_system/capps");
         searchAdminServiceClient = null;
         resourceAdminServiceClient = null;
