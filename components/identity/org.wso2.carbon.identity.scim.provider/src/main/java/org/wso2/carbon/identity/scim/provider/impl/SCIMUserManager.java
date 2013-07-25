@@ -520,8 +520,6 @@ public class SCIMUserManager implements UserManager {
 					+ filterAttribute + filterOperation + attributeValue);
 		} catch (IdentitySCIMException e) {
             throw new CharonException("Error in retrieving SCIM Group information from database.");
-        } catch (UserStoreException e) {
-        	throw new CharonException("Error in retrieving SCIM Group information from UserStore.");
         }
         return filteredGroups;
     }
