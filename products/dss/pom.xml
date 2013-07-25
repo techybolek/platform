@@ -30,7 +30,7 @@
     <groupId>org.wso2.dss</groupId>
     <artifactId>dataservices-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <name>WSO2 DataServices Parent</name>
     <url>http://wso2.org/projects/solutions/data-services/java</url>
     <description>WSO2 Data Services Server</description>
