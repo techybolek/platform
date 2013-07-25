@@ -1,0 +1,8 @@
+<annotationsConfig xmlns="http://wso2.org/carbon/analytics">
+    <annotations>
+        <annotation>
+            <name>test</name>
+            <class>org.wso2.carbon.analytics.hive.annotation.builtin.AnnotationTest</class>
+        </annotation>
+    </annotations>
+</annotationsConfig>

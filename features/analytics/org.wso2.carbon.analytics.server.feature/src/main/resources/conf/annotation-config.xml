@@ -1,0 +1,12 @@
+<annotationsConfig xmlns="http://wso2.org/carbon/analytics">
+    <annotations>
+        <annotation>
+            <name>aaa</name>
+            <class>vvv</class>
+        </annotation>
+        <annotation>
+            <name>ggg</name>
+            <class>jjj</class>
+        </annotation>
+    </annotations>
+</annotationsConfig>
