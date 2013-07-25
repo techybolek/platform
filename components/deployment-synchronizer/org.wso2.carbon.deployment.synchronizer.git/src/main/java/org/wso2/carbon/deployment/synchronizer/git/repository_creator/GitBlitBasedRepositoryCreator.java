@@ -29,7 +29,6 @@ import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.RepositoryCreator;
 import org.wso2.carbon.deployment.synchronizer.RepositoryInformation;
 import org.wso2.carbon.deployment.synchronizer.git.GitRepositoryInformation;
-import org.wso2.carbon.deployment.synchronizer.git.internal.GitDeploymentSynchronizerConstants;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,12 +45,12 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
     public RepositoryInformation createRepository(int tenantId, String baseUrl, String username, String password)
             throws DeploymentSynchronizerException {
 
-        RepositoryInformation repoInfo = null;
+        RepositoryInformation repoInfo;
         baseUrl = (baseUrl.endsWith("/")) ? baseUrl : baseUrl + "/";
         String repositoryName = "tenant_" + Integer.toString(tenantId) + ".git";
         String repoUrl = baseUrl + "git/" + repositoryName;
 
-        UserModel userModel = getUserModel(baseUrl, username);
+        UserModel userModel = getUserModel(baseUrl, username, username, password);
 
         if(userModel != null) {
 
@@ -60,10 +59,11 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
             }
 
         } else {
-            userModel = createUserModel(tenantId, baseUrl, username, password);
+            //user is the same as admin user
+            userModel = createUserModel(tenantId, baseUrl, username, password, username, password);
         }
 
-        RepositoryModel repositoryModel = getRepositoryModel(baseUrl, repositoryName);
+        RepositoryModel repositoryModel = getRepositoryModel(baseUrl, repositoryName, username, password);
 
         if(repositoryModel != null) {
 
@@ -72,11 +72,12 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
             }
 
         } else {
-            repositoryModel = createRepositoryModel(baseUrl, repositoryName, username, repoUrl, tenantId);
+            repositoryModel = createRepositoryModel(baseUrl, repositoryName, username, repoUrl, tenantId,
+                    username, password);
         }
         repoInfo = new GitRepositoryInformation(repoUrl);
 
-        setUserPermissions(baseUrl, repositoryModel, userModel);
+        setUserPermissions(baseUrl, repositoryModel, userModel, username, password);
 
         return repoInfo;
     }
@@ -86,11 +87,14 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
      *
      * @param tenantId tenant Id
      * @param baseUrl GitBlit server url
-     * @param username username of the user model
-     * @param password password of the user model
+     * @param username username of the user to be added
+     * @param password password of the user to be added
+     * @param adminUserName admin username of the server
+     * @param adminPassword admin password of the server
      * @return created UserModel instance
      */
-    private UserModel createUserModel (int tenantId, String baseUrl, String username, String password) {
+    private UserModel createUserModel (int tenantId, String baseUrl, String username, String password,
+                                       String adminUserName, String adminPassword) {
 
         UserModel userModel = new UserModel(username);
         userModel.canAdmin = true;
@@ -98,9 +102,7 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
 
         boolean isUserCreated = false;
         try {
-            isUserCreated = RpcUtils.createUser(userModel, baseUrl,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_USERNAME,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_PASAWORD.toCharArray());
+            isUserCreated = RpcUtils.createUser(userModel, baseUrl, adminUserName, adminPassword.toCharArray());
 
         } catch (IOException e) {
             handleError("User creation failed for tenant " + tenantId, e);
@@ -125,10 +127,13 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
      * @param userName user name of the owner of the repository
      * @param repoUrl full repository url
      * @param tenantId tenant Id
+     * @param adminUserName admin user name of the server
+     * @param adminPassword admin password of the server
      * @return RepositoryModel instance if successfully created, else null
      */
     private RepositoryModel createRepositoryModel (String baseUrl, String repositoryName, String userName,
-                                                   String repoUrl, int tenantId) {
+                                                   String repoUrl, int tenantId, String adminUserName,
+                                                   String adminPassword) {
 
         RepositoryModel repositoryModel = new RepositoryModel();
         repositoryModel.name = repositoryName;
@@ -138,9 +143,7 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
         boolean isRepoCreated;
 
         try {
-            isRepoCreated = RpcUtils.createRepository(repositoryModel, baseUrl,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_USERNAME,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_PASAWORD.toCharArray());
+            isRepoCreated = RpcUtils.createRepository(repositoryModel, baseUrl, adminUserName, adminPassword.toCharArray());
 
         } catch (IOException e) {
             handleError("Repository creation failed for tenant " + tenantId, e);
@@ -163,17 +166,17 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
      *
      * @param baseUrl GitBlit server url
      * @param userName username of the user
+     * @param adminUserName admin username of the server
+     * @param adminPassword admin password of the server
      * @return instance of UserModel if exists, else null
      */
-    private UserModel getUserModel(String baseUrl, String userName) {
+    private UserModel getUserModel(String baseUrl, String userName, String adminUserName, String adminPassword) {
 
         UserModel userModel =  null;
         List<UserModel> users;
 
         try {
-            users = RpcUtils.getUsers(baseUrl,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_USERNAME,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_PASAWORD.toCharArray());
+            users = RpcUtils.getUsers(baseUrl, adminUserName, adminPassword.toCharArray());
 
         } catch (IOException e) {
             log.error("Error retrieving user details from git server " + baseUrl, e);
@@ -193,18 +196,19 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
      * Checks and returns the corresponding RepositoryModel instance for the given username in the repository at baseUrl
      *
      * @param baseUrl Gitblit server url
-     * @param name repository name
+     * @param repositoryName repository name
+     * @param adminUserName admin user name of the server
+     * @param adminPassword admin password of the server
      * @return RepositoryModel instance if exists, else null
      */
-    private RepositoryModel getRepositoryModel(String baseUrl, String name) {
+    private RepositoryModel getRepositoryModel(String baseUrl, String repositoryName, String adminUserName,
+                                               String adminPassword) {
 
         RepositoryModel repositoryModel = null;
         Map<String, RepositoryModel> repositories;
 
         try {
-            repositories = RpcUtils.getRepositories(baseUrl,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_USERNAME,
-                    GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_PASAWORD.toCharArray());
+            repositories = RpcUtils.getRepositories(baseUrl, adminUserName, adminPassword.toCharArray());
 
         } catch (IOException e) {
             log.error("Error retrieving repository details from git server " + baseUrl, e);
@@ -212,7 +216,7 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
         }
 
         for (RepositoryModel model : repositories.values()) {
-            if (model.name.equals(name)) {
+            if (model.name.equals(repositoryName)) {
                 repositoryModel = model;
                 break;
             }
@@ -226,16 +230,18 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
      * @param baseUrl GitBlit server url
      * @param repoModel RepositoryModel instance
      * @param userModel UserModel instance
+     * @param adminUserName admin user name of the server
+     * @param adminPassword admin password of the server
      */
-    private void setUserPermissions(String baseUrl, RepositoryModel repoModel, UserModel userModel) {
+    private void setUserPermissions(String baseUrl, RepositoryModel repoModel, UserModel userModel,
+                                    String adminUserName, String adminPassword) {
 
         List<RegistrantAccessPermission> permissions;
 
         try {
             permissions = RpcUtils.
-                    getRepositoryMemberPermissions(repoModel, baseUrl,
-                            GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_USERNAME,
-                            GitDeploymentSynchronizerConstants.GITBLIT_ADMIN_PASAWORD.toCharArray());
+                    getRepositoryMemberPermissions(repoModel, baseUrl, adminUserName, adminPassword.toCharArray());
+
         } catch (IOException e) {
             log.error("Retrieving permissions failed for repository " + repoModel.name, e);
             return;

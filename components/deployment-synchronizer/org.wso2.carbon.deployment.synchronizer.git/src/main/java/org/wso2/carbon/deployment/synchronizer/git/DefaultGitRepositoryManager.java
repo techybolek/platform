@@ -31,8 +31,8 @@ public class DefaultGitRepositoryManager extends RepositoryManager {
 
     private static final Log log = LogFactory.getLog(DefaultGitRepositoryManager.class);
     private String gitServerUrl;
-    private String gitServerUserName;
-    private String gitServerPassword;
+    private String gitServerAdminUserName;
+    private String gitServerAdminPassword;
 
     public DefaultGitRepositoryManager() {
         readDefaultGitRepositoryConfiguration();
@@ -53,12 +53,12 @@ public class DefaultGitRepositoryManager extends RepositoryManager {
 
         String gitRepositoryUsernameParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.GIT_USERNAME);
         if (gitRepositoryUsernameParam != null) {
-            gitServerUserName = gitRepositoryUsernameParam;
+            gitServerAdminUserName = gitRepositoryUsernameParam;
         }
 
         String gitRepositoryPasswordParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.GIT_PASSWORD);
         if (gitRepositoryPasswordParam != null) {
-            gitServerPassword = gitRepositoryPasswordParam;
+            gitServerAdminPassword = gitRepositoryPasswordParam;
         }
     }
 
@@ -78,7 +78,7 @@ public class DefaultGitRepositoryManager extends RepositoryManager {
 
     @Override
     public RepositoryInformation getCredentialsInformation(int tenantId) throws DeploymentSynchronizerException {
-        return new GitRepositoryInformation(gitServerUserName, gitServerPassword);
+        return new GitRepositoryInformation(gitServerAdminUserName, gitServerAdminPassword);
     }
 
     @Override
@@ -94,8 +94,8 @@ public class DefaultGitRepositoryManager extends RepositoryManager {
             handleError(errorMsg);
         }
 
-        String repositoryUrl = repositoryCreator.createRepository(tenantId, gitServerUrl, gitServerUserName,
-                gitServerPassword).getUrl();
+        String repositoryUrl = repositoryCreator.createRepository(tenantId, gitServerUrl, gitServerAdminUserName,
+                gitServerAdminPassword).getUrl();
 
         tenantGitRepoCtx.setRemoteRepoUrl(repositoryUrl);
         TenantGitRepositoryContextCache.getTenantRepositoryContextCache().

@@ -43,8 +43,4 @@ public class GitDeploymentSynchronizerConstants {
     public static final String GITBLIT = "gitblit";
     public static final String SCM = "scm";
 
-    //Gitblit based constants
-    public static final String GITBLIT_ADMIN_USERNAME = "admin";
-    public static final String GITBLIT_ADMIN_PASAWORD = "admin";
-
 }
