@@ -2421,9 +2421,10 @@ public class PolicyEditorUtil {
         policyEditorData[i++] = basicTargetDTO.getSubjectList();
         policyEditorData[i++] = basicTargetDTO.getSubjectId();
         policyEditorData[i++] = basicTargetDTO.getSubjectDataType();
+        String  subjectId =  basicTargetDTO.getSubjectId();
         basicTargetDTO.setFunctionOnSubjects(holder.getFunctionUri(basicTargetDTO.getFunctionOnSubjects()));
-        basicTargetDTO.setSubjectId(holder.getAttributeIdUri(basicTargetDTO.getSubjectId()));
-        if((selectedDataType = holder.getDataTypeUriForAttribute(basicTargetDTO.getSubjectId())) != null){
+        basicTargetDTO.setSubjectId(holder.getAttributeIdUri(subjectId));
+        if((selectedDataType = holder.getDataTypeUriForAttribute(subjectId)) != null){
             basicTargetDTO.setSubjectDataType(selectedDataType);
         }
 
@@ -2438,9 +2439,10 @@ public class PolicyEditorUtil {
         policyEditorData[i++] = basicTargetDTO.getEnvironmentList();
         policyEditorData[i++] = basicTargetDTO.getEnvironmentId();
         policyEditorData[i++] = basicTargetDTO.getEnvironmentDataType();
+        String  environmentId =  basicTargetDTO.getEnvironmentId();
         basicTargetDTO.setFunctionOnEnvironment(holder.getFunctionUri(basicTargetDTO.getFunctionOnEnvironment()));
-        basicTargetDTO.setEnvironmentId(holder.getAttributeIdUri(basicTargetDTO.getEnvironmentId()));
-        if((selectedDataType = holder.getDataTypeUriForAttribute(basicTargetDTO.getEnvironmentId())) != null){
+        basicTargetDTO.setEnvironmentId(holder.getAttributeIdUri(environmentId));
+        if((selectedDataType = holder.getDataTypeUriForAttribute(environmentId)) != null){
             basicTargetDTO.setEnvironmentDataType(selectedDataType);
         }
 
@@ -2507,10 +2509,11 @@ public class PolicyEditorUtil {
         policyEditorData[i++] = basicRuleDTO.getSubjectList();
         policyEditorData[i++] = basicRuleDTO.getSubjectId();
         policyEditorData[i++] = basicRuleDTO.getSubjectDataType();
+        String subjectId =  basicRuleDTO.getSubjectId();
         basicRuleDTO.setPreFunctionOnSubjects(holder.getPreFunctionUri(basicRuleDTO.getPreFunctionOnSubjects()));
         basicRuleDTO.setFunctionOnSubjects(holder.getFunctionUri(basicRuleDTO.getFunctionOnSubjects()));
-        basicRuleDTO.setSubjectId(holder.getAttributeIdUri(basicRuleDTO.getSubjectId()));
-        if((selectedDataType = holder.getDataTypeUriForAttribute(basicRuleDTO.getSubjectId())) != null){
+        basicRuleDTO.setSubjectId(holder.getAttributeIdUri(subjectId));
+        if((selectedDataType = holder.getDataTypeUriForAttribute(subjectId)) != null){
             basicRuleDTO.setSubjectDataType(selectedDataType);
         }
 
@@ -2528,10 +2531,11 @@ public class PolicyEditorUtil {
         policyEditorData[i++] = basicRuleDTO.getEnvironmentList();
         policyEditorData[i++] = basicRuleDTO.getEnvironmentId();
         policyEditorData[i++] = basicRuleDTO.getEnvironmentDataType();
+        String environmentId =  basicRuleDTO.getSubjectId();
         basicRuleDTO.setPreFunctionOnEnvironment(holder.getPreFunctionUri(basicRuleDTO.getPreFunctionOnEnvironment()));
         basicRuleDTO.setFunctionOnEnvironment(holder.getFunctionUri(basicRuleDTO.getFunctionOnEnvironment()));
-        basicRuleDTO.setEnvironmentId(holder.getAttributeIdUri(basicRuleDTO.getEnvironmentId()));
-        if((selectedDataType = holder.getDataTypeUriForAttribute(basicRuleDTO.getEnvironmentId())) != null){
+        basicRuleDTO.setEnvironmentId(holder.getAttributeIdUri(environmentId));
+        if((selectedDataType = holder.getDataTypeUriForAttribute(environmentId)) != null){
             basicRuleDTO.setEnvironmentDataType(selectedDataType);
         }
 
