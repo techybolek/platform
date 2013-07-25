@@ -56,12 +56,14 @@ public class SimplePAPStatusDataHandler implements PAPStatusDataHandler{
         }
     }
 
+
     @Override
     public void handle(String about, StatusHolder statusHolder) throws EntitlementException {
         List<StatusHolder> list = new ArrayList<StatusHolder>();
         list.add(statusHolder);
         handle(about, statusHolder.getKey(), list);
     }
+
 
     @Override
     public StatusHolder[] getStatusData(String about, String key, String type, String searchString)

@@ -193,17 +193,16 @@ public class PolicyPublishExecutor implements Runnable {
 
                 try {
                     policyPublisherModule.publish(policyDTO, action);
+                    subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
+                            policyId, version, subscriberId, action));
+                    policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
+                            policyId, version, subscriberId, action));
                 } catch (Exception e) {
                     subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                             policyId, version, subscriberId, action, false, e.getMessage()));
                     policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
                             policyId, version, subscriberId, action, false, e.getMessage()));
-                    continue;
                 }
-                subscriberHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                        policyId, version, subscriberId, action));
-                policyHolders.add(new StatusHolder(EntitlementConstants.StatusTypes.PUBLISH_POLICY,
-                        policyId, version, subscriberId, action));
 
                 for(PAPStatusDataHandler module : papStatusDataHandler){
                     try {
@@ -214,7 +213,6 @@ public class PolicyPublishExecutor implements Runnable {
                     }
                 }
             }
-
 
             for(PAPStatusDataHandler module : papStatusDataHandler){
                 try {
