@@ -113,6 +113,10 @@ public class BasicAuthHandler implements SCIMAuthenticationHandler {
                             PrivilegedCarbonContext.getCurrentContext().getOSGiService(RealmService.class);
                     if (realmService != null) {
                         int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+                        if(tenantId == -1) {
+                        	log.error("Invalid tenant domain " + tenantDomain);
+                        	return false;
+                        }
                         //get tenant's user realm
                         UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
                         boolean authenticated = userRealm.getUserStoreManager().authenticate(tenantLessUserName, password);

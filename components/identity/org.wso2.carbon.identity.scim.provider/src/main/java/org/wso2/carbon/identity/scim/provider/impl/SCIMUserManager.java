@@ -520,6 +520,8 @@ public class SCIMUserManager implements UserManager {
 					+ filterAttribute + filterOperation + attributeValue);
 		} catch (IdentitySCIMException e) {
             throw new CharonException("Error in retrieving SCIM Group information from database.");
+        } catch (UserStoreException e) {
+        	throw new CharonException("Error in retrieving SCIM Group information from UserStore.");
         }
         return filteredGroups;
     }
@@ -726,7 +728,9 @@ public class SCIMUserManager implements UserManager {
                     continue;
                 }
                 Group group = getGroupOnlyWithMetaAttributes(role);
-                scimUser.setGroup(null, group.getId(), role);
+				if (group != null) { // can be null for non SCIM groups
+					scimUser.setGroup(null, group.getId(), role);
+				}
             }
         } catch (UserStoreException e) {
             throw new CharonException("Error in getting user information from Carbon User Store for " +
@@ -793,8 +797,7 @@ public class SCIMUserManager implements UserManager {
         Group group = new Group();
         group.setDisplayName(groupName);
         SCIMGroupHandler groupHandler = new SCIMGroupHandler(carbonUM.getTenantId());
-        group = groupHandler.getGroupWithAttributes(group, groupName);
-        return group;
+        return groupHandler.getGroupWithAttributes(group, groupName);
     }
 
     /**
