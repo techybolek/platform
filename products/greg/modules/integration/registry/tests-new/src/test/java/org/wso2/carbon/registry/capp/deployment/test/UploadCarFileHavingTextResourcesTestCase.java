@@ -46,7 +46,7 @@ public class UploadCarFileHavingTextResourcesTestCase {
     private CarbonAppUploaderClient cAppUploader;
     private ApplicationAdminClient adminServiceApplicationAdmin;
     private ManageEnvironment environment;
-    private final String cAppName = "text_resources";
+    private final String cAppName = "text_resources_1.0.0";
     private final String txtPath = "/_system/capps/buggggg.txt";
     private final String xmlPath = "/_system/capps/text_files.xml";
 
@@ -79,10 +79,10 @@ public class UploadCarFileHavingTextResourcesTestCase {
                 , "Deployed CApplication not in CApp List");
     }
 
-    @Test(description = "Search whether CApp is in /_system/config/repository/applications", dependsOnMethods = {"uploadCApplicationWithTextResource"})
-    public void isCApplicationInRegistry() throws RegistryException {
-        wsRegistry.get("/_system/config/repository/applications/" + cAppName);
-    }
+//    @Test(description = "Search whether CApp is in /_system/config/repository/applications", dependsOnMethods = {"uploadCApplicationWithTextResource"})
+//    public void isCApplicationInRegistry() throws RegistryException {
+//        wsRegistry.get("/_system/config/repository/applications/" + cAppName);
+//    }
 
     @Test(description = "Verify Uploaded Resources", dependsOnMethods = {"uploadCApplicationWithTextResource"})
     public void isResourcesExist() throws RegistryException {

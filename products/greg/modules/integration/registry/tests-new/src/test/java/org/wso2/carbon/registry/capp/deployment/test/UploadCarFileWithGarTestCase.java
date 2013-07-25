@@ -53,7 +53,7 @@ public class UploadCarFileWithGarTestCase {
     private ManageEnvironment environment;
     private ResourceAdminServiceClient resourceAdminServiceClient;
 
-    private String cAppName = "GarTestCApp";
+    private String cAppName = "GarTestCApp_1.0.0";
     private final String wsdlPath = "/_system/governance/trunk/wsdls/org/wso2/carbon/service/Axis2Service.wsdl";
     private final String wsdlUploadedPath = "/_system/config/gar/Axis2Service.wsdl";
     private final String servicePath = "/_system/governance/trunk/services/org/wso2/carbon/service/Axis2Service";
@@ -93,11 +93,11 @@ public class UploadCarFileWithGarTestCase {
                 , "Deployed CApplication not in CApp List");
     }
 
-    @Test(description = "Search whether CApp is in /_system/config/repository/applications",
-          dependsOnMethods = {"uploadCApplicationWithGar"})
-    public void isCApplicationInRegistry() throws RegistryException {
-        wsRegistry.get("/_system/config/repository/applications/" + cAppName);
-    }
+//    @Test(description = "Search whether CApp is in /_system/config/repository/applications",
+//          dependsOnMethods = {"uploadCApplicationWithGar"})
+//    public void isCApplicationInRegistry() throws RegistryException {
+//        wsRegistry.get("/_system/config/repository/applications/" + cAppName);
+//    }
 
     @Test(description = "Verify Uploaded Resources", dependsOnMethods = {"uploadCApplicationWithGar"})
     public void isResourcesExist() throws RegistryException {

@@ -59,6 +59,9 @@ public class DeployCAppWithWsdl {
     private ResourceAdminServiceClient resourceAdminServiceClient;
     private String sessionCookie;
     private LogViewerClient logViewerClient;
+    private String wsdl_new_1Capp ="wsdl_new_1.0.0";
+    private String wsdl_tCapp = "wsdl-t_1.0.0";
+    private String serverRole_incorrectCapp ="serverRole-incorrect_1.0.0";
 
     @BeforeClass
     public void initialize()
@@ -94,7 +97,8 @@ public class DeployCAppWithWsdl {
 
         cAppUploader.uploadCarbonAppArtifact("wsdl_1.0.0.car", new DataHandler(new URL("file:///" + resourcePath)));
 
-        assertTrue(CAppTestUtils.isCAppDeployed(sessionCookie, "wsdl_new",
+        //artifact.xml  name is  "wsdl_new".
+        assertTrue(CAppTestUtils.isCAppDeployed(sessionCookie, wsdl_new_1Capp,
                                                 adminServiceApplicationAdmin), "Deployed wsdl_1.0.0.car not in CApp List");
 
         LogEvent[] logEvents = logViewerClient.getLogs("INFO", "Successfully Deployed Carbon Application : wsdl_new", "", "");
@@ -120,7 +124,7 @@ public class DeployCAppWithWsdl {
 
         cAppUploader.uploadCarbonAppArtifact("serverRole-incorrect_1.0.0.car", new DataHandler(new URL("file:///" + resourcePath)));
 
-        assertFalse(CAppTestUtils.isCAppDeployed(sessionCookie, "incorrectServerRole",
+        assertFalse(CAppTestUtils.isCAppDeployed(sessionCookie, serverRole_incorrectCapp,
                                                  adminServiceApplicationAdmin), "Deployed serverRole-incorrect_1.0.0.car not in CApp List");
 
         LogEvent[] logEvents = logViewerClient.getLogs("WARN", "No artifacts found to be deployed in this server." +
@@ -151,7 +155,7 @@ public class DeployCAppWithWsdl {
 
         cAppUploader.uploadCarbonAppArtifact("wsdl-t_1.0.0.car", new DataHandler(new URL("file:///" + resourcePath)));
 
-        assertTrue(CAppTestUtils.isCAppDeployed(sessionCookie, "wsdl-t",
+        assertTrue(CAppTestUtils.isCAppDeployed(sessionCookie, wsdl_tCapp,
                                                 adminServiceApplicationAdmin), "Deployed wsdl-t_1.0.0.car not in CApp List");
 
         LogEvent[] logEvents = logViewerClient.getLogs("INFO", "Successfully Deployed Carbon Application : wsdl-t", "", "");
@@ -185,12 +189,12 @@ public class DeployCAppWithWsdl {
             throws ApplicationAdminExceptionException, RemoteException, InterruptedException,
                    RegistryException {
 
-        adminServiceApplicationAdmin.deleteApplication("wsdl_new");
-        adminServiceApplicationAdmin.deleteApplication("wsdl-t");
+        adminServiceApplicationAdmin.deleteApplication(wsdl_new_1Capp);
+        adminServiceApplicationAdmin.deleteApplication(wsdl_tCapp);
 
-        Assert.assertTrue(CAppTestUtils.isCAppDeleted(sessionCookie, "wsdl_new", adminServiceApplicationAdmin)
+        Assert.assertTrue(CAppTestUtils.isCAppDeleted(sessionCookie, wsdl_new_1Capp, adminServiceApplicationAdmin)
                 , "Deployed wsdl_new still in CApp List");
-        Assert.assertTrue(CAppTestUtils.isCAppDeleted(sessionCookie, "wsdl-t", adminServiceApplicationAdmin)
+        Assert.assertTrue(CAppTestUtils.isCAppDeleted(sessionCookie, wsdl_tCapp, adminServiceApplicationAdmin)
                 , "Deployed wsdl-t still in CApp List");
     }
 

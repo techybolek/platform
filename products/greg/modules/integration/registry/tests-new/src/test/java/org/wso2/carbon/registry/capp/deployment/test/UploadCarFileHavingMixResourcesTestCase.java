@@ -46,7 +46,7 @@ public class UploadCarFileHavingMixResourcesTestCase {
     private CarbonAppUploaderClient cAppUploader;
     private ApplicationAdminClient adminServiceApplicationAdmin;
 
-    private final String cAppName = "mix";
+    private final String cAppName = "mix_1.0.0";
     private final String warPath = "/_system/capp/servlets-examples-cluster-node2.war";
     private final String xmlPath = "/_system/capps/text_files.xml";
     private final String txtPath = "/_system/capps/buggggg.txt";
