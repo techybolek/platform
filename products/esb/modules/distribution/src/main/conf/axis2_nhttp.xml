@@ -690,8 +690,6 @@
                      class="org.wso2.carbon.core.transports.smtp.SMTPFaultHandler">
                 <order phase="Transport"/>
             </handler-->
-            <handler name="RelaySecuirtyMessageBuilderDispatchandler"
-                     class="org.apache.synapse.transport.passthru.util.RelaySecuirtyMessageBuilderDispatchandler"/>
 	    <handler name="CarbonContentConfigurator"
                      class="org.wso2.carbon.mediation.initializer.handler.CarbonContextConfigurator"/>
 
