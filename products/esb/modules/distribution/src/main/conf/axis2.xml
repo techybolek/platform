@@ -840,7 +840,7 @@
            <handler name="CacheMessageBuilderDispatchandler"
                      class="org.apache.synapse.transport.passthru.util.CacheMessageBuilderDispatchandler"/>
 	   <handler name="CarbonContentConfigurator"
-                     class="org.wso2.carbon.mediation.initializer.multitenancy.handler.CarbonContextConfigurator"/>
+                     class="org.wso2.carbon.mediation.initializer.handler.CarbonContextConfigurator"/>
         </phase>
         <phase name="Addressing">
             <handler name="AddressingBasedDispatcher"
