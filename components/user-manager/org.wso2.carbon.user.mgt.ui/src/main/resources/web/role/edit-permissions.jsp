@@ -117,7 +117,7 @@
             ConfigurationContext configContext =
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
-            rootNode = client.getRolePermissions(roleName);
+            rootNode = client.getRolePermissions(roleNameWithoutDn);
         } catch (Exception e) {
             CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
             session.setAttribute(CarbonUIMessage.ID, uiMsg);

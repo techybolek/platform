@@ -68,7 +68,7 @@
 //                                                                roleBeanEditPermission.getSelectedPermissions());
 //            forwardTo = "../userstore/ex-role-mgt.jsp?ordinal=1";
 //        }else{
-             client.setRoleUIPermission(roleName, selectedPermissions);
+             client.setRoleUIPermission(roleNameWithoutDN, selectedPermissions);
              //forwardTo = "role-mgt.jsp?ordinal=1";
 //        }
 
