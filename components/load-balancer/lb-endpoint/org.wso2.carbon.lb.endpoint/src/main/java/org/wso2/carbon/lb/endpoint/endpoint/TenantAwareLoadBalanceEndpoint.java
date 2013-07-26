@@ -387,7 +387,10 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
     	if(tenantId == 0 && url.contains(MultitenantConstants.TENANT_DOMAIN+"=")){
     		// OK,this is the SAML SSO response from the IS
     		// e.g url = https://localhost:9444/acs?teantDomain=domain
-    		String domainName = url.split("=").clone()[1];
+    		String domainName = url.split(MultitenantConstants.TENANT_DOMAIN+"=").clone()[1];
+            if(domainName!=null && domainName.contains("&")){
+                domainName = domainName.substring(0, domainName.indexOf("&"));
+            }
     		// return tenant id if domain name is not null
             if (domainName != null) {
                 try {
