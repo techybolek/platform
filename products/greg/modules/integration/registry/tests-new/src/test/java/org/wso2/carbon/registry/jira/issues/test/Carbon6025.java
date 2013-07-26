@@ -18,10 +18,12 @@ import org.wso2.carbon.governance.api.schema.SchemaManager;
 import org.wso2.carbon.governance.api.schema.dataobjects.Schema;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -70,15 +72,16 @@ public class Carbon6025 {
     }
 
     @Test(groups = {"wso2.greg"}, description = "verify imports inside wsdl", dependsOnMethods = "testAddGar")
-    public void testVerifyImports() throws GovernanceException {
+    public void testVerifyImports() throws RegistryException {
         verifyService();
         verifySchema();
         verifyPolicy();
         verifyWSDL();
     }
 
-    public void verifyService() throws GovernanceException {
+    public void verifyService() throws RegistryException {
         ServiceManager serviceManager = new ServiceManager(governance);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service[] services = serviceManager.getAllServices();
         boolean resourceFound = false;
         for (Service service : services) {

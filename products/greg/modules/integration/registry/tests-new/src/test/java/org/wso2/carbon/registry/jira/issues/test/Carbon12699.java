@@ -31,9 +31,9 @@ import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
 import org.wso2.carbon.automation.core.utils.fileutils.FileManager;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
+import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
-import org.wso2.carbon.governance.list.stub.beans.xsd.ServiceBean;
 import org.wso2.carbon.governance.list.stub.beans.xsd.WSDLBean;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
@@ -65,6 +65,7 @@ public class Carbon12699 {
     private static final String ACTION_PROMOTE = "Promote";
     private String wsdlPathLeaf;
     private int wsdlCount;
+    private ServiceManager serviceManager;
 
     /**
      * @throws RemoteException
@@ -95,6 +96,7 @@ public class Carbon12699 {
         lifeCycleAdminServiceClient =
                 new LifeCycleAdminServiceClient(environment.getGreg().getProductVariables().getBackendUrl(),
                                                 environment.getGreg().getSessionCookie());
+        serviceManager = new ServiceManager(wsRegistryServiceClient);
 
     }
 
@@ -195,9 +197,8 @@ public class Carbon12699 {
                 resourceAdminClient.deleteResource("/_system/governance" + wsdlPathLeaf);
             }
         }
-        ServiceBean service = listMetadataServiceClient.listServices(null);
         String servicePathToDelete = "";
-        for (String servicePath : service.getPath()) {
+        for (String servicePath : serviceManager.getAllServicePaths()) {
             if (servicePath.contains("echoyuSer1")) {
                 servicePathToDelete = "/_system/governance" + servicePath;
             }
