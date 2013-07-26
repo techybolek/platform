@@ -151,12 +151,12 @@
 		<!--
              If we use multiple usertsore with tenants, we might need to use following initialContextfactory implementation to do datasource lookup
 		 -->
-		<!--<DefaultInitialContextFactory>org.wso2.carbon.tomcat.jndi.CarbonJavaURLContextFactory</DefaultInitialContextFactory>-->
+		<DefaultInitialContextFactory>org.wso2.carbon.tomcat.jndi.CarbonJavaURLContextFactory</DefaultInitialContextFactory>
         
         <!--
              The fully qualified name of the default initial context factory
         -->
-        <DefaultInitialContextFactory>org.apache.naming.java.javaURLContextFactory</DefaultInitialContextFactory>
+		<!--<DefaultInitialContextFactory>org.apache.naming.java.javaURLContextFactory</DefaultInitialContextFactory>-->
         <!--
              The restrictions that are done to various JNDI Contexts in a Multi-tenant environment
         -->
