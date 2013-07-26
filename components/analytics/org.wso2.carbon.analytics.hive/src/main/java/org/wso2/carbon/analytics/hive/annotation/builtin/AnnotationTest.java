@@ -11,6 +11,11 @@ public class AnnotationTest extends AbstractHiveAnnotation {
         addParameter("foo1");
     }
 
+    @Override
+    public void clear() {
+
+    }
+
 
     @Override
     public void execute() {

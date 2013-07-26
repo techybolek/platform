@@ -38,6 +38,8 @@ public abstract class AbstractHiveAnnotation extends AbstractHiveAnalyzer {
 
     public abstract void init();
 
+    public abstract void clear();
+
     public String getScope() {
         return scope;
     }

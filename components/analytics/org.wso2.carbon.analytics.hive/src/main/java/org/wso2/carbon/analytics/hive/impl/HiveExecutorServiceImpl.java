@@ -63,7 +63,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             Class.forName("org.apache.hadoop.hive.jdbc.HiveDriver");
         } catch (ClassNotFoundException e) {
             log.fatal("Hive JDBC Driver not found in the class path. Hive query execution will" +
-                      " fail..", e);
+                    " fail..", e);
         }
 
         try {
@@ -82,7 +82,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
     public QueryResult[] execute(String script) throws HiveExecutionException {
         String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
         int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
-        if (Utils.canConnectToRSS() && HiveMultitenantUtil.isMultiTenantMode() &&  null != HiveRSSMetastoreManager.getInstance()) {
+        if (Utils.canConnectToRSS() && HiveMultitenantUtil.isMultiTenantMode() && null != HiveRSSMetastoreManager.getInstance()) {
             HiveRSSMetastoreManager.getInstance().prepareRSSMetaStore(tenantDomain, tenantId);
         }
         if (script != null) {
@@ -162,13 +162,13 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
     private void removeUTFCharsFromValues(ScriptResult result) {
         QueryResult[] queryResults = result.getQueryResults();
-        for(QueryResult queryResult:queryResults){
+        for (QueryResult queryResult : queryResults) {
             QueryResultRow[] resultRows = queryResult.getResultRows();
-            for(QueryResultRow queryResultRow:resultRows){
+            for (QueryResultRow queryResultRow : resultRows) {
                 String[] columnValues = queryResultRow.getColumnValues();
                 String[] columnValuesWithoutUTFChars = new String[columnValues.length];
-                for (int i=0; i< columnValues.length;i++){
-                    columnValuesWithoutUTFChars[i] =columnValues[i].replaceAll("[\\u0000]", "");
+                for (int i = 0; i < columnValues.length; i++) {
+                    columnValuesWithoutUTFChars[i] = columnValues[i].replaceAll("[\\u0000]", "");
                 }
                 queryResultRow.setColumnValues(columnValuesWithoutUTFChars);
             }
@@ -274,7 +274,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                 ScriptResult result = new ScriptResult();
                 result.setErrorMessage("Error getting connection to any" +
-                                       " listed remote Hive meta stores..." + e);
+                        " listed remote Hive meta stores..." + e);
                 return result;
             }
 
@@ -290,39 +290,18 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             }
 
             try {
-                String newScript= resolveGlobalAnnotations(script);
+                String newScript = resolveGlobalAnnotations(script);
 
-                Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-                Matcher regexMatcher = regex.matcher(newScript);
-                String formattedScript = "";
-                while (regexMatcher.find()) {
-                    String temp = "";
-                    if (regexMatcher.group(1) != null) {
-                        // Add double-quoted string without the quotes
-                        temp = regexMatcher.group(1).replaceAll(";", "%%");
-                        if (temp.contains("%%")) {
-                            temp = temp.replaceAll(" ", "");
-                            temp = temp.replaceAll("\n", "");
-                        }
-                        temp = "\"" + temp + "\"";
-                    } else if (regexMatcher.group(2) != null) {
-                        // Add single-quoted string without the quotes
-                        temp = regexMatcher.group(2).replaceAll(";", "%%");
-                        if (temp.contains("%%")) {
-                            temp = temp.replaceAll(" ", "");
-                            temp = temp.replaceAll("\n", "");
-                        }
-                        temp = "\'" + temp + "\'";
-                    } else {
-                        temp = regexMatcher.group();
-                    }
-                    formattedScript += temp + " ";
-                }
-
+                String formattedScript = formatScript(newScript);
 
                 String[] cmdLines = formattedScript.split(";\\r?\\n|;"); // Tokenize with ;[new-line]
 
                 ScriptResult result = new ScriptResult();
+
+                String regexAnnot = "((@)(?:[a-z][a-z]+)\\()";
+
+                Set cleanAnnotations = new HashSet();
+
 
                 Date startDateTime = null;
                 long startTime = 0;
@@ -336,9 +315,6 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     String trimmedCmdLine = cmdLine.trim();
                     trimmedCmdLine = trimmedCmdLine.replaceAll(";", "");
                     trimmedCmdLine = trimmedCmdLine.replaceAll("%%", ";");
-                    //Fixing some issues in the hive query due to /n/t
-                    trimmedCmdLine = trimmedCmdLine.replaceAll("\n", " ");
-                    trimmedCmdLine = trimmedCmdLine.replaceAll("\t", " ");
 
                     if ("".equals(trimmedCmdLine)) {
                         continue;
@@ -377,9 +353,17 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                                 }
                             }
                         }
-                    } else if (trimmedCmdLine.startsWith("@script.") ||
-                            trimmedCmdLine.startsWith("@SCRIPT.")) {
-                              executeAnnotation(trimmedCmdLine);
+
+                        if (!cleanAnnotations.isEmpty()) {
+                            for (Object s : cleanAnnotations) {
+                                AbstractHiveAnnotation cAnn = (AbstractHiveAnnotation) s;
+                                cAnn.clear();
+                            }
+                        }
+                    } else if (trimmedCmdLine.matches(regexAnnot)) {
+                        AbstractHiveAnnotation cAnnotation = executeAnnotation(trimmedCmdLine);
+                        cleanAnnotations.add(cAnnotation);
+
                     } else { // Normal hive query
                         QueryResult queryResult = new QueryResult();
 
@@ -405,40 +389,47 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                             List<String> columnValues = new ArrayList<String>();
 
-							int noOfColumns = rs.getMetaData().getColumnCount();
+                            int noOfColumns = rs.getMetaData().getColumnCount();
 
-                            boolean isTombstone=true;
-                            for(int k=1;k<=noOfColumns;k++){
-                                 Object obj= rs.getObject(k);
-                                if(obj != null){
-                                    isTombstone =false;
+                            boolean isTombstone = true;
+                            for (int k = 1; k <= noOfColumns; k++) {
+                                Object obj = rs.getObject(k);
+                                if (obj != null) {
+                                    isTombstone = false;
                                     break;
                                 }
                             }
 
-                            if(!isTombstone){
+                            if (!isTombstone) {
                                 Object resObject = rs.getObject(1);
-		                        if (resObject.toString().contains("\t")) {
-		                            columnValues = Arrays.asList(resObject.toString().split("\t"));
-		                        } else {
-		                            for (int i = 1; i <= columnCount; i++) {
-		                                Object resObj = rs.getObject(i);
-		                                if (null != resObj) {
-		                                    columnValues.add(rs.getObject(i).toString());
-		                                } else {
-		                                    columnValues.add("");
-		                                }
-		                            }
-		                        }
-		                        resultRow.setColumnValues(columnValues.toArray(new String[]{}));
+                                if (resObject.toString().contains("\t")) {
+                                    columnValues = Arrays.asList(resObject.toString().split("\t"));
+                                } else {
+                                    for (int i = 1; i <= columnCount; i++) {
+                                        Object resObj = rs.getObject(i);
+                                        if (null != resObj) {
+                                            columnValues.add(rs.getObject(i).toString());
+                                        } else {
+                                            columnValues.add("");
+                                        }
+                                    }
+                                }
+                                resultRow.setColumnValues(columnValues.toArray(new String[]{}));
 
-		                        results.add(resultRow);
-							}
+                                results.add(resultRow);
+                            }
 
                         }
 
                         queryResult.setResultRows(results.toArray(new QueryResultRow[]{}));
                         result.addQueryResult(queryResult);
+                    }
+
+                    if (!cleanAnnotations.isEmpty()) {
+                        for (Object s : cleanAnnotations) {
+                            AbstractHiveAnnotation cAnn = (AbstractHiveAnnotation) s;
+                            cAnn.clear();
+                        }
                     }
 
                 }
@@ -485,7 +476,6 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                 return result;
 
-
             } catch (SQLException e) {
                 log.error("Error while executing Hive script.\n" + e.getMessage(), e);
 
@@ -504,56 +494,30 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
         }
 
-        private String resolveGlobalAnnotations(String script){
-             String newScript=script;
-             String regex="((Global)\\{.*?\\})";
-            String globalConf= null;
+        private String resolveGlobalAnnotations(String script) {
+            String newScript = script;
+            String regex = "((Global)\\{.*?\\})";
+            String globalConf = null;
+            newScript = newScript.replaceAll("\n", " ");
+            newScript = newScript.replaceAll("\t", " ");
 
+            Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Matcher m = p.matcher(newScript);
+            if (m.find()) {
+                globalConf = m.group(1);
 
-            Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-             Matcher m = p.matcher(newScript);
-             if (m.find())
-             {
-                 globalConf=m.group(1);
+            }
 
-              }
-
-            if (globalConf != null){
-                 String a=globalConf.trim();
+            if (globalConf != null) {
+                String a = globalConf.trim();
                 String[] contentSet = a.split("Global");
                 String txt = contentSet[1];
 
                 String s = txt.substring(1, txt.length() - 1);
 
-                Pattern regex1 = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-                Matcher regexMatcher = regex1.matcher(s);
-                String formattedScript = "";
-                while (regexMatcher.find()) {
-                    String temp = "";
-                    if (regexMatcher.group(1) != null) {
-                        // Add double-quoted string without the quotes
-                        temp = regexMatcher.group(1).replaceAll(";", "%%");
-                        if (temp.contains("%%")) {
-                            temp = temp.replaceAll(" ", "");
-                            temp = temp.replaceAll("\n", "");
-                        }
-                        temp = "\"" + temp + "\"";
-                    } else if (regexMatcher.group(2) != null) {
-                        // Add single-quoted string without the quotes
-                        temp = regexMatcher.group(2).replaceAll(";", "%%");
-                        if (temp.contains("%%")) {
-                            temp = temp.replaceAll(" ", "");
-                            temp = temp.replaceAll("\n", "");
-                        }
-                        temp = "\'" + temp + "\'";
-                    } else {
-                        temp = regexMatcher.group();
-                    }
-                    formattedScript += temp + " ";
-                }
 
-
-                String[] cmdLines1 = formattedScript.split(";\\r?\\n|;"); // Tokenize with ;[new-line]
+                String aa = formatScript(s).trim();
+                String[] cmdLines1 = aa.split(";\\r?\\n|;"); // Tokenize with ;[new-line]
 
 
                 for (String cmdLine : cmdLines1) {
@@ -561,85 +525,123 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     String trimmedCmdLine = cmdLine.trim();
                     trimmedCmdLine = trimmedCmdLine.replaceAll(";", "");
                     trimmedCmdLine = trimmedCmdLine.replaceAll("%%", ";");
-                    //Fixing some issues in the hive query due to /n/t
-                    trimmedCmdLine = trimmedCmdLine.replaceAll("\n", " ");
-                    trimmedCmdLine = trimmedCmdLine.replaceAll("\t", " ");
-
                     if ("".equals(trimmedCmdLine)) {
                         continue;
                     }
 
                     executeAnnotation(trimmedCmdLine);
                 }
-                    String[] newScript1=newScript.split(regex);
+                String[] newScript1 = newScript.split(regex);
                 return newScript1[1];
-            }else{
+            } else {
                 return newScript;
             }
 
         }
 
-        private void executeAnnotation(String trimmedCmdLine){
+        private AbstractHiveAnnotation executeAnnotation(String trimmedCmdLine) {
 
-        HashMap<String, String> annotations = new HashMap<String, String>(); // annotation execution
-        String[] contentSet = trimmedCmdLine.split("@");
-        String txt = contentSet[1];
+            HashMap<String, String> annotations = new HashMap<String, String>(); // annotation execution
+            String[] contentSet = trimmedCmdLine.split("@");
+            String txt = contentSet[1];
+            AbstractHiveAnnotation hiveAnnotation = null;
 
+            String re2 = "(\\(.*\\))";    // Round Braces 1
 
-        String re2 = "(\\(.*\\))";    // Round Braces 1
+            Pattern p = Pattern.compile(re2, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Matcher m = p.matcher(txt);
+            if (m.find()) {
+                String rbraces1 = m.group(1);
+                int temp = rbraces1.trim().length();
 
-        Pattern p = Pattern.compile(re2, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        Matcher m = p.matcher(txt);
-        if (m.find()) {
-            String rbraces1 = m.group(1);
-            int temp = rbraces1.trim().length();
+                String s = rbraces1.substring(1, temp - 1);
 
-            String s = rbraces1.substring(1, temp - 1);
+                String[] variables = s.split(",");
 
-            String[] variables = s.split(",");
-
-            for (String g : variables) {
-                String[] values = g.split("=");
-                String key = values[0];
-                String value = values[1].substring(1, values[1].length() - 1);
-                annotations.put(key, value);
-            }
-        }
-
-        String[] txt1=txt.split(re2);
-         String txt2 = txt1[0];
-
-
-        String className = AnnotationBuilder.getAnnotationClass(txt2);
-
-        Class clazz = null;
-        try {
-            clazz = Class.forName(className, true,
-                    this.getClass().getClassLoader());
-        } catch (ClassNotFoundException e) {
-            log.error("Unable to find custom annotation class..", e);
-        }
-
-        if (clazz != null) {
-            Object annotation = null;
-            try {
-                annotation = clazz.newInstance();
-            } catch (InstantiationException e) {
-                log.error("Unable to instantiate custom annotation class..", e);
-            } catch (IllegalAccessException e) {
-                log.error("Unable to instantiate custom annotation class..", e);
+                for (String g : variables) {
+                    String[] values = g.split("=");
+                    String key = values[0];
+                    String value = values[1].substring(1, values[1].length() - 1);
+                    annotations.put(key, value);
+                }
             }
 
-            if (annotation instanceof AbstractHiveAnnotation) {
-                AbstractHiveAnnotation hiveAnnotation =
-                        (AbstractHiveAnnotation) annotation;
-                hiveAnnotation.init();
-                hiveAnnotation.validate(annotations.keySet());
-                hiveAnnotation.execute();
+            String[] txt1 = txt.split(re2);
+            String txt2 = txt1[0];
+
+
+            String className = AnnotationBuilder.getAnnotationClass(txt2);
+
+            if (className == null) {
+
+                Class clazz = null;
+                try {
+                    clazz = Class.forName(className, true,
+                            this.getClass().getClassLoader());
+                } catch (ClassNotFoundException e) {
+                    log.error("Unable to find custom annotation class..", e);
+                }
+                if (clazz != null) {
+                    Object annotation = null;
+                    try {
+                        annotation = clazz.newInstance();
+                    } catch (InstantiationException e) {
+                        log.error("Unable to instantiate custom annotation class..", e);
+                    } catch (IllegalAccessException e) {
+                        log.error("Unable to instantiate custom annotation class..", e);
+                    }
+
+                    if (annotation instanceof AbstractHiveAnnotation) {
+                        hiveAnnotation =
+                                (AbstractHiveAnnotation) annotation;
+                        hiveAnnotation.init();
+                        boolean validated = hiveAnnotation.validate(annotations.keySet());
+                        if (validated) {
+                            hiveAnnotation.setParameters(annotations);
+                            hiveAnnotation.execute();
+                        } else {
+                            log.error("Couldn't validate the annotation...");
+                        }
+
+                    } else {
+                        log.error("Custom annotations should extend AbstractHiveAnnotation..");
+                    }
+                }
             } else {
-                log.error("Custom annotations should extend AbstractHiveAnnotation..");
+                log.error("Annotation class is not defined in the annotation-config.xml..");
             }
+            return hiveAnnotation;
         }
+
+        private String formatScript(String script) {
+            String scriptFormat = script;
+            Pattern regex1 = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
+            Matcher regexMatcher = regex1.matcher(scriptFormat);
+            String formattedScript = "";
+            while (regexMatcher.find()) {
+                String temp = "";
+                if (regexMatcher.group(1) != null) {
+                    // Add double-quoted string without the quotes
+                    temp = regexMatcher.group(1).replaceAll(";", "%%");
+                    if (temp.contains("%%")) {
+                        temp = temp.replaceAll(" ", "");
+                        temp = temp.replaceAll("\n", "");
+                    }
+                    temp = "\"" + temp + "\"";
+                } else if (regexMatcher.group(2) != null) {
+                    // Add single-quoted string without the quotes
+                    temp = regexMatcher.group(2).replaceAll(";", "%%");
+                    if (temp.contains("%%")) {
+                        temp = temp.replaceAll(" ", "");
+                        temp = temp.replaceAll("\n", "");
+                    }
+                    temp = "\'" + temp + "\'";
+                } else {
+                    temp = regexMatcher.group();
+                }
+                formattedScript += temp + " ";
+            }
+            return formattedScript;
         }
 
         private Connection getConnection() throws SQLException {
@@ -656,7 +658,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                     if (uris.length == 0) {
                         log.warn("No remote URI's specified though remote Meta store is enabled." +
-                                 " Defaulting to local meta store..");
+                                " Defaulting to local meta store..");
                         uris = new String[1];
                         uris[0] = LOCAL_META_STORE_URI;
                     }
@@ -672,7 +674,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                             con = DriverManager.getConnection(uri, null, null);
                         } catch (SQLException e) {
                             log.error("Error getting connection for meta store URI " + uri +
-                                      " ..", e);
+                                    " ..", e);
 
                             tryCount++;
                             if (uriCounter >= noOfUris && tryCount == noOfUris) {
@@ -693,7 +695,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                 } else {
                     log.warn("No remote URI's specified though remote Meta store is enabled." +
-                             " Defaulting to local meta store..");
+                            " Defaulting to local meta store..");
                     try {
                         con = DriverManager.getConnection(LOCAL_META_STORE_URI, null, null);
                     } catch (SQLException e) {
