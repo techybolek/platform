@@ -59,18 +59,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.caching</groupId>
-                <artifactId>wso2caching-core</artifactId>
-                <version>${wso2caching.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.caching</groupId>
-                <artifactId>wso2caching-mar</artifactId>
-                <version>${wso2caching.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-saaj_1.3_spec</artifactId>
                 <version>${geronimo.saaj.version.caching}</version>
