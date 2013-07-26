@@ -2,28 +2,28 @@
 <artifact name="twitter" type="synapse/template">
 
 	<subArtifacts>
-		<artifact name="tweet.update_status">
+		<artifact name="twitter.update_status">
 			<file>update_status.xml</file>
 			<description>twitter updates</description>
 		</artifact>
-		<artifact name="tweet.show_status">
+		<artifact name="ttwitter.show_status">
 			<file>show_status.xml</file>
 			<description>show status of the twitter</description>
 		</artifact>
-		<artifact name="tweet.retweet">
+		<artifact name="twitter.retweet">
 			<file>retweet_status.xml</file>
 			<description>retweeting</description>
 		</artifact>
-		<artifact name="tweet.login_user">
+		<artifact name="twitter.login_user">
 			<file>login_user.xml</file>
 			<description>login twitter user</description>
 		</artifact>
-		<artifact name="tweet.search">
+		<artifact name="twitter.search">
 			<file>search_string.xml</file>
 			<description>search twitter string</description>
 		</artifact>
 
-		<artifact name="tweet.search_places">
+		<artifact name="twitter.search_places">
 			<file>search_places.xml</file>
 			<description>search for places</description>
 		</artifact>
