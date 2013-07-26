@@ -104,20 +104,36 @@
                                                                 </div>
                                                             </td>
                                                         </tr>
+                                                        <tr>
+                                                            <td colspan="2">
+                                                                Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
+                                                                <div style="display:none">
+                                                                    <input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
+                                                                    <button class="btn"
+                                                                            onclick="updateTokenValidity('<%=app.name%>','PRODUCTION',this)" style="font-size:11px;width:104px;" >Update Time</button>
+                                                                    <div style="display:none">Successfully updated.</div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
                                                     </table>
 
                                                     <div class="info-msg">
-                                                         <% if(app.prodKey==null){%>
+                                                        <% if(app.prodKey==null){%>
                                                         All domains are allowed by default. <a id="prodLink<%=str_i%>" onclick="toggleAutSection(this)">Edit</a>
                                                         <% } %>
                                                         <div id="allowDomainDiv<%=str_i%>" style="padding:0;margin:10px 20px 0 0;display:none" <% if(app.prodKey!=null){%> data-value="havetohide"<%} %>>
                                                                     <textarea id="accessallowdomains<%=str_i%>" style="width:99%"></textarea>
                                                                     <span>Leave empty or filling with "ALL" will allow all domains.</span>
                                                         </div>
-                                                        
-                                                        <label class="control-label" for="validityTime"><%=i18n.localize("validityTime")%></label>
-                                                        <input type="text" class="required" maxlength="70" id="validityTime<%=str_i%>" autofocus="autofocus"/>
-                                                      </div>
+                                                        <% if(app.prodKey==null){%>
+                                                        <div style="margin-top: 20px;"><%=i18n.localize("validityTime")%> <a  onclick="toggleTokenTimeSection(this)">Edit</a></div>
+                                                        <% } %>
+                                                        <div class="form-search" style="display:none">
+                                                                <input type="text" class="input-small token-validity-input" maxlength="70" id="validityTime<%=str_i%>" autofocus="autofocus" style="margin-top:5px;height:20px;padding:2px"  /> s
+                                                        </div>
+
+
+                                                    </div>
                                                     <div class="gen-btn-wrapper" <% if(app.prodKey!=null){%>style="display:none"<% } %>>
                                                                 <a  class="app-key-generate-button btn btn-primary"
                                                                data-application="<%=app.name%>"
@@ -195,19 +211,33 @@
                                                                 </div>
                                                             </td>
                                                         </tr>
+                                                        <tr>
+                                                            <td colspan="2">
+                                                                Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
+                                                                <div style="display:none">
+                                                                    <input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
+                                                                    <button class="btn"
+                                                                            onclick="updateTokenValidity('<%=app.name%>','PRODUCTION',this)" style="font-size:11px;width:104px;" >Update Time</button>
+                                                                    <div style="display:none">Successfully updated.</div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
                                                     </table>
                                                     <div class="info-msg">
-                                                      <% if(app.sandboxKey==null){%>
-                                                      All domains are allowed by default. <a id="sandLink<%=str_i%>" onclick="toggleAutSection(this)">Edit</a>.
-                                                      <% } %>
-                                                      <div id="allowDomainDivSand<%=str_i%>" style="padding:0;margin:10px 20px 0 0;display:none" <% if(app.sandboxKey!=null){%> data-value="havetohide"<%} %>>
-                                                                  <textarea title="" id="allowDomainsSand<%=str_i%>" style="width:99%"></textarea>
-                                                                  <span>Leave empty or filling with "ALL" will allow all domains.</span>
-                                                      </div>
-                                                      
-                                                      <label class="control-label" for="validityTimeSand"><%=i18n.localize("validityTime")%></label>
-                                                      <input type="text" class="required" maxlength="70" id="validityTimeSand<%=str_i%>" autofocus="autofocus"/>
-                                                                                                        
+                                                          <% if(app.sandboxKey==null){%>
+                                                          All domains are allowed by default. <a id="sandLink<%=str_i%>" onclick="toggleAutSection(this)">Edit</a>.
+                                                          <% } %>
+                                                          <div id="allowDomainDivSand<%=str_i%>" style="padding:0;margin:10px 20px 0 0;display:none" <% if(app.sandboxKey!=null){%> data-value="havetohide"<%} %>>
+                                                                      <textarea title="" id="allowDomainsSand<%=str_i%>" style="width:99%"></textarea>
+                                                                      <span>Leave empty or filling with "ALL" will allow all domains.</span>
+                                                          </div>
+                                                        <% if(app.sandboxKey==null){%>
+                                                        <div style="margin-top: 20px;"><%=i18n.localize("validityTime")%> <a  onclick="toggleTokenTimeSection(this)">Edit</a></div>
+                                                        <% } %>
+                                                        <div class="form-search" style="display:none">
+                                                            <input type="text" class="input-small token-validity-input" maxlength="70" id="validityTimeSand<%=str_i%>" autofocus="autofocus" style="margin-top:5px;height:20px;padding:2px"  /> s
+                                                        </div>
+                                                    </div>
                                                     <div class="gen-btn-wrapper" <% if(app.sandboxKey!=null){%>style="display:none"<% } %> >
                                                         <a class="app-key-generate-button btn btn-primary"
                                                        data-application="<%=app.name%>"
