@@ -32,8 +32,10 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -79,6 +81,7 @@ public class Carbon11689 {
 
     @Test(groups = {"wso2.greg"}, description = "modify service", dependsOnMethods = {"testAddService"})
     public void testModifyService() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service service = serviceManager.getService(serviceId);
         service.setAttribute("overview_description", "modified");
         serviceManager.addService(service);
