@@ -1,4 +1,4 @@
-package org.wso2.carbon.mediation.initializer.multitenancy.handler;
+package org.wso2.carbon.mediation.initializer.handler;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
