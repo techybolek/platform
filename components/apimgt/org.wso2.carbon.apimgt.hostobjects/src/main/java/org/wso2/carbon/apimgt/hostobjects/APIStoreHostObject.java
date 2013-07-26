@@ -231,7 +231,7 @@ public class APIStoreHostObject extends ScriptableObject {
             try {
                 SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
                 ApplicationKeysDTO dto = keyMgtClient.getApplicationAccessKey((String) args[0],
-                                                                              (String) args[1], (String) args[2], (String) args[3], accessAllowDomainsArray);
+                                                                              (String) args[1], (String) args[2], (String) args[3], accessAllowDomainsArray,(String) args[5]);
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
                 boolean first = true;
