@@ -1,12 +1,8 @@
 <annotationsConfig xmlns="http://wso2.org/carbon/analytics">
     <annotations>
         <annotation>
-            <name>aaa</name>
-            <class>vvv</class>
-        </annotation>
-        <annotation>
-            <name>ggg</name>
-            <class>jjj</class>
+            <name>test</name>
+            <class>org.wso2.carbon.analytics.hive.annotation.builtin.AnnotationTest</class>
         </annotation>
     </annotations>
 </annotationsConfig>
