@@ -152,7 +152,7 @@
     "Mobile Phone":"Mobile Phone",
     "IM":"IM",
     "URL":"URL",
-    "Role":"Role"
-
+    "Role":"Role",
+	"validityTime":"Token valid period"
 
 }

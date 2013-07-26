@@ -9,16 +9,19 @@ $(document).ready(function () {
         var domainsDiv;
         var regen;
         var link;
+        var validityTime;
         if (keyType == 'PRODUCTION') {
             authoDomains = $('#accessallowdomains' + i).attr('value');
             domainsDiv = 'allowDomainDiv'+ i;
             regen = 'table #accessallowdomainsRegen'+i;
             link = 'prodLink' + i;
+            validityTime=$('#validityTime'+i).attr('value');
         } else {
             authoDomains = $('#allowDomainsSand' + i).attr('value');
             domainsDiv = 'allowDomainDivSand'+ i;
             regen = 'table #allowDomainsSandRegen'+i;
             link = 'sandLink' + i;
+            validityTime=$('#validityTimeSand'+i).attr('value');
         }
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
@@ -26,7 +29,8 @@ $(document).ready(function () {
             application:elem.attr("data-application"),
             keytype:elem.attr("data-keytype"),
             callbackUrl:elem.attr("data-callbackUrl"),
-            authorizedDomains:authoDomains
+            authorizedDomains:authoDomains,
+            validityTime:validityTime,
         }, function (result) {
             if (!result.error) {
                 $('table .consumerKey', $(elem).parent().parent()).html(result.data.key.consumerKey);

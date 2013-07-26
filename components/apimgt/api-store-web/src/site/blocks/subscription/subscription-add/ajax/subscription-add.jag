@@ -124,11 +124,12 @@ include("/jagg/jagg.jag");
         keyType = request.getParameter("keytype");
         callbackUrl = request.getParameter("callbackUrl");
         username = user.username;
-        accessAllowDomains = request.getParameter("authorizedDomains");
-
+        accessAllowDomains = request.getParameter("authorizedDomains");       
         var accessAllowDomainsArr = accessAllowDomains.split(",");
+        validityTime = request.getParameter("validityTime");
+        
         mod = jagg.module("subscription");
-        result = mod.generateApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr);
+        result = mod.generateApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr, validityTime);
 
         if (result.error) {
             obj = {
