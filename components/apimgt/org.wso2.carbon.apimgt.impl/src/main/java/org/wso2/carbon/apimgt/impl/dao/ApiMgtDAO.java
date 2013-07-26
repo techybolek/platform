@@ -2144,7 +2144,7 @@ public class ApiMgtDAO {
     public String registerApplicationAccessToken(String consumerKey, String applicationName,
                                                  String userId,
                                                  int tenantId, String keyType,
-                                                 String[] accessAllowDomains)
+                                                 String[] accessAllowDomains, String validityTime)
             throws IdentityException, APIManagementException {
        
     	//identify loggedinuser
@@ -2189,6 +2189,10 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         long validityPeriod = getApplicationAccessTokenValidityPeriod();
+        if(validityTime != null){
+        	validityPeriod = Long.parseLong(validityTime);
+        }
+        
         try {
             connection = APIMgtDBUtil.getConnection();
             //Add access token
