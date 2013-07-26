@@ -44,16 +44,12 @@ public class IdentityProviderMgtService {
     public String[] getTenantIdPs() throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        Connection dbConnection = null;
         List<String> tenantIdPs = null;
         try {
-            dbConnection = IdentityProviderMgtUtil.getDBConnection();
-            tenantIdPs = dao.getTenantIdPs(dbConnection, tenantId, tenantDomain);
+            tenantIdPs = dao.getTenantIdPs(null, tenantId, tenantDomain);
             return tenantIdPs.toArray(new String[tenantIdPs.size()]);
         } catch (IdentityProviderMgtException e) {
             throw new IdentityProviderMgtException("Error getting Identity DB connection", e);
-        } finally {
-            DatabaseUtil.closeConnection(dbConnection);
         }
     }
 

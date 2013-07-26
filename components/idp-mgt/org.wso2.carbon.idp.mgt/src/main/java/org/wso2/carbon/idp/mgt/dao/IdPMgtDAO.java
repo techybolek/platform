@@ -36,10 +36,17 @@ public class IdPMgtDAO {
     private static final Log log = LogFactory.getLog(IdPMgtDAO.class);
 
     public List<String> getTenantIdPs(Connection dbConnection, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
+
+        boolean dbConnInitialized = true;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         List<String> tenantIdPs = new ArrayList<String>();
         try {
+            if(dbConnection == null){
+                dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            } else {
+                dbConnInitialized = false;
+            }
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDPS_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
@@ -53,6 +60,10 @@ public class IdPMgtDAO {
             log.error(msg + " " + tenantDomain, e);
             DatabaseUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
+        } finally {
+            if(dbConnInitialized){
+                DatabaseUtil.closeConnection(dbConnection);
+            }
         }
     }
 

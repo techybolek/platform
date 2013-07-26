@@ -65,15 +65,11 @@ public class IdPMetadataService {
      */
     public String[] getTenantIdPs(String tenantDomain) throws IdentityProviderMgtException {
         int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        Connection dbConnection = null;
         List<String> tenantIdPs = null;
         try {
-            dbConnection = IdentityProviderMgtUtil.getDBConnection();
-            tenantIdPs = dao.getTenantIdPs(dbConnection, tenantId, tenantDomain);
+            tenantIdPs = dao.getTenantIdPs(null, tenantId, tenantDomain);
         } catch (IdentityProviderMgtException e) {
             throw new IdentityProviderMgtException("Error getting Identity DB connection", e);
-        } finally {
-            DatabaseUtil.closeConnection(dbConnection);
         }
         return tenantIdPs.toArray(new String[tenantIdPs.size()]);
     }
