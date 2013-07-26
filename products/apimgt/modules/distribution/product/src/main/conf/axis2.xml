@@ -833,6 +833,9 @@
                      class="org.apache.axis2.dispatchers.AddressingBasedDispatcher">
                 <order phase="Addressing"/>
             </handler>
+	    <handler name="CarbonContentConfigurator"
+            class="org.wso2.carbon.mediation.initializer.multitenancy.handler.CarbonContextConfigurator"/>
+           
         </phase>
         <phase name="Security"/>
         <phase name="PreDispatch"/>
@@ -903,6 +906,7 @@
         -->
         <phase name="MsgInObservation"/>
 	<phase name="Validation"/>
+
         <phase name="Transport">
             <handler name="RequestURIBasedDispatcher"
                      class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher">
@@ -912,13 +916,17 @@
                      class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher">
                 <order phase="Transport"/>
             </handler>
-        </phase>
-        <phase name="Addressing">
+	    <handler name="CarbonContentConfigurator"
+            class="org.wso2.carbon.mediation.initializer.multitenancy.handler.CarbonContextConfigurator"/>
+           </phase>
+
+           <phase name="Addressing">
             <handler name="AddressingBasedDispatcher"
                      class="org.apache.axis2.dispatchers.AddressingBasedDispatcher">
                 <order phase="Addressing"/>
             </handler>
-        </phase>
+           </phase>
+
         <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
