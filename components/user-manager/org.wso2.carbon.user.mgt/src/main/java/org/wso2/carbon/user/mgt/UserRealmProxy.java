@@ -140,7 +140,8 @@ public class UserRealmProxy {
                     // set Display name as the item name
                     flaggedNames[i].setItemDisplayName(user);
                 }
-                int index1 = flaggedNames[i].getItemName() != null ? flaggedNames[i].getItemName().indexOf("/") : -1;
+                int index1 = flaggedNames[i].getItemName() != null
+                        ? flaggedNames[i].getItemName().indexOf(CarbonConstants.DOMAIN_SEPARATOR) : -1;
                 boolean domainProvided = index1 > 0;
                 String domain = domainProvided ? flaggedNames[i].getItemName().substring(0, index1) : null;
                 if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
@@ -165,10 +166,11 @@ public class UserRealmProxy {
                         userCount.put(domain,1);
                     }
                 }else{
-                    if(userCount.containsKey(null)){
-                        userCount.put(null,userCount.get(null)+1);
+                    if(userCount.containsKey(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
+                        userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,
+                                userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)+1);
                     }else{
-                        userCount.put(null,1);
+                        userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME, 1);
                     }
                 }
                 i++;
@@ -191,16 +193,18 @@ public class UserRealmProxy {
         String exceededDomains = "";
         boolean isPrimaryExceeding = false;
         try {
-            Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_USER_LIST);
+            Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).
+                    getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_USER_LIST);
             String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
             for(int i=0;i<domains.length;i++){
-                if(domains[i] == null){
-                    if(userCount.get(null).intValue() == maxUserListCount.get(null).intValue()){
+                if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equalsIgnoreCase(domains[i])){
+                    if(userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).intValue() ==
+                            maxUserListCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).intValue()){
                         isPrimaryExceeding = true;
                     }
                     continue;
                 }
-                if(userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())){
+                if(userCount.get(domains[i]).equals(maxUserListCount.get(domains[i].toUpperCase()))){
                     exceededDomains += domains[i];
                     if(i != domains.length - 1){
                         exceededDomains += ":";
@@ -257,7 +261,8 @@ public class UserRealmProxy {
 				if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
 					if (secManager != null &&
 					    (secManager.isReadOnly() || (secManager.getRealmConfiguration()
-					                                           .getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null && secManager.getRealmConfiguration()
+                               .getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null &&
+                                secManager.getRealmConfiguration()
 					                                                                                                                          .getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES)
 					                                                                                                                          .equals("false")))) {
 						fName.setEditable(false);
@@ -272,10 +277,11 @@ public class UserRealmProxy {
 						userCount.put(domain, 1);
 					}
 				} else {
-					if (userCount.containsKey(null)) {
-						userCount.put(null, userCount.get(null) + 1);
+					if (userCount.containsKey(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)) {
+						userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,
+                                userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME) + 1);
 					} else {
-						userCount.put(null, 1);
+						userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME, 1);
 					}
 				}
 				flaggedNames.add(fName);
@@ -283,17 +289,19 @@ public class UserRealmProxy {
 
 			String exceededDomains = "";
 			boolean isPrimaryExceeding = false;
-			Map<String, Integer> maxUserListCount =
-			                                        ((AbstractUserStoreManager) realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_ROLE_LIST);
+			Map<String, Integer> maxUserListCount =((AbstractUserStoreManager) realm.
+                                getUserStoreManager()).getMaxListCount(UserCoreConstants.
+                                RealmConfig.PROPERTY_MAX_ROLE_LIST);
 			String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
 			for (int i = 0; i < domains.length; i++) {
-				if (domains[i] == null) {
-					if (userCount.get(null) == maxUserListCount.get(null)) {
+				if (UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domains[i])) {
+					if (userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).
+                        equals(maxUserListCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME))) {
 						isPrimaryExceeding = true;
 					}
 					continue;
 				}
-				if (userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())) {
+				if (userCount.get(domains[i]).equals(maxUserListCount.get(domains[i].toUpperCase()))) {
 					exceededDomains += domains[i];
 					if (i != domains.length - 1) {
 						exceededDomains += ":";
@@ -381,10 +389,11 @@ public class UserRealmProxy {
                         userCount.put(domain,1);
                     }
                 }else{
-                    if(userCount.containsKey(null)){
-                        userCount.put(null,userCount.get(null)+1);
+                    if(userCount.containsKey(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
+                        userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,
+                                userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)+1);
                     }else{
-                        userCount.put(null,1);
+                        userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,1);
                     }
                 }
                 flaggedNames.add(fName);
@@ -408,13 +417,14 @@ public class UserRealmProxy {
             Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_ROLE_LIST);
             String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
             for(int i=0;i<domains.length;i++){
-                if(domains[i] == null){
-                    if(userCount.get(null) == maxUserListCount.get(null)){
+                if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domains[i])){
+                    if(userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).
+                            equals(maxUserListCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME))){
                         isPrimaryExceeding = true;
                     }
                     continue;
                 }
-                if(userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())){
+                if(userCount.get(domains[i]).equals(maxUserListCount.get(domains[i].toUpperCase()))){
                     exceededDomains += domains[i];
                     if(i != domains.length - 1){
                         exceededDomains += ":";
@@ -968,10 +978,11 @@ public class UserRealmProxy {
                             userCount.put(domain,1);
                         }
                     }else{
-                        if(userCount.containsKey(null)){
-                            userCount.put(null,userCount.get(null)+1);
+                        if(userCount.containsKey(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
+                            userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,
+                                    userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)+1);
                         }else{
-                            userCount.put(null,1);
+                            userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,1);
                         }
                     }
                     flaggedNames.add(fName);
@@ -981,13 +992,14 @@ public class UserRealmProxy {
                 Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_USER_LIST);
                 String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
                 for(int i=0;i<domains.length;i++){
-                    if(domains[i] == null){
-                        if(userCount.get(null) == maxUserListCount.get(null)){
+                    if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domains[i])){
+                        if(userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).
+                                equals(maxUserListCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME))){
                             isPrimaryExceeding = true;
                         }
                         continue;
                     }
-                    if(userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())){
+                    if(userCount.get(domains[i]).equals(maxUserListCount.get(domains[i].toUpperCase()))){
                         exceededDomains += domains[i];
                         if(i != domains.length - 1){
                             exceededDomains += ":";
@@ -1047,10 +1059,11 @@ public class UserRealmProxy {
                         userCount.put(domain,1);
                     }
                 }else{
-                    if(userCount.containsKey(null)){
-                        userCount.put(null,userCount.get(null)+1);
+                    if(userCount.containsKey(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
+                        userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,
+                                userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)+1);
                     }else{
-                        userCount.put(null,1);
+                        userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,1);
                     }
                 }
                 flaggedNames[i] = fName;
@@ -1060,13 +1073,14 @@ public class UserRealmProxy {
             Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_USER_LIST);
             String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
             for(int i=0;i<domains.length;i++){
-                if(domains[i] == null){
-                    if(userCount.get(null) == maxUserListCount.get(null)){
+                if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domains[i])){
+                    if(userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).
+                            equals(maxUserListCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME))){
                         isPrimaryExceeding = true;
                     }
                     continue;
                 }
-                if(userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())){
+                if(userCount.get(domains[i]).equals(maxUserListCount.get(domains[i].toUpperCase()))){
                     exceededDomains += domains[i];
                     if(i != domains.length - 1){
                         exceededDomains += ":";
@@ -1184,10 +1198,11 @@ public class UserRealmProxy {
                             userCount.put(domain,1);
                         }
                     }else{
-                        if(userCount.containsKey(null)){
-                            userCount.put(null,userCount.get(null)+1);
+                        if(userCount.containsKey(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
+                            userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,
+                                    userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)+1);
                         }else{
-                            userCount.put(null,1);
+                            userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,1);
                         }
                     }
                     flaggedNames.add(fName);
@@ -1197,13 +1212,14 @@ public class UserRealmProxy {
                 Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_ROLE_LIST);
                 String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
                 for(int i=0;i<domains.length;i++){
-                    if(domains[i] == null){
-                        if(userCount.get(null) == maxUserListCount.get(null)){
+                    if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domains[i])){
+                        if(userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).
+                                equals(maxUserListCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME))){
                             isPrimaryExceeding = true;
                         }
                         continue;
                     }
-                    if(userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())){
+                    if(userCount.get(domains[i]).equals(maxUserListCount.get(domains[i].toUpperCase()))){
                         exceededDomains += domains[i];
                         if(i != domains.length - 1){
                             exceededDomains += ":";
@@ -1299,10 +1315,11 @@ public class UserRealmProxy {
                             userCount.put(domain,1);
                         }
                     }else{
-                        if(userCount.containsKey(null)){
-                            userCount.put(null,userCount.get(null)+1);
+                        if(userCount.containsKey(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
+                            userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,
+                                    userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)+1);
                         }else{
-                            userCount.put(null,1);
+                            userCount.put(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME,1);
                         }
                     }
                     flaggedNames.add(fname);
@@ -1326,13 +1343,14 @@ public class UserRealmProxy {
             Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_ROLE_LIST);
             String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
             for(int i=0;i<domains.length;i++){
-                if(domains[i] == null){
-                    if(userCount.get(null) == maxUserListCount.get(null)){
+                if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domains[i])){
+                    if(userCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME).
+                            equals(maxUserListCount.get(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME))){
                         isPrimaryExceeding = true;
                     }
                     continue;
                 }
-                if(userCount.get(domains[i]) == maxUserListCount.get(domains[i].toUpperCase())){
+                if(userCount.get(domains[i]).equals(maxUserListCount.get(domains[i].toUpperCase()))){
                     exceededDomains += domains[i];
                     if(i != domains.length - 1){
                         exceededDomains += ":";
