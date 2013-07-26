@@ -20,7 +20,7 @@ package org.wso2.carbon.mediator.cache;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.config.xml.XMLConfigConstants;
-import org.wso2.caching.CachingConstants;
+import org.wso2.carbon.caching.core.CachingConstants;
 import org.wso2.carbon.mediator.service.MediatorException;
 import org.wso2.carbon.mediator.service.ui.AbstractListMediator;
 
