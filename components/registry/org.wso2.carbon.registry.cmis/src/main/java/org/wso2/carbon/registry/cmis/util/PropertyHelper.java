@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.registry.cmis;
+package org.wso2.carbon.registry.cmis.util;
 
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Properties;

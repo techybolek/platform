@@ -30,6 +30,7 @@ import org.apache.chemistry.opencmis.commons.spi.Holder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.PropertyHelper;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
