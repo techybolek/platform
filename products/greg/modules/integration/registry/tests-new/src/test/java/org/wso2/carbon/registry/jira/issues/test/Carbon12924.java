@@ -45,6 +45,7 @@ import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkProperties;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.beans.xsd.LifecycleBean;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.util.xsd.Property;
@@ -53,6 +54,7 @@ import org.wso2.carbon.registry.activities.stub.RegistryExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.lifecycle.test.utils.LifeCycleUtils;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -343,6 +345,7 @@ public class Carbon12924 {
                           "        </workList>";
 
         ServiceManager serviceManager = new ServiceManager(governance);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service[] services = serviceManager.getAllServices();
         for (Service s : services) {
             if (s.getQName().getLocalPart().equals(serviceName)) {
