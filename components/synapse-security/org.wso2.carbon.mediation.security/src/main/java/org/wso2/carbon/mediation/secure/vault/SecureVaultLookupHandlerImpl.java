@@ -29,12 +29,10 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
-
 public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 
-
 	private static Log log = LogFactory.getLog(SecureVaultLookupHandlerImpl.class);
-	
+
 	public enum LookupType {
 		FILE, REGISTRY
 	}
@@ -46,23 +44,22 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	private RegistryService registryService;
 
 	UserRegistry registry = null;
-	
 
-	
-	private SecureVaultLookupHandlerImpl(ServerConfigurationService serverConfigurationService,
+	private SecureVaultLookupHandlerImpl(
+			ServerConfigurationService serverConfigurationService,
 			RegistryService registryService) throws RegistryException {
 		this.serverConfigService = serverConfigurationService;
 		this.registryService = registryService;
 		try {
 			init();
 		} catch (RegistryException e) {
-			// TODO Auto-generated catch block
 			throw new RegistryException("Error while intializing the registry");
 		}
 
 	}
 
-	public static SecureVaultLookupHandlerImpl getDefaultSecurityService() throws RegistryException {
+	public static SecureVaultLookupHandlerImpl getDefaultSecurityService()
+			throws RegistryException {
 		return getDefaultSecurityService(SecurityServiceHolder.getInstance()
 				.getServerConfigurationService(), SecurityServiceHolder.getInstance()
 				.getRegistryService());
@@ -81,20 +78,51 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	private void init() throws RegistryException {
 		try {
 			registry = registryService.getConfigSystemRegistry();
+
+			// creating vault-specific storage repository (this happens only if
+			// not resource not existing)
+			initRegistryRepo();
+
 			SecretManagerInitializer initializer = SecretManagerInitializer.getInstance();
-			Resource resource = registry.get("connector-secure-vault-config");
-			initializer.init(resource.getProperties(),resource);
-			
-			//creating vault-specific storage repository (this happens only if not resource not existing)
-			org.wso2.carbon.registry.core.Collection secureVaultCollection= registry.newCollection();
-			registry.put(SecureVaultConstants.SYSTEM_CONFIG_CONNECTOR_SECURE_VAULT_CONFIG, secureVaultCollection);
-			
-				} catch (RegistryException e) {
+			Resource resource = registry
+			.get(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
+			initializer.init(resource.getProperties(), resource);
+
+		} catch (RegistryException e) {
 			throw new RegistryException("Error while intializing the registry");
 		}
 	}
 
-	
+	/**
+	 * Initializing the repository which requires to store the secure vault cipher text
+	 * 
+	 * @throws RegistryException
+	 */
+	private void initRegistryRepo() throws RegistryException {
+
+		if (!isRepoExists()) {
+			org.wso2.carbon.registry.core.Collection secureVaultCollection = registry
+					.newCollection();
+			registry.put(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY,
+					secureVaultCollection);
+		}
+	}
+
+	/**
+	 * Checks whether the given repository already existing.
+	 * 
+	 * @return
+	 */
+	protected boolean isRepoExists(){
+		try {
+			registry
+			.get(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
+		} catch (RegistryException e) {
+			return false;
+		}
+		return true;
+	}
+
 	public String getProviderClass() {
 		return this.getClass().getName();
 	}
@@ -132,7 +160,7 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	 * @throws RegistryException
 	 */
 	private String lookupRegistry(String aliasPasword) throws RegistryException {
-		if(log.isDebugEnabled()){
+		if (log.isDebugEnabled()) {
 			log.info("processing evaluating registry based lookup");
 		}
 		SecretManager secretManager = SecretManager.getInstance();
@@ -149,7 +177,7 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	 * @return
 	 */
 	private String lookupFileRepositry(String aliasPasword) {
-		if(log.isDebugEnabled()){
+		if (log.isDebugEnabled()) {
 			log.info("processing evaluating file based lookup");
 		}
 		SecretManager secretManager = SecretManager.getInstance();

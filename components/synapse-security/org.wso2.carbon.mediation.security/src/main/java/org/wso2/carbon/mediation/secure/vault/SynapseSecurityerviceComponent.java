@@ -51,7 +51,6 @@ public class SynapseSecurityerviceComponent {
 		   try {
 			SecureVaultLookupHandlerImpl.getDefaultSecurityService();
 		} catch (RegistryException e) {
-			// TODO Auto-generated catch block
 			log.error("Error while activating secure vault registry component",e);
 		}
 	}

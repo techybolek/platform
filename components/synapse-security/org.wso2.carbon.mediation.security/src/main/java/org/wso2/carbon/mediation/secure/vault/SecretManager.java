@@ -198,10 +198,8 @@ public class SecretManager {
 				}
 				
 				instance.init(configurationProperties, id);
-				//if (parentRepository == null) {
-					parentRepository = instance;
-				//}
-
+				parentRepository = instance;
+			
 				instance.setParent(currentParent);
 				currentParent = instance;
 				if (log.isDebugEnabled()) {
