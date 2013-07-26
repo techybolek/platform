@@ -110,7 +110,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws APIKeyMgtException on error
      */
     public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
-    		String callbackUrl, String[] allowedDomains)
+    		String callbackUrl, String[] allowedDomains, String validityTime)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -122,7 +122,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
             credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
             accessToken = apiMgtDAO.registerApplicationAccessToken(credentials[0], applicationName,
-                    tenantAwareUserId, tenantId, tokenType, allowedDomains);
+                    tenantAwareUserId, tenantId, tokenType, allowedDomains,validityTime);
 
         } else if (credentials == null) {
             credentials = apiMgtDAO.getOAuthCredentials(accessToken, tokenType);
