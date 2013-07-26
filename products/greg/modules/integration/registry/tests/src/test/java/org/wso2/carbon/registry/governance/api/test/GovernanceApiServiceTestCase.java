@@ -63,7 +63,7 @@ public class GovernanceApiServiceTestCase {
         TestUtils.cleanupResources(governanceRegistry);
         serviceManager = new ServiceManager(governanceRegistry);
         wsdlMgr = new WsdlManager(governanceRegistry);
-        wsdl = wsdlMgr.newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/branches/4.0.0/products/greg/4.5.0/modules/" +
+        wsdl = wsdlMgr.newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules/" +
                 "integration/registry/tests/src/test/java/resources/wsdl/echo.wsdl");
         GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
     }

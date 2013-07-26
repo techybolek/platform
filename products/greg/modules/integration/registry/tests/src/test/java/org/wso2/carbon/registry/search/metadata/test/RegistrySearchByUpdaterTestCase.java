@@ -143,7 +143,7 @@ public class RegistrySearchByUpdaterTestCase {
         Assert.assertTrue((result.getResourceDataList().length > 0), "No Record Found. set valid Updater name pattern");
         for (ResourceData resourceData : result.getResourceDataList()) {
             Resource resource = registry.get(resourceData.getResourcePath());
-            Assert.assertTrue((resource.getLastUpdaterUserName().startsWith("PRIMARY/adm")),
+            Assert.assertTrue((resource.getLastUpdaterUserName().startsWith("adm")),
                               "search word pattern not contain on Updater Name :" + resourceData.getResourcePath());
         }
 

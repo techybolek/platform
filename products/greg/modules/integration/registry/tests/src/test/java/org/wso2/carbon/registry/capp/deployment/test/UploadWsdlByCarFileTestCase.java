@@ -44,7 +44,7 @@ public class UploadWsdlByCarFileTestCase {
     private CarbonAppUploaderClient cAppUploader;
     private ApplicationAdminClient adminServiceApplicationAdmin;
 
-    private String cAppName = "wsdl_new";
+    private String cAppName = "wsdl_new_1.0.0";
     private final String wsdlPath = "/_system/governance/trunk/wsdls/net/restfulwebservices/www/servicecontracts/_2008/_01/WeatherForecastService.svc.wsdl";
     private final String wsdlUploadedPath = "/_system/wsdl_new/WeatherForecastService.svc.wsdl";
     private final String servicePath = "/_system/governance/trunk/services/net/restfulwebservices/www/servicecontracts/_2008/_01/WeatherForecastService";
