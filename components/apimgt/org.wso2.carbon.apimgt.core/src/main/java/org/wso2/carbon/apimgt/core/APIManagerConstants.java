@@ -20,6 +20,19 @@ public class APIManagerConstants {
 	public static final String APPLICATION_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/tiers.xml";
 
     public static final String GOVERNANCE_REGISTRY_PREFIX = "gov:";
+    
+    /*API Management configuration in carbon.xml */
+    public static final String API_MANGEMENT = "APIManagement.";
+        
+    public static final String API_MANGEMENT_ENABLED = API_MANGEMENT + "Enabled";
+    
+    public static final String EXTERNAL_API_MANGEMENT = API_MANGEMENT + "ExternalAPIManager.";
+    
+    public static final String EXTERNAL_API_GATEWAY = EXTERNAL_API_MANGEMENT + "APIGatewayURL";
+    
+    public static final String EXTERNAL_API_PUBLISHER = EXTERNAL_API_MANGEMENT + "APIPublisherURL";
+    
+    public static final String API_MANGEMENT_LOAD_CTX = API_MANGEMENT + "LoadAPIContextsInServerStartup";
 
 
 }
