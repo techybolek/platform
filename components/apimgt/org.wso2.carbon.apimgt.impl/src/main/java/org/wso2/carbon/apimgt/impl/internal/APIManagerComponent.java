@@ -160,10 +160,10 @@ public class APIManagerComponent {
                 }
             }
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
-            String apiManagementEnabled = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
-            String loadAPIContextsAtStartup = CarbonUtils.getServerConfiguration().getFirstProperty("LoadAPIContextsInServerStartup");
-            if ((apiManagementEnabled != null && apiManagementEnabled.equals("true")) &&
-                    (loadAPIContextsAtStartup != null && loadAPIContextsAtStartup.equals("true"))) {
+            /* TODO: Load Config values from apimgt.core*/
+            boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();
+            boolean loadAPIContextsAtStartup = APIUtil.isLoadAPIContextsAtStartup();
+            if (apiManagementEnabled && loadAPIContextsAtStartup) {
                 List<String> contextList = ApiMgtDAO.getAllAvailableContexts();
                 Cache contextCache = APIUtil.getAPIContextCache();
                 for (String context : contextList) {

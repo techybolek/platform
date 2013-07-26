@@ -1424,7 +1424,11 @@ public final class APIUtil {
     }
 
     public static boolean isAPIManagementEnabled() {
-        return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement"));
+        return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.Enabled"));
+    }
+    
+    public static boolean isLoadAPIContextsAtStartup() {
+        return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.LoadAPIContextsInServerStartup"));
     }
 
     public static Cache getAPIContextCache() {
