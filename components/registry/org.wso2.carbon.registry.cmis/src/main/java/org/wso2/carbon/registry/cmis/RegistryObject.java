@@ -32,25 +32,26 @@ import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.apache.chemistry.opencmis.commons.server.ObjectInfoHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.cmis.impl.FolderTypeHandler;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
+
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.*;
 
-public abstract class GregObject {
+public abstract class RegistryObject {
 
-    private static final Logger log = LoggerFactory.getLogger(GregObject.class);
+    private static final Logger log = LoggerFactory.getLogger(RegistryObject.class);
 
     private final Registry repository;
     private Resource resource;
-    protected final GregTypeManager typeManager;
+    protected final RegistryTypeManager typeManager;
     protected final PathManager pathManager;
     //protected final GregTypeHandlerManager typeHandlerManager;
 
@@ -62,7 +63,7 @@ public abstract class GregObject {
      * @param pathManager
      * //@param typeHandlerManager
      */
-    protected GregObject(Registry repository,Resource resource, GregTypeManager typeManager, PathManager pathManager) {
+    protected RegistryObject(Registry repository,Resource resource, RegistryTypeManager typeManager, PathManager pathManager) {
         this.resource = resource;
         this.typeManager = typeManager;
         this.pathManager = pathManager;
@@ -153,9 +154,9 @@ public abstract class GregObject {
      * @return  this instance as a <code>GregDocument</code>
      * @throws CmisConstraintException if <code>this.isDocument() == false</code>
      */
-    public GregDocument asDocument() {
+    public RegistryDocument asDocument() {
         if (isDocument()) {
-            return (GregDocument) this;
+            return (RegistryDocument) this;
         } else {
             throw new CmisConstraintException("Not a document: " + this);
         }
@@ -165,9 +166,9 @@ public abstract class GregObject {
      * @return  this instance as a <code>GregFolder</code>
      * @throws CmisConstraintException if <code>this.isFolder() == false</code>
      */
-    public GregFolder asFolder() {
+    public RegistryFolder asFolder() {
         if (isFolder()) {
-            return (GregFolder) this;
+            return (RegistryFolder) this;
         } else {
             throw new CmisObjectNotFoundException("Not a folder: " + this);
         }
@@ -177,9 +178,9 @@ public abstract class GregObject {
      * @return  this instance as a <code>GregVersionBase</code>
      * @throws CmisConstraintException if <code>this.isVersionable() == false</code>
      */
-    public GregVersionBase asVersion() {
+    public RegistryVersionBase asVersion() {
         if (isVersionable()) {
-            return (GregVersionBase) this;
+            return (RegistryVersionBase) this;
         } else {
             throw new CmisObjectNotFoundException("Not a version: " + this);
         }
@@ -193,7 +194,7 @@ public abstract class GregObject {
      * @throws CmisObjectNotFoundException  if <code>path</code> does not identify a GREG node
      * @throws CmisRuntimeException
      */
-    public GregObject getNode(String path) throws RegistryException {
+    public RegistryObject getNode(String path) throws RegistryException {
 
         return create(repository.get(path));
 
@@ -212,7 +213,7 @@ public abstract class GregObject {
      * Since my implementation is fixed for types Document & Folder, this method 
      * is implemented in the respective GregDocument or GregFolder classes.
      */
-    protected abstract GregObject create(Resource resource);
+    protected abstract RegistryObject create(Resource resource);
     //GREG implementation calls getGregNode from DefaultDocumentHandler & DefaultFolderHandler.
     //Doc returns a new GREG version
     //Folder returns a new GREG Folder
@@ -270,7 +271,7 @@ public abstract class GregObject {
      * @throws  CmisObjectNotFoundException  if this is the root folder
      * @throws  CmisRuntimeException
      */
-    public GregFolder getParent() {
+    public RegistryFolder getParent() {
         try {
             if(resource.getPath().equals("/")){
                 throw new CmisObjectNotFoundException("No parent for root folder");
@@ -385,7 +386,7 @@ public abstract class GregObject {
     protected static long getPropertyLength(Resource node, String propertyName) throws RegistryException {
         String property = node.getProperty(propertyName);
         //if property asks for GREG_DATA then this should return the length of the content stream //my assumption
-        if(propertyName.equals(GregProperty.GREG_DATA)){
+        if(propertyName.equals(CMISConstants.GREG_DATA)){
             if(property != null && !property.equals("true")){
                 return 0;
             }
@@ -504,7 +505,7 @@ public abstract class GregObject {
             return;
         }
 
-        if (value.equals(GregProperty.GREG_PROPERTY_NOT_SET)) {
+        if (value.equals(CMISConstants.GREG_PROPERTY_NOT_SET)) {
             value = null;
         }
 
@@ -622,7 +623,7 @@ public abstract class GregObject {
      *
      * @throws CmisStorageException
      */
-    public GregObject updateProperties(Properties properties) {
+    public RegistryObject updateProperties(Properties properties) {
 
         // get and check the new name
         String newName = PropertyHelper.getStringProperty(properties, PropertyIds.NAME);
@@ -649,7 +650,7 @@ public abstract class GregObject {
         	// Are there properties to update?
             PropertyUpdater propertyUpdater = PropertyUpdater.create(typeManager, getTypeId(), properties);
 
-            GregVersionBase gregVersion = isVersionable() ? asVersion() : null;
+            RegistryVersionBase gregVersion = isVersionable() ? asVersion() : null;
 
             // Update properties. Checkout if required
             boolean autoCheckout = false;
@@ -669,7 +670,7 @@ public abstract class GregObject {
                 return gregVersion.checkin(null, null, "auto checkout");
             } else if (gregVersion != null && gregVersion.isCheckedOut()) {
                 // the node is checked out -> return pwc.
-                GregVersionBase gregNewVersion = create(newNode).asVersion();
+                RegistryVersionBase gregNewVersion = create(newNode).asVersion();
                 return gregNewVersion.getPwc();
             } else {
                 // non versionable or not a new node -> return this
@@ -713,7 +714,7 @@ public abstract class GregObject {
      *
      * @throws CmisStorageException
      */
-    public GregObject move(GregFolder parent) {
+    public RegistryObject move(RegistryFolder parent) {
         try {
             // move it if target location is not same as source location
         	//TODO 
@@ -746,7 +747,7 @@ public abstract class GregObject {
 
         private PropertyUpdater() { }
 
-        public static PropertyUpdater create(GregTypeManager typeManager, String typeId, Properties properties) {
+        public static PropertyUpdater create(RegistryTypeManager typeManager, String typeId, Properties properties) {
             if (properties == null) {
                 throw new CmisConstraintException("No properties!");
             }

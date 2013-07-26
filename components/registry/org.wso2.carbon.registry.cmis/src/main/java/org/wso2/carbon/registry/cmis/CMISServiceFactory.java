@@ -44,10 +44,10 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * A {@link CmisServiceFactory} implementation which returns {@link GregService} instances.
+ * A {@link CmisServiceFactory} implementation which returns {@link RegistryService} instances.
  */
-public class GregServiceFactory extends AbstractServiceFactory {
-    private static final Logger log = LoggerFactory.getLogger(GregServiceFactory.class);
+public class CMISServiceFactory extends AbstractServiceFactory {
+    private static final Logger log = LoggerFactory.getLogger(CMISServiceFactory.class);
 
     //The values should match the keys in repository.properties
     public static final String CARBON_HOME = "carbon-home";
@@ -61,12 +61,12 @@ public class GregServiceFactory extends AbstractServiceFactory {
     public static final BigInteger DEFAULT_MAX_ITEMS_OBJECTS = BigInteger.valueOf(200);
     public static final BigInteger DEFAULT_DEPTH_OBJECTS = BigInteger.valueOf(10);
 
-    private GregTypeManager typeManager;
+    private RegistryTypeManager typeManager;
     private PathManager pathManager;
     private Map<String, String> gregConfig;
     private String mountPath = "/";
-    private GregRepository gregRepository;
-    private Map<String, GregRepository> sessions = Collections.synchronizedMap(new HashMap<String,GregRepository>());
+    private CMISRepository gregRepository;
+    private Map<String, CMISRepository> sessions = Collections.synchronizedMap(new HashMap<String,CMISRepository>());
     @Override
     public void init(Map<String, String> parameters) {
         
@@ -98,7 +98,7 @@ public class GregServiceFactory extends AbstractServiceFactory {
         //The registry clients are stored in the map "sessions"
         //If there is an existing session, use it. Otherwise make a new one.
 
-        GregRepository repository = null;
+        CMISRepository repository = null;
         String username = context.getUsername();
 
         if(sessions.containsKey(username)){
@@ -106,7 +106,7 @@ public class GregServiceFactory extends AbstractServiceFactory {
             //TODO check for session timeout
         } else{
             try {
-                repository = new GregRepository(acquireGregRepository(gregConfig, context), pathManager, typeManager);
+                repository = new CMISRepository(acquireGregRepository(gregConfig, context), pathManager, typeManager);
                 //put to sessions for future reference
                 sessions.put(username, repository);
 
@@ -120,7 +120,7 @@ public class GregServiceFactory extends AbstractServiceFactory {
             }
         }
 
-        CmisServiceWrapper<GregService> serviceWrapper = new CmisServiceWrapper<GregService>(
+        CmisServiceWrapper<CMISService> serviceWrapper = new CmisServiceWrapper<CMISService>(
                 createGregService(repository, context), DEFAULT_MAX_ITEMS_TYPES, DEFAULT_DEPTH_TYPES,
                 DEFAULT_MAX_ITEMS_OBJECTS, DEFAULT_DEPTH_OBJECTS);
 
@@ -165,12 +165,12 @@ public class GregServiceFactory extends AbstractServiceFactory {
      * @param context
      * @return
      */
-    protected GregService createGregService(GregRepository gregRepository, CallContext context) {
-        return new GregService(gregRepository);
+    protected CMISService createGregService(CMISRepository gregRepository, CallContext context) {
+        return new CMISService(gregRepository);
     }
 
-    protected GregTypeManager createTypeManager() {
-        return  new GregTypeManager();   
+    protected RegistryTypeManager createTypeManager() {
+        return  new RegistryTypeManager();
     }
 
    private void readConfiguration(Map<String, String> parameters) {

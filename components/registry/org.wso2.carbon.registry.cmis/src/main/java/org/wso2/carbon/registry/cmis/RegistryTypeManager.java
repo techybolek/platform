@@ -40,8 +40,8 @@ import java.util.*;
 /**
  * Type Manager.
  */
-public class GregTypeManager implements TypeManager {
-    private static final Logger log = LoggerFactory.getLogger(GregTypeManager.class);
+public class RegistryTypeManager implements TypeManager {
+    private static final Logger log = LoggerFactory.getLogger(RegistryTypeManager.class);
 
     public static final String DOCUMENT_TYPE_ID = "cmis:document";
     public static final String FOLDER_TYPE_ID = "cmis:folder";
@@ -51,7 +51,7 @@ public class GregTypeManager implements TypeManager {
 
     private final Map<String, TypeDefinitionContainerImpl> fTypes;
 
-    public GregTypeManager() {
+    public RegistryTypeManager() {
         fTypes = new HashMap<String, TypeDefinitionContainerImpl>();
     }
 

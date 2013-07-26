@@ -19,10 +19,11 @@ package org.wso2.carbon.registry.cmis;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.*;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
+
 import org.wso2.carbon.registry.cmis.util.Util;
 
 import java.math.BigDecimal;
@@ -106,7 +107,7 @@ public class GregStaticMethods {
             //repository.rename(resource.getPath(), resource.getParentPath()+values.get(0));
         }
         else if (PropertyIds.CONTENT_STREAM_MIME_TYPE.equals(propertyName)) {
-            resource.setProperty(GregProperty.GREG_MIMETYPE, values);
+            resource.setProperty(CMISConstants.GREG_MIMETYPE, values);
             resource.setMediaType(values.get(0));
         } else {
             resource.setProperty(propertyName, values);

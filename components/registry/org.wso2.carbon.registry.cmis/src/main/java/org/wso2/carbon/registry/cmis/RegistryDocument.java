@@ -29,10 +29,11 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertiesImpl;
 import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
+
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -42,9 +43,9 @@ import java.util.Set;
 /**
  * Instances of this class represent a cmis:document of an underlying GREG <code>Node</code>.
  */
-public abstract class GregDocument extends GregObject{
+public abstract class RegistryDocument extends RegistryObject{
 	
-	private static final Logger log = LoggerFactory.getLogger(GregDocument.class);
+	private static final Logger log = LoggerFactory.getLogger(RegistryDocument.class);
 
     public static final String MIME_UNKNOWN = "application/octet-stream";
 
@@ -56,7 +57,7 @@ public abstract class GregDocument extends GregObject{
      * @param pathManager
      *
      */
-    public GregDocument(Registry repository, Resource resource, GregTypeManager typeManager, PathManager pathManager) {
+    public RegistryDocument(Registry repository, Resource resource, RegistryTypeManager typeManager, PathManager pathManager) {
         super(repository, resource, typeManager, pathManager);
     }
     
@@ -65,7 +66,7 @@ public abstract class GregDocument extends GregObject{
      */
     public boolean isDocumentCheckedOut() {
 
-        String property = getNode().getProperty(GregProperty.GREG_IS_CHECKED_OUT);
+        String property = getNode().getProperty(CMISConstants.GREG_IS_CHECKED_OUT);
 		
 		if(property == null || property.equals("false")){
             return false;
@@ -81,9 +82,9 @@ public abstract class GregDocument extends GregObject{
         result.setFileName(getName());
             
         try {
-            result.setLength(BigInteger.valueOf(getPropertyLength(getNode(), GregProperty.GREG_DATA)));
+            result.setLength(BigInteger.valueOf(getPropertyLength(getNode(), CMISConstants.GREG_DATA)));
             if(getNode().getContent() != null){
-                String mimeType = getNode().getProperty(GregProperty.GREG_MIMETYPE);
+                String mimeType = getNode().getProperty(CMISConstants.GREG_MIMETYPE);
                 result.setMimeType(mimeType);
                 //result.setMimeType(getNode().getMediaType());
             } else {
@@ -108,7 +109,7 @@ public abstract class GregDocument extends GregObject{
      *
      * @throws CmisStorageException
      */
-    public GregObject setContentStream(ContentStream contentStream, boolean overwriteFlag) {
+    public RegistryObject setContentStream(ContentStream contentStream, boolean overwriteFlag) {
         try {
             //Check for existing data
             Object dataObject = getNode().getContent();
@@ -122,10 +123,10 @@ public abstract class GregDocument extends GregObject{
                 throw new CmisContentAlreadyExistsException("Content already exists!");
             }
 
-            GregVersionBase gregVersion = isVersionable() ? asVersion() : null;
+            RegistryVersionBase gregVersion = isVersionable() ? asVersion() : null;
 
             boolean autoCheckout = gregVersion != null && !gregVersion.isCheckedOut();
-            GregVersionBase gregVersionContext = null;
+            RegistryVersionBase gregVersionContext = null;
             if (autoCheckout) {
                 gregVersionContext = gregVersion.checkout();
             } else {
@@ -180,7 +181,7 @@ public abstract class GregDocument extends GregObject{
 
     @Override
     protected String getTypeIdInternal() {
-        return GregTypeManager.DOCUMENT_TYPE_ID;
+        return RegistryTypeManager.DOCUMENT_TYPE_ID;
     }
 
     @Override
@@ -272,11 +273,11 @@ public abstract class GregDocument extends GregObject{
         addPropertyBoolean(properties, typeId, filter, PropertyIds.IS_IMMUTABLE, getIsImmutable());
 
         // content stream
-        long length = getPropertyLength(contextNode,GregProperty.GREG_DATA);
+        long length = getPropertyLength(contextNode,CMISConstants.GREG_DATA);
         addPropertyInteger(properties, typeId, filter, PropertyIds.CONTENT_STREAM_LENGTH, length);
 
         // mime type
-        String mimeType = getPropertyOrElse(contextNode, GregProperty.GREG_MIMETYPE, MIME_UNKNOWN);
+        String mimeType = getPropertyOrElse(contextNode, CMISConstants.GREG_MIMETYPE, MIME_UNKNOWN);
         addPropertyString(properties, typeId, filter, PropertyIds.CONTENT_STREAM_MIME_TYPE, mimeType);
         objectInfo.setContentType(mimeType);
 
@@ -302,7 +303,7 @@ public abstract class GregDocument extends GregObject{
             addPropertyId(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_ID, getCheckedOutId());
             //addPropertyString(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_BY, getCheckedOutBy());
         } else{
-            addPropertyId(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_ID,GregProperty.GREG_PROPERTY_NOT_SET);
+            addPropertyId(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_ID, CMISConstants.GREG_PROPERTY_NOT_SET);
             //addPropertyString(properties, typeId, filter, PropertyIds.VERSION_SERIES_CHECKED_OUT_BY, null);
         }
 
@@ -320,6 +321,7 @@ public abstract class GregDocument extends GregObject{
                 }
         } catch (RegistryException e) {
             log.debug(e.getMessage());
+            setAction(result, Action.CAN_GET_CONTENT_STREAM, false);
         } finally {
             setAction(result, Action.CAN_SET_CONTENT_STREAM, true);
             setAction(result, Action.CAN_DELETE_CONTENT_STREAM, true);

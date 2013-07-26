@@ -29,13 +29,14 @@ import org.apache.chemistry.opencmis.commons.server.ObjectInfoHandler;
 import org.apache.chemistry.opencmis.commons.spi.Holder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
 import org.wso2.carbon.registry.cmis.impl.FolderTypeHandler;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
+
 import org.wso2.carbon.registry.cmis.impl.UnversionedDocumentTypeHandler;
 
 import java.math.BigInteger;
@@ -44,11 +45,11 @@ import java.util.*;
 /**
  * This class represents the GREG back-end for CMIS server.
  */
-public class GregRepository {
-    private static final Logger log = LoggerFactory.getLogger(GregRepository.class);
+public class CMISRepository {
+    private static final Logger log = LoggerFactory.getLogger(CMISRepository.class);
 
     private final Registry repository;
-    private final GregTypeManager typeManager;
+    private final RegistryTypeManager typeManager;
     private final PathManager pathManager;
     private final String REPOSITORY_ID = "Governance Registry";
 
@@ -60,7 +61,7 @@ public class GregRepository {
      * @param typeManager
      *
      */
-    public GregRepository(Registry repository, PathManager pathManager, GregTypeManager typeManager) {
+    public CMISRepository(Registry repository, PathManager pathManager, RegistryTypeManager typeManager) {
         this.repository = repository;
         this.typeManager = typeManager;
         this.pathManager = pathManager;
@@ -113,7 +114,7 @@ public class GregRepository {
             throw new CmisObjectNotFoundException("Type '" + typeId + "' is unknown!");
         }
 
-        return GregTypeManager.copyTypeDefinition(type);
+        return RegistryTypeManager.copyTypeDefinition(type);
     }
 
     /**
@@ -146,14 +147,14 @@ public class GregRepository {
             throw new CmisObjectNotFoundException("Type '" + typeId + "' is unknown!");
         }
 
-        boolean isVersionable = GregTypeManager.isVersionable(type);
+        boolean isVersionable = RegistryTypeManager.isVersionable(type);
         if (!isVersionable && versioningState != VersioningState.NONE) {
             throw new CmisConstraintException("Versioning not supported for " + typeId);
         }
 
         String name = PropertyHelper.getStringProperty(properties, PropertyIds.NAME);
         // get parent Node
-        GregFolder parent = getGregNode(folderId).asFolder();
+        RegistryFolder parent = getGregNode(folderId).asFolder();
 
         if (isVersionable && versioningState == VersioningState.NONE) {
             throw new CmisConstraintException("Versioning required for " + typeId);
@@ -161,11 +162,11 @@ public class GregRepository {
         //-----------------------------GREG DEPENDANT-------------------------------------------------------------
         if(versioningState == VersioningState.NONE){
             UnversionedDocumentTypeHandler handler = new UnversionedDocumentTypeHandler(getRegistry(), pathManager, typeManager);
-            GregObject gregNode = handler.createDocument(parent, name, properties, contentStream, versioningState);
+            RegistryObject gregNode = handler.createDocument(parent, name, properties, contentStream, versioningState);
             return gregNode.getId();
         } else{
             DocumentTypeHandler typeHandler = new DocumentTypeHandler(getRegistry(), pathManager, typeManager);
-            GregObject gregNode = typeHandler.createDocument(parent, name, properties, contentStream, versioningState);
+            RegistryObject gregNode = typeHandler.createDocument(parent, name, properties, contentStream, versioningState);
             return gregNode.getId();
         }
         
@@ -180,10 +181,10 @@ public class GregRepository {
     	log.debug("createDocumentFromSource");
 
         // get parent folder Node
-        GregFolder parent = getGregNode(folderId).asFolder();
+        RegistryFolder parent = getGregNode(folderId).asFolder();
 
         // get source document Node
-        GregDocument source = getGregNode(sourceId).asDocument();
+        RegistryDocument source = getGregNode(sourceId).asDocument();
 
         boolean isVersionable = source.isVersionable();
         if (!isVersionable && versioningState != VersioningState.NONE) {
@@ -195,7 +196,7 @@ public class GregRepository {
         }
 
         // create child from source
-        GregObject gregNode = parent.addNodeFromSource(source, properties);
+        RegistryObject gregNode = parent.addNodeFromSource(source, properties);
         return gregNode.getId();
     }
 
@@ -224,9 +225,9 @@ public class GregRepository {
         String name = PropertyHelper.getStringProperty(properties, PropertyIds.NAME);
 
         // get parent Node
-        GregFolder parent = getGregNode(folderId).asFolder();
+        RegistryFolder parent = getGregNode(folderId).asFolder();
         FolderTypeHandler typeHandler = new FolderTypeHandler(getRegistry(), pathManager, typeManager);
-        GregObject gregNode = typeHandler.createFolder(parent, name, properties);
+        RegistryObject gregNode = typeHandler.createFolder(parent, name, properties);
         return gregNode.getId();
     }
 
@@ -243,8 +244,8 @@ public class GregRepository {
         }
 
         // get the node and parent
-        GregObject gregNode = getGregNode(objectId.getValue());
-        GregFolder parent = getGregNode(targetFolderId).asFolder();
+        RegistryObject gregNode = getGregNode(objectId.getValue());
+        RegistryFolder parent = getGregNode(targetFolderId).asFolder();
         gregNode = gregNode.move(parent);
         objectId.setValue(gregNode.getId());
         return gregNode.compileObjectType(null, false, objectInfos, requiresObjectInfo);
@@ -289,7 +290,7 @@ public class GregRepository {
             }
         }
 
-        GregDocument gregDocument = getGregNode(pathToGet).asDocument();
+        RegistryDocument gregDocument = getGregNode(pathToGet).asDocument();
         String id = gregDocument.setContentStream(contentStream, Boolean.TRUE.equals(overwriteFlag)).getId();
         objectId.setValue(id);
     }
@@ -301,7 +302,7 @@ public class GregRepository {
     	log.debug("deleteObject");
 
         // get the node
-        GregObject gregNode = getGregNode(objectId);
+        RegistryObject gregNode = getGregNode(objectId);
 
         //If PWC cancelCheckOut
         //String property = gregNode.getNode().getProperty(GregProperty.GREG_IS_CHECKED_OUT);
@@ -309,7 +310,7 @@ public class GregRepository {
         if(objectId.endsWith("_pwc")){
             cancelCheckout(objectId);
         } else{
-            gregNode.delete(Boolean.TRUE.equals(allVersions), GregPrivateWorkingCopy.isPwc(repository, objectId));
+            gregNode.delete(Boolean.TRUE.equals(allVersions), RegistryPrivateWorkingCopy.isPwc(repository, objectId));
         }
     }
 
@@ -325,7 +326,7 @@ public class GregRepository {
         }
 
         // get the folder
-        GregFolder gregFolder = getGregNode(folderId).asFolder();
+        RegistryFolder gregFolder = getGregNode(folderId).asFolder();
         return gregFolder.deleteTree();
     }
 
@@ -342,7 +343,7 @@ public class GregRepository {
         }
 
         // get the node
-        GregObject gregNode = getGregNode(objectId.getValue());
+        RegistryObject gregNode = getGregNode(objectId.getValue());
         String id = gregNode.updateProperties(properties).getId();
         objectId.setValue(id);
         return gregNode.compileObjectType(null, false, objectInfos, objectInfoRequired);
@@ -362,7 +363,7 @@ public class GregRepository {
         }
 
         // get the node
-        GregObject gregNode = getGregNode(objectId);
+        RegistryObject gregNode = getGregNode(objectId);
 
         // gather properties
         return gregNode.compileObjectType(splitFilter(filter), includeAllowableActions, objectInfos, requiresObjectInfo);
@@ -384,7 +385,7 @@ public class GregRepository {
     public AllowableActions getAllowableActions(String objectId) {
     	log.debug("getAllowableActions");
 
-        GregObject gregNode = getGregNode(objectId);
+        RegistryObject gregNode = getGregNode(objectId);
         return gregNode.getAllowableActions();
 
     }
@@ -400,7 +401,7 @@ public class GregRepository {
         }
 
         // get the node
-        GregDocument gregDocument = getGregNode(objectId).asDocument();
+        RegistryDocument gregDocument = getGregNode(objectId).asDocument();
 
         ContentStream contentStream = gregDocument.getContentStream();
         if(contentStream.getStream() != null){
@@ -432,7 +433,7 @@ public class GregRepository {
         }
 
         // get the folder
-        GregFolder gregFolder = getGregNode(folderId).asFolder();
+        RegistryFolder gregFolder = getGregNode(folderId).asFolder();
 
         // set object info of the the folder
         if (requiresObjectInfo) {
@@ -447,9 +448,9 @@ public class GregRepository {
 
         // iterate through children
         Set<String> splitFilter = splitFilter(filter);
-        Iterator<GregObject> childNodes = gregFolder.getNodes();
+        Iterator<RegistryObject> childNodes = gregFolder.getNodes();
         while (childNodes.hasNext()) {
-            GregObject child = childNodes.next();            
+            RegistryObject child = childNodes.next();
             count++;
 
             if (skip > 0) {
@@ -497,7 +498,7 @@ public class GregRepository {
         }
 
         // get the folder
-        GregFolder gregFolder = getGregNode(folderId).asFolder();
+        RegistryFolder gregFolder = getGregNode(folderId).asFolder();
 
         // set object info of the the folder
         if (requiresObjectInfo) {
@@ -538,7 +539,7 @@ public class GregRepository {
     	log.debug("getObjectParents");
 
         // get the file or folder
-        GregObject gregNode = getGregNode(objectId);
+        RegistryObject gregNode = getGregNode(objectId);
 
         // don't climb above the root folder
         if (gregNode.isRoot()) {
@@ -551,7 +552,7 @@ public class GregRepository {
         }
 
         // get parent
-        GregObject parent = gregNode.getParent();
+        RegistryObject parent = gregNode.getParent();
         ObjectData object = parent.compileObjectType(splitFilter(filter), includeAllowableActions, objectInfos,
                 requiresObjectInfo);
 
@@ -577,8 +578,8 @@ public class GregRepository {
             throw new CmisInvalidArgumentException("Invalid folder path!");
         }
 
-        GregObject root = getGregNode(PathManager.CMIS_ROOT_ID);
-        GregObject gregNode;
+        RegistryObject root = getGregNode(PathManager.CMIS_ROOT_ID);
+        RegistryObject gregNode;
         if (PathManager.isRoot(folderPath)) {
             gregNode = root;
         } else {
@@ -621,10 +622,10 @@ public class GregRepository {
 
             if (folderId == null) {
                 //Get the list of tracked out documents
-                Resource tracker = repository.get(GregProperty.GREG_CHECKED_OUT_TRACKER);
+                Resource tracker = repository.get(CMISConstants.GREG_CHECKED_OUT_TRACKER);
                 children = tracker.getProperties().keySet().toArray(new String[0]);
             } else{
-                GregFolder folder = getGregNode(folderId).asFolder();
+                RegistryFolder folder = getGregNode(folderId).asFolder();
                 children  = folder.getNode().getChildren();
             }
 
@@ -639,7 +640,7 @@ public class GregRepository {
             for(String child: children) {
 
                 if(getRegistry().resourceExists(child)){
-                    GregObject node = getGregNode(child);
+                    RegistryObject node = getGregNode(child);
 
                     if (!node.isVersionable()) {
                         continue;
@@ -661,13 +662,13 @@ public class GregRepository {
                     }
 
                     // build and add child object
-                    GregPrivateWorkingCopy gregVersion = node.asVersion().getPwc();
+                    RegistryPrivateWorkingCopy gregVersion = node.asVersion().getPwc();
                     ObjectData objectData = gregVersion.compileObjectType(splitFilter, includeAllowableActions, null, false);
                     result.getObjects().add(objectData);
                 } else {
-                    Resource resource = getRegistry().get(GregProperty.GREG_CHECKED_OUT_TRACKER);
+                    Resource resource = getRegistry().get(CMISConstants.GREG_CHECKED_OUT_TRACKER);
                     resource.removeProperty(child);
-                    getRegistry().put(GregProperty.GREG_CHECKED_OUT_TRACKER, resource);
+                    getRegistry().put(CMISConstants.GREG_CHECKED_OUT_TRACKER, resource);
                 }
             }
 
@@ -680,9 +681,9 @@ public class GregRepository {
 
     }
 
-    private boolean isPrivateWorkingCopy(GregObject node) {
-        String checkedOutProperty = node.getNode().getProperty(GregProperty.GREG_IS_CHECKED_OUT);
-        String createdAsPwcProperty = node.getNode().getProperty(GregProperty.GREG_CREATED_AS_PWC);
+    private boolean isPrivateWorkingCopy(RegistryObject node) {
+        String checkedOutProperty = node.getNode().getProperty(CMISConstants.GREG_IS_CHECKED_OUT);
+        String createdAsPwcProperty = node.getNode().getProperty(CMISConstants.GREG_CREATED_AS_PWC);
 
         boolean checkedOut = checkedOutProperty != null && checkedOutProperty.equals("true");
         boolean createdAsPwc = createdAsPwcProperty != null && createdAsPwcProperty.equals("true");
@@ -708,13 +709,13 @@ public class GregRepository {
         }
 
         // get the node
-        GregObject gregNode = getGregNode(objectId.getValue());
+        RegistryObject gregNode = getGregNode(objectId.getValue());
         if (!gregNode.isVersionable()) {
             throw new CmisUpdateConflictException("Not a version: " + gregNode);
         }
 
         // checkout
-        GregPrivateWorkingCopy pwc = gregNode.asVersion().checkout();
+        RegistryPrivateWorkingCopy pwc = gregNode.asVersion().checkout();
         objectId.setValue(pwc.getId());
         if (contentCopied != null) {
             contentCopied.setValue(true);
@@ -734,7 +735,7 @@ public class GregRepository {
         }
 
         // get the node
-        GregObject gregNode = getGregNode(objectId);
+        RegistryObject gregNode = getGregNode(objectId);
         if (!gregNode.isVersionable()) {
             throw new CmisUpdateConflictException("Not a version: " + gregNode);
         }
@@ -757,7 +758,7 @@ public class GregRepository {
         }
 
         // get the node
-        GregObject gregNode;
+        RegistryObject gregNode;
         try {
             gregNode = getGregNode(objectId.getValue());
         }
@@ -770,7 +771,7 @@ public class GregRepository {
         }
 
         // checkin
-        GregVersion checkedIn = gregNode.asVersion().checkin(properties, contentStream, checkinComment);
+        RegistryVersion checkedIn = gregNode.asVersion().checkin(properties, contentStream, checkinComment);
         objectId.setValue(checkedIn.getId());
     }
 
@@ -790,20 +791,20 @@ public class GregRepository {
         Set<String> splitFilter = splitFilter(filter);
 
         // get the node
-        GregObject gregNode = getGregNode(objectId);
+        RegistryObject gregNode = getGregNode(objectId);
 
         // Collect versions
         if (gregNode.isVersionable()) {
-            GregVersionBase gregVersion = gregNode.asVersion();
+            RegistryVersionBase gregVersion = gregNode.asVersion();
 
-            Iterator<GregVersion> versions = gregVersion.getVersions();
+            Iterator<RegistryVersion> versions = gregVersion.getVersions();
             //if (versions.hasNext()) {
             //    versions.next(); // skip root version
             //}
 
             List<ObjectData> allVersions = new ArrayList<ObjectData>();
             while (versions.hasNext()) {
-                GregVersion version = versions.next();
+                RegistryVersion version = versions.next();
                 ObjectData objectData = version.compileObjectType(splitFilter, includeAllowableActions, objectInfos,
                         requiresObjectInfo);
                 allVersions.add(objectData);
@@ -811,10 +812,10 @@ public class GregRepository {
 
             // Add pwc if checked out
             //Skip if document was created as PWC
-            String property = gregVersion.getNode().getProperty(GregProperty.GREG_CREATED_AS_PWC);
+            String property = gregVersion.getNode().getProperty(CMISConstants.GREG_CREATED_AS_PWC);
             //TODO: property is checked for null. Might have to change this in the future.
             if (gregVersion.isDocumentCheckedOut() && (property == null) ) {
-                GregPrivateWorkingCopy pwc = gregVersion.getPwc();
+                RegistryPrivateWorkingCopy pwc = gregVersion.getPwc();
                 ObjectData objectData = pwc.compileObjectType(splitFilter, includeAllowableActions, objectInfos,
                         requiresObjectInfo);
 
@@ -890,7 +891,7 @@ public class GregRepository {
         return "CMIS Repository for Governance Registry";
     }
 
-    protected GregObject getGregNode(String id) {
+    protected RegistryObject getGregNode(String id) {
         try {
             if (id == null || id.length() == 0) {
                 throw new CmisInvalidArgumentException("Null or empty id");
@@ -928,7 +929,7 @@ public class GregRepository {
 
                 node = repository.get(nodeId);
 
-                GregObject gregNode = null;
+                RegistryObject gregNode = null;
                 if(node!=null){
                 	if(node instanceof Collection){
                 		gregNode = new FolderTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(node);
@@ -945,20 +946,20 @@ public class GregRepository {
             } else {
             	Resource node = null;
                 node = repository.get(id);
-                GregObject gregNode = null;
+                RegistryObject gregNode = null;
                 if(node!=null){
                 	if(node instanceof Collection){
                 		gregNode = new FolderTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(repository.get(id));
                 	} else if( node instanceof Resource){
 
                         //check if Unversioned type
-                        String property = node.getProperty(GregProperty.GREG_UNVERSIONED_TYPE);
+                        String property = node.getProperty(CMISConstants.GREG_UNVERSIONED_TYPE);
                         if(property!=null && property.equals("true")){
                             gregNode = new UnversionedDocumentTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(repository.get(id));
                             return gregNode;
                         }
                 		gregNode = new DocumentTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(repository.get(id));
-                	    if (GregPrivateWorkingCopy.denotesPwc(repository, id)) {
+                	    if (RegistryPrivateWorkingCopy.denotesPwc(repository, id)) {
                             return gregNode.asVersion().getPwc();
                         }
                     }
@@ -978,14 +979,14 @@ public class GregRepository {
     /**
      * Transitively gather the children of a node down to a specific depth
      */
-    private static void gatherDescendants(GregFolder gregFolder, List<ObjectInFolderContainer> list,
+    private static void gatherDescendants(RegistryFolder gregFolder, List<ObjectInFolderContainer> list,
             boolean foldersOnly, int depth, Set<String> filter, Boolean includeAllowableActions,
             Boolean includePathSegments, ObjectInfoHandler objectInfos, boolean requiresObjectInfo) {
 
         // iterate through children
-        Iterator<GregObject> childNodes = gregFolder.getNodes();
+        Iterator<RegistryObject> childNodes = gregFolder.getNodes();
         while (childNodes.hasNext()) {
-            GregObject child = childNodes.next();
+            RegistryObject child = childNodes.next();
 
             // folders only?
             if (foldersOnly && !child.isFolder()) {

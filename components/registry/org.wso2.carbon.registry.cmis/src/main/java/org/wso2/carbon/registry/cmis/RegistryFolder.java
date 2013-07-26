@@ -33,6 +33,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertiesImpl;
 import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
@@ -40,7 +41,7 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
 import org.wso2.carbon.registry.cmis.impl.FolderTypeHandler;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
+
 
 import java.util.*;
 
@@ -48,10 +49,10 @@ import java.util.*;
 /**
  * Instances of this class represent a cmis:folder backed by an underlying GREG <code>Node</code>.
  */
-public class GregFolder extends GregObject {
-    private static final Logger log = LoggerFactory.getLogger(GregFolder.class);
+public class RegistryFolder extends RegistryObject {
+    private static final Logger log = LoggerFactory.getLogger(RegistryFolder.class);
 
-    public GregFolder(Registry repository, Resource node, GregTypeManager typeManager, PathManager pathManager) {
+    public RegistryFolder(Registry repository, Resource node, RegistryTypeManager typeManager, PathManager pathManager) {
         super(repository, node, typeManager, pathManager);
     }
 
@@ -66,7 +67,7 @@ public class GregFolder extends GregObject {
      * 		Not sure about the spec
      * 		Do I have to give every resource (incl. Collections) except the checked out resources???
      */
-    public Iterator<GregObject> getNodes() {
+    public Iterator<RegistryObject> getNodes() {
         try {
             String[] children = getNode().getChildren();
         	List<String> list = new ArrayList<String>();
@@ -79,9 +80,9 @@ public class GregFolder extends GregObject {
                     log.debug(e.getMessage());
                     throw new CmisObjectNotFoundException(e.getMessage(), e);
                 }
-        		if (hasProperty(resource, GregProperty.GREG_IS_CHECKED_OUT)){
-        			if(resource.getProperty(GregProperty.GREG_IS_CHECKED_OUT).equals("true")){
-        	            String property = resource.getProperty(GregProperty.GREG_CREATED_AS_PWC);
+        		if (hasProperty(resource, CMISConstants.GREG_IS_CHECKED_OUT)){
+        			if(resource.getProperty(CMISConstants.GREG_IS_CHECKED_OUT).equals("true")){
+        	            String property = resource.getProperty(CMISConstants.GREG_CREATED_AS_PWC);
                         if(property != null && property.equals("true")){
                             list.add(child);
                         }
@@ -99,12 +100,12 @@ public class GregFolder extends GregObject {
 
         	final Iterator<String> newListIterator = list.iterator();
         	
-            Iterator<GregObject> gregObjects = new Iterator<GregObject>() {
+            Iterator<RegistryObject> gregObjects = new Iterator<RegistryObject>() {
                 public boolean hasNext() {
                     return newListIterator.hasNext();
                 }
 
-                public GregObject next() {
+                public RegistryObject next() {
                     try {
 						return create(getRepository().get(newListIterator.next()));
 					} catch (RegistryException e) {
@@ -137,11 +138,11 @@ public class GregFolder extends GregObject {
      *
      * @throws CmisStorageException
      */
-    public GregObject addNodeFromSource(GregDocument source, Properties properties) {
+    public RegistryObject addNodeFromSource(RegistryDocument source, Properties properties) {
         try {
         	String filename = source.getNodeName();
             String destPath = getRepository().copy(source.getNode().getPath(), getNode().getPath() + "/" + filename);
-            GregObject gregObject = create(getRepository().get(destPath));
+            RegistryObject gregObject = create(getRepository().get(destPath));
 
             // overlay new properties
             if (properties != null && properties.getProperties() != null) {
@@ -231,15 +232,15 @@ public class GregFolder extends GregObject {
         //}
         //ParentId must be set for all folder objects except for root folder
         if(pathManager.isRoot(getNode())){
-            addPropertyId(properties, typeId, filter, PropertyIds.PARENT_ID, GregProperty.GREG_PROPERTY_NOT_SET);
+            addPropertyId(properties, typeId, filter, PropertyIds.PARENT_ID, CMISConstants.GREG_PROPERTY_NOT_SET);
         } else{
             addPropertyId(properties, typeId, filter, PropertyIds.PARENT_ID, getNode().getPath());
         }
 
         //Allowable child object type ids
         List<String> allowableChildObjectTypeIds = new ArrayList<String>();
-        allowableChildObjectTypeIds.add(GregTypeManager.FOLDER_TYPE_ID);
-        allowableChildObjectTypeIds.add(GregTypeManager.DOCUMENT_TYPE_ID);
+        allowableChildObjectTypeIds.add(RegistryTypeManager.FOLDER_TYPE_ID);
+        allowableChildObjectTypeIds.add(RegistryTypeManager.DOCUMENT_TYPE_ID);
         addPropertyId(properties, typeId, filter, PropertyIds.ALLOWED_CHILD_OBJECT_TYPE_IDS, allowableChildObjectTypeIds);
 
     }
@@ -280,7 +281,7 @@ public class GregFolder extends GregObject {
 
     @Override
     protected String getTypeIdInternal() {
-        return GregTypeManager.FOLDER_TYPE_ID;
+        return RegistryTypeManager.FOLDER_TYPE_ID;
     }
     
     @Override
@@ -354,7 +355,7 @@ public class GregFolder extends GregObject {
     }
 
 	@Override
-	protected GregObject create(Resource resource) {
+	protected RegistryObject create(Resource resource) {
 		if  (resource instanceof CollectionImpl){
             FolderTypeHandler handler = new FolderTypeHandler(getRepository(), pathManager, typeManager);
 		    return handler.getGregNode(resource);

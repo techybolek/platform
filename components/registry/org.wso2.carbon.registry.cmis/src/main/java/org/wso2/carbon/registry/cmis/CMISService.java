@@ -33,13 +33,13 @@ import java.util.List;
 /**
  * Greg service implementation.
  */
-public class GregService extends AbstractCmisService {
-    private final GregRepository gregRepository;
+public class CMISService extends AbstractCmisService {
+    private final CMISRepository gregRepository;
     //private final Map<String, Session> sessions = new HashMap<String, Session>();
 
     private CallContext context;
 
-    public GregService(GregRepository gregRepository) {
+    public CMISService(CMISRepository gregRepository) {
         this.gregRepository = gregRepository;
     }
 

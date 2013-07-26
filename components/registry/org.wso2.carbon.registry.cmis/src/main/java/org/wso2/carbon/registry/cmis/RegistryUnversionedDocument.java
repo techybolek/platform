@@ -27,9 +27,9 @@ import java.util.Set;
 /**
  * Instances of this class represent a non versionable cmis:document backed by an underlying GREG <code>Node</code>.
  */
-public class GregUnversionedDocument extends GregDocument {
+public class RegistryUnversionedDocument extends RegistryDocument {
     
-    public GregUnversionedDocument(Registry repository, Resource node, GregTypeManager typeManager, PathManager pathManager) {
+    public RegistryUnversionedDocument(Registry repository, Resource node, RegistryTypeManager typeManager, PathManager pathManager) {
         super(repository, node, typeManager, pathManager);
     }
 
@@ -102,7 +102,7 @@ public class GregUnversionedDocument extends GregDocument {
     }
 
 	@Override
-	protected GregObject create(Resource resource) {
+	protected RegistryObject create(Resource resource) {
 		UnversionedDocumentTypeHandler handler = new UnversionedDocumentTypeHandler(getRepository(), pathManager, typeManager);
 		
 		return handler.getGregNode(resource); 

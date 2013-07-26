@@ -38,11 +38,11 @@ import org.wso2.carbon.registry.cmis.*;
 public class DocumentTypeHandler extends AbstractGregTypeHandler {
 
     public DocumentTypeHandler(Registry repository, PathManager pathManager,
-			GregTypeManager typeManager) {
+                               RegistryTypeManager typeManager) {
 		super(repository, pathManager, typeManager);
 	}
 
-	private static final Logger log = LoggerFactory.getLogger(GregFolder.class);
+	private static final Logger log = LoggerFactory.getLogger(DocumentTypeHandler.class);
 
     public String getTypeId() {
         return BaseTypeId.CMIS_DOCUMENT.value();
@@ -60,40 +60,40 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
         documentType.setIsFulltextIndexed(false);
         documentType.setIsIncludedInSupertypeQuery(true);
         documentType.setLocalName("Document");
-        documentType.setLocalNamespace(GregTypeManager.NAMESPACE);
+        documentType.setLocalNamespace(RegistryTypeManager.NAMESPACE);
         documentType.setIsQueryable(true);
-        documentType.setQueryName(GregTypeManager.DOCUMENT_TYPE_ID);
-        documentType.setId(GregTypeManager.DOCUMENT_TYPE_ID);
+        documentType.setQueryName(RegistryTypeManager.DOCUMENT_TYPE_ID);
+        documentType.setId(RegistryTypeManager.DOCUMENT_TYPE_ID);
         documentType.setIsVersionable(true);
         documentType.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
 
-        GregTypeManager.addBasePropertyDefinitions(documentType);
-        GregTypeManager.addDocumentPropertyDefinitions(documentType);
+        RegistryTypeManager.addBasePropertyDefinitions(documentType);
+        RegistryTypeManager.addDocumentPropertyDefinitions(documentType);
 
         return documentType;
     }
 
 
     //Method can be replaced with GREG. Returns GregDocument
-    public GregDocument getGregNode(Resource node) throws RegistryException {
+    public RegistryDocument getGregNode(Resource node) throws RegistryException {
         String version = node.getPath();
         String[] versions = repository.getVersions(node.getPath());
 
         if(versions !=null && versions.length != 0){
             version = versions[0];
         }
-    	return new GregVersion(repository, node, version, typeManager, pathManager);
+    	return new RegistryVersion(repository, node, version, typeManager, pathManager);
     }
 
     
-    public GregObject createDocument(GregFolder parentFolder, String name, Properties properties, ContentStream contentStream, VersioningState versioningState) {
+    public RegistryObject createDocument(RegistryFolder parentFolder, String name, Properties properties, ContentStream contentStream, VersioningState versioningState) {
         try {
         	Resource fileNode = repository.newResource();
         	
         	// write content, if available
             if(contentStream != null && contentStream.getStream() != null){
             	//set stream
-                fileNode.setProperty(GregProperty.GREG_DATA, "true");
+                fileNode.setProperty(CMISConstants.GREG_DATA, "true");
             	fileNode.setContentStream(contentStream.getStream());
             }
 
@@ -103,11 +103,11 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
             fileNode = repository.get(destinationPath);
             
         	// compile the properties
-            GregFolder.setProperties(repository, fileNode, getTypeDefinition(), properties);
+            RegistryFolder.setProperties(repository, fileNode, getTypeDefinition(), properties);
 
             //Set MIMETYPE
             if (contentStream != null && contentStream.getMimeType() != null) {
-            	fileNode.setProperty(GregProperty.GREG_MIMETYPE, contentStream.getMimeType());
+            	fileNode.setProperty(CMISConstants.GREG_MIMETYPE, contentStream.getMimeType());
                 fileNode.setMediaType(contentStream.getMimeType());
             }
 
@@ -115,44 +115,44 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
             fileNode = repository.get(destinationPath);
 
             if (versioningState == VersioningState.NONE) {
-                fileNode.setProperty(GregProperty.GREG_UNVERSIONED_TYPE, "true");
+                fileNode.setProperty(CMISConstants.GREG_UNVERSIONED_TYPE, "true");
                 repository.put(destinationPath, fileNode);
-                return new GregUnversionedDocument(repository, fileNode, typeManager, pathManager);
+                return new RegistryUnversionedDocument(repository, fileNode, typeManager, pathManager);
             }
 
             //Else, create as a PWC. See spec
             //TODO Set the destination of this PWC to a temp and put it to it's intended location when checked in
-            fileNode.setProperty(GregProperty.GREG_IS_CHECKED_OUT, "true");
+            fileNode.setProperty(CMISConstants.GREG_IS_CHECKED_OUT, "true");
 
             //Put to registry
             repository.put(destinationPath, fileNode);
 
-            GregObject gregFileNode = getGregNode(fileNode);
-            GregVersionBase gregVersion = gregFileNode.asVersion();
+            RegistryObject gregFileNode = getGregNode(fileNode);
+            RegistryVersionBase gregVersion = gregFileNode.asVersion();
             if(versioningState==VersioningState.CHECKEDOUT){
 
                 //Put to checked out tracker
                 Resource resource = null;
-                if(repository.resourceExists(GregProperty.GREG_CHECKED_OUT_TRACKER)){
-                    resource  = repository.get(GregProperty.GREG_CHECKED_OUT_TRACKER);
+                if(repository.resourceExists(CMISConstants.GREG_CHECKED_OUT_TRACKER)){
+                    resource  = repository.get(CMISConstants.GREG_CHECKED_OUT_TRACKER);
                 } else{
                     resource = repository.newResource();
                     //Have to set content, otherwise Greg will throw exception when browsing this file in Workbench
                     resource.setContent("tracker");
                 }
                 resource.setProperty(gregVersion.getNode().getPath(), "true");
-                repository.put(GregProperty.GREG_CHECKED_OUT_TRACKER, resource);
+                repository.put(CMISConstants.GREG_CHECKED_OUT_TRACKER, resource);
 
                 //Set property saying this was created as a PWC
-                gregVersion.getNode().setProperty(GregProperty.GREG_CREATED_AS_PWC, "true");
+                gregVersion.getNode().setProperty(CMISConstants.GREG_CREATED_AS_PWC, "true");
                 repository.put(gregVersion.getNode().getPath(), gregVersion.getNode());
                 gregVersion = getGregNode(repository.get(gregVersion.getNode().getPath())).asVersion();
                 return gregVersion.getPwc();
             } else  {
                 if( versioningState == VersioningState.MAJOR){
-                    gregVersion.getNode().addProperty(GregProperty.GREG_VERSION_STATE, GregProperty.GREG_MAJOR_VERSION);
+                    gregVersion.getNode().addProperty(CMISConstants.GREG_VERSION_STATE, CMISConstants.GREG_MAJOR_VERSION);
                 } else if (versioningState==VersioningState.MINOR){
-                    gregVersion.getNode().addProperty(GregProperty.GREG_VERSION_STATE, GregProperty.GREG_MINOR_VERSION);
+                    gregVersion.getNode().addProperty(CMISConstants.GREG_VERSION_STATE, CMISConstants.GREG_MINOR_VERSION);
                 }
                 //put properties
                 repository.put(gregVersion.getNode().getPath(), gregVersion.getNode());

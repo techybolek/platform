@@ -19,11 +19,11 @@ package org.wso2.carbon.registry.cmis.impl;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.ContentStreamAllowed;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.DocumentTypeDefinitionImpl;
+import org.wso2.carbon.registry.cmis.RegistryDocument;
+import org.wso2.carbon.registry.cmis.RegistryTypeManager;
+import org.wso2.carbon.registry.cmis.RegistryUnversionedDocument;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.cmis.GregDocument;
-import org.wso2.carbon.registry.cmis.GregTypeManager;
-import org.wso2.carbon.registry.cmis.GregUnversionedDocument;
 import org.wso2.carbon.registry.cmis.PathManager;
 
 /**
@@ -34,7 +34,7 @@ public class UnversionedDocumentTypeHandler extends DocumentTypeHandler {
     public static final String DOCUMENT_UNVERSIONED_TYPE_ID = "cmis:unversioned-document";
 
     public UnversionedDocumentTypeHandler(Registry repository,
-			PathManager pathManager, GregTypeManager typeManager) {
+			PathManager pathManager, RegistryTypeManager typeManager) {
 		super(repository, pathManager, typeManager);
 	}
 
@@ -55,21 +55,21 @@ public class UnversionedDocumentTypeHandler extends DocumentTypeHandler {
         unversionedDocument.setIsQueryable(true);
         unversionedDocument.setQueryName(DOCUMENT_UNVERSIONED_TYPE_ID);
         unversionedDocument.setId(DOCUMENT_UNVERSIONED_TYPE_ID);
-        unversionedDocument.setParentTypeId(GregTypeManager.DOCUMENT_TYPE_ID);
+        unversionedDocument.setParentTypeId(RegistryTypeManager.DOCUMENT_TYPE_ID);
 
         unversionedDocument.setIsVersionable(false);
         unversionedDocument.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
 
-        GregTypeManager.addBasePropertyDefinitions(unversionedDocument);
-        GregTypeManager.addDocumentPropertyDefinitions(unversionedDocument);
+        RegistryTypeManager.addBasePropertyDefinitions(unversionedDocument);
+        RegistryTypeManager.addDocumentPropertyDefinitions(unversionedDocument);
 
         return unversionedDocument;
     }
 
     
     @Override
-    public GregDocument getGregNode(Resource node) {
-        return new GregUnversionedDocument(repository, node, typeManager, pathManager);
+    public RegistryDocument getGregNode(Resource node) {
+        return new RegistryUnversionedDocument(repository, node, typeManager, pathManager);
     }
 }
 

@@ -23,13 +23,13 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisStorageException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.FolderTypeDefinitionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.RegistryFolder;
+import org.wso2.carbon.registry.cmis.RegistryTypeManager;
 import org.wso2.carbon.registry.cmis.util.Util;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.cmis.GregFolder;
-import org.wso2.carbon.registry.cmis.GregTypeManager;
 import org.wso2.carbon.registry.cmis.PathManager;
 
 /**
@@ -38,7 +38,7 @@ import org.wso2.carbon.registry.cmis.PathManager;
 public class FolderTypeHandler extends AbstractGregTypeHandler {
 
     public FolderTypeHandler(Registry repository, PathManager pathManager,
-			GregTypeManager typeManager) {
+                             RegistryTypeManager typeManager) {
 		super(repository, pathManager, typeManager);
 	}
 
@@ -68,23 +68,23 @@ public class FolderTypeHandler extends AbstractGregTypeHandler {
         folderType.setIsFulltextIndexed(false);
         folderType.setIsIncludedInSupertypeQuery(true);
         folderType.setLocalName("Folder");
-        folderType.setLocalNamespace(GregTypeManager.NAMESPACE);
+        folderType.setLocalNamespace(RegistryTypeManager.NAMESPACE);
         folderType.setIsQueryable(true);
-        folderType.setQueryName(GregTypeManager.FOLDER_TYPE_ID);
-        folderType.setId(GregTypeManager.FOLDER_TYPE_ID);
+        folderType.setQueryName(RegistryTypeManager.FOLDER_TYPE_ID);
+        folderType.setId(RegistryTypeManager.FOLDER_TYPE_ID);
 
 
-        GregTypeManager.addBasePropertyDefinitions(folderType);
-        GregTypeManager.addFolderPropertyDefinitions(folderType);
+        RegistryTypeManager.addBasePropertyDefinitions(folderType);
+        RegistryTypeManager.addFolderPropertyDefinitions(folderType);
 
         return folderType;
     }
 
-    public GregFolder getGregNode(Resource node) {
-        return new GregFolder(repository, node, typeManager, pathManager);
+    public RegistryFolder getGregNode(Resource node) {
+        return new RegistryFolder(repository, node, typeManager, pathManager);
     }
 
-    public GregFolder createFolder(GregFolder parentFolder, String name, Properties properties) {
+    public RegistryFolder createFolder(RegistryFolder parentFolder, String name, Properties properties) {
         try {
         	
         	Collection node = repository.newCollection();
@@ -92,7 +92,7 @@ public class FolderTypeHandler extends AbstractGregTypeHandler {
         	repository.put(destinationPath, node);
         	Resource resource = repository.get(destinationPath);
         	// compile the properties
-            GregFolder.setProperties(repository, resource, getTypeDefinition(), properties);
+            RegistryFolder.setProperties(repository, resource, getTypeDefinition(), properties);
 
             return getGregNode(resource);
         }

@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.registry.cmis.impl;
 
-public class GregProperty {
+public class CMISConstants {
 
 	public static final String GREG_MIMETYPE = "registry.cmis.property.mime";
     public static final String GREG_MAJOR_VERSION = "registry.cmis.property.gregMajorVersion";

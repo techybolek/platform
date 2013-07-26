@@ -19,38 +19,39 @@ package org.wso2.carbon.registry.cmis;
 import org.apache.chemistry.opencmis.server.support.TypeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
+
 
 /**
  * Instances of this class represent a private working copy of a cmis:document backed by an underlying
  * GREG <code>Node</code>.
  */
-public class GregPrivateWorkingCopy extends GregVersionBase {
-    private static final Logger log = LoggerFactory.getLogger(GregPrivateWorkingCopy.class);
+public class RegistryPrivateWorkingCopy extends RegistryVersionBase {
+    private static final Logger log = LoggerFactory.getLogger(RegistryPrivateWorkingCopy.class);
 
     /**
      * Name of a private working copy
      */
     public static final String PWC_NAME = "pwc";
 
-    public GregPrivateWorkingCopy(Registry repository, Resource node, GregTypeManager typeManager, PathManager pathManager) {
+    public RegistryPrivateWorkingCopy(Registry repository, Resource node, RegistryTypeManager typeManager, PathManager pathManager) {
         
         super(repository, node, typeManager, pathManager);
     }
 
     /**
      * @return <code>true</code> iff <code>versionName</code> is the name of private working copy.
-     * @see GregPrivateWorkingCopy#PWC_NAME
+     * @see  RegistryPrivateWorkingCopy#PWC_NAME
      */
     public static boolean denotesPwc(Registry registry, String versionName) {
         try {
             Resource resource = registry.get(versionName);
-            String property = resource.getProperty(GregProperty.GREG_CREATED_AS_PWC);
-            String checkedOut = resource.getProperty(GregProperty.GREG_IS_CHECKED_OUT);
+            String property = resource.getProperty(CMISConstants.GREG_CREATED_AS_PWC);
+            String checkedOut = resource.getProperty(CMISConstants.GREG_IS_CHECKED_OUT);
 
             if(resource.getPath().endsWith("_pwc") || ( property != null && property.equals("true") )
                                                    || ( checkedOut != null && checkedOut.equals("true") )){
@@ -65,12 +66,12 @@ public class GregPrivateWorkingCopy extends GregVersionBase {
     /**
      * @param objectId
      * @return <code>true</code> iff <code>objectId</code> is the id of a private working copy.
-     * @see GregPrivateWorkingCopy#PWC_NAME
+     * @see  RegistryPrivateWorkingCopy#PWC_NAME
      */
     public static boolean isPwc(Registry registry, String objectId) {
         String property = null;
         try {
-            property = registry.get(objectId).getProperty(GregProperty.GREG_CREATED_AS_PWC);
+            property = registry.get(objectId).getProperty(CMISConstants.GREG_CREATED_AS_PWC);
         } catch (RegistryException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -90,7 +91,7 @@ public class GregPrivateWorkingCopy extends GregVersionBase {
 
     @Override
     protected String getObjectId() throws RegistryException {
-        String property = getNode().getProperty(GregProperty.GREG_CREATED_AS_PWC);
+        String property = getNode().getProperty(CMISConstants.GREG_CREATED_AS_PWC);
         if(property != null && property.equals("true")){
             return getVersionSeriesId();
         } else{
@@ -124,7 +125,7 @@ public class GregPrivateWorkingCopy extends GregVersionBase {
     }
 
 	@Override
-	public GregObject create(Resource resource) {
+	public RegistryObject create(Resource resource) {
 		// TODO Auto-generated method stub
 		//call the relevant typeHandler's getGregNode method
 		//return new GregVersionBase(getRepository(), super.version, resource, typeManager, pathManager);

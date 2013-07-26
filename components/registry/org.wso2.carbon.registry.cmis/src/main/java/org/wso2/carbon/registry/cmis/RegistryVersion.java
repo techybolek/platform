@@ -18,11 +18,12 @@ package org.wso2.carbon.registry.cmis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
+
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,15 +32,15 @@ import java.util.regex.Pattern;
  * Instances of this class represent a specific version of a cmis:document backed by an underlying
  * GREG <code>Node</code>.
  */
-public class GregVersion extends GregVersionBase {
+public class RegistryVersion extends RegistryVersionBase {
 
     private static final Pattern VERSION_LABEL_PATTERN = Pattern.compile("(\\d+)(\\.(\\d+))?.*");
     private static final int GROUP_MAJOR = 1;
     private static final int GROUP_MINOR = 3;
-    private static final Logger log = LoggerFactory.getLogger(GregVersion.class);
+    private static final Logger log = LoggerFactory.getLogger(RegistryVersion.class);
     private final String version;
 
-    public GregVersion(Registry repository,Resource node, String version, GregTypeManager typeManager, PathManager pathManager) {
+    public RegistryVersion(Registry repository,Resource node, String version, RegistryTypeManager typeManager, PathManager pathManager) {
 
         //TODO
         //I might have to load the new version given in "version" and then make the node
@@ -69,9 +70,9 @@ public class GregVersion extends GregVersionBase {
 
     @Override
     protected boolean isMajorVersion() {
-        String property = getNode().getProperty(GregProperty.GREG_VERSION_STATE);
+        String property = getNode().getProperty(CMISConstants.GREG_VERSION_STATE);
         if(property != null) {
-            if(property.equals(GregProperty.GREG_MAJOR_VERSION)){
+            if(property.equals(CMISConstants.GREG_MAJOR_VERSION)){
                 return true;
             } else{
                 return false;
@@ -116,7 +117,7 @@ public class GregVersion extends GregVersionBase {
     }
 
 	@Override
-	protected GregObject create(Resource resource) {
+	protected RegistryObject create(Resource resource) {
 		
 		DocumentTypeHandler documentTypeHandler = new DocumentTypeHandler(getRepository(), pathManager, typeManager);
 		try {

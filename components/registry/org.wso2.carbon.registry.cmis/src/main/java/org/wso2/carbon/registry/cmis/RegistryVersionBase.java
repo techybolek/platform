@@ -29,10 +29,10 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertiesImpl;
 import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.registry.cmis.impl.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.cmis.impl.GregProperty;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,17 +45,17 @@ import java.util.Arrays;
  * Instances of this class represent a versionable cmis:document and its versions backed by an underlying
  * GREG <code>Node</code>.
  */
-public abstract class GregVersionBase extends GregDocument {
-    private static final Logger log = LoggerFactory.getLogger(GregVersionBase.class);
+public abstract class RegistryVersionBase extends RegistryDocument {
+    private static final Logger log = LoggerFactory.getLogger(RegistryVersionBase.class);
 
-    protected GregVersionBase(Registry repository, Resource node, GregTypeManager typeManager, PathManager pathManager) {
+    protected RegistryVersionBase(Registry repository, Resource node, RegistryTypeManager typeManager, PathManager pathManager) {
         super(repository, node, typeManager, pathManager);
     }
 
     /**
      * See CMIS 1.0 section 2.2.7.6 getAllVersions
      */
-    public Iterator<GregVersion> getVersions() {
+    public Iterator<RegistryVersion> getVersions() {
         try {
             String[] versionArray = getRepository().getVersions(getNode().getPath());
             List<String> versions;
@@ -73,15 +73,15 @@ public abstract class GregVersionBase extends GregDocument {
             //Collections.reverse(versions); //sort();
 
             final Iterator<String> iterator = versions.iterator();
-            return new Iterator<GregVersion>() {
+            return new Iterator<RegistryVersion>() {
                 public boolean hasNext() {
                     return iterator.hasNext();
                 }
 
-                public GregVersion next() {
+                public RegistryVersion next() {
                     String nextVersion = iterator.next();
                     try {
-                        return new GregVersion(getRepository(), getRepository().get(nextVersion), nextVersion, typeManager, pathManager);
+                        return new RegistryVersion(getRepository(), getRepository().get(nextVersion), nextVersion, typeManager, pathManager);
                     } catch (RegistryException e) {
                         throw new CmisRuntimeException("Error iterating over versions");
                     }
@@ -163,7 +163,7 @@ public abstract class GregVersionBase extends GregDocument {
      *
      * @throws CmisRuntimeException
      */
-    public GregPrivateWorkingCopy checkout() {
+    public RegistryPrivateWorkingCopy checkout() {
         Resource node = getNode();
         try {
             if (isCheckedOut(node)) {
@@ -183,7 +183,7 @@ public abstract class GregVersionBase extends GregDocument {
      *
      * @throws CmisRuntimeException
      */
-    public GregVersion checkin(Properties properties, ContentStream contentStream, String checkinComment) {
+    public RegistryVersion checkin(Properties properties, ContentStream contentStream, String checkinComment) {
         Resource node = getNode();
 
         try {
@@ -202,7 +202,7 @@ public abstract class GregVersionBase extends GregDocument {
             // todo handle checkinComment
             Resource resource = checkin();
             String pathOfLatestVersion = getRepository().getVersions(resource.getPath())[0];
-            return new GregVersion(getRepository(), resource, pathOfLatestVersion, typeManager, pathManager);
+            return new RegistryVersion(getRepository(), resource, pathOfLatestVersion, typeManager, pathManager);
         }
         catch (RegistryException e) {
             log.debug(e.getMessage(), e);
@@ -230,23 +230,23 @@ public abstract class GregVersionBase extends GregDocument {
     /**
      * Get the private working copy of the versions series or throw an exception if not checked out.
      *
-     * @return  a {@link GregPrivateWorkingCopy} instance
+     * @return  a {@link RegistryPrivateWorkingCopy} instance
      * @throws CmisObjectNotFoundException  if not checked out
      * @throws CmisRuntimeException
      */
-    public GregPrivateWorkingCopy getPwc(Resource node) {
+    public RegistryPrivateWorkingCopy getPwc(Resource node) {
         if (node.getPath().endsWith("_pwc")) {
-		    return new GregPrivateWorkingCopy(getRepository(), node, typeManager, pathManager);
+		    return new RegistryPrivateWorkingCopy(getRepository(), node, typeManager, pathManager);
 		} else {
 		    throw new CmisObjectNotFoundException("Not checked out document has no private working copy");
 		}
     }
 
-    public GregPrivateWorkingCopy getPwc() {
+    public RegistryPrivateWorkingCopy getPwc() {
 
         Resource node = getNode();
         if (isCheckedOut(node)) {
-            return new GregPrivateWorkingCopy(getRepository(), node, typeManager, pathManager);
+            return new RegistryPrivateWorkingCopy(getRepository(), node, typeManager, pathManager);
 		} else {
 		    throw new CmisObjectNotFoundException("Not checked out document has no private working copy");
 		}
@@ -255,11 +255,11 @@ public abstract class GregVersionBase extends GregDocument {
     /**
      * Get a specific version by name
      * @param name  name of the version to get
-     * @return  a {@link GregVersion} instance for <code>name</code>
+     * @return  a {@link RegistryVersion} instance for <code>name</code>
      * @throws CmisObjectNotFoundException  if a version <code>name</code> does not exist
      * @throws CmisRuntimeException
      */
-    public GregVersion getVersion(String name) {
+    public RegistryVersion getVersion(String name) {
         try {
             Resource node = getNode();
             String[] versions = getRepository().getVersions(node.getPath());
@@ -275,7 +275,7 @@ public abstract class GregVersionBase extends GregDocument {
             if(gotVersion==null){
             	throw new CmisObjectNotFoundException("GregVersionBase.java: No version found!!");
             }
-            return new GregVersion(getRepository(), node, gotVersion, typeManager, pathManager);
+            return new RegistryVersion(getRepository(), node, gotVersion, typeManager, pathManager);
         }
         catch (RegistryException e) {
             log.debug(e.getMessage(), e);
@@ -341,7 +341,7 @@ public abstract class GregVersionBase extends GregDocument {
     
     @Override
     protected String getTypeIdInternal() {
-        return GregTypeManager.DOCUMENT_TYPE_ID;
+        return RegistryTypeManager.DOCUMENT_TYPE_ID;
     }
 
     @Override
@@ -352,7 +352,7 @@ public abstract class GregVersionBase extends GregDocument {
     @Override
     protected String getCheckedOutId() throws RegistryException {
         if (isCheckedOut()){
-            String property = getNode().getProperty(GregProperty.GREG_CREATED_AS_PWC);
+            String property = getNode().getProperty(CMISConstants.GREG_CREATED_AS_PWC);
             if(property != null && property.equals("true")){
                 return getVersionSeriesId();
             } else{
@@ -367,7 +367,7 @@ public abstract class GregVersionBase extends GregDocument {
     @Override
     protected String getCheckedOutBy() throws RegistryException {
         return isCheckedOut()
-                ? getNode().getProperty(GregProperty.GREG_CHECKED_OUT_BY)
+                ? getNode().getProperty(CMISConstants.GREG_CHECKED_OUT_BY)
                 : null;
     }
     
@@ -383,20 +383,20 @@ public abstract class GregVersionBase extends GregDocument {
         * */
 
         //TODO get User Name from context object
-    	node.setProperty(GregProperty.GREG_CHECKED_OUT_BY, "user");
+    	node.setProperty(CMISConstants.GREG_CHECKED_OUT_BY, "user");
         repository.put(node.getPath(), node);
 
         //Make a private working copy (/resourceName_pwc)
         String destPath = node.getPath()+"_pwc";
         repository.copy(node.getPath(), destPath);
 
-        node.setProperty(GregProperty.GREG_IS_CHECKED_OUT, "true");
+        node.setProperty(CMISConstants.GREG_IS_CHECKED_OUT, "true");
         repository.put(node.getPath(), node);
 
         //put the checked out doc path in checkedOut tracker
         Resource resource = null;
-        if(repository.resourceExists(GregProperty.GREG_CHECKED_OUT_TRACKER)){
-            resource = repository.get(GregProperty.GREG_CHECKED_OUT_TRACKER);
+        if(repository.resourceExists(CMISConstants.GREG_CHECKED_OUT_TRACKER)){
+            resource = repository.get(CMISConstants.GREG_CHECKED_OUT_TRACKER);
         } else{
             resource  = repository.newResource();
             //Have to set content, otherwise Greg will throw exception when browsing this file in Workbench
@@ -404,7 +404,7 @@ public abstract class GregVersionBase extends GregDocument {
         }
 
         resource.setProperty(destPath, "true");
-        repository.put(GregProperty.GREG_CHECKED_OUT_TRACKER, resource);
+        repository.put(CMISConstants.GREG_CHECKED_OUT_TRACKER, resource);
 
         return repository.get(destPath);
     }
@@ -425,9 +425,9 @@ public abstract class GregVersionBase extends GregDocument {
 
     private Resource checkin() throws RegistryException {
 
-        getNode().setProperty(GregProperty.GREG_IS_CHECKED_OUT, "false");
-        if(getNode().getProperty(GregProperty.GREG_CHECKED_OUT_BY)  != null ){
-    	    getNode().removeProperty(GregProperty.GREG_CHECKED_OUT_BY);
+        getNode().setProperty(CMISConstants.GREG_IS_CHECKED_OUT, "false");
+        if(getNode().getProperty(CMISConstants.GREG_CHECKED_OUT_BY)  != null ){
+    	    getNode().removeProperty(CMISConstants.GREG_CHECKED_OUT_BY);
         }
         getRepository().put(getNode().getPath(), getNode());
 
@@ -435,8 +435,8 @@ public abstract class GregVersionBase extends GregDocument {
         if(nodePath.endsWith("_pwc")){
 
             //Remove checkedOut doc from tracker
-            Resource resource = getRepository().resourceExists(GregProperty.GREG_CHECKED_OUT_TRACKER)
-                                ? getRepository().get(GregProperty.GREG_CHECKED_OUT_TRACKER)
+            Resource resource = getRepository().resourceExists(CMISConstants.GREG_CHECKED_OUT_TRACKER)
+                                ? getRepository().get(CMISConstants.GREG_CHECKED_OUT_TRACKER)
                                 : null;
             if(resource!=null){
                 if(resource.getProperty(nodePath)!=null){
@@ -481,8 +481,8 @@ public abstract class GregVersionBase extends GregDocument {
 
         //Remove from tracker
         //Remove checkedOut doc from tracker
-        Resource tracker = repository.resourceExists(GregProperty.GREG_CHECKED_OUT_TRACKER)
-                ? repository.get(GregProperty.GREG_CHECKED_OUT_TRACKER)
+        Resource tracker = repository.resourceExists(CMISConstants.GREG_CHECKED_OUT_TRACKER)
+                ? repository.get(CMISConstants.GREG_CHECKED_OUT_TRACKER)
                 : null;
 
         if(tracker!=null){
@@ -512,9 +512,9 @@ public abstract class GregVersionBase extends GregDocument {
             Resource resource = repository.get(pathOfOriginalCopy);
             //Reset properties
             //Allow the version series to be checked out again
-            resource.setProperty(GregProperty.GREG_IS_CHECKED_OUT, "false");
-            if(resource.getProperty(GregProperty.GREG_CHECKED_OUT_BY)  != null ){
-    	        resource.removeProperty(GregProperty.GREG_CHECKED_OUT_BY);
+            resource.setProperty(CMISConstants.GREG_IS_CHECKED_OUT, "false");
+            if(resource.getProperty(CMISConstants.GREG_CHECKED_OUT_BY)  != null ){
+    	        resource.removeProperty(CMISConstants.GREG_CHECKED_OUT_BY);
             }
             repository.put(pathOfOriginalCopy, resource);
             //delete the pwc
@@ -542,7 +542,7 @@ public abstract class GregVersionBase extends GregDocument {
                 throw new CmisObjectNotFoundException(e.getMessage(), e);
             }
         }
-    	String property = node.getProperty(GregProperty.GREG_IS_CHECKED_OUT);
+    	String property = node.getProperty(CMISConstants.GREG_IS_CHECKED_OUT);
     	if (property == null){
     		return false;
     	}
@@ -554,3 +554,4 @@ public abstract class GregVersionBase extends GregDocument {
     }
 
 }
+

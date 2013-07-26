@@ -16,9 +16,9 @@
 
 package org.wso2.carbon.registry.cmis.impl;
 
-import org.wso2.carbon.registry.cmis.GregFolder;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.cmis.GregTypeManager;
+
+import org.wso2.carbon.registry.cmis.RegistryTypeManager;
 import org.wso2.carbon.registry.cmis.PathManager;
 
 /**
@@ -27,11 +27,11 @@ import org.wso2.carbon.registry.cmis.PathManager;
  */
 public abstract class AbstractGregTypeHandler{
 
-    protected GregTypeManager typeManager;
+    protected RegistryTypeManager typeManager;
     protected PathManager pathManager;
     protected Registry repository;
     
-    public AbstractGregTypeHandler(Registry repository, PathManager pathManager, GregTypeManager typeManager) {
+    public AbstractGregTypeHandler(Registry repository, PathManager pathManager, RegistryTypeManager typeManager) {
         this.typeManager = typeManager;
         this.pathManager = pathManager;
         this.repository = repository;
