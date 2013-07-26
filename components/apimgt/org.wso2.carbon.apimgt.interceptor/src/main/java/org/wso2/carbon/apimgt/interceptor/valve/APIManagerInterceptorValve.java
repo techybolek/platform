@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.core.APIManagerErrorConstants;
+import org.wso2.carbon.apimgt.core.APIManagerConstants;
 import org.wso2.carbon.apimgt.core.authenticate.APITokenValidator;
 import org.wso2.carbon.apimgt.core.gateway.APITokenAuthenticator;
 import org.wso2.carbon.apimgt.core.usage.APIStatsPublisher;
@@ -45,7 +46,6 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
 import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.cache.Cache;
 import javax.servlet.http.HttpServletRequest;
@@ -72,10 +72,6 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 
     private String hostName;
 
-    private String externalAPIManagerURL = null;
-
-    private String manageAPIs;
-
     Cache contextCache = null;
 
     APITokenAuthenticator authenticator;
@@ -86,8 +82,6 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
             statsPublishingEnabled = UsageComponent.getApiMgtConfigReaderService().isEnabled();
             statsPublisherClass = UsageComponent.getApiMgtConfigReaderService().getPublisherClass();
             hostName = DataPublisherUtil.getHostAddress();
-            externalAPIManagerURL = CarbonUtils.getServerConfiguration().getFirstProperty("APIGateway");
-            manageAPIs = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
             contextCache = APIUtil.getAPIContextCache();
             authenticator = new APITokenAuthenticator();
             initialized = true;
@@ -125,54 +119,47 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
 
         long requestTime = System.currentTimeMillis();
 
-        if ("true".equals(manageAPIs) && contextExist) {
-
-            //If external API Manager url is null
-            if (externalAPIManagerURL == null) {
-
-                //Use embedded API Management
-                log.debug("API Manager Interceptor Valve Got invoked!!");
-                String bearerToken = request.getHeader(APIConstants.OperationParameter.AUTH_PARAM_NAME);
-                String accessToken = null;
-                if (bearerToken != null) {
-                    String[] token = bearerToken.split("Bearer");/*Check a util method*/
-                    if (token.length > 0 && token[1] != null) {
-                        accessToken = token[1].trim();
-                    }
+        if (contextExist) {
+        	//Use embedded API Management
+        	log.debug("API Manager Interceptor Valve Got invoked!!");
+            String bearerToken = request.getHeader(APIConstants.OperationParameter.AUTH_PARAM_NAME);
+            String accessToken = null;
+            if (bearerToken != null) {
+            	String[] token = bearerToken.split("Bearer");/*Check a util method*/
+                if (token.length > 0 && token[1] != null) {
+                	accessToken = token[1].trim();
                 }
-                /* Authenticate*/
-                try {
-                    String apiVersion = getAPIVersion(request);
-                    doAuthenticate(context, apiVersion, accessToken,
-                            authenticator.getResourceAuthenticationScheme(context, apiVersion, request.getRequestURI(), request.getMethod()),
-                            request.getHeader(APITokenValidator.getAPIManagerClientDomainHeader()));
-                } catch (APIManagementException e) {
+            }
+            /* Authenticate*/
+            try {
+            	String apiVersion = getAPIVersion(request);
+                doAuthenticate(context, apiVersion, accessToken,
+                		authenticator.getResourceAuthenticationScheme(context, apiVersion, request.getRequestURI(), request.getMethod()),
+                request.getHeader(APITokenValidator.getAPIManagerClientDomainHeader()));
+            } catch (APIManagementException e) {
                     //ignore
-                } catch (APIFaultException e) {/* If !isAuthorized APIFaultException is thrown*/
-                	String faultPayload = getFaultPayload(e, APIManagerErrorConstants.API_SECURITY_NS, 
-                			APIManagerErrorConstants.API_SECURITY_NS_PREFIX).toString();
-					handleFailure(response, faultPayload);
-					//Invoke next valve in pipe.
-                    getNext().invoke(request, response, compositeValve);
-                    return;
-				}
-                /* Throttle*/
-                try {
-					doThrottle(request, accessToken);
-				} catch (APIFaultException e) {/* If Throttled Out, APIFaultException is thrown*/
-					String faultPayload = getFaultPayload(e, APIManagerErrorConstants.API_THROTTLE_NS, 
-                			APIManagerErrorConstants.API_THROTTLE_NS_PREFIX).toString();
-					handleFailure(response, faultPayload);
-					//Invoke next valve in pipe.
-                    getNext().invoke(request, response, compositeValve);
-                    return;
-				}
-                /* Publish Statistic if enabled*/
-                if (statsPublishingEnabled) {
-                    publishRequestStatistics(request, requestTime);
-                }
-            } else { //user external api-manager for api management
-                //TODO
+            } catch (APIFaultException e) {/* If !isAuthorized APIFaultException is thrown*/
+            	String faultPayload = getFaultPayload(e, APIManagerErrorConstants.API_SECURITY_NS, 
+                APIManagerErrorConstants.API_SECURITY_NS_PREFIX).toString();
+				handleFailure(response, faultPayload);
+				//Invoke next valve in pipe.
+                getNext().invoke(request, response, compositeValve);
+                return;
+			}
+            /* Throttle*/
+            try {
+            	doThrottle(request, accessToken);
+			} catch (APIFaultException e) {/* If Throttled Out, APIFaultException is thrown*/
+				String faultPayload = getFaultPayload(e, APIManagerErrorConstants.API_THROTTLE_NS, 
+                APIManagerErrorConstants.API_THROTTLE_NS_PREFIX).toString();
+				handleFailure(response, faultPayload);
+				//Invoke next valve in pipe.
+                getNext().invoke(request, response, compositeValve);
+                return;
+			}
+            /* Publish Statistic if enabled*/
+            if (statsPublishingEnabled) {
+            	publishRequestStatistics(request, requestTime);
             }
         }
 
@@ -180,7 +167,7 @@ public class APIManagerInterceptorValve extends CarbonTomcatValve {
         getNext().invoke(request, response, compositeValve);
 
         //Handle Responses
-        if ("true".equals(manageAPIs) && contextExist && statsPublishingEnabled) {
+        if (contextExist && statsPublishingEnabled) {
             publishResponseStatistics(request, requestTime);
         }
     }

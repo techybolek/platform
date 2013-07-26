@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.interceptor.valve.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.core.APIManagerConstants;
 import org.wso2.carbon.apimgt.interceptor.valve.APIManagerInterceptorValve;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
@@ -44,17 +45,17 @@ import java.util.ArrayList;
 public class APIManagerInterceptorComponent {
 	private static final Log log = LogFactory.getLog(APIManagerInterceptorComponent.class);
     private static String apiManagementEnabled;
-    private static String externalAPIManagerURL;
+    private static String externalAPIManagerGatewayURL;
 
     protected void activate(ComponentContext ctx) {
     	if (log.isDebugEnabled()) {
     		log.info("Activating API Manager Interceptor Component");
     	}
-        apiManagementEnabled = CarbonUtils.getServerConfiguration().getFirstProperty("EnableAPIManagement");
-        externalAPIManagerURL = CarbonUtils.getServerConfiguration().getFirstProperty("APIGateway");
+        apiManagementEnabled = CarbonUtils.getServerConfiguration().getFirstProperty(APIManagerConstants.API_MANGEMENT_ENABLED);
+        externalAPIManagerGatewayURL = CarbonUtils.getServerConfiguration().getFirstProperty(APIManagerConstants.EXTERNAL_API_GATEWAY);
 
-    	//Register the valves with Tomcat
-        if (apiManagementEnabled.equalsIgnoreCase("true")) {
+    	/* Register the valves with Tomcat, if apimgt is enabled & external api manager is not configured */
+        if (apiManagementEnabled.equalsIgnoreCase("true") && externalAPIManagerGatewayURL == null) {
             ArrayList<CarbonTomcatValve> valves = new ArrayList<CarbonTomcatValve>();
             valves.add(new APIManagerInterceptorValve());
             TomcatValveContainer.addValves(valves);
@@ -87,8 +88,8 @@ public class APIManagerInterceptorComponent {
         return apiManagementEnabled;
     }
 
-    public static String getExternalAPIManagerURL() {
-        return externalAPIManagerURL;
+    public static String getExternalAPIManagerGatewayURL() {
+        return externalAPIManagerGatewayURL;
     }
 
 }
