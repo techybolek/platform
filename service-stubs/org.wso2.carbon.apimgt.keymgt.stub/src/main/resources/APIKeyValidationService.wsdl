@@ -1,5 +1,4 @@
-
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax232="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax230="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax236="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax234="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax232="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax230="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax236="http://model.api.apimgt.carbon.wso2.org/xsd" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:ax234="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
     <wsdl:documentation>APIKeyValidationService</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://model.api.apimgt.carbon.wso2.org/xsd">
@@ -78,10 +77,13 @@
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.impl.apimgt.carbon.wso2.org/xsd">
             <xs:complexType name="APIKeyValidationInfoDTO">
                 <xs:sequence>
+                    <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="apiPublisher" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="applicationId" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="applicationName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="applicationTier" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="authorized" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="endUserName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="endUserToken" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="issuedTime" type="xs:long"/>
@@ -221,13 +223,13 @@
     </wsdl:binding>
     <wsdl:service name="APIKeyValidationService">
         <wsdl:port name="APIKeyValidationServiceHttpsSoap11Endpoint" binding="tns:APIKeyValidationServiceSoap11Binding">
-            <soap:address location="https://lalaji-TECRA-M11:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap11Endpoint"/>
+            <soap:address location="https://10.200.1.180:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap11Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIKeyValidationServiceHttpsSoap12Endpoint" binding="tns:APIKeyValidationServiceSoap12Binding">
-            <soap12:address location="https://lalaji-TECRA-M11:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap12Endpoint"/>
+            <soap12:address location="https://10.200.1.180:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsSoap12Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIKeyValidationServiceHttpsEndpoint" binding="tns:APIKeyValidationServiceHttpBinding">
-            <http:address location="https://lalaji-TECRA-M11:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsEndpoint"/>
+            <http:address location="https://10.200.1.180:8243/services/APIKeyValidationService.APIKeyValidationServiceHttpsEndpoint"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
