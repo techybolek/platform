@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.registry.jira.issues.test;
 
-import java.io.IOException;
-import java.rmi.RemoteException;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.testng.Assert;
@@ -29,20 +26,21 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
+
+import java.io.IOException;
 
 public class Registry633 {
     private WsdlManager wsdlManager;
     private WSRegistryServiceClient wsRegistry;
     private final static String WSDL_URL =
-            "http://svn.wso2.org/repos/wso2/carbon/platform/branches/4.0.0/platform-integration/clarity-tests/" +
-            "1.0.1/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/GREG/wsdl/Imports_with_imports.wsdl";
+            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
+                    "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts" +
+                    "/GREG/wsdl/Imports_with_imports.wsdl";
     private Wsdl wsdl, newWsdl;
 
     @BeforeClass(groups = {"wso2.greg"})
