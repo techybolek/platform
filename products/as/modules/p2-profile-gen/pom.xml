@@ -337,6 +337,10 @@
                                 <!-- end reporting features -->
            
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.platform.version}</featureArtifactDef>
+				
+				<!-- as runtime features-->
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.as.runtimes.cxf.feature:${carbon.platform.version}</featureArtifactDef>
+				<!-- end of as runtime features-->
 
                             </featureArtifacts>
                         </configuration>
@@ -716,6 +720,16 @@
                                    <id>org.wso2.carbon.user.mgt.feature.group</id>
                                    <version>${carbon.platform.version}</version>
                                </feature>
+				
+				<!-- as-runtimes-->
+				<feature>
+                                   <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
+                                   <version>${carbon.platform.version}</version>
+                               </feature>
+
+				<!-- end of as-runtimes-->
+
+
 
                                 <!--<feature>
                                     <id>org.wso2.carbon.cloud.gateway.agent.feature.group</id>
@@ -1078,6 +1092,14 @@
                                    <id>org.wso2.carbon.user.mgt.server.feature.group</id>
                                    <version>${carbon.platform.version}</version>
                                </feature>
+				
+				<!-- as -runtime features -->
+				<feature>
+                                   <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
+                                   <version>${carbon.platform.version}</version>
+                               </feature>
+			       	<!-- end of as -runtime features -->
+
                             </features>
                         </configuration>
                     </execution>
