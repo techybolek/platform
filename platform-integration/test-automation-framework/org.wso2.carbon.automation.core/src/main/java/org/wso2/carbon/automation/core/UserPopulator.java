@@ -67,6 +67,7 @@ public class UserPopulator {
                 createStratosUsers(superTenantDetails, userCount, productList);
             } else {
                 createStratosUsersForIntegration(superTenantDetails, userCount, productList);
+
             }
             log.info("Users Populated");
         } else {
@@ -100,6 +101,7 @@ public class UserPopulator {
         }
     }
 
+
     private void createProductUsers(String backendUrl) throws Exception {
         UserInfo adminUserInfo = UserListCsvReader.getUserInfo(0);
         createRoleWithAllPermissions(ProductConstant.DEFAULT_PRODUCT_ROLE, backendUrl, adminUserInfo);
@@ -110,8 +112,8 @@ public class UserPopulator {
                 UserInfo userDetails = UserListCsvReader.getUserInfo(userIdValue);
 
                 try {
-                    if (!userMgtAdmin.userNameExists("PRIMARY/" + ProductConstant.DEFAULT_PRODUCT_ROLE,
-                                                     "PRIMARY/" + userDetails.getUserName())) {
+                    if (!userMgtAdmin.userNameExists(ProductConstant.DEFAULT_PRODUCT_ROLE,
+                                                     userDetails.getUserName())) {
                         if (userId == 1) {
                             userMgtAdmin.addUser(userDetails.getUserName(), userDetails.getUserName(),
                                                  new String[]{"admin"}, null);
@@ -136,6 +138,7 @@ public class UserPopulator {
                 FrameworkFactory.getFrameworkProperties(productList.get(0));
         populateTenants(superTenantDetails, userCount, manProperties);
     }
+
 
     private void createStratosUsersForIntegration(UserInfo superTenantDetails, int userCount,
                                                   List<String> productList) throws Exception {
@@ -174,6 +177,7 @@ public class UserPopulator {
                                              tenantAdminUserInfo);
                 //if the service.jks is available in the resources/security/keystore directory,, it will add as a keystore of the tenant
                 addKeyStoreIfAvailable(manProperties.getProductVariables().getBackendUrl(), tenantDetails);
+
             } else if (userId > ProductConstant.ADMIN_USER_ID) { // populate all tenant users
                 assert tenantDetails != null;
 
@@ -191,6 +195,7 @@ public class UserPopulator {
             }
         }
     }
+
 
     protected static String login(String userName, String password, String backendUrl,
                                   String hostName)
@@ -217,7 +222,7 @@ public class UserPopulator {
         resourceAdmin = new ResourceAdminServiceClient(backendUrl, session);
         userManagementClient = new UserManagementClient(backendUrl, session);
         String[] userList = null;
-        if (!userManagementClient.roleNameExists("PRIMARY/" + roleName)) {
+        if (!userManagementClient.roleNameExists(roleName)) {
             userManagementClient.addRole(roleName, userList, permissions);
             resourceAdmin.addResourcePermission("/", ProductConstant.DEFAULT_PRODUCT_ROLE, "3", "1");
             resourceAdmin.addResourcePermission("/", ProductConstant.DEFAULT_PRODUCT_ROLE, "2", "1");
