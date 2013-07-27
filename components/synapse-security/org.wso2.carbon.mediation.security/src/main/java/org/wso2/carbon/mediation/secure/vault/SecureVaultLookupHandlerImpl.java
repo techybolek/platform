@@ -83,14 +83,6 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 			// creating vault-specific storage repository (this happens only if
 			// not resource not existing)
 			initRegistryRepo();
-
-			// SecretManagerInitializer initializer =
-			// SecretManagerInitializer.getInstance();
-			Resource resource = registry
-					.get(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
-			System.out.println("test");
-			// initializer.init(resource.getProperties(), resource);
-
 		} catch (RegistryException e) {
 			throw new RegistryException("Error while intializing the registry");
 		}

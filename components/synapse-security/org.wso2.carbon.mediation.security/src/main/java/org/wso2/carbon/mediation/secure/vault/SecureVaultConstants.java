@@ -26,5 +26,8 @@ public interface SecureVaultConstants {
 	public final static String PROP_SECRET_PROVIDER = "carbon.secretProvider";
 	
 	public final static String SERVELT_SESSION = "comp.mgt.servlet.session";
+	
+	public static final String CONF_CONNECTOR_SECURE_VAULT_CONFIG_PROP_LOOK = "conf:/connector-secure-vault-config";
+
 
 }

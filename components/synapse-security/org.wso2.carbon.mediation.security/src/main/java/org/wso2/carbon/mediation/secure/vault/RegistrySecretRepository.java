@@ -44,7 +44,6 @@ public class RegistrySecretRepository implements SecretRepository {
 
 	}
 
-
 	/**
 	 * @param alias
 	 *            Alias name for look up a secret
@@ -54,7 +53,7 @@ public class RegistrySecretRepository implements SecretRepository {
 	public String getSecret(String alias) {
 
 		Entry propEntry = synCtx.getConfiguration().getEntryDefinition(
-				"conf:/connector-secure-vault-config");
+				SecureVaultConstants.CONF_CONNECTOR_SECURE_VAULT_CONFIG_PROP_LOOK);
 
 		Registry registry = synCtx.getConfiguration().getRegistry();
 
@@ -75,6 +74,9 @@ public class RegistrySecretRepository implements SecretRepository {
 		String decryptedText = new String(CipherInitializer.getInstance().getBaseCipher()
 				.decrypt(propertyValue.trim().getBytes()));
 
+		if (log.isDebugEnabled()) {
+			log.info("evaluation completed succesfully " + decryptedText);
+		}
 		return decryptedText;
 
 	}
