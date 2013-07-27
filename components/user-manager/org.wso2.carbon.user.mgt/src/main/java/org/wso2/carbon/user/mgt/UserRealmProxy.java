@@ -841,7 +841,7 @@ public class UserRealmProxy {
             String loggedInUserName = getLoggedInUser();
             boolean isRoleHasAdminPermission;
             
-            String roleWithoutDN = roleName.split(UserCoreConstants.DN_COMBINER)[0];
+            String roleWithoutDN = roleName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
 
             // check whether this role had admin permission
             isRoleHasAdminPermission = realm.getAuthorizationManager().
@@ -1585,7 +1585,7 @@ public class UserRealmProxy {
         try {
 
             String loggedInUserName = getLoggedInUser();
-            String roleWihtoutDn = roleName.split(UserCoreConstants.DN_COMBINER)[0];
+            String roleWihtoutDn = roleName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
 
             if (CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleWihtoutDn)) {
                 log.error("Security Alert! Carbon anonymous role is being manipulated by user " + loggedInUserName);
@@ -2068,8 +2068,8 @@ public class UserRealmProxy {
     
 	private void mapEntityName(String entityName, FlaggedName fName,
 	                           UserStoreManager userStoreManager) {
-		if (entityName.contains(UserCoreConstants.DN_COMBINER)) {
-			String[] nameAndDn = entityName.split(UserCoreConstants.DN_COMBINER);
+		if (entityName.contains(UserCoreConstants.TENANT_DOMAIN_COMBINER)) {
+			String[] nameAndDn = entityName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER);
 			fName.setItemName(nameAndDn[0]);
 			fName.setDn(nameAndDn[1]);
 
