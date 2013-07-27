@@ -1,4 +1,4 @@
-<artifactType hasNamespace="true" iconSet="9" pluralLabel="Events" shortName="events_lc" singularLabel="Event" type="application/vnd.wso2-eventslc+xml">
+<artifactType hasNamespace="true" iconSet="9" pluralLabel="Events" shortName="evlc" singularLabel="Event" type="application/vnd.wso2-eventslc+xml">
         <storagePath>/eventslc/@{details_name}</storagePath>
         <nameAttribute>details_name</nameAttribute>
 	<lifecycle>ServiceLifeCycle</lifecycle>

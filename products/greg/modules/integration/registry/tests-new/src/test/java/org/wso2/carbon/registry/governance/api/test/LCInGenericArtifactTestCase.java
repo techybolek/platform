@@ -86,7 +86,7 @@ public class LCInGenericArtifactTestCase {
                 "rxt resource doesn't exists");
 
         GovernanceArtifactConfiguration governanceArtifactConfiguration =
-                GovernanceUtils.findGovernanceArtifactConfiguration("events_lc", governance);
+                GovernanceUtils.findGovernanceArtifactConfiguration("evlc", governance);
 
         assertTrue(governanceArtifactConfiguration.getMediaType().contains("application/vnd" +
                 ".wso2-eventslc+xml"));
@@ -110,7 +110,7 @@ public class LCInGenericArtifactTestCase {
         assertTrue(governanceArtifactConfiguration.getPathExpression().contains("/eventslc/@{details_name}"));
         assertTrue(governanceArtifactConfiguration.getArtifactElementNamespace().
                 contains("http://www.wso2.org/governance/metadata"));
-        assertTrue(governanceArtifactConfiguration.getKey().equals("events_lc"));
+        assertTrue(governanceArtifactConfiguration.getKey().equals("evlc"));
     }
 
     @Test(groups = {"wso2.greg"}, description = "add an artefact with multiple longer lines", enabled = true, dependsOnMethods = "testAddNewRxtFile")
