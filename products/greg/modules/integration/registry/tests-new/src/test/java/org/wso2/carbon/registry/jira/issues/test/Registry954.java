@@ -14,8 +14,10 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -51,10 +53,11 @@ public class Registry954 {
     }
 
     @Test(groups = {"wso2.greg"}, description = "test getPath() method")
-    public void testGetServicePath() throws GovernanceException {
+    public void testGetServicePath() throws RegistryException {
         addService("test_namespace1", "service1", "1.0.0");
         addService("test_namespace2", "service2", "1.0.0");
         addService("test_namespace3", "service3", "1.0.0");
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service[] services = serviceManager.getAllServices();
         boolean foundNull = false;
         for (Service service : services) {
