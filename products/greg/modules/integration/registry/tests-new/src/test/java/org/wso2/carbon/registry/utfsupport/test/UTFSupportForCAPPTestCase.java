@@ -79,7 +79,7 @@ public class UTFSupportForCAPPTestCase {
                                              new DataHandler(new URL("file:///" + filePath)));
 
 
-        Assert.assertTrue(CAppTestUtils.isCAppDeployed(environment.getGreg().getSessionCookie(), "text_resources",
+        Assert.assertTrue(CAppTestUtils.isCAppDeployed(environment.getGreg().getSessionCookie(), "text_resources_1.0.0",
                                                        applicationAdminClient));
 
         CustomSearchParameterBean searchQuery = new CustomSearchParameterBean();
@@ -124,7 +124,7 @@ public class UTFSupportForCAPPTestCase {
                                              new DataHandler(new URL("file:///" + filePath)));
 
 
-        Assert.assertTrue(CAppTestUtils.isCAppDeployed(environment.getGreg().getSessionCookie(), "Capp", applicationAdminClient));
+        Assert.assertTrue(CAppTestUtils.isCAppDeployed(environment.getGreg().getSessionCookie(), "Capp_1.0.0", applicationAdminClient));
 
         Assert.assertTrue(searchWsdl());
         Assert.assertTrue(searchSchema());
