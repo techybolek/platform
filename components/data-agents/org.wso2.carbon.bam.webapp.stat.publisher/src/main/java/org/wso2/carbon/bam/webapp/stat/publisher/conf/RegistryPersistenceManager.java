@@ -302,24 +302,4 @@ public class RegistryPersistenceManager {
         return load();
     }
 
-    public String getWebappConfigProperty(int tenantId, String webappName){
-        String registryPath = WebappStatisticsPublisherConstants.WEBAPP_REG_PATH+"/"+tenantId+"/"+webappName+"/";
-        try {
-            return  getConfigurationProperty(registryPath, WebappStatisticsPublisherConstants.ENABLE_STATISTICS);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-          return null;
-    }
-
-    public void setWebappConfigProperty(int tenantId, String webappName, int value){
-        String registryPath = WebappStatisticsPublisherConstants.WEBAPP_REG_PATH+"/"+tenantId+"/"+webappName+"/";
-
-        try {
-            updateConfigurationProperty(WebappStatisticsPublisherConstants.ENABLE_STATISTICS, value, registryPath);
-        } catch (RegistryException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

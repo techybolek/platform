@@ -31,15 +31,10 @@ import org.wso2.carbon.bam.webapp.stat.publisher.publish.GlobalWebappEventPublis
 import org.wso2.carbon.bam.webapp.stat.publisher.publish.WebappAgentUtil;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.BrowserInfoUtils;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.TenantEventConfigData;
-import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappConfig;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappStatisticsPublisherConstants;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.webapp.statistics.ComputeData;
-import org.wso2.carbon.webapp.statistics.data.StatisticData;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -102,15 +97,8 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         // Get the requested url from the request to check what it consist of  and to check weather this web app has enable statistic monitoring
         Long startTime = System.currentTimeMillis();
         String requestURI = request.getRequestURI();
-        String[] requestedUriParts = requestURI.split("/");
-        String webappName = "";
-        if (requestURI.startsWith("/t/")) {
-            webappName = requestedUriParts[4];
-        } else {
-            webappName = requestedUriParts[1];
-        }
-
-        boolean webappStatsEnable = WebappConfig.getWebappConfigData(webappName);
+        // check weather web app has enabled for web app statistics
+        boolean webappStatsEnable = Boolean.parseBoolean(request.getContext().findParameter(WebappStatisticsPublisherConstants.ENABLE_STATISTICS));
         
         /*
         * Invoke the next valve. For our valve being the last configured in catalina-server.xml this will trigger the web application context requested.
@@ -120,10 +108,6 @@ public class WebAppStatisticPublisherValve extends ValveBase {
 
         // This start time is to capture the request initiated time to measure the response time.
         responseTime = System.currentTimeMillis() - startTime;
-
-        if (!CarbonUtils.isWorkerNode()) {
-            setWebappStatistics(request, response, responseTime);
-        }
 
         /*
         * Checks weather web applications statistics are enable in repository/conf/etc/bam.xml,
@@ -342,55 +326,6 @@ public class WebAppStatisticPublisherValve extends ValveBase {
             ip = request.getRemoteAddr();
         }
         return ip;
-    }
-
-
-    public void setWebappStatistics(Request request, Response response, Long responseTime) {
-
-        String requestURI = request.getRequestURI().trim();
-        //Extracting the tenant domain using the requested url.
-        String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(requestURI);
-
-
-        StatisticData statisticData = new StatisticData();
-
-        int firstDigit = Integer.parseInt(Integer.toString(response.getStatus()).substring(0, 1));
-
-        statisticData.setRequstCount(1);
-        if (firstDigit == 2 || firstDigit == 3) {
-            statisticData.setResponseCount(1);
-            statisticData.setFaultCount(0);
-        } else if (firstDigit == 4 || firstDigit == 5) {
-            statisticData.setResponseCount(0);
-            statisticData.setFaultCount(1);
-        }
-
-        String[] requestedUriParts = requestURI.split("/");
-        if (requestURI.startsWith("/t/")) {
-            statisticData.setWebappName(requestedUriParts[4]);
-            statisticData.setTenantName(requestedUriParts[2]);
-        } else {
-            statisticData.setWebappName(requestedUriParts[1]);
-            statisticData.setTenantName(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        }
-
-        //Extracting the configuration context. if tenant domain is null then main carbon server configuration is loaded
-       /* ConfigurationContext currentCtx;
-        if (tenantDomain != null) {
-            currentCtx = getTenantConfigurationContext(tenantDomain);
-        } else {
-            currentCtx = CarbonDataHolder.getServerConfigContext();
-        }*/
-
-        //Requesting the tenant id, if this main carbon context id will be -1234
-        int tenantID = CarbonContext.getCurrentContext().getTenantId(); /*MultitenantUtils.getTenantId(currentCtx);*/
-        statisticData.setTenantId(tenantID);
-        statisticData.setResponseTime(responseTime);
-
-        ComputeData cd = new ComputeData();
-        cd.setRequestData(statisticData);
-
-
     }
 
 }

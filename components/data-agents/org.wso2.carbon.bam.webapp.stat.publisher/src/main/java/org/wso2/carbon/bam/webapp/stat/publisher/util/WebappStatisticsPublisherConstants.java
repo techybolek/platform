@@ -36,9 +36,6 @@ public class WebappStatisticsPublisherConstants {
     public static final String WEBAPP_PROPERTIES_REG_PATH = RegistryResources.COMPONENTS
             + "org.wso2.carbon.bam.webapp.stat.publisher/properties";
 
-    public static final String WEBAPP_REG_PATH = RegistryResources.COMPONENTS
-    + "org.wso2.carbon.bam.webapp.stat.publisher/webapp/";
-
     public static final String ENABLE_STATISTICS = "enable.statistics";
     public static final String UID_REPLACE_CHAR = "..";
     public static final String UID_REPLACE_CHAR_REGEX = "\\.\\.";
