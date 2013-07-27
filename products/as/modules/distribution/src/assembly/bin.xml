@@ -41,6 +41,7 @@
                 <exclude>**/release-notes.html</exclude>
                 <exclude>**/carbon.xml</exclude>
                 <exclude>**/axis2/axis2.xml</exclude>
+		<exclude>**/catalina-server.xml</exclude>
             </excludes>
         </fileSet>
 		<!--  copying modules xml -->
@@ -308,6 +309,9 @@
             <includes>
 	        <include>**/identity.xml</include>
             </includes>
+	    <excludes>
+                <exclude>**/catalina-server.xml</exclude>
+            </excludes>
         </fileSet>
 
 	<!--Multitenancy related file -->
@@ -633,6 +637,14 @@
             <source>src/resources/dataService/OSSLicenseManager/flexui/source/build.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples/OSSLicenseManager/flexui/source
             </outputDirectory>
+        </file>
+
+	<!-- Coping catalina-server.xml to add bam.web.app.statistic tomcat-valve and web.statistic tomcat-valve -->
+	<file>
+            <source>src/resources/tomcatValve/catalina-server.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/tomcat</outputDirectory>
+	    <filtered>true</filtered>
+            <fileMode>644</fileMode>	
         </file>
     </files>
 </assembly>
