@@ -147,6 +147,7 @@
         <module>data-bridge</module>
 	    <module>ndatasource</module>
 	    <module>jaggery/features</module>
+        <module>as-runtimes</module>
 	    <!--module>bam</module-->
 	    <!--module>appfactory</module-->
         <module>hadoop/hdfs</module>
