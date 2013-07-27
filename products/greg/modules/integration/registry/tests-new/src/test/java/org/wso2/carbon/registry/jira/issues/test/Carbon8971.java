@@ -60,13 +60,13 @@ public class Carbon8971 {
     private WSRegistryServiceClient wsRegistryServiceClient;
 
     private final static String WSDL_URL =
-            "http://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-            + "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/"
-            + "src/main/resources/artifacts/GREG/wsdl/info.wsdl";
+            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
+                    "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/" +
+                    "artifacts/GREG/wsdl/info.wsdl";
     private final static String POLICY_URL =
-            "http://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-            + "platform-integration/system-test-framework/core/org.wso2.automation.platform.core/"
-            + "src/main/resources/artifacts/GREG/policy/UTPolicy.xml";
+            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/" +
+                    "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/" +
+                    "artifacts/GREG/policy/UTPolicy.xml";
 
     private final static String WSDL_NAME = "info.wsdl";
     private final static String POLICY_NAME = "UTPolicy.xml";
