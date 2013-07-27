@@ -41,6 +41,14 @@
                     <xs:sequence></xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="setBamConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="webappFileName" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="reloadWebapps">
                 <xs:complexType>
                     <xs:sequence>
@@ -123,6 +131,20 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" nillable="true" type="ax2427:WebappsWrapper"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getBamConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="webappFileName" nillable="true" type="xs:string"></xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getBamConfigurationResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -315,6 +337,9 @@
     <wsdl:message name="expireAllSessionsRequest">
         <wsdl:part name="parameters" element="ns1:expireAllSessions"></wsdl:part>
     </wsdl:message>
+    <wsdl:message name="setBamConfigurationRequest">
+        <wsdl:part name="parameters" element="ns1:setBamConfiguration"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="startWebappsRequest">
         <wsdl:part name="parameters" element="ns1:startWebapps"></wsdl:part>
     </wsdl:message>
@@ -326,6 +351,12 @@
     </wsdl:message>
     <wsdl:message name="deleteStoppedWebappsRequest">
         <wsdl:part name="parameters" element="ns1:deleteStoppedWebapps"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getBamConfigurationRequest">
+        <wsdl:part name="parameters" element="ns1:getBamConfiguration"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getBamConfigurationResponse">
+        <wsdl:part name="parameters" element="ns1:getBamConfigurationResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getPagedWebappsSummaryRequest">
         <wsdl:part name="parameters" element="ns1:getPagedWebappsSummary"></wsdl:part>
@@ -421,6 +452,9 @@
         <wsdl:operation name="expireAllSessions">
             <wsdl:input message="tns:expireAllSessionsRequest" wsaw:Action="urn:expireAllSessions"></wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="setBamConfiguration">
+            <wsdl:input message="tns:setBamConfigurationRequest" wsaw:Action="urn:setBamConfiguration"></wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <wsdl:input message="tns:startWebappsRequest" wsaw:Action="urn:startWebapps"></wsdl:input>
         </wsdl:operation>
@@ -430,6 +464,10 @@
         </wsdl:operation>
         <wsdl:operation name="deleteStoppedWebapps">
             <wsdl:input message="tns:deleteStoppedWebappsRequest" wsaw:Action="urn:deleteStoppedWebapps"></wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getBamConfiguration">
+            <wsdl:input message="tns:getBamConfigurationRequest" wsaw:Action="urn:getBamConfiguration"></wsdl:input>
+            <wsdl:output message="tns:getBamConfigurationResponse" wsaw:Action="urn:getBamConfigurationResponse"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getPagedWebappsSummary">
             <wsdl:input message="tns:getPagedWebappsSummaryRequest" wsaw:Action="urn:getPagedWebappsSummary"></wsdl:input>
@@ -519,6 +557,12 @@
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="setBamConfiguration">
+            <soap:operation soapAction="urn:setBamConfiguration" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <soap:operation soapAction="urn:startWebapps" style="document"></soap:operation>
             <wsdl:input>
@@ -534,8 +578,8 @@
                 <soap:body use="literal"></soap:body>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getPagedWebappsSummary">
-            <soap:operation soapAction="urn:getPagedWebappsSummary" style="document"></soap:operation>
+        <wsdl:operation name="getBamConfiguration">
+            <soap:operation soapAction="urn:getBamConfiguration" style="document"></soap:operation>
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
@@ -548,6 +592,15 @@
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getPagedWebappsSummary">
+            <soap:operation soapAction="urn:getPagedWebappsSummary" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"></soap:body>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="expireSessionsInWebapps">
             <soap:operation soapAction="urn:expireSessionsInWebapps" style="document"></soap:operation>
@@ -708,6 +761,12 @@
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="setBamConfiguration">
+            <soap12:operation soapAction="urn:setBamConfiguration" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <soap12:operation soapAction="urn:startWebapps" style="document"></soap12:operation>
             <wsdl:input>
@@ -723,8 +782,8 @@
                 <soap12:body use="literal"></soap12:body>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getPagedWebappsSummary">
-            <soap12:operation soapAction="urn:getPagedWebappsSummary" style="document"></soap12:operation>
+        <wsdl:operation name="getBamConfiguration">
+            <soap12:operation soapAction="urn:getBamConfiguration" style="document"></soap12:operation>
             <wsdl:input>
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
@@ -737,6 +796,15 @@
             <wsdl:input>
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getPagedWebappsSummary">
+            <soap12:operation soapAction="urn:getPagedWebappsSummary" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="expireSessionsInWebapps">
             <soap12:operation soapAction="urn:expireSessionsInWebapps" style="document"></soap12:operation>
@@ -897,6 +965,12 @@
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="setBamConfiguration">
+            <http:operation location="setBamConfiguration"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="startWebapps">
             <http:operation location="startWebapps"></http:operation>
             <wsdl:input>
@@ -912,8 +986,8 @@
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getPagedWebappsSummary">
-            <http:operation location="getPagedWebappsSummary"></http:operation>
+        <wsdl:operation name="getBamConfiguration">
+            <http:operation location="getBamConfiguration"></http:operation>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
@@ -926,6 +1000,15 @@
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getPagedWebappsSummary">
+            <http:operation location="getPagedWebappsSummary"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="expireSessionsInWebapps">
             <http:operation location="expireSessionsInWebapps"></http:operation>
@@ -1074,13 +1157,13 @@
     </wsdl:binding>
     <wsdl:service name="WebappAdmin">
         <wsdl:port name="WebappAdminHttpsSoap11Endpoint" binding="tns:WebappAdminSoap11Binding">
-            <soap:address location="https://10.100.0.187:9443/services/WebappAdmin.WebappAdminHttpsSoap11Endpoint/"></soap:address>
+            <soap:address location="https://10.100.0.134:9443/services/WebappAdmin.WebappAdminHttpsSoap11Endpoint/"></soap:address>
         </wsdl:port>
         <wsdl:port name="WebappAdminHttpsSoap12Endpoint" binding="tns:WebappAdminSoap12Binding">
-            <soap12:address location="https://10.100.0.187:9443/services/WebappAdmin.WebappAdminHttpsSoap12Endpoint/"></soap12:address>
+            <soap12:address location="https://10.100.0.134:9443/services/WebappAdmin.WebappAdminHttpsSoap12Endpoint/"></soap12:address>
         </wsdl:port>
         <wsdl:port name="WebappAdminHttpsEndpoint" binding="tns:WebappAdminHttpBinding">
-            <http:address location="https://10.100.0.187:9443/services/WebappAdmin.WebappAdminHttpsEndpoint/"></http:address>
+            <http:address location="https://10.100.0.134:9443/services/WebappAdmin.WebappAdminHttpsEndpoint/"></http:address>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
