@@ -27,8 +27,10 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.policies.PolicyManager;
 import org.wso2.carbon.governance.api.policies.dataobjects.Policy;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -48,12 +50,14 @@ public class PolicyAdditionTestCase {
     public void initialize() throws RemoteException,
                                     LoginAuthenticationExceptionException,
                                     org.wso2.carbon.registry.api.RegistryException {
-        int userId = 2;
+        int userId = 1;
         RegistryProviderUtil provider = new RegistryProviderUtil();
         WSRegistryServiceClient wsRegistry = provider.getWSRegistry(userId,
                                                                     ProductConstant.GREG_SERVER_NAME);
         governanceRegistry = provider.getGovernanceRegistry(wsRegistry, userId);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
         policyManager = new PolicyManager(governanceRegistry);
+
 
     }
 
@@ -101,7 +105,7 @@ public class PolicyAdditionTestCase {
         policyManager.addPolicy(policyViaUrl);
         policyViaUrl.addAttribute("author", "KanaURL");
         policyViaUrl.addAttribute("version", "1.0.0");
-        policyViaUrl.addAttribute("description", "Policy addtion via url");
+        policyViaUrl.addAttribute("description", "Policy addition via url");
 
         policyManager.updatePolicy(policyViaUrl);
 
@@ -109,7 +113,7 @@ public class PolicyAdditionTestCase {
         assertTrue(policyViaUrl.getAttribute("author").contentEquals("KanaURL"));
         assertEquals(policyViaUrl.getAttribute("version"), "1.0.0");
         assertEquals(policyViaUrl.getAttribute("description"),
-                     "Policy addtion via url");
+                     "Policy addition via url");
 
         assertTrue(policyViaUrl.getPath().contains(
                 "/trunk/policies/UTPolicy.xml"));
