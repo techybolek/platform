@@ -69,7 +69,7 @@ public class NegativePolicyAdditionTestCase {
      * @throws org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException
      *
      */
-    @Test(groups = "wso2.greg", description = "Add Invalid policy", expectedExceptions = GovernanceException.class)
+    @Test(groups = "wso2.greg", description = "Add Invalid policy")
     public void testInvalidAdditionPolicyViaUrl() throws RemoteException,
                                                          ResourceAdminServiceExceptionException,
                                                          GovernanceException,
