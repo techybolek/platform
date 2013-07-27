@@ -71,7 +71,7 @@ public class ServiceDependencyCountTestCase {
             if (artifact.getAttribute("overview_name").equals("S1-REGISTRY-1595")) {
 
                 GovernanceArtifact artifact1[] = artifact.getDependencies();
-                if ((artifact1.length == 2)) {
+                if ((artifact1.length == 1)) {
                      isCorrectCount =true;
                 }
             }
