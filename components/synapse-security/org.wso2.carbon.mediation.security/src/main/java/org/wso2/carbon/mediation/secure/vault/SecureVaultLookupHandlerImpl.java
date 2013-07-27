@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -83,10 +84,12 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 			// not resource not existing)
 			initRegistryRepo();
 
-			SecretManagerInitializer initializer = SecretManagerInitializer.getInstance();
+			// SecretManagerInitializer initializer =
+			// SecretManagerInitializer.getInstance();
 			Resource resource = registry
-			.get(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
-			initializer.init(resource.getProperties(), resource);
+					.get(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
+			System.out.println("test");
+			// initializer.init(resource.getProperties(), resource);
 
 		} catch (RegistryException e) {
 			throw new RegistryException("Error while intializing the registry");
@@ -94,7 +97,8 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	}
 
 	/**
-	 * Initializing the repository which requires to store the secure vault cipher text
+	 * Initializing the repository which requires to store the secure vault
+	 * cipher text
 	 * 
 	 * @throws RegistryException
 	 */
@@ -113,10 +117,9 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	 * 
 	 * @return
 	 */
-	protected boolean isRepoExists(){
+	protected boolean isRepoExists() {
 		try {
-			registry
-			.get(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
+			registry.get(SecureVaultConstants.CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY);
 		} catch (RegistryException e) {
 			return false;
 		}
@@ -142,12 +145,12 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	 * .LookupType)
 	 */
 	@Override
-	public String evaluate(String aliasPasword, LookupType lookupType)
-			throws RegistryException {
+	public String evaluate(String aliasPasword, LookupType lookupType,
+			MessageContext synCtx) throws RegistryException {
 		if (lookupType.equals(LookupType.FILE)) {
-			return lookupFileRepositry(aliasPasword);
+			return lookupFileRepositry(aliasPasword, synCtx);
 		} else {
-			return lookupRegistry(aliasPasword);
+			return lookupRegistry(aliasPasword, synCtx);
 		}
 
 	}
@@ -159,15 +162,14 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	 * @return
 	 * @throws RegistryException
 	 */
-	private String lookupRegistry(String aliasPasword) throws RegistryException {
+	private String lookupRegistry(String aliasPasword, MessageContext synCtx)
+			throws RegistryException {
 		if (log.isDebugEnabled()) {
 			log.info("processing evaluating registry based lookup");
 		}
-		SecretManager secretManager = SecretManager.getInstance();
-		if (secretManager.isInitialized()) {
-			return secretManager.getSecret(aliasPasword);
-		}
-		return null;
+		SecretCipherHander secretManager = new SecretCipherHander(synCtx);
+		return secretManager.getSecret(aliasPasword);
+
 	}
 
 	/**
@@ -176,11 +178,11 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	 * @param aliasPasword
 	 * @return
 	 */
-	private String lookupFileRepositry(String aliasPasword) {
+	private String lookupFileRepositry(String aliasPasword, MessageContext synCtx) {
 		if (log.isDebugEnabled()) {
 			log.info("processing evaluating file based lookup");
 		}
-		SecretManager secretManager = SecretManager.getInstance();
+		SecretCipherHander secretManager = new SecretCipherHander(synCtx);
 		if (secretManager.isInitialized()) {
 			return secretManager.getSecret(aliasPasword);
 		}

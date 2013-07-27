@@ -20,6 +20,7 @@ package org.wso2.carbon.mediation.secure.vault;
 
 import java.util.Properties;
 
+import org.apache.synapse.MessageContext;
 import org.wso2.carbon.mediation.secure.vault.SecureVaultLookupHandlerImpl.LookupType;
 
 
@@ -44,7 +45,7 @@ public interface SecureVaultLookupHandler {
 	 * @return
 	 * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
 	 */
-	public String evaluate(String aliasPasword, LookupType lookupType)
+	public String evaluate(String aliasPasword, LookupType lookupType,MessageContext synCtx)
 			throws org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 }

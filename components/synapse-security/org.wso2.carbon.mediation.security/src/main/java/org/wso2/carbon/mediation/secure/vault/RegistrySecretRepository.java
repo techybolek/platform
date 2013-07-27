@@ -18,21 +18,13 @@
  */
 package org.wso2.carbon.mediation.secure.vault;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.securevault.CipherFactory;
-import org.wso2.securevault.CipherOperationMode;
-import org.wso2.securevault.DecryptionProvider;
-import org.wso2.securevault.EncodingType;
-import org.wso2.securevault.commons.MiscellaneousUtil;
-import org.wso2.securevault.definition.CipherInformation;
-import org.wso2.securevault.keystore.IdentityKeyStoreWrapper;
-import org.wso2.securevault.keystore.KeyStoreWrapper;
-import org.wso2.securevault.keystore.TrustKeyStoreWrapper;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.Entry;
+import org.apache.synapse.registry.Registry;
 import org.wso2.securevault.secret.SecretRepository;
 
 /**
@@ -42,103 +34,16 @@ public class RegistrySecretRepository implements SecretRepository {
 
 	private static Log log = LogFactory.getLog(RegistrySecretRepository.class);
 
-	private static final String LOCATION = "location";
-	private static final String KEY_STORE = "keyStore";
-	private static final String DOT = ".";
-	private static final String SECRET = "secret";
-	private static final String ALIAS = "alias";
-	private static final String ALIASES = "aliases";
-	private static final String ALGORITHM = "algorithm";
-	private static final String DEFAULT_ALGORITHM = "RSA";
-	private static final String TRUSTED = "trusted";
-	private static final String DEFAULT_CONF_LOCATION = "cipher-text.properties";
-
 	/* Parent secret repository */
 	private SecretRepository parentRepository;
-	/* Map of secrets keyed by alias for property name */
-	private final Map<String, String> secrets = new HashMap<String, String>();
-	/* Map of encrypted values keyed by alias for property name */
-	private final Map<String, String> encryptedData = new HashMap<String, String>();
-	/* Wrapper for Identity KeyStore */
-	private IdentityKeyStoreWrapper identity;
-	/* Wrapper for trusted KeyStore */
-	private TrustKeyStoreWrapper trust;
-	/* Whether this secret repository has been initiated successfully */
-	private boolean initialize = false;
 
+	private MessageContext synCtx;
 
-	public RegistrySecretRepository(IdentityKeyStoreWrapper identity,
-			TrustKeyStoreWrapper trust) {
-		this.identity = identity;
-		this.trust = trust;
-	}
-
-	/**
-	 * Initializes the repository based on provided properties
-	 * 
-	 * @param properties
-	 *            Configuration properties
-	 * @param id
-	 *            Identifier to identify properties related to the corresponding
-	 *            repository
-	 */
-	public void init(Properties properties, String id) {
-		StringBuffer sb = new StringBuffer();
-		sb.append(id);
-		sb.append(DOT);
-		sb.append(LOCATION);
-
-		String filePath = MiscellaneousUtil.getProperty(properties, sb.toString(),
-				DEFAULT_CONF_LOCATION);
-
-		Properties cipherProperties = MiscellaneousUtil.loadProperties(filePath);
-		if (cipherProperties.isEmpty()) {
-			if (log.isDebugEnabled()) {
-				log.debug("Cipher texts cannot be loaded form : " + filePath);
-			}
-			return;
-		}
-
-		StringBuffer sbTwo = new StringBuffer();
-		sbTwo.append(id);
-		sbTwo.append(DOT);
-		sbTwo.append(ALGORITHM);
-		// Load algorithm
-		String algorithm = MiscellaneousUtil.getProperty(properties, sbTwo.toString(),
-				DEFAULT_ALGORITHM);
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(DOT);
-		buffer.append(KEY_STORE);
-
-		// Load keyStore
-		String keyStore = MiscellaneousUtil.getProperty(properties, buffer.toString(),
-				null);
-		KeyStoreWrapper keyStoreWrapper;
-		if (TRUSTED.equals(keyStore)) {
-			keyStoreWrapper = trust;
-
-		} else {
-			keyStoreWrapper = identity;
-		}
-
-		// Creates a cipherInformation
-
-		CipherInformation cipherInformation = new CipherInformation();
-		cipherInformation.setAlgorithm(algorithm);
-		cipherInformation.setCipherOperationMode(CipherOperationMode.DECRYPT);
-		cipherInformation.setInType(EncodingType.BASE64); // TODO
-		DecryptionProvider baseCipher = CipherFactory.createCipher(cipherInformation,
-				keyStoreWrapper);
-
-		// decrypt the encrypted text
-		
-		for(Map.Entry<String, String> entry : encryptedData.entrySet()){
-			String decryptedText = new String(baseCipher.decrypt(entry.getValue().trim().getBytes()));
-			secrets.put(entry.getKey(), decryptedText);
-			initialize = true;
-		}
+	public RegistrySecretRepository() {
+		super();
 
 	}
+
 
 	/**
 	 * @param alias
@@ -148,30 +53,30 @@ public class RegistrySecretRepository implements SecretRepository {
 	 */
 	public String getSecret(String alias) {
 
-		if (alias == null || "".equals(alias)) {
-			return alias; // TODO is it needed to throw an error?
-		}
+		Entry propEntry = synCtx.getConfiguration().getEntryDefinition(
+				"conf:/connector-secure-vault-config");
 
-		if (!initialize || secrets.isEmpty()) {
-			if (log.isDebugEnabled()) {
-				log.debug("There is no secret found for alias '" + alias
-						+ "' returning itself");
+		Registry registry = synCtx.getConfiguration().getRegistry();
+
+		String propertyValue = "";
+
+		if (registry != null) {
+			registry.getResource(propEntry, new Properties());
+			if (alias != null) {
+				Properties reqProperties = propEntry.getEntryProperties();
+				if (reqProperties != null) {
+					if (reqProperties.get(alias) != null) {
+						propertyValue = reqProperties.getProperty(alias);
+					}
+				}
 			}
-			return alias;
 		}
 
-		StringBuffer sb = new StringBuffer();
-		sb.append(alias);
+		String decryptedText = new String(CipherInitializer.getInstance().getBaseCipher()
+				.decrypt(propertyValue.trim().getBytes()));
 
-		String secret = secrets.get(sb.toString());
-		if (secret == null || "".equals(secret)) {
-			if (log.isDebugEnabled()) {
-				log.debug("There is no secret found for alias '" + alias
-						+ "' returning itself");
-			}
-			return alias;
-		}
-		return secret;
+		return decryptedText;
+
 	}
 
 	/**
@@ -182,30 +87,7 @@ public class RegistrySecretRepository implements SecretRepository {
 	 */
 	public String getEncryptedData(String alias) {
 
-		if (alias == null || "".equals(alias)) {
-			return alias; // TODO is it needed to throw an error?
-		}
-
-		if (!initialize || encryptedData.isEmpty()) {
-			if (log.isDebugEnabled()) {
-				log.debug("There is no secret found for alias '" + alias
-						+ "' returning itself");
-			}
-			return alias;
-		}
-
-		StringBuffer sb = new StringBuffer();
-		sb.append(alias);
-
-		String encryptedValue = encryptedData.get(sb.toString());
-		if (encryptedValue == null || "".equals(encryptedValue)) {
-			if (log.isDebugEnabled()) {
-				log.debug("There is no secret found for alias '" + alias
-						+ "' returning itself");
-			}
-			return alias;
-		}
-		return encryptedValue;
+		return null;
 	}
 
 	public void setParent(SecretRepository parent) {
@@ -216,11 +98,18 @@ public class RegistrySecretRepository implements SecretRepository {
 		return this.parentRepository;
 	}
 
-	public Map<String, String> getEncryptedData() {
-		return encryptedData;
+	public MessageContext getSynCtx() {
+		return synCtx;
 	}
 
-	
+	public void setSynCtx(MessageContext synCtx) {
+		this.synCtx = synCtx;
+	}
 
+	@Override
+	public void init(Properties arg0, String arg1) {
+		// TODO Auto-generated method stub
+
+	}
 
 }

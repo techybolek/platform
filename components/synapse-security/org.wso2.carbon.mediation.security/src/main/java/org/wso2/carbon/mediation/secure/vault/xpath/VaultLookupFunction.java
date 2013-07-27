@@ -76,7 +76,7 @@ public class VaultLookupFunction implements Function {
 		SecureVaultLookupHandler mediationSecurity;
 		try {
 			mediationSecurity = SecureVaultLookupHandlerImpl.getDefaultSecurityService();
-			String val = mediationSecurity.evaluate(argOne,LookupType.REGISTRY);
+			String val = mediationSecurity.evaluate(argOne,LookupType.REGISTRY,synCtx);
 			return val;
 		} catch (Exception msg) {
 			throw new FunctionCallException(msg);
