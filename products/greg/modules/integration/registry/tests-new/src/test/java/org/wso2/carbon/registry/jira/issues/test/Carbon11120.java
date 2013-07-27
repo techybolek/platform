@@ -59,6 +59,7 @@ public class Carbon11120 {
     private final static String WSDL_NAME = "echo.wsdl";
     private WSDLBean wsdlBean;
     private ServiceBean serviceBean;
+    private ServiceManager serviceManager;
 
     /**
      * @throws LoginAuthenticationExceptionException
@@ -93,6 +94,7 @@ public class Carbon11120 {
         logViewerClient =
                 new LogViewerClient(environment.getGreg().getProductVariables().getBackendUrl(),
                                     environment.getGreg().getSessionCookie());
+        serviceManager = new ServiceManager(governance);
     }
 
     /**
@@ -104,7 +106,7 @@ public class Carbon11120 {
      * @throws MalformedURLException
      */
     public void addWSDL() throws ResourceAdminServiceExceptionException, RemoteException,
-                                 MalformedURLException {
+            MalformedURLException, GovernanceException {
         Boolean nameExists = false;
         String path1 =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
@@ -122,11 +124,10 @@ public class Carbon11120 {
         }
         assertTrue(nameExists, "WSDL not added");
 
-        ServiceBean service = listMetaDataServiceClient.listServices(null);
-
         boolean serviceStatus = false;
 
-        for (String name : service.getNames()) {
+        for (Service service : serviceManager.getAllServices()) {
+            String name = service.getQName().getLocalPart();
             if (name.contains(SERVICE_NAME)) {
                 serviceStatus = true;
             }
