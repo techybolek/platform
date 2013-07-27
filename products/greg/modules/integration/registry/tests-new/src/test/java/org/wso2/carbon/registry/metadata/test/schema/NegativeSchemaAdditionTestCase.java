@@ -89,7 +89,7 @@ public class NegativeSchemaAdditionTestCase {
     /**
      * adding schema without name via url
      */
-    @Test(groups = "wso2.greg", description = "Add Schema without name", expectedExceptions = GovernanceException.class, dependsOnMethods = "testInvalidAdditionSchemaViaUrl")
+    @Test(groups = "wso2.greg", description = "Add Schema without name",  dependsOnMethods = "testInvalidAdditionSchemaViaUrl")
     public void testAdditionSchemaWithoutNameViaUrl() throws RemoteException,
             ResourceAdminServiceExceptionException,
             GovernanceException,
