@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.webapp.mgt;
 
+import org.apache.axis2.AxisFault;
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
@@ -26,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.persistence.metadata.ArtifactMetadataException;
 import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
@@ -67,12 +69,12 @@ public class WebApplication {
         this.context = context;
         setWebappFile(webappFile);
         setLastModifiedTime(webappFile.lastModified());
-        
+
         boolean isFaulty = checkFaultyWebappParam(context);
         if (isFaulty) {
             return;
         }
-        
+
         String serviceListPathParamName = "service-list-path";                                                                                    
         String serviceListPathParam = context.getServletContext().getInitParameter(serviceListPathParamName);
         if ("".equals(serviceListPathParam) || serviceListPathParam == null) {
@@ -208,14 +210,39 @@ public class WebApplication {
     }
 
     public boolean reload() {
+
+        boolean reloaded = false;
+        String bamEnable = "";
+        //reload the context of WebApplication
+
         try {
             //reload the context of Host
             handleHotUpdateToHost("reload");
         } catch (CarbonException e) {
             log.error("error while reloading context for the hosts", e);
         }
-        //reload the context of WebApplication
-        return reload(context);
+
+
+        try {
+            bamEnable = getBamEnableFromWebappMetaData();
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to get bam enable from web app meta data.");
+    }
+        }
+        reloaded = reload(context);
+
+        /**
+         * adding context parameters
+         */
+
+        if (context.findParameter(WebappsConstants.ENABLE_BAM_STATISTICS) != null) {
+            context.removeParameter(WebappsConstants.ENABLE_BAM_STATISTICS);
+        }
+        context.addParameter(WebappsConstants.ENABLE_BAM_STATISTICS, bamEnable);
+
+
+        return reloaded;
     }
 
     private boolean reload(Context contextOfWepap) {
@@ -225,6 +252,27 @@ public class WebApplication {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Reads from webappmeta files and return wether bam enabled.
+     * @return
+     * @throws AxisFault
+     * @throws ArtifactMetadataException
+     */
+    protected String getBamEnableFromWebappMetaData() throws AxisFault, ArtifactMetadataException {
+        return tomcatGenericWebappsDeployer.recievePersistedWebappMetaData(getWebappFile().getName(), WebappsConstants.ENABLE_BAM_STATISTICS);
+    }
+
+    protected void updateWebappMetaDataforBam(String value) {
+        try {
+            tomcatGenericWebappsDeployer.setPersistedWebappMetaData(getWebappFile().getName(), WebappsConstants.ENABLE_BAM_STATISTICS, value);
+            reload();
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to persist data - bam enable");
+            }
+        }
     }
 
     /**

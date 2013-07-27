@@ -28,6 +28,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.core.persistence.metadata.ArtifactMetadataException;
 import org.wso2.carbon.utils.ArchiveManipulator;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.DataPaginator;
@@ -508,6 +509,34 @@ public class WebappAdmin extends AbstractAdmin {
             getWebappsHolder().getStartedWebapps().get(webappFileName).reload();
         }
         sendClusterSyncMessage(ApplicationOpType.RELOAD, webappFileNames);
+    }
+
+    /**
+     * Reset the bam enable and disable option.
+     * @param webappFileName
+     * @param value
+     */
+    public void setBamConfiguration(String webappFileName, String value){
+        getWebappsHolder().getStartedWebapps().get(webappFileName).updateWebappMetaDataforBam(value);
+        /*String []  webappFileNames = new String [1];
+        webappFileNames[0] = webappFileName;
+        sendClusterSyncMessage(ApplicationOpType.RELOAD, webappFileNames);*/
+    }
+
+    /**
+     * This method returns the bam configuration statistic enabled or not
+     * @param webappFileName
+     * @return
+     */
+    public String getBamConfiguration(String webappFileName){
+        try {
+            return getWebappsHolder().getStartedWebapps().get(webappFileName).getBamEnableFromWebappMetaData();
+        } catch (Exception e) {
+            if(log.isDebugEnabled()) {
+                log.debug("Unable to read bam configurations");
+            }
+            return null;
+        }
     }
 
     /**

@@ -16,7 +16,9 @@
 
 package org.wso2.carbon.webapp.mgt;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.core.StandardContext;
@@ -25,6 +27,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.persistence.metadata.ArtifactMetadataException;
+import org.wso2.carbon.core.persistence.metadata.ArtifactMetadataManager;
+import org.wso2.carbon.core.persistence.metadata.ArtifactType;
+import org.wso2.carbon.core.persistence.metadata.DeploymentArtifactMetadataFactory;
 import org.wso2.carbon.core.session.CarbonTomcatClusterableSessionManager;
 import org.wso2.carbon.tomcat.api.CarbonTomcatService;
 import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
@@ -243,6 +249,13 @@ public class TomcatGenericWebappsDeployer {
             context.setReloadable(false);
             WebApplication webapp = new WebApplication(this, context, webappFile);
             webapp.setServletContextParameters(webContextParams);
+
+            String bamEnable =   recievePersistedWebappMetaData(webappFile.getName(), WebappsConstants.ENABLE_BAM_STATISTICS);
+            if(bamEnable == null || bamEnable == "")  {
+                bamEnable="false";
+            }
+            webapp.addParameter(WebappsConstants.ENABLE_BAM_STATISTICS, bamEnable);
+
             webapp.setState("Started");
             webappsHolder.getStartedWebapps().put(filename, webapp);
             webappsHolder.getFaultyWebapps().remove(filename);
@@ -265,6 +278,41 @@ public class TomcatGenericWebappsDeployer {
             webappsHolder.getStartedWebapps().remove(filename);
             throw new CarbonException(msg, e);
         }
+    }
+
+    /**
+     * This method reads from webapp meta files to check weather bam statistics are enabled.
+     * @param artifactName
+     * @param propertyName
+     * @return  bam enable or disable
+     * @throws AxisFault
+     * @throws ArtifactMetadataException
+     */
+    protected String recievePersistedWebappMetaData(String artifactName, String propertyName) throws AxisFault, ArtifactMetadataException {
+        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
+        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
+        ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
+                getMetadataManager();
+        return manager.loadParameter(artifactName ,type,propertyName);
+    }
+
+    /**
+     * This method stores the value in the webapp metadata file.
+     * @param artifactName
+     * @param propertyName
+     * @param value
+     * @throws AxisFault
+     * @throws ArtifactMetadataException
+     */
+    protected void setPersistedWebappMetaData(String artifactName, String propertyName, String value) throws AxisFault, ArtifactMetadataException {
+        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
+        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
+        ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
+                getMetadataManager();
+
+        manager.setParameter(artifactName, type,
+                propertyName, value, true);
+
     }
 
     private void registerApplicationEventListeners(List<Object> applicationEventListeners,
