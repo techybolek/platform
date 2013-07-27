@@ -1,113 +1,60 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax215="http://data.statistics.webapp.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://services.publisher.stat.webapp.bam.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax217="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.publisher.stat.webapp.bam.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax215="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://services.publisher.stat.webapp.bam.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.publisher.stat.webapp.bam.carbon.wso2.org">
     <wsdl:documentation>WebappStatPublisherAdmin</wsdl:documentation>
     <wsdl:types>
-        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://data.statistics.webapp.carbon.wso2.org/xsd">
-            <xs:complexType name="StatisticData">
-                <xs:sequence>
-                    <xs:element minOccurs="0" name="averageResponseTime" type="xs:double"/>
-                    <xs:element minOccurs="0" name="faultCount" type="xs:int"/>
-                    <xs:element minOccurs="0" name="maximumResponseTime" type="xs:double"/>
-                    <xs:element minOccurs="0" name="minimumresponseTime" type="xs:double"/>
-                    <xs:element minOccurs="0" name="requstCount" type="xs:int"/>
-                    <xs:element minOccurs="0" name="responseCount" type="xs:int"/>
-                    <xs:element minOccurs="0" name="responseTime" type="xs:double"/>
-                    <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
-                    <xs:element minOccurs="0" name="tenantName" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="webappName" nillable="true" type="xs:string"/>
-                </xs:sequence>
-            </xs:complexType>
-        </xs:schema>
-        <xs:schema xmlns:ax216="http://data.statistics.webapp.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax218="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
-            <xs:import namespace="http://data.statistics.webapp.carbon.wso2.org/xsd"/>
-            <xs:import namespace="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd"/>
-            <xs:element name="setWebappConfiguration">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="webappName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="value" type="xs:int"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+        <xs:schema xmlns:ax216="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+            <xs:import namespace="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd"></xs:import>
             <xs:element name="isCloudDeployment">
                 <xs:complexType>
-                    <xs:sequence/>
+                    <xs:sequence></xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="isCloudDeploymentResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getWebappRelatedData">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="webAppName" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getWebappRelatedDataResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax215:StatisticData"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getWebappConfiguration">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="webappName" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getWebappConfigurationResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getServerConfigBAMServerURL">
                 <xs:complexType>
-                    <xs:sequence/>
+                    <xs:sequence></xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getServerConfigBAMServerURLResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getEventingConfigData">
                 <xs:complexType>
-                    <xs:sequence/>
+                    <xs:sequence></xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getEventingConfigDataResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax217:ServiceEventingConfigData"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax215:ServiceEventingConfigData"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="WebappStatPublisherAdminException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="WebappStatPublisherAdminException" nillable="true" type="ns1:Exception"/>
+                        <xs:element minOccurs="0" name="WebappStatPublisherAdminException" nillable="true" type="ns1:Exception"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:complexType name="Exception">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="configureEventing">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="eventingConfigData" nillable="true" type="ax217:ServiceEventingConfigData"/>
+                        <xs:element minOccurs="0" name="eventingConfigData" nillable="true" type="ax215:ServiceEventingConfigData"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -115,290 +62,192 @@
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://conf.publisher.stat.webapp.bam.carbon.wso2.org/xsd">
             <xs:complexType name="ServiceEventingConfigData">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="msgDumpingEnabled" type="xs:boolean"/>
-                    <xs:element minOccurs="0" name="nickName" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax217:Property"/>
-                    <xs:element minOccurs="0" name="publishingEnabled" type="xs:boolean"/>
-                    <xs:element minOccurs="0" name="streamName" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="url" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="webappStatsEnabled" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="msgDumpingEnabled" type="xs:boolean"></xs:element>
+                    <xs:element minOccurs="0" name="nickName" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"></xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax215:Property"></xs:element>
+                    <xs:element minOccurs="0" name="publishingEnabled" type="xs:boolean"></xs:element>
+                    <xs:element minOccurs="0" name="streamName" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="url" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="webappStatsEnabled" type="xs:boolean"></xs:element>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="Property">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"></xs:element>
+                    <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"></xs:element>
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
     </wsdl:types>
     <wsdl:message name="configureEventingRequest">
-        <wsdl:part name="parameters" element="ns1:configureEventing"/>
+        <wsdl:part name="parameters" element="ns1:configureEventing"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="WebappStatPublisherAdminException">
-        <wsdl:part name="parameters" element="ns1:WebappStatPublisherAdminException"/>
+        <wsdl:part name="parameters" element="ns1:WebappStatPublisherAdminException"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getServerConfigBAMServerURLRequest">
-        <wsdl:part name="parameters" element="ns1:getServerConfigBAMServerURL"/>
+        <wsdl:part name="parameters" element="ns1:getServerConfigBAMServerURL"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getServerConfigBAMServerURLResponse">
-        <wsdl:part name="parameters" element="ns1:getServerConfigBAMServerURLResponse"/>
-    </wsdl:message>
-    <wsdl:message name="getWebappRelatedDataRequest">
-        <wsdl:part name="parameters" element="ns1:getWebappRelatedData"/>
-    </wsdl:message>
-    <wsdl:message name="getWebappRelatedDataResponse">
-        <wsdl:part name="parameters" element="ns1:getWebappRelatedDataResponse"/>
-    </wsdl:message>
-    <wsdl:message name="setWebappConfigurationRequest">
-        <wsdl:part name="parameters" element="ns1:setWebappConfiguration"/>
-    </wsdl:message>
-    <wsdl:message name="getWebappConfigurationRequest">
-        <wsdl:part name="parameters" element="ns1:getWebappConfiguration"/>
-    </wsdl:message>
-    <wsdl:message name="getWebappConfigurationResponse">
-        <wsdl:part name="parameters" element="ns1:getWebappConfigurationResponse"/>
+        <wsdl:part name="parameters" element="ns1:getServerConfigBAMServerURLResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="isCloudDeploymentRequest">
-        <wsdl:part name="parameters" element="ns1:isCloudDeployment"/>
+        <wsdl:part name="parameters" element="ns1:isCloudDeployment"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="isCloudDeploymentResponse">
-        <wsdl:part name="parameters" element="ns1:isCloudDeploymentResponse"/>
+        <wsdl:part name="parameters" element="ns1:isCloudDeploymentResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getEventingConfigDataRequest">
-        <wsdl:part name="parameters" element="ns1:getEventingConfigData"/>
+        <wsdl:part name="parameters" element="ns1:getEventingConfigData"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="getEventingConfigDataResponse">
-        <wsdl:part name="parameters" element="ns1:getEventingConfigDataResponse"/>
+        <wsdl:part name="parameters" element="ns1:getEventingConfigDataResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:portType name="WebappStatPublisherAdminPortType">
         <wsdl:operation name="configureEventing">
-            <wsdl:input message="tns:configureEventingRequest" wsaw:Action="urn:configureEventing"/>
-            <wsdl:fault message="tns:WebappStatPublisherAdminException" name="WebappStatPublisherAdminException" wsaw:Action="urn:configureEventingWebappStatPublisherAdminException"/>
+            <wsdl:input message="tns:configureEventingRequest" wsaw:Action="urn:configureEventing"></wsdl:input>
+            <wsdl:fault message="tns:WebappStatPublisherAdminException" name="WebappStatPublisherAdminException" wsaw:Action="urn:configureEventingWebappStatPublisherAdminException"></wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getServerConfigBAMServerURL">
-            <wsdl:input message="tns:getServerConfigBAMServerURLRequest" wsaw:Action="urn:getServerConfigBAMServerURL"/>
-            <wsdl:output message="tns:getServerConfigBAMServerURLResponse" wsaw:Action="urn:getServerConfigBAMServerURLResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappRelatedData">
-            <wsdl:input message="tns:getWebappRelatedDataRequest" wsaw:Action="urn:getWebappRelatedData"/>
-            <wsdl:output message="tns:getWebappRelatedDataResponse" wsaw:Action="urn:getWebappRelatedDataResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="setWebappConfiguration">
-            <wsdl:input message="tns:setWebappConfigurationRequest" wsaw:Action="urn:setWebappConfiguration"/>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappConfiguration">
-            <wsdl:input message="tns:getWebappConfigurationRequest" wsaw:Action="urn:getWebappConfiguration"/>
-            <wsdl:output message="tns:getWebappConfigurationResponse" wsaw:Action="urn:getWebappConfigurationResponse"/>
+            <wsdl:input message="tns:getServerConfigBAMServerURLRequest" wsaw:Action="urn:getServerConfigBAMServerURL"></wsdl:input>
+            <wsdl:output message="tns:getServerConfigBAMServerURLResponse" wsaw:Action="urn:getServerConfigBAMServerURLResponse"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="isCloudDeployment">
-            <wsdl:input message="tns:isCloudDeploymentRequest" wsaw:Action="urn:isCloudDeployment"/>
-            <wsdl:output message="tns:isCloudDeploymentResponse" wsaw:Action="urn:isCloudDeploymentResponse"/>
+            <wsdl:input message="tns:isCloudDeploymentRequest" wsaw:Action="urn:isCloudDeployment"></wsdl:input>
+            <wsdl:output message="tns:isCloudDeploymentResponse" wsaw:Action="urn:isCloudDeploymentResponse"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getEventingConfigData">
-            <wsdl:input message="tns:getEventingConfigDataRequest" wsaw:Action="urn:getEventingConfigData"/>
-            <wsdl:output message="tns:getEventingConfigDataResponse" wsaw:Action="urn:getEventingConfigDataResponse"/>
+            <wsdl:input message="tns:getEventingConfigDataRequest" wsaw:Action="urn:getEventingConfigData"></wsdl:input>
+            <wsdl:output message="tns:getEventingConfigDataResponse" wsaw:Action="urn:getEventingConfigDataResponse"></wsdl:output>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="WebappStatPublisherAdminSoap11Binding" type="tns:WebappStatPublisherAdminPortType">
-        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap:binding>
         <wsdl:operation name="configureEventing">
-            <soap:operation soapAction="urn:configureEventing" style="document"/>
+            <soap:operation soapAction="urn:configureEventing" style="document"></soap:operation>
             <wsdl:input>
-                <soap:body use="literal"/>
+                <soap:body use="literal"></soap:body>
             </wsdl:input>
             <wsdl:fault name="WebappStatPublisherAdminException">
-                <soap:fault use="literal" name="WebappStatPublisherAdminException"/>
+                <soap:fault use="literal" name="WebappStatPublisherAdminException"></soap:fault>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getServerConfigBAMServerURL">
-            <soap:operation soapAction="urn:getServerConfigBAMServerURL" style="document"/>
+            <soap:operation soapAction="urn:getServerConfigBAMServerURL" style="document"></soap:operation>
             <wsdl:input>
-                <soap:body use="literal"/>
+                <soap:body use="literal"></soap:body>
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="setWebappConfiguration">
-            <soap:operation soapAction="urn:setWebappConfiguration" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappRelatedData">
-            <soap:operation soapAction="urn:getWebappRelatedData" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappConfiguration">
-            <soap:operation soapAction="urn:getWebappConfiguration" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
+                <soap:body use="literal"></soap:body>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="isCloudDeployment">
-            <soap:operation soapAction="urn:isCloudDeployment" style="document"/>
+            <soap:operation soapAction="urn:isCloudDeployment" style="document"></soap:operation>
             <wsdl:input>
-                <soap:body use="literal"/>
+                <soap:body use="literal"></soap:body>
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal"/>
+                <soap:body use="literal"></soap:body>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getEventingConfigData">
-            <soap:operation soapAction="urn:getEventingConfigData" style="document"/>
+            <soap:operation soapAction="urn:getEventingConfigData" style="document"></soap:operation>
             <wsdl:input>
-                <soap:body use="literal"/>
+                <soap:body use="literal"></soap:body>
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal"/>
+                <soap:body use="literal"></soap:body>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="WebappStatPublisherAdminSoap12Binding" type="tns:WebappStatPublisherAdminPortType">
-        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap12:binding>
         <wsdl:operation name="configureEventing">
-            <soap12:operation soapAction="urn:configureEventing" style="document"/>
+            <soap12:operation soapAction="urn:configureEventing" style="document"></soap12:operation>
             <wsdl:input>
-                <soap12:body use="literal"/>
+                <soap12:body use="literal"></soap12:body>
             </wsdl:input>
             <wsdl:fault name="WebappStatPublisherAdminException">
-                <soap12:fault use="literal" name="WebappStatPublisherAdminException"/>
+                <soap12:fault use="literal" name="WebappStatPublisherAdminException"></soap12:fault>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getServerConfigBAMServerURL">
-            <soap12:operation soapAction="urn:getServerConfigBAMServerURL" style="document"/>
+            <soap12:operation soapAction="urn:getServerConfigBAMServerURL" style="document"></soap12:operation>
             <wsdl:input>
-                <soap12:body use="literal"/>
+                <soap12:body use="literal"></soap12:body>
             </wsdl:input>
             <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="setWebappConfiguration">
-            <soap12:operation soapAction="urn:setWebappConfiguration" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappRelatedData">
-            <soap12:operation soapAction="urn:getWebappRelatedData" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappConfiguration">
-            <soap12:operation soapAction="urn:getWebappConfiguration" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
+                <soap12:body use="literal"></soap12:body>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="isCloudDeployment">
-            <soap12:operation soapAction="urn:isCloudDeployment" style="document"/>
+            <soap12:operation soapAction="urn:isCloudDeployment" style="document"></soap12:operation>
             <wsdl:input>
-                <soap12:body use="literal"/>
+                <soap12:body use="literal"></soap12:body>
             </wsdl:input>
             <wsdl:output>
-                <soap12:body use="literal"/>
+                <soap12:body use="literal"></soap12:body>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getEventingConfigData">
-            <soap12:operation soapAction="urn:getEventingConfigData" style="document"/>
+            <soap12:operation soapAction="urn:getEventingConfigData" style="document"></soap12:operation>
             <wsdl:input>
-                <soap12:body use="literal"/>
+                <soap12:body use="literal"></soap12:body>
             </wsdl:input>
             <wsdl:output>
-                <soap12:body use="literal"/>
+                <soap12:body use="literal"></soap12:body>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="WebappStatPublisherAdminHttpBinding" type="tns:WebappStatPublisherAdminPortType">
-        <http:binding verb="POST"/>
+        <http:binding verb="POST"></http:binding>
         <wsdl:operation name="configureEventing">
-            <http:operation location="configureEventing"/>
+            <http:operation location="configureEventing"></http:operation>
             <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
+                <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
         </wsdl:operation>
         <wsdl:operation name="getServerConfigBAMServerURL">
-            <http:operation location="getServerConfigBAMServerURL"/>
+            <http:operation location="getServerConfigBAMServerURL"></http:operation>
             <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
+                <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="setWebappConfiguration">
-            <http:operation location="setWebappConfiguration"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappRelatedData">
-            <http:operation location="getWebappRelatedData"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getWebappConfiguration">
-            <http:operation location="getWebappConfiguration"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
+                <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="isCloudDeployment">
-            <http:operation location="isCloudDeployment"/>
+            <http:operation location="isCloudDeployment"></http:operation>
             <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
+                <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
+                <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getEventingConfigData">
-            <http:operation location="getEventingConfigData"/>
+            <http:operation location="getEventingConfigData"></http:operation>
             <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
+                <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
+                <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="WebappStatPublisherAdmin">
         <wsdl:port name="WebappStatPublisherAdminHttpsSoap11Endpoint" binding="tns:WebappStatPublisherAdminSoap11Binding">
-            <soap:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap11Endpoint/"/>
+            <soap:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap11Endpoint/"></soap:address>
         </wsdl:port>
         <wsdl:port name="WebappStatPublisherAdminHttpsSoap12Endpoint" binding="tns:WebappStatPublisherAdminSoap12Binding">
-            <soap12:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap12Endpoint/"/>
+            <soap12:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsSoap12Endpoint/"></soap12:address>
         </wsdl:port>
         <wsdl:port name="WebappStatPublisherAdminHttpsEndpoint" binding="tns:WebappStatPublisherAdminHttpBinding">
-            <http:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsEndpoint/"/>
+            <http:address location="https://10.100.0.134:9443/services/WebappStatPublisherAdmin.WebappStatPublisherAdminHttpsEndpoint/"></http:address>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
