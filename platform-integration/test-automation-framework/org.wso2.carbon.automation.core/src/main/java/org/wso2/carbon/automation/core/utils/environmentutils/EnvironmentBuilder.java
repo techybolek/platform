@@ -29,6 +29,7 @@ public class EnvironmentBuilder {
     protected EnvironmentVariables bam;
     protected EnvironmentVariables brs;
     protected EnvironmentVariables cep;
+    protected EnvironmentVariables store;
     protected EnvironmentVariables gs;
     protected EnvironmentVariables mb;
     protected EnvironmentVariables ms;
@@ -123,6 +124,30 @@ public class EnvironmentBuilder {
         envVariables = loginSetup(userId, managerServiceAuthentication, workerServiceAuthentication
                 , frameworkProperties, ssSetter, ssWorker);
         this.ss = envVariables;
+        return this;
+    }
+
+    public EnvironmentBuilder store(int userId)
+            throws LoginAuthenticationExceptionException, RemoteException {
+        envVariables = new EnvironmentVariables();
+        FrameworkProperties frameworkProperties =
+                FrameworkFactory.getFrameworkProperties(ProductConstant.STORE_SERVER_NAME);
+        ProductVariables storeSetter = frameworkProperties.getProductVariables();
+        WorkerVariables storeWorker = frameworkProperties.getWorkerVariables();
+        AuthenticatorClient managerServiceAuthentication;
+        AuthenticatorClient workerServiceAuthentication = null;
+        managerBackEndUrl = storeSetter.getBackendUrl();
+        workerBackEndUrl = storeWorker.getBackendUrl();
+        managerHostName = storeSetter.getHostName();
+        workerHostName = storeWorker.getHostName();
+        httpPort = storeSetter.getHttpPort();
+        managerServiceAuthentication = new AuthenticatorClient(managerBackEndUrl);
+        if (frameworkProperties.getEnvironmentSettings().isClusterEnable()) {
+            workerServiceAuthentication = new AuthenticatorClient(workerBackEndUrl);
+        }
+        envVariables = loginSetup(userId, managerServiceAuthentication, workerServiceAuthentication
+                , frameworkProperties, storeSetter, storeWorker);
+        this.store = envVariables;
         return this;
     }
 

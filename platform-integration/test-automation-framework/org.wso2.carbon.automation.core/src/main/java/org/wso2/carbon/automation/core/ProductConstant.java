@@ -47,6 +47,7 @@ public class ProductConstant {
     public static final String IS_SERVER_NAME = "IS";
     public static final String AM_SERVER_NAME = "AM";
     public static final String AXIS2_SERVER_NAME = "AXIS2";
+    public static final String STORE_SERVER_NAME = "STORE";
     public static final String LB_SERVER_NAME = "LB";
     public static final String CLUSTER = "CLUSTER";
     public static final String MANAGER_SERVER_NAME = "MANAGER";

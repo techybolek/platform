@@ -19,6 +19,7 @@ import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.Manag
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.MbSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.MsSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.SsSetter;
+import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.StoreSetter;
 
 public class FrameworkFactory {
     static FrameworkProperties properties = new FrameworkProperties();
@@ -69,7 +70,6 @@ public class FrameworkFactory {
             properties.setWorkerVariables(amSetter.getWorkerVariables());
         }
 
-
         if (product.equals(ProductConstant.ESB_SERVER_NAME)) {
             EsbSetter esbSetter = new EsbSetter();
             properties.setDataSource(esbSetter.getDataSource());
@@ -80,7 +80,6 @@ public class FrameworkFactory {
             properties.setProductVariables(esbSetter.getProductVariables());
             properties.setWorkerVariables(esbSetter.getWorkerVariables());
         }
-
 
         if (product.equals(ProductConstant.DSS_SERVER_NAME)) {
             DssSetter dssSetter = new DssSetter();
@@ -102,6 +101,17 @@ public class FrameworkFactory {
             properties.setSelenium(ssSetter.getSelenium());
             properties.setProductVariables(ssSetter.getProductVariables());
             properties.setWorkerVariables(ssSetter.getWorkerVariables());
+        }
+
+        if (product.equals(ProductConstant.STORE_SERVER_NAME)) {
+            StoreSetter storeSetter = new StoreSetter();
+            properties.setDataSource(storeSetter.getDataSource());
+            properties.setEnvironmentSettings(storeSetter.getEnvironmentSettings());
+            properties.setEnvironmentVariables(storeSetter.getEnvironmentVariables());
+            properties.setRavana(storeSetter.getRavana());
+            properties.setSelenium(storeSetter.getSelenium());
+            properties.setProductVariables(storeSetter.getProductVariables());
+            properties.setWorkerVariables(storeSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.IS_SERVER_NAME)) {
@@ -238,5 +248,4 @@ public class FrameworkFactory {
         properties.setProductVariables(clusterSetter.getProductVariables(cluster));
         return properties;
     }
-
 }

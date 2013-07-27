@@ -290,7 +290,7 @@ public class PlatformExecutionManager implements IExecutionListener {
             }
             try {
                 Thread.sleep(500);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
 
             }
         }
