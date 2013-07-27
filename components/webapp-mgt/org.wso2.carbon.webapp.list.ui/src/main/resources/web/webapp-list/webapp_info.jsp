@@ -30,7 +30,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="org.wso2.carbon.webapp.list.ui.WebAppDataExtractor" %>
-<%@ page import="org.wso2.carbon.webapp.list.ui.WebappStatPublisherAdminClient" %>
 
 <fmt:bundle basename="org.wso2.carbon.webapp.list.ui.i18n.Resources">
 <carbon:breadcrumb
@@ -611,7 +610,7 @@
                         <tr>
                     </table>
                     <br>
-
+                    <%   if(CarbonUIUtil.isContextRegistered(config, "/bampubsvcstat/")) { %>
                     <table class="styledLeft" id="serviceTable"
                            style="margin-left: 0px;" width="100%">
                         <thead>
@@ -624,19 +623,17 @@
 
                             </script>
                             <td>
+
                                 <%  String cek = "";
                                     boolean checked = false;
                                     String webAppName = webappFileName;
-                                    if(webappFileName.contains(".war")){
-                                        webAppName = webappFileName.trim().substring(0, webappFileName.length()-4);
-                                    }
-                                    WebappStatPublisherAdminClient adminClient = new WebappStatPublisherAdminClient(
+                                    WebappAdminClient adminClient = new WebappAdminClient(
                                             cookie, backendServerURL, configContext, request.getLocale());
 
 
                                     try{
 
-                                        checked = adminClient.getWebappConfigData(webAppName);
+                                        checked = adminClient.getBamConfig(webAppName);
 
                                     }catch (Exception e) {
                                         CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
@@ -651,24 +648,14 @@
 
                                 %>
                                 <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" <%= cek %>>  Enable BAM Statistics
-                            </td>
-                        </tr>
-                        <%
-                            if(CarbonUIUtil.isContextRegistered(config, "/urlmapper/")){ %>
-                        <tr>
-                            <td width="50%"><nobr>
-                                <a class="icon-link" style="background-image: url(images/url-rewrite.png);"
-                                   href="../urlmapper/index.jsp?carbonEndpoint=<%=webapp.getContext()%>&apptype=<%=webappType%>&servletContext=<%=servletContext%>">
-                                    URL Mappings
-                                </a></nobr>
-                            </td>
-                        </tr>
-                        <%
 
-                            }
-                        %>
-                        <tr>
+
+                            </td>
+                        </tr>
                     </table>
+                    <% } else { %>
+                    &nbsp;
+                    <% } %>
 
                 </td>
                 <td width="10px">&nbsp;</td>
@@ -750,9 +737,6 @@
         jQuery(".bam_statistics").click(function(){
             <%
          String webAppName = webappFileName;
-         if(webappFileName.contains(".war")){
-            webAppName = webappFileName.trim().substring(0, webappFileName.length()-4);
-         }
 
          %>
             //var webappFileName=

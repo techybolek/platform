@@ -341,4 +341,32 @@ public class WebappAdminClient {
         }
         return inputStream;
     }
+
+
+    public void setBamConfig(String fileName, String value){
+        if(value.contains("1")){
+            value = "true";
+        }  else {
+            value = "false";
+        }
+
+        try {
+            stub.setBamConfiguration(fileName,value);
+        } catch (Exception e) {
+            if(log.isDebugEnabled()){
+                log.debug("Cannot set bam configuration to the back end.");
+            }
+        }
+    }
+
+    public Boolean getBamConfig(String fileName){
+        try {
+            return Boolean.parseBoolean(stub.getBamConfiguration(fileName));
+        } catch (Exception e) {
+            if(log.isDebugEnabled()){
+                log.debug("Cannot recieve bam configuration from the back end.");
+            }
+            return null;
+        }
+    }
 }

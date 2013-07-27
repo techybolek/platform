@@ -22,8 +22,6 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-
-<%@ page import="org.wso2.carbon.webapp.list.ui.WebappStatPublisherAdminClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 
 <%
@@ -35,11 +33,11 @@
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
-    WebappStatPublisherAdminClient client = new WebappStatPublisherAdminClient(
+    WebappAdminClient client = new WebappAdminClient(
             cookie, backendServerURL, configContext, request.getLocale());
 
     try{
-        client.setWebappConfigdata(webappFileName, value);
+        client.setBamConfig(webappFileName, value);
     } catch (Exception e) {
         CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
         session.setAttribute(CarbonUIMessage.ID, uiMsg);
