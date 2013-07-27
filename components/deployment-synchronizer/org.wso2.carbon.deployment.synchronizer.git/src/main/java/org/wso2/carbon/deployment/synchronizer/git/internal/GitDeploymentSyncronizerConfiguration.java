@@ -9,7 +9,9 @@ public class GitDeploymentSyncronizerConfiguration {
     private String gitServer;
 
     public GitDeploymentSyncronizerConfiguration() {
+        //defaults
         isStandardDeployment = true;
+        gitServer = GitDeploymentSynchronizerConstants.GITBLIT;
     }
 
     public boolean isStandardDeployment() {
