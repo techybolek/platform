@@ -43,9 +43,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 /**
- * This class is used to generate two key stores for a tenant at tenant creation and store it in the governance registry.
- * One would be act as the tenant keystore which would hold the tenant's public-private key pair.
- * The other is used as the tenant's trust store for holding certificats of trusted IdPs
+ * This class is used to generate a key store for a tenant and store it in the governance registry.
+ * This class also provides APIs for idp-mgt component to generate a trust store with a given name.
  */
 public class KeyStoreGenerator {
 
@@ -53,8 +52,7 @@ public class KeyStoreGenerator {
     private UserRegistry govRegistry;
     private int tenantId;
     private String tenantDomain;
-    private String keyStorePassword;
-    private String trustStorePassword;
+    private String password;
 
 
     public KeyStoreGenerator(int  tenantId) throws KeyStoreMgtException {
@@ -83,15 +81,29 @@ public class KeyStoreGenerator {
      */
     public void generateKeyStore() throws KeyStoreMgtException {
         try {
-            keyStorePassword = generatePassword();
-            trustStorePassword = generatePassword();
+            password = generatePassword();
             KeyStore keyStore = KeyStore.getInstance("JKS");
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            keyStore.load(null, keyStorePassword.toCharArray());
-            trustStore.load(null, trustStorePassword.toCharArray());
+            keyStore.load(null, password.toCharArray());
             X509Certificate pubCert = generateKeyPair(keyStore);
             persistKeyStore(keyStore, pubCert);
-            persistTrustStore(trustStore);
+        } catch (Exception e) {
+            String msg = "Error while instantiating a keystore";
+            log.error(msg, e);
+            throw new KeyStoreMgtException(msg, e);
+        }
+    }
+
+    /**
+     * This method first generates the keystore, then persist it in the gov.registry of that tenant
+     *
+     * @throws KeyStoreMgtException Error when generating or storing the keystore
+     */
+    public void generateTrustStore(String trustStoreName) throws KeyStoreMgtException {
+        try {
+            password = generatePassword();
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(null, password.toCharArray());
+            persistTrustStore(keyStore, trustStoreName);
         } catch (Exception e) {
             String msg = "Error while instantiating a keystore";
             log.error(msg, e);
@@ -130,7 +142,7 @@ public class KeyStoreGenerator {
             X509Certificate PKCertificate = v3CertGen.generateX509Certificate(keyPair.getPrivate());
 
             //add private key to KS
-            keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), keyStorePassword.toCharArray(),
+            keyStore.setKeyEntry(tenantDomain, keyPair.getPrivate(), password.toCharArray(),
                                  new java.security.cert.Certificate[]{PKCertificate});
             return PKCertificate;
         } catch (Exception ex) {
@@ -153,7 +165,7 @@ public class KeyStoreGenerator {
             throws KeyStoreMgtException {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            keyStore.store(outputStream, keyStorePassword.toCharArray());
+            keyStore.store(outputStream, password.toCharArray());
             outputStream.flush();
             outputStream.close();
 
@@ -161,7 +173,7 @@ public class KeyStoreGenerator {
             // Use the keystore using the keystore admin
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
             keystoreAdmin.addKeyStore(outputStream.toByteArray(), keyStoreName,
-                                      keyStorePassword, " ", "JKS", keyStorePassword);
+                                      password, " ", "JKS", password);
             
             //Create the pub. key resource
             Resource pubKeyResource = govRegistry.newResource();
@@ -194,17 +206,15 @@ public class KeyStoreGenerator {
      * @param trustStore created trust store of the tenant
      * @throws KeyStoreMgtException Exception when storing the trust store in the registry
      */
-    private void persistTrustStore(KeyStore trustStore)
-            throws KeyStoreMgtException {
+    private void persistTrustStore(KeyStore trustStore, String trustStoreName) throws KeyStoreMgtException {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            trustStore.store(outputStream, trustStorePassword.toCharArray());
+            trustStore.store(outputStream, password.toCharArray());
             outputStream.flush();
             outputStream.close();
 
-            String keyStoreName = generateTSNameFromDomainName();
             KeyStoreAdmin keystoreAdmin = new KeyStoreAdmin(tenantId, govRegistry);
-            keystoreAdmin.addTrustStore(outputStream.toByteArray(), keyStoreName, trustStorePassword, " ", "JKS");
+            keystoreAdmin.addTrustStore(outputStream.toByteArray(), trustStoreName, password, " ", "JKS");
         } catch (Exception e) {
             String msg = "Error when processing keystore/pub. cert to be stored in registry";
             log.error(msg, e);
@@ -240,15 +250,6 @@ public class KeyStoreGenerator {
     private String generateKSNameFromDomainName(){
         String ksName = tenantDomain.trim().replace(".", "-");
         return (ksName + ".jks" );
-    }
-
-    /**
-     * This method generates the trust store file name from the Domain Name
-     * @return
-     */
-    private String generateTSNameFromDomainName(){
-        String ksName = tenantDomain.trim().replace(".", "-");
-        return (ksName + "-truststore.jks" );
     }
 
     private String getTenantDomainName() throws KeyStoreMgtException {
