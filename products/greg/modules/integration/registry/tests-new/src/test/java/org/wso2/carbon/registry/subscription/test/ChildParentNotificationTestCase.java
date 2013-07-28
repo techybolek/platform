@@ -179,7 +179,7 @@ public class ChildParentNotificationTestCase {
     @AfterClass
     public void clean() throws Exception {
         resourceAdminServiceClient.deleteResource(ROOT + RESOURCE_NAME);
-        userManagementClient.deleteRole(ROLE_NAME);
+//        userManagementClient.deleteRole(ROLE_NAME);
         infoServiceAdminClient.removeTag(TAG, ROOT, sessionID);
 
         resourceAdminServiceClient = null;

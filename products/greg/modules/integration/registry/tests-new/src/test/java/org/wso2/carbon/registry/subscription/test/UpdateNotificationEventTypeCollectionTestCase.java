@@ -181,6 +181,9 @@ public class UpdateNotificationEventTypeCollectionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Add role", dependsOnMethods = "testAddLeafCollection")
     public void testAddRole() throws Exception {
+        if(userManagementClient.roleNameExists("RoleSubscriptionTest")){
+            return;
+        }
         userManagementClient.addRole("RoleSubscriptionTest",
                                      new String[]{userInfo.getUserNameWithoutDomain()}, new String[]{""});
         assertTrue(userManagementClient.roleNameExists("RoleSubscriptionTest"));
@@ -398,7 +401,7 @@ public class UpdateNotificationEventTypeCollectionTestCase {
         infoServiceAdminClient.rateResource("0", ROOT, sessionID);
         infoServiceAdminClient.removeComment("/;comments:1", sessionID);
         infoServiceAdminClient.removeTag(TAG, ROOT, sessionID);
-        userManagementClient.deleteRole("RoleSubscriptionTest");
+//        userManagementClient.deleteRole("RoleSubscriptionTest");
         resourceAdminServiceClient = null;
         userManagementClient = null;
         infoServiceAdminClient = null;

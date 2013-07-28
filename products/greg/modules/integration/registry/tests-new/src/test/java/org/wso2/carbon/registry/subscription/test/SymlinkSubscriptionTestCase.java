@@ -116,6 +116,9 @@ public class SymlinkSubscriptionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Add role", dependsOnMethods = "testAddSymlink")
     public void testAddRole() throws Exception {
+        if(userManagementClient.roleNameExists("RoleSymlinkSubscriptionTest")){
+            return;
+        }
         userManagementClient.addRole("RoleSymlinkSubscriptionTest",
                                      new String[]{userInfo.getUserNameWithoutDomain()}, new String[]{""});
         assertTrue(userManagementClient.roleNameExists("RoleSymlinkSubscriptionTest"));
@@ -203,7 +206,7 @@ public class SymlinkSubscriptionTestCase {
     public void clean() throws Exception {
         resourceAdminServiceClient.deleteResource(ROOT + SYMLINK_NAME);
         resourceAdminServiceClient.deleteResource(ROOT + COLLECTION_NAME);
-        userManagementClient.deleteRole("RoleSymlinkSubscriptionTest");
+//        userManagementClient.deleteRole("RoleSymlinkSubscriptionTest");
         resourceAdminServiceClient = null;
         userManagementClient = null;
         infoServiceAdminClient = null;

@@ -71,7 +71,7 @@ public class ManagementConsoleSubscription {
                                          userInfo.getUserName(), userInfo.getPassword());
 
         if (userManagementClient.roleNameExists("RoleSubscriptionTest")) {
-            userManagementClient.deleteRole("RoleSubscriptionTest");
+            return true;
         }
 
         userManagementClient.addRole("RoleSubscriptionTest",
@@ -169,7 +169,7 @@ public class ManagementConsoleSubscription {
                                          userInfo.getUserName(), userInfo.getPassword());
 
         if (userManagementClient.roleNameExists("RoleSubscriptionTest")) {
-            userManagementClient.deleteRole("RoleSubscriptionTest");
+//            userManagementClient.deleteRole("RoleSubscriptionTest");
         }
 
         PropertiesAdminServiceClient propertiesAdminServiceClient =

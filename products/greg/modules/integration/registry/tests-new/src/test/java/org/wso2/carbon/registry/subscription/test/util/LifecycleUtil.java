@@ -431,7 +431,7 @@ public class LifecycleUtil {
      */
     private void clean() throws Exception {
         if (userManagementClient.roleNameExists("RoleSubscriptionTest")) {
-            userManagementClient.deleteRole("RoleSubscriptionTest");
+//            userManagementClient.deleteRole("RoleSubscriptionTest");
         }
 
         wsRegistryServiceClient = null;

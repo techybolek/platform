@@ -155,6 +155,9 @@ public class UpdateNotificationEventTypeResourceTestCase {
      */
     @Test(groups = "wso2.greg", description = "Add role", dependsOnMethods = "testAddResourceForAssociation")
     public void testAddRole() throws Exception {
+        if(userManagementClient.roleNameExists("RoleSubscriptionTest")){
+            return;
+        }
         userManagementClient.addRole("RoleSubscriptionTest",
                                      new String[]{userInfo.getUserNameWithoutDomain()}, new String[]{""});
         assertTrue(userManagementClient.roleNameExists("RoleSubscriptionTest"));
@@ -377,7 +380,7 @@ public class UpdateNotificationEventTypeResourceTestCase {
         resourceAdminServiceClient.deleteResource(ROOT + RESOURCE_NAME);
         resourceAdminServiceClient.deleteResource(LEAF_RESOURCE_PAH + RESOURCE_NAME);
         resourceAdminServiceClient.deleteResource(ROOT + ASSOCIATION_RESOURCE_NAME);
-        userManagementClient.deleteRole("RoleSubscriptionTest");
+//        userManagementClient.deleteRole("RoleSubscriptionTest");
         resourceAdminServiceClient = null;
         userManagementClient = null;
         infoServiceAdminClient = null;
