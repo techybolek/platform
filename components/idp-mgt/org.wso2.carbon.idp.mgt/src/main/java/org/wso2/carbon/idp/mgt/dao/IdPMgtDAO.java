@@ -404,7 +404,7 @@ public class IdPMgtDAO {
             if(roleIdMap.containsKey(entry.getKey())){
                 int idpRoleId = roleIdMap.get(entry.getKey());
                 String localRole = entry.getValue();
-                sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLES_MAPPING_SQL;
+                sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLE_MAPPINGS_SQL;
                 prepStmt = conn.prepareStatement(sqlStmt);
                 prepStmt.setInt(1, idpRoleId);
                 prepStmt.setInt(2, tenantId);
@@ -504,7 +504,7 @@ public class IdPMgtDAO {
                 if(roleIdMap.containsKey(entry.getKey())){
                     int idpRoleId = roleIdMap.get(entry.getKey());
                     String localRole = entry.getValue();
-                    sqlStmt = IdentityProviderMgtConstants.SQLQueries.DELETE_TENANT_IDP_ROLES_MAPPING_SQL;
+                    sqlStmt = IdentityProviderMgtConstants.SQLQueries.DELETE_TENANT_IDP_ROLE_MAPPINGS_SQL;
                     prepStmt = conn.prepareStatement(sqlStmt);
                     prepStmt.setInt(1, idpRoleId);
                     prepStmt.setInt(2, tenantId);
@@ -522,7 +522,7 @@ public class IdPMgtDAO {
                 if(roleIdMap.containsKey(entry.getKey())){
                     int idpRoleId = roleIdMap.get(entry.getKey());
                     String localRole = entry.getValue();
-                    sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLES_MAPPING_SQL;
+                    sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_ROLE_MAPPINGS_SQL;
                     prepStmt = conn.prepareStatement(sqlStmt);
                     prepStmt.setInt(1, idpRoleId);
                     prepStmt.setInt(2, tenantId);
