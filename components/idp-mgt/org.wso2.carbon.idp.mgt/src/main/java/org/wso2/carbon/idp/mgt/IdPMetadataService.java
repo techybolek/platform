@@ -40,6 +40,7 @@ public class IdPMetadataService {
     /**
      * Retrieves registered IdPs for a given tenant
      *
+     * @param tenantDomain Tenant domain whole IdP names are requested
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
     public String[] getTenantIdPs(String tenantDomain) {
@@ -59,21 +60,23 @@ public class IdPMetadataService {
     /**
      * Retrieves trusted IdP information about a given tenant
      *
+     * @param idPName Unique name of the IdP of whose metadata is requested
      * @param tenantDomain Tenant domain whose information is requested
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public TrustedIdPDTO getTenantIdPMetaData(String issuer, String tenantDomain) {
+    public TrustedIdPDTO getTenantIdPMetaData(String idPName, String tenantDomain) {
         try {
             int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(idPName, tenantId, tenantDomain);
             TrustedIdPDTO trustedIdPDTO = null;
             if(trustedIdPDO != null){
                 trustedIdPDTO = new TrustedIdPDTO();
+                trustedIdPDTO.setIdPName(idPName);
                 trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
                 trustedIdPDO.setPrimary(trustedIdPDO.isPrimary());
                 trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
                 if(trustedIdPDO.getPublicCertThumbPrint() != null){
-                    trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(issuer, tenantId, tenantDomain));
+                    trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(idPName, tenantId, tenantDomain));
                 }
                 trustedIdPDTO.setRoles(trustedIdPDO.getRoles().toArray(new String[trustedIdPDO.getRoles().size()]));
                 List<String> appendedRoleMappings = new ArrayList<String>();
@@ -89,7 +92,7 @@ public class IdPMetadataService {
             return trustedIdPDTO;
         } catch (IdentityProviderMgtException e) {
             if(log.isDebugEnabled()){
-                log.debug("Error occurred while retrieving metadata for IdP " + issuer + " for tenant " + tenantDomain);
+                log.debug("Error occurred while retrieving metadata for IdP " + idPName + " for tenant " + tenantDomain);
             }
         }
         return null;
@@ -98,16 +101,16 @@ public class IdPMetadataService {
     /**
      * Retrieves trusted IdP information about a given tenant
      *
-     * @param issuer Issuer Id of the IdP whose roles need to be mapped
+     * @param idPName Unique Name of the IdP to which the given IdP roles need to be mapped
      * @param tenantDomain The tenant domain of of roles to be mapped
      * @param idPRoles IdP Roles which need to be mapped to tenant's roles
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public String[] getMappedTenantRoles(String issuer, String tenantDomain, String[] idPRoles) {
+    public String[] getMappedTenantRoles(String idPName, String tenantDomain, String[] idPRoles) {
         List<String> mappedRoles = new ArrayList<String>();
         try {
             int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(idPName, tenantId, tenantDomain);
             Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
             if(roleMappings != null && !roleMappings.isEmpty()){
                 if(idPRoles == null){
@@ -127,7 +130,7 @@ public class IdPMetadataService {
             return mappedRoles.toArray(new String[mappedRoles.size()]);
         } catch (IdentityProviderMgtException e) {
             if(log.isDebugEnabled()){
-                log.debug("Error occurred while retrieving Tenant Role mappings for IdP " + issuer + " for tenant " + tenantDomain);
+                log.debug("Error occurred while retrieving Tenant Role mappings for IdP " + idPName + " for tenant " + tenantDomain);
             }
         }
         return new String[0];
@@ -136,17 +139,17 @@ public class IdPMetadataService {
     /**
      * Retrieves trusted IdP information about a given tenant
      *
-     * @param issuer Issuer Id of the IdP to which the given tenant roles need to be mapped
+     * @param idPName Unique Name of the IdP to which the given tenant roles need to be mapped
      * @param tenantDomain The tenant domain of of roles to be mapped
      * @param tenantRoles Tenant Roles which need to be mapped to trusted IdP's roles
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public String[] getMappedIdPRoles(String issuer, String tenantDomain, String[] tenantRoles) {
+    public String[] getMappedIdPRoles(String idPName, String tenantDomain, String[] tenantRoles) {
 
         List<String> mappedRoles = new ArrayList<String>();
         try {
             int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(idPName, tenantId, tenantDomain);
             Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
             Map<String,String> mirrorMap = new HashMap<String,String>();
             if(roleMappings != null && !roleMappings.isEmpty()){
@@ -177,7 +180,7 @@ public class IdPMetadataService {
             return mappedRoles.toArray(new String[mappedRoles.size()]);
         } catch (IdentityProviderMgtException e){
             if(log.isDebugEnabled()){
-                log.debug("Error occurred while retrieving IdP Role mappings for IdP " + issuer + " for tenant " + tenantDomain);
+                log.debug("Error occurred while retrieving IdP Role mappings for IdP " + idPName + " for tenant " + tenantDomain);
             }
         }
         return new String[0];
@@ -198,10 +201,10 @@ public class IdPMetadataService {
         return null;
     }
 
-    public boolean validateSAMLResponse(String tenantDomain, String issuer, String samlResponseString, String[] audiences) {
+    public boolean validateSAMLResponse(String tenantDomain, String idPName, String samlResponseString, String[] audiences) {
 
         try {
-            return SAMLResponseValidator.validateSAMLResponse(getTenantIdPMetaData(issuer, tenantDomain),  samlResponseString, audiences);
+            return SAMLResponseValidator.validateSAMLResponse(getTenantIdPMetaData(idPName, tenantDomain),  samlResponseString, audiences);
         } catch (IdentityProviderMgtException e){
             if(log.isDebugEnabled()){
                 log.debug("Error occurred while validating SAML2 Response message");

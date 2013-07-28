@@ -23,27 +23,32 @@ import org.wso2.carbon.idp.mgt.util.IdentityProviderMgtUtil;
 public class TrustedIdPDTO {
 
     /**
-     * The trusted IDP's Issuer ID for this tenant.
+     * The trusted IdP's unique name for this tenant.
+     */
+    private String idPName;
+
+    /**
+     * The trusted IdP's Issuer ID for this tenant.
      */
     private String idPIssuerId;
 
     /**
-     * The trusted IDP's URL for this tenant.
+     * The trusted IdP's URL for this tenant.
      */
     private String idPUrl;
 
     /**
-     * The trusted IDP's Certificate for this tenant.
+     * The trusted IdP's Certificate for this tenant.
      */
     private String publicCert;
 
     /**
-     * The trusted IDP's roles for this tenant.
+     * The trusted IdP's roles for this tenant.
      */
     private String[] roles;
 
     /**
-     * The trusted IDP's role mapping for this tenant.
+     * The trusted IdP's role mapping for this tenant.
      */
     private String[] roleMappings;
 
@@ -59,6 +64,13 @@ public class TrustedIdPDTO {
 
     //////////////////// Getters and Setters //////////////////////////
 
+    public String getIdPName() {
+        return idPName;
+    }
+
+    public void setIdPName(String idPName) {
+        this.idPName = idPName;
+    }
 
     public String getIdPIssuerId() {
         return idPIssuerId;

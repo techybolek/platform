@@ -66,7 +66,7 @@ public class IdPMgtDAO {
         }
     }
 
-    public TrustedIdPDO getTenantIdP(String issuer, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
+    public TrustedIdPDO getTenantIdP(String idPName, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
         Connection dbConnection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -76,20 +76,21 @@ public class IdPMgtDAO {
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.GET_TENANT_IDP_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, issuer);
+            prepStmt.setString(2, idPName);
             rs = prepStmt.executeQuery();
             if(rs.next()){
                 trustedIdPDO = new TrustedIdPDO();
                 int idPId = rs.getInt(1);
-                trustedIdPDO.setIdPIssuerId(issuer);
-                trustedIdPDO.setIdPUrl(rs.getString(2));
-                trustedIdPDO.setPublicCertThumbPrint(rs.getString(3));
-                if(rs.getString(4).equals("1")){
+                trustedIdPDO.setIdPName(idPName);
+                trustedIdPDO.setIdPIssuerId(rs.getString(2));
+                trustedIdPDO.setIdPUrl(rs.getString(3));
+                trustedIdPDO.setPublicCertThumbPrint(rs.getString(4));
+                if(rs.getString(5).equals("1")){
                     trustedIdPDO.setPrimary(true);
                 } else {
                     trustedIdPDO.setPrimary(false);
                 }
-                String audience = rs.getString(5);
+                String audience = rs.getString(6);
                 if(audience != null){
                     trustedIdPDO.setAudience(new ArrayList<String>(Arrays.asList(rs.getString(5).split("\\s"))));
                 } else {
@@ -142,6 +143,7 @@ public class IdPMgtDAO {
         Connection dbConnection = null;
         try {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            String idPName = trustedIdP.getIdPName();
             String issuerId = trustedIdP.getIdPIssuerId();
             boolean isPrimary = trustedIdP.isPrimary();
             String trustedIdPUrl = trustedIdP.getIdPUrl();
@@ -153,7 +155,7 @@ public class IdPMgtDAO {
             }
             String audience = IdentityProviderMgtUtil.convertListToString(trustedIdP.getAudience());
 
-            doAddIdP(dbConnection, tenantId, issuerId, trustedIdPUrl, thumbPrint, isPrimary, audience);
+            doAddIdP(dbConnection, tenantId, idPName, issuerId, trustedIdPUrl, thumbPrint, isPrimary, audience);
             int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(idPId <= 0){
                 String msg = "Error adding trusted IdP for tenant " + tenantDomain;
@@ -181,6 +183,7 @@ public class IdPMgtDAO {
 
         Connection dbConnection = null;
 
+        String idPName1 = trustedIdPDO1.getIdPName();
         String issuerId1 = trustedIdPDO1.getIdPIssuerId();
         boolean isPrimary1 = false;
         if(trustedIdPDO1.isPrimary()){
@@ -193,6 +196,7 @@ public class IdPMgtDAO {
         String audience1 = IdentityProviderMgtUtil.convertListToString(trustedIdPDO1.getAudience());
 
         String issuerId2 = trustedIdPDO2.getIdPIssuerId();
+        String idPName2 = trustedIdPDO2.getIdPName();
         boolean isPrimary2 = false;
         if(trustedIdPDO2.isPrimary()){
             isPrimary2 =true;
@@ -247,8 +251,11 @@ public class IdPMgtDAO {
                 log.error(msg);
                 throw new IdentityProviderMgtException(msg);
             }
-            if(!issuerId1.equals(issuerId2) ||
-                    (trustedIdPUrl1 != null && trustedIdPUrl2 != null && !trustedIdPUrl1.equals(trustedIdPUrl2) ||
+            if(idPName1 != idPName2 ||
+                    (issuerId1 != null && issuerId2 != null && !issuerId1.equals(issuerId2) ||
+                            issuerId1!= null && issuerId2 == null ||
+                            issuerId1 == null && trustedIdPUrl2 != null) ||
+                    (trustedIdPUrl1 != null && issuerId2 != null && !issuerId1.equals(issuerId2) ||
                             trustedIdPUrl1!= null && trustedIdPUrl2 == null ||
                             trustedIdPUrl1 == null && trustedIdPUrl2 != null) ||
                     (thumbPrint1 != null && thumbPrint2 != null && !thumbPrint1.equals(thumbPrint2) ||
@@ -261,7 +268,7 @@ public class IdPMgtDAO {
                 if(isPrimary1 != isPrimary2){
                     doSwitchPrimary(dbConnection, tenantId);
                 }
-                doUpdateIdP(dbConnection, tenantId, issuerId1, issuerId2, trustedIdPUrl2, thumbPrint2, isPrimary2, audience2);
+                doUpdateIdP(dbConnection, tenantId, idPName1, idPName2, issuerId2, trustedIdPUrl2, thumbPrint2, isPrimary2, audience2);
             }
             if(!addedRoles.isEmpty() || !deletedRoles.isEmpty() || !renamedOldRoles.isEmpty()){
                 doUpdateIdPRoles(dbConnection, idPId, addedRoles, deletedRoles, renamedOldRoles, renamedNewRoles);
@@ -285,7 +292,7 @@ public class IdPMgtDAO {
         Connection dbConnection = null;
         try {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
-            String issuerId = trustedIdP.getIdPIssuerId();
+            String idPName = trustedIdP.getIdPName();
             int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(idPId <= 0){
                 String msg = "Trying to delete non-existent IdP for tenant " + tenantDomain;
@@ -300,7 +307,7 @@ public class IdPMgtDAO {
                 log.warn(msg);
             }
 
-            doDeleteIdP(dbConnection, tenantId, issuerId);
+            doDeleteIdP(dbConnection, tenantId, idPName);
 
             if(idPId == primaryIdPId){
                 doAppointPrimary(dbConnection, tenantId, tenantDomain);
@@ -344,20 +351,21 @@ public class IdPMgtDAO {
         }
     }
 
-    private void doAddIdP(Connection conn, int tenantId, String issuer, String idpUrl, String thumbPrint, boolean isPrimary, String audience) throws SQLException {
+    private void doAddIdP(Connection conn, int tenantId, String idPName, String issuer, String idpUrl, String thumbPrint, boolean isPrimary, String audience) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.ADD_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
         prepStmt.setInt(1, tenantId);
-        prepStmt.setString(2, issuer);
-        prepStmt.setString(3, idpUrl);
-        prepStmt.setString(4, thumbPrint);
+        prepStmt.setString(2, idPName);
+        prepStmt.setString(3, issuer);
+        prepStmt.setString(4, idpUrl);
+        prepStmt.setString(5, thumbPrint);
         if(isPrimary){
-            prepStmt.setString(5, "1");
+            prepStmt.setString(6, "1");
         } else {
-            prepStmt.setString(5, "0");
+            prepStmt.setString(6, "0");
         }
-        prepStmt.setString(6, audience);
+        prepStmt.setString(7, audience);
 
         prepStmt.executeUpdate();
     }
@@ -410,22 +418,23 @@ public class IdPMgtDAO {
         }
     }
     
-    private void doUpdateIdP(Connection conn, int tenantId, String issuerOld, String issuerNew, String idpUrl,
+    private void doUpdateIdP(Connection conn, int tenantId, String oldIdpName, String newIdPName, String issuer, String idpUrl,
                              String thumbPrint, boolean isPrimary, String audience) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.UPDATE_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
-        prepStmt.setString(1, issuerNew);
-        prepStmt.setString(2, idpUrl);
-        prepStmt.setString(3, thumbPrint);
+        prepStmt.setString(1, newIdPName);
+        prepStmt.setString(2, issuer);
+        prepStmt.setString(3, idpUrl);
+        prepStmt.setString(4, thumbPrint);
         if(isPrimary){
-            prepStmt.setString(4, "1");
+            prepStmt.setString(5, "1");
         } else {
-            prepStmt.setString(4, "0");
+            prepStmt.setString(5, "0");
         }
-        prepStmt.setString(5, audience);
-        prepStmt.setInt(6, tenantId);
-        prepStmt.setString(7, issuerOld);
+        prepStmt.setString(6, audience);
+        prepStmt.setInt(7, tenantId);
+        prepStmt.setString(8, oldIdpName);
         prepStmt.executeUpdate();
     }
 
@@ -528,12 +537,12 @@ public class IdPMgtDAO {
         }
     }
 
-    private void doDeleteIdP(Connection conn, int tenantId, String issuer) throws SQLException {
+    private void doDeleteIdP(Connection conn, int tenantId, String idPName) throws SQLException {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.DELETE_TENANT_IDP_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
         prepStmt.setInt(1, tenantId);
-        prepStmt.setString(2, issuer);
+        prepStmt.setString(2, idPName);
         prepStmt.executeUpdate();
     }
 
@@ -544,7 +553,7 @@ public class IdPMgtDAO {
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.IS_EXISTING_TENANT_IDP_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, trustedIdPDO.getIdPIssuerId());
+            prepStmt.setString(2, trustedIdPDO.getIdPName());
             ResultSet rs = prepStmt.executeQuery();
             if(rs.next()){
                 return rs.getInt(1);

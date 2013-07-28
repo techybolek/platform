@@ -58,18 +58,19 @@ public class IdentityProviderMgtService {
      *
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public TrustedIdPDTO getTenantIdP(String issuer) throws IdentityProviderMgtException {
+    public TrustedIdPDTO getTenantIdP(String idPName) throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(idPName, tenantId, tenantDomain);
         TrustedIdPDTO trustedIdPDTO = null;
         if(trustedIdPDO != null){
             trustedIdPDTO = new TrustedIdPDTO();
+            trustedIdPDTO.setIdPName(trustedIdPDO.getIdPName());
             trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
             trustedIdPDTO.setPrimary(trustedIdPDO.isPrimary());
             trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
             if(trustedIdPDO.getPublicCertThumbPrint() != null){
-                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(trustedIdPDO.getIdPIssuerId(), tenantId, tenantDomain));
+                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(trustedIdPDO.getIdPName(), tenantId, tenantDomain));
             }
             trustedIdPDTO.setRoles(trustedIdPDO.getRoles().toArray(new String[trustedIdPDO.getRoles().size()]));
             List<String> appendedRoleMappings = new ArrayList<String>();
@@ -110,8 +111,8 @@ public class IdentityProviderMgtService {
         TrustedIdPDO newTrustedIdPDO = new TrustedIdPDO();
         TrustedIdPDO oldTrustedIdPDO = new TrustedIdPDO();
 
-        if(oldTrustedIdP.getIdPIssuerId() == null || oldTrustedIdP.getIdPIssuerId().equals("")){
-            String msg = "Invalid arguments: IssuerId value is empty";
+        if(oldTrustedIdP.getIdPName() == null || oldTrustedIdP.getIdPName().equals("")){
+            String msg = "Invalid arguments: IdP Name value is empty";
             log.error(msg);
             throw new IdentityProviderMgtException(msg);
         }
@@ -120,6 +121,7 @@ public class IdentityProviderMgtService {
             log.error(msg);
             throw new IdentityProviderMgtException(msg);
         }
+        oldTrustedIdPDO.setIdPName(oldTrustedIdP.getIdPName());
         oldTrustedIdPDO.setIdPIssuerId(oldTrustedIdP.getIdPIssuerId());
         oldTrustedIdPDO.setPrimary(oldTrustedIdP.isPrimary());
         oldTrustedIdPDO.setIdPUrl(oldTrustedIdP.getIdPUrl());
@@ -157,11 +159,12 @@ public class IdentityProviderMgtService {
         }
 
 
-        if(newTrustedIdP.getIdPIssuerId() == null || newTrustedIdP.getIdPIssuerId().equals("")){
-            String msg = "Invalid arguments: IssuerId value is empty";
+        if(newTrustedIdP.getIdPName() == null || newTrustedIdP.getIdPName().equals("")){
+            String msg = "Invalid arguments: IdP Name value is empty";
             log.error(msg);
             throw new IdentityProviderMgtException(msg);
         }
+        newTrustedIdPDO.setIdPName(newTrustedIdP.getIdPName());
         newTrustedIdPDO.setIdPIssuerId(newTrustedIdP.getIdPIssuerId());
         newTrustedIdPDO.setPrimary(newTrustedIdP.isPrimary());
         newTrustedIdPDO.setIdPUrl(newTrustedIdP.getIdPUrl());
@@ -216,22 +219,23 @@ public class IdentityProviderMgtService {
         if(oldTrustedIdPDO.getPublicCertThumbPrint() != null &&
                 newTrustedIdPDO.getPublicCertThumbPrint() != null &&
                 !oldTrustedIdPDO.getPublicCertThumbPrint().equals(newTrustedIdPDO.getPublicCertThumbPrint())){
-            IdentityProviderMgtUtil.updateCertToStore(oldTrustedIdP.getIdPIssuerId(), newTrustedIdP.getIdPIssuerId(), newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
+            IdentityProviderMgtUtil.updateCertToStore(oldTrustedIdP.getIdPName(), newTrustedIdP.getIdPName(), newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
         } else if(oldTrustedIdPDO.getPublicCertThumbPrint() == null && newTrustedIdPDO.getPublicCertThumbPrint() != null){
-            IdentityProviderMgtUtil.importCertToStore(newTrustedIdP.getIdPIssuerId(), newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
+            IdentityProviderMgtUtil.importCertToStore(newTrustedIdP.getIdPName(), newTrustedIdP.getPublicCert(), tenantId, tenantDomain);
         } else if(oldTrustedIdPDO.getPublicCertThumbPrint() != null && newTrustedIdPDO.getPublicCertThumbPrint() == null){
-            IdentityProviderMgtUtil.deleteCertFromStore(oldTrustedIdP.getIdPIssuerId(), tenantId, tenantDomain);
+            IdentityProviderMgtUtil.deleteCertFromStore(oldTrustedIdP.getIdPName(), tenantId, tenantDomain);
         }
     }
 
     private void doAddIdP(TrustedIdPDTO trustedIdP, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
         TrustedIdPDO trustedIdPDO = new TrustedIdPDO();
-        if(trustedIdP.getIdPIssuerId() == null || trustedIdP.getIdPIssuerId().equals("")){
-            String msg = "Invalid arguments: IssuerId value is empty";
+        if(trustedIdP.getIdPName() == null || trustedIdP.getIdPName().equals("")){
+            String msg = "Invalid arguments: IdP Name value is empty";
             log.error(msg);
             throw new IdentityProviderMgtException(msg);
         }
+        trustedIdPDO.setIdPName(trustedIdP.getIdPName());
         trustedIdPDO.setIdPIssuerId(trustedIdP.getIdPIssuerId());
         trustedIdPDO.setPrimary(trustedIdP.isPrimary());
         trustedIdPDO.setIdPUrl(trustedIdP.getIdPUrl());
@@ -280,24 +284,25 @@ public class IdentityProviderMgtService {
         dao.addTenantIdP(trustedIdPDO, tenantId, tenantDomain);
 
         if(trustedIdP.getPublicCert() != null){
-            IdentityProviderMgtUtil.importCertToStore(trustedIdP.getIdPIssuerId(), trustedIdP.getPublicCert(), tenantId, tenantDomain);
+            IdentityProviderMgtUtil.importCertToStore(trustedIdP.getIdPName(), trustedIdP.getPublicCert(), tenantId, tenantDomain);
         }
     }
 
     private void doDeleteIdP(TrustedIdPDTO trustedIdP, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
         TrustedIdPDO trustedIdPDO = new TrustedIdPDO();
-        if(trustedIdP.getIdPIssuerId() == null || trustedIdP.getIdPIssuerId().equals("")){
-            String msg = "Invalid arguments: IssuerId value is empty";
+        if(trustedIdP.getIdPName() == null || trustedIdP.getIdPName().equals("")){
+            String msg = "Invalid arguments: IdP Name value is empty";
             log.error(msg);
             throw new IdentityProviderMgtException(msg);
         }
+        trustedIdPDO.setIdPName(trustedIdP.getIdPName());
         trustedIdPDO.setIdPIssuerId(trustedIdP.getIdPIssuerId());
         trustedIdPDO.setIdPUrl(trustedIdP.getIdPUrl());
 
         dao.deleteTenantIdP(trustedIdPDO, tenantId, tenantDomain);
 
-        IdentityProviderMgtUtil.deleteCertFromStore(trustedIdP.getIdPIssuerId(), tenantId, tenantDomain);
+        IdentityProviderMgtUtil.deleteCertFromStore(trustedIdP.getIdPName(), tenantId, tenantDomain);
     }
 
 }

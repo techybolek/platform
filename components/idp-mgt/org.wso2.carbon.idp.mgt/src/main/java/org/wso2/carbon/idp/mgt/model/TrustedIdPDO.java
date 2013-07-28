@@ -31,27 +31,32 @@ public class TrustedIdPDO {
     private String tenantDomain;
 
     /**
-     * The trusted IDP's Issuer ID for this tenant.
+     * The trusted IdP's Unique name for this tenant.
+     */
+    private String idPName;
+
+    /**
+     * The trusted IdP's Issuer ID for this tenant.
      */
     private String idPIssuerId;
 
     /**
-     * The trusted IDP's URL for this tenant.
+     * The trusted IdP's URL for this tenant.
      */
     private String idPUrl;
 
     /**
-     * The trusted IDP's Certificate for this tenant.
+     * The trusted IdP's Certificate for this tenant.
      */
     private String publicCertThumbPrint;
 
     /**
-     * The trusted IDP's roles for this tenant.
+     * The trusted IdP's roles for this tenant.
      */
     private List<String> roles;
 
     /**
-     * The trusted IDP's role mapping for this tenant.
+     * The trusted IdP's role mapping for this tenant.
      */
     private Map<String,String> roleMappings;
 
@@ -73,6 +78,14 @@ public class TrustedIdPDO {
 
     public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
+    }
+
+    public String getIdPName() {
+        return idPName;
+    }
+
+    public void setIdPName(String idPName) {
+        this.idPName = idPName;
     }
 
     public String getIdPIssuerId() {
