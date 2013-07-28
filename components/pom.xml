@@ -72,6 +72,7 @@
                 <!--<module>health-monitor</module>-->
                 <module>user-manager</module>
 		<module>identity</module>
+		<module>idp-mgt</module>
                 <module>jar-services</module>
                 <module>java2wsdl</module>
                 <module>jaxws</module>
