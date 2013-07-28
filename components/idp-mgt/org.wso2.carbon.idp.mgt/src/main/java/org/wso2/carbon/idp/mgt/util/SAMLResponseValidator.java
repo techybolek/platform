@@ -54,7 +54,7 @@ public class SAMLResponseValidator {
     private static boolean bootstrapped = false;
 
     public static boolean validateSAMLResponse(TrustedIdPDTO trustedIdPDTO, String samlResponseString, String[] audiences)
-            throws IdentityProviderMgtException {
+            throws IdentityProviderMgtException{
 
         try {
             if(!bootstrapped){
@@ -66,26 +66,42 @@ public class SAMLResponseValidator {
             throw new IdentityProviderMgtException(msg);
         }
 
-        Response samlResponse = (Response) unmarshall(new String(Base64.decode(samlResponseString)));
+        if(log.isDebugEnabled()){
+            String message = "Encoded SAML Response string: " + samlResponseString;
+            log.debug(message);
+        }
+
+        Response samlResponse = null;
+        samlResponse = (Response) unmarshall(new String(Base64.decode(samlResponseString)));
+
+        if (samlResponse.getStatus() != null &&
+                samlResponse.getStatus().getStatusCode() != null &&
+                samlResponse.getStatus().getStatusCode().getValue().equals(IdentityProviderMgtConstants.StatusCodes.IDENTITY_PROVIDER_ERROR) &&
+                samlResponse.getStatus().getStatusCode().getStatusCode() != null &&
+                samlResponse.getStatus().getStatusCode().getStatusCode().getValue().equals(IdentityProviderMgtConstants.StatusCodes.NO_PASSIVE)) {
+            return false;
+        }
+
         List<Assertion> assertions = samlResponse.getAssertions();
         Assertion assertion = null;
         if (assertions != null && assertions.size() > 0) {
             assertion = assertions.get(0);
         }
         if (assertion == null) {
-            if (samlResponse.getStatus() != null &&
-                    samlResponse.getStatus().getStatusCode() != null &&
-                    samlResponse.getStatus().getStatusCode().getValue().equals(IdentityProviderMgtConstants.StatusCodes.IDENTITY_PROVIDER_ERROR) &&
-                    samlResponse.getStatus().getStatusCode().getStatusCode() != null &&
-                    samlResponse.getStatus().getStatusCode().getStatusCode().getValue().equals(IdentityProviderMgtConstants.StatusCodes.NO_PASSIVE)) {
-                return false;
+            if(log.isDebugEnabled()){
+                String message = "SAML Assertion not found in the Response";
+                log.debug(message);
             }
-            throw new IdentityProviderMgtException("SAML Assertion not found in the Response");
+            return false;
         }
 
         // Validate Issuer Id
         if(!assertion.getIssuer().getValue().equals(trustedIdPDTO.getIdPIssuerId())){
-            throw new IdentityProviderMgtException("Invalid IssuerId");
+            if(log.isDebugEnabled()){
+                String message = "Invalid IssuerId";
+                log.debug(message);
+            }
+            return false;
         }
 
         String subject = null;
@@ -94,7 +110,11 @@ public class SAMLResponseValidator {
         }
 
         if(subject == null){
-            throw new IdentityProviderMgtException("SAML Response does not contain the name of the subject");
+            if(log.isDebugEnabled()){
+                String message = "SAML Response does not contain the name of the subject";
+                log.debug(message);
+            }
+            return false;
         }
 
         // validate audience restriction
@@ -119,26 +139,21 @@ public class SAMLResponseValidator {
             UnmarshallerFactory unmarshallerFactory = Configuration.getUnmarshallerFactory();
             Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
             return unmarshaller.unmarshall(element);
-        } catch (ParserConfigurationException e) {
-            throw new IdentityProviderMgtException("Error in unmarshalling SAML Request from the encoded String", e);
-        } catch (UnmarshallingException e) {
-            throw new IdentityProviderMgtException("Error in unmarshalling SAML Request from the encoded String", e);
-        } catch (SAXException e) {
-            throw new IdentityProviderMgtException("Error in unmarshalling SAML Request from the encoded String", e);
-        } catch (IOException e) {
-            throw new IdentityProviderMgtException("Error in unmarshalling SAML Request from the encoded String", e);
+        } catch (Exception e) {
+            if(log.isDebugEnabled()){
+                log.debug(e.getMessage(), e);
+            }
+            throw new IdentityProviderMgtException(e.getMessage());
         }
-
     }
 
     /**
      * Validate the AudienceRestriction of SAML2 Response
      *
      * @param assertion SAML2 Assertion
-     * @return validity
+     * @return true if audience valid, false otherwise
      */
-    private static void validateAudienceRestriction(Assertion assertion, TrustedIdPDTO trustedIdPDTO, String[] audiences)
-            throws IdentityProviderMgtException {
+    private static boolean validateAudienceRestriction(Assertion assertion, TrustedIdPDTO trustedIdPDTO, String[] audiences) {
 
         List<String> requestedAudiences;
         if(audiences != null && audiences.length > 0){
@@ -166,34 +181,60 @@ public class SAMLResponseValidator {
                                     }
                                 }
                             } else {
-                                throw new IdentityProviderMgtException("SAML Response's AudienceRestriction doesn't contain Audiences");
+                                if(log.isDebugEnabled()){
+                                    String message = "SAML Response's AudienceRestriction doesn't contain Audiences";
+                                    log.debug(message);
+                                }
+                                return false;
                             }
                             if(audienceFound){
                                 break;
                             }
                         }
                         if(!audienceFound){
-                            throw new IdentityProviderMgtException("SAML Assertion Audience Restriction validation failed");
+                            if(log.isDebugEnabled()){
+                                String message = "SAML Assertion Audience Restriction validation failed";
+                                log.debug(message);
+                            }
+                            return false;
                         }
                     } else {
-                        throw new IdentityProviderMgtException("SAML Response doesn't contain AudienceRestrictions");
+                        if(log.isDebugEnabled()){
+                            String message = "SAML Response doesn't contain AudienceRestrictions";
+                            log.debug(message);
+                        }
+                        return false;
                     }
                 } else {
-                    throw new IdentityProviderMgtException("SAML Response doesn't contain Conditions");
+                    if(log.isDebugEnabled()){
+                        String message = "SAML Response doesn't contain Conditions";
+                        log.debug(message);
+                    }
+                    return false;
                 }
             }
         }
+        return true;
     }
 
     /**
-     * Validate the signature of a SAML2 Response and Assertion
+     * Validate the signature of a SAML2 Assertion
      *
      * @param response   SAML2 Response
-     * @return true, if signature is valid.
+     * @return true, if signature is valid, false otherwise
      */
-    private static void validateSignature(Response response, TrustedIdPDTO trustedIdPDTO) throws IdentityProviderMgtException {
+    private static boolean validateSignature(Response response, TrustedIdPDTO trustedIdPDTO) {
 
-        X509Certificate cert = (X509Certificate)IdentityProviderMgtUtil.getCertificate(trustedIdPDTO.getPublicCert());
+        X509Certificate cert = null;
+        try {
+            cert = (X509Certificate) IdentityProviderMgtUtil.getCertificate(trustedIdPDTO.getPublicCert());
+        } catch (IdentityProviderMgtException e) {
+            if(log.isDebugEnabled()){
+                String message = "Error while retrieving trusted certificate of IdP " + trustedIdPDTO.getIdPIssuerId();
+                log.debug(message);
+            }
+            return  false;
+        }
         Credential credential = new X509CredentialImpl(cert);
 
         List<Assertion> assertions = response.getAssertions();
@@ -203,15 +244,24 @@ public class SAMLResponseValidator {
         }
 
         if(assertion.getSignature() == null){
-            throw new IdentityProviderMgtException("SAMLAssertion signing is enabled, but signature element not found in SAML Assertion element.");
+            if(log.isDebugEnabled()){
+                String message = "SAMLAssertion signing is enabled, but signature element not found in SAML Assertion element";
+                log.debug(message);
+            }
+            return false;
         } else {
             try {
                 SignatureValidator validator = new SignatureValidator(credential);
                 validator.validate(assertion.getSignature());
             }  catch (ValidationException e) {
-                throw new IdentityProviderMgtException("Signature validation failed for SAML Assertion");
+                if(log.isDebugEnabled()){
+                    String message = "Signature validation failed for SAML Assertion";
+                    log.debug(message);
+                }
+                return false;
             }
         }
+        return true;
     }
 
     private static String decodeHTMLCharacters(String encodedStr) {

@@ -55,8 +55,8 @@ public class IdPMgtDAO {
             }
             return tenantIdPs;
         } catch (SQLException e){
-            String msg = "Error occurred while retrieving registered IdP Issuers for tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while retrieving registered IdP Issuers for tenant " + tenantDomain;
+            log.error(msg, e);
             IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
@@ -129,8 +129,8 @@ public class IdPMgtDAO {
             }
             return trustedIdPDO;
         } catch (SQLException e){
-            String msg = "Error occurred while retrieving IdP information for tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while retrieving IdP information for tenant " + tenantDomain;
+            log.error(msg, e);
             IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
@@ -156,8 +156,8 @@ public class IdPMgtDAO {
             doAddIdP(dbConnection, tenantId, issuerId, trustedIdPUrl, thumbPrint, isPrimary, audience);
             int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(idPId <= 0){
-                String msg = "Error adding trusted IdP for tenant";
-                log.error(msg + " " + tenantId);
+                String msg = "Error adding trusted IdP for tenant " + tenantDomain;
+                log.error(msg);
                 throw new IdentityProviderMgtException(msg);
             }
             if(roles != null && roles.size() > 0){
@@ -243,8 +243,8 @@ public class IdPMgtDAO {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
             int idPId = isTenantIdPExisting(dbConnection, trustedIdPDO1, tenantId, tenantDomain);
             if(idPId <= 0){
-                String msg = "Trying to update non-existent IdP for tenant";
-                log.error(msg + " " + tenantDomain);
+                String msg = "Trying to update non-existent IdP for tenant " + tenantDomain;
+                log.error(msg);
                 throw new IdentityProviderMgtException(msg);
             }
             if(!issuerId1.equals(issuerId2) ||
@@ -272,8 +272,8 @@ public class IdPMgtDAO {
             }
             dbConnection.commit();
         } catch(SQLException e){
-            String msg = "Error occurred while updating IdP information  for tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while updating IdP information  for tenant " + tenantDomain;
+            log.error(msg, e);
             IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
@@ -288,16 +288,16 @@ public class IdPMgtDAO {
             String issuerId = trustedIdP.getIdPIssuerId();
             int idPId = isTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(idPId <= 0){
-                String msg = "Trying to delete non-existent IdP for tenant";
-                log.error(msg + " " + tenantDomain);
+                String msg = "Trying to delete non-existent IdP for tenant " + tenantDomain;
+                log.error(msg);
                 return;
             }
 
             trustedIdP.setPrimary(true);
             int primaryIdPId = isPrimaryTenantIdPExisting(dbConnection, trustedIdP, tenantId, tenantDomain);
             if(primaryIdPId <= 0){
-                String msg = "Cannot find primary IdP for tenant";
-                log.warn(msg + " " + tenantDomain);
+                String msg = "Cannot find primary IdP for tenant " + tenantDomain;
+                log.warn(msg);
             }
 
             doDeleteIdP(dbConnection, tenantId, issuerId);
@@ -308,8 +308,8 @@ public class IdPMgtDAO {
 
             dbConnection.commit();
         } catch (SQLException e){
-            String msg = "Error occurred while deleting IdP of tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while deleting IdP of tenant " + tenantDomain;
+            log.error(msg, e);
             IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
@@ -339,8 +339,8 @@ public class IdPMgtDAO {
             prepStmt.setByte(4, new Integer(0).byteValue());
             prepStmt.executeUpdate();
         } else {
-            String msg = "No IdPs registered for tenant";
-            log.warn(msg + " " + tenantDomain);
+            String msg = "No IdPs registered for tenant " + tenantDomain;
+            log.warn(msg);
         }
     }
 
@@ -388,8 +388,9 @@ public class IdPMgtDAO {
             roleIdMap.put(role, id);
         }
         if(roleIdMap.isEmpty()){
-            log.error("No IdP roles defined for tenant " + tenantId);
-            throw new IdentityProviderMgtException("No IdP roles defined for tenant");
+            String message = "No IdP roles defined for tenant " + tenantDomain;
+            log.error(message);
+            throw new IdentityProviderMgtException(message);
         }
         for(Map.Entry<String,String> entry : roleMappings.entrySet()){
             if(roleIdMap.containsKey(entry.getKey())){
@@ -402,8 +403,8 @@ public class IdPMgtDAO {
                 prepStmt.setString(3, localRole);
                 prepStmt.executeUpdate();
             } else {
-                String msg = "Cannot find IdP role " + entry.getKey() + " for tenant";
-                log.error("Cannot find IdP role for tenant" + " " + tenantDomain);
+                String msg = "Cannot find IdP role " + entry.getKey() + " for tenant " + tenantDomain;
+                log.error(msg);
                 throw new IdentityProviderMgtException(msg);
             }
         }
@@ -474,8 +475,8 @@ public class IdPMgtDAO {
             roleIdMap.put(role, id);
         }
         if(roleIdMap.isEmpty()){
-            String msg = "No IdP roles defined for tenant";
-            log.error(msg + " " + tenantDomain);
+            String msg = "No IdP roles defined for tenant " + tenantDomain;
+            log.error(msg);
             throw new IdentityProviderMgtException(msg);
         }
         if(!deletedRoleMappings.isEmpty()){
@@ -501,8 +502,8 @@ public class IdPMgtDAO {
                     prepStmt.setString(3, localRole);
                     prepStmt.executeUpdate();
                 } else {
-                    String msg = "Cannot find IdP role " + entry.getKey() + " for tenant";
-                    log.error(msg + " " + tenantDomain);
+                    String msg = "Cannot find IdP role " + entry.getKey() + " for tenant " + tenantDomain;
+                    log.error(msg);
                     throw new IdentityProviderMgtException(msg);
                 }
             }
@@ -519,8 +520,8 @@ public class IdPMgtDAO {
                     prepStmt.setString(3, localRole);
                     prepStmt.executeUpdate();
                 } else {
-                    String msg = "Cannot find IdP role " + entry.getKey() + " for tenant";
-                    log.error(msg + " " + tenantDomain);
+                    String msg = "Cannot find IdP role " + entry.getKey() + " for tenant " + tenantDomain;
+                    log.error(msg);
                     throw new IdentityProviderMgtException(msg);
                 }
             }
@@ -549,8 +550,8 @@ public class IdPMgtDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            String msg = "Error occurred while retrieving IdP information for tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while retrieving IdP information for tenant " + tenantDomain;
+            log.error(msg, e);
             throw new IdentityProviderMgtException(msg);
         }
         return 0;
@@ -569,8 +570,8 @@ public class IdPMgtDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            String msg = "Error occurred while retrieving IdP information for tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while retrieving IdP information for tenant " + tenantDomain;
+            log.error(msg, e);
             throw new IdentityProviderMgtException(msg);
         }
         return 0;
@@ -588,8 +589,8 @@ public class IdPMgtDAO {
             prepStmt.executeUpdate();
             dbConnection.commit();
         } catch (SQLException e) {
-            String msg = "Error occurred while deleting tenant role " + role + " of tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while deleting tenant role " + role + " of tenant " + tenantDomain;
+            log.error(msg, e);
             IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
@@ -610,8 +611,9 @@ public class IdPMgtDAO {
             prepStmt.executeUpdate();
             dbConnection.commit();
         } catch (SQLException e) {
-            String msg = "Error occurred while renaming tenant role " + oldRoleName + " to " + newRoleName + " of tenant";
-            log.error(msg + " " + tenantDomain, e);
+            String msg = "Error occurred while renaming tenant role " + oldRoleName +
+                    " to " + newRoleName + " of tenant " + tenantDomain;
+            log.error(msg, e);
             IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {

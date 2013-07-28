@@ -192,13 +192,13 @@ public class IdentityProviderMgtService {
                 try {
                     usm = CarbonContext.getCurrentContext().getUserRealm().getUserStoreManager();
                     if(usm.isExistingRole(split[1]) || usm.isExistingRole(split[1], true)){
-                        String msg = "Cannot find tenant role " + split[1] + " for tenant";
-                        log.error(msg + " " + tenantDomain);
+                        String msg = "Cannot find tenant role " + split[1] + " for tenant " + tenantDomain;
+                        log.error(msg);
                         throw new IdentityProviderMgtException(msg);
                     }
                 } catch (UserStoreException e) {
-                    String msg = "Error occurred while retrieving UserStoreManager for tenant";
-                    log.error(msg + " " + tenantDomain);
+                    String msg = "Error occurred while retrieving UserStoreManager for tenant " + tenantDomain;
+                    log.error(msg);
                     throw new IdentityProviderMgtException(msg);
                 }
                 mappings.put(split[0],split[1]);
@@ -258,13 +258,13 @@ public class IdentityProviderMgtService {
                 try {
                     usm = CarbonContext.getCurrentContext().getUserRealm().getUserStoreManager();
                     if(usm.isExistingRole(split[1]) || usm.isExistingRole(split[1], true)){
-                        String msg = "Cannot find tenant role " + split[1] + " for tenant";
-                        log.error(msg + " " + tenantDomain);
+                        String msg = "Cannot find tenant role " + split[1] + " for tenant " + tenantDomain;
+                        log.error(msg);
                         throw new IdentityProviderMgtException(msg);
                     }
                 } catch (UserStoreException e) {
-                    String msg = "Error occurred while retrieving UserStoreManager for tenant";
-                    log.error(msg + " " + tenantDomain);
+                    String msg = "Error occurred while retrieving UserStoreManager for tenant " + tenantDomain;
+                    log.error(msg);
                     throw new IdentityProviderMgtException(msg);
                 }
                 mappings.put(split[0],split[1]);

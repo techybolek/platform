@@ -49,8 +49,9 @@ public class ConfigParser {
         try {
             buildConfiguration();
         } catch (Exception e) {
-            log.error("Error while loading Trusted IdP Configurations", e);
-            throw new IdentityProviderMgtException("Error while loading Trusted IdP Configurations", e);
+            String message = "Error while loading Trusted IdP Configurations";
+            log.error(message, e);
+            throw new IdentityProviderMgtException(message, e);
         }
     }
 

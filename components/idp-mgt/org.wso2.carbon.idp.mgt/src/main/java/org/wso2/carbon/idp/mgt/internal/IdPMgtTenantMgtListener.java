@@ -41,9 +41,9 @@ public class IdPMgtTenantMgtListener implements TenantMgtListener {
             KeyStoreGenerator ksGenerator = new KeyStoreGenerator(tenantInfo.getTenantId());
             ksGenerator.generateTrustStore(trustStoreName);
         } catch (KeyStoreMgtException e) {
-            String message = "Error when generating the trust store for tenant";
-            log.error(message + " " + tenantInfo.getTenantDomain(), e);
-            throw new StratosException(message, e);
+            String message = "Error when generating the trust store for tenant " + tenantInfo.getTenantDomain();
+            log.error(message, e);
+            throw new StratosException(message);
         }
     }
 

@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.idp.mgt;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.idp.mgt.dao.IdPMgtDAO;
 import org.wso2.carbon.idp.mgt.dto.TrustedIdPDTO;
 import org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException;
@@ -31,6 +33,8 @@ import java.util.Map;
 
 public class IdPMetadataService {
 
+    private static Log log = LogFactory.getLog(IdPMetadataService.class);
+
     private static IdPMgtDAO dao = new IdPMgtDAO();
 
     /**
@@ -38,15 +42,18 @@ public class IdPMetadataService {
      *
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public String[] getTenantIdPs(String tenantDomain) throws IdentityProviderMgtException {
-        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        List<String> tenantIdPs = null;
+    public String[] getTenantIdPs(String tenantDomain) {
         try {
+            int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+            List<String> tenantIdPs = null;
             tenantIdPs = dao.getTenantIdPs(null, tenantId, tenantDomain);
+            return tenantIdPs.toArray(new String[tenantIdPs.size()]);
         } catch (IdentityProviderMgtException e) {
-            throw new IdentityProviderMgtException("Error getting Identity DB connection", e);
+            if(log.isDebugEnabled()){
+                log.debug("Error occurred while retrieving registered IdPs for tenant " + tenantDomain);
+            }
         }
-        return tenantIdPs.toArray(new String[tenantIdPs.size()]);
+        return new String[0];
     }
 
     /**
@@ -55,30 +62,37 @@ public class IdPMetadataService {
      * @param tenantDomain Tenant domain whose information is requested
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public TrustedIdPDTO getTenantIdPMetaData(String issuer, String tenantDomain) throws IdentityProviderMgtException {
-        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
-        TrustedIdPDTO trustedIdPDTO = null;
-        if(trustedIdPDO != null){
-            trustedIdPDTO = new TrustedIdPDTO();
-            trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
-            trustedIdPDO.setPrimary(trustedIdPDO.isPrimary());
-            trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
-            if(trustedIdPDO.getPublicCertThumbPrint() != null){
-                trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(issuer, tenantId, tenantDomain));
+    public TrustedIdPDTO getTenantIdPMetaData(String issuer, String tenantDomain) {
+        try {
+            int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+            TrustedIdPDTO trustedIdPDTO = null;
+            if(trustedIdPDO != null){
+                trustedIdPDTO = new TrustedIdPDTO();
+                trustedIdPDTO.setIdPIssuerId(trustedIdPDO.getIdPIssuerId());
+                trustedIdPDO.setPrimary(trustedIdPDO.isPrimary());
+                trustedIdPDTO.setIdPUrl(trustedIdPDO.getIdPUrl());
+                if(trustedIdPDO.getPublicCertThumbPrint() != null){
+                    trustedIdPDTO.setPublicCert(IdentityProviderMgtUtil.getEncodedIdPCertFromAlias(issuer, tenantId, tenantDomain));
+                }
+                trustedIdPDTO.setRoles(trustedIdPDO.getRoles().toArray(new String[trustedIdPDO.getRoles().size()]));
+                List<String> appendedRoleMappings = new ArrayList<String>();
+                for(Map.Entry<String,String> entry:trustedIdPDO.getRoleMappings().entrySet()){
+                    String idpRole = entry.getKey();
+                    String tenantRole = entry.getValue();
+                    appendedRoleMappings.add(idpRole+":"+tenantRole);
+                }
+                trustedIdPDTO.setRoleMappings(appendedRoleMappings.toArray(new String[appendedRoleMappings.size()]));
+                trustedIdPDTO.setPrimary(trustedIdPDO.isPrimary());
+                trustedIdPDTO.setAudience(trustedIdPDO.getAudience().toArray(new String[trustedIdPDO.getAudience().size()]));
             }
-            trustedIdPDTO.setRoles(trustedIdPDO.getRoles().toArray(new String[trustedIdPDO.getRoles().size()]));
-            List<String> appendedRoleMappings = new ArrayList<String>();
-            for(Map.Entry<String,String> entry:trustedIdPDO.getRoleMappings().entrySet()){
-                String idpRole = entry.getKey();
-                String tenantRole = entry.getValue();
-                appendedRoleMappings.add(idpRole+":"+tenantRole);
+            return trustedIdPDTO;
+        } catch (IdentityProviderMgtException e) {
+            if(log.isDebugEnabled()){
+                log.debug("Error occurred while retrieving metadata for IdP " + issuer + " for tenant " + tenantDomain);
             }
-            trustedIdPDTO.setRoleMappings(appendedRoleMappings.toArray(new String[appendedRoleMappings.size()]));
-            trustedIdPDTO.setPrimary(trustedIdPDO.isPrimary());
-            trustedIdPDTO.setAudience(trustedIdPDO.getAudience().toArray(new String[trustedIdPDO.getAudience().size()]));
         }
-        return trustedIdPDTO;
+        return null;
     }
 
     /**
@@ -89,27 +103,34 @@ public class IdPMetadataService {
      * @param idPRoles IdP Roles which need to be mapped to tenant's roles
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public String[] getMappedTenantRoles(String issuer, String tenantDomain, String[] idPRoles) throws IdentityProviderMgtException {
+    public String[] getMappedTenantRoles(String issuer, String tenantDomain, String[] idPRoles) {
         List<String> mappedRoles = new ArrayList<String>();
-        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
-        Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
-        if(roleMappings != null && !roleMappings.isEmpty()){
-            if(idPRoles == null){
-                for(Map.Entry<String,String> roleMapping: roleMappings.entrySet()){
-                    mappedRoles.add(roleMapping.getKey() + ":" + roleMapping.getValue());
-                }
-            } else {
-                for(String idPRole : idPRoles){
-                    if(roleMappings.containsKey(idPRole)){
-                        mappedRoles.add(idPRole + ":" + roleMappings.get(idPRole));
-                    } else {
-                        mappedRoles.add(idPRole+":");
+        try {
+            int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+            Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
+            if(roleMappings != null && !roleMappings.isEmpty()){
+                if(idPRoles == null){
+                    for(Map.Entry<String,String> roleMapping: roleMappings.entrySet()){
+                        mappedRoles.add(roleMapping.getKey() + ":" + roleMapping.getValue());
+                    }
+                } else {
+                    for(String idPRole : idPRoles){
+                        if(roleMappings.containsKey(idPRole)){
+                            mappedRoles.add(idPRole + ":" + roleMappings.get(idPRole));
+                        } else {
+                            mappedRoles.add(idPRole+":");
+                        }
                     }
                 }
             }
+            return mappedRoles.toArray(new String[mappedRoles.size()]);
+        } catch (IdentityProviderMgtException e) {
+            if(log.isDebugEnabled()){
+                log.debug("Error occurred while retrieving Tenant Role mappings for IdP " + issuer + " for tenant " + tenantDomain);
+            }
         }
-        return mappedRoles.toArray(new String[mappedRoles.size()]);
+        return new String[0];
     }
 
     /**
@@ -120,41 +141,49 @@ public class IdPMetadataService {
      * @param tenantRoles Tenant Roles which need to be mapped to trusted IdP's roles
      * @throws org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException
      */
-    public String[] getMappedIdPRoles(String issuer, String tenantDomain, String[] tenantRoles) throws IdentityProviderMgtException {
+    public String[] getMappedIdPRoles(String issuer, String tenantDomain, String[] tenantRoles) {
+
         List<String> mappedRoles = new ArrayList<String>();
-        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
-        TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
-        Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
-        Map<String,String> mirrorMap = new HashMap<String,String>();
-        if(roleMappings != null && !roleMappings.isEmpty()){
-            for(Map.Entry<String,String> roleMapping : roleMappings.entrySet()){
-                String key = roleMapping.getKey();
-                String value = roleMapping.getValue();
-                if(mirrorMap.containsKey(value)){
-                    mirrorMap.put(value, mirrorMap.get(value) + "," + key);
+        try {
+            int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+            TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
+            Map<String, String> roleMappings = trustedIdPDO.getRoleMappings();
+            Map<String,String> mirrorMap = new HashMap<String,String>();
+            if(roleMappings != null && !roleMappings.isEmpty()){
+                for(Map.Entry<String,String> roleMapping : roleMappings.entrySet()){
+                    String key = roleMapping.getKey();
+                    String value = roleMapping.getValue();
+                    if(mirrorMap.containsKey(value)){
+                        mirrorMap.put(value, mirrorMap.get(value) + "," + key);
+                    } else {
+                        mirrorMap.put(value, key);
+                    }
+                }
+                if(tenantRoles == null){
+                    for(Map.Entry<String,String> mirrorRole: mirrorMap.entrySet()){
+                        mappedRoles.add(mirrorRole.getKey() + ":" + mirrorRole.getValue());
+                    }
                 } else {
-                    mirrorMap.put(value, key);
+                    for(String tenantRole : tenantRoles){
+                        if(mirrorMap.containsKey(tenantRole)){
+                            mappedRoles.add(tenantRole + ":" + mirrorMap.get(tenantRole));
+                        } else {
+                            mappedRoles.add(tenantRole + ":");
+                        }
+
+                    }
                 }
             }
-            if(tenantRoles == null){
-                for(Map.Entry<String,String> mirrorRole: mirrorMap.entrySet()){
-                    mappedRoles.add(mirrorRole.getKey() + ":" + mirrorRole.getValue());
-                }
-            } else {
-                for(String tenantRole : tenantRoles){
-                    if(mirrorMap.containsKey(tenantRole)){
-                        mappedRoles.add(tenantRole + ":" + mirrorMap.get(tenantRole));
-                    } else {
-                        mappedRoles.add(tenantRole + ":");
-                    }
-
-                }
+            return mappedRoles.toArray(new String[mappedRoles.size()]);
+        } catch (IdentityProviderMgtException e){
+            if(log.isDebugEnabled()){
+                log.debug("Error occurred while retrieving IdP Role mappings for IdP " + issuer + " for tenant " + tenantDomain);
             }
         }
-        return mappedRoles.toArray(new String[mappedRoles.size()]);
+        return new String[0];
     }
 
-    public String getPrimaryIdP(String tenantDomain) throws IdentityProviderMgtException {
+    public String getPrimaryIdP(String tenantDomain) {
 
         String[] tenantIdPs = getTenantIdPs(tenantDomain);
         for(String tenantIdP : tenantIdPs){
@@ -163,11 +192,21 @@ public class IdPMetadataService {
                 return tenantIdP;
             }
         }
-        throw new IdentityProviderMgtException("Primary IdP not found");
+        if(log.isDebugEnabled()){
+            log.debug("No primary IdP found for tenant " + tenantDomain);
+        }
+        return null;
     }
 
-    public boolean validateSAMLResponse(String tenantDomain, String issuer, String samlResponseString, String[] audiences) throws IdentityProviderMgtException {
+    public boolean validateSAMLResponse(String tenantDomain, String issuer, String samlResponseString, String[] audiences) {
 
-        return SAMLResponseValidator.validateSAMLResponse(getTenantIdPMetaData(issuer, tenantDomain),  samlResponseString, audiences);
+        try {
+            return SAMLResponseValidator.validateSAMLResponse(getTenantIdPMetaData(issuer, tenantDomain),  samlResponseString, audiences);
+        } catch (IdentityProviderMgtException e){
+            if(log.isDebugEnabled()){
+                log.debug("Error occurred while validating SAML2 Response message");
+            }
+            return false;
+        }
     }
 }
