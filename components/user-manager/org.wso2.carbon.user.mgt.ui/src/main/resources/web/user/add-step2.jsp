@@ -294,7 +294,7 @@
                                             }
                             %>
                                 <input type="checkbox" name="userRoles"
-                                       value="<%=name.getItemName() + UserCoreConstants.DN_COMBINER + name.getDn()%>" <%=doCheck%> <%=doEdit%> /><%=CharacterEncoder.getSafeText(name.getItemName())%>
+                                       value="<%=name.getItemName() + UserCoreConstants.TENANT_DOMAIN_COMBINER + name.getDn()%>" <%=doCheck%> <%=doEdit%> /><%=CharacterEncoder.getSafeText(name.getItemName())%>
                                 <input type="hidden" name="shownUsers" value="<%=CharacterEncoder.getSafeText(name.getItemName())%>"/><br/>
                             <%
                                             }

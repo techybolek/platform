@@ -49,7 +49,7 @@
         viewUsers = Boolean.parseBoolean(request.getParameter("viewUsers"));
     }
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
-    String roleNameWithoutDn = roleName.split(UserCoreConstants.DN_COMBINER)[0];
+    String roleNameWithoutDn = roleName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
 
     String roleIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
     try {

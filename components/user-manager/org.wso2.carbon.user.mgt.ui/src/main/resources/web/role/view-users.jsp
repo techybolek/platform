@@ -118,13 +118,13 @@
 
 		FlaggedName[] datas =
 		                      (FlaggedName[]) session.getAttribute(UserAdminUIConstants.ROLE_LIST);
-		roleNameWithDn = roleName + UserCoreConstants.DN_COMBINER;
+		roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
 		if (datas != null && roleIndex < datas.length) {
 			roleNameWithDn += datas[roleIndex].getDn();
 		}
 	} 
 	
-	String roleWithoutDn = roleNameWithDn.split(UserCoreConstants.DN_COMBINER)[0];
+	String roleWithoutDn = roleNameWithDn.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
 	
 	String readOnlyRoleString = request.getParameter(UserAdminUIConstants.ROLE_READ_ONLY);
 	if (readOnlyRoleString == null) {

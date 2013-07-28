@@ -48,7 +48,7 @@
         }
     }
     
-    String roleNameWithoutDN = roleName.split(UserCoreConstants.DN_COMBINER)[0];
+    String roleNameWithoutDN = roleName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
 
     try {
         String[] selectedPermissions = request.getParameterValues("selectedPermissions");

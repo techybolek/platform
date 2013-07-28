@@ -78,7 +78,7 @@
     int roleIndex = Integer.parseInt(rIndex);
     
     FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
-    String roleNameWithDn = roleName + UserCoreConstants.DN_COMBINER;
+    String roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
     if(datas != null && roleIndex < datas.length){
     	roleNameWithDn += datas[roleIndex].getDn();
     }

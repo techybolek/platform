@@ -90,11 +90,11 @@
 
         UIPermissionNode rootNode = null;
         String roleName = request.getParameter("roleName");
-        String roleNameWithoutDn = roleName.split(UserCoreConstants.DN_COMBINER)[0];
+        String roleNameWithoutDn = roleName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
         try {
         	
             String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
-            String roleNameWithDn = roleName + UserCoreConstants.DN_COMBINER;
+            String roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
             if(rIndex != null){
             	try{
 	            	int roleIndex = Integer.parseInt(rIndex);
