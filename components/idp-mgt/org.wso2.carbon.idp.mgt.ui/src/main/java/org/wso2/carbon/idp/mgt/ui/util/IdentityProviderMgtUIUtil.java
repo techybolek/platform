@@ -73,6 +73,7 @@ public class IdentityProviderMgtUIUtil {
             FileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
             List items =  upload.parseRequest(servletContext);
+            String idPName = null;
             String issuer = null;
             boolean primary = false;
             String url = null;
@@ -104,7 +105,13 @@ public class IdentityProviderMgtUIUtil {
             for (Object item : items) {
                 DiskFileItem diskFileItem = (DiskFileItem) item;
                 String name = diskFileItem.getFieldName();
-                if (name.equals("issuer")) {
+                if (name.equals("idPName")) {
+                    FileItem fileItem = diskFileItem;
+                    byte[] idPNameArray = fileItem.get();
+                    if(idPNameArray != null && idPNameArray.length > 0){
+                        idPName = new String(idPNameArray);
+                    }
+                } else if (name.equals("issuer")) {
                     FileItem fileItem = diskFileItem;
                     byte[] issuerArray = fileItem.get();
                     if(issuerArray != null && issuerArray.length > 0){
@@ -180,6 +187,7 @@ public class IdentityProviderMgtUIUtil {
                 }
             }
             newRoles.addAll(tempList);
+            trustedIdPDTO.setIdPName(idPName);
             trustedIdPDTO.setIdPIssuerId(issuer);
             trustedIdPDTO.setPrimary(primary);
             trustedIdPDTO.setIdPUrl(url);

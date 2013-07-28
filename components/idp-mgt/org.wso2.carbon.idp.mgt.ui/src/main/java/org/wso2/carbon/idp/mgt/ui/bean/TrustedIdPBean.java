@@ -24,12 +24,17 @@ import java.util.Map;
 public class TrustedIdPBean {
 
     /**
-     * The trusted IDP's Issuer ID for this tenant.
+     * The trusted IdP's unique name for this tenant.
+     */
+    private String idPName;
+
+    /**
+     * The trusted IdP's Issuer ID for this tenant.
      */
     private String idPIssuerId;
 
     /**
-     * The trusted IDP's URL for this tenant.
+     * The trusted IdP's URL for this tenant.
      */
     private String idPUrl;
 
@@ -39,12 +44,12 @@ public class TrustedIdPBean {
     private CertData certData;
 
     /**
-     * The trusted IDP's roles for this tenant.
+     * The trusted IdP's roles for this tenant.
      */
     private List<String> roles;
 
     /**
-     * The trusted IDP's role mapping for this tenant.
+     * The trusted IdP's role mapping for this tenant.
      */
     private Map<String,String> roleMappings;
 
@@ -60,6 +65,13 @@ public class TrustedIdPBean {
 
     //////////////////// Getters and Setters //////////////////////////
 
+    public String getIdPName() {
+        return idPName;
+    }
+
+    public void setIdPName(String idPName) {
+        this.idPName = idPName;
+    }
 
     public String getIdPIssuerId() {
         return idPIssuerId;

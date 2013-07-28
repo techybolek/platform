@@ -35,9 +35,9 @@
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         IdentityProviderMgtServiceClient client = new IdentityProviderMgtServiceClient(cookie, backendServerURL, configContext);
-        if(request.getParameter("issuer") != null && !request.getParameter("issuer").equals("")){
+        if(request.getParameter("idPName") != null && !request.getParameter("idPName").equals("")){
             TrustedIdPDTO deleteDTO = new TrustedIdPDTO();
-            deleteDTO.setIdPIssuerId(request.getParameter("issuer"));
+            deleteDTO.setIdPName(request.getParameter("idPName"));
             client.updateTenantIdP(deleteDTO, null);
             String message = MessageFormat.format(resourceBundle.getString("success.deleting.idp"),null);
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);

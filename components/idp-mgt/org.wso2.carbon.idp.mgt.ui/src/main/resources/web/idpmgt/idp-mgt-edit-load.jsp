@@ -33,17 +33,18 @@
 <%
     String BUNDLE = "org.wso2.carbon.idp.mgt.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
-    String issuer = request.getParameter("issuer");
+    String idPName = request.getParameter("idPName");
     try {
-        if(issuer != null && !issuer.equals("")){
+        if(idPName != null && !idPName.equals("")){
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext =
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             IdentityProviderMgtServiceClient client = new IdentityProviderMgtServiceClient(cookie, backendServerURL, configContext);
-            TrustedIdPDTO trustedIdPDTO = client.getTenantIdP(issuer);
+            TrustedIdPDTO trustedIdPDTO = client.getTenantIdP(idPName);
             if(trustedIdPDTO != null){
                 TrustedIdPBean trustedIdPBean = new TrustedIdPBean();
+                trustedIdPBean.setIdPName(trustedIdPDTO.getIdPName());
                 trustedIdPBean.setIdPIssuerId(trustedIdPDTO.getIdPIssuerId());
                 trustedIdPBean.setPrimary(trustedIdPDTO.getPrimary());
                 trustedIdPBean.setIdPUrl(trustedIdPDTO.getIdPUrl());
@@ -84,7 +85,7 @@
     }
 %>
 <script type="text/javascript">
-    location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>";
+    location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>";
 </script>
 
 

@@ -43,13 +43,13 @@
             location.href = "idp-mgt-edit.jsp";
         })
     })
-    function editIssuer(obj){
-        location.href = "idp-mgt-edit-load.jsp?issuer=" + jQuery(obj).parent().prev().text();
+    function editIdPName(obj){
+        location.href = "idp-mgt-edit-load.jsp?idPName=" + jQuery(obj).parent().prev().text();
     }
-    function deleteIssuer(obj){
+    function deleteIdPName(obj){
         CARBON.showConfirmationDialog('Are you sure you want to delete "'  + jQuery(obj).parent().prev().text() + '" IdP information?',
                 function (){
-                    location.href = "idp-mgt-delete-finish.jsp?issuer=" + jQuery(obj).parent().prev().text();
+                    location.href = "idp-mgt-delete-finish.jsp?idPName=" + jQuery(obj).parent().prev().text();
                 },
                 null);
     }
@@ -68,7 +68,7 @@
                 <fmt:message key='idp.add.help'/>
             </div>
             <div class="sectionSub">
-            <table class="styledLeft" id="issuersListTable">
+            <table class="styledLeft" id="idPsListTable">
                 <thead><tr><th class="leftCol-big"><fmt:message key='registered.idps'/></th><th><fmt:message key='idp.actions'/></th></tr></thead>
                 <tbody>
                     <% if(trustedIdPs != null && trustedIdPs.length > 0){ %>
@@ -76,19 +76,19 @@
                             <tr>
                                 <td><%=trustedIdPs[i]%></td>
                                 <td>
-                                    <a title="<fmt:message key='idp.issuer.edit'/>"
-                                       onclick="editIssuer(this);return false;"
+                                    <a title="<fmt:message key='idp.name.edit'/>"
+                                       onclick="editIdPName(this);return false;"
                                        href="#"
                                        class="icon-link"
                                        style="background-image: url(images/edit.gif)">
-                                       <fmt:message key='idp.issuer.edit'/>
+                                       <fmt:message key='idp.name.edit'/>
                                     </a>
-                                    <a title="<fmt:message key='idp.issuer.delete'/>"
-                                       onclick="deleteIssuer(this);return false;"
+                                    <a title="<fmt:message key='idp.name.delete'/>"
+                                       onclick="deleteIdPName(this);return false;"
                                        href="#"
                                        class="icon-link"
                                        style="background-image: url(images/delete.gif)">
-                                       <fmt:message key='idp.issuer.delete'/>
+                                       <fmt:message key='idp.name.delete'/>
                                     </a>
                                 </td>
                             </tr>

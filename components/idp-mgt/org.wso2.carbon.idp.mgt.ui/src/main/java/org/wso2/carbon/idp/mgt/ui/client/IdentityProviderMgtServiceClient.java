@@ -74,9 +74,9 @@ public class IdentityProviderMgtServiceClient {
      * @return TrustedIdPDTO
      * @throws Exception
      */
-    public TrustedIdPDTO getTenantIdP(String issuer) throws Exception{
+    public TrustedIdPDTO getTenantIdP(String idPName) throws Exception{
         try {
-            return stub.getTenantIdP(issuer);
+            return stub.getTenantIdP(idPName);
         } catch (RemoteException e) {
             log.error("Error invoking remote service", e);
             throw new Exception("Error invoking remote service");

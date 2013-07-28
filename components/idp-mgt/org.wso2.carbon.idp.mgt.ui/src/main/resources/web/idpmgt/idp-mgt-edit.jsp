@@ -30,7 +30,8 @@
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <%
-    String issuer = request.getParameter("issuer");
+    String idPName = request.getParameter("idPName");
+    String issuer = null;
     String url = null;
     CertData certData = null;
     List<String> roles = null;
@@ -47,7 +48,8 @@
     <%
         return;
     }
-    if(issuer != null && !issuer.equals("") && bean != null){
+    if(idPName != null && !idPName.equals("") && bean != null){
+        idPName = bean.getIdPName();
         issuer = bean.getIdPIssuerId();
         url = bean.getIdPUrl();
         certData = bean.getCertData();
@@ -55,6 +57,9 @@
         roleMappings = bean.getRoleMappings();
         primary = bean.isPrimary();
         audience = bean.getAudience();
+    }
+    if(idPName == null){
+        idPName = "";
     }
     if(issuer == null){
         issuer = "";
@@ -182,7 +187,7 @@
                                         function (){
                                             if(jQuery('#deletePublicCert').val() == 'true'){
                                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
-                                                        jQuery('#issuer').val() + '?',
+                                                        jQuery('#idPName').val() + '?',
                                                         function (){
                                                             if(allDeletedAudienceStr != ""){
                                                                 CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
@@ -190,35 +195,35 @@
                                                                             doEditFinish();
                                                                         },
                                                                         function(){
-                                                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                                                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                                                                         });
                                                             } else {
                                                                 doEditFinish();
                                                             }
                                                         },
                                                         function(){
-                                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                                                         });
                                             } else {
                                                 doEditFinish();
                                             }
                                         },
                                         function(){
-                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                                         });
                             } else {
                                 doEditFinish();
                             }
                         },
                         function(){
-                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                         });
             } else if(jQuery('#deleteRoleMappings').val() == 'true'){
                 CARBON.showConfirmationDialog('Are you sure you want to delete all the role mappings?',
                         function (){
                             if(jQuery('#deletePublicCert').val() == 'true'){
                                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
-                                        jQuery('#issuer').val() + '?',
+                                        jQuery('#idPName').val() + '?',
                                         function (){
                                             if(allDeletedAudienceStr != ""){
                                                 CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
@@ -226,25 +231,25 @@
                                                             doEditFinish();
                                                         },
                                                         function(){
-                                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                                                         });
                                             } else {
                                                 doEditFinish();
                                             }
                                         },
                                         function(){
-                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                                         });
                             } else {
                                 doEditFinish();
                             }
                         },
                         function(){
-                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                         });
             } else if(jQuery('#deletePublicCert').val() == 'true'){
                 CARBON.showConfirmationDialog('Are you sure you want to delete the public certificate of ' +
-                        jQuery('#issuer').val() + '?',
+                        jQuery('#idPName').val() + '?',
                         function (){
                             if(allDeletedAudienceStr != ""){
                                 CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
@@ -252,14 +257,14 @@
                                             doEditFinish();
                                         },
                                         function(){
-                                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                                         });
                             } else {
                                 doEditFinish();
                             }
                         },
                         function(){
-                            location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                            location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                         });
             } else if (allDeletedAudienceStr != "") {
                 CARBON.showConfirmationDialog('Are you sure you want to delete the audience ' + allDeletedAudienceStr,
@@ -267,7 +272,7 @@
                         doEditFinish();
                     },
                     function(){
-                        location.href = "idp-mgt-edit.jsp?issuer=<%=issuer%>"
+                        location.href = "idp-mgt-edit.jsp?idPName=<%=idPName%>"
                     });
             } else {
                 doEditFinish();
@@ -276,7 +281,7 @@
     }
     function doEditFinish(){
         jQuery('#primary').removeAttr('disabled');
-        <% if(issuer == null || issuer.equals("")){ %>
+        <% if(idPName == null || idPName.equals("")){ %>
             jQuery('#idp-mgt-edit-form').attr('action','idp-mgt-add-finish.jsp');
         <% } %>
         jQuery('#idp-mgt-edit-form').submit();
@@ -286,9 +291,9 @@
     }
     function doValidation() {
         var reason = "";
-        reason = validateEmpty("issuer");
+        reason = validateEmpty("idPName");
         if (reason != "") {
-            CARBON.showWarningDialog("IssuerId of IdP cannot be empty");
+            CARBON.showWarningDialog("Name of IdP cannot be empty");
             return false;
         }
         for(var i=0; i <= rowId; i++){
@@ -331,9 +336,18 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="leftCol-med labelField"><fmt:message key='idp.issuer'/>:<span class="required">*</span></td>
+                        <td class="leftCol-med labelField"><fmt:message key='idp.name'/>:<span class="required">*</span></td>
                         <td>
-                            <input id="issuer" name="issuer" type="text" value="<%=issuer%>" autofocus/>
+                            <input id="idPName" name="idPName" type="text" value="<%=idPName%>" autofocus/>
+                            <div class="sectionHelp">
+                                <fmt:message key='idp.name.help'/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="leftCol-med labelField"><fmt:message key='idp.issuer'/>:</td>
+                        <td>
+                            <input id="issuer" name="issuer" type="text" value="<%=issuer%>"/>
                             <div class="sectionHelp">
                                 <fmt:message key='idp.issuer.help'/>
                             </div>
