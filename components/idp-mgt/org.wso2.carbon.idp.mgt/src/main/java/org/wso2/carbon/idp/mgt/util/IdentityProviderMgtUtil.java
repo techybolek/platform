@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException;
@@ -158,28 +157,25 @@ public class IdentityProviderMgtUtil {
     public static String getEncodedIdPCertFromThumb(String thumb, int tenantId, String tenantDomain)
             throws IdentityProviderMgtException {
 
-        String keyStoreName = null;
+        KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
         try {
-            KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
+            String trustStoreName = null;
+            KeyStore trustStore = null;
             if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
-                ServerConfigurationService config = ServerConfiguration.getInstance();
-                String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
-                keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
+                trustStore = keyMan.getPrimaryKeyStore();
             } else {
-                String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + "-truststore.jks";
+                trustStoreName = tenantDomain.trim().replace(".", "-") + "-idp-mgt-truststore.jks";
+                trustStore = keyMan.getKeyStore(trustStoreName);
             }
             Certificate cert = null;
             MessageDigest sha = null;
-            KeyStore ks = null;
-            ks = keyMan.getKeyStore(keyStoreName);
             sha = MessageDigest.getInstance("SHA-1");
-            for (Enumeration e = ks.aliases(); e.hasMoreElements();) {
+            for (Enumeration e = trustStore.aliases(); e.hasMoreElements();) {
                 String alias = (String) e.nextElement();
-                Certificate[] certs = ks.getCertificateChain(alias);
+                Certificate[] certs = trustStore.getCertificateChain(alias);
                 if (certs == null || certs.length == 0) {
                     // no cert chain, so lets check if getCertificate gives us a result.
-                    cert = ks.getCertificate(alias);
+                    cert = trustStore.getCertificate(alias);
                     if (cert == null) {
                         return null;
                     }
@@ -205,20 +201,18 @@ public class IdentityProviderMgtUtil {
     }
 
     public static String getEncodedIdPCertFromAlias(String alias, int tenantId, String tenantDomain) throws IdentityProviderMgtException{
-        String keyStoreName = null;
-        try {
-            KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
-            if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
-                ServerConfigurationService config = ServerConfiguration.getInstance();
-                String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
-                keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
-            } else {
-                String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + "-truststore.jks";
-            }
-            KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
-            Certificate cert = ks.getCertificate(alias);
+        KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
+        try {
+            String trustStoreName = null;
+            KeyStore trustStore = null;
+            if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
+                trustStore = keyMan.getPrimaryKeyStore();
+            } else {
+                trustStoreName = tenantDomain.trim().replace(".", "-") + "-idp-mgt-truststore.jks";
+                trustStore = keyMan.getKeyStore(trustStoreName);
+            }
+            Certificate cert = trustStore.getCertificate(alias);
             if(cert != null){
                 return Base64.encode(cert.getEncoded());
             }
@@ -232,32 +226,31 @@ public class IdentityProviderMgtUtil {
 
     public static void importCertToStore(String alias, String certData, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
+        KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
         try {
-
-            KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
-            String keyStoreName = null;
+            String trustStoreName = null;
+            KeyStore trustStore = null;
             if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
-                ServerConfigurationService config = ServerConfiguration.getInstance();
-                String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
-                keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
+                trustStore = keyMan.getPrimaryKeyStore();
+                trustStoreName = getKeyStoreFileName(
+                        ServerConfiguration.getInstance().getFirstProperty(
+                                RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE));
             } else {
-                String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + "-truststore.jks";
+                trustStoreName = tenantDomain.trim().replace(".", "-") + "-idp-mgt-truststore.jks";
+                trustStore = keyMan.getKeyStore(trustStoreName);
             }
-            KeyStore ks = keyMan.getKeyStore(keyStoreName);
-
             byte[] bytes = Base64.decode(certData);
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
             X509Certificate cert;
             cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(bytes));
 
-            if (ks.getCertificate(alias) != null) {
+            if (trustStore.getCertificate(alias) != null) {
                 String msg = "Certificate with alias " + alias + " already exists for tenant";
                 log.error(msg + " " + tenantDomain);
                 throw new IdentityProviderMgtException(msg);
             }
-            ks.setCertificateEntry(alias, cert);
-            keyMan.updateKeyStore(keyStoreName, ks);
+            trustStore.setCertificateEntry(alias, cert);
+            keyMan.updateKeyStore(trustStoreName, trustStore);
 
         } catch (Exception e) {
             String msg = "Error occurred while importing IdP public certificate for tenant";
@@ -268,38 +261,37 @@ public class IdentityProviderMgtUtil {
 
     public static void updateCertToStore(String oldAlias, String newAlias, String certData, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
+        KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
         try {
-
-            KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
-            String keyStoreName = null;
+            String trustStoreName = null;
+            KeyStore trustStore = null;
             if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
-                ServerConfigurationService config = ServerConfiguration.getInstance();
-                String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
-                keyStoreName = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
+                trustStore = keyMan.getPrimaryKeyStore();
+                trustStoreName = getKeyStoreFileName(
+                        ServerConfiguration.getInstance().getFirstProperty(
+                                RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE));
             } else {
-                String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + "-truststore.jks";
-
+                trustStoreName = tenantDomain.trim().replace(".", "-") + "-idp-mgt-truststore.jks";
+                trustStore = keyMan.getKeyStore(trustStoreName);
             }
-            KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
             byte[] bytes = Base64.decode(certData);
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
             X509Certificate cert;
             cert = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(bytes));
 
-            if (ks.getCertificate(oldAlias) != null) {
+            if (trustStore.getCertificate(oldAlias) != null) {
                 if(log.isDebugEnabled()){
                     log.debug("Deleting existing certificate with alias " + oldAlias + " for tenant " + tenantDomain);
                 }
-                ks.deleteEntry(oldAlias);
+                trustStore.deleteEntry(oldAlias);
             } else {
                 if(log.isDebugEnabled()){
                     log.debug("No certificates found with alias" + oldAlias + " for tenant " + tenantDomain);
                 }
             }
-            ks.setCertificateEntry(newAlias, cert);
-            keyMan.updateKeyStore(keyStoreName, ks);
+            trustStore.setCertificateEntry(newAlias, cert);
+            keyMan.updateKeyStore(trustStoreName, trustStore);
 
         } catch (Exception e) {
             String msg = "Error occurred while importing IdP public certificate for tenant";
@@ -310,25 +302,26 @@ public class IdentityProviderMgtUtil {
 
     public static void deleteCertFromStore(String alias, int tenantId, String tenantDomain) throws IdentityProviderMgtException {
 
+        KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
         try {
-            KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
-            String keyStoreName = null;
+            String trustStoreName = null;
+            KeyStore trustStore = null;
             if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
-                ServerConfigurationService config = ServerConfiguration.getInstance();
-                String keyStorePath = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE);
-                keyStoreName  = IdentityProviderMgtUtil.getKeyStoreFileName(keyStorePath);
+                trustStore = keyMan.getPrimaryKeyStore();
+                trustStoreName = getKeyStoreFileName(
+                        ServerConfiguration.getInstance().getFirstProperty(
+                                RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_FILE));
             } else {
-                String ksName = tenantDomain.trim().replace(".", "-");
-                keyStoreName = ksName + "-truststore.jks";
+                trustStoreName = tenantDomain.trim().replace(".", "-") + "-idp-mgt-truststore.jks";
+                trustStore = keyMan.getKeyStore(trustStoreName);
             }
-            KeyStore ks = keyMan.getKeyStore(keyStoreName);
 
-            if (ks.getCertificate(alias) == null) {
-                log.warn("Certificate with alias " + alias + " does not exist in tenant key store " + keyStoreName);
+            if (trustStore.getCertificate(alias) == null) {
+                log.warn("Certificate with alias " + alias + " does not exist in tenant key store " + trustStore);
             } else {
-                ks.deleteEntry(alias);
+                trustStore.deleteEntry(alias);
+                keyMan.updateKeyStore(trustStoreName, trustStore);
             }
-            keyMan.updateKeyStore(keyStoreName, ks);
         } catch (Exception e) {
             String msg = "Error occurred while deleting IdP public certificate for tenant";
             log.error(msg + " " + tenantDomain, e);
@@ -363,6 +356,26 @@ public class IdentityProviderMgtUtil {
         } catch (Exception e) {
             log.error("Error occurred while decoding and reconstructing Certificate", e);
             throw new IdentityProviderMgtException("Error occurred while decoding and reconstructing Certificate");
+        }
+    }
+
+    public static void closeConnection(Connection dbConnection) {
+        if (dbConnection != null) {
+            try {
+                dbConnection.close();
+            } catch (SQLException e) {
+                log.error("Error occurred while closing database connection" + e);
+            }
+        }
+    }
+
+    public static void rollBack(Connection dbConnection) {
+        try {
+            if (dbConnection != null) {
+                dbConnection.rollback();
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while rolling back transactions", e);
         }
     }
 

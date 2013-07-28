@@ -29,6 +29,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.idp.mgt.IdPMetadataService;
 import org.wso2.carbon.idp.mgt.persistence.JDBCPersistenceManager;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -48,9 +49,24 @@ public class IdentityProviderMgtServiceComponent {
     protected void activate(ComponentContext ctxt) {
         try {
             BundleContext bundleCtx = ctxt.getBundleContext();
-            bundleCtx.registerService(IdPMetadataService.class.getName(),new IdPMetadataService(),null);
-            ServiceRegistration serviceRegistration = bundleCtx.registerService(UserOperationEventListener.class.getName(), new IdPMgtUserStoreListener(), null);
-            if(serviceRegistration != null){
+
+            IdPMgtTenantMgtListener idPMgtTenantMgtListener = new IdPMgtTenantMgtListener();
+            ServiceRegistration tenantMgtListenerSR = bundleCtx.registerService(TenantMgtListener.class.getName(), idPMgtTenantMgtListener, null);
+            if(tenantMgtListenerSR != null){
+                log.debug("Identity Provider Management TenantMgtListener registered");
+            } else {
+                log.error("Identity Provider Management TenantMgtListener could not be registered");
+            }
+
+            ServiceRegistration idpMetadataSR = bundleCtx.registerService(IdPMetadataService.class.getName(),new IdPMetadataService(),null);
+            if(idpMetadataSR != null){
+                log.debug("Identity Provider Management IdPMetadataService registered");
+            } else {
+                log.error("Identity Provider Management IdPMetadataService could not be registered");
+            }
+
+            ServiceRegistration userOperationListenerSR = bundleCtx.registerService(UserOperationEventListener.class.getName(), new IdPMgtUserStoreListener(), null);
+            if(userOperationListenerSR != null){
                 log.debug("Identity Provider Management UserStoreListener is enabled");
             } else {
                 log.error("Identity Provider Management UserStoreListener could not be registered");

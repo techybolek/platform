@@ -23,7 +23,6 @@ import org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.idp.mgt.model.TrustedIdPDO;
 import org.wso2.carbon.idp.mgt.util.IdentityProviderMgtConstants;
 import org.wso2.carbon.idp.mgt.util.IdentityProviderMgtUtil;
-import org.wso2.carbon.user.core.util.DatabaseUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,11 +57,11 @@ public class IdPMgtDAO {
         } catch (SQLException e){
             String msg = "Error occurred while retrieving registered IdP Issuers for tenant";
             log.error(msg + " " + tenantDomain, e);
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
             if(dbConnInitialized){
-                DatabaseUtil.closeConnection(dbConnection);
+                IdentityProviderMgtUtil.closeConnection(dbConnection);
             }
         }
     }
@@ -132,10 +131,10 @@ public class IdPMgtDAO {
         } catch (SQLException e){
             String msg = "Error occurred while retrieving IdP information for tenant";
             log.error(msg + " " + tenantDomain, e);
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeConnection(dbConnection);
+            IdentityProviderMgtUtil.closeConnection(dbConnection);
         }
     }
 
@@ -170,11 +169,11 @@ public class IdPMgtDAO {
             dbConnection.commit();
         } catch (SQLException e){
             String msg = "Error occurred while adding IdP for tenant";
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityProviderMgtUtil.rollBack(dbConnection);
             log.error(msg + " " + tenantDomain, e);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeConnection(dbConnection);
+            IdentityProviderMgtUtil.closeConnection(dbConnection);
         }
     }
 
@@ -275,10 +274,10 @@ public class IdPMgtDAO {
         } catch(SQLException e){
             String msg = "Error occurred while updating IdP information  for tenant";
             log.error(msg + " " + tenantDomain, e);
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeConnection(dbConnection);
+            IdentityProviderMgtUtil.closeConnection(dbConnection);
         }
     }
 
@@ -311,10 +310,10 @@ public class IdPMgtDAO {
         } catch (SQLException e){
             String msg = "Error occurred while deleting IdP of tenant";
             log.error(msg + " " + tenantDomain, e);
-            DatabaseUtil.rollBack(dbConnection);
+            IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeConnection(dbConnection);
+            IdentityProviderMgtUtil.closeConnection(dbConnection);
         }
     }
 
@@ -577,23 +576,46 @@ public class IdPMgtDAO {
         return 0;
     }
 
-    public void deleteTenantRole(String role) throws IdentityProviderMgtException {
+    public void deleteTenantRole(int tenantId, String role, String tenantDomain) throws IdentityProviderMgtException {
         Connection dbConnection = null;
         PreparedStatement prepStmt = null;
         try {
             dbConnection = IdentityProviderMgtUtil.getDBConnection();
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.DELETE_TENANT_ROLE_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
-            prepStmt.setString(1, role);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, role);
             prepStmt.executeUpdate();
             dbConnection.commit();
         } catch (SQLException e) {
-            String msg = "Error occurred while deleting roles of tenant";
-            log.error(msg, e);
-            DatabaseUtil.rollBack(dbConnection);
+            String msg = "Error occurred while deleting tenant role " + role + " of tenant";
+            log.error(msg + " " + tenantDomain, e);
+            IdentityProviderMgtUtil.rollBack(dbConnection);
             throw new IdentityProviderMgtException(msg);
         } finally {
-            DatabaseUtil.closeConnection(dbConnection);
+            IdentityProviderMgtUtil.closeConnection(dbConnection);
+        }
+    }
+
+    public void renameTenantRole(String newRoleName, int tenantId, String oldRoleName, String tenantDomain) throws IdentityProviderMgtException {
+        Connection dbConnection = null;
+        PreparedStatement prepStmt = null;
+        try {
+            dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            String sqlStmt = IdentityProviderMgtConstants.SQLQueries.RENAME_TENANT_ROLE_SQL;
+            prepStmt = dbConnection.prepareStatement(sqlStmt);
+            prepStmt.setString(1, newRoleName);
+            prepStmt.setInt(2, tenantId);
+            prepStmt.setString(3, oldRoleName);
+            prepStmt.executeUpdate();
+            dbConnection.commit();
+        } catch (SQLException e) {
+            String msg = "Error occurred while renaming tenant role " + oldRoleName + " to " + newRoleName + " of tenant";
+            log.error(msg + " " + tenantDomain, e);
+            IdentityProviderMgtUtil.rollBack(dbConnection);
+            throw new IdentityProviderMgtException(msg);
+        } finally {
+            IdentityProviderMgtUtil.closeConnection(dbConnection);
         }
     }
 

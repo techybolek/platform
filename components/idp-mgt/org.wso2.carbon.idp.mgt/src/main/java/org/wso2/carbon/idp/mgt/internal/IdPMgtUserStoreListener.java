@@ -17,25 +17,35 @@
 */
 package org.wso2.carbon.idp.mgt.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.idp.mgt.dao.IdPMgtDAO;
 import org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserOperationEventListener;
 
 public class IdPMgtUserStoreListener extends AbstractUserOperationEventListener {
 
-    private static final Log log = LogFactory.getLog(IdPMgtUserStoreListener.class);
-
     private IdPMgtDAO dao = new IdPMgtDAO();
 
-    public boolean doPostDeleteRole(String roleName, UserStoreManager um) throws UserStoreException {
+    public boolean doPostUpdateRoleName (String newRoleName, String oldRoleName, UserStoreManager um) throws UserStoreException {
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
         try {
-            dao.deleteTenantRole(roleName);
+            dao.renameTenantRole(newRoleName, tenantId, oldRoleName, tenantDomain);
         } catch (IdentityProviderMgtException e) {
-            throw new UserStoreException("Error occurred while deleting roles of tenant");
+            throw new UserStoreException(e.getMessage(), e);
+        }
+        return true;
+    }
+
+    public boolean doPostDeleteRole(String roleName, UserStoreManager userStoreManager) throws UserStoreException {
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
+        try {
+            dao.deleteTenantRole(tenantId, roleName, tenantDomain);
+        } catch (IdentityProviderMgtException e) {
+            throw new UserStoreException(e.getMessage(), e);
         }
         return true;
     }

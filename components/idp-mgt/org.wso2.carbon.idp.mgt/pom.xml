@@ -1,5 +1,5 @@
 <!--
-# Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+# Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,8 +43,18 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.user.core</artifactId>
+            <artifactId>org.wso2.carbon.user.api</artifactId>
             <version>${wso2carbon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.stratos.common</artifactId>
+            <version>2.2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.keystore.mgt</artifactId>
+            <version>2.2.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

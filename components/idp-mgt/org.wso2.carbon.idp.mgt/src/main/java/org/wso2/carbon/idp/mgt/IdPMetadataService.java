@@ -17,38 +17,13 @@
 */
 package org.wso2.carbon.idp.mgt;
 
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.util.Base64;
-import org.opensaml.xml.validation.ValidationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.wso2.carbon.idp.mgt.dao.IdPMgtDAO;
 import org.wso2.carbon.idp.mgt.dto.TrustedIdPDTO;
 import org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.idp.mgt.model.TrustedIdPDO;
-import org.wso2.carbon.idp.mgt.util.IdentityProviderMgtConstants;
 import org.wso2.carbon.idp.mgt.util.IdentityProviderMgtUtil;
 import org.wso2.carbon.idp.mgt.util.SAMLResponseValidator;
-import org.wso2.carbon.idp.mgt.util.X509CredentialImpl;
-import org.wso2.carbon.user.core.util.DatabaseUtil;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

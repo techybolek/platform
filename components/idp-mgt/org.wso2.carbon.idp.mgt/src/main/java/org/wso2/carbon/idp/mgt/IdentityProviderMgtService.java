@@ -25,9 +25,9 @@ import org.wso2.carbon.idp.mgt.dto.TrustedIdPDTO;
 import org.wso2.carbon.idp.mgt.exception.IdentityProviderMgtException;
 import org.wso2.carbon.idp.mgt.model.TrustedIdPDO;
 import org.wso2.carbon.idp.mgt.util.IdentityProviderMgtUtil;
-import org.wso2.carbon.user.core.util.DatabaseUtil;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 
-import java.sql.Connection;
 import java.util.*;
 
 public class IdentityProviderMgtService {
@@ -43,7 +43,7 @@ public class IdentityProviderMgtService {
      */
     public String[] getTenantIdPs() throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
-        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         List<String> tenantIdPs = null;
         try {
             tenantIdPs = dao.getTenantIdPs(null, tenantId, tenantDomain);
@@ -60,7 +60,7 @@ public class IdentityProviderMgtService {
      */
     public TrustedIdPDTO getTenantIdP(String issuer) throws IdentityProviderMgtException {
         String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
-        int tenantId = IdentityProviderMgtUtil.getTenantIdOfDomain(tenantDomain);
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         TrustedIdPDO trustedIdPDO = dao.getTenantIdP(issuer, tenantId, tenantDomain);
         TrustedIdPDTO trustedIdPDTO = null;
         if(trustedIdPDO != null){
@@ -188,6 +188,19 @@ public class IdentityProviderMgtService {
         if(newTrustedIdP.getRoleMappings() != null){
             for(String mapping:newTrustedIdP.getRoleMappings()){
                 String[] split = mapping.split(":");
+                UserStoreManager usm = null;
+                try {
+                    usm = CarbonContext.getCurrentContext().getUserRealm().getUserStoreManager();
+                    if(usm.isExistingRole(split[1]) || usm.isExistingRole(split[1], true)){
+                        String msg = "Cannot find tenant role " + split[1] + " for tenant";
+                        log.error(msg + " " + tenantDomain);
+                        throw new IdentityProviderMgtException(msg);
+                    }
+                } catch (UserStoreException e) {
+                    String msg = "Error occurred while retrieving UserStoreManager for tenant";
+                    log.error(msg + " " + tenantDomain);
+                    throw new IdentityProviderMgtException(msg);
+                }
                 mappings.put(split[0],split[1]);
             }
         }
@@ -241,6 +254,19 @@ public class IdentityProviderMgtService {
         if(trustedIdP.getRoleMappings() != null && trustedIdP.getRoleMappings().length > 0){
             for(String mapping:trustedIdP.getRoleMappings()){
                 String[] split = mapping.split(":");
+                UserStoreManager usm = null;
+                try {
+                    usm = CarbonContext.getCurrentContext().getUserRealm().getUserStoreManager();
+                    if(usm.isExistingRole(split[1]) || usm.isExistingRole(split[1], true)){
+                        String msg = "Cannot find tenant role " + split[1] + " for tenant";
+                        log.error(msg + " " + tenantDomain);
+                        throw new IdentityProviderMgtException(msg);
+                    }
+                } catch (UserStoreException e) {
+                    String msg = "Error occurred while retrieving UserStoreManager for tenant";
+                    log.error(msg + " " + tenantDomain);
+                    throw new IdentityProviderMgtException(msg);
+                }
                 mappings.put(split[0],split[1]);
             }
         }
@@ -271,9 +297,7 @@ public class IdentityProviderMgtService {
 
         dao.deleteTenantIdP(trustedIdPDO, tenantId, tenantDomain);
 
-        if(trustedIdP.getPublicCert() != null){
-            IdentityProviderMgtUtil.deleteCertFromStore(trustedIdP.getIdPIssuerId(), tenantId, tenantDomain);
-        }
+        IdentityProviderMgtUtil.deleteCertFromStore(trustedIdP.getIdPIssuerId(), tenantId, tenantDomain);
     }
 
 }
