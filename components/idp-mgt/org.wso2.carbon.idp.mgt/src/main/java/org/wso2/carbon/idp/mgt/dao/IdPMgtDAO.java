@@ -548,8 +548,15 @@ public class IdPMgtDAO {
 
     public int isTenantIdPExisting(Connection dbConnection, TrustedIdPDO trustedIdPDO, int tenantId, String tenantDomain)
             throws IdentityProviderMgtException {
+
+        boolean dbConnInitialized = true;
         PreparedStatement prepStmt = null;
         try {
+            if(dbConnection == null){
+                dbConnection = IdentityProviderMgtUtil.getDBConnection();
+            } else {
+                dbConnInitialized = false;
+            }
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.IS_EXISTING_TENANT_IDP_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
@@ -562,6 +569,10 @@ public class IdPMgtDAO {
             String msg = "Error occurred while retrieving IdP information for tenant " + tenantDomain;
             log.error(msg, e);
             throw new IdentityProviderMgtException(msg);
+        } finally {
+            if(dbConnInitialized){
+                IdentityProviderMgtUtil.closeConnection(dbConnection);
+            }
         }
         return 0;
     }

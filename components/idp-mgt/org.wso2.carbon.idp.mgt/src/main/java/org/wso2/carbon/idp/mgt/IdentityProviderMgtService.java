@@ -236,6 +236,12 @@ public class IdentityProviderMgtService {
             throw new IdentityProviderMgtException(msg);
         }
         trustedIdPDO.setIdPName(trustedIdP.getIdPName());
+        if(dao.isTenantIdPExisting(null, trustedIdPDO, tenantId, tenantDomain) > 0){
+            String msg = "An IdP has already been registered with the name " + trustedIdPDO.getIdPName() +
+                    " for tenant " + tenantDomain;
+            log.error(msg);
+            throw new IdentityProviderMgtException(msg);
+        }
         trustedIdPDO.setIdPIssuerId(trustedIdP.getIdPIssuerId());
         trustedIdPDO.setPrimary(trustedIdP.isPrimary());
         trustedIdPDO.setIdPUrl(trustedIdP.getIdPUrl());
