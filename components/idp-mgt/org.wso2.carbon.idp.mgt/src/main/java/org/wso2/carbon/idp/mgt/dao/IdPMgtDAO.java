@@ -321,9 +321,9 @@ public class IdPMgtDAO {
         PreparedStatement prepStmt = null;
         String sqlStmt = IdentityProviderMgtConstants.SQLQueries.SWITCH_TENANT_IDP_PRIMARY_SQL;
         prepStmt = conn.prepareStatement(sqlStmt);
-        prepStmt.setByte(1, new Integer(0).byteValue());
+        prepStmt.setString(1, "0");
         prepStmt.setInt(2, tenantId);
-        prepStmt.setByte(3, new Integer(1).byteValue());
+        prepStmt.setString(3, "1");
         prepStmt.executeUpdate();
     }
 
@@ -333,10 +333,10 @@ public class IdPMgtDAO {
             PreparedStatement prepStmt = null;
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.SWITCH_TENANT_IDP_PRIMARY_ON_DELETE_SQL;
             prepStmt = conn.prepareStatement(sqlStmt);
-            prepStmt.setByte(1, new Integer(1).byteValue());
+            prepStmt.setString(1, "1");
             prepStmt.setInt(2, tenantId);
             prepStmt.setString(3, tenantIdPs.get(0));
-            prepStmt.setByte(4, new Integer(0).byteValue());
+            prepStmt.setString(4, "0");
             prepStmt.executeUpdate();
         } else {
             String msg = "No IdPs registered for tenant " + tenantDomain;
@@ -564,7 +564,7 @@ public class IdPMgtDAO {
             String sqlStmt = IdentityProviderMgtConstants.SQLQueries.IS_EXISTING_PRIMARY_TENANT_IDP_SQL;
             prepStmt = dbConnection.prepareStatement(sqlStmt);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setByte(2, new Integer(1).byteValue());
+            prepStmt.setString(2, "1");
             ResultSet rs = prepStmt.executeQuery();
             if(rs.next()){
                 return rs.getInt(1);
