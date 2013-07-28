@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.openidconnect.as.OIDC;
 import org.apache.oltu.openidconnect.as.util.OIDCAuthzServerUtil;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
+import org.wso2.carbon.identity.oauth.endpoint.OAuthRequestWrapper;
 import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth.util.EndpointUtil;
@@ -40,6 +41,7 @@ import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.util.CharacterEncoder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -57,8 +59,7 @@ public class OAuth2AuthzEndpoint {
     @Path("/")
     @Consumes("application/x-www-form-urlencoded")
     @Produces("text/html")
-    public Response authorize(@Context HttpServletRequest request, MultivaluedMap<String, String> paramMap) throws URISyntaxException {
-
+    public Response authorize(@Context HttpServletRequest request) throws URISyntaxException {
 
             String clientId = CharacterEncoder.getSafeText(request.getParameter("client_id"));
             OAuth2Parameters oauth2Params = (OAuth2Parameters) request.getSession().getAttribute(OAuthConstants.OAUTH2_PARAMS);
@@ -105,7 +106,8 @@ public class OAuth2AuthzEndpoint {
     @Consumes("application/x-www-form-urlencoded")
     @Produces("text/html")
     public Response authorizePost(@Context HttpServletRequest request, MultivaluedMap<String, String> paramMap) throws URISyntaxException {
-        return authorize(request, paramMap);
+		HttpServletRequestWrapper httpRequest = new OAuthRequestWrapper(request, paramMap);
+		return authorize(httpRequest);
     }
 
 	/**
