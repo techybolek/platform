@@ -85,7 +85,7 @@
                         <Bundle-Description>
                             ${pom.description}
                         </Bundle-Description>
-                        <Bundle-Version>1.6.2</Bundle-Version>
+                        <Bundle-Version>4.0.2</Bundle-Version>
                         <Export-Package>
                             org.wso2.caching.*,
                         </Export-Package>
