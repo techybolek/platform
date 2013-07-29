@@ -166,10 +166,6 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
 
 }
 
-var updateTokenValidity = function(appName, keyType, btn) {
-    alert('update token time with time ' + $('.token-validity-input',$(btn).parent()).val());
-
-};
 
 var updateAccessAllowDomains = function(appName, keyType, i, btn) {
     var elem = $(btn);
