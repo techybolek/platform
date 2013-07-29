@@ -186,7 +186,7 @@ public class TokenMgtDAO {
                 accessTokenStoreTable = accessTokenStoreTable + "_" + userStoreDomain;
             }
 
-            String oracleSQL = null, mySQLSQL = null, msSQL = null;
+            String oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null;
             if(includeExpiredTokens){
                 oracleSQL =
                         "SELECT * FROM( " +
@@ -204,6 +204,13 @@ public class TokenMgtDAO {
 
                 msSQL = "SELECT TOP 1 ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, VALIDITY_PERIOD, TOKEN_STATE FROM IDN_OAUTH2_ACCESS_TOKEN " +
                         "WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED') AND USER_TYPE= ? ORDER BY TIME_CREATED DESC";
+
+                postgreSQL = "SELECT * FROM(SELECT ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, VALIDITY_PERIOD, TOKEN_STATE " +
+                             " FROM " + accessTokenStoreTable + " WHERE CONSUMER_KEY = ? " +
+                             " AND AUTHZ_USER = ? " +
+                             " AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED') AND USER_TYPE= ? " +
+                             " ORDER BY TIME_CREATED DESC) AS TOKEN " +
+                             " LIMIT 1 ";
             } else {
                 oracleSQL =
                         "SELECT * FROM( " +
@@ -221,6 +228,12 @@ public class TokenMgtDAO {
 
                 msSQL = "SELECT TOP 1 ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, VALIDITY_PERIOD, TOKEN_STATE FROM IDN_OAUTH2_ACCESS_TOKEN " +
                         "WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND TOKEN_STATE='ACTIVE' AND USER_TYPE= ? ORDER BY TIME_CREATED DESC";
+                postgreSQL = "SELECT * FROM(SELECT ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, VALIDITY_PERIOD, TOKEN_STATE " +
+                                    " FROM " + accessTokenStoreTable + " WHERE CONSUMER_KEY = ? " +
+                                    " AND AUTHZ_USER = ? " +
+                                    " AND TOKEN_STATE='ACTIVE' AND USER_TYPE= ? " +
+                                    " ORDER BY TIME_CREATED DESC) AS TOKEN " +
+                                    " LIMIT 1 ";
             }
             if (connection.getMetaData().getDriverName().contains("MySQL")
                     || connection.getMetaData().getDriverName().contains("H2")) {
@@ -228,8 +241,9 @@ public class TokenMgtDAO {
             }
             else if(connection.getMetaData().getDriverName().contains("MS SQL")){
                 sql = msSQL;
-            }
-            else {
+            } else if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                sql = postgreSQL;
+            } else {
                 sql = oracleSQL;
             }
             prepStmt = connection.prepareStatement(sql);
