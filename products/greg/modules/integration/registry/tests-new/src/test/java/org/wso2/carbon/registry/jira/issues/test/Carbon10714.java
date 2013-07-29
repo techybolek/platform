@@ -16,10 +16,6 @@
 
 package org.wso2.carbon.registry.jira.issues.test;
 
-import java.rmi.RemoteException;
-
-import javax.xml.namespace.QName;
-
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -39,13 +35,18 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceFilter;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.services.ArrayOfString;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
+
+import javax.xml.namespace.QName;
+import java.rmi.RemoteException;
 
 public class Carbon10714 {
     private static final String SERVICE_LIFE_CYCLE = "ServiceLifeCycle";
@@ -262,9 +263,9 @@ public class Carbon10714 {
      *
      */
     @Test(groups = {"wso2.greg"}, description = "Promoted Services")
-    public void testPromotedServices() throws GovernanceException, RemoteException,
-                                              LifeCycleManagementServiceExceptionException,
-                                              CustomLifecyclesChecklistAdminServiceExceptionException {
+    public void testPromotedServices() throws RegistryException, RemoteException,
+            LifeCycleManagementServiceExceptionException,
+            CustomLifecyclesChecklistAdminServiceExceptionException {
         serviceForPromoting =
                 serviceManager.newService(new QName(
                         "http://service.delete.branch/mnm/beep",
@@ -278,6 +279,7 @@ public class Carbon10714 {
         String ACTION_PROMOTE = "Promote";
         lifeCycleAdminService.invokeAspectWithParams(servicePathDev, SERVICE_LIFE_CYCLE,
                                                      ACTION_PROMOTE, null, parameters);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service searchResult = serviceManager.findServices(new ServiceFilter() {
             public boolean matches(Service service) throws GovernanceException {
                 String attributeVal = service.getAttribute("overview_name");
@@ -309,13 +311,14 @@ public class Carbon10714 {
     @Test(groups = {"wso2.greg"}, description = "Try out wild card search from the basic filter",
           dependsOnMethods = "testPromotedServices")
     public void testWildCardSearch()
-            throws RemoteException, ResourceAdminServiceExceptionException {
+            throws RemoteException, ResourceAdminServiceExceptionException, GovernanceException {
         String criteria = null;
-        String[] names = listMetaDataServiceClient.listServices(criteria).getNames();
+        Service [] services = serviceManager.getAllServices();
         int count = 0;
 
-        for (String name : names) {
-            if (name.contains("serviceForSearching") || name.contains("serviceForPromotingNew1")) {
+        for (Service service : services) {
+            if (service.getQName().getLocalPart().contains("serviceForSearching") ||
+                    service.getQName().getLocalPart().contains("serviceForPromotingNew1")) {
                 count++;
             }
         }
