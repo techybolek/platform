@@ -20,24 +20,18 @@
 package org.wso2.carbon.mediation.security.vault;
 
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.base.api.ServerConfigurationService;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
-//TODO: neeed to cache the evaluate method, give 15seconds to lookup the evaluated path
-//then if all the predefined critarias success then use the cache object else refresh the map
-//@see org.wso2.carbon.mediation.registry.WSO2Registry cachableDuration
-//synCtx.getConfiguration().getRegistry().getConfigurationProperties().getProperty(key)
+
 public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 
 	private static Log log = LogFactory.getLog(SecureVaultLookupHandlerImpl.class);
@@ -142,7 +136,8 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 			throws RegistryException {
 		if (decryptedCacheMap.containsKey(aliasPasword)) {
 			SecureVaultCacheContext cacheContext = decryptedCacheMap.get(aliasPasword);
-			long cacheTime = 15000;
+			String cacheDurable = synCtx.getConfiguration().getRegistry().getConfigurationProperties().getProperty("cachableDuration");
+			long cacheTime = (cacheDurable != null && !cacheDurable.isEmpty())? Long.parseLong(cacheDurable):10000;
 			if((cacheContext.getDateTime().getTime()+cacheTime)>=System.currentTimeMillis()){
 				//which means the given value between the cachable limit
 				return cacheContext.getDecryptedValue();
