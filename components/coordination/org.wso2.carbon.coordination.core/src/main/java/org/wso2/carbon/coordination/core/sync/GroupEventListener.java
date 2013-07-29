@@ -32,5 +32,9 @@ public interface GroupEventListener {
 	public void onGroupMessage(byte[] data);
 	
 	public byte[] onPeerMessage(byte[] data) throws CoordinationException;
+
+    public void onExpired();
+
+    public void onConnect();
 	
 }

@@ -32,6 +32,7 @@ import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.wso2.carbon.coordination.common.CoordinationException;
 import org.wso2.carbon.coordination.common.CoordinationException.ExceptionCode;
+import org.wso2.carbon.coordination.core.services.impl.ZKCoordinationService;
 import org.wso2.carbon.coordination.core.utils.CoordinationUtils;
 
 /**
@@ -63,8 +64,11 @@ public abstract class ZKSyncPrimitive implements Watcher {
 		this.rootPath = CoordinationUtils.createPathFromId(baseName, id);
 		this.eventQueue = new LinkedBlockingQueue<WatchedEvent>();
 		this.waitTimeout = waitTimeout;
-		this.createRecursive(this.getRootPath());
 	}
+
+    protected void init () throws CoordinationException {
+        this.createRecursive(this.getRootPath());
+    }
 	
 	public String getRootPath() {
 		return rootPath;
@@ -128,8 +132,12 @@ public abstract class ZKSyncPrimitive implements Watcher {
 			}
 		}
 	}
-	
-	/**
+
+    public void setZooKeeper(ZooKeeper zooKeeper) {
+        this.zooKeeper = zooKeeper;
+    }
+
+    /**
 	 * Represents a ZooKeeper path. 
 	 */
 	private class ZKPath {
@@ -220,5 +228,18 @@ public abstract class ZKSyncPrimitive implements Watcher {
 		    this.getEventQueue().add(event);
 		}
 	}
+
+    public void init(String id) throws CoordinationException{
+
+    }
+
+    public void onExpired(){
+
+    }
+
+    public void onConnect(String id){
+
+    }
+
 	
 }

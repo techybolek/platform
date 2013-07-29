@@ -156,7 +156,17 @@ public class Tester implements Watcher, GroupEventListener {
 		return req;
 	}
 
-	@Override
+    @Override
+    public void onExpired() {
+        System.out.println("Member Expired: ");
+    }
+
+    @Override
+    public void onConnect() {
+        System.out.println("Member connected");
+    }
+
+    @Override
 	public void onMemberArrival(String newMemberId) {
 		System.out.println("Member Arrived: " + newMemberId);
 	}

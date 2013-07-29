@@ -35,17 +35,17 @@ public class CoordinationUtils {
 	}
 	
 	public static String createPathFromId(String context, String id) {
-		int tenantId;
+		String tenantDomain;
 		try {
-		    tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+		    tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
 		} catch (Throwable e) {
 			/* when running tests */
-			tenantId = MultitenantConstants.SUPER_TENANT_ID;
+			tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 		}
-		if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
-			tenantId = MultitenantConstants.SUPER_TENANT_ID;
+		if (tenantDomain == null) {
+			tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 		}
-		return CoordinationConstants.CONTENT_PATH_ROOT + "/" + tenantId + "/" + context + "/" + id; 		
+		return CoordinationConstants.CONTENT_PATH_ROOT + "/" + tenantDomain + "/" + context + "/" + id;
 	}
 	
 	public static boolean isJVMShuttingDown() {

@@ -80,7 +80,17 @@ public class GroupTest extends BaseTestCase implements GroupEventListener {
 		return null;
 	}
 
-	@Override
+    @Override
+    public void onExpired() {
+        System.out.println("Member Expired");
+    }
+
+    @Override
+    public void onConnect() {
+        System.out.println("Member Connected");
+    }
+
+    @Override
 	public void onMemberArrival(String newMemberId) {
 		System.out.println("Member Arrived: " + newMemberId);
 	}

@@ -15,16 +15,8 @@
  */
 package org.wso2.carbon.coordination.core.services.impl;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
@@ -32,17 +24,16 @@ import org.wso2.carbon.coordination.common.CoordinationException;
 import org.wso2.carbon.coordination.common.CoordinationException.ExceptionCode;
 import org.wso2.carbon.coordination.core.CoordinationConfiguration;
 import org.wso2.carbon.coordination.core.services.CoordinationService;
-import org.wso2.carbon.coordination.core.sync.Barrier;
-import org.wso2.carbon.coordination.core.sync.Group;
-import org.wso2.carbon.coordination.core.sync.IntegerCounter;
-import org.wso2.carbon.coordination.core.sync.Lock;
+import org.wso2.carbon.coordination.core.sync.*;
 import org.wso2.carbon.coordination.core.sync.Queue;
-import org.wso2.carbon.coordination.core.sync.impl.ZKBarrier;
-import org.wso2.carbon.coordination.core.sync.impl.ZKGroup;
-import org.wso2.carbon.coordination.core.sync.impl.ZKIntegerCounter;
-import org.wso2.carbon.coordination.core.sync.impl.ZKLock;
-import org.wso2.carbon.coordination.core.sync.impl.ZKQueue;
+import org.wso2.carbon.coordination.core.sync.impl.*;
 import org.wso2.carbon.coordination.core.utils.CoordinationUtils;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Coordination service implementation class.
@@ -56,6 +47,8 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 	public static final int ZNODE_CLEANUP_DELAY = 1000 * 60 * 2;
 	
 	public static final int ZNODE_CLEANUP_TASK_INTERVAL = 1000 * 30;
+
+    public static final int SESSION_TIME_OUT_WAITING_DELAY = 2000;
 	
 	private static final Log log = LogFactory.getLog(ZKCoordinationService.class);
 	
@@ -64,19 +57,29 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 	private boolean enabled;
 	
 	private boolean closed;
+
+    private boolean expired;
+
+    private boolean cleanUpDone;
 	
 	private static ScheduledExecutorService scheduler;
 	
 	private static List<ZNodeDeletionEntry> znodeTimerDeletionList;
 	
 	private static List<String> znodeOnCloseDeletionList;
-	
-	public ZKCoordinationService(CoordinationConfiguration conf) throws CoordinationException {
+
+    private Set<ZKSyncPrimitive> syncPrimitives;
+
+    private CoordinationConfiguration coordinationConf;
+
+   	public ZKCoordinationService(CoordinationConfiguration conf) throws CoordinationException {
 		this.closed = false;
 		this.enabled = conf.isEnabled();
+        this.coordinationConf = conf;
+        this.syncPrimitives = new HashSet<ZKSyncPrimitive>();
 		if (this.isEnabled()) {
 		    try {
-			    this.zooKeeper = new ZooKeeper(conf.getConnectionString(), 
+			    this.zooKeeper = new ZooKeeper(conf.getConnectionString(),
 			    		conf.getSessionTimeout(), this);
 			    if (znodeOnCloseDeletionList == null) {
 			    	znodeOnCloseDeletionList = new Vector<String>();
@@ -108,8 +111,16 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 	public static List<String> getZNodeOnCloseDeletionList() {
 		return znodeOnCloseDeletionList;
 	}
-	
-	@Override
+
+    public Set<ZKSyncPrimitive> getSyncPrimitives() {
+        return syncPrimitives;
+    }
+
+    public CoordinationConfiguration getCoordinationConf() {
+        return coordinationConf;
+    }
+
+    @Override
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -123,7 +134,9 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 	@Override
 	public Barrier createBarrier(String id, int count, int waitTimeout) throws CoordinationException {
 		this.checkService();
-		return new ZKBarrier(this.getZooKeeper(), id, count, waitTimeout);
+        ZKBarrier barrier = new ZKBarrier(this.getZooKeeper(), id, count, waitTimeout);
+        this.getSyncPrimitives().add(barrier);
+		return barrier;
 	}
 
 	@Override
@@ -133,13 +146,17 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 			throw new CoordinationException("'" + ZKGroup.GROUP_COMM_NODE_ID + 
 					"' cannot be used a group id, since it is reserved.", ExceptionCode.GENERIC_ERROR);
 		}
-		return new ZKGroup(this.getZooKeeper(), id);
+        ZKGroup group = new ZKGroup(this.getZooKeeper(), id);
+        this.getSyncPrimitives().add(group);
+		return group;
 	}
 
 	@Override
 	public Queue createQueue(String id, int waitTimeout) throws CoordinationException {
 		this.checkService();
-		return new ZKQueue(this.getZooKeeper(), id, waitTimeout);
+        ZKQueue queue = new ZKQueue(this.getZooKeeper(), id, waitTimeout);
+        this.getSyncPrimitives().add(queue);
+		return queue;
 	}
 	
 	public ZooKeeper getZooKeeper() {
@@ -175,7 +192,9 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 	@Override
 	public Lock createLock(String id, int waitTimeout) throws CoordinationException {
 		this.checkService();
-		return new ZKLock(this.getZooKeeper(), id, waitTimeout);
+        ZKLock lock = new ZKLock(this.getZooKeeper(), id, waitTimeout);
+        this.getSyncPrimitives().add(lock);
+		return lock;
 	}
 	
 	public static void scheduleOnCloseZNodeDeletion(String path) {
@@ -193,8 +212,24 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 			// ignore
 		}
 	}
-	
-	private static class ZNodeDeletionEntry {
+
+    public boolean isCleanUpDone() {
+        return cleanUpDone;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public void setCleanUpDone(boolean cleanUpDone) {
+        this.cleanUpDone = cleanUpDone;
+    }
+
+    private static class ZNodeDeletionEntry {
 		
 		private long createdTime;
 		
@@ -233,7 +268,45 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 
 	@Override
 	public void process(WatchedEvent event) {
-		if (log.isDebugEnabled()) {
+        if (event.getType() == Event.EventType.None) {
+            Event.KeeperState state = event.getState();
+            switch (state) {
+                case SyncConnected:
+                    this.setCleanUpDone(false);
+                    if (!isExpired()) {
+                        Iterator<ZKSyncPrimitive> primitiveIterator = this.getSyncPrimitives().iterator();
+                        while (primitiveIterator.hasNext()) {
+                            String primitiveId = primitiveIterator.next().getId();
+                            primitiveIterator.next().onConnect(primitiveId);
+                        }
+                    }
+                    this.setExpired(false);
+                    break;
+                case Disconnected:
+                    Timer sessionExpireHandlerTimer = new Timer();
+                    /* Task to check whether session is expired */
+                    sessionExpireHandlerTimer.schedule(new SessionExpireHandler(), this.getCoordinationConf().
+                            getSessionTimeout() + SESSION_TIME_OUT_WAITING_DELAY);
+                    break;
+                case Expired:
+                    this.setExpired(true);
+                    this.cleanUp();
+                    try {
+                        this.getZooKeeper().close();
+                        this.zooKeeper = new ZooKeeper(this.getCoordinationConf().getConnectionString(),
+                                this.getCoordinationConf().getSessionTimeout(), this);
+                        for (ZKSyncPrimitive primitive : this.getSyncPrimitives()) {
+                            primitive.setZooKeeper(this.zooKeeper);
+                            String primitiveId = primitive.getId();
+                            primitive.onConnect(primitiveId);
+                        }
+                    } catch (Exception e) {
+                        new CoordinationException(ExceptionCode.IO_ERROR, e);
+                    }
+                    break;
+            }
+        }
+        if (log.isDebugEnabled()) {
 			log.debug("At ZKCoordinationService#process: " + event.toString());
 		}
 	}
@@ -244,5 +317,22 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 		this.checkService();
 		return new ZKIntegerCounter(this.getZooKeeper(), id);
 	}
+
+    private synchronized void cleanUp() {
+        if(!isCleanUpDone())  {
+            for (ZKSyncPrimitive primitive : getSyncPrimitives()) {
+                primitive.onExpired();
+            }
+        }
+        this.setCleanUpDone(true);
+    }
+
+    private class SessionExpireHandler extends TimerTask {
+
+        @Override
+        public void run() {
+            cleanUp();
+        }
+    }
 
 }

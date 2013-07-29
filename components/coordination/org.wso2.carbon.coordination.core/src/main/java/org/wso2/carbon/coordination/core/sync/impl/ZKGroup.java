@@ -15,30 +15,9 @@
  */
 package org.wso2.carbon.coordination.core.sync.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.*;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.data.Stat;
@@ -48,6 +27,16 @@ import org.wso2.carbon.coordination.core.services.impl.ZKCoordinationService;
 import org.wso2.carbon.coordination.core.sync.Group;
 import org.wso2.carbon.coordination.core.sync.GroupEventListener;
 import org.wso2.carbon.coordination.core.utils.CoordinationUtils;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * ZooKeeper based node group implementation.
@@ -86,25 +75,34 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 	private static Marshaller peerRequestMarshaller;
 	
 	private static Marshaller peerResponseMarshaller;
-	
+
 	private static Unmarshaller peerRequestUnmarshaller;
-	
+
 	private static Unmarshaller peerResponseUnmarshaller;
-	
+
 	private Object memberArrivalCountLock = new Object();
 		
-	public ZKGroup(ZooKeeper zooKeeper, String groupId)
-			throws CoordinationException {
-		super(zooKeeper, ZKGroup.class.getCanonicalName(), groupId, -1);
-		this.lastProcessedMemberIds = new ArrayList<String>();
-		this.initMessageSerializers();
-		this.peerRequestChannels = new HashMap<String, ZKGroup.CommunicationChannel>();
-		this.initGroupCommChannel();
-		this.initPeerResults();
-		this.join(this.getGroupId());
-		this.initMyRequestCommChannel();
-		this.active = true;
+	public ZKGroup(ZooKeeper zooKeeper, String groupId) throws CoordinationException {
+        super(zooKeeper, ZKGroup.class.getCanonicalName(), groupId, -1);
+        this.lastProcessedMemberIds = new ArrayList<String>();
+        this.initMessageSerializers();
+        this.init(this.getGroupId());
 	}
+
+    @Override
+    public void init(String groupId) {
+        try {
+            super.init(groupId);
+            this.peerRequestChannels = new HashMap<String, ZKGroup.CommunicationChannel>();
+            this.initGroupCommChannel();
+            this.initPeerResults();
+            this.join(groupId);
+            this.initMyRequestCommChannel();
+            this.active = true;
+        } catch (CoordinationException ex) {
+            log.error("Error while creating the group : " + groupId);
+        }
+    }
 	
 	private void initMessageSerializers() throws CoordinationException {
 		try {
@@ -230,8 +228,8 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 			/* smallest id will be the leader, atleast myself should be here */
 			this.lastProcessedMemberIds = newMembers;
 			this.processArrivals(oldMembers);
-			this.processDepartures(oldMembers);
-			this.processLeader(oldLeaderId);			
+            this.processLeader(oldLeaderId);
+            this.processDepartures(oldMembers);
 			/* notify any wait for members situation */
 			synchronized (this.memberArrivalCountLock) {
 				this.memberArrivalCountLock.notifyAll();
@@ -911,5 +909,20 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 			}
 		}
 	}
+
+    @Override
+    public void onExpired(){
+        if (this.getGroupEventListener() != null) {
+            this.getGroupEventListener().onExpired();
+        }
+    }
+
+    @Override
+    public void onConnect(String groupId) {
+        this.init(groupId);
+        if (this.getGroupEventListener() != null) {
+            this.getGroupEventListener().onConnect();
+        }
+    }
 	
 }
