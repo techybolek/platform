@@ -2189,7 +2189,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         long validityPeriod = getApplicationAccessTokenValidityPeriod();
-        if(validityTime != null){
+        if(validityTime != null && !"".equals(validityTime)){
         	validityPeriod = Long.parseLong(validityTime);
         }
         
