@@ -31,15 +31,20 @@ import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.ServerGroupManager;
 import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
 import org.wso2.carbon.automation.core.annotations.SetEnvironment;
-import org.wso2.carbon.automation.core.utils.UserInfo;
-import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkFactory;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkProperties;
-import org.wso2.carbon.governance.list.stub.beans.xsd.ServiceBean;
-import org.wso2.carbon.governance.list.stub.beans.xsd.WSDLBean;
+import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.services.ServiceManager;
+import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.wsdls.WsdlManager;
+import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
+import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.activation.DataHandler;
@@ -52,7 +57,6 @@ import java.rmi.RemoteException;
 import java.util.Iterator;
 
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 
@@ -65,6 +69,9 @@ public class Carbon11572 {
     private FileOutputStream fileOutputStream;
     private XMLStreamWriter writer;
     private int userId = ProductConstant.ADMIN_USER_ID;
+    private Registry governance;
+    private WsdlManager wsdlManager;
+    private ServiceManager serviceManager;
 
     @BeforeClass(alwaysRun = true)
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
@@ -73,7 +80,7 @@ public class Carbon11572 {
         init();
     }
 
-    private void init() throws RemoteException, LoginAuthenticationExceptionException {
+    private void init() throws RemoteException, LoginAuthenticationExceptionException, RegistryException {
         EnvironmentBuilder builder = new EnvironmentBuilder().greg(userId);
         ManageEnvironment environment = builder.build();
         serverAdminClient = new ServerAdminClient(environment.getGreg().getProductVariables().getBackendUrl(),
@@ -84,6 +91,18 @@ public class Carbon11572 {
         listMetaDataServiceClient =
                 new ListMetaDataServiceClient(environment.getGreg().getBackEndUrl(),
                                               environment.getGreg().getSessionCookie());
+        WSRegistryServiceClient wsRegistry =
+                new RegistryProviderUtil().getWSRegistry(userId,
+                        ProductConstant.GREG_SERVER_NAME);
+        RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
+        wsRegistry =
+                registryProviderUtil.getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME);
+        governance = registryProviderUtil.getGovernanceRegistry(wsRegistry, userId);
+
+         wsdlManager = new WsdlManager(governance);
+
+         serviceManager = new ServiceManager(governance);
+
     }
 
     @Test(groups = {"wso2.greg"}, description = "change registry.xml and restart server")
@@ -143,71 +162,58 @@ public class Carbon11572 {
             "wso2.greg"}, description = "add a WSDL without creating a service", dependsOnMethods = "editRegistryXML")
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
     public void addWSDL()
-            throws ResourceAdminServiceExceptionException, RemoteException, MalformedURLException {
+            throws ResourceAdminServiceExceptionException, RemoteException, MalformedURLException, GovernanceException {
         boolean nameExists = false;
         //add WSDL file
         String path1 = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" + File.separator
                        + "GREG" + File.separator + "wsdl" + File.separator + "echo.wsdl";
         DataHandler dataHandler1 = new DataHandler(new URL("file:///" + path1));
 
-        WSDLBean wsdlBean = listMetaDataServiceClient.listWSDLs();
-        String[] paths = wsdlBean.getPath();
+
+       Wsdl[] wsdls = wsdlManager.getAllWsdls();
 
         //delete wsdl if exists
-        if (paths != null) {
-            if (paths.length > 0) {
-                for (String path : paths) {
-                    if (path.equals("echo.wsdl")) {
-                        resourceAdminClient.deleteResource(path);
+        if (wsdls != null) {
+                for (Wsdl wsdl : wsdls) {
+                    if ("echo.wsdl".equals(wsdl.getQName().getLocalPart())) {
+                        resourceAdminClient.deleteResource(wsdl.getPath());
                         break;
                     }
                 }
-            }
         }
 
-        ServiceBean serviceBean = listMetaDataServiceClient.listServices(null);
-        String[] serviceBeanPath = serviceBean.getPath();
+       Service[] services = serviceManager.getAllServices();
 
         //delete service if exists
-        if (serviceBeanPath != null) {
-            if (serviceBeanPath.length > 0) {
-                for (String servicePath : serviceBeanPath) {
-                    if (servicePath.equals("echoyuSer1")) {
-                        resourceAdminClient.deleteResource(servicePath);
+        if (services != null) {
+                for (Service service : services) {
+                    if ("echoyuSer1".equals(service.getPath())) {
+                        resourceAdminClient.deleteResource(service.getPath());
                         break;
                     }
-                }
             }
         }
-
         resourceAdminClient.addWSDL("desc 1", dataHandler1);
 
-        WSDLBean wsdlBeanAfter = listMetaDataServiceClient.listWSDLs();
-        String[] names1 = wsdlBeanAfter.getName();
-        if (names1.length > 0) {
-            for (String name : names1) {
-                if (name.equalsIgnoreCase("echo.wsdl")) {
+        wsdls = wsdlManager.getAllWsdls();
+
+            for (Wsdl wsdl: wsdls) {
+                if ("echo.wsdl".equals(wsdl.getQName().getLocalPart())) {
                     nameExists = true;
                 }
-            }
+
         }
         assertTrue(nameExists);
         //check whether the service is created
 
         boolean serviceStatus = false;
 
-        ServiceBean serviceBeanAfter = listMetaDataServiceClient.listServices(null);
-        String[] serviceBeanPathAfter = serviceBeanAfter.getPath();
+        services = serviceManager.getAllServices();
 
-        //delete service if exists
-        if (serviceBeanPathAfter != null) {
-            if (serviceBeanPathAfter.length > 0) {
-                for (String servicePath : serviceBeanPathAfter) {
-                    if (servicePath.equals("echoyuSer1")) {
-                        serviceStatus = true;
-                        break;
-                    }
-                }
+        for (Service service : services) {
+            if ("echoyuSer1".equals(service.getQName().getLocalPart())) {
+                serviceStatus = true;
+                break;
             }
         }
 
