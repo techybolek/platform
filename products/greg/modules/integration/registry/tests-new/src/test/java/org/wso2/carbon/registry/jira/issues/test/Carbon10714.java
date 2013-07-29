@@ -311,8 +311,9 @@ public class Carbon10714 {
     @Test(groups = {"wso2.greg"}, description = "Try out wild card search from the basic filter",
           dependsOnMethods = "testPromotedServices")
     public void testWildCardSearch()
-            throws RemoteException, ResourceAdminServiceExceptionException, GovernanceException {
+            throws RemoteException, ResourceAdminServiceExceptionException, RegistryException {
         String criteria = null;
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service [] services = serviceManager.getAllServices();
         int count = 0;
 
