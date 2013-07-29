@@ -83,7 +83,7 @@ public abstract class AbstractObjectFieldContext implements FieldContext {
 	}
 	
 	@Override
-	public Object getCurrentValue() {
+	public Object getCurrentValue() throws FieldContextException {
 		return this.getClass().getName();
 	}
 	
