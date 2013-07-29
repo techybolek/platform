@@ -256,6 +256,7 @@
              <modules>
             <module>integration/security-verifier</module>
             <module>as</module>
+            <module>greg</module>
             <!--module>is</module>
             <module>esb</module>
             <module>greg</module>
