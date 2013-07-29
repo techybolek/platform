@@ -348,7 +348,22 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
                 log.debug("No changes in the local working copy");
             }
         } catch (SVNClientException e) {
-            handleException("Error while committing artifacts to the SVN repository", e);
+            String message = e.getMessage();
+            String pattern = System.getProperty("line.separator");
+            message = message.replaceAll(pattern, " ");
+
+            boolean isOutOfDate = message.matches(".*svn: Commit failed.* is out of date");
+
+            if (isOutOfDate) {
+                log.warn("Working copy is out of date. Forcing a svn update. Tenant: " + tenantId, e);
+                boolean updated = checkout(tenantId, filePath);
+                if (!updated) {
+                    log.error("Failed to update the working copy even though the previous commit failed due to " +
+                            "out of date content.");
+                }
+            } else {
+                handleException("Error while committing artifacts to the SVN repository", e);
+            }
         }
         return false;
     }
