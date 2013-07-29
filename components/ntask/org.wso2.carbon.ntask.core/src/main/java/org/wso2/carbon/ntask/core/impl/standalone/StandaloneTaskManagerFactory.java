@@ -15,15 +15,15 @@
  */
 package org.wso2.carbon.ntask.core.impl.standalone;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.TaskManagerFactory;
 import org.wso2.carbon.ntask.core.TaskManagerId;
 import org.wso2.carbon.ntask.core.TaskRepository;
 import org.wso2.carbon.ntask.core.impl.RegistryBasedTaskRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This represents the standalone task manager factory class.
@@ -38,7 +38,7 @@ public class StandaloneTaskManagerFactory implements TaskManagerFactory {
 	}
 	
 	protected TaskManager createTaskManager(TaskManagerId tmId) throws TaskException {
-		TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantId(), 
+		TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
 				tmId.getTaskType());
 		return new StandaloneTaskManager(taskRepo);
 	}

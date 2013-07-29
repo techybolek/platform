@@ -21,6 +21,7 @@ import org.quartz.*;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.spi.OperableTrigger;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.common.TaskConstants;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
@@ -47,7 +48,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
     /* This holds the information  about the tasks which was trying to schedule
        before the server initialize properly
      */
-    private ArrayList<StartupPendingTask> startupPendingTasks
+    private static ArrayList<StartupPendingTask> startupPendingTasks
             = new ArrayList<StartupPendingTask>();
 
     /*
@@ -65,6 +66,11 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
     public AbstractQuartzTaskManager(TaskRepository taskRepository) throws TaskException {
         this.taskRepository = taskRepository;
         this.scheduler = TasksDSComponent.getScheduler();
+        try {
+            this.getScheduler().getListenerManager().addTriggerListener(new TaskTriggerListener("TASK_TRIGGER_LISTENER")) ;
+        } catch (SchedulerException e) {
+            throw new TaskException("Error in initiating task trigger listener", Code.UNKNOWN, e);
+        }
     }
 
     public TaskRepository getTaskRepository() {
@@ -75,8 +81,8 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         return scheduler;
     }
 
-    public int getTenantId() {
-        return this.getTaskRepository().getTenantId();
+    public String getTenantDomain() {
+        return this.getTaskRepository().getTenantDomain();
     }
 
     public String getTaskType() {
@@ -147,6 +153,13 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         return result;
     }
 
+    protected synchronized void deleteLocalTasks() throws TaskException {
+        List<TaskInfo> localTaskList = this.getAllLocalRunningTasks();
+        for (TaskInfo task : localTaskList) {
+            this.deleteLocalTask(task.getName(), false);
+        }
+    }
+
     protected synchronized void pauseLocalTask(String taskName) throws TaskException {
         String taskGroup = this.getTenantTaskGroup();
         try {
@@ -158,7 +171,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
     }
 
     private String getTenantTaskGroup() {
-        return "TENANT_" + this.getTenantId() + "_TYPE_" + this.getTaskType();
+        return "TENANT_" + this.getTenantDomain() + "_TYPE_" + this.getTaskType();
     }
 
     private JobDataMap getJobDataMapFromTaskInfo(TaskInfo taskInfo) {
@@ -168,7 +181,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         return dataMap;
     }
 
-    protected synchronized void scheduleLocalAllTasks() throws TaskException {
+    protected synchronized void scheduleAllTasks() throws TaskException {
         List<TaskInfo> tasks = this.getTaskRepository().getAllTasks();
         for (TaskInfo task : tasks) {
             try {
@@ -220,7 +233,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
                 if (paused) {
                     this.getScheduler().pauseJob(job.getKey());
                 }
-                log.info("Task scheduled: [" + this.getTenantId() +
+                log.info("Task scheduled: [" + this.getTenantDomain() +
                         "][" + this.getTaskType() + "][" + taskName + "]");
             } catch (SchedulerException e) {
                 throw new TaskException("Error in scheduling task with name: " + taskName,
@@ -303,11 +316,22 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         return this.containsLocalTask(taskName, taskGroup);
     }
 
-    protected List<TaskInfo> getAllLocalScheduledTasks() throws TaskException {
+    protected List<TaskInfo> getAllLocalRunningTasks() throws TaskException {
         List<TaskInfo> tasks = this.getTaskRepository().getAllTasks();
         List<TaskInfo> result = new ArrayList<TaskInfo>();
         for (TaskInfo taskInfo : tasks) {
             if (this.isLocalTaskScheduled(taskInfo.getName())) {
+                result.add(taskInfo);
+            }
+        }
+        return result;
+    }
+
+    protected List<TaskInfo> getAllFinishedTasks() throws TaskException {
+        List<TaskInfo> tasks = this.getTaskRepository().getAllTasks();
+        List<TaskInfo> result = new ArrayList<TaskInfo>();
+        for (TaskInfo taskInfo : tasks) {
+            if (TaskUtils.isTaskFinished(this.getTaskRepository(), taskInfo.getName())) {
                 result.add(taskInfo);
             }
         }
@@ -392,6 +416,50 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
         private StartupPendingTask(String taskName, boolean paused) {
             this.taskName = taskName;
             this.paused = paused;
+        }
+
+    }
+
+    public class TaskTriggerListener implements TriggerListener {
+
+        private String name;
+
+        public TaskTriggerListener(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public void triggerFired(Trigger trigger, JobExecutionContext jobExecutionContext) {
+
+        }
+
+        @Override
+        public boolean vetoJobExecution(Trigger trigger, JobExecutionContext jobExecutionContext) {
+            return false;
+        }
+
+        @Override
+        public void triggerMisfired(Trigger trigger) {
+
+        }
+
+        @Override
+        public void triggerComplete(Trigger trigger, JobExecutionContext jobExecutionContext, Trigger.CompletedExecutionInstruction completedExecutionInstruction) {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(getTenantDomain(), true);
+            if(trigger.getNextFireTime() == null) {
+                try {
+                    TaskUtils.setTaskFinished(getTaskRepository(), trigger.getJobKey().getName(), true);
+                } catch (TaskException e) {
+                    log.error("Error in Finishing Task: " + trigger.getJobKey().getName());
+                }
+            }
+            PrivilegedCarbonContext.endTenantFlow();
         }
 
     }

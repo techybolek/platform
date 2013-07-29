@@ -15,14 +15,14 @@
  */
 package org.wso2.carbon.ntask.core.impl;
 
+import org.wso2.carbon.ntask.common.TaskException;
+import org.wso2.carbon.ntask.core.TaskInfo;
+import org.wso2.carbon.ntask.core.TaskLocationResolver;
+import org.wso2.carbon.ntask.core.TaskServiceContext;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.wso2.carbon.ntask.common.TaskException;
-import org.wso2.carbon.ntask.core.TaskServiceContext;
-import org.wso2.carbon.ntask.core.TaskInfo;
-import org.wso2.carbon.ntask.core.TaskLocationResolver;
 
 /**
  * This class represents a TaskLocationResolver implementation, which assigns a location to the task
@@ -41,7 +41,7 @@ public class RoundRobinTaskLocationResolver implements TaskLocationResolver {
 		int n = names.size();
 		for (int i = 0; i < n; i++) {
 			if (taskInfo.getName().equals(names.get(i))) {
-				int tenantTaskTypeOffset = (ctx.getTenantId() + ":" + ctx.getTaskType()).hashCode();
+				int tenantTaskTypeOffset = (ctx.getTenantDomain() + ":" + ctx.getTaskType()).hashCode();
 				int result = i + tenantTaskTypeOffset;
 				if (result < 0) {
 					if (result == Integer.MIN_VALUE) {

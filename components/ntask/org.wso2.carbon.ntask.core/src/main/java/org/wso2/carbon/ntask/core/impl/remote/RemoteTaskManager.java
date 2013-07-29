@@ -74,8 +74,8 @@ public class RemoteTaskManager implements TaskManager {
 		return taskRepository;
 	}
 	
-	public int getTenantId() {
-		return this.getTaskRepository().getTenantId();
+	public String getTenantDomain() {
+		return this.getTaskRepository().getTenantDomain();
 	}
 	
 	public String getTaskType() {
@@ -101,15 +101,15 @@ public class RemoteTaskManager implements TaskManager {
 	
 	@Override
 	public void scheduleTask(String taskName) throws TaskException {
-		String remoteTaskId = RemoteTaskUtils.createRemoteTaskMapping(this.getTenantId(), 
+		String remoteTaskId = RemoteTaskUtils.createRemoteTaskMapping(this.getTenantDomain(),
 				this.getTaskType(), taskName);
 		this.setRemoteTaskIdForTask(taskName, remoteTaskId);
 		TaskInfo taskInfo = this.getTaskRepository().getTask(taskName);
 		try {
 			this.getRemoteTaskAdmin().addRemoteSystemTask(
 					RemoteTaskUtils.convert(
-							taskInfo, this.getTaskType(), remoteTaskId, this.getTenantId()), 
-							this.getTenantId());
+							taskInfo, this.getTaskType(), remoteTaskId, this.getTenantDomain()),
+							this.getTenantDomain());
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
 		}
@@ -135,7 +135,7 @@ public class RemoteTaskManager implements TaskManager {
 		try {
 			boolean result = this.getRemoteTaskAdmin().deleteRemoteSystemTask(
 					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantId());
+					this.getTaskType(), taskName), this.getTenantDomain());
 			/* remove the remote task id mapping */
 			String remoteTaskId = this.getRemoteTaskId(taskName);
 			if (remoteTaskId != null) {
@@ -155,7 +155,7 @@ public class RemoteTaskManager implements TaskManager {
 		try {
 			this.getRemoteTaskAdmin().pauseRemoteSystemTask(
 					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantId());
+					this.getTaskType(), taskName), this.getTenantDomain());
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
 		}
@@ -166,7 +166,7 @@ public class RemoteTaskManager implements TaskManager {
 		try {
 			this.getRemoteTaskAdmin().resumeRemoteSystemTask(
 					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantId());
+					this.getTaskType(), taskName), this.getTenantDomain());
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
 		}
@@ -189,7 +189,7 @@ public class RemoteTaskManager implements TaskManager {
 		try {
 			DeployedTaskInformation depTaskInfo = this.getRemoteTaskAdmin().getRemoteSystemTask(
 					RemoteTaskUtils.remoteTaskNameFromTaskInfo(
-					this.getTaskType(), taskName), this.getTenantId());
+					this.getTaskType(), taskName), this.getTenantDomain());
 			if (depTaskInfo == null) {
 				return TaskState.NONE;
 			}
@@ -226,7 +226,7 @@ public class RemoteTaskManager implements TaskManager {
 		TaskStatusMessage msg = new TaskStatusMessage();
 		msg.setTaskName(taskName);
 		msg.setTaskType(this.getTaskType());
-		msg.setTenantId(this.getTenantId());
+		msg.setTenantDomain(this.getTenantDomain());
 		try {
 			List<ClusteringCommand> result = agent.sendMessage(msg, true);
 			TaskStatusResult status;
@@ -305,7 +305,7 @@ public class RemoteTaskManager implements TaskManager {
 	}
 	
 	private String generateRunningTaskId(String taskName) {
-		return this.getTenantId() + "#" + this.getTaskType() + "#" + taskName;
+		return this.getTenantDomain() + "#" + this.getTaskType() + "#" + taskName;
 	}
 	
 	private class TaskExecution implements Runnable {
@@ -342,7 +342,7 @@ public class RemoteTaskManager implements TaskManager {
 				    task.setProperties(taskInfo.getProperties());
 				    try {
 					    PrivilegedCarbonContext.startTenantFlow();
-					    PrivilegedCarbonContext.getCurrentContext().setTenantId(getTenantId());
+					    PrivilegedCarbonContext.getCurrentContext().setTenantDomain(getTenantDomain());
 				        task.init();
 				        task.execute();
 				    } finally {
@@ -365,7 +365,7 @@ public class RemoteTaskManager implements TaskManager {
 
 		private static final long serialVersionUID = 8904018070655665868L;
 
-		private int tenantId;
+		private String tenantDomain;
 		
 		private String taskType;
 		
@@ -373,12 +373,12 @@ public class RemoteTaskManager implements TaskManager {
 		
 		private TaskStatusResult result;
 		
-		public int getTenantId() {
-			return tenantId;
+		public String getTenantDomain() {
+			return tenantDomain;
 		}
 
-		public void setTenantId(int tenantId) {
-			this.tenantId = tenantId;
+		public void setTenantDomain(String tenantDomain) {
+			this.tenantDomain = tenantDomain;
 		}
 
 		public String getTaskType() {
@@ -406,7 +406,7 @@ public class RemoteTaskManager implements TaskManager {
 		public void execute(ConfigurationContext ctx) throws ClusteringFault {
 			try {
 				PrivilegedCarbonContext.startTenantFlow();
-				PrivilegedCarbonContext.getCurrentContext().setTenantId(this.getTenantId());
+				PrivilegedCarbonContext.getCurrentContext().setTenantDomain(this.getTenantDomain());
 				TaskManager tm = TasksDSComponent.getTaskService().getTaskManager(
 						this.getTaskType());
 				if (tm instanceof RemoteTaskManager) {

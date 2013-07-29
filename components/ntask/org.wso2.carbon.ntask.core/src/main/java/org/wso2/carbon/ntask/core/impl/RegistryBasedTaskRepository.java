@@ -15,30 +15,30 @@
  */
 package org.wso2.carbon.ntask.core.impl;
 
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.ntask.common.TaskException;
+import org.wso2.carbon.ntask.common.TaskException.Code;
+import org.wso2.carbon.ntask.core.TaskInfo;
+import org.wso2.carbon.ntask.core.TaskManagerId;
+import org.wso2.carbon.ntask.core.TaskRepository;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
-import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.ntask.common.TaskException;
-import org.wso2.carbon.ntask.common.TaskException.Code;
-import org.wso2.carbon.ntask.core.TaskInfo;
-import org.wso2.carbon.ntask.core.TaskManagerId;
-import org.wso2.carbon.ntask.core.TaskRepository;
-import org.wso2.carbon.ntask.core.TaskUtils;
 
 /**
  * Registry based task repository implementation.
@@ -57,7 +57,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	
 	private static Unmarshaller taskUnmarshaller;
 	
-	private int tid;
+	private String tenantDomain;
 	
 	static {
 		try {
@@ -70,14 +70,14 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		}
 	}
 			
-	public RegistryBasedTaskRepository(int tid, String taskType) throws TaskException {
-		this.tid = tid;
+	public RegistryBasedTaskRepository(String tenantDomain, String taskType) throws TaskException {
+		this.tenantDomain = tenantDomain;
 		this.taskType = taskType;
 	}
 	
 	@Override
-	public int getTenantId() {
-		return tid;
+	public String getTenantDomain() {
+		return tenantDomain;
 	}
 
 	private static Marshaller getTaskMarshaller() {
@@ -89,17 +89,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	}
 
 	public static Registry getRegistry() throws TaskException {
-		if (registry == null) {
-			synchronized (RegistryBasedTaskRepository.class) {
-				if (registry == null) {
-					registry = TaskUtils.getGovRegistryForTenant(
-							MultitenantConstants.SUPER_TENANT_ID);
-				}
-			}
-		}
-		return registry;
+		return (Registry) PrivilegedCarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
 	}
-	
+
 	public String getTaskType() {
 		return taskType;
 	}
@@ -109,6 +101,8 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		List<TaskInfo> result = new ArrayList<TaskInfo>();
 		String tasksPath = this.getMyTasksPath();
 		try {
+            PrivilegedCarbonContext.getCurrentContext().
+                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 			if (getRegistry().resourceExists(tasksPath)) {
 				Collection tasksCollection = (Collection) getRegistry().get(tasksPath);
 				String[] taskPaths = tasksCollection.getChildren();
@@ -178,7 +172,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	}
 	
 	private String getMyTasksPath() {
-		return REG_TASK_REPO_BASE_PATH + "/" + this.getTenantId() + "/" + this.getTasksType();
+		return REG_TASK_REPO_BASE_PATH + "/" + this.getTenantDomain() + "/" + this.getTasksType();
 	}
 	
 	private TaskInfo getTaskInfoRegistryPath(String path) throws Exception {
@@ -191,7 +185,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 			taskInfo = (TaskInfo) getTaskUnmarshaller().unmarshal(in);
 		}
 		in.close();
-		taskInfo.getProperties().put(TaskInfo.TENANT_ID_PROP, String.valueOf(this.getTenantId()));
+		taskInfo.getProperties().put(TaskInfo.TENANT_DOMAIN_PROP, String.valueOf(this.getTenantDomain()));
 		return taskInfo;
 	}
 	
@@ -203,10 +197,13 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	public static List<TaskManagerId> getAvailableTenantTasksInRepo() throws TaskException {
 		List<TaskManagerId> tmList = new ArrayList<TaskManagerId>();
 		try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().
+                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 		    boolean result = getRegistry().resourceExists(
 				    RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
 		    Resource tmpRes;
-		    int tid;
+		    String tenantDomain;
 		    if (result) {
 		    	tmpRes = getRegistry().get(RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
 		    	if (!(tmpRes instanceof Collection)) {
@@ -228,8 +225,8 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 			    		taskTypePathCollection = (Collection) tmpRes;
 			    		if (taskTypePathCollection.getChildren().length > 0) {
 			    			try {
-			    			    tid = Integer.parseInt(tidPath.substring(tidPath.lastIndexOf('/') + 1));
-			    			    tmList.add(new TaskManagerId(tid, taskTypePath.substring(
+			    			    tenantDomain = tidPath.substring(tidPath.lastIndexOf('/') + 1);
+			    			    tmList.add(new TaskManagerId(tenantDomain, taskTypePath.substring(
 			    			    		taskTypePath.lastIndexOf('/') + 1)));
 			    			} catch (NumberFormatException ignore) {
 								continue;
@@ -240,7 +237,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		    }
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
-		}
+		} finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
 		return tmList;
 	}
 	
@@ -259,7 +258,7 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	        throws TaskException, RegistryException {
 		try {
 		    return getRegistry().get(RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH + "/" + 
-				    this.getTenantId() + "/" + this.getTasksType() + "/" + taskName);
+				    this.getTenantDomain() + "/" + this.getTasksType() + "/" + taskName);
 		} catch (ResourceNotFoundException e) {
 			throw new TaskException("The task '" + taskName + "' does not exist", 
 					Code.NO_TASK_EXISTS, e);

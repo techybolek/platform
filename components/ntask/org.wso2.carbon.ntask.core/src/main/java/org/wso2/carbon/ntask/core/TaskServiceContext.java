@@ -15,9 +15,9 @@
  */
 package org.wso2.carbon.ntask.core;
 
-import java.util.List;
-
 import org.wso2.carbon.ntask.common.TaskException;
+
+import java.util.List;
 
 /**
  * This class represents a runtime context of the task service.
@@ -33,8 +33,8 @@ public class TaskServiceContext {
 		this.serverCount = serverCount;
 	}
 	
-	public int getTenantId() {
-		return this.taskRepo.getTenantId();
+	public String getTenantDomain() {
+		return this.taskRepo.getTenantDomain();
 	}
 	
 	public String getTaskType() {

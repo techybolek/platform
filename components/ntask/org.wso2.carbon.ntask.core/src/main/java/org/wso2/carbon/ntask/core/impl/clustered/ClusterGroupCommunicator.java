@@ -15,15 +15,6 @@
  */
 package org.wso2.carbon.ntask.core.impl.clustered;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -36,6 +27,11 @@ import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the cluster group communicator used by clustered task managers.
@@ -111,10 +107,10 @@ public class ClusterGroupCommunicator {
 		return this.getClusterGroup(taskType).isLeader();
 	}
 	
-	public byte[] sendReceive(int tenantId, String taskType, String memberId,
+	public byte[] sendReceive(String tenantDomain, String taskType, String memberId,
 			String messageHeader, byte[] payload) throws Exception {
 		return this.getClusterGroup(taskType).sendReceive(
-				tenantId, memberId, messageHeader, payload);
+				tenantDomain, memberId, messageHeader, payload);
 	}
 	
 	public class ClusterGroup implements GroupEventListener {
@@ -127,20 +123,24 @@ public class ClusterGroupCommunicator {
 				
 		public ClusterGroup(String taskType) throws TaskException {
 			this.taskType = taskType;
+			initClusterGroup(this.getTaskType());
+			this.group.setGroupEventListener(this);
 			try {
-				this.group = TasksDSComponent.getCoordinationService().createGroup(
-						CARBON_TASK_GROUP_BASE + this.getTaskType());
-				this.group.setGroupEventListener(this);
-				try {
-				    this.leader = this.getGroup().getLeaderId().equals(this.getGroup().getMemberId());
-				} catch (CoordinationException e) {
-					throw new TaskException("Error in creating cluster group: " + 
-				            e.getMessage(), Code.UNKNOWN, e);
-				}
+			    this.leader = this.getGroup().getLeaderId().equals(this.getGroup().getMemberId());
 			} catch (CoordinationException e) {
-				throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+				throw new TaskException("Error in creating cluster group: " +
+			            e.getMessage(), Code.UNKNOWN, e);
 			}
 		}
+
+        private void initClusterGroup(String taskType) {
+            try {
+                this.group = TasksDSComponent.getCoordinationService().createGroup(
+                        CARBON_TASK_GROUP_BASE + this.getTaskType());
+            } catch (CoordinationException e) {
+                log.error("Error while creating the group : " + taskType);
+            }
+        }
 		
 		public List<String> getMemberIds() throws CoordinationException {
 			return this.getGroup().getMemberIds();
@@ -158,9 +158,9 @@ public class ClusterGroupCommunicator {
 			return group;
 		}
 
-		public byte[] sendReceive(int tenantId, String memberId,
+		public byte[] sendReceive(String tenantDomain, String memberId,
 				String messageHeader, byte[] payload) throws Exception {
-			OperationRequest req = new OperationRequest(tenantId, messageHeader, payload);
+			OperationRequest req = new OperationRequest(tenantDomain, messageHeader, payload);
 			byte[] result = this.getGroup().sendReceive(memberId, objectToBytes(req));
 			OperationResponse res = (OperationResponse) bytesToObject(result);
 			return res.getPayload();
@@ -172,14 +172,6 @@ public class ClusterGroupCommunicator {
 				log.info("Task server leader changed [" + this.getTaskType() + "]: " + leaderId);
 			}
 			this.leader = leaderId.equals(this.getGroup().getMemberId());
-			try {
-				if (this.isLeader()) {
-					log.info("Task server leader changed [" + this.getTaskType() + "], rescheduling missing tasks...");
-					this.scheduleAllMissingTasks();
-				}
-			} catch (TaskException e) {
-				log.error("Error in scheduling missing tasks: " + e.getMessage(), e);
-			}
 		}
 		
 		public boolean isLeader() {
@@ -230,7 +222,7 @@ public class ClusterGroupCommunicator {
 			    OperationRequest req = (OperationRequest) bytesToObject(buff);
 			    try {
 			    	PrivilegedCarbonContext.startTenantFlow();
-			    	PrivilegedCarbonContext.getCurrentContext().setTenantId(req.getTenantId());
+			    	PrivilegedCarbonContext.getCurrentContext().setTenantDomain(req.getTenantDomain(),true);
 			    	TaskManager tm = getTaskService().getTaskManager(this.getTaskType());
 			    	if (tm instanceof ClusteredTaskManager) {
 			    		OperationResponse res = ((ClusteredTaskManager) tm).onOperationRequest(req);
@@ -247,8 +239,34 @@ public class ClusterGroupCommunicator {
 				throw new CoordinationException(e.getMessage(), ExceptionCode.GENERIC_ERROR, e);
 			}
 		}
-		
-	}
+
+        @Override
+        public void onExpired() {
+            try {
+                this.deleteLocalTasks();
+            } catch (TaskException e) {
+                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public void onConnect() {
+            try {
+                initClusterGroup(this.getTaskType());
+            } catch (Exception e) {
+                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
+            }
+        }
+
+        private void deleteLocalTasks() throws TaskException {
+            for (TaskManager tm : getTaskService().getAllTenantTaskManagersForType(this.getTaskType())) {
+                if (tm instanceof ClusteredTaskManager) {
+                    ((ClusteredTaskManager) tm).deleteLocalTasks();
+                }
+            }
+        }
+
+    }
 
 	public static byte[] objectToBytes(Object obj) throws Exception {
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -270,20 +288,20 @@ public class ClusterGroupCommunicator {
 		
 		private static final long serialVersionUID = 1L;
 
-		private int tenantId;
+		private String tenantDomain;
 				
 		private String opName;
 		
 		private byte[] payload;
 		
-		public OperationRequest(int tenantId, String opName, byte[] payload) {
-			this.tenantId = tenantId;
+		public OperationRequest(String tenantDomain, String opName, byte[] payload) {
+			this.tenantDomain = tenantDomain;
 			this.opName = opName;
 			this.payload = payload;
 		}
 
-		public int getTenantId() {
-			return tenantId;
+		public String getTenantDomain() {
+			return tenantDomain;
 		}
 
 		public String getOpName() {

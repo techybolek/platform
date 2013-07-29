@@ -15,26 +15,17 @@
  */
 package org.wso2.carbon.ntask.core;
 
-import java.io.File;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.axiom.om.OMElement;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.w3c.dom.*;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
 
 /**
  * This class contains utitilty functions related to tasks.
@@ -45,22 +36,10 @@ public class TaskUtils {
 	
 	public static final String SECRET_ALIAS_ATTR_NAME = "secretAlias";
 	
-	public static final String TASK_PAUSED_PROPERTY = "TASK_PAUSED_PROPERTY";
+	public static final String TASK_STATE_PROPERTY = "TASK_STATE_PROPERTY";
 	
 	private static SecretResolver secretResolver;
 
-	public static Registry getGovRegistryForTenant(int tid) throws TaskException {
-		try {
-			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tid);
-			return TasksDSComponent.getRegistryService().getGovernanceSystemRegistry(tid);
-		} catch (RegistryException e) {
-			throw new TaskException("Error in retrieving registry instance", Code.UNKNOWN, e);
-		} finally {
-			PrivilegedCarbonContext.endTenantFlow();
-		}
-	}
-	
     public static Document convertToDocument(File file) throws TaskException {
         DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
         fac.setNamespaceAware(true);
@@ -111,20 +90,59 @@ public class TaskUtils {
 			}
 		}
 	}
+
+    public static void setTaskState(TaskRepository taskRepo, String taskName,
+                                    TaskManager.TaskState taskState) throws TaskException {
+        taskRepo.setTaskMetadataProp(taskName, TASK_STATE_PROPERTY, taskState.toString());
+    }
+
+    public static TaskManager.TaskState getTaskState(TaskRepository taskRepo,
+                                                     String taskName) throws TaskException {
+        String currentTaskState = taskRepo.getTaskMetadataProp(taskName, TASK_STATE_PROPERTY);
+        if (currentTaskState != null) {
+            for (TaskManager.TaskState taskState : TaskManager.TaskState.values()) {
+                if (currentTaskState.equalsIgnoreCase(taskState.toString())) {
+                    return taskState;
+                }
+            }
+        }
+        return null;
+    }
 	
 	public static void setTaskPaused(TaskRepository taskRepo, String taskName, 
 			boolean paused) throws TaskException {
-		taskRepo.setTaskMetadataProp(taskName, TASK_PAUSED_PROPERTY, Boolean.toString(paused));
+        if (paused) {
+            setTaskState(taskRepo, taskName, TaskManager.TaskState.PAUSED);
+        }else {
+            setTaskState(taskRepo, taskName, TaskManager.TaskState.NORMAL);
+        }
 	}
 	
 	public static boolean isTaskPaused(TaskRepository taskRepo, 
 			String taskName) throws TaskException {
-		String paused = taskRepo.getTaskMetadataProp(taskName, TASK_PAUSED_PROPERTY);
-		if (paused == null) {
-			return false;
-		} else {
-			return Boolean.parseBoolean(paused);
-		}
+        TaskManager.TaskState currentState = getTaskState(taskRepo,taskName);
+        if (currentState == null || !currentState.equals(TaskManager.TaskState.PAUSED)) {
+            return false;
+        } else
+            return true;
 	}
+
+    public static void setTaskFinished(TaskRepository taskRepo, String taskName,
+                                       boolean finished) throws TaskException {
+        if (finished) {
+            setTaskState(taskRepo, taskName, TaskManager.TaskState.FINISHED);
+        }else {
+            setTaskState(taskRepo, taskName, TaskManager.TaskState.NORMAL);
+        }
+    }
+
+    public static boolean isTaskFinished(TaskRepository taskRepo,
+                                         String taskName) throws TaskException {
+        TaskManager.TaskState currentState = getTaskState(taskRepo, taskName);
+        if (currentState == null || !currentState.equals(TaskManager.TaskState.FINISHED)) {
+            return false;
+        } else
+            return true;
+    }
 		
 }

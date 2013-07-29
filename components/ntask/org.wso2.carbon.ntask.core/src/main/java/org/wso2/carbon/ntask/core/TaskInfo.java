@@ -15,19 +15,18 @@
  */
 package org.wso2.carbon.ntask.core;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.wso2.carbon.ntask.common.TaskConstants;
 import org.wso2.carbon.ntask.common.TaskConstants.TaskMisfirePolicy;
 import org.wso2.carbon.ntask.core.impl.FixedLocationResolver;
 import org.wso2.carbon.ntask.core.impl.RandomTaskLocationResolver;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represents a task job definition. 
@@ -37,7 +36,7 @@ public class TaskInfo implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TENANT_ID_PROP = "__TENANT_ID_PROP__";
+	public static final String TENANT_DOMAIN_PROP = "__TENANT_DOMAIN_PROP__";
 	
 	private String name;
 	

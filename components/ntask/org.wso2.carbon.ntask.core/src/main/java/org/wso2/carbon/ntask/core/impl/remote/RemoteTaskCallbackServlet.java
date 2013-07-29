@@ -15,15 +15,15 @@
  */
 package org.wso2.carbon.ntask.core.impl.remote;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This class represents a servlet used to listen for requests from a remote task server.
@@ -55,12 +55,12 @@ public class RemoteTaskCallbackServlet extends HttpServlet {
 				log.debug("Remote Task Request Received: " + remoteTaskId);
 			}
 			Object[] taskInfo = RemoteTaskUtils.lookupRemoteTask(remoteTaskId);
-			int tenantId = (Integer) taskInfo[0];
+			String tenantDomain = (String) taskInfo[0];
 			String taskType = (String) taskInfo[1];
 			String taskName = (String) taskInfo[2];
 			try {
 			    PrivilegedCarbonContext.startTenantFlow();
-			    PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
+			    PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
 		        TaskManager tm = TasksDSComponent.getTaskService().getTaskManager(taskType);
 		        if (!(tm instanceof RemoteTaskManager)) {
 		        	log.error("The server is not running in remote task mode, " +

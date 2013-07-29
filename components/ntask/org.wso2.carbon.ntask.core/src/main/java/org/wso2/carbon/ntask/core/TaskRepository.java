@@ -15,9 +15,9 @@
  */
 package org.wso2.carbon.ntask.core;
 
-import java.util.List;
-
 import org.wso2.carbon.ntask.common.TaskException;
+
+import java.util.List;
 
 /**
  * This interface represents a task repository, which can be used to store and load tasks. 
@@ -61,10 +61,10 @@ public interface TaskRepository {
 	public String getTasksType();
 	
 	/**
-	 * Returns the tenant id of the tasks represented by this task manager.
-	 * @return The tenant id of the tasks
+	 * Returns the tenant domain of the tasks represented by this task manager.
+	 * @return The tenant domain of the tasks
 	 */
-	public int getTenantId();
+	public String getTenantDomain();
 	
 	/**
 	 * Sets a task metadata property to a given task name with a given property key.

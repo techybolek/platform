@@ -35,7 +35,7 @@ public class StandaloneTaskManager extends AbstractQuartzTaskManager {
 
 	@Override
 	public void initStartupTasks() throws TaskException {
-		this.scheduleLocalAllTasks();
+		this.scheduleAllTasks();
 	}
 
 	@Override

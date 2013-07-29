@@ -15,8 +15,6 @@
  */
 package org.wso2.carbon.ntask.core.impl;
 
-import java.util.Map;
-
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -25,6 +23,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.common.TaskConstants;
 import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.ntask.core.TaskInfo;
+
+import java.util.Map;
 
 /**
  * This class represents an adapter class used to wrap a Task in a Quartz Job.
@@ -48,10 +48,10 @@ public class TaskQuartzJobAdapter implements Job {
 			Map<String, String> properties = (Map<String, String>) dataMap.get(
 					TaskConstants.TASK_PROPERTIES);
 			task.setProperties(properties);
-			int tenantId = Integer.parseInt(properties.get(TaskInfo.TENANT_ID_PROP));
+			String tenantDomain = properties.get(TaskInfo.TENANT_DOMAIN_PROP);
 			try {
 				PrivilegedCarbonContext.startTenantFlow();
-				PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+				PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
 				task.init();
 				task.execute();
 			} finally {

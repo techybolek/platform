@@ -15,9 +15,6 @@
  */
 package org.wso2.carbon.ntask.core.impl.remote;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.wso2.carbon.ntask.common.TaskException;
@@ -32,6 +29,9 @@ import org.wso2.carbon.ntask.core.service.TaskService.TaskServiceConfiguration;
 import org.wso2.carbon.remotetasks.stub.admin.common.RemoteTaskAdmin;
 import org.wso2.carbon.remotetasks.stub.admin.common.RemoteTaskAdminStub;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This represents the remote task manager factory class.
  */
@@ -41,7 +41,7 @@ public class RemoteTaskManagerFactory implements TaskManagerFactory {
 	
 	@Override
 	public TaskManager getTaskManager(TaskManagerId tmId) throws TaskException {
-		TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantId(), 
+		TaskRepository taskRepo = new RegistryBasedTaskRepository(tmId.getTenantDomain(),
 				tmId.getTaskType());
 		return new RemoteTaskManager(taskRepo, getRemoteTaskAdmin());
 	}

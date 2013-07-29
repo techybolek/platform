@@ -15,25 +15,21 @@
  */
 package org.wso2.carbon.ntask.core.impl.clustered;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.coordination.common.CoordinationException;
 import org.wso2.carbon.coordination.common.CoordinationException.ExceptionCode;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
-import org.wso2.carbon.ntask.core.TaskInfo;
-import org.wso2.carbon.ntask.core.TaskLocationResolver;
-import org.wso2.carbon.ntask.core.TaskRepository;
-import org.wso2.carbon.ntask.core.TaskServiceContext;
-import org.wso2.carbon.ntask.core.TaskUtils;
+import org.wso2.carbon.ntask.core.*;
 import org.wso2.carbon.ntask.core.impl.AbstractQuartzTaskManager;
 import org.wso2.carbon.ntask.core.impl.clustered.ClusterGroupCommunicator.OperationRequest;
 import org.wso2.carbon.ntask.core.impl.clustered.ClusterGroupCommunicator.OperationResponse;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents a clustered task manager, which is used when tasks are distributed across a
@@ -49,8 +45,8 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		super(taskRepository);
 	}
 	
-	public int getTenantId() {
-		return this.getTaskRepository().getTenantId();
+	public String getTenantDomain() {
+		return this.getTaskRepository().getTenantDomain();
 	}
 	
 	public String getTaskType() {
@@ -63,25 +59,18 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 
 	public void initStartupTasks() throws TaskException {
 		if (this.isLeader()) {
-			List<TaskInfo> tasks = this.getAllTasks();
-			for (TaskInfo task : tasks) {
-				try {
-				    this.scheduleTask(task.getName());
-				} catch (Exception e) {
-					/* we should not want to throw an exception here, we will continue
-					 * scheduling rest of the tasks */
-					log.error("Error in scheduling task: " + e.getMessage(), e);
-				}
-			}
+            this.scheduleAllTasks();
 		}
 	}
 	
 	public void scheduleMissingTasks() throws TaskException {
-		List<List<TaskInfo>> tasksInServers = this.getAllTasksInServers();
+		List<List<TaskInfo>> tasksInServers = this.getAllRunningTasksInServers();
 		List<TaskInfo> scheduledTasks = new ArrayList<TaskInfo>();
 		for (List<TaskInfo> entry : tasksInServers) {
 			scheduledTasks.addAll(entry);
 		}
+        /* add already finished tasks*/
+        scheduledTasks.addAll(this.getAllFinishedTasks());
 		List<TaskInfo> allTasks = this.getAllTasks();
 		List<TaskInfo> missingTasks = new ArrayList<TaskInfo>(allTasks);
 		missingTasks.removeAll(scheduledTasks);
@@ -114,11 +103,11 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		}
 	}
 	
-	public List<TaskInfo> getTasksInServer(int location) throws TaskException {
+	public List<TaskInfo> getRunningTasksInServer(int location) throws TaskException {
 		try {
 			List<String> ids = this.getMemberIds();
 		    String memberId = ids.get(location % ids.size());
-		    return this.getTasksInServer(memberId);
+		    return this.getRunningTasksInServer(memberId);
 		} catch (Exception e) {
 			throw new TaskException("Error in getting tasks in server: " + location + " : " +
 		            e.getMessage(), Code.UNKNOWN, e);
@@ -246,12 +235,12 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		return locationResolver.getLocation(this.getTaskServiceContext(), taskInfo);
 	}
 	
-	public List<List<TaskInfo>> getAllTasksInServers() throws TaskException {
+	public List<List<TaskInfo>> getAllRunningTasksInServers() throws TaskException {
 		List<List<TaskInfo>> result = new ArrayList<List<TaskInfo>>();
 		try {
 			List<String> ids = this.getMemberIds();
 			for (int i = 0; i < ids.size(); i++) {
-				result.add(this.getTasksInServer(i));
+				result.add(this.getRunningTasksInServer(i));
 			}
 		} catch (CoordinationException e) {
 			throw new TaskException("Error in retreiving all tasks in servers: " + 
@@ -267,7 +256,7 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 	
 	public byte[] sendReceive(String memberId,
 			String messageHeader, byte[] payload) throws Exception {
-		return this.getClusterComm().sendReceive(this.getTenantId(), 
+		return this.getClusterComm().sendReceive(this.getTenantDomain(),
 				this.getTaskType(), memberId, messageHeader, payload);
 	}
 	
@@ -294,7 +283,7 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 			if (createIfNotExists) {
 				location = this.locateMemberForTask(taskName);
 			} else {
-			    throw new TaskException("The task server cannot be located for task: " 
+			    throw new TaskException("The task server cannot be located for task: "
 					    + taskName, Code.NO_TASK_EXISTS);
 			}
 		}
@@ -307,14 +296,14 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<TaskInfo> getTasksInServer(String memberId) throws Exception {
+	public List<TaskInfo> getRunningTasksInServer(String memberId) throws Exception {
 		byte[] data = this.sendReceive(memberId,
-				OperationNames.GET_TASKS_IN_SERVER, new byte[0]);
+				OperationNames.GET_RUNNING_TASKS_IN_SERVER, new byte[0]);
 		return (List<TaskInfo>) ClusterGroupCommunicator.bytesToObject(data);
 	}
 
-	public List<TaskInfo> getTasksInServerServer() throws Exception {
-		return getAllLocalScheduledTasks();
+	public List<TaskInfo> getRunningTasksInServerServer() throws Exception {
+		return getAllLocalRunningTasks();
 	}
 
 	public TaskState getTaskState(String memberId, String taskName)
@@ -409,8 +398,8 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 			} else if (OperationNames.RESUME_TASK.equals(req.getOpName())) {
 				this.resumeTaskServer(new String(req.getPayload()));
 				result = new byte[0];
-			} else if (OperationNames.GET_TASKS_IN_SERVER.equals(req.getOpName())) {
-				List<TaskInfo> tasks = this.getTasksInServerServer();
+			} else if (OperationNames.GET_RUNNING_TASKS_IN_SERVER.equals(req.getOpName())) {
+				List<TaskInfo> tasks = this.getRunningTasksInServerServer();
 				result = ClusterGroupCommunicator.objectToBytes(tasks);
 			} else if (OperationNames.GET_TASK_STATE.equals(req.getOpName())) {
 				TaskState taskState = this.getTaskStateServer(new String(req.getPayload()));
@@ -424,6 +413,10 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		}
 	}
 
+    public void deleteLocalTasks() throws TaskException {
+        super.deleteLocalTasks();
+    }
+
 	public static final class OperationNames {
 		
 		public static final String MEMBER_ID_FROM_TASK_NAME = "MEMBER_ID_FROM_TASK_NAME";
@@ -432,7 +425,7 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		public static final String DELETE_TASK = "DELETE_TASK";
 		public static final String PAUSE_TASK = "PAUSE_TASK";
 		public static final String RESUME_TASK = "RESUME_TASK";
-		public static final String GET_TASKS_IN_SERVER = "GET_TASKS_IN_SERVER";
+		public static final String GET_RUNNING_TASKS_IN_SERVER = "GET_RUNNING_TASKS_IN_SERVER";
 		public static final String GET_TASK_STATE = "GET_TASK_STATE";
 		
 	}
