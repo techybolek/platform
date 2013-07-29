@@ -36,7 +36,7 @@ public class DSTaskExt extends AbstractTask {
 		    this.taskInstance = (DataTask) Class.forName(this.getProperties().get(
 		    		DSTaskConstants.DATA_TASK_CLASS_NAME)).newInstance();
 		    this.dataTaskContext = new DataTaskContext(
-		    		PrivilegedCarbonContext.getCurrentContext().getTenantId());
+		    		PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true));
 		} catch (Exception e) {
 			throw new RuntimeException("Error in initializing Data Task: " + e.getMessage(), e);
 		}

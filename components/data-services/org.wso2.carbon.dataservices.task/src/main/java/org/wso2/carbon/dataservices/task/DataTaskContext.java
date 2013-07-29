@@ -18,11 +18,6 @@
  */
 package org.wso2.carbon.dataservices.task;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
@@ -34,6 +29,11 @@ import org.wso2.carbon.dataservices.core.engine.DataService;
 import org.wso2.carbon.dataservices.core.engine.ParamValue;
 import org.wso2.carbon.dataservices.core.tools.DSTools;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 /**
  * This class represents a context class used in data tasks.
  */
@@ -41,8 +41,8 @@ public class DataTaskContext {
 	
 	private AxisConfiguration axisConfig;
 			
-	public DataTaskContext(int tid) {
-		this.axisConfig = DSTaskUtils.lookupAxisConfig(tid);
+	public DataTaskContext(String tenantDomain) {
+		this.axisConfig = DSTaskUtils.lookupAxisConfig(tenantDomain);
 	}
 
 	private DataService getDataService(String serviceName) {
