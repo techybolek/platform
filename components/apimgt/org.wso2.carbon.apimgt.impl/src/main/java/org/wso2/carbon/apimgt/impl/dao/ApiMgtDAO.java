@@ -786,6 +786,9 @@ public class ApiMgtDAO {
             //Adding data to the AM_SUBSCRIPTION table
             //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
             ps = conn.prepareStatement(sqlQuery, new String[]{"SUBSCRIPTION_ID"});
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                ps = conn.prepareStatement(sqlQuery, new String[]{"subscription_id"});
+            }
 
             ps.setString(1, identifier.getTier());
             ps.setInt(2, apiId);
