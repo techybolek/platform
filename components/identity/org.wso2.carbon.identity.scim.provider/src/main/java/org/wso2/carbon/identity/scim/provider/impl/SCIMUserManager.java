@@ -720,9 +720,12 @@ public class SCIMUserManager implements UserManager {
             for (String role : roles) {
                 if (UserCoreUtil.isEveryoneRole(role, carbonUM.getRealmConfiguration())
                     || UserCoreUtil.isPrimaryAdminRole(role, carbonUM.getRealmConfiguration())
-                    || CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equalsIgnoreCase(role)) {
+                    || CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equalsIgnoreCase(role)
+                    || role.toLowerCase().startsWith((UserCoreConstants.INTERNAL_DOMAIN +
+                                                CarbonConstants.DOMAIN_SEPARATOR).toLowerCase())) {
                     // carbon specific roles do not possess SCIM info, hence
                     // skipping them.
+                    // skip intenal roles
                     continue;
                 }
                 Group group = getGroupOnlyWithMetaAttributes(role);
