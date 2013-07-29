@@ -202,6 +202,44 @@ public class ApiListPage {
         return false;
     }
 
+    public boolean checkFilterStatePersistence(String lifecycleName, String lifecycleState) {
+        driver.findElement(By.linkText(uiElementMapper.getElement("api.list.link"))).click();
+        String lcState = lifecycleState;
+        String lcName = lifecycleName;
+        new Select(driver.findElement(By.id("stateList"))).selectByVisibleText(lcState);
+        new Select(driver.findElement(By.id("lifeCycleList"))).selectByVisibleText(lcName);
+
+        driver.findElement(By.xpath(uiElementMapper.getElement("filter.search.button"))).click();
+
+        String listSecondPageXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/form[4]/table[2]/tbody/tr/td/a[2]";
+
+        try {
+            String paginationText = driver.findElement(By.xpath(listSecondPageXpath))
+                    .getText();
+            if (paginationText.equals("2")) {
+                driver.findElement(By.xpath(listSecondPageXpath))
+                        .click();
+                String newlcState = new Select(driver.findElement(By.id("stateList"))).getFirstSelectedOption()
+                        .getText();
+                String newlcName = new Select(driver.findElement(By.id("lifeCycleList"))).getFirstSelectedOption()
+                        .getText();
+
+                if (newlcName.equals(lcName) && newlcState.equals(lcState)) {
+                    log.info("Filter state was presisted correctly");
+                    return true;
+                } else {
+                    log.info("Filter state was not presisted correctly");
+                    return false;
+                }
+            }
+        } catch (NoSuchElementException ex) {
+            log.info("Not enough API's in the list to check Filter State with pagination");
+            return false;
+        }
+
+        return false;
+    }
+
     public LoginPage logout() throws IOException {
         driver.findElement(By.linkText(uiElementMapper.getElement("home.greg.sign.out.xpath"))).click();
         return new LoginPage(driver);
