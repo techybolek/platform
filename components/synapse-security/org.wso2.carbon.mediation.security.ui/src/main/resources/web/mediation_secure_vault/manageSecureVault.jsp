@@ -25,7 +25,7 @@
 <script src="../ajax/js/prototype.js" type="text/javascript"/>
 
 <%@ page import="org.wso2.carbon.registry.common.ui.UIConstants"%>
-<%@ page import="org.wso2.carbon.mediation.secure.vault.ui.*"%>
+<%@ page import="org.wso2.carbon.mediation.security.vault.ui.*"%>
 <%@ page import="org.wso2.carbon.registry.properties.stub.beans.*"%>
 <%@ page import="org.wso2.carbon.registry.common.ui.UIConstants"%>
 <%@page
@@ -50,11 +50,11 @@
 <%
 	PropertiesBean propertiesBean;
 	try {
-		org.wso2.carbon.mediation.secure.vault.ui.PropertiesServiceClient client = new org.wso2.carbon.mediation.secure.vault.ui.PropertiesServiceClient(config,
-				session);
+		org.wso2.carbon.mediation.security.vault.ui.PropertiesServiceClient client = new org.wso2.carbon.mediation.security.vault.ui.PropertiesServiceClient(config,
+		session);
 		propertiesBean = client.getProperties(request);
 		if (propertiesBean == null) {
-			return;
+	return;
 		}
 	} catch (Exception ignored) {
 		return;

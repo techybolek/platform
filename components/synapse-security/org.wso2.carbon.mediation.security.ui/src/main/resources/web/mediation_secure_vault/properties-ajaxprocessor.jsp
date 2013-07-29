@@ -23,12 +23,13 @@
 <%@ page
 	import="org.wso2.carbon.registry.properties.stub.utils.xsd.Property"%>
 <%@ page
-	import="org.wso2.carbon.mediation.secure.vault.ui.PropertiesServiceClient"%>
+	import="org.wso2.carbon.mediation.security.vault.ui.PropertiesServiceClient"%>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@ page import="java.util.HashMap"%>
 <%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext"%>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants"%>
-
+<%@ taglib prefix="carbon"
+	uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"%>
 
 <%
     PropertiesServiceClient client_ = new PropertiesServiceClient(config, session);
@@ -204,10 +205,15 @@
 
 			</tr>
 
-			<%
-                }}
-            %>
-		</table>
+			<%}%>
+			</table>
+     			<carbon:resourcePaginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
+                                      resourceBundle="org.wso2.carbon.registry.properties.ui.i18n.Resources"
+                                      nextKey="next" prevKey="prev"
+                                      paginationFunction="" />
+
+			<%}%>
+		
 
 	</div>
 
