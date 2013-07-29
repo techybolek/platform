@@ -105,15 +105,18 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
     var authorizedDomainsTemp;
     var clientId;
     var clientSecret;
+    var validityTime;
     if (keyType == 'PRODUCTION') {
         inputId=$('#prodOldAccessToken'+i);
         divId = 'prodTable'+i;
         authorizedDomainsTemp = $('#accessallowdomainsRegen'+i).attr('value');
+        validityTime=$('#refreshProdValidityTime'+i).attr('value');
     } else {
         inputId= $('#sandOldAccessToken'+i);
         sandDomains=$('#prodOldAccessToken'+i);
         divId = "sandTable"+i;
         authorizedDomainsTemp = $('#allowDomainsSandRegen'+i).attr('value');
+        validityTime=$('#refreshSandValidityTime'+i).attr('value');
     }
     oldAccessToken=inputId.val();
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
@@ -123,7 +126,8 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
         oldAccessToken:oldAccessToken,
         authorizedDomains:authorizedDomainsTemp,
         clientId:clientId,
-        clientSecret:clientSecret
+        clientSecret:clientSecret,
+        validityTime:validityTime
     }, function (result) {
         if (!result.error) {
 

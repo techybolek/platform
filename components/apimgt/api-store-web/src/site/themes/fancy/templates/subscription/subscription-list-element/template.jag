@@ -59,7 +59,7 @@
                                                                 <div>
                                                                 Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
                                                                 	<div style="display:none">
-                                                                		<input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
+                                                                		<input type="text" class="input-small token-validity-input" id="refreshProdValidityTime<%=str_i%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
                                                                   
                                                                 	</div>
                                                                  </div>
@@ -170,7 +170,7 @@
                                                                 <div>
                                                                 Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
                                                                 	<div style="display:none">
-                                                                		<input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
+                                                                		<input type="text" class="input-small token-validity-input" id="refreshSandValidityTime<%=str_i%>" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
                                                                   
                                                                 	</div>
                                                                  </div>

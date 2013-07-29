@@ -44,13 +44,15 @@ var generateApplicationKey = function (application, username, keyType, callbackU
     }
 };
 
-var refreshToken = function (username,application, keyType ,oldAccessToken, accessAllowDomains , clientId, clientSecret) {
+var refreshToken = function (username,application, keyType ,oldAccessToken, accessAllowDomains ,
+		clientId, clientSecret, validityTime) {
     var key,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        key = store.refreshToken(username,application, keyType,oldAccessToken, accessAllowDomains, clientId, clientSecret);
+        key = store.refreshToken(username,application, keyType,oldAccessToken, accessAllowDomains, 
+        		clientId, clientSecret,validityTime);
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
         }
