@@ -43,20 +43,23 @@ public class FtpServerManager {
     ListenerFactory factory = new ListenerFactory();
     boolean isRunning = false;
     int ftpPort;
+    String userName;
+    String password;
+    String homeDirectory;
     FtpServer ftpServer;
     private Thread ftpThread = null;
 
-    public static void main(String[] args) {
-        new FtpServerManager().startServer();
+    public FtpServerManager(int ftpPort, String homeDirectory,String userName, String password) {
+        this.homeDirectory = homeDirectory;
+        this.ftpPort = ftpPort;
+        this.userName=userName;
+        this.password=password;
     }
 
     public void startFtpServer() {
 
-
-        //userManagerFactory.setFile(new File("/home/dharshana/wso2source/carbon/platform/trunk/platform-integration/test-automation-framework/org.wso2.carbon.automation.core/src/main/resources/ftp"));//choose any. We're telling the FTP-server where to read it's user list
-
 // set the port of the listener
-        factory.setPort(2223);
+        factory.setPort(ftpPort);
 // replace the default listener
         serverFactory.addListener("default", factory.createListener());
 // start the server
@@ -65,15 +68,15 @@ public class FtpServerManager {
         try {
             ftpServer.start();
         } catch (FtpException e) {
-            e.printStackTrace();
+            log.error("FTP server startup failed "+e.getMessage());
         }
     }
 
     public UserManager setUser() {
         BaseUser user = new BaseUser();
-        user.setName("test");
-        user.setPassword("test");
-        user.setHomeDirectory("/home/dharshana/kernal");
+        user.setName(userName);
+        user.setPassword(password);
+        user.setHomeDirectory(homeDirectory);
         List<Authority> authorities = new ArrayList<Authority>();
         authorities.add(new WritePermission());
         user.setAuthorities(authorities);
@@ -81,7 +84,7 @@ public class FtpServerManager {
         try {
             um.save(user);//Save the user to the user list on the filesystem
         } catch (FtpException e1) {
-            //Deal with exception as you need
+            log.error("FTP server startup failed "+e1.getMessage());
         }
         return um;
     }
@@ -93,7 +96,7 @@ public class FtpServerManager {
                     try {
                         startFtpServer();
                     } catch (Exception e) {
-                        // log.error("Tomcat server startup failed ");
+                        log.error("FTP server startup failed "+e.getMessage());
                     }
                 }
             };
