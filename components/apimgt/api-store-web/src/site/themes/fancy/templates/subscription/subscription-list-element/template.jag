@@ -56,7 +56,13 @@
                                                                 <% } else { %>
                                                                     <%=app.prodKey%>
                                                                 <% } %>
-                                                                </div>
+                                                                <div>
+                                                                Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
+                                                                	<div style="display:none">
+                                                                		<input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
+                                                                  
+                                                                	</div>
+                                                                 </div>
                                                                 <div>
                                                                     <span class="show-hide-key processing-msg" style="display:none;"><%=i18n.localize("generating")%></span>
                                                                     <a class="show-hide-key"
@@ -104,17 +110,7 @@
                                                                 </div>
                                                             </td>
                                                         </tr>
-                                                        <tr>
-                                                            <td colspan="2">
-                                                                Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
-                                                                <div style="display:none">
-                                                                    <input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
-                                                                    <button class="btn"
-                                                                            onclick="updateTokenValidity('<%=app.name%>','PRODUCTION',this)" style="font-size:11px;width:104px;" >Update Time</button>
-                                                                    <div style="display:none">Successfully updated.</div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
+                                                        
                                                     </table>
 
                                                     <div class="info-msg">
@@ -172,6 +168,13 @@
                                                                     <% } %>
                                                                 </div>
                                                                 <div>
+                                                                Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
+                                                                	<div style="display:none">
+                                                                		<input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
+                                                                  
+                                                                	</div>
+                                                                 </div>
+                                                                <div>
                                                                     <span class="show-hide-key processing-msg" style="display:none;"><%=i18n.localize("generating")%></span>
                                                                     <a class="show-hide-key"
                                                                          onclick="regenerate('<%=app.name%>','SANDBOX',<%=str_i%>,this,'pull-right'+<%=str_i%>)" ><i class="icon-refresh"></i>
@@ -210,18 +213,7 @@
                                                                     <div style="display:none">Successfully updated.</div>
                                                                 </div>
                                                             </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="2">
-                                                                Token Validity: <span class="prodAuthorizedDomains">3600 Seconds</span> &nbsp;<a onclick="toggleAutSection(this)"> Edit</a>
-                                                                <div style="display:none">
-                                                                    <input type="text" class="input-small token-validity-input" maxlength="70"  autofocus="autofocus" style="margin-top:5px;"  /> s
-                                                                    <button class="btn"
-                                                                            onclick="updateTokenValidity('<%=app.name%>','PRODUCTION',this)" style="font-size:11px;width:104px;" >Update Time</button>
-                                                                    <div style="display:none">Successfully updated.</div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
+                                                        </tr>                                                       
                                                     </table>
                                                     <div class="info-msg">
                                                           <% if(app.sandboxKey==null){%>
