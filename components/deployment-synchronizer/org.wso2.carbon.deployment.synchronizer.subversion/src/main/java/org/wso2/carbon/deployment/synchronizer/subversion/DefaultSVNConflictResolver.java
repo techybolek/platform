@@ -35,7 +35,7 @@ public class DefaultSVNConflictResolver implements ISVNConflictResolver {
 
     public SVNConflictResult resolve(SVNConflictDescriptor conflict) throws SVNClientException {
         log.warn("SVN conflict encountered at: " + conflict.getPath() + " - Executing default" +
-                " resolution action");
+                " resolution action - " + "\"choose-theirs-conflict-full\"");
         return new SVNConflictResult(SVNConflictResult.chooseTheirsFull, conflict.getMergedPath());
     }
 }

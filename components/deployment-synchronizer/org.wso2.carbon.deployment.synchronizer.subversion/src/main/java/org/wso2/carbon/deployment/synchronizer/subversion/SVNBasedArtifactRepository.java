@@ -707,7 +707,6 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         return false;
     }
 
-    @Override
     public void cleanupTenantContext(int tenantId) {
         tenantSVNRepositories.remove(tenantId);
     }
@@ -766,7 +765,6 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         }
         return addToSvn;
     }
-
 
     private String getSimpleFileName(String filePath) {
         int lastIdx = filePath.lastIndexOf(File.separator);
