@@ -103,6 +103,7 @@
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="allowedDomains" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="clientId" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="clientSecret" nillable="true" type="xs:string"></xs:element>
+                        <xs:element minOccurs="0" name="validityTime" nillable="true" type="xs:string"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
