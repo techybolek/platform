@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.mediation.secure.vault.xpath;
+package org.wso2.carbon.mediation.security.vault.xpath;
 
 import javax.xml.namespace.QName;
 
@@ -23,7 +23,9 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.util.xpath.ext.SynapseXpathFunctionContextProvider;
 import org.jaxen.Function;
 
-public class ServiceUrl implements SynapseXpathFunctionContextProvider {
+public class SecureVaultLookupXPathFunctionProvider implements SynapseXpathFunctionContextProvider {
+
+	private static final String VAULT_LOOKUP = "vault-lookup";
 
 	public Function getInitializedExtFunction(MessageContext messageContext) {
 		VaultLookupFunction resolver = new VaultLookupFunction(messageContext);
@@ -31,6 +33,6 @@ public class ServiceUrl implements SynapseXpathFunctionContextProvider {
 	}
 
 	public QName getResolvingQName() {
-		return new QName("vault-lookup");
+		return new QName(VAULT_LOOKUP);
 	}
 }

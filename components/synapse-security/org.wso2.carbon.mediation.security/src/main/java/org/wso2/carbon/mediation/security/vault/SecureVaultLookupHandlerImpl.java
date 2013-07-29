@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.mediation.secure.vault;
+package org.wso2.carbon.mediation.security.vault;
 
 import java.util.Properties;
 
@@ -30,6 +30,10 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
+//TODO: neeed to cache the evaluate method, give 15seconds to lookup the evaluated path
+//then if all the predefined critarias success then use the cache object else refresh the map
+//@see org.wso2.carbon.mediation.registry.WSO2Registry cachableDuration
+//synCtx.getConfiguration().getRegistry().getConfigurationProperties().getProperty(key)
 public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 
 	private static Log log = LogFactory.getLog(SecureVaultLookupHandlerImpl.class);
@@ -122,10 +126,10 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 		return this.getClass().getName();
 	}
 
-	@Override
-	public void init(Properties arg0) {
-
-	}
+//	@Override
+//	public void init(Properties arg0) {
+//
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -139,6 +143,7 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	@Override
 	public String evaluate(String aliasPasword, LookupType lookupType,
 			MessageContext synCtx) throws RegistryException {
+		
 		if (lookupType.equals(LookupType.FILE)) {
 			return lookupFileRepositry(aliasPasword, synCtx);
 		} else {
@@ -175,10 +180,7 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 			log.info("processing evaluating file based lookup");
 		}
 		SecretCipherHander secretManager = new SecretCipherHander(synCtx);
-		if (secretManager.isInitialized()) {
-			return secretManager.getSecret(aliasPasword);
-		}
-		return null;
+		return secretManager.getSecret(aliasPasword);
 	}
 
 }

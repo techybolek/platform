@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.wso2.carbon.mediation.secure.vault;
+package org.wso2.carbon.mediation.security.vault;
 
 import java.util.Properties;
 

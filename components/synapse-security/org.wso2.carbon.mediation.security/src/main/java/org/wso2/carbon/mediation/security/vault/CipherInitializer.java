@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.wso2.carbon.mediation.secure.vault;
+package org.wso2.carbon.mediation.security.vault;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -121,6 +121,8 @@ public class CipherInitializer {
 		return properties;
 	}
 
+	//TODO:need proper isolation of the configuration..
+	
 	private void init() {
 		Properties properties = loadProperties();
 

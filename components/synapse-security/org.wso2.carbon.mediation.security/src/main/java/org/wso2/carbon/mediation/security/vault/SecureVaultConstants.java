@@ -1,8 +1,8 @@
-package org.wso2.carbon.mediation.secure.vault;
+package org.wso2.carbon.mediation.security.vault;
 
 public interface SecureVaultConstants {
 	public static final String SYSTEM_CONFIG_CONNECTOR_SECURE_VAULT_CONFIG = "/_system/config/connector-secure-vault-config";
-	public static final String CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY = "connector-secure-vault-config";
+	public static final String CONNECTOR_SECURE_VAULT_CONFIG_REPOSITORY = "connector-secure-vault-config"; //TODO renamed to secure-vault  place this in /_system/config/repository/components
 	public static final String CARBON_HOME = "carbon.home";
 	public static final String  SECRET_CONF = "secret-conf.properties";
 	public static final String CONF_DIR = "conf";

@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.mediation.secure.vault;
+package org.wso2.carbon.mediation.security.vault;
 
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.registry.core.service.RegistryService;

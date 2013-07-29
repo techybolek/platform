@@ -16,26 +16,26 @@
 * under the License.
 */
 
-package org.wso2.carbon.mediation.secure.vault;
+package org.wso2.carbon.mediation.security.vault;
 
 import java.util.Properties;
 
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.mediation.secure.vault.SecureVaultLookupHandlerImpl.LookupType;
+import org.wso2.carbon.mediation.security.vault.SecureVaultLookupHandlerImpl.LookupType;
 
 
 
 public interface SecureVaultLookupHandler {
-
-	/**
-	 * @param properties
-	 */
-	public void init(Properties properties);
-
-	/**
-	 * @return
-	 */
-	public String getProviderClass();
+//
+//	/**
+//	 * @param properties
+//	 */
+//	public void init(Properties properties);
+//
+//	/**
+//	 * @return
+//	 */
+//	public String getProviderClass();
 
 	/**
 	 * Method to evaluate the parameters passed to extract values from secure-vault lookup
