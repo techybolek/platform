@@ -100,7 +100,7 @@ public class CarbonRepositoryUtils {
 
         try {
             //Firrst attempt to get the configuration from carbon.xml
-            DeploymentSynchronizerConfiguration config = getDeploymentSyncConfiguration();
+            DeploymentSynchronizerConfiguration config = getDeploymentSyncConfigurationFromConf();
 
             //If configuration has not been specified in carbon.xml
             if (config == null) {
@@ -131,7 +131,7 @@ public class CarbonRepositoryUtils {
      * @return a DeploymentSynchronizerConfiguration instance
      * @throws org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException on error
      */
-    public static DeploymentSynchronizerConfiguration getDeploymentSyncConfiguration() throws DeploymentSynchronizerException{
+    public static DeploymentSynchronizerConfiguration getDeploymentSyncConfigurationFromConf() throws DeploymentSynchronizerException{
 
         DeploymentSynchronizerConfiguration config = new DeploymentSynchronizerConfiguration();
         ServerConfiguration serverConfig = ServerConfiguration.getInstance();
@@ -143,50 +143,54 @@ public class CarbonRepositoryUtils {
         }
         config.setEnabled(JavaUtils.isTrueExplicitly(value));
 
-        value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.AUTO_CHECKOUT_MODE);
-        config.setAutoCheckout(value != null && JavaUtils.isTrueExplicitly(value));
+        if (config.isEnabled()) {
+            value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.AUTO_CHECKOUT_MODE);
+            config.setAutoCheckout(value != null && JavaUtils.isTrueExplicitly(value));
 
-        value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.AUTO_COMMIT_MODE);
-        config.setAutoCommit(value != null && JavaUtils.isTrueExplicitly(value));
+            value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.AUTO_COMMIT_MODE);
+            config.setAutoCommit(value != null && JavaUtils.isTrueExplicitly(value));
 
-        value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.USE_EVENTING);
-        config.setUseEventing(value != null && JavaUtils.isTrueExplicitly(value));
+            value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.USE_EVENTING);
+            config.setUseEventing(value != null && JavaUtils.isTrueExplicitly(value));
 
-        value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.AUTO_SYNC_PERIOD);
-        if (value != null) {
-            config.setPeriod(Long.parseLong(value));
-        } else {
-            config.setPeriod(DeploymentSynchronizerConstants.DEFAULT_AUTO_SYNC_PERIOD);
-        }
-
-        value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.REPOSITORY_TYPE);
-        if (value != null) {
-            config.setRepositoryType(value);
-        } else {
-            config.setRepositoryType(DeploymentSynchronizerConstants.DEFAULT_REPOSITORY_TYPE);
-        }
-
-        ArtifactRepository repository =
-                RepositoryReferenceHolder.getInstance().getRepositoryByType(config.getRepositoryType());
-        if(repository == null){
-            throw new DeploymentSynchronizerException("No Repository found for type " + config.getRepositoryType());
-        }
-
-        List<RepositoryConfigParameter> parameters = repository.getParameters();
-
-        //If repository specific configuration parameters are found.
-        if(parameters != null){
-            //Find the 'value' of each parameter from the server config by parameter 'name' and attach to parameter
-            for(RepositoryConfigParameter parameter : parameters){
-                parameter.setValue(serverConfig.getFirstProperty(parameter.getName()));
+            value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.AUTO_SYNC_PERIOD);
+            if (value != null) {
+                config.setPeriod(Long.parseLong(value));
+            } else {
+                config.setPeriod(DeploymentSynchronizerConstants.DEFAULT_AUTO_SYNC_PERIOD);
             }
 
-            //Attach parameter list to config object.
-            config.setRepositoryConfigParameters(
-                    parameters.toArray(new RepositoryConfigParameter[parameters.size()]));
-        }
+            value = serverConfig.getFirstProperty(DeploymentSynchronizerConstants.REPOSITORY_TYPE);
+            if (value != null) {
+                config.setRepositoryType(value);
+            } else {
+                config.setRepositoryType(DeploymentSynchronizerConstants.DEFAULT_REPOSITORY_TYPE);
+            }
 
-        return config;
+            ArtifactRepository repository =
+                    RepositoryReferenceHolder.getInstance().getRepositoryByType(config.getRepositoryType());
+            if(repository == null){
+                throw new DeploymentSynchronizerException("No Repository found for type " + config.getRepositoryType());
+            }
+
+            List<RepositoryConfigParameter> parameters = repository.getParameters();
+
+            //If repository specific configuration parameters are found.
+            if(parameters != null){
+                //Find the 'value' of each parameter from the server config by parameter 'name' and attach to parameter
+                for(RepositoryConfigParameter parameter : parameters){
+                    parameter.setValue(serverConfig.getFirstProperty(parameter.getName()));
+                }
+
+                //Attach parameter list to config object.
+                config.setRepositoryConfigParameters(
+                        parameters.toArray(new RepositoryConfigParameter[parameters.size()]));
+            }
+
+            return config;
+        }else{
+            return null;
+        }
     }
 
     public static DeploymentSynchronizerConfiguration getDefaultDeploymentSyncConfiguration() throws DeploymentSynchronizerException {
