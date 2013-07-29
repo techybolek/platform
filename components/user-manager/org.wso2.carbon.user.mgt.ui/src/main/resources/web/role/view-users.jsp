@@ -15,7 +15,6 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page session="true" %>
@@ -111,21 +110,7 @@
     session.setAttribute(UserAdminUIConstants.ROLE_LIST_VIEW_USER_FILTER, filter);
 
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
-	String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
-	String roleNameWithDn = roleName;
-	if (rIndex != null) {
-		int roleIndex = Integer.parseInt(rIndex);
 
-		FlaggedName[] datas =
-		                      (FlaggedName[]) session.getAttribute(UserAdminUIConstants.ROLE_LIST);
-		roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
-		if (datas != null && roleIndex < datas.length) {
-			roleNameWithDn += datas[roleIndex].getDn();
-		}
-	} 
-	
-	String roleWithoutDn = roleNameWithDn.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
-	
 	String readOnlyRoleString = request.getParameter(UserAdminUIConstants.ROLE_READ_ONLY);
 	if (readOnlyRoleString == null) {
 		readOnlyRoleString =
@@ -177,7 +162,7 @@
 			                         new UserAdminClient(cookie, backendServerURL,
 			                                             configContext);
 			if (filter.length() > 0) {
-				FlaggedName[] data = client.getUsersOfRole(roleNameWithDn, filter, 0);
+				FlaggedName[] data = client.getUsersOfRole(roleName, filter, 0);
 				dataList = new ArrayList<FlaggedName>(Arrays.asList(data));
 				exceededDomains = dataList.remove(dataList.size() - 1);
 				session.setAttribute(UserAdminUIConstants.ROLE_LIST_ASSIGNED_USER_CACHE_EXCEEDED,
@@ -312,7 +297,7 @@
 
 
 <div id="middle">
-    <h2><fmt:message key="users.list.in.role"/> <%=roleWithoutDn%>
+    <h2><fmt:message key="users.list.in.role"/> <%=roleName%>
     </h2>
 
     <script type="text/javascript">
@@ -325,7 +310,6 @@
     <div id="workArea">
         <form name="filterForm" method="post" action="view-users.jsp">
         	<input type="hidden" name="roleName" value="<%=roleName %>" />
-        	<input type="hidden" name="i" value="<%=rIndex %>"/>
             <table class="normal">
                 <tr>
                     <td><fmt:message key="list.users"/></td>
@@ -350,10 +334,9 @@
                           parameters="<%="roleName="+roleName%>"/>
         <form method="post" action="edit-users-finish.jsp?viewUsers=true" onsubmit="return doValidation();"
               name="edit_users" id="edit_users">
-            <input type="hidden" id="roleName" name="roleName" value="<%=roleNameWithDn%>"/>
+            <input type="hidden" id="roleName" name="roleName" value="<%=roleName%>"/>
             <input type="hidden" id="logout" name="logout" value="false"/>
             <input type="hidden" id="finish" name="finish" value="false"/>
-            <input type="hidden" name="i" value="<%=rIndex %>"/>
 
             <table class="styledLeft" id="table_users_list_of_role">
 

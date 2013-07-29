@@ -15,7 +15,6 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page session="true" %>
@@ -73,15 +72,6 @@
     session.setAttribute(UserAdminUIConstants.ROLE_LIST_UNASSIGNED_USER_FILTER, filter);
 
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
-    
-    String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
-    int roleIndex = Integer.parseInt(rIndex);
-    
-    FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
-    String roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
-    if(datas != null && roleIndex < datas.length){
-    	roleNameWithDn += datas[roleIndex].getDn();
-    }
 
     String readOnlyRoleString  = request.getParameter(UserAdminUIConstants.ROLE_READ_ONLY);
     if(readOnlyRoleString == null){
@@ -126,7 +116,7 @@
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
             if (filter.length() > 0) {
-                FlaggedName[] data = client.getUsersOfRole(roleNameWithDn, filter, -1);
+                FlaggedName[] data = client.getUsersOfRole(roleName, filter, -1);
                 List<FlaggedName> datasList = new ArrayList<FlaggedName>(Arrays.asList(data));
                 exceededDomains = datasList.remove(datasList.size() - 1);
                 session.setAttribute(UserAdminUIConstants.ROLE_LIST_UNASSIGNED_USER_CACHE_EXCEEDED, exceededDomains);
@@ -281,7 +271,6 @@
     <div id="workArea">
         <form name="filterForm" method="post" action="edit-users.jsp">
         	<input type="hidden" name="roleName" value="<%=roleName %>">
-        	<input type="hidden" name="i" value="<%=rIndex %>">
             <table class="normal">
                 <tr>
                     <td><fmt:message key="list.users"/></td>
@@ -299,11 +288,10 @@
         <p>&nbsp;</p>
         <form method="post" action="edit-users-finish.jsp?" onsubmit="return doValidation();"
               name="edit_users" id="edit_users">
-            <input type="hidden" id="roleName" name="roleName" value="<%=roleNameWithDn%>"/>
+            <input type="hidden" id="roleName" name="roleName" value="<%=roleName%>"/>
             <input type="hidden" id="logout" name="logout" value="false"/>
             <input type="hidden" id="finish" name="finish" value="false"/>
             <input type="hidden" name="pageNumber" value="<%=pageNumber%>" />
-                        <input type="hidden" name="i" value="<%=rIndex %>"/>
             <table class="styledLeft">
                 <thead>
                 <tr>

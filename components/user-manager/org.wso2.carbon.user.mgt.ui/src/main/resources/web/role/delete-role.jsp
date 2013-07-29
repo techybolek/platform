@@ -15,8 +15,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
-<%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
+
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
@@ -25,16 +24,6 @@
 <%
 	String forwardTo = null;
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
-		 
-    String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
-    int roleIndex = Integer.parseInt(rIndex);
-    
-    FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
-    String roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
-    if(datas != null && roleIndex < datas.length){
-    	roleNameWithDn += datas[roleIndex].getDn();
-    }
-
     String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     try {
@@ -43,7 +32,7 @@
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
-        client.deleteRole(roleNameWithDn);
+        client.deleteRole(roleName);
         session.removeAttribute(UserAdminUIConstants.ROLE_LIST_CACHE);
         session.removeAttribute(UserAdminUIConstants.ROLE_LIST_CACHE_EXCEEDED);        
         forwardTo = "role-mgt.jsp";

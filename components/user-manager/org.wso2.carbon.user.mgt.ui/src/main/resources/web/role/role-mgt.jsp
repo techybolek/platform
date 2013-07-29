@@ -158,7 +158,6 @@
                 if (datas == null || datas.length == 0) {
                     showFilterMessage = true;
                 }
-                session.setAttribute(UserAdminUIConstants.ROLE_LIST, datas);
             }
             if(userRealmInfo == null){
                 userRealmInfo = client.getUserRealmInfo();
@@ -206,10 +205,10 @@
 		
     <script type="text/javascript">
 
-        function deleteUserGroup(role, index) {
+        function deleteUserGroup(role) {
             function doDelete(){
                 var roleName = role;
-                location.href = 'delete-role.jsp?roleName=' + roleName +'&userType=internal&i=' + index;
+                location.href = 'delete-role.jsp?roleName=' + roleName +'&userType=internal';
             }
             CARBON.showConfirmationDialog('<fmt:message key="confirm.delete.role"/> ' + role + '?', doDelete, null);
         }
@@ -225,9 +224,9 @@
     </script>
     <script type="text/javascript">
 
-        function updateUserGroup(role, index) {
+        function updateUserGroup(role) {
                 var roleName = role;
-                location.href = 'rename-role.jsp?roleName=' + roleName + '&i=' + index;
+                location.href = 'rename-role.jsp?roleName=' + roleName;
         }
 
     </script>
@@ -310,7 +309,6 @@
                 %>
                 <tbody>
                 <%
-                		 int index = 0;
                          for (FlaggedName data : roles) {
                             if (data != null) { //Confusing!!. Sometimes a null object comes. Maybe a bug in Axis!!
                                 if(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(data.getItemName())) {
@@ -340,24 +338,24 @@
                     <td>
                     <%if(!data.getShared()){ %>
                     <% if(data.getItemName().equals(userRealmInfo.getAdminRole()) == false && data.getItemName().equals(userRealmInfo.getEveryOneRole()) == false && data.getEditable()){%>
-<a href="#" onclick="updateUserGroup('<%=roleName%>', '<%=index %>')" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="rename"/></a>
+<a href="#" onclick="updateUserGroup('<%=roleName%>')" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="rename"/></a>
                     <% }  %>
                     <% if(!data.getItemName().equals(userRealmInfo.getAdminRole())) {%>
-<a href="edit-permissions.jsp?roleName=<%=roleName%>&i=<%=index %>" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="edit.permissions"/></a>
+<a href="edit-permissions.jsp?roleName=<%=roleName%>" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="edit.permissions"/></a>
                     <% }
                     }%>
                     
                     <% if (!userRealmInfo.getEveryOneRole().equals(data.getItemName()) && data.getEditable()) { %>
-<a href="edit-users.jsp?roleName=<%=roleName%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%=!data.getEditable()%>&i=<%=index %>" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="edit.users"/></a>
+<a href="edit-users.jsp?roleName=<%=roleName%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%=!data.getEditable()%>" class="icon-link" style="background-image:url(images/edit.gif);"><fmt:message key="edit.users"/></a>
                     <% } %>
                      <% if (!userRealmInfo.getEveryOneRole().equals(data.getItemName())) { %>
-                        <a href="view-users.jsp?roleName=<%=roleName%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%=!data.getEditable()%>&i=<%=index %>"
+                        <a href="view-users.jsp?roleName=<%=roleName%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%=!data.getEditable()%>"
                            class="icon-link" style="background-image:url(images/view.gif);"><fmt:message key="view.users"/></a>
                       <% } %>
                     <%if(!data.getShared()){ %>
 
                     <% if(data.getItemName().equals(userRealmInfo.getAdminRole()) == false && data.getItemName().equals(userRealmInfo.getEveryOneRole()) == false && data.getEditable()){%>
-<a href="#" onclick="deleteUserGroup('<%=roleName%>', '<%=index %>')" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key="delete"/></a>
+<a href="#" onclick="deleteUserGroup('<%=roleName%>')" class="icon-link" style="background-image:url(images/delete.gif);"><fmt:message key="delete"/></a>
                     <% }}  %>
 
                     </td>
@@ -365,7 +363,6 @@
 
                 <%
                             }
-                            index++;
                         }
                %>
                 </tbody>

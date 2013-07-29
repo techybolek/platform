@@ -15,7 +15,6 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants"%>
 <%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
 <%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
@@ -90,34 +89,14 @@
 
         UIPermissionNode rootNode = null;
         String roleName = request.getParameter("roleName");
-        String roleNameWithoutDn = roleName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
+
         try {
-        	
-            String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
-            String roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
-            if(rIndex != null){
-            	try{
-	            	int roleIndex = Integer.parseInt(rIndex);
-		            FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
-		            
-		            if(datas != null && roleIndex < datas.length){
-		            	roleNameWithDn += datas[roleIndex].getDn();
-		            }
-
-            	}catch(NumberFormatException e){
-            		e.printStackTrace();
-            		throw e;
-            	}
-	        }
-            
-            roleName = roleNameWithDn;
-
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext =
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
-            rootNode = client.getRolePermissions(roleNameWithoutDn);
+            rootNode = client.getRolePermissions(roleName);
         } catch (Exception e) {
             CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
             session.setAttribute(CarbonUIMessage.ID, uiMsg);
@@ -136,7 +115,7 @@
         topPage="false" request="<%=request%>" />
         
 <div id="middle">
-    <h2><fmt:message key="permissions.of.the.role"/> <%=roleNameWithoutDn%></h2>
+    <h2><fmt:message key="permissions.of.the.role"/> <%=roleName%></h2>
 
     <div id="workArea">
       

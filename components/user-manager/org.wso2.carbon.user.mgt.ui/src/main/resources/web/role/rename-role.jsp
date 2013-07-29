@@ -15,8 +15,6 @@
  ~ specific langauage governing permissions and limitations
  ~ under the License.
  -->
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
-<%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
@@ -34,17 +32,7 @@
     String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
     String modifiedRole = roleName;
     UserStoreInfo[] allUserStoreInfo = null;
-    
-    String rIndex = CharacterEncoder.getSafeText(request.getParameter("i"));
-    int roleIndex = Integer.parseInt(rIndex);
-    
-    FlaggedName[] datas = (FlaggedName[])session.getAttribute(UserAdminUIConstants.ROLE_LIST);
-    String roleNameWithDn = roleName + UserCoreConstants.TENANT_DOMAIN_COMBINER;
-    if(datas != null && roleIndex < datas.length){
-    	roleNameWithDn += datas[roleIndex].getDn();
-    }
 
-    
     if(modifiedRole.contains(UserAdminUIConstants.DOMAIN_SEPARATOR)){
         modifiedRole = modifiedRole. substring(modifiedRole.indexOf(UserAdminUIConstants.DOMAIN_SEPARATOR) + 1);
     }
@@ -123,7 +111,7 @@
 
         function doRename() {
 		    if(doValidation()){
-                var oldRoleName = "<%=roleNameWithDn%>";
+                var oldRoleName = "<%=roleName%>";
                 var newRoleName = document.getElementById("roleName").value;
                 
                 if (newRoleName.indexOf("/") !=-1) {
@@ -156,7 +144,7 @@
             <form action="rename-role-finish.jsp" method="post" id="renameRoleForm">
             
                  <input type="hidden"  id="role_regex" name="role_regex" value=<%=regEx%>>
-                 <input type="hidden"  id="oldRoleName" name="oldRoleName" value=<%=roleNameWithDn%>>                              
+                 <input type="hidden"  id="oldRoleName" name="oldRoleName" value=<%=roleName%>>
                  
                 <table class="styledLeft">
                     <thead>
