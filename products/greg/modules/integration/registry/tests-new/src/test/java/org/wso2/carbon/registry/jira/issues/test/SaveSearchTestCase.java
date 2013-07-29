@@ -32,8 +32,10 @@ import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkSettings;
 import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.permission.test.utils.PermissionTestConstants;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.search.metadata.test.bean.SearchParameterBean;
@@ -189,6 +191,7 @@ public class SaveSearchTestCase {
                                                       "testService"));
 
         serviceManager.addService(service);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
         for (String serviceId : serviceManager.getAllServiceIds()) {
             service = serviceManager.getService(serviceId);
