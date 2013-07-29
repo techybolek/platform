@@ -63,6 +63,11 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
     * */
     public GitBasedArtifactRepository () {
 
+        //TODO:fix properly
+        if(!isGitDeploymentSyncEnabled()) {
+            return;
+        }
+
         readConfiguration();
 
         //standard worker manager separated deployment
@@ -82,6 +87,24 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
             repositoryManager = new S2GitRepositoryManager();
             behaviour = new S2Behaviour(repositoryManager);
         }
+    }
+
+    private boolean isGitDeploymentSyncEnabled () {
+
+        //check if deployment synchronization is enabled
+        String depSyncEnabledParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.ENABLED);
+
+        //Check if deployment synchronization is enabled
+        if (depSyncEnabledParam != null && depSyncEnabledParam.equals("true")) {
+
+            //check if repository type is 'git', else no need to create GitBasedArtifactRepository instance
+            String repoTypeParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.REPOSITORY_TYPE);
+            if (repoTypeParam != null && repoTypeParam.equals(DeploymentSynchronizerConstants.REPOSITORY_TYPE_GIT)) {
+                 return true;
+            }
+        }
+
+        return false;
     }
 
     /**

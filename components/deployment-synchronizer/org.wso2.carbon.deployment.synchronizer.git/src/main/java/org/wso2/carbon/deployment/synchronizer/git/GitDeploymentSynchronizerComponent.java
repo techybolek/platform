@@ -4,10 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
-import org.wso2.carbon.deployment.synchronizer.git.internal.GitDeploymentSynchronizerConstants;
-import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 
 
 /**
@@ -26,7 +23,11 @@ public class GitDeploymentSynchronizerComponent {
      */
     protected void activate(ComponentContext context) {
 
-        ServerConfiguration serverConf = ServerConfiguration.getInstance();
+        ArtifactRepository gitBasedArtifactRepository = new GitBasedArtifactRepository();
+        gitDepSyncServiceRegistration = context.getBundleContext().registerService(ArtifactRepository.class.getName(),
+                gitBasedArtifactRepository, null);
+
+        /*ServerConfiguration serverConf = ServerConfiguration.getInstance();
         String depSyncEnabledParam = serverConf.getFirstProperty(GitDeploymentSynchronizerConstants.ENABLED);
 
         //Check if deployment synchronization is enabled
@@ -50,7 +51,7 @@ public class GitDeploymentSynchronizerComponent {
             if(log.isDebugEnabled()) {
                 log.debug("Deployment synchronization disabled, GitBasedArtifactRepository instance not created");
             }
-        }
+        }*/
 
         if(log.isDebugEnabled()) {
             log.debug("Git based deployment synchronizer component activated");
