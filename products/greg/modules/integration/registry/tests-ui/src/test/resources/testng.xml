@@ -36,6 +36,7 @@
             <class name="org.wso2.carbon.registry.integration.ui.AddNewLifeCycleTestCase"/>
             <class name="org.wso2.carbon.registry.integration.ui.AddNewArtifactTestCase"/>
             <class name="org.wso2.carbon.registry.integration.ui.AddNewHandlerTestCase"/>
+            <class name="org.wso2.carbon.registry.integration.ui.LifeCycleFilterStatePresistanceTest"/>
 
         </classes>
     </test>
