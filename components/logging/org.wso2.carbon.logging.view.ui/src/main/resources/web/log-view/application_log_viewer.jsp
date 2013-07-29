@@ -347,13 +347,10 @@
                       page="application_log_viewer.jsp" pageNumberParameterName="pageNumber"
                       prevKey="prev" nextKey="next"
                       parameters="<%= parameter%>"/>
+                      </td>
 					</tr>
-					
 				</tbody>
 			</table>
-						</tr>
-					</tbody>
-				</table>
 			</div>
 		</div>
 	</fmt:bundle>
