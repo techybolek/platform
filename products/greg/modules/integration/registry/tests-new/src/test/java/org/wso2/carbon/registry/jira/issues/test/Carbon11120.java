@@ -31,11 +31,13 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.list.stub.beans.xsd.ServiceBean;
 import org.wso2.carbon.governance.list.stub.beans.xsd.WSDLBean;
 import org.wso2.carbon.logging.view.stub.types.carbon.LogEvent;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -106,7 +108,7 @@ public class Carbon11120 {
      * @throws MalformedURLException
      */
     public void addWSDL() throws ResourceAdminServiceExceptionException, RemoteException,
-            MalformedURLException, GovernanceException {
+            MalformedURLException, RegistryException {
         Boolean nameExists = false;
         String path1 =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
@@ -125,6 +127,8 @@ public class Carbon11120 {
         assertTrue(nameExists, "WSDL not added");
 
         boolean serviceStatus = false;
+
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
         for (Service service : serviceManager.getAllServices()) {
             String name = service.getQName().getLocalPart();
@@ -146,8 +150,8 @@ public class Carbon11120 {
      */
     @Test(groups = "wso2.greg", description = "Save the existing service without modifying and list services ")
     public void testSaveListService() throws RemoteException, MalformedURLException,
-                                             ResourceAdminServiceExceptionException,
-                                             GovernanceException {
+            ResourceAdminServiceExceptionException,
+            RegistryException {
 
         String ADD_LOG =
                 "Failed to get service details. Exception occurred while trying to invoke service method addService";
@@ -163,8 +167,6 @@ public class Carbon11120 {
                 readLogs(ADD_LOG);
             }
         }
-
-        serviceBean = listMetaDataServiceClient.listServices(null);
         readLogs(LIST_LOG);
     }
 
@@ -191,8 +193,9 @@ public class Carbon11120 {
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
         }
-        String servicePathToDelete = "";
-        for (String servicePath : serviceBean.getPath()) {
+
+        String servicePathToDelete ="";
+        for (String servicePath : serviceManager.getAllServicePaths()) {
             if (servicePath.contains(SERVICE_NAME)) {
                 servicePathToDelete = "/_system/governance" + servicePath;
             }
