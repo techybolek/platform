@@ -53,7 +53,7 @@ public class FtpServerManager {
     public void startFtpServer() {
 
 
-        userManagerFactory.setFile(new File("/home/dharshana/wso2source/carbon/platform/trunk/platform-integration/test-automation-framework/org.wso2.carbon.automation.core/src/main/resources/ftp"));//choose any. We're telling the FTP-server where to read it's user list
+        //userManagerFactory.setFile(new File("/home/dharshana/wso2source/carbon/platform/trunk/platform-integration/test-automation-framework/org.wso2.carbon.automation.core/src/main/resources/ftp"));//choose any. We're telling the FTP-server where to read it's user list
 
 // set the port of the listener
         factory.setPort(2223);
