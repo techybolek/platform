@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.AdvancedSQLProps;
 import org.wso2.carbon.dataservices.common.DBConstants.AutoCommit;
+import org.wso2.carbon.dataservices.common.DBConstants.DataTypes;
 import org.wso2.carbon.dataservices.common.DBConstants.FaultCodes;
 import org.wso2.carbon.dataservices.common.DBConstants.QueryTypes;
 import org.wso2.carbon.dataservices.common.DBConstants.RDBMS;
@@ -125,21 +126,21 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         }
     };
 
-    public SQLQuery(DataService dataService, String queryId, String configId, boolean returnGeneratedKeys,
-                    String[] keyColumns, String query, List<QueryParam> queryParams, Result result,
-                    EventTrigger inputEventTrigger, EventTrigger outputEventTrigger,
-                    Map<String, String> advancedProperties, String inputNamespace)
-            throws DataServiceFault {
-        super(dataService, queryId, queryParams, result, configId,
-                inputEventTrigger, outputEventTrigger, advancedProperties, inputNamespace);
+    public SQLQuery(DataService dataService, String queryId, String configId,
+            boolean returnGeneratedKeys, String[] keyColumns, String query,
+            List<QueryParam> queryParams, Result result, EventTrigger inputEventTrigger,
+            EventTrigger outputEventTrigger, Map<String, String> advancedProperties,
+            String inputNamespace) throws DataServiceFault {
+        super(dataService, queryId, queryParams, result, configId, inputEventTrigger,
+                outputEventTrigger, advancedProperties, inputNamespace);
         this.returnGeneratedKeys = returnGeneratedKeys;
         this.keyColumns = keyColumns;
         this.query = query;
         try {
             this.config = (SQLConfig) this.getDataService().getConfig(this.getConfigId());
         } catch (ClassCastException e) {
-            throw new DataServiceFault(e, "Configuration is not an SQL config:" +
-                    this.getConfigId());
+            throw new DataServiceFault(e, "Configuration is not an SQL config:"
+                    + this.getConfigId());
         }
         this.init();
     }
@@ -157,35 +158,40 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         this.checkRefCursor(this.getQueryParams());
         /* check for existence of any SQL Arrays */
         this.hasOutParams = this.getOutQueryParams().size() > 0;
-        /* first a result should be available and then check the other necessary conditions */
+        /*
+         * first a result should be available and then check the other necessary
+         * conditions
+         */
         this.resultOnlyOutParams = this.calculateResultOnlyOutParams();
         /* set the optimal JDBC result set fetch size */
-        this.optimalRSFetchSize = DBUtils.getOptimalRSFetchSizeForRDBMS(
-                this.getConfig().getProperty(RDBMS.URL));
+        this.optimalRSFetchSize = DBUtils.getOptimalRSFetchSizeForRDBMS(this.getConfig()
+                .getProperty(RDBMS.URL));
         /* set batch update support for this query */
         try {
-            this.hasBatchQuerySupport = this.getDataService().isBatchRequestsEnabled() &&
-                    (this.isForceJDBCBatchReqs() || this.calculateBatchQuerySupport());
+            this.hasBatchQuerySupport = this.getDataService().isBatchRequestsEnabled()
+                    && (this.isForceJDBCBatchReqs() || this.calculateBatchQuerySupport());
         } catch (DataServiceFault e) {
             this.hasBatchQuerySupport = false;
-            log.warn("Unable to determine batch query support for query '" + this.getQueryId() +
-                    "' : " + e.getMessage() + " - batch query support is disabled.");
+            log.warn("Unable to determine batch query support for query '" + this.getQueryId()
+                    + "' : " + e.getMessage() + " - batch query support is disabled.");
         }
     }
 
     private boolean calculateResultOnlyOutParams() {
-        return (this.getResult() != null) && (this.hasRefCursor() ||
-                (this.hasOutParams() &&
-                        ((this.getResult().getDefaultElementGroup().getAllElements().size() +
-                                this.getResult().getDefaultElementGroup().getAttributeEntries().size()) ==
-                                this.getOutQueryParams().size())));
+        return (this.getResult() != null)
+                && (this.hasRefCursor() || (this.hasOutParams() && ((this.getResult()
+                        .getDefaultElementGroup().getAllElements().size() + this.getResult()
+                        .getDefaultElementGroup().getAttributeEntries().size()) == this
+                        .getOutQueryParams().size())));
     }
 
     /**
      * Extract the stored proc name from the SQL.
-     *
-     * @param skipFirstWord If the first word should be considered the name or not,
-     *                      if this is true, the second word will be considered as the stored proc name
+     * 
+     * @param skipFirstWord
+     *            If the first word should be considered the name or not, if
+     *            this is true, the second word will be considered as the stored
+     *            proc name
      * @return The stored procedure name
      */
     private String extractStoredProcName(boolean skipFirstWord) {
@@ -219,26 +225,26 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         DatabaseMetaData md = conn.getMetaData();
         ResultSet rs = null;
         boolean error = true;
-		try {
-			rs = md.getProcedureColumns(null, null, name, "%");
-			Object[] resultMap = new Object[2];
-			if (!rs.next()) {
-				rs.close();
-				rs = md.getFunctionColumns(null, null, name, "%");
-			} else {
-				rs.close();
-				rs = md.getProcedureColumns(null, null, name, "%");
-			}
-			resultMap[0] = conn;
-			resultMap[1] = rs;
-			error = false;
-			return resultMap;
-		} finally {
-			if (error) {
-			    this.releaseResources(rs, null);
-			    this.finalizeConnection(conn, true);
-			}
-		}
+        try {
+            rs = md.getProcedureColumns(null, null, name, "%");
+            Object[] resultMap = new Object[2];
+            if (!rs.next()) {
+                rs.close();
+                rs = md.getFunctionColumns(null, null, name, "%");
+            } else {
+                rs.close();
+                rs = md.getProcedureColumns(null, null, name, "%");
+            }
+            resultMap[0] = conn;
+            resultMap[1] = rs;
+            error = false;
+            return resultMap;
+        } finally {
+            if (error) {
+                this.releaseResources(rs, null);
+                this.finalizeConnection(conn, true);
+            }
+        }
     }
 
     private boolean calculateBatchQuerySupport() throws DataServiceFault {
@@ -259,23 +265,26 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                                     "Cannot find metadata for the stored procedure");
                         }
                     }
-                    /* stored procedures here can only have IN params and results which only
-                          * returns an integer, which has the update count,
-                          * all other situations are not supported for batch updates */
+                    /*
+                     * stored procedures here can only have IN params and
+                     * results which only returns an integer, which has the
+                     * update count, all other situations are not supported for
+                     * batch updates
+                     */
                     StoredProcMetadataCollection mdCollection = new StoredProcMetadataCollection(rs);
                     for (StoredProcMetadataEntry entry : mdCollection.getEntries()) {
                         switch (entry.getColumnReturn()) {
-                            case DatabaseMetaData.procedureColumnIn:
-                                break;
-                            case DatabaseMetaData.procedureColumnReturn:
-                                if (!(entry.getColumnDataType() == Types.INTEGER ||
-                                        entry.getColumnDataType() == Types.BIGINT
-                                        || entry.getColumnDataType() == Types.DECIMAL)) {
-                                    return false;
-                                }
-                                break;
-                            default:
+                        case DatabaseMetaData.procedureColumnIn:
+                            break;
+                        case DatabaseMetaData.procedureColumnReturn:
+                            if (!(entry.getColumnDataType() == Types.INTEGER
+                                    || entry.getColumnDataType() == Types.BIGINT || entry
+                                        .getColumnDataType() == Types.DECIMAL)) {
                                 return false;
+                            }
+                            break;
+                        default:
+                            return false;
                         }
                     }
                     return true;
@@ -333,7 +342,6 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         return forceJDBCBatchReqs;
     }
 
-
     private void processAdvancedProps(Map<String, String> props) throws DataServiceFault {
         if (props == null) {
             return;
@@ -347,9 +355,9 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             } else if (AdvancedSQLProps.FETCH_DIRECTION_REVERSE.equals(fetchDirectionProp)) {
                 this.fetchDirection = ResultSet.FETCH_REVERSE;
             } else {
-                throw new DataServiceFault("Invalid fetch direction: " + fetchDirectionProp +
-                        ", valid values are {'" + AdvancedSQLProps.FETCH_DIRECTION_FORWARD +
-                        "', '" + AdvancedSQLProps.FETCH_DIRECTION_REVERSE + "'}");
+                throw new DataServiceFault("Invalid fetch direction: " + fetchDirectionProp
+                        + ", valid values are {'" + AdvancedSQLProps.FETCH_DIRECTION_FORWARD
+                        + "', '" + AdvancedSQLProps.FETCH_DIRECTION_REVERSE + "'}");
             }
             this.hasFetchDirection = true;
         } else {
@@ -362,8 +370,8 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             try {
                 this.fetchSize = Integer.parseInt(fetchSizeProp);
             } catch (NumberFormatException e) {
-                throw new DataServiceFault(e, "Invalid fetch size: " + fetchSizeProp +
-                        ", fetch size should be an integer");
+                throw new DataServiceFault(e, "Invalid fetch size: " + fetchSizeProp
+                        + ", fetch size should be an integer");
             }
             this.hasFetchSize = true;
         } else {
@@ -376,12 +384,12 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             try {
                 this.maxFieldSize = Integer.parseInt(maxFieldSizeProp);
                 if (this.maxFieldSize <= 0) {
-                    throw new DataServiceFault("Invalid maximum field size: " + maxFieldSizeProp +
-                            ", maximum field size should be a positive integer");
+                    throw new DataServiceFault("Invalid maximum field size: " + maxFieldSizeProp
+                            + ", maximum field size should be a positive integer");
                 }
             } catch (NumberFormatException e) {
-                throw new DataServiceFault(e, "Invalid maximum field size: " + maxFieldSizeProp +
-                        ", maximum field size should be a positive integer");
+                throw new DataServiceFault(e, "Invalid maximum field size: " + maxFieldSizeProp
+                        + ", maximum field size should be a positive integer");
             }
             this.hasMaxFieldSize = true;
         } else {
@@ -394,12 +402,12 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             try {
                 this.maxRows = Integer.parseInt(maxRowsProp);
                 if (this.maxRows <= 0) {
-                    throw new DataServiceFault("Invalid maximum rows: " + maxRowsProp +
-                            ", maximum rows should be a positive integer");
+                    throw new DataServiceFault("Invalid maximum rows: " + maxRowsProp
+                            + ", maximum rows should be a positive integer");
                 }
             } catch (NumberFormatException e) {
-                throw new DataServiceFault(e, "Invalid maximum rows: " + maxRowsProp +
-                        ", maximum rows should be a positive integer");
+                throw new DataServiceFault(e, "Invalid maximum rows: " + maxRowsProp
+                        + ", maximum rows should be a positive integer");
             }
             this.hasMaxRows = true;
         } else {
@@ -412,12 +420,12 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             try {
                 this.queryTimeout = Integer.parseInt(queryTimeoutProp);
                 if (this.queryTimeout <= 0) {
-                    throw new DataServiceFault("Invalid query timeout: " + queryTimeoutProp +
-                            ", query timeout be a positive integer");
+                    throw new DataServiceFault("Invalid query timeout: " + queryTimeoutProp
+                            + ", query timeout be a positive integer");
                 }
             } catch (NumberFormatException e) {
-                throw new DataServiceFault(e, "Invalid query timeout: " + queryTimeoutProp +
-                        ", query timeout be a positive integer");
+                throw new DataServiceFault(e, "Invalid query timeout: " + queryTimeoutProp
+                        + ", query timeout be a positive integer");
             }
             this.hasQueryTimeout = true;
         } else {
@@ -436,8 +444,8 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                     this.autoCommit = AutoCommit.AUTO_COMMIT_OFF;
                 }
             } catch (Exception e) {
-                throw new DataServiceFault(e, "Invalid autocommit value: " + autoCommitProp +
-                        ", autocommit should be a boolean value");
+                throw new DataServiceFault(e, "Invalid autocommit value: " + autoCommitProp
+                        + ", autocommit should be a boolean value");
             }
         } else {
             /* global auto commit setting */
@@ -514,22 +522,24 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     private void sortStringsByLength(List<String> values) {
-    	Collections.sort(values, new Comparator<String>() {
-			@Override
-			public int compare(String lhs, String rhs) {
-				return lhs.length() - rhs.length();
-			}
-		});
+        Collections.sort(values, new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return lhs.length() - rhs.length();
+            }
+        });
     }
-    
+
     private String createSqlFromQueryString(String query) {
-    	/* get a copy of the param names */
+        /* get a copy of the param names */
         List<String> values = new ArrayList<String>(this.getNamedParamNames());
         /* sort the strings */
         this.sortStringsByLength(values);
-        /* make it from largest to smallest, this is done to make sure, if there are params like,
-         * :abcd,:abc, then the step of replacing :abc doesn't also initially replace :abcd's
-         * substring as well */
+        /*
+         * make it from largest to smallest, this is done to make sure, if there
+         * are params like, :abcd,:abc, then the step of replacing :abc doesn't
+         * also initially replace :abcd's substring as well
+         */
         Collections.reverse(values);
         for (String val : values) {
             /* replace named params with ?'s */
@@ -551,10 +561,16 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             } else if (query.charAt(i) == ':') {
                 /* check if the string is at the end */
                 if (i + 1 < query.length()) {
-                    /* split params in situations like ":a,:b", ":a :b", ":a:b", "(:a,:b)" */
+                    /*
+                     * split params in situations like ":a,:b", ":a :b", ":a:b",
+                     * "(:a,:b)"
+                     */
                     tmpParam = query.substring(i + 1, query.length()).split(" |,|\\)|\\(|:")[0];
                     if (queryParams.contains(tmpParam)) {
-                        /* only consider this as a parameter if it's in input mappings */
+                        /*
+                         * only consider this as a parameter if it's in input
+                         * mappings
+                         */
                         paramNames.add(tmpParam);
                     }
                 }
@@ -577,13 +593,13 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         Set<Integer> processedOrdinalsForNamedParams = new HashSet<Integer>();
         for (int i = 0; i < paramNames.size(); i++) {
             if (!paramNames.get(i).equals("?")) {
-            	tmpParamName = paramNames.get(i);
+                tmpParamName = paramNames.get(i);
                 tmpParam = paramMap.get(tmpParamName);
                 if (tmpParam != null) {
-                	if (!checkedQueryParams.contains(tmpParamName)) {
-                		tmpParam.clearOrdinals();
-                		checkedQueryParams.add(tmpParamName);
-                	}
+                    if (!checkedQueryParams.contains(tmpParamName)) {
+                        tmpParam.clearOrdinals();
+                        checkedQueryParams.add(tmpParamName);
+                    }
                     this.namedParamNames.add(tmpParamName);
                     /* ordinals of named params */
                     tmpOrdinal = i + 1;
@@ -592,28 +608,28 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             }
         }
-        this.cleanupProcessedNamedParams(checkedQueryParams, 
-        		processedOrdinalsForNamedParams, paramMap);
+        this.cleanupProcessedNamedParams(checkedQueryParams, processedOrdinalsForNamedParams,
+                paramMap);
     }
-    
+
     /**
-     * This method is used to clean up the ordinal in the named paramter scenario, where the SQL may not
-     * have all the params as named parameters, so other non-named parameters ordinals may clash with the
-     * processed one.
+     * This method is used to clean up the ordinal in the named paramter
+     * scenario, where the SQL may not have all the params as named parameters,
+     * so other non-named parameters ordinals may clash with the processed one.
      */
-    private void cleanupProcessedNamedParams(Set<String> checkedQueryParams, 
-    		Set<Integer> processedOrdinalsForNamedParams, Map<String, QueryParam> paramMap) {
-    	QueryParam tmpQueryParam;
-    	for (String paramName : paramMap.keySet()) {
-    		if (!checkedQueryParams.contains(paramName)) {
-    			tmpQueryParam = paramMap.get(paramName);
-    			/* unchecked query param can only have one ordinal */
-    			if (processedOrdinalsForNamedParams.contains(tmpQueryParam.getOrdinal())) {
-    				/* set to a value that will not clash with valid ordinals */
-    				tmpQueryParam.setOrdinal(0);
-    			}
-    		}
-    	}
+    private void cleanupProcessedNamedParams(Set<String> checkedQueryParams,
+            Set<Integer> processedOrdinalsForNamedParams, Map<String, QueryParam> paramMap) {
+        QueryParam tmpQueryParam;
+        for (String paramName : paramMap.keySet()) {
+            if (!checkedQueryParams.contains(paramName)) {
+                tmpQueryParam = paramMap.get(paramName);
+                /* unchecked query param can only have one ordinal */
+                if (processedOrdinalsForNamedParams.contains(tmpQueryParam.getOrdinal())) {
+                    /* set to a value that will not clash with valid ordinals */
+                    tmpQueryParam.setOrdinal(0);
+                }
+            }
+        }
     }
 
     public boolean hasOutParams() {
@@ -627,8 +643,8 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     private List<QueryParam> extractOutQueryParams(List<QueryParam> queryParams) {
         List<QueryParam> inOutQueryParams = new ArrayList<QueryParam>();
         for (QueryParam queryParam : queryParams) {
-            if (queryParam.getType().endsWith(QueryTypes.OUT) && !queryParam.getSqlType().equals(
-                    DBConstants.DataTypes.ORACLE_REF_CURSOR)) {
+            if (queryParam.getType().endsWith(QueryTypes.OUT)
+                    && !queryParam.getSqlType().equals(DBConstants.DataTypes.ORACLE_REF_CURSOR)) {
                 inOutQueryParams.add(queryParam);
             }
         }
@@ -656,45 +672,45 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     private boolean isValidCreds(String[] creds) {
-    	return (creds != null && creds.length > 1 && creds[0] != null);
+        return (creds != null && creds.length > 1 && creds[0] != null);
     }
-    
+
     public String[] lookupConnectionCredentials() throws DataServiceFault {
-    	if (this.getConfig().getPrimaryDynAuth() != null) {
-    		String user = DBUtils.getCurrentContextUsername();
-    		String[] creds = this.getConfig().getPrimaryDynAuth().lookupCredentials(user);
-    		if (this.isValidCreds(creds)) {
-    			return creds;
-    		} else {
-    			if (this.getConfig().getSecondaryDynAuth() != null) {
-    				creds = this.getConfig().getSecondaryDynAuth().lookupCredentials(user);
-    				if (this.isValidCreds(creds)) {
-    					return creds;
-    				}
-    			}
-    			creds = this.getConfig().getPrimaryDynAuth().lookupCredentials(
-						RDBMS.USERNAME_WILDCARD);
-    			if (this.isValidCreds(creds)) {
-    				return creds;
-    			} else {
-					throw new DataServiceFault(
-							"A username/password mapping does not exist for the " +
-							"request user: " + user);
-				}
-    		}
-    	} else {
-    		return new String[] { null, null };
-    	}
+        if (this.getConfig().getPrimaryDynAuth() != null) {
+            String user = DBUtils.getCurrentContextUsername();
+            String[] creds = this.getConfig().getPrimaryDynAuth().lookupCredentials(user);
+            if (this.isValidCreds(creds)) {
+                return creds;
+            } else {
+                if (this.getConfig().getSecondaryDynAuth() != null) {
+                    creds = this.getConfig().getSecondaryDynAuth().lookupCredentials(user);
+                    if (this.isValidCreds(creds)) {
+                        return creds;
+                    }
+                }
+                creds = this.getConfig().getPrimaryDynAuth()
+                        .lookupCredentials(RDBMS.USERNAME_WILDCARD);
+                if (this.isValidCreds(creds)) {
+                    return creds;
+                } else {
+                    throw new DataServiceFault(
+                            "A username/password mapping does not exist for the "
+                                    + "request user: " + user);
+                }
+            }
+        } else {
+            return new String[] { null, null };
+        }
     }
-    
+
     /**
      * Creates a new connection and return it.
-     *
+     * 
      * @see Connection
      */
     private Connection createConnection() throws DataServiceFault {
         try {
-        	String[] creds = this.lookupConnectionCredentials();
+            String[] creds = this.lookupConnectionCredentials();
             Connection connection = null;
             DataService dataService = this.getDataService();
             if (dataService.isInTransaction() && !dataService.isEnableXA()) {
@@ -712,12 +728,12 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 /* set auto commit, but don't mess with XA-transactions */
                 if (!(dataService.isInTransaction() && dataService.isEnableXA())) {
                     switch (this.getAutoCommit()) {
-                        case AUTO_COMMIT_ON:
-                            setAutoCommit(connection, true);
-                            break;
-                        case AUTO_COMMIT_OFF:
-                            setAutoCommit(connection, false);
-                            break;
+                    case AUTO_COMMIT_ON:
+                        setAutoCommit(connection, true);
+                        break;
+                    case AUTO_COMMIT_OFF:
+                        setAutoCommit(connection, false);
+                        break;
                     }
                 }
             }
@@ -781,13 +797,12 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     private boolean isJDBCLastBatchRequest() {
-        return (this.isJDBCBatchRequest() &&
-                (DBUtils.getBatchRequestNumber() + 1 >= DBUtils.getBatchRequestCount()));
+        return (this.isJDBCBatchRequest() && (DBUtils.getBatchRequestNumber() + 1 >= DBUtils
+                .getBatchRequestCount()));
     }
 
     private void writeOutGeneratedKeys(Statement stmt, XMLStreamWriter xmlWriter,
-                                       InternalParamCollection params,
-                                       int queryLevel) throws DataServiceFault, SQLException {
+            InternalParamCollection params, int queryLevel) throws DataServiceFault, SQLException {
         ResultSet krs = stmt.getGeneratedKeys();
         DataEntry dataEntry;
         while (krs.next()) {
@@ -796,18 +811,16 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         }
     }
 
-    private void processNormalQuery(XMLStreamWriter xmlWriter,
-                                    InternalParamCollection params,
-                                    int queryLevel)
-            throws DataServiceFault {
+    private void processNormalQuery(XMLStreamWriter xmlWriter, InternalParamCollection params,
+            int queryLevel) throws DataServiceFault {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         boolean isError = false;
         try {
             conn = this.createConnection();
-            stmt = this.createProcessedPreparedStatement(
-                    SQLQuery.DS_QUERY_TYPE_NORMAL, params, conn);
+            stmt = this.createProcessedPreparedStatement(SQLQuery.DS_QUERY_TYPE_NORMAL, params,
+                    conn);
             /* check if this is a batch request */
             if (this.isJDBCFirstBatchRequest()) {
                 this.setBatchPreparedStatement(stmt);
@@ -847,27 +860,28 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             throw new DataServiceFault(e, FaultCodes.DATABASE_ERROR,
                     "Error in 'SQLQuery.processNormalQuery'");
         } finally {
-        	this.releaseResources(rs, this.isStatementClosable(isError) ? stmt : null);
+            this.releaseResources(rs, this.isStatementClosable(isError) ? stmt : null);
             /* finalize the DB connection, close it if possible etc.. */
             this.finalizeConnection(conn, isError);
         }
     }
 
     private boolean isRSClosed(ResultSet rs) throws SQLException {
-    	try {
-    		return rs.isClosed();
-    	} catch (SQLException e) {
-			throw e;
-		} catch (Throwable e) {
-			/* in case they throw a method not found exception 
-			 * for the JDBC driver not supporting v4.0 features */
-			return false;
-		}
+        try {
+            return rs.isClosed();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Throwable e) {
+            /*
+             * in case they throw a method not found exception for the JDBC
+             * driver not supporting v4.0 features
+             */
+            return false;
+        }
     }
-    
-    private void processStoredProcQuery(XMLStreamWriter xmlWriter,
-                                        InternalParamCollection params, int queryLevel)
-            throws DataServiceFault {
+
+    private void processStoredProcQuery(XMLStreamWriter xmlWriter, InternalParamCollection params,
+            int queryLevel) throws DataServiceFault {
         Connection conn = null;
         boolean isError = false;
         CallableStatement stmt = null;
@@ -899,7 +913,10 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                     }
                 }
             } else {
-                /* check if all the result elements are out params; if so, no result set */
+                /*
+                 * check if all the result elements are out params; if so, no
+                 * result set
+                 */
                 if (this.isResultOnlyOutParams()) {
                     stmt.execute();
                     /* if there's a ref cursor, get the result set */
@@ -919,17 +936,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                     }
                 } else {
                     if (this.hasOutParams()) {
-                        /* so if someone mixes up OUT parameters with normal results, 
-                         * this will effectively turn off streaming */
+                        /*
+                         * so if someone mixes up OUT parameters with normal
+                         * results, this will effectively turn off streaming
+                         */
                         List<DataEntry> entries = this.getAllDataEntriesFromRS(rs, true);
-                        /* result sets must be processed before extracting out params */
+                        /*
+                         * result sets must be processed before extracting out
+                         * params
+                         */
                         DataEntry outParamDataEntry = this.getDataEntryFromOutParams(stmt);
                         for (DataEntry dataEntry : entries) {
                             this.mergeDataEntries(dataEntry, outParamDataEntry);
                             this.writeResultEntry(xmlWriter, dataEntry, params, queryLevel);
                         }
                     } else {
-                        /* do-while loop since, 'rs.next()' has already been called once */
+                        /*
+                         * do-while loop since, 'rs.next()' has already been
+                         * called once
+                         */
                         DataEntry dataEntry;
                         do {
                             dataEntry = this.getDataEntryFromRS(new ResultSetWrapper(rs));
@@ -944,37 +969,37 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             throw new DataServiceFault(e, FaultCodes.DATABASE_ERROR,
                     "Error in 'SQLQuery.processStoredProcQuery'");
         } finally {
-        	this.releaseResources(rs, this.isStatementClosable(isError) ? stmt : null);
+            this.releaseResources(rs, this.isStatementClosable(isError) ? stmt : null);
             /* close the DB connection */
             this.finalizeConnection(conn, isError);
         }
     }
-    
+
     private boolean isStatementClosable(boolean isError) {
-    	return (isError || !this.isJDBCBatchRequest() || this.isJDBCLastBatchRequest());
-    }
-    
-    private void releaseResources(ResultSet rs, Statement stmt) {
-    	/* close the result set */
-    	if (rs != null) {
-    		try {
-    			rs.close();
-    		} catch (Exception ignore) {
-				// ignore
-			}
-    	}
-    	/* close the statement */
-    	if (stmt != null) {
-    		try {
-    			stmt.close();
-    		} catch (Exception ignore) {
-				// ignore
-			}
-    	}
+        return (isError || !this.isJDBCBatchRequest() || this.isJDBCLastBatchRequest());
     }
 
-    private List<DataEntry> getAllDataEntriesFromRS(ResultSet rs,
-                                                    boolean rsNextAlreadyCalled) throws SQLException {
+    private void releaseResources(ResultSet rs, Statement stmt) {
+        /* close the result set */
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (Exception ignore) {
+                // ignore
+            }
+        }
+        /* close the statement */
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (Exception ignore) {
+                // ignore
+            }
+        }
+    }
+
+    private List<DataEntry> getAllDataEntriesFromRS(ResultSet rs, boolean rsNextAlreadyCalled)
+            throws SQLException {
         List<DataEntry> entries = new ArrayList<DataEntry>();
         if (!rsNextAlreadyCalled) {
             if (!rs.next()) {
@@ -1002,9 +1027,12 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             try {
                 resultAndNoUpdateCount = stmt.getMoreResults(Statement.KEEP_CURRENT_RESULT);
             } catch (SQLException e) {
-                /* for some DBMS, this will throw an unsupported feature exception, even when after a valid result set is
-                     * retrieved first, so if there's a valid result set existing, we will ignore the eventual unsupported feature
-                     * exception */
+                /*
+                 * for some DBMS, this will throw an unsupported feature
+                 * exception, even when after a valid result set is retrieved
+                 * first, so if there's a valid result set existing, we will
+                 * ignore the eventual unsupported feature exception
+                 */
                 if (result == null) {
                     throw e;
                 }
@@ -1015,8 +1043,8 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     /*
-      * merge data entry objects from rhs -> lhs.
-      */
+     * merge data entry objects from rhs -> lhs.
+     */
 
     private void mergeDataEntries(DataEntry lhs, DataEntry rhs) {
         lhs.getData().putAll(rhs.getData());
@@ -1053,142 +1081,142 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             /* retrieve values according to the column type */
             columnType = metaData.getColumnType(i);
             switch (columnType) {
-                /* handle string types */
-                case Types.VARCHAR:
-                    /* fall through */
-                case Types.LONGVARCHAR:
-                    /* fall through */
-                case Types.CHAR:
-                    /* fall through */
-                case Types.CLOB:
-                    /* fall through */
-                case Types.NCHAR:
-                    /* fall through */
-                case Types.NCLOB:
-                    /* fall through */
-                case Types.NVARCHAR:
-                    /* fall through */
-                case Types.LONGNVARCHAR:
-                    value = rs.getString(i);
-                    paramValue = new ParamValue(value);
+            /* handle string types */
+            case Types.VARCHAR:
+                /* fall through */
+            case Types.LONGVARCHAR:
+                /* fall through */
+            case Types.CHAR:
+                /* fall through */
+            case Types.CLOB:
+                /* fall through */
+            case Types.NCHAR:
+                /* fall through */
+            case Types.NCLOB:
+                /* fall through */
+            case Types.NVARCHAR:
+                /* fall through */
+            case Types.LONGNVARCHAR:
+                value = rs.getString(i);
+                paramValue = new ParamValue(value);
+                break;
+            /* handle numbers */
+            case Types.INTEGER:
+                /* fall through */
+            case Types.TINYINT:
+                /* fall through */
+            case Types.SMALLINT:
+                value = ConverterUtil.convertToString(rs.getInt(i));
+                paramValue = new ParamValue(value);
+                break;
+            case Types.DOUBLE:
+                value = ConverterUtil.convertToString(rs.getDouble(i));
+                paramValue = new ParamValue(value);
+                break;
+            case Types.FLOAT:
+                value = ConverterUtil.convertToString(rs.getFloat(i));
+                paramValue = new ParamValue(value);
+                break;
+            case Types.BOOLEAN:
+                /* fall through */
+            case Types.BIT:
+                value = ConverterUtil.convertToString(rs.getBoolean(i));
+                paramValue = new ParamValue(value);
+                break;
+            case Types.DECIMAL:
+                bigDecimal = rs.getBigDecimal(i);
+                if (bigDecimal != null) {
+                    value = ConverterUtil.convertToString(bigDecimal);
+                } else {
+                    value = null;
+                }
+                paramValue = new ParamValue(value);
+                break;
+            /* handle data/time values */
+            case Types.TIME:
+                /* handle time data type */
+                sqlTime = rs.getTime(i);
+                if (sqlTime != null) {
+                    value = this.convertToTimeString(sqlTime);
+                } else {
+                    value = null;
+                }
+                paramValue = new ParamValue(value);
+                break;
+            case Types.DATE:
+                /* handle date data type */
+                sqlDate = rs.getDate(i);
+                if (sqlDate != null) {
+                    value = ConverterUtil.convertToString(sqlDate);
+                } else {
+                    value = null;
+                }
+                paramValue = new ParamValue(value);
+                break;
+            case Types.TIMESTAMP:
+                sqlTimestamp = rs.getTimestamp(i);
+                if (sqlTimestamp != null) {
+                    value = this.convertToTimestampString(sqlTimestamp);
+                } else {
+                    value = null;
+                }
+                paramValue = new ParamValue(value);
+                break;
+            /* handle binary types */
+            case Types.BLOB:
+                sqlBlob = rs.getBlob(i);
+                if (sqlBlob != null) {
+                    value = this.getBase64StringFromInputStream(sqlBlob.getBinaryStream());
+                } else {
+                    value = null;
+                }
+                paramValue = new ParamValue(value);
+                break;
+            case Types.BINARY:
+                /* fall through */
+            case Types.LONGVARBINARY:
+                /* fall through */
+            case Types.VARBINARY:
+                binInStream = rs.getBinaryStream(i);
+                if (binInStream != null) {
+                    value = this.getBase64StringFromInputStream(binInStream);
+                } else {
+                    value = null;
+                }
+                paramValue = new ParamValue(value);
+                break;
+            /* handling User Defined Types */
+            case Types.STRUCT:
+                Struct udt = (Struct) rs.getObject(i);
+                paramValue = new ParamValue(udt);
+                break;
+            case Types.ARRAY:
+                paramValue = new ParamValue(ParamValue.PARAM_VALUE_ARRAY);
+                Array dataArray = (Array) rs.getObject(i);
+                if (dataArray == null) {
                     break;
-                /* handle numbers */
-                case Types.INTEGER:
-                    /* fall through */
-                case Types.TINYINT:
-                    /* fall through */
-                case Types.SMALLINT:
-                    value = ConverterUtil.convertToString(rs.getInt(i));
-                    paramValue = new ParamValue(value);
-                    break;
-                case Types.DOUBLE:
-                    value = ConverterUtil.convertToString(rs.getDouble(i));
-                    paramValue = new ParamValue(value);
-                    break;
-                case Types.FLOAT:
-                    value = ConverterUtil.convertToString(rs.getFloat(i));
-                    paramValue = new ParamValue(value);
-                    break;
-                case Types.BOOLEAN:
-                    /* fall through */
-                case Types.BIT:
-                    value = ConverterUtil.convertToString(rs.getBoolean(i));
-                    paramValue = new ParamValue(value);
-                    break;
-                case Types.DECIMAL:
-                    bigDecimal = rs.getBigDecimal(i);
-                    if (bigDecimal != null) {
-                        value = ConverterUtil.convertToString(bigDecimal);
-                    } else {
-                        value = null;
-                    }
-                    paramValue = new ParamValue(value);
-                    break;
-                /* handle data/time values */
-                case Types.TIME:
-                    /* handle time data type */
-                    sqlTime = rs.getTime(i);
-                    if (sqlTime != null) {
-                        value = this.convertToTimeString(sqlTime);
-                    } else {
-                        value = null;
-                    }
-                    paramValue = new ParamValue(value);
-                    break;
-                case Types.DATE:
-                    /* handle date data type */
-                    sqlDate = rs.getDate(i);
-                    if (sqlDate != null) {
-                        value = ConverterUtil.convertToString(sqlDate);
-                    } else {
-                        value = null;
-                    }
-                    paramValue = new ParamValue(value);
-                    break;
-                case Types.TIMESTAMP:
-                    sqlTimestamp = rs.getTimestamp(i);
-                    if (sqlTimestamp != null) {
-                        value = this.convertToTimestampString(sqlTimestamp);
-                    } else {
-                        value = null;
-                    }
-                    paramValue = new ParamValue(value);
-                    break;
-                /* handle binary types */
-                case Types.BLOB:
-                    sqlBlob = rs.getBlob(i);
-                    if (sqlBlob != null) {
-                        value = this.getBase64StringFromInputStream(sqlBlob.getBinaryStream());
-                    } else {
-                        value = null;
-                    }
-                    paramValue = new ParamValue(value);
-                    break;
-                case Types.BINARY:
-                    /* fall through */
-                case Types.LONGVARBINARY:
-                    /* fall through */
-                case Types.VARBINARY:
-                    binInStream = rs.getBinaryStream(i);
-                    if (binInStream != null) {
-                        value = this.getBase64StringFromInputStream(binInStream);
-                    } else {
-                        value = null;
-                    }
-                    paramValue = new ParamValue(value);
-                    break;
-                /* handling User Defined Types */
-                case Types.STRUCT:
-                    Struct udt = (Struct) rs.getObject(i);
-                    paramValue = new ParamValue(udt);
-                    break;
-                case Types.ARRAY:
-                    paramValue = new ParamValue(ParamValue.PARAM_VALUE_ARRAY);
-                    Array dataArray = (Array) rs.getObject(i);
-                    if (dataArray == null) {
-                        break;
-                    }
-                    paramValue = this.processSQLArray(dataArray, paramValue);
-                    break;
-                case Types.NUMERIC:
-               	 bigDecimal = rs.getBigDecimal(i);
-                    if (bigDecimal != null) {
-                        value = ConverterUtil.convertToString(bigDecimal);
-                    } else {
-                        value = null;
-                    }
-                    paramValue = new ParamValue(value);
-                    break;
-               case Types.BIGINT:
-               	value = ConverterUtil.convertToString(rs.getLong(i));
-                   paramValue = new ParamValue(value);
-                   break;
-              	
-                /* handle all other types as strings */
-                default:
-                    value = rs.getString(i);
-                    paramValue = new ParamValue(value);
-                    break;
+                }
+                paramValue = this.processSQLArray(dataArray, paramValue);
+                break;
+            case Types.NUMERIC:
+                bigDecimal = rs.getBigDecimal(i);
+                if (bigDecimal != null) {
+                    value = ConverterUtil.convertToString(bigDecimal);
+                } else {
+                    value = null;
+                }
+                paramValue = new ParamValue(value);
+                break;
+            case Types.BIGINT:
+                value = ConverterUtil.convertToString(rs.getLong(i));
+                paramValue = new ParamValue(value);
+                break;
+
+            /* handle all other types as strings */
+            default:
+                value = rs.getString(i);
+                paramValue = new ParamValue(value);
+                break;
             }
             dataEntry.addValue(useColumnNumbers ? Integer.toString(i) : metaData.getColumnLabel(i),
                     paramValue);
@@ -1197,35 +1225,41 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     /**
-     * Processes a SQL Array instance and transform it into a ParamValue instance
-     *
-     * @param dataArray     SQLArray instance
-     * @param paramValue    Container into which the SQLArray elements should be populated
-     * @return              ParamValue instance containing all the elements of the corresponding
-     *                      SQLArray instance
-     * @throws SQLException When it fails to processes the result set produced by the SQLArray
-     *                      instance
+     * Processes a SQL Array instance and transform it into a ParamValue
+     * instance
+     * 
+     * @param dataArray
+     *            SQLArray instance
+     * @param paramValue
+     *            Container into which the SQLArray elements should be populated
+     * @return ParamValue instance containing all the elements of the
+     *         corresponding SQLArray instance
+     * @throws SQLException
+     *             When it fails to processes the result set produced by the
+     *             SQLArray instance
      */
     private ParamValue processSQLArray(Array dataArray, ParamValue paramValue) throws SQLException {
-    	ResultSet rs = null;
-    	try {
+        ResultSet rs = null;
+        try {
             rs = dataArray.getResultSet();
             while (rs.next()) {
                 Object arrayEl = rs.getObject(2);
                 if (arrayEl instanceof Struct) {
                     paramValue.getArrayValue().add(new ParamValue((Struct) arrayEl));
                 } else if (arrayEl instanceof Array) {
-                    paramValue.getArrayValue().add(processSQLArray(
-                            (Array)arrayEl, new ParamValue(ParamValue.PARAM_VALUE_ARRAY)));
+                    paramValue.getArrayValue().add(
+                            processSQLArray((Array) arrayEl, new ParamValue(
+                                    ParamValue.PARAM_VALUE_ARRAY)));
                 } else {
                     paramValue.getArrayValue().add(new ParamValue(String.valueOf(arrayEl)));
                 }
             }
             return paramValue;
-    	} finally {
-    		this.releaseResources(rs, null);
-    	}
+        } finally {
+            this.releaseResources(rs, null);
+        }
     }
+
     private String convertToTimeString(Time sqlTime) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(sqlTime.getTime());
@@ -1258,16 +1292,67 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
 
     private byte[] getBytesFromBase64String(String base64Str) throws SQLException {
         try {
-            byte[] data = Base64.decodeBase64(base64Str.getBytes(DBConstants.DEFAULT_CHAR_SET_TYPE));
+            byte[] data = Base64
+                    .decodeBase64(base64Str.getBytes(DBConstants.DEFAULT_CHAR_SET_TYPE));
             return data;
         } catch (Exception e) {
             throw new SQLException(e.getMessage());
         }
     }
 
+    private Integer[] extractSQLParamIndices(String sql) {
+        List<Integer> result = new ArrayList<Integer>();
+        char[] data = sql.toCharArray();
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] == '?') {
+                result.add(i);
+            }
+        }
+        return result.toArray(new Integer[result.size()]);
+    }
+
     /**
-     * Returns the SQL manipulated to suite the given parameters,
-     * e.g. adding additional "?"'s for array types.
+     * Modifies the SQL to include the direct value of the parameters of type
+     * "QUERY_STRING"; The SQL will be recreated and the other parameters will
+     * be re-organized to point to correct ordinal values.
+     * 
+     * @return [0] The updated SQL, [1] The updated parameter count
+     */
+    private Object[] processDynamicQuery(String sql, InternalParamCollection params,
+            int paramCount) {
+        Integer[] paramIndices = this.extractSQLParamIndices(sql);
+        int currentOrdinalDiff = 0;
+        int currentParamIndexDiff = 0;
+        InternalParam tmpParam;
+        int paramIndex;
+        String tmpValue;
+        int resultParamCount = paramCount;
+        for (int i = 1; i <= paramCount; i++) {
+            tmpParam = params.getParam(i);
+            if (DataTypes.QUERY_STRING.equals(tmpParam.getSqlType())) {
+                paramIndex = paramIndices[i - 1] + currentParamIndexDiff;
+                tmpValue = params.getParam(i).getValue().getScalarValue();
+                currentParamIndexDiff += tmpValue.length() - 1;
+                if (paramIndex + 1 < sql.length()) {
+                    sql = sql.substring(0, paramIndex) + tmpValue + sql.substring(paramIndex + 1);
+                } else {
+                    sql = sql.substring(0, paramIndex) + tmpValue;
+                }
+                params.remove(i);
+                currentOrdinalDiff++;
+                resultParamCount--;
+            } else {
+                params.remove(i);
+                tmpParam.setOrdinal(i - currentOrdinalDiff);
+                params.addParam(tmpParam);
+            }
+        }
+        return new Object[] { sql, resultParamCount };
+    }
+
+    /**
+     * Returns the SQL manipulated to suite the given parameters, e.g. adding
+     * additional "?"'s for array types.
      */
     public String createProcessedSql(String sql, InternalParamCollection params, int paramCount) {
         String currentSql = sql;
@@ -1279,9 +1364,12 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         for (int i = 1; i <= paramCount; i++) {
             param = params.getParam(i);
             value = param.getValue();
-            /* value can be null in stored proc OUT params, so it is simply treated as a
-                * single param, because the number of elements in an array cannot be
-                * calculated, since there's no actual value passed in */
+            /*
+             * value can be null in stored proc OUT params, so it is simply
+             * treated as a single param, because the number of elements in an
+             * array cannot be calculated, since there's no actual value passed
+             * in
+             */
             if (value != null && (value.getValueType() == ParamValue.PARAM_VALUE_ARRAY)) {
                 count = (value.getArrayValue()).size();
                 if (this.hasRefCursor()) {
@@ -1289,7 +1377,7 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                     if (i < currentRefCursorOrdinal) {
                         this.getCurrentRefCursor().setOrdinal(currentRefCursorOrdinal + count - 1);
                     }
-                } 
+                }
             } else {
                 count = 1;
             }
@@ -1301,9 +1389,9 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     /**
-     * Given the starting position, this method searches for the first occurence of "?"
-     * and replace it with `count` "?"'s.
-     * Returns [0] - end position of "?"'s, [1] - modified sql.
+     * Given the starting position, this method searches for the first occurence
+     * of "?" and replace it with `count` "?"'s. Returns [0] - end position of
+     * "?"'s, [1] - modified sql.
      */
     private Object[] expandSQL(int start, int count, String sql) {
         StringBuilder result = new StringBuilder();
@@ -1320,7 +1408,7 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 break;
             }
         }
-        return new Object[]{end, result.toString()};
+        return new Object[] { end, result.toString() };
     }
 
     private String generateQuestionMarks(int n) {
@@ -1344,17 +1432,26 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         return n;
     }
 
-    private PreparedStatement createProcessedPreparedStatement(
-            int queryType, InternalParamCollection params, Connection conn) throws DataServiceFault {
+    private PreparedStatement createProcessedPreparedStatement(int queryType,
+            InternalParamCollection params, Connection conn) throws DataServiceFault {
         try {
-            /* lets see first if there's already a batch prepared statement created */
+            /*
+             * lets see first if there's already a batch prepared statement
+             * created
+             */
             boolean inTheMiddleOfABatch = false;
             PreparedStatement stmt = this.getBatchPreparedStatement();
+            int currentParamCount = this.getParamCount();
 
             /* create a new prepared statement */
             if (stmt == null) {
-                String processedSQL =
-                        this.createProcessedSql(this.getSql(), params, this.getParamCount());
+                /* batch mode is not supported for dynamic queries */
+                Object[] result = this.processDynamicQuery(this.getSql(), params,
+                        this.getParamCount());
+                String dynamicSQL = (String) result[0];
+                currentParamCount = (Integer) result[1];
+                String processedSQL = this
+                        .createProcessedSql(dynamicSQL, params, currentParamCount);
                 if (queryType == SQLQuery.DS_QUERY_TYPE_NORMAL) {
                     if (this.isReturnGeneratedKeys()) {
                         if (this.getKeyColumns() != null) {
@@ -1388,9 +1485,13 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 if (this.isHasFetchSize()) {
                     stmt.setFetchSize(this.getFetchSize());
                 } else {
-                    /* stream data by sections - avoid the full result set to be loaded to memory,
-                          * and only stream if there aren't any OUT parameters, MySQL fails in the scenario
-                          * of streaming and OUT parameters, so the possibility is there for other DBMSs */
+                    /*
+                     * stream data by sections - avoid the full result set to be
+                     * loaded to memory, and only stream if there aren't any OUT
+                     * parameters, MySQL fails in the scenario of streaming and
+                     * OUT parameters, so the possibility is there for other
+                     * DBMSs
+                     */
                     if (!this.hasOutParams()) {
                         stmt.setFetchSize(this.getOptimalRSFetchSize());
                     }
@@ -1408,11 +1509,13 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             int currentOrdinal = 0;
             InternalParam param;
             ParamValue value;
-            int count = this.getParamCount();
-            for (int i = 1; i <= count; i++) {
+            for (int i = 1; i <= currentParamCount; i++) {
                 param = params.getParam(i);
                 value = param.getValue();
-                /* handle array values, if value is null, this param has to be an OUT param */
+                /*
+                 * handle array values, if value is null, this param has to be
+                 * an OUT param
+                 */
                 if (value != null && value.getValueType() == ParamValue.PARAM_VALUE_ARRAY) {
                     for (ParamValue arrayElement : value.getArrayValue()) {
                         this.setParamInPreparedStatement(stmt, param, arrayElement.toString(),
@@ -1439,8 +1542,7 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     private void setParamInPreparedStatement(PreparedStatement stmt, InternalParam param,
-                                             String value, int queryType,
-                                             int index) throws SQLException, DataServiceFault {
+            String value, int queryType, int index) throws SQLException, DataServiceFault {
         String paramName = param.getName();
         String sqlType = param.getSqlType();
         String paramType = param.getType();
@@ -1476,7 +1578,7 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         } else if (DBConstants.DataTypes.BINARY.equals(sqlType)) {
             setBinaryValue(queryType, paramName, value, paramType, stmt, index);
         } else if (DBConstants.DataTypes.BLOB.equals(sqlType)) {
-        	setBlobValue(queryType, paramName, value, paramType, stmt, index);
+            setBlobValue(queryType, paramName, value, paramType, stmt, index);
         } else if (DBConstants.DataTypes.ORACLE_REF_CURSOR.equals(sqlType)) {
             setOracleRefCusor(stmt, index);
         } else if (DBConstants.DataTypes.STRUCT.equals(sqlType)) {
@@ -1484,13 +1586,13 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         } else if (DBConstants.DataTypes.ARRAY.equals(sqlType)) {
             setArrayValue(stmt, index, paramType, structType);
         } else {
-            throw new DataServiceFault("[" + this.getDataService().getName() +
-                    "]  Found Unsupported data type : " + sqlType + " as input parameter.");
+            throw new DataServiceFault("[" + this.getDataService().getName()
+                    + "]  Found Unsupported data type : " + sqlType + " as input parameter.");
         }
     }
 
     private void setArrayValue(PreparedStatement sqlQuery, int i, String paramType,
-                               String structType) throws SQLException, DataServiceFault {
+            String structType) throws SQLException, DataServiceFault {
         if (QueryTypes.OUT.equals(paramType)) {
             ((CallableStatement) sqlQuery).registerOutParameter(i + 1, Types.ARRAY, structType);
         } else {
@@ -1498,32 +1600,28 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         }
     }
 
-    private void setDefaultStringValue(String value, String paramType,
-                                       PreparedStatement sqlQuery, int i) throws SQLException {
+    private void setDefaultStringValue(String value, String paramType, PreparedStatement sqlQuery,
+            int i) throws SQLException {
         if (QueryTypes.IN.equals(paramType)) {
             sqlQuery.setString(i + 1, value);
         } else if (QueryTypes.INOUT.equals(paramType)) {
             sqlQuery.setString(i + 1, value);
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.VARCHAR);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.VARCHAR);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.VARCHAR);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.VARCHAR);
         }
     }
 
-    private void setTimeValue(int queryType, String paramName,
-                              String value, String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException, DataServiceFault {
+    private void setTimeValue(int queryType, String paramName, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException, DataServiceFault {
         Time time = null;
         try {
             if (value != null) {
                 time = DBUtils.getTime(value);
             }
         } catch (ParseException e) {
-            throw new DataServiceFault(e,
-                    "Incorrect Time format for parameter : " + paramName
-                            + ". Time should be in the format hh:mm:ss");
+            throw new DataServiceFault(e, "Incorrect Time format for parameter : " + paramName
+                    + ". Time should be in the format hh:mm:ss");
         }
         if ("IN".equals(paramType)) {
             if (queryType == SQLQuery.DS_QUERY_TYPE_NORMAL) {
@@ -1534,30 +1632,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.TIME);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.TIME);
                 } else {
                     ((CallableStatement) sqlQuery).setTime(i + 1, time);
                 }
             }
         } else if ("INOUT".equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.TIME);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.TIME);
             } else {
                 ((CallableStatement) sqlQuery).setTime(i + 1, time);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.TIME);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.TIME);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.TIME);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.TIME);
         }
     }
 
-    private void setBinaryValue(int queryType, String paramName,
-                                String value, String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException, DataServiceFault {
+    private void setBinaryValue(int queryType, String paramName, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException, DataServiceFault {
         if ("IN".equals(paramType)) {
             if (value == null) {
                 sqlQuery.setNull(i + 1, java.sql.Types.BINARY);
@@ -1567,97 +1660,87 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             }
         } else if ("INOUT".equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.BINARY);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.BINARY);
             } else {
                 byte[] data = this.getBytesFromBase64String(value);
                 ((CallableStatement) sqlQuery).setBinaryStream(i + 1,
                         new ByteArrayInputStream(data), data.length);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.BINARY);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BINARY);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.BINARY);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BINARY);
         }
     }
-    
-    private void setBlobValue(int queryType, String paramName,
-    						  String value, String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException, DataServiceFault {
-    	if ("IN".equals(paramType)) {
-    		if (value == null) {
-    			sqlQuery.setNull(i + 1, java.sql.Types.BLOB);
-    		} else {
-    			byte[] data = this.getBytesFromBase64String(value);
-    			sqlQuery.setBlob(i + 1, new ByteArrayInputStream(data), data.length);
-    		}
-    	} else if ("INOUT".equals(paramType)) {
-    			if (value == null) {
-    				((CallableStatement) sqlQuery).setNull(i + 1,
-    						java.sql.Types.BLOB);
-    			} else {
-    				byte[] data = this.getBytesFromBase64String(value);
-    				((CallableStatement) sqlQuery).setBlob(i + 1,
-    						new ByteArrayInputStream(data), data.length);
-    			}
-    			((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-    					java.sql.Types.BLOB);
-    	} else {
-    		((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-    				java.sql.Types.BLOB);
-    	}
-    }
-    
-    
 
-    private void setOracleRefCusor(PreparedStatement sqlQuery, int i)
-            throws SQLException, DataServiceFault {
+    private void setBlobValue(int queryType, String paramName, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException, DataServiceFault {
+        if ("IN".equals(paramType)) {
+            if (value == null) {
+                sqlQuery.setNull(i + 1, java.sql.Types.BLOB);
+            } else {
+                byte[] data = this.getBytesFromBase64String(value);
+                sqlQuery.setBlob(i + 1, new ByteArrayInputStream(data), data.length);
+            }
+        } else if ("INOUT".equals(paramType)) {
+            if (value == null) {
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.BLOB);
+            } else {
+                byte[] data = this.getBytesFromBase64String(value);
+                ((CallableStatement) sqlQuery).setBlob(i + 1, new ByteArrayInputStream(data),
+                        data.length);
+            }
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BLOB);
+        } else {
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BLOB);
+        }
+    }
+
+    private void setOracleRefCusor(PreparedStatement sqlQuery, int i) throws SQLException,
+            DataServiceFault {
         ((CallableStatement) sqlQuery).registerOutParameter(i + 1, ORACLE_REF_CURSOR_TYPE);
     }
 
     /**
-     * This method sets the parameters to be passed to/from an oracle stored procedure that
-     * deals with User Defined Types.
-     *
-     * @param sqlQuery       Prepared Statement
-     * @param parameterIndex current parameter index
-     * @param structType     Name of the User Defined Type
-     * @param paramType      Whether the parameter is IN or OUT
-     * @throws SQLException     Throws an SQL Exception
-     * @throws DataServiceFault DataServiceFault
+     * This method sets the parameters to be passed to/from an oracle stored
+     * procedure that deals with User Defined Types.
+     * 
+     * @param sqlQuery
+     *            Prepared Statement
+     * @param parameterIndex
+     *            current parameter index
+     * @param structType
+     *            Name of the User Defined Type
+     * @param paramType
+     *            Whether the parameter is IN or OUT
+     * @throws SQLException
+     *             Throws an SQL Exception
+     * @throws DataServiceFault
+     *             DataServiceFault
      */
-    private void setUserDefinedType(PreparedStatement sqlQuery,
-                                    int parameterIndex,
-                                    String paramType,
-                                    String structType) throws SQLException, DataServiceFault {
+    private void setUserDefinedType(PreparedStatement sqlQuery, int parameterIndex,
+            String paramType, String structType) throws SQLException, DataServiceFault {
         if (QueryTypes.OUT.equals(paramType)) {
             ((CallableStatement) sqlQuery).registerOutParameter(parameterIndex + 1, Types.STRUCT,
                     structType.toUpperCase());
         } else {
-            throw new DataServiceFault("IN or INOUT operations are not supported for User " +
-                    "Defined Types");
+            throw new DataServiceFault("IN or INOUT operations are not supported for User "
+                    + "Defined Types");
         }
     }
 
-    private void setTimestampValue(int queryType, String paramName,
-                                   String value, String paramType, PreparedStatement sqlQuery, int i)
-            throws DataServiceFault, SQLException {
+    private void setTimestampValue(int queryType, String paramName, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws DataServiceFault, SQLException {
         Timestamp timestamp = null;
         try {
             if (value != null) {
                 timestamp = DBUtils.getTimestamp(value);
             }
         } catch (ParseException e) {
-            throw new DataServiceFault(e,
-                    "Incorrect Timestamp format for parameter : "
-                            + paramName
-                            + ". Timestamp should be in one of following formats "
-                            + "yyyy-MM-dd'T'hh:mm:ss.sss'+'hh:mm, "
-                            + "yyyy-MM-dd'T'hh:mm:ss.sss'-'hh:mm, "
-                            + "yyyy-MM-dd'T'hh:mm:ss.sss'Z', "
-                            + "yyyy-MM-dd hh:mm:ss.SSSSSS or "
-                            + "yyyy-MM-dd hh:mm:ss");
+            throw new DataServiceFault(e, "Incorrect Timestamp format for parameter : " + paramName
+                    + ". Timestamp should be in one of following formats "
+                    + "yyyy-MM-dd'T'hh:mm:ss.sss'+'hh:mm, " + "yyyy-MM-dd'T'hh:mm:ss.sss'-'hh:mm, "
+                    + "yyyy-MM-dd'T'hh:mm:ss.sss'Z', " + "yyyy-MM-dd hh:mm:ss.SSSSSS or "
+                    + "yyyy-MM-dd hh:mm:ss");
         }
         if ("IN".equals(paramType)) {
             if (queryType == SQLQuery.DS_QUERY_TYPE_NORMAL) {
@@ -1668,31 +1751,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.TIMESTAMP);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.TIMESTAMP);
                 } else {
-                    ((CallableStatement) sqlQuery).setTimestamp(i + 1,
-                            timestamp);
+                    ((CallableStatement) sqlQuery).setTimestamp(i + 1, timestamp);
                 }
             }
         } else if ("INOUT".equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.TIMESTAMP);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.TIMESTAMP);
             } else {
                 ((CallableStatement) sqlQuery).setTimestamp(i + 1, timestamp);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.TIMESTAMP);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.TIMESTAMP);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.TIMESTAMP);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.TIMESTAMP);
         }
     }
 
-    private void setDateValue(int queryType, String paramName,
-                              String value, String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException, DataServiceFault {
+    private void setDateValue(int queryType, String paramName, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException, DataServiceFault {
         Date val = null;
         if (value != null) {
             val = DBUtils.getDate(value);
@@ -1707,34 +1784,29 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                     }
                 } else {
                     if (value == null) {
-                        ((CallableStatement) sqlQuery).setNull(i + 1,
-                                java.sql.Types.DATE);
+                        ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.DATE);
                     } else {
                         ((CallableStatement) sqlQuery).setDate(i + 1, val);
                     }
                 }
             } else if (QueryTypes.INOUT.equals(paramType)) {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.DATE);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.DATE);
                 } else {
                     ((CallableStatement) sqlQuery).setDate(i + 1, val);
                 }
-                ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                        java.sql.Types.DATE);
+                ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.DATE);
             } else {
-                ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                        java.sql.Types.DATE);
+                ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.DATE);
             }
         } catch (IllegalArgumentException e) {
-            throw new DataServiceFault(e, "Incorrect date format for parameter  : "
-                    + paramName + ". Date should be in yyyy-mm-dd format.");
+            throw new DataServiceFault(e, "Incorrect date format for parameter  : " + paramName
+                    + ". Date should be in yyyy-mm-dd format.");
         }
     }
 
-    private void setRealValue(int queryType, String value,
-                              String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setRealValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         Float val = null;
         if (value != null) {
             val = new Float(value);
@@ -1748,30 +1820,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.FLOAT);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.FLOAT);
                 } else {
                     ((CallableStatement) sqlQuery).setFloat(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.FLOAT);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.FLOAT);
             } else {
                 ((CallableStatement) sqlQuery).setFloat(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.FLOAT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.FLOAT);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.FLOAT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.FLOAT);
         }
     }
 
-    private void setBigIntValue(int queryType, String value,
-                                String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setBigIntValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         Long val = null;
         if (value != null) {
             val = new Long(value);
@@ -1785,30 +1852,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.BIGINT);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.BIGINT);
                 } else {
                     ((CallableStatement) sqlQuery).setLong(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.BIGINT);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.BIGINT);
             } else {
                 ((CallableStatement) sqlQuery).setLong(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.BIGINT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BIGINT);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.BIGINT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BIGINT);
         }
     }
 
-    private void setSmallIntValue(int queryType, String value,
-                                  String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setSmallIntValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         Short val = null;
         if (value != null) {
             val = new Short(value);
@@ -1822,30 +1884,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.SMALLINT);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.SMALLINT);
                 } else {
                     ((CallableStatement) sqlQuery).setShort(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.SMALLINT);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.SMALLINT);
             } else {
                 ((CallableStatement) sqlQuery).setShort(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.SMALLINT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.SMALLINT);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.SMALLINT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.SMALLINT);
         }
     }
 
-    private void setTinyIntValue(int queryType, String value,
-                                 String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setTinyIntValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         Byte val = null;
         if (value != null) {
             val = new Byte(value);
@@ -1859,30 +1916,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.TINYINT);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.TINYINT);
                 } else {
                     ((CallableStatement) sqlQuery).setByte(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.TINYINT);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.TINYINT);
             } else {
                 ((CallableStatement) sqlQuery).setByte(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.TINYINT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.TINYINT);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.TINYINT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.TINYINT);
         }
     }
 
-    private void setBitValue(int queryType, String value,
-                             String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setBitValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         Boolean val = null;
         if (value != null) {
             val = Boolean.valueOf(value);
@@ -1896,30 +1948,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.BIT);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.BIT);
                 } else {
                     ((CallableStatement) sqlQuery).setBoolean(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.BIT);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.BIT);
             } else {
                 ((CallableStatement) sqlQuery).setBoolean(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.BIT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BIT);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.BIT);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.BIT);
         }
     }
 
-    private void setNumericValue(int queryType, String value,
-                                 String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setNumericValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         BigDecimal val = null;
         if (value != null) {
             val = new BigDecimal(value);
@@ -1933,30 +1980,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.NUMERIC);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.NUMERIC);
                 } else {
                     ((CallableStatement) sqlQuery).setBigDecimal(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.NUMERIC);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.NUMERIC);
             } else {
                 ((CallableStatement) sqlQuery).setBigDecimal(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.NUMERIC);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.NUMERIC);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.NUMERIC);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.NUMERIC);
         }
     }
 
-    private void setDoubleValue(int queryType, String value,
-                                String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setDoubleValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         Double val = null;
         if (value != null) {
             val = Double.parseDouble(value);
@@ -1970,30 +2012,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.DOUBLE);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.DOUBLE);
                 } else {
                     ((CallableStatement) sqlQuery).setDouble(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.DOUBLE);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.DOUBLE);
             } else {
                 ((CallableStatement) sqlQuery).setDouble(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.DOUBLE);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.DOUBLE);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.DOUBLE);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.DOUBLE);
         }
     }
 
-    private void setStringValue(int queryType, String value,
-                                String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setStringValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         if (QueryTypes.IN.equals(paramType)) {
             if (queryType == SQLQuery.DS_QUERY_TYPE_NORMAL) {
                 if (value == null) {
@@ -2003,30 +2040,25 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.VARCHAR);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.VARCHAR);
                 } else {
                     ((CallableStatement) sqlQuery).setString(i + 1, value);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.VARCHAR);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.VARCHAR);
             } else {
                 ((CallableStatement) sqlQuery).setString(i + 1, value);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.VARCHAR);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.VARCHAR);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.VARCHAR);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.VARCHAR);
         }
     }
 
-    private void setIntValue(int queryType, String value,
-                             String paramType, PreparedStatement sqlQuery, int i)
-            throws SQLException {
+    private void setIntValue(int queryType, String value, String paramType,
+            PreparedStatement sqlQuery, int i) throws SQLException {
         Integer val = null;
         if (value != null) {
             val = Integer.parseInt(value);
@@ -2040,65 +2072,60 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                 }
             } else {
                 if (value == null) {
-                    ((CallableStatement) sqlQuery).setNull(i + 1,
-                            java.sql.Types.INTEGER);
+                    ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.INTEGER);
                 } else {
                     ((CallableStatement) sqlQuery).setInt(i + 1, val);
                 }
             }
         } else if (QueryTypes.INOUT.equals(paramType)) {
             if (value == null) {
-                ((CallableStatement) sqlQuery).setNull(i + 1,
-                        java.sql.Types.INTEGER);
+                ((CallableStatement) sqlQuery).setNull(i + 1, java.sql.Types.INTEGER);
             } else {
                 ((CallableStatement) sqlQuery).setInt(i + 1, val);
             }
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.INTEGER);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.INTEGER);
         } else {
-            ((CallableStatement) sqlQuery).registerOutParameter(i + 1,
-                    java.sql.Types.INTEGER);
+            ((CallableStatement) sqlQuery).registerOutParameter(i + 1, java.sql.Types.INTEGER);
         }
     }
 
-    private ParamValue getOutparameterValue(CallableStatement cs,
-                                            String type, int ordinal)
+    private ParamValue getOutparameterValue(CallableStatement cs, String type, int ordinal)
             throws DataServiceFault {
         try {
             Object elementValue;
             if (type.equals(DBConstants.DataTypes.STRING)) {
                 elementValue = cs.getString(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                        elementValue.toString());
+                return new ParamValue(elementValue == null ? null : elementValue.toString());
             } else if (type.equals(DBConstants.DataTypes.DOUBLE)) {
                 elementValue = cs.getDouble(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                        ConverterUtil.convertToString((Double) elementValue));
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Double) elementValue));
             } else if (type.equals(DBConstants.DataTypes.BIGINT)) {
                 elementValue = cs.getLong(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                        ConverterUtil.convertToString((Long) elementValue));
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Long) elementValue));
             } else if (type.equals(DBConstants.DataTypes.INTEGER)) {
                 elementValue = cs.getInt(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                        ConverterUtil.convertToString((Integer) elementValue));
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Integer) elementValue));
             } else if (type.equals(DBConstants.DataTypes.TIME)) {
                 elementValue = cs.getTime(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                        this.convertToTimeString((Time) elementValue));
+                return new ParamValue(elementValue == null ? null
+                        : this.convertToTimeString((Time) elementValue));
             } else if (type.equals(DBConstants.DataTypes.DATE)) {
                 elementValue = cs.getDate(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                        ConverterUtil.convertToString((Date) elementValue));
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Date) elementValue));
             } else if (type.equals(DBConstants.DataTypes.TIMESTAMP)) {
                 elementValue = cs.getTimestamp(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                        this.convertToTimestampString((Timestamp) elementValue));
+                return new ParamValue(elementValue == null ? null
+                        : this.convertToTimestampString((Timestamp) elementValue));
             } else if (type.equals(DBConstants.DataTypes.BLOB)) {
                 elementValue = cs.getBlob(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                	this.getBase64StringFromInputStream(((Blob)elementValue).getBinaryStream()));
-            }else if (type.equals(DBConstants.DataTypes.STRUCT)) {
+                return new ParamValue(elementValue == null ? null
+                        : this.getBase64StringFromInputStream(((Blob) elementValue)
+                                .getBinaryStream()));
+            } else if (type.equals(DBConstants.DataTypes.STRUCT)) {
                 elementValue = cs.getObject(ordinal);
                 return new ParamValue(elementValue == null ? null : (Struct) elementValue);
             } else if (type.equals(DBConstants.DataTypes.ARRAY)) {
@@ -2108,30 +2135,31 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
                     this.processSQLArray(dataArray, paramValue);
                 }
                 return paramValue;
-            } else if(type.equals(DBConstants.DataTypes.NUMERIC)){
-            	elementValue = cs.getBigDecimal(ordinal);
-            	return new ParamValue(elementValue == null ? null : 
-            		ConverterUtil.convertToString((BigDecimal)elementValue));
-            } else if(type.equals(DBConstants.DataTypes.BIT)){
-            	elementValue = cs.getBoolean(ordinal);
-            	return new ParamValue(elementValue == null ? null : 
-            		ConverterUtil.convertToString((Boolean)elementValue));
-            } else if(type.equals(DBConstants.DataTypes.TINYINT)){
-            	elementValue = cs.getByte(ordinal);
-            	return new ParamValue(elementValue == null ? null : 
-            		ConverterUtil.convertToString((Byte)elementValue));
-            } else if(type.equals(DBConstants.DataTypes.SMALLINT)){
-            	elementValue = cs.getShort(ordinal);
-            	return new ParamValue(elementValue == null ? null : 
-            		ConverterUtil.convertToString((Short)elementValue));
-            } else if(type.equals(DBConstants.DataTypes.REAL)){
-            	elementValue = cs.getFloat(ordinal);
-            	return new ParamValue(elementValue == null ? null : 
-            		ConverterUtil.convertToString((Float)elementValue));
-            } else if(type.equals(DBConstants.DataTypes.BINARY)){
-            	elementValue = cs.getBlob(ordinal);
-                return new ParamValue(elementValue == null ? null :
-                	this.getBase64StringFromInputStream(((Blob)elementValue).getBinaryStream()));
+            } else if (type.equals(DBConstants.DataTypes.NUMERIC)) {
+                elementValue = cs.getBigDecimal(ordinal);
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((BigDecimal) elementValue));
+            } else if (type.equals(DBConstants.DataTypes.BIT)) {
+                elementValue = cs.getBoolean(ordinal);
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Boolean) elementValue));
+            } else if (type.equals(DBConstants.DataTypes.TINYINT)) {
+                elementValue = cs.getByte(ordinal);
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Byte) elementValue));
+            } else if (type.equals(DBConstants.DataTypes.SMALLINT)) {
+                elementValue = cs.getShort(ordinal);
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Short) elementValue));
+            } else if (type.equals(DBConstants.DataTypes.REAL)) {
+                elementValue = cs.getFloat(ordinal);
+                return new ParamValue(elementValue == null ? null
+                        : ConverterUtil.convertToString((Float) elementValue));
+            } else if (type.equals(DBConstants.DataTypes.BINARY)) {
+                elementValue = cs.getBlob(ordinal);
+                return new ParamValue(elementValue == null ? null
+                        : this.getBase64StringFromInputStream(((Blob) elementValue)
+                                .getBinaryStream()));
             } else {
                 throw new DataServiceFault("Unsupported data type: " + type);
             }
@@ -2148,8 +2176,7 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         return hasRefCursor;
     }
 
-    public void runQuery(XMLStreamWriter xmlWriter,
-                         InternalParamCollection params, int queryLevel)
+    public void runQuery(XMLStreamWriter xmlWriter, InternalParamCollection params, int queryLevel)
             throws DataServiceFault {
         int type = this.getQueryType();
         if (type == SQLQuery.DS_QUERY_TYPE_NORMAL) {
@@ -2160,7 +2187,7 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             throw new DataServiceFault("Unsupported query type: " + type);
         }
     }
-    
+
     @Override
     public void releaseBatchRequestResources() {
         /* clear the TL batch prepared statement */
@@ -2170,8 +2197,11 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     private void setAutoCommit(Connection conn, boolean autoCommit) throws SQLException {
         try {
             conn.setAutoCommit(autoCommit);
-        } catch (SQLFeatureNotSupportedException ignore) { //Some databases does not allow this. eg:Cassandra CQL
-            //ignore
+        } catch (SQLFeatureNotSupportedException ignore) { // Some databases
+                                                           // does not allow
+                                                           // this. eg:Cassandra
+                                                           // CQL
+            // ignore
         }
     }
 
@@ -2184,10 +2214,11 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
 
         public StoredProcMetadataCollection(ResultSet rs) throws SQLException {
             entries = new ArrayList<StoredProcMetadataEntry>();
-            do { // use do-while loop since rs.next has already called once previously
-                entries.add(new StoredProcMetadataEntry(rs.getString(1), rs.getString(2),
-                        rs.getString(3), rs.getString(4), rs.getShort(5), rs.getInt(6),
-                        rs.getString(7), rs.getInt(8), rs.getInt(9), rs.getShort(10),
+            do { // use do-while loop since rs.next has already called once
+                 // previously
+                entries.add(new StoredProcMetadataEntry(rs.getString(1), rs.getString(2), rs
+                        .getString(3), rs.getString(4), rs.getShort(5), rs.getInt(6), rs
+                        .getString(7), rs.getInt(8), rs.getInt(9), rs.getShort(10),
                         rs.getShort(11), rs.getShort(12), rs.getString(13)));
             } while (rs.next());
         }
@@ -2199,7 +2230,8 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
     }
 
     /**
-     * This class represents a information on a single stored procedure parameter/result element.
+     * This class represents a information on a single stored procedure
+     * parameter/result element.
      */
     public class StoredProcMetadataEntry {
 
@@ -2230,11 +2262,9 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
         private String columnRemarks;
 
         public StoredProcMetadataEntry(String procedureCatalog, String procedureSchema,
-                                      String procedureName, String columnName, short columnReturn,
-                                      int columnDataType, String columnReturnTypeName,
-                                      int columnPrecision, int columnByteLength, short columnScale,
-                                      short columnRadix, short columnNullable,
-                                      String columnRemarks) {
+                String procedureName, String columnName, short columnReturn, int columnDataType,
+                String columnReturnTypeName, int columnPrecision, int columnByteLength,
+                short columnScale, short columnRadix, short columnNullable, String columnRemarks) {
             this.procedureCatalog = procedureCatalog;
             this.procedureSchema = procedureSchema;
             this.procedureName = procedureName;
@@ -2302,5 +2332,5 @@ public class SQLQuery extends Query implements BatchRequestParticipant {
             return columnRemarks;
         }
     }
-    
-  }
+
+}

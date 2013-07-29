@@ -130,6 +130,7 @@ public class DBUtils {
         conversionTypes = new HashMap<String, String>();
         conversionTypes.put(DBConstants.DataTypes.CHAR, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.STRING, "java.lang.String");
+        conversionTypes.put(DBConstants.DataTypes.QUERY_STRING, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.VARCHAR, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.TEXT, "java.lang.String");
         conversionTypes.put(DBConstants.DataTypes.NUMERIC, "java.math.BigDecimal");

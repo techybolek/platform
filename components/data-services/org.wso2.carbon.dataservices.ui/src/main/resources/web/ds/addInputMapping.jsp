@@ -249,6 +249,10 @@
         <option value="ARRAY" selected="selected">ARRAY</option>
         <% } else { %>
         <option value="ARRAY">ARRAY</option>
+        <% } if (sqlType.equals("QUERY_STRING")) { %>
+        <option value="QUERY_STRING" selected="selected">QUERY_STRING</option>
+        <% } else { %>
+        <option value="QUERY_STRING">QUERY_STRING</option>
         <% } %>
     </select>
     </td>

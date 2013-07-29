@@ -143,6 +143,7 @@ public final class DBConstants {
         public static final String ORACLE_REF_CURSOR = "ORACLE_REF_CURSOR";
         public static final String STRUCT = "STRUCT";
         public static final String ARRAY = "ARRAY";
+        public static final String QUERY_STRING = "QUERY_STRING";
     }
 
     /**

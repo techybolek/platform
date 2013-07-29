@@ -60,4 +60,8 @@ public class InternalParamCollection {
 		return this.getParams().size();
 	}
 	
+	public void remove(int i) {
+	    this.getData().remove(i);
+	}
+	
 }

@@ -19,66 +19,74 @@
 package org.wso2.carbon.dataservices.core.engine;
 
 /**
- *  This class represents a param that is used inside a query.
+ * This class represents a param that is used inside a query.
  */
 public class InternalParam {
 
-	private String name;
-	
-	/** i.e. scalar/array values */
-	private ParamValue value;
-	
-	/** i.e. STRING, INTEGER */
-	private String sqlType; 
-	
-	/**` i.e. IN, INOUT */
-	private String type;
-	
-	private int ordinal;
+    private String name;
+
+    /** i.e. scalar/array values */
+    private ParamValue value;
+
+    /** i.e. STRING, INTEGER */
+    private String sqlType;
+
+    /** i.e. IN, INOUT */
+    private String type;
+
+    private int ordinal;
 
     private String structType;
 
-	public InternalParam(String name, ParamValue value, String sqlType, 
-			String type, String structType, int ordinal) {
-		this.name = name;
-		this.value = value;
-		this.sqlType = sqlType;
-		this.type = type;
+    public InternalParam(String name, ParamValue value, String sqlType, String type,
+            String structType, int ordinal) {
+        this.name = name;
+        this.value = value;
+        this.sqlType = sqlType;
+        this.type = type;
         this.structType = structType;
-		this.ordinal = ordinal;
-	}
-	
-	public InternalParam(InternalParam param, int ordinal) {
-		this.name = param.name;
-		this.value = param.value;
-		this.sqlType = param.sqlType;
-		this.type = param.type;
+        this.ordinal = ordinal;
+    }
+
+    public InternalParam(InternalParam param, int ordinal) {
+        this.name = param.name;
+        this.value = param.value;
+        this.sqlType = param.sqlType;
+        this.type = param.type;
         this.structType = param.structType;
-		this.ordinal = ordinal;
-	}
-    
-	public String getName() {
-		return name;
-	}
+        this.ordinal = ordinal;
+    }
 
-	public String getSqlType() {
-		return sqlType;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getSqlType() {
+        return sqlType;
+    }
 
-	public ParamValue getValue() {
-		return value;
-	}
-	
-	public int getOrdinal() {
-		return ordinal;
-	}
+    public String getType() {
+        return type;
+    }
+
+    public ParamValue getValue() {
+        return value;
+    }
+
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
+    }
 
     public String getStructType() {
-		return structType;
-	}
-	
+        return structType;
+    }
+
+    public String toString() {
+        return "{" + this.getName() + ":" + this.getValue() + "}";
+    }
+
 }
