@@ -60,20 +60,20 @@ public class RemoteTasksAdmin extends AbstractAdmin {
 	}
 	
 	public void addRemoteSystemTask(StaticTaskInformation taskInfo,
-			int targetTenantId) throws RemoteTasksException {
-		RemoteTaskManager.getInstance().addSystemTask(targetTenantId, taskInfo);
+			String targetTenantDomain) throws RemoteTasksException {
+		RemoteTaskManager.getInstance().addSystemTask(targetTenantDomain, taskInfo);
 	}
 	
 	public void rescheduleRemoteSystemTask(String taskName, TriggerInformation stTriggerInfo,
-			int targetTenantId) throws RemoteTasksException {
-		RemoteTaskManager.getInstance().rescheduleSystemTask(targetTenantId, 
+			String targetTenantDomain) throws RemoteTasksException {
+		RemoteTaskManager.getInstance().rescheduleSystemTask(targetTenantDomain,
 				taskName, stTriggerInfo);
 	}
 	
 	public DeployedTaskInformation getRemoteSystemTask(String name,
-			int targetTenantId) throws RemoteTasksException {
+			String targetTenantDomain) throws RemoteTasksException {
 		try {
-		    return RemoteTaskManager.getInstance().getSystemTask(targetTenantId, name);
+		    return RemoteTaskManager.getInstance().getSystemTask(targetTenantDomain, name);
 		} catch (RemoteTasksException e) {
 			e.printStackTrace();
 			throw e;
@@ -81,22 +81,22 @@ public class RemoteTasksAdmin extends AbstractAdmin {
 	}
 	
 	public boolean deleteRemoteSystemTask(String name,
-			int targetTenantId) throws RemoteTasksException {
-		return RemoteTaskManager.getInstance().deleteSystemTask(targetTenantId, name);
+			String targetTenantDomain) throws RemoteTasksException {
+		return RemoteTaskManager.getInstance().deleteSystemTask(targetTenantDomain, name);
 	}
 	
 	public void pauseRemoteSystemTask(String name,
-			int targetTenantId) throws RemoteTasksException {
-		RemoteTaskManager.getInstance().pauseSystemTask(targetTenantId, name);
+			String targetTenantDomain) throws RemoteTasksException {
+		RemoteTaskManager.getInstance().pauseSystemTask(targetTenantDomain, name);
 	}
 	
 	public void resumeRemoteSystemTask(String name,
-			int targetTenantId) throws RemoteTasksException {
-		RemoteTaskManager.getInstance().resumeSystemTask(targetTenantId, name);
+			String targetTenantDomain) throws RemoteTasksException {
+		RemoteTaskManager.getInstance().resumeSystemTask(targetTenantDomain, name);
 	}
 	
-	public String[] getAllRemoteSystemTasks(int targetTenantId) throws RemoteTasksException {
-		return RemoteTaskManager.getInstance().getAllSystemTasks(targetTenantId);
+	public String[] getAllRemoteSystemTasks(String targetTenantDomain) throws RemoteTasksException {
+		return RemoteTaskManager.getInstance().getAllSystemTasks(targetTenantDomain);
 	}
 	
 }

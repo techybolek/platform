@@ -18,9 +18,6 @@
  */
 package org.wso2.carbon.remotetasks.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -30,12 +27,11 @@ import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
-import org.wso2.carbon.remotetasks.common.DeployedTaskInformation;
-import org.wso2.carbon.remotetasks.common.RemoteTasksConstants;
-import org.wso2.carbon.remotetasks.common.RemoteTasksException;
-import org.wso2.carbon.remotetasks.common.StaticTaskInformation;
-import org.wso2.carbon.remotetasks.common.TriggerInformation;
+import org.wso2.carbon.remotetasks.common.*;
 import org.wso2.carbon.remotetasks.core.internal.RemoteTasksServiceComponent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents the remote task manager.
@@ -67,12 +63,12 @@ public class RemoteTaskManager {
 		}
 	}
 	
-	private int getCurrentTenantId() {
-		return CarbonContext.getCurrentContext().getTenantId();
+	private String getCurrentTenantDomain() {
+		return CarbonContext.getCurrentContext().getTenantDomain();
 	}
 	
 	private void checkSystemRequest() throws RemoteTasksException {
-		if (this.getCurrentTenantId() != MultitenantConstants.SUPER_TENANT_ID) {
+		if (this.getCurrentTenantDomain() != MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) {
 			throw new RemoteTasksException(
 					"System request verification failed, " +
 					"only Super-Tenant can make this type of requests");
@@ -95,12 +91,12 @@ public class RemoteTaskManager {
 		this.addTask(stTaskInfo, false);
 	}
 	
-	public void addSystemTask(int targetTenantId, 
+	public void addSystemTask(String targetTenantDomain,
 			StaticTaskInformation stTaskInfo) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
 			this.addTask(stTaskInfo, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -127,12 +123,12 @@ public class RemoteTaskManager {
 		this.rescheduleTask(taskName, stTriggerInfo, false);
 	}
 	
-	public void rescheduleSystemTask(int targetTenantId, String taskName, 
+	public void rescheduleSystemTask(String targetTenantDomain, String taskName,
 			TriggerInformation stTriggerInfo) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
 			this.rescheduleTask(taskName, stTriggerInfo, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -153,12 +149,12 @@ public class RemoteTaskManager {
 		return this.deleteTask(taskName, false);
 	}
 	
-	public boolean deleteSystemTask(int targetTenantId,
+	public boolean deleteSystemTask(String targetTenantDomain,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
 			return this.deleteTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -179,12 +175,12 @@ public class RemoteTaskManager {
 		this.pauseTask(taskName, false);
 	}
 	
-	public void pauseSystemTask(int targetTenantId,
+	public void pauseSystemTask(String targetTenantDomain,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
 			this.pauseTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -205,12 +201,12 @@ public class RemoteTaskManager {
 		this.resumeTask(taskName, false);
 	}
 	
-	public void resumeSystemTask(int targetTenantId,
+	public void resumeSystemTask(String targetTenantDomain,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
 			this.resumeTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -245,12 +241,12 @@ public class RemoteTaskManager {
 		return this.getTask(taskName, false);
 	}
 	
-	public DeployedTaskInformation getSystemTask(int targetTenantId, 
+	public DeployedTaskInformation getSystemTask(String targetTenantDomain,
 			String taskName) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
 			return this.getTask(taskName, true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
@@ -275,21 +271,21 @@ public class RemoteTaskManager {
 		return this.getAllTasks(false);
 	}
 	
-	public String[] getAllSystemTasks(int targetTenantId) throws RemoteTasksException {
+	public String[] getAllSystemTasks(String targetTenantDomain) throws RemoteTasksException {
 		this.checkSystemRequest();
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
-			PrivilegedCarbonContext.getCurrentContext().setTenantId(targetTenantId);
+			PrivilegedCarbonContext.getCurrentContext().setTenantDomain(targetTenantDomain);
 			return this.getAllTasks(true);
 		} finally {
 			PrivilegedCarbonContext.endTenantFlow();
 		}
 	}
 	
-	public void userTaskExecuted(int tenantId, String taskName) {
+	public void userTaskExecuted(String tenantDomain, String taskName) {
 		if (log.isDebugEnabled()) {
-			log.debug("Task Manager notified of task execution, TID: " + 
-					tenantId + ", Task Name: " + taskName);
+			log.debug("Task Manager notified of task execution, TDomain: " +
+					tenantDomain + ", Task Name: " + taskName);
 		}
 	}
 	

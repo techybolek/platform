@@ -87,9 +87,9 @@ public class RemoteTask extends AbstractTask {
 	 * for monitoring, billing etc.. requirements.
 	 */
 	private void notifyTaskManager() {
-		int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+		String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
 		String taskName = this.getProperties().get(RemoteTasksConstants.REMOTE_TASK_NAME);
-		RemoteTaskManager.getInstance().userTaskExecuted(tenantId, taskName);
+		RemoteTaskManager.getInstance().userTaskExecuted(tenantDomain, taskName);
 	}
 
 }
