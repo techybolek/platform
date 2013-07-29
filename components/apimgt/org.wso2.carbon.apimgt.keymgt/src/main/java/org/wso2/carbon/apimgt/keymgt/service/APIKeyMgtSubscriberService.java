@@ -152,27 +152,25 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     }
     
 	/**
-	 * Renew the ApplicationAccesstoken
+	 * Renew the ApplicationAccesstoken, Call Token endpoint and get parameters.
 	 * 
 	 * @param tokenType
 	 * @param oldAccessToken
 	 * @param allowedDomains
 	 * @param clientId
 	 * @param clientSecret
+	 * @param validityTime
 	 * @return
 	 * @throws Exception
 	 */
 
 	public String renewAccessToken(String tokenType, String oldAccessToken,
-	                               String[] allowedDomains, String clientId, String clientSecret)
-	                                                                                             throws Exception {
+	                               String[] allowedDomains, String clientId, String clientSecret,
+	                               String validityTime) throws Exception {
 		String newAccessToken = null;
 		long validityPeriod = 0;
 		// create a post request to getNewAccessToken for client_credentials
 		// grant type.
-//		HttpContext httpContext = new BasicHttpContext();
-//		CookieStore cookieStore = new BasicCookieStore();
-//		httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
 		
 		String tokenEndpoint = OAuthServerConfiguration.getInstance().getTokenEndPoint();
 		HttpClient httpclient = new DefaultHttpClient();
@@ -185,7 +183,6 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
 		try {
 			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-		//	HttpResponse response = httpclient.execute(httppost,httpContext);
 			HttpResponse response = httpclient.execute(httppost);
 			HttpEntity responseEntity = response.getEntity();
 
@@ -197,6 +194,11 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 				JSONObject obj = new JSONObject(responseStr);
 				newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
 				validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
+
+				if (validityTime != null && !"".equals(validityTime)) {
+					validityPeriod = Long.parseLong(validityTime);
+				}
+
 			}
 
 		} catch (Exception e2) {
