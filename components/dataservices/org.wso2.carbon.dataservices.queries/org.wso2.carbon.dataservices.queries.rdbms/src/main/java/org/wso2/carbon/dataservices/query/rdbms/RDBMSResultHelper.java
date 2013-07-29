@@ -26,6 +26,9 @@ import java.sql.SQLException;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
 import org.wso2.carbon.com.core.model.DataType;
 
+/**
+ * Helper class for RDBMS field context functionality. 
+ */
 public class RDBMSResultHelper {
 
 	public static Object getResultSetValue(ResultSet rs, PathComponent comp, 

@@ -25,6 +25,9 @@ import org.wso2.carbon.com.core.model.DataFormat;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextException;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
 
+/**
+ * This class represents an RDBMS Struct based field context implementation.
+ */
 public class RDBMSStructContext extends AbstractRDBMSObjectFieldContext {
 
 	private Object[] attributes;
@@ -61,5 +64,4 @@ public class RDBMSStructContext extends AbstractRDBMSObjectFieldContext {
 		return false;
 	}
 	
-
 }

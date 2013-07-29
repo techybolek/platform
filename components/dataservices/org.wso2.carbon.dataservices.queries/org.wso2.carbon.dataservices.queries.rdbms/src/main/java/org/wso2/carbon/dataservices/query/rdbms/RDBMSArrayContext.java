@@ -25,6 +25,9 @@ import org.wso2.carbon.com.core.model.DataFormat;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextException;
 import org.wso2.carbon.com.core.fieldcontext.FieldContextPath.PathComponent;
 
+/**
+ * This class represents an RDBMS Array context field implementation.
+ */
 public class RDBMSArrayContext extends AbstractRDBMSObjectFieldContext {
 
 	private Object[] dataArray;
@@ -32,9 +35,6 @@ public class RDBMSArrayContext extends AbstractRDBMSObjectFieldContext {
 	private int currentIndex;
 	
 	public RDBMSArrayContext(Array sqlArray) throws FieldContextException {
-		if (sqlArray == null) {
-			throw new FieldContextException("The RDBMS SQL Array cannot be null");
-		}
 		try {
 			this.dataArray = (Object[]) sqlArray.getArray();
 			this.currentIndex = -1;
@@ -47,8 +47,22 @@ public class RDBMSArrayContext extends AbstractRDBMSObjectFieldContext {
 	@Override
 	protected Object getRDBMSResultValue(PathComponent comp, DataFormat format)
 			throws SQLException {
-		if (this.currentIndex >= this.dataArray.length) {
+		if (!comp.isIndex()) {
+			throw new SQLException("The RDBMS Array must be given an array index to " +
+					"access an component: " + comp.toString());
+		}
+		int index = comp.getIndexValue();
+		if (index >= this.dataArray.length) {
 			throw new SQLException("The current SQL Array size: " + this.dataArray.length + 
+					" is smaller than the given index: " + index);
+		}
+		return this.dataArray[index];
+	}
+	
+	@Override
+	public Object getCurrentValue() throws FieldContextException {
+		if (this.currentIndex >= this.dataArray.length) {
+			throw new FieldContextException("The current SQL Array size: " + this.dataArray.length + 
 					" is smaller than the current index: " + this.currentIndex);
 		}
 		return this.dataArray[this.currentIndex];
