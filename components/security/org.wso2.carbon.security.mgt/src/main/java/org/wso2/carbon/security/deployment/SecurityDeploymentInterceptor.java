@@ -105,7 +105,7 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
     protected void activate(ComponentContext ctxt) {
         BundleContext bundleCtx = ctxt.getBundleContext();
         try {
-            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getCurrentContext();
+	    PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
