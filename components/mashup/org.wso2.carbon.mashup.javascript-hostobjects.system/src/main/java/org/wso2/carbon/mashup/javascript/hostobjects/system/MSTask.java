@@ -53,14 +53,14 @@ public class MSTask extends AbstractTask {
 
         	String serviceNameProperty = getProperties().get(MSTaskConstants.AXIS_SERVICE);
         	
-    		String tidProp = this.getProperties().get(TaskInfo.TENANT_ID_PROP);
-    		if (tidProp == null) {
+    		String tenantDomainProp = this.getProperties().get(TaskInfo.TENANT_DOMAIN_PROP);
+    		if (tenantDomainProp == null) {
     			throw new RuntimeException("Cannot determine the tenant id for the scheduled service: " + 
     					serviceNameProperty);
     		}
-    		int tid = Integer.parseInt(tidProp);
+    		String tenantDomain = tenantDomainProp;
     		
-    		AxisService axisService = this.lookupAxisService(tid, serviceNameProperty);
+    		AxisService axisService = this.lookupAxisService(tenantDomain, serviceNameProperty);
         	if (axisService == null) {
     			throw new RuntimeException("Cannot determine the tenant id for the scheduled service: " + 
     					serviceNameProperty);
@@ -133,15 +133,14 @@ public class MSTask extends AbstractTask {
 		
 	}
 
-	private AxisService lookupAxisService(int tid, String serviceName) {
+	private AxisService lookupAxisService(String tenantDomain, String serviceName) {
 		ConfigurationContext mainConfigCtx = TasksDSComponent.getConfigurationContextService().
 				getServerConfigContext();
 		AxisConfiguration tenantAxisConf;
-		if (tid == MultitenantConstants.SUPER_TENANT_ID) {
+		if (tenantDomain == MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) {
 			tenantAxisConf = mainConfigCtx.getAxisConfiguration();
 		} else {
-		    String tenantDomain = MSTaskUtils.getTenantDomainFromId(tid);
-		    tenantAxisConf = TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, 
+		    tenantAxisConf = TenantAxisUtils.getTenantAxisConfiguration(tenantDomain,
 		    		mainConfigCtx);
 		}		
 
