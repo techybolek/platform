@@ -21,6 +21,9 @@ package org.wso2.carbon.com.core.model;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
+/**
+ * A complex data field representation.
+ */
 public class ComplexField implements Field {
 
 	private String name;

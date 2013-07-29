@@ -18,6 +18,9 @@
  */
 package org.wso2.carbon.com.core.model;
 
+/**
+ * Carbon Object Model Exception.
+ */
 public class COMException extends Exception {
 
 	private static final long serialVersionUID = -8304843099855656036L;

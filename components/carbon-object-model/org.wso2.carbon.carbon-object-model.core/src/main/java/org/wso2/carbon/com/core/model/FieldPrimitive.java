@@ -20,6 +20,9 @@ package org.wso2.carbon.com.core.model;
 
 import org.wso2.carbon.com.core.fieldcontext.FieldContext;
 
+/**
+ * Primitive type data field.
+ */
 public class FieldPrimitive implements Field {
 
 	private String name;

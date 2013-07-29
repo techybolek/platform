@@ -18,6 +18,9 @@
  */
 package org.wso2.carbon.com.core.model;
 
+/**
+ * The data type of an item.
+ */
 public enum DataType {
 
 	STRING,

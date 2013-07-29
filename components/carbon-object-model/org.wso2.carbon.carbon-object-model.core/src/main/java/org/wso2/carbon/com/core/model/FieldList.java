@@ -18,6 +18,9 @@
  */
 package org.wso2.carbon.com.core.model;
 
+/**
+ * A data field list.
+ */
 public interface FieldList extends Field {
 
 	public Field next();

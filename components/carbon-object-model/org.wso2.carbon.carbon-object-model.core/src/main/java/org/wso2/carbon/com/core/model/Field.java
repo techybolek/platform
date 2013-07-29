@@ -18,6 +18,9 @@
  */
 package org.wso2.carbon.com.core.model;
 
+/**
+ * A data field representation.
+ */
 public interface Field {
 
 	public String getName();

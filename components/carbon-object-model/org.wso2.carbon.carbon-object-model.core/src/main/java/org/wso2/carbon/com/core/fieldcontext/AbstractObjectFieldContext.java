@@ -26,6 +26,9 @@ import org.wso2.carbon.com.core.model.ContainerType;
 import org.wso2.carbon.com.core.model.DataFormat;
 import org.wso2.carbon.com.core.model.DataType;
 
+/**
+ * A default Abstract implementation of FieldContext with data item caching.
+ */
 public abstract class AbstractObjectFieldContext implements FieldContext {
 
 	private Map<String, FieldContext> fieldContextCache = new HashMap<String, FieldContext>();

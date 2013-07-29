@@ -18,7 +18,9 @@
  */
 package org.wso2.carbon.com.core.model;
 
-
+/**
+ * This class represents the DataFormat used by field contexts and the Carbon Object Model.
+ */
 public class DataFormat {
 
 	private DataType dataType;

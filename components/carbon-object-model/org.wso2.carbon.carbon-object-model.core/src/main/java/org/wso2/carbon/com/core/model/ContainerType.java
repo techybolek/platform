@@ -18,6 +18,9 @@
  */
 package org.wso2.carbon.com.core.model;
 
+/**
+ * The container type of a data item.
+ */
 public enum ContainerType {
 
 	SCALAR,
