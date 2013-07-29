@@ -19,7 +19,11 @@
 
 package org.wso2.carbon.mediation.security.vault;
 
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,15 +42,13 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 
 	private static Log log = LogFactory.getLog(SecureVaultLookupHandlerImpl.class);
 
-	public enum LookupType {
-		FILE, REGISTRY
-	}
-
 	private static SecureVaultLookupHandlerImpl instance = null;
 
 	private ServerConfigurationService serverConfigService;
 
 	private RegistryService registryService;
+
+	private Map<String, SecureVaultCacheContext> decryptedCacheMap = new ConcurrentHashMap<String, SecureVaultCacheContext>();
 
 	UserRegistry registry = null;
 
@@ -126,11 +128,6 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 		return this.getClass().getName();
 	}
 
-//	@Override
-//	public void init(Properties arg0) {
-//
-//	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -141,46 +138,31 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	 * .LookupType)
 	 */
 	@Override
-	public String evaluate(String aliasPasword, LookupType lookupType,
-			MessageContext synCtx) throws RegistryException {
-		
-		if (lookupType.equals(LookupType.FILE)) {
-			return lookupFileRepositry(aliasPasword, synCtx);
-		} else {
-			return lookupRegistry(aliasPasword, synCtx);
-		}
-
-	}
-
-	/**
-	 * Lookup in the register to retrieve value
-	 * 
-	 * @param aliasPasword
-	 * @return
-	 * @throws RegistryException
-	 */
-	private String lookupRegistry(String aliasPasword, MessageContext synCtx)
+	public String evaluate(String aliasPasword, MessageContext synCtx)
 			throws RegistryException {
-		if (log.isDebugEnabled()) {
-			log.info("processing evaluating registry based lookup");
+		if (decryptedCacheMap.containsKey(aliasPasword)) {
+			SecureVaultCacheContext cacheContext = decryptedCacheMap.get(aliasPasword);
+			long cacheTime = 15000;
+			if((cacheContext.getDateTime().getTime()+cacheTime)>=System.currentTimeMillis()){
+				//which means the given value between the cachable limit
+				return cacheContext.getDecryptedValue();
+			}else{
+				decryptedCacheMap.remove(aliasPasword);
+				return vaultLookup(aliasPasword, synCtx);
+			}
+			
+		} else {
+			String decryptedValue = vaultLookup(aliasPasword, synCtx);
+			return decryptedValue;
 		}
-		SecretCipherHander secretManager = new SecretCipherHander(synCtx);
-		return secretManager.getSecret(aliasPasword);
-
 	}
 
-	/**
-	 * Lookup credentials via the FileRepository configuration
-	 * 
-	 * @param aliasPasword
-	 * @return
-	 */
-	private String lookupFileRepositry(String aliasPasword, MessageContext synCtx) {
-		if (log.isDebugEnabled()) {
-			log.info("processing evaluating file based lookup");
-		}
+	private String vaultLookup(String aliasPasword, MessageContext synCtx) {
 		SecretCipherHander secretManager = new SecretCipherHander(synCtx);
-		return secretManager.getSecret(aliasPasword);
+		String decryptedValue = secretManager.getSecret(aliasPasword);
+		decryptedCacheMap.put(aliasPasword, new SecureVaultCacheContext(Calendar
+				.getInstance().getTime(), decryptedValue));
+		return decryptedValue;
 	}
 
 }

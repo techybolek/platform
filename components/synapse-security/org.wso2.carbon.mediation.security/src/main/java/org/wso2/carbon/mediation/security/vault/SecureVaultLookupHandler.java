@@ -18,24 +18,11 @@
 
 package org.wso2.carbon.mediation.security.vault;
 
-import java.util.Properties;
-
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.mediation.security.vault.SecureVaultLookupHandlerImpl.LookupType;
 
 
 
 public interface SecureVaultLookupHandler {
-//
-//	/**
-//	 * @param properties
-//	 */
-//	public void init(Properties properties);
-//
-//	/**
-//	 * @return
-//	 */
-//	public String getProviderClass();
 
 	/**
 	 * Method to evaluate the parameters passed to extract values from secure-vault lookup
@@ -45,7 +32,7 @@ public interface SecureVaultLookupHandler {
 	 * @return
 	 * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
 	 */
-	public String evaluate(String aliasPasword, LookupType lookupType,MessageContext synCtx)
+	public String evaluate(String aliasPasword,MessageContext synCtx)
 			throws org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 }

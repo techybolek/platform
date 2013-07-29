@@ -20,7 +20,7 @@
 	    <menu>
             <id>secure_vault_main_menu</id>
             <i18n-key>mediation.secure.vault</i18n-key>
-            <i18n-bundle>org.wso2.carbon.mediation.secure.vault.ui.i18n.Resources</i18n-bundle>
+            <i18n-bundle>org.wso2.carbon.mediation.security.vault.ui.i18n.Resources</i18n-bundle>
             <parent-menu>manage_menu</parent-menu>
             <link>#</link>
             <region>region1</region>
@@ -33,7 +33,7 @@
 		<menu>
 			<id>secure_vault_list_view</id>
 			<i18n-key>mediation.secure.vault.list.configs</i18n-key>
-			<i18n-bundle>org.wso2.carbon.mediation.secure.vault.ui.i18n.Resources</i18n-bundle>
+			<i18n-bundle>org.wso2.carbon.mediation.security.vault.ui.i18n.Resources</i18n-bundle>
 			<parent-menu>secure_vault_main_menu</parent-menu>
 			<link>../mediation_secure_vault/manageSecureVault.jsp</link>
 			<region>region1</region>

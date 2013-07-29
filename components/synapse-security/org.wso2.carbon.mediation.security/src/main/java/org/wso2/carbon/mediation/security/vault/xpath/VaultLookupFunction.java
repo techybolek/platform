@@ -29,7 +29,6 @@ import org.jaxen.FunctionCallException;
 import org.jaxen.function.StringFunction;
 import org.wso2.carbon.mediation.security.vault.SecureVaultLookupHandler;
 import org.wso2.carbon.mediation.security.vault.SecureVaultLookupHandlerImpl;
-import org.wso2.carbon.mediation.security.vault.SecureVaultLookupHandlerImpl.LookupType;
 
 /**
  * Implements the XPath extension function synapse:vault-lookup(scope,prop-name)
@@ -76,7 +75,7 @@ public class VaultLookupFunction implements Function {
 		SecureVaultLookupHandler mediationSecurity;
 		try {
 			mediationSecurity = SecureVaultLookupHandlerImpl.getDefaultSecurityService();
-			String val = mediationSecurity.evaluate(argOne,LookupType.REGISTRY,synCtx);
+			String val = mediationSecurity.evaluate(argOne,synCtx);
 			return val;
 		} catch (Exception msg) {
 			throw new FunctionCallException(msg);
