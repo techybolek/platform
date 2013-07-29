@@ -634,7 +634,6 @@
                                 <th><nobr><fmt:message key="status"/></nobr></th>
                                 <th><nobr><fmt:message key="date.started"/></nobr></th>
                                 <th><nobr><fmt:message key="last.active"/></nobr></th>
-                                <th><nobr><fmt:message key="total.instances"/></nobr></th>
 <%
         if(isAuthenticatedForInstanceManagement) {
 %>
@@ -675,10 +674,6 @@
     }
 
                                 QName pid = QName.valueOf(instanceInfo.getPid());
-%>
-                                <td><a href="<%=BpelUIUtil.getInstanceFilterURL(instanceInfo.getPid())%>"><%=Integer.toString(BpelUIUtil.getTotalInstance(processManagementClient.getProcessInfo(pid)))%></a></td>
-
-<%
 
             if(isAuthenticatedForInstanceManagement) {
 %>
