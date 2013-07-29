@@ -1171,9 +1171,9 @@ public class UserRealmProxy {
                     if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
                         if ((admin.getSecondaryUserStoreManager(domain).isReadOnly() ||
                             (admin.getSecondaryUserStoreManager(domain).getRealmConfiguration().
-                            getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null &&
+                            getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED) != null &&
                             admin.getSecondaryUserStoreManager(domain).getRealmConfiguration().
-                            getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES).equals("false"))) &&
+                            getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED).equals("false"))) &&
                             hybridRoles != null && Arrays.binarySearch(hybridRoles, role) < 0) {
 
                             fName.setEditable(false);
@@ -1182,9 +1182,9 @@ public class UserRealmProxy {
                         }
                     } else {
                         if ((admin.isReadOnly() || (admin.getRealmConfiguration().
-                                getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null &&
+                                getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED) != null &&
                             admin.getRealmConfiguration().
-                                getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES).equals("false"))) &&
+                                getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED).equals("false"))) &&
                             hybridRoles != null && Arrays.binarySearch(hybridRoles, role) < 0) {
                             fName.setEditable(false);
                         } else {
@@ -1295,14 +1295,14 @@ public class UserRealmProxy {
                         UserStoreManager secManager = admin.getSecondaryUserStoreManager(domain);
                         if(secManager.isReadOnly() ||
                                 "false".equals(secManager.getRealmConfiguration().
-                                        getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES))){
+                                getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED))){
                             fname.setEditable(false);
                         } else {
                             fname.setEditable(true);
                         }
                     } else {
                         if(admin.isReadOnly() || "false".equals(admin.getRealmConfiguration().
-                                        getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES))){
+                                getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED))){
                             fname.setEditable(false);
                         } else {
                             fname.setEditable(true);
@@ -1585,27 +1585,26 @@ public class UserRealmProxy {
         try {
 
             String loggedInUserName = getLoggedInUser();
-            String roleWihtoutDn = roleName.split(UserCoreConstants.TENANT_DOMAIN_COMBINER)[0];
 
-            if (CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleWihtoutDn)) {
+            if (CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleName)) {
                 log.error("Security Alert! Carbon anonymous role is being manipulated by user " + loggedInUserName);
                 throw new UserStoreException("Invalid data");
             }
 
-            if (realm.getRealmConfiguration().getEveryOneRoleName().equals(roleWihtoutDn)) {
+            if (realm.getRealmConfiguration().getEveryOneRoleName().equals(roleName)) {
                 log.error("Security Alert! Carbon Everyone role is being manipulated by user " + loggedInUserName);
                 throw new UserStoreException("Invalid data");
             }
 
             boolean isRoleHasAdminPermission = realm.getAuthorizationManager().
-                    isRoleAuthorized(roleWihtoutDn, "/permission/", UserMgtConstants.EXECUTE_ACTION);
+                    isRoleAuthorized(roleName, "/permission/", UserMgtConstants.EXECUTE_ACTION);
             if(!isRoleHasAdminPermission){
                 isRoleHasAdminPermission = realm.getAuthorizationManager().
-                        isRoleAuthorized(roleWihtoutDn, "/permission/admin/", UserMgtConstants.EXECUTE_ACTION);
+                        isRoleAuthorized(roleName, "/permission/admin/", UserMgtConstants.EXECUTE_ACTION);
             }
 
             RealmConfiguration realmConfig = realm.getRealmConfiguration();
-            if ((realmConfig.getAdminRoleName().equals(roleWihtoutDn) || isRoleHasAdminPermission) &&
+            if ((realmConfig.getAdminRoleName().equals(roleName) || isRoleHasAdminPermission) &&
                                     !realmConfig.getAdminUserName().equals(loggedInUserName)) {
                 log.warn("An attempt to add or remove users from Admin role by user : "
                                                                                 + loggedInUserName);
@@ -1615,7 +1614,7 @@ public class UserRealmProxy {
 
             if(deleteUsers != null){
                 Arrays.sort(deleteUsers);
-                if(realmConfig.getAdminRoleName().equals(roleWihtoutDn) &&
+                if(realmConfig.getAdminRoleName().equals(roleName) &&
                         Arrays.binarySearch(deleteUsers, realmConfig.getAdminUserName()) > -1){
                     log.warn("An attempt to remove Admin user from Admin role by user : "
                                                                                     + loggedInUserName);
@@ -1706,11 +1705,6 @@ public class UserRealmProxy {
             }
 
             RealmConfiguration realmConfig = realm.getRealmConfiguration();
-
-            String[] oldRoles = realm.getUserStoreManager().getRoleListOfUser(userName);
-
-            // oldRoles can not be null as everyone role is there.
-            Arrays.sort(oldRoles);
             
             if(!realmConfig.getAdminUserName().equals(loggedInUserName)){
 
@@ -1779,31 +1773,31 @@ public class UserRealmProxy {
                 }
             }
 
-            List<String> delRoles = new ArrayList<String>();
-            List<String> addRoles = new ArrayList<String>();
-
-            if(newRoles != null){
-                for(String name : newRoles){
-                    if (Arrays.binarySearch(oldRoles, name) < 0) {
-                        addRoles.add(name);
-                    }
-                }
-                newRoles =  addRoles.toArray(new String[addRoles.size()]);
-            }
-
-            if(!(oldRoles.length == 1 &&
-                        oldRoles[0].equals(realm.getRealmConfiguration().getEveryOneRoleName()))){
-                if(deletedRoles != null){
-                    for(String name : deletedRoles){
-                        if (Arrays.binarySearch(oldRoles, name) > -1) {
-                            delRoles.add(name);
-                        }
-                    }
-                }
-                deletedRoles = delRoles.toArray(new String[delRoles.size()]);
-            } else {                
-                deletedRoles = null;
-            }
+//            List<String> delRoles = new ArrayList<String>();
+//            List<String> addRoles = new ArrayList<String>();
+//
+//            if(newRoles != null){
+//                for(String name : newRoles){
+//                    if (Arrays.binarySearch(oldRoles, name) < 0) {
+//                        addRoles.add(name);
+//                    }
+//                }
+//                newRoles =  addRoles.toArray(new String[addRoles.size()]);
+//            }
+//
+//            if(!(oldRoles.length == 1 &&
+//                        oldRoles[0].equals(realm.getRealmConfiguration().getEveryOneRoleName()))){
+//                if(deletedRoles != null){
+//                    for(String name : deletedRoles){
+//                        if (Arrays.binarySearch(oldRoles, name) > -1) {
+//                            delRoles.add(name);
+//                        }
+//                    }
+//                }
+//                deletedRoles = delRoles.toArray(new String[delRoles.size()]);
+//            } else {
+//                deletedRoles = null;
+//            }
 
             realm.getUserStoreManager().updateRoleListOfUser(userName, deletedRoles , newRoles);
 
