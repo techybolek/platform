@@ -47,7 +47,7 @@
                  <module>application-mgt</module>
                  <module>application-deployers</module>
                  <module>reporting</module>
-                 <module>bam</module>
+                 <!--module>bam</module-->
                  <!--module>bam-data-publishers</module-->
                  <module>business-processes</module>
                  <module>business-messaging</module>
