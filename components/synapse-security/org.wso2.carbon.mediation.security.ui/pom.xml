@@ -123,7 +123,7 @@
 						<Bundle-Name>${project.artifactId}</Bundle-Name>
 						<Carbon-Component>UIBundle</Carbon-Component>
 						<Export-Package>
-							org.wso2.carbon.mediation.secure.vault.ui.*,
+							org.wso2.carbon.mediation.security.vault.ui.*,
                         </Export-Package>
 						<Import-Package>
 							org.wso2.carbon.registry.core.*;version="0.0.0",

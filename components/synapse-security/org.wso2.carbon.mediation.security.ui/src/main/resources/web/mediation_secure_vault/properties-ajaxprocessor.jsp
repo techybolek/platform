@@ -71,7 +71,7 @@
    }
 </script>--%>
 <fmt:bundle
-	basename="org.wso2.carbon.mediation.secure.vault.ui.i18n.Resources">
+	basename="org.wso2.carbon.mediation.security.vault.ui.i18n.Resources">
 
 
 	<div id="propertiesSum" class="summeryStyle">

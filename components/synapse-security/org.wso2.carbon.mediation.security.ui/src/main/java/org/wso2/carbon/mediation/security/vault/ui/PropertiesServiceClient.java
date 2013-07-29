@@ -30,7 +30,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.mediation.secure.vault.SecureVaultConstants;
+import org.wso2.carbon.mediation.security.vault.SecureVaultConstants;
 import org.wso2.carbon.mediation.security.vault.cipher.tool.CipherTool;
 import org.wso2.carbon.registry.common.ui.UIConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;

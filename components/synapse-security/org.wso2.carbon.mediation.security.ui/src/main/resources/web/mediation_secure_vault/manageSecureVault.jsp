@@ -39,7 +39,7 @@
 	href="../mediation_secure_vault/css/secureVault.css">
 
 <carbon:jsi18n
-		resourceBundle="org.wso2.carbon.mediation.secure.vault.ui.i18n.JSResources"
+		resourceBundle="org.wso2.carbon.mediation.security.vault.ui.i18n.JSResources"
 		request="<%=request%>" namespace="org.wso2.carbon.mediation.secure.vault.ui" />
 
 <script type="text/javascript">
@@ -62,7 +62,7 @@
 %>
 
 <fmt:bundle
-	basename="org.wso2.carbon.mediation.secure.vault.ui.i18n.Resources">
+	basename="org.wso2.carbon.mediation.security.vault.ui.i18n.Resources">
 
 	<div style="height: auto; margin-top: 10px;">
 

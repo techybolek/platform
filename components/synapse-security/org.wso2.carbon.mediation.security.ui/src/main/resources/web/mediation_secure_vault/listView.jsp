@@ -42,12 +42,12 @@
 %>
 
 <fmt:bundle
-	basename="org.wso2.carbon.mediation.secure.vault.ui.i18n.Resources">
+	basename="org.wso2.carbon.mediation.security.vault.ui.i18n.Resources">
 	<carbon:breadcrumb label="libs.list.headertext"
-		resourceBundle="org.wso2.carbon.mediation.secure.vault.ui.i18n.Resources"
+		resourceBundle="org.wso2.carbon.mediation.security.vault.ui.i18n.Resources"
 		topPage="true" request="<%=request%>" />
 	<carbon:jsi18n
-		resourceBundle="org.wso2.carbon.mediation.secure.vault.ui.i18n.JSResources"
+		resourceBundle="org.wso2.carbon.mediation.security.vault.ui.i18n.JSResources"
 		request="<%=request%>" />
 
 	<script type="text/javascript"></script>
