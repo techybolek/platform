@@ -19,6 +19,9 @@ struct APIKeyValidationInfoDTO {
     8: optional i32 validationStatus;
     9: optional string applicationId;
     10: optional string applicationTier;
+    11: optional string apiName;
+    12: optional string consumerKey;
+    12: optional string apiPublisher;
 }
 
 struct URITemplate {
