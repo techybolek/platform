@@ -15,7 +15,6 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page session="true" %>
@@ -374,7 +373,6 @@
                                   <table class="odd-even-data-table normal" style="width:100%">
                                     <%
                                         if (roles != null) {
-                                        	int index = 0;
                                             for (FlaggedName name : roles) {
                                                 if (name != null) {
                                                     String doEdit = "";
@@ -393,7 +391,7 @@
                                       <tr>
                                           <td>
                                               <label>
-                                                <input type="checkbox" name="selectedRoles" value="<%=name.getItemName() + UserCoreConstants.TENANT_DOMAIN_COMBINER + name.getDn()%>" <%=doEdit%> <%=doCheck%>/> <%=CharacterEncoder.getSafeText(name.getItemName())%>
+                                                <input type="checkbox" name="selectedRoles" value="<%=name.getItemName()%>" <%=doEdit%> <%=doCheck%>/> <%=CharacterEncoder.getSafeText(name.getItemName())%>
                                                 <%if (!name.getEditable()) { %> <%="(Read-Only)"%> <% } %>
                                                 <input type="hidden" name="shownRoles" value="<%=CharacterEncoder.getSafeText(name.getItemName())%>"/>
                                               </label>
@@ -408,7 +406,7 @@
                                               <% if(!userRealmInfo.getEveryOneRole().equals(name.getItemName())) {%>
                                                   <a style="background-image:url(images/view.gif);"
                                                      class="icon-link"
-                                                     href="../role/view-users.jsp?roleName=<%=name.getItemName() + UserCoreConstants.TENANT_DOMAIN_COMBINER + name.getDn()%>&prevPage=edit&prevUser=<%=userName%>&prevPageNumber=<%=pageNumber%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%if (!name.getEditable()) { %>true<% }else{ %>false<% } %>"><fmt:message key="view.users"/>
+                                                     href="../role/view-users.jsp?roleName=<%=name.getItemName()%>&prevPage=edit&prevUser=<%=userName%>&prevPageNumber=<%=pageNumber%>&<%=UserAdminUIConstants.ROLE_READ_ONLY%>=<%if (!name.getEditable()) { %>true<% }else{ %>false<% } %>"><fmt:message key="view.users"/>
                                                   </a>
                                               <% } %>
                                           </td>

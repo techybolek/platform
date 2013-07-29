@@ -1,4 +1,4 @@
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
+
 <%@page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -294,7 +294,7 @@
                                             }
                             %>
                                 <input type="checkbox" name="userRoles"
-                                       value="<%=name.getItemName() + UserCoreConstants.TENANT_DOMAIN_COMBINER + name.getDn()%>" <%=doCheck%> <%=doEdit%> /><%=CharacterEncoder.getSafeText(name.getItemName())%>
+                                       value="<%=name.getItemName()%>" <%=doCheck%> <%=doEdit%> /><%=CharacterEncoder.getSafeText(name.getItemName())%>
                                 <input type="hidden" name="shownUsers" value="<%=CharacterEncoder.getSafeText(name.getItemName())%>"/><br/>
                             <%
                                             }
