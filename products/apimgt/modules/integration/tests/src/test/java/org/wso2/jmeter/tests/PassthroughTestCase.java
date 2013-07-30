@@ -74,12 +74,12 @@ public class PassthroughTestCase {
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     @Test(groups = "wso2.am", description = "creates and API, subscribe to it and send GET and DELETE requests without " +
-            "Content-Type header and checks for if the Content-Type header is forcefully added by APIM, " +
-            "which should not happen")
+                                            "Content-Type header and checks for if the Content-Type header is forcefully added by APIM, " +
+                                            "which should not happen")
     public void JIRA_APIMANAGER_1397_testContentTypeHeaderInsertionCheck() throws Exception {
         JMeterTest publishScript = new JMeterTest(new File(ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator
-                + "artifacts" + File.separator + "AM" + File.separator + "scripts"
-                + File.separator + "content_type_check_publish_and_subscribe_script.jmx"));
+                                                           + "artifacts" + File.separator + "AM" + File.separator + "scripts"
+                                                           + File.separator + "content_type_check_publish_and_subscribe_script.jmx"));
 
         JMeterTestManager manager = new JMeterTestManager();
         manager.runTest(publishScript);
@@ -91,8 +91,8 @@ public class PassthroughTestCase {
         Thread.sleep(1000);
 
         JMeterTest scriptGET = new JMeterTest(new File(ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator
-                        + "artifacts" + File.separator + "AM" + File.separator + "scripts"
-                        + File.separator + "content_type_check_for_GET_script.jmx"));
+                                                       + "artifacts" + File.separator + "AM" + File.separator + "scripts"
+                                                       + File.separator + "content_type_check_for_GET_script.jmx"));
 
         manager.runTest(scriptGET);
 
@@ -115,8 +115,8 @@ public class PassthroughTestCase {
         Thread.sleep(1000);
 
         JMeterTest scriptDELETE = new JMeterTest(new File(ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator
-                + "artifacts" + File.separator + "AM" + File.separator + "scripts"
-                + File.separator + "content_type_check_for_DELETE_script.jmx"));
+                                                          + "artifacts" + File.separator + "AM" + File.separator + "scripts"
+                                                          + File.separator + "content_type_check_for_DELETE_script.jmx"));
 
         manager.runTest(scriptDELETE);
 
@@ -132,85 +132,6 @@ public class PassthroughTestCase {
             break;
         }
 
-    }
-
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
-    @AfterClass(alwaysRun = true)
-    public void testCleanup() throws Exception {
-        serverConfigurationManager.restoreToLastConfiguration();
-        serverConfigurationManager = null;
-    }
-}
-package org.wso2.jmeter.tests;
-
-import org.apache.axiom.om.OMElement;
-import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.wso2.automation.tools.jmeter.JMeterTest;
-import org.wso2.automation.tools.jmeter.JMeterTestManager;
-import org.wso2.carbon.automation.core.ProductConstant;
-import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
-import org.wso2.carbon.automation.core.annotations.SetEnvironment;
-import org.wso2.carbon.automation.core.utils.UserInfo;
-import org.wso2.carbon.automation.core.utils.UserListCsvReader;
-import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
-import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentVariables;
-import org.wso2.carbon.automation.core.utils.serverutils.ServerConfigurationManager;
-import org.wso2.carbon.utils.ServerConstants;
-
-import java.io.File;
-import java.io.IOException;
-
-public class PassthroughTestCase {
-
-    private ServerConfigurationManager serverConfigurationManager;
-
-    protected Log log = LogFactory.getLog(getClass());
-    protected EnvironmentVariables amServer;
-    protected UserInfo userInfo;
-    protected OMElement synapseConfiguration = null;
-
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
-    @BeforeClass(alwaysRun = true)
-    public void testChangeTransportMechanism() throws Exception, AxisFault {
-        init(2);
-        serverConfigurationManager = new ServerConfigurationManager(amServer.getBackEndUrl());
-        String carbonHome = System.getProperty(ServerConstants.CARBON_HOME);
-
-        File axis2xmlFile = new File(carbonHome + File.separator + "repository" + File.separator + "conf"
-                                     + File.separator + "axis2" + File.separator + "axis2.xml");
-
-        File sourceAxis2xmlFile = new File(carbonHome + File.separator + "repository" + File.separator
-                                           + "conf" + File.separator + "axis2" + File.separator + "axis2.xml_PT");
-
-        if (!axis2xmlFile.exists() || !sourceAxis2xmlFile.exists()) {
-            throw new IOException("File not found in given location");
-        }
-
-        serverConfigurationManager.applyConfiguration(sourceAxis2xmlFile, axis2xmlFile);
-    }
-
-    protected void init(int userId) throws Exception {
-        userInfo = UserListCsvReader.getUserInfo(userId);
-        EnvironmentBuilder builder = new EnvironmentBuilder().am(userId);
-        amServer = builder.build().getAm();
-    }
-
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
-    @Test(groups = "wso2.am", description = "Covers tenant creation, role creation, API creation, publish api," +
-                                            "get default app id, subscribe users to default app, invoke api")
-    public void testListServices() throws Exception {
-        JMeterTest script =
-                new JMeterTest(new File(ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator + "artifacts"
-                                        + File.separator + "AM" + File.separator + "scripts"
-                                        + File.separator + "API_Manager_functionality_and_loadTest.jmx"));
-
-        JMeterTestManager manager = new JMeterTestManager();
-        manager.runTest(script);
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
