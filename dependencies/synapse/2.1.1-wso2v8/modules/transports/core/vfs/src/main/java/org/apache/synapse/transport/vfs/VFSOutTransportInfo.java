@@ -23,6 +23,7 @@ import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.vfs2.provider.UriParser;
 
 import java.util.Map;
 
@@ -52,9 +53,17 @@ public class VFSOutTransportInfo implements OutTransportInfo {
      */
     VFSOutTransportInfo(String outFileURI, boolean fileLocking) {
 
-        if (outFileURI.startsWith(VFSConstants.VFS_PREFIX)) {
-            this.outFileURI = outFileURI.substring(VFSConstants.VFS_PREFIX.length());
+     	if (outFileURI.startsWith(VFSConstants.VFS_PREFIX)) {
+            String vfsURI = outFileURI.substring(VFSConstants.VFS_PREFIX.length());
+            String queryParams = UriParser.extractQueryString(new StringBuilder(vfsURI));
 
+            //Lets get rid of unwanted query params and clean the URI - we can't do this with java.net.URI as it does not support multiple
+            //protocols in the URI, for example "vfs:file:/".
+            if(null != queryParams && !"".equals(queryParams) && vfsURI.contains(VFSConstants.APPEND)) {
+               this.outFileURI = cleanURI(vfsURI, queryParams, outFileURI);
+            } else {
+                this.outFileURI = vfsURI;
+            }
         } else {
             this.outFileURI = outFileURI;
         }
@@ -96,6 +105,32 @@ public class VFSOutTransportInfo implements OutTransportInfo {
             log.debug("Using the reconnectionTimeout : " + reconnectTimeout);
             log.debug("Using the append         : " + append);
             log.debug("File locking             : " + (this.fileLocking ? "ON" : "OFF"));
+        }
+    }
+
+    private String cleanURI(String vfsURI, String queryParams, String originalFileURI) {
+        vfsURI = vfsURI.replace("?"+queryParams, "");
+        queryParams = queryParams.replace(VFSConstants.APPEND+"=true", "");
+        queryParams = queryParams.replace(VFSConstants.APPEND+"=false", "");
+        queryParams = queryParams.replace("&&", "&");
+        if(!"".equals(queryParams) && queryParams.toCharArray()[0] == "&".charAt(0)) {
+            queryParams = queryParams.substring(1);
+        }
+
+        String[] queryParamsArray = queryParams.split("&");
+        String newQueryParams = "";
+        if(queryParamsArray.length > 0) {
+            for(String param : queryParamsArray) {
+                newQueryParams = newQueryParams.concat(param) + "&";
+            }
+            newQueryParams = newQueryParams.substring(0, newQueryParams.length()-1);
+            if(!"".equals(newQueryParams)) {
+                return vfsURI + "?" + newQueryParams;
+            } else {
+                return vfsURI;
+            }
+        } else {
+            return originalFileURI.substring(VFSConstants.VFS_PREFIX.length());
         }
     }
 
