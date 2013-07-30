@@ -31,6 +31,12 @@
 <%@ taglib prefix="carbon"
 	uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"%>
 
+<link type="text/css" href="../dialog/js/jqueryui/tabs/ui.all.css" rel="stylesheet"/>
+<script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery-1.2.6.min.js"></script>
+<script type="text/javascript"
+        src="../dialog/js/jqueryui/tabs/jquery-ui-1.6.custom.min.js"></script>
+<script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery.cookie.js"></script>
+
 <%
     PropertiesServiceClient client_ = new PropertiesServiceClient(config, session);
     try {
@@ -58,8 +64,8 @@
     } else {
         start = 1;
     }
-    PaginationContext.init(start, count, "", "", 1500);
-    PropertiesBean propertiesBean_ = client_.getProperties(request);
+    //PaginationContext.init(start, count, "", "", 1500);
+     PropertiesBean propertiesBean_ = client_.getProperties(request);
     if (propertiesBean_ == null) {
         return;
     }
@@ -70,9 +76,12 @@
        return;
    }
 </script>--%>
+
+
 <fmt:bundle
 	basename="org.wso2.carbon.mediation.security.vault.ui.i18n.Resources">
-
+<div id="middle">
+<div id="workArea" style="background-color:#F4F4F4;">
 
 	<div id="propertiesSum" class="summeryStyle">
 		<%
@@ -92,6 +101,7 @@
 		<%
             }
         %>
+
 	</div>
 
 	<div id="propertiesList">
@@ -104,12 +114,12 @@
                     properties.put(aPropArray.getKey(), aPropArray.getValue());
                 }
         %>
-		<table cellpadding="0" cellspacing="0" border="0" class="styledLeft">
+		<table cellpadding="0" cellspacing="0" border="0" class="styledLeft" style="width:800px">
 			<thead>
 				<tr>
-					<th style="width: 40%" align="left"><fmt:message key="name" />
+					<th style="width: 20%;border-right:none !important" align="left"><fmt:message key="name" />
 					</th>
-					<th align="left"><fmt:message key="value" /></th>
+					<th align="left" style="border-left:none !important"></th>
 					<th align="left"><fmt:message key="action" /></th>
 				</tr>
 			</thead>
@@ -142,12 +152,12 @@
             %>
 
 			<tr id="propEditPanel_<%=i%>" style="display: none;">
-				<td><input id="propRPath_<%=i%>" type="hidden"
+				<td style="border-right:none !important"><input id="propRPath_<%=i%>" type="hidden"
 					value="<%=propertiesBean_.getPathWithVersion()%>" /><input
 					id="oldPropName_<%=i%>" type="hidden" value="<%=name%>" /><input
 					value="<%=name%>" type="text" id="propName_<%=i%>"
 					class="propEditNameSelector" /></td>
-				<td><input value="<%=value%>" id="propValue_<%=i%>" type="text" />
+				<td style="border-left:none !important">Enter New Password:<input value="<%=value%>" id="propValue_<%=i%>" type="text" />
 				</td>
 				<td><a class="icon-link"
 					style="background-image: url(../properties/images/save-button.gif);"
@@ -169,11 +179,10 @@
             	String tmpValue = value.replaceAll("<","&lt;");
             	tmpValue = tmpValue.replaceAll(">","&gt;");
             	%>
-				<td><span class="__propName"><%=tmpName%></span><span
+				<td style="border-right:none !important"><span class="__propName"><%=tmpName%></span><span
 					class="__propNameRef propViewNameSelector" style="display: none;"><%=name%></span>
 				</td>
-				<td><span class="__propValue"><%=tmpValue%></span><span
-					class="__propValueRef" style="display: none;"><%=value%></span>
+				<td style="border-left:none !important">
 				</td>
 
 
@@ -207,14 +216,19 @@
 
 			<%}%>
 			</table>
-     			<carbon:resourcePaginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
-                                      resourceBundle="org.wso2.carbon.registry.properties.ui.i18n.Resources"
-                                      nextKey="next" prevKey="prev"
-                                      paginationFunction="" />
+     			
+                      <carbon:paginator pageNumber="<%=pageNumber%>"
+                      		     numberOfPages="<%=numberOfPages%>"
+                                     page="manageSecureVault.jsp"
+                                     pageNumberParameterName="dynamicPageNumber"
+                                     resourceBundle="org.wso2.carbon.registry.properties.ui.i18n.Resources"
+                                     prevKey="prev" nextKey="next"
+                                     parameters="<%=""%>"/>
 
 			<%}%>
 		
 
 	</div>
-
+  </div>
+</div>
 </fmt:bundle>

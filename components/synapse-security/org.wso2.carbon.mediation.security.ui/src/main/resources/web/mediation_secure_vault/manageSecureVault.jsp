@@ -63,16 +63,18 @@
 
 <fmt:bundle
 	basename="org.wso2.carbon.mediation.security.vault.ui.i18n.Resources">
+<div id="middle">
+        <h2>
+		<fmt:message key="properties" />
+	</h2>
+        <div id="workArea">
+	
 
-	<div style="height: auto; margin-top: 10px;">
+		
 
-		<h2 class="sub-headding-prop">
-			<fmt:message key="properties" />
-		</h2>
 
-	</div>
-	<div class="box1-mid-fill" id="propertiesMinimized"></div>
-	<div class="box1-mid" id="propertiesExpanded" style="display: ">
+	
+	<div id="propertiesExpanded" style="display: ">
 		<%
 			if (propertiesBean.getLoggedIn() && propertiesBean.getPutAllowed()
 						&& !propertiesBean.getVersionView()) {
@@ -147,6 +149,7 @@
 		</div>
 
 	</div>
-
+</div>
+</div>	
 
 </fmt:bundle>
