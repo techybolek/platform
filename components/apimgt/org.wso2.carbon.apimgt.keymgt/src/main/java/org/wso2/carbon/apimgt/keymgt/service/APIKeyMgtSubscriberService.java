@@ -208,8 +208,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
 		}
 		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-		return apiMgtDAO.updateRefreshedApplicationAccessToken(tokenType, oldAccessToken, allowedDomains, newAccessToken,
-		                                    validityPeriod);
+		apiMgtDAO.updateRefreshedApplicationAccessToken(oldAccessToken,tokenType, newAccessToken,
+		    		                                    validityPeriod);
+		return newAccessToken;
 
 	}
 
