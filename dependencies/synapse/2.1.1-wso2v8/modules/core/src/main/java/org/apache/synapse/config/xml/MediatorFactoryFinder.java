@@ -327,6 +327,7 @@ public class MediatorFactoryFinder implements XMLToObjectMapper {
 
         buildParamteres(connectorElem, invokeMediator);
 
+        invokeMediator.setPackageName(libraryName);
         invokeMediator.setDynamicMediator(true);
         return invokeMediator;
 

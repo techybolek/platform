@@ -40,7 +40,7 @@ import javax.xml.namespace.QName;
  */
 public class InvokeMediatorSerializer extends AbstractMediatorSerializer{
     public static final String INVOKE_N = "call-template";
-    public static final String DYNAMIC_CONNECTOR_PREFIX="org.wso2.carbon.connectors";
+
 
     @Override
     protected OMElement serializeSpecificMediator(Mediator m) {
@@ -50,7 +50,8 @@ public class InvokeMediatorSerializer extends AbstractMediatorSerializer{
         InvokeMediator mediator = (InvokeMediator) m;
         OMElement invokeElem = null;
         if(mediator.isDynamicMediator()){
-        	invokeElem=fac.createOMElement(mediator.getTargetTemplate().substring(DYNAMIC_CONNECTOR_PREFIX.length()+1,mediator.getTargetTemplate().length()), synNS);
+        	String packageName = (mediator.getPackageName() != null && !mediator.getPackageName().isEmpty())?mediator.getPackageName():"";
+        	invokeElem=fac.createOMElement(mediator.getTargetTemplate().substring(packageName.length()+1,mediator.getTargetTemplate().length()), synNS);
         	 if (mediator.getKey() != null) {
                  // Serialize Value using ValueSerializer
                  ValueSerializer keySerializer = new ValueSerializer();

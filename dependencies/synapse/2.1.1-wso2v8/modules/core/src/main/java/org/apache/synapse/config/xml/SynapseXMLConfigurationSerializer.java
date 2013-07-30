@@ -85,6 +85,8 @@ public class SynapseXMLConfigurationSerializer implements ConfigurationSerialize
             RegistrySerializer.serializeRegistry(definitions, synCfg
                     .getRegistry());
         }
+        
+        serializeImports(definitions, synCfg.getSynapseImports().values());
 
         // add proxy services
         Iterator itr = synCfg.getProxyServices().iterator();
@@ -154,7 +156,7 @@ public class SynapseXMLConfigurationSerializer implements ConfigurationSerialize
         serializeMessageProcessors(definitions,synCfg.getMessageProcessors());
 
         serializeAPIs(definitions, synCfg.getAPIs());
-        serializeImports(definitions, synCfg.getSynapseImports().values());
+     
 
         return definitions;
     }

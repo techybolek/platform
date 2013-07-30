@@ -43,6 +43,12 @@ public class InvokeMediator extends AbstractMediator {
      * this is a read only attribute of the mediator
      */
     private String targetTemplate;
+    
+    /**
+     * Refers to the parent package qualified reference
+     * 
+     */
+    private String packageName;
 
     /**
      * maps each parameter name to a Expression/Value
@@ -151,7 +157,15 @@ public class InvokeMediator extends AbstractMediator {
 	public void setKey(Value key) {
 		this.key = key;
 	}
-    
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+  
 	
     
 }
