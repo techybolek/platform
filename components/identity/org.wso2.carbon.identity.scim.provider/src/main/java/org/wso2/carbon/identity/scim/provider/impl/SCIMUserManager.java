@@ -157,6 +157,9 @@ public class SCIMUserManager implements UserManager {
             String[] userNames = carbonUM.listUsers("*", -1);
             if (userNames != null && userNames.length != 0) {
                 for (String userName : userNames) {
+                	if(userName.contains(UserCoreConstants.NAME_COMBINER)) {
+                		userName = userName.split("\\"+ UserCoreConstants.NAME_COMBINER)[0];
+                	}
                     if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equals(userName)) {
                         continue;
                     }
