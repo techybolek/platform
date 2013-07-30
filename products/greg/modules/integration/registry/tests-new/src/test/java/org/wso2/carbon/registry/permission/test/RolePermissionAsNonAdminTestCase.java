@@ -116,6 +116,7 @@ public class RolePermissionAsNonAdminTestCase {
         adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH, PermissionTestConstants.NON_ADMIN_ROLE_2,
                                                        PermissionTestConstants.READ_ACTION, PermissionTestConstants.PERMISSION_DISABLED);
         assertNull(nonAdminResourceAdminClient2.getResource(NEW_RESOURCE_PATH));
+
         nonAdminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH, PermissionTestConstants.NON_ADMIN_ROLE_2,
                                                           PermissionTestConstants.READ_ACTION, PermissionTestConstants.PERMISSION_ENABLED);
         assertNotNull(nonAdminResourceAdminClient2.getResource(NEW_RESOURCE_PATH));

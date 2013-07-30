@@ -150,7 +150,7 @@ public class RolePermissionAsAdminTestCase {
     }
 
     @Test(groups = "wso2.greg", expectedExceptions = IOException.class,
-          description = "Test anonymous deny access to resources when everyone is allowed for resources")
+          description = "Test anonymous deny access to resources when internal/everyone is allowed for resources")
     public void testDenyAccessToAnonymousWhenEveryoneAllowed()
             throws ResourceAdminServiceResourceServiceExceptionException, IOException {
         adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH, PermissionTestConstants.EVERYONE_ROLE,
@@ -163,7 +163,7 @@ public class RolePermissionAsAdminTestCase {
     }
 
     @Test(groups = "wso2.greg", expectedExceptions = IOException.class,
-          description = "Test anonymous deny access to resources when everyone is denied for resources")
+          description = "Test anonymous deny access to resources when internal/everyone is denied for resources")
     public void testDenyAccessToAnonymousWhenEveryoneDenied()
             throws ResourceAdminServiceResourceServiceExceptionException, IOException {
         adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH, PermissionTestConstants.EVERYONE_ROLE,

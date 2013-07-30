@@ -28,6 +28,7 @@ import org.wso2.carbon.automation.core.utils.UserInfo;
 import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
+import org.wso2.carbon.registry.permission.test.utils.PermissionTestConstants;
 
 public class Carbon8980 {
     private static final String[] SECURITY_PERMISSION_LIST = {
@@ -71,8 +72,8 @@ public class Carbon8980 {
 
     @Test
     public void testCreateUser() throws Exception {
-        user1UserManagementClient.addUser(NEW_USER, NEW_USER_PW, new String[]{"everyone"}, "testUserAProfile");
-        Assert.assertTrue(adminUserManagementClient.userNameExists("everyone", NEW_USER));
+        user1UserManagementClient.addUser(NEW_USER, NEW_USER_PW, new String[]{PermissionTestConstants.EVERYONE_ROLE}, "testUserAProfile");
+        Assert.assertTrue(adminUserManagementClient.userNameExists(PermissionTestConstants.EVERYONE_ROLE, NEW_USER));
     }
 
     @Test(dependsOnMethods = "testCreateUser")
@@ -94,7 +95,7 @@ public class Carbon8980 {
         if (adminUserManagementClient.roleNameExists(NEW_ROLE)) {
             adminUserManagementClient.deleteRole(NEW_ROLE);
         }
-        if (adminUserManagementClient.userNameExists("everyone", NEW_USER)) {
+        if (adminUserManagementClient.userNameExists(PermissionTestConstants.EVERYONE_ROLE, NEW_USER)) {
             adminUserManagementClient.deleteUser(NEW_USER);
         }
         adminUserManagementClient = null;

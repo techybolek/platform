@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.authenticator.stub.LogoutAuthenticationExceptionException;
 import org.wso2.carbon.automation.api.clients.registry.ResourceAdminServiceClient;
+import org.wso2.carbon.automation.api.clients.user.mgt.UserManagementClient;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
@@ -53,6 +54,7 @@ public class PermissionInheritanceTestCase {
     private static final String TEST_RESOURCE_MEDIA_TYPE = "text/plain";
 
     private DataHandler dataHandler;
+    private UserManagementClient userManagementClient;
 
     @BeforeClass(alwaysRun = true)
     public void initialize() throws LoginAuthenticationExceptionException, RemoteException,
@@ -241,11 +243,14 @@ public class PermissionInheritanceTestCase {
 
     @Test(groups = "wso2.greg", description = "Test authorization access inheritance")
     public void testAllowAuthPermission() throws Exception {
-
+        //Add  testuser2 to testRole.
+        userManagementClient.updateUserListOfRole(PermissionTestConstants.NON_ADMIN_ROLE, new String[]{"testuser2"},new String[]{});
         //Allow denied permission
         adminResourceAdminClient.addResourcePermission(TEST_DIR_PATH + ALLOWED_DIR,
                                                        PermissionTestConstants.NON_ADMIN_ROLE, PermissionTestConstants.AUTHORIZE_ACTION,
                                                        PermissionTestConstants.PERMISSION_ENABLED);
+        adminResourceAdminClient.addResource(TEST_DIR_PATH + ALLOWED_DIR + "/allowAuth.txt",
+                TEST_RESOURCE_MEDIA_TYPE, "", dataHandler);
 
         PermissionBean permissionBean = nonAdminResourceAdminClient.getPermission(TEST_DIR_PATH + ALLOWED_DIR +
                                                                                   "/allowAuth.txt");

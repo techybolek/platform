@@ -21,7 +21,7 @@ package org.wso2.carbon.registry.permission.test.utils;
 public class PermissionTestConstants {
     public static final String NON_ADMIN_ROLE = "testRole";
     public static final String NON_ADMIN_ROLE_2 = "testRole2";
-    public static final String EVERYONE_ROLE = "everyone";
+    public static final String EVERYONE_ROLE = "internal/everyone";
 
     public static final String READ_ACTION = "2";
     public static final String WRITE_ACTION = "3";
