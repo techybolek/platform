@@ -299,7 +299,13 @@
                         </goals>
                         <configuration>
                             <id>org.jaggeryjs.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+		 	    <adviceFile>
+                                <properties>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
+                                </properties>
+                            </adviceFile>
                             <bundles>
                                 <bundleDef>org.jaggeryjs:org.jaggeryjs.jaggery.deployer</bundleDef>
                                 <bundleDef>org.jaggeryjs:org.jaggeryjs.jaggery.core</bundleDef>
