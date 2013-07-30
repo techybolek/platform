@@ -103,10 +103,28 @@
 
 
     function submitTextContent(value) {
+    	if(validateSubmit()){
+    		return true;
+    	}
         addServiceParams();
+        document.Submit.submit();
         return true;
     }
 
+    function validateSubmit(){
+    	try{
+	    	var iInterval = parseInt(document.getElementById('retry_interval').value);
+	    	if(iInterval <= 0){
+	    		CARBON.showErrorDialog('Invalid ' + '<fmt:message key="interval"/>');
+	    		return true;
+	    	}
+    	}catch(e){
+    		CARBON.showErrorDialog('Invalid ' + '<fmt:message key="interval"/>');
+    		return true;    		
+    	}
+    	return false;
+    }
+    
     function addServiceParams() {
         addServiceParameter("interval", document.getElementById('retry_interval').value);
         addServiceParameter("sequence", document.getElementById('Sequence').value);
@@ -389,7 +407,7 @@
     <tbody>
     <tr>
         <td colspan="2" class="buttonRow">
-            <input type="submit" value="<fmt:message key="save"/>" class="button"
+            <input type="button" value="<fmt:message key="save"/>" class="button"
                    onclick="submitTextContent(document.Submit);"/>
             <input type="button" value="<fmt:message key="cancel"/>"
                    onclick="javascript:document.location.href='../message_processor/index.jsp?region=region1&item=messageProcessor_menu&ordinal=0'"
