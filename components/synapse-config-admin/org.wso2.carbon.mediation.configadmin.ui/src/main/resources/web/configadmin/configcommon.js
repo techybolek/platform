@@ -32,7 +32,7 @@ function submitconform(action, form) {
             if (status != "success") {
                 CARBON.showWarningDialog(configjsi18n['error.occurred']);
             } else {
-                if(data.trim()=="valid"){
+                if(trim(data)=="valid"){
                     form.submit();
                     return true;
                 }  else{
