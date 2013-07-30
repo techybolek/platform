@@ -1,20 +1,37 @@
+/*
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.core.retrieve;
 
 
-import org.wso2.carbon.appfactory.common.AppFactoryException;
-import org.wso2.carbon.appfactory.core.ArtifactStorage;
-import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import java.io.*;
-import java.lang.System;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.commons.io.FilenameUtils;
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.appfactory.common.AppFactoryException;
+import org.wso2.carbon.appfactory.core.ArtifactStorage;
+import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 
 public class RetrieveArtifactService {
     private static final Log log = LogFactory.getLog(RetrieveArtifactService.class);
@@ -50,7 +67,6 @@ public class RetrieveArtifactService {
               if (file == null) {
                 return "Not Found";
             } else if ((file.getName()).endsWith(".war")) {
-                String fileName1 = FilenameUtils.removeExtension(file.getName());
                 String artifactVersion = (file.getName()).substring(file.getName().indexOf('-') + 1, file.getName().indexOf(".war"));
                 String artifactName = file.getName().substring(0, (file.getName().indexOf('-')));
                 artifactDetails = artifactName + '-' + artifactVersion;

@@ -1,17 +1,17 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.git.repository.provider;
@@ -25,10 +25,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.repository.mgt.RepositoryMgtException;
-import org.wso2.carbon.appfactory.repository.mgt.client.AppfactoryRepositoryClient;
-import org.wso2.carbon.appfactory.repository.mgt.internal.Util;
 import org.wso2.carbon.appfactory.repository.provider.common.AbstractRepositoryProvider;
 import org.wso2.carbon.appfactory.repository.provider.common.bean.Permission;
 import org.wso2.carbon.appfactory.repository.provider.common.bean.PermissionType;
@@ -44,7 +41,6 @@ public class SCMManagerBasedGITRepositoryProvider extends AbstractRepositoryProv
     private static final Log log = LogFactory.getLog(SCMManagerBasedGITRepositoryProvider.class);
 
     public static final String REST_GET_REPOSITORY_URI = "/repositories/git/";
-
     public static final String TYPE = "git";
 
     /**
@@ -162,5 +158,11 @@ public class SCMManagerBasedGITRepositoryProvider extends AbstractRepositoryProv
     @Override
     protected String getType() {
         return TYPE;
+    }
+
+    @Override
+    public boolean createTenantRepo(String tenantId) throws RepositoryMgtException {
+        // TODO Implement repo creation for tenant here
+        return false;
     }
 }

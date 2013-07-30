@@ -1,17 +1,17 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.jenkins.build;
@@ -114,6 +114,7 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
         parameters.put(JenkinsCIConstants.MAVEN3_CONFIG_NAME,
                 ServiceContainer.getAppFactoryConfiguration()
                         .getFirstProperty(JenkinsCIConstants.MAVEN3_CONFIG_NAME_CONFIG_SELECTOR));
+       
 
         parameters.put(JenkinsCIConstants.REPOSITORY_ACCESS_CREDENTIALS_USERNAME,
                 ServiceContainer.getAppFactoryConfiguration()
@@ -220,12 +221,19 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
      * @param pollingPeriod AD pollingPeriod
      * @throws AppFactoryException if a error occurs
      */
-
+    @Deprecated
     public void editADJobConfiguration(String applicationId, String version,  String updateState,
                                   int pollingPeriod) throws AppFactoryException {
         connector.editJob(getJobName(applicationId, version, ""), updateState, pollingPeriod);
 
     }
+    
+    public void setJobAutoBuildable(String applicationId, String version,  boolean isAutoBuild,
+                                       int pollingPeriod) throws AppFactoryException {
+        String repositoryType=ProjectUtils.getRepositoryType(applicationId);
+             connector.setJobAutoBuildable(getJobName(applicationId, version, ""),repositoryType, isAutoBuild, pollingPeriod);
+
+         }
 
     /**
      * {@inheritDoc}. returns global build statistics and load information.
@@ -251,8 +259,8 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
         return getBuildStatistics(jobsNames);
     }
     
-    public String getValuesForJobAsJsonTree(String jobName,String treeStructure)throws AppFactoryException{
-        return connector.getValuesForJobAsJsonTree(jobName,treeStructure);
+    public String getJsonTree(String jobName,String treeStructure)throws AppFactoryException{
+        return connector.getJsonTree(jobName, treeStructure);
     }
 
     /**
@@ -296,6 +304,21 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
 
         return stats;
 
+    }
+
+	public void setJobAutoDeployable(String applicationId, String version, boolean isAutoDeployable) throws AppFactoryException {
+		connector.setJobAutoDeployable(getJobName(applicationId, version, ""), isAutoDeployable);
+    }
+
+	/**
+	 * Removes permission to access given application for given set of users in jenkins build system.
+	 * @param applicationKey - key of the application.
+	 * @param users - users to be removed from application access.
+	 * @throws AppFactoryException 
+	 */
+	public void removeUsersFromApplication(String applicationKey, String[] users) throws AppFactoryException {
+	    connector.unAssignUsers(applicationKey, users);
+	    
     }
 
 }

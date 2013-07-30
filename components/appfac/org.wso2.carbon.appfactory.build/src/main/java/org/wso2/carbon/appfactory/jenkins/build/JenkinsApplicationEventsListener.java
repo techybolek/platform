@@ -1,14 +1,33 @@
+/*
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.jenkins.build;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
+import org.wso2.carbon.appfactory.common.AppFactoryConstants;
+import org.wso2.carbon.appfactory.common.AppFactoryConstants.ApplicationStage;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.ApplicationEventsListener;
 import org.wso2.carbon.appfactory.core.dto.Application;
 import org.wso2.carbon.appfactory.core.dto.UserInfo;
 import org.wso2.carbon.appfactory.core.dto.Version;
+import org.wso2.carbon.appfactory.core.governance.RxtManager;
 import org.wso2.carbon.appfactory.jenkins.build.internal.ServiceContainer;
 import org.wso2.carbon.appfactory.utilities.project.ProjectUtils;
 
@@ -19,7 +38,7 @@ import org.wso2.carbon.appfactory.utilities.project.ProjectUtils;
 public class JenkinsApplicationEventsListener extends ApplicationEventsListener {
 
     private static Log log = LogFactory.getLog(JenkinsApplicationEventsListener.class);
-
+    private RxtManager rxtManager;
     private int priority;
 
     /**
@@ -34,7 +53,9 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
      */
     public JenkinsApplicationEventsListener(int priority) {
 
+    	this.identifier = AppFactoryConstants.JENKINS;
         this.priority = priority;
+        this.rxtManager=new RxtManager();
     }
 
     /**
@@ -45,13 +66,16 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
 
         log.info("Application Creation event recieved for : " + application.getId() + " " +
                 application.getName());
-        ServiceContainer.getJenkinsCISystemDriver().setupApplicationAccount(application.getId());
-
+        JenkinsCISystemDriver jenkinsCISystemDriver=ServiceContainer.getJenkinsCISystemDriver();
+        jenkinsCISystemDriver.setupApplicationAccount(application.getId());
         Version[] versions = ProjectUtils.getVersions(application.getId());
-
+        String tagName = "tag"+(Math.random()*100);
+        String stage=rxtManager.getStage(application.getId(),versions[0].getId());
         if (ArrayUtils.isNotEmpty(versions)) {
-            ServiceContainer.getJenkinsCISystemDriver().createJob(application.getId(),
+            jenkinsCISystemDriver.createJob(application.getId(),
                     versions[0].getId(), "");
+            jenkinsCISystemDriver.startBuild(jenkinsCISystemDriver.getJobName(application.getId(),
+                   versions[0].getId(),""),true,stage,"");
         }
 
     }
@@ -92,6 +116,10 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
 
         ServiceContainer.getJenkinsCISystemDriver().createJob(application.getId(), target.getId(),
                 "");
+        String jobName = ServiceContainer.getJenkinsCISystemDriver().getJobName(application.getId(), target.getId(), "");
+        log.info("Job created successfully in jenkins. Job name - " + jobName);
+        ServiceContainer.getJenkinsCISystemDriver().startBuild(jobName, true, rxtManager.getStage(application.getId(),target.getId()), "");
+        log.info("Started the build for the newly created version. jobname - " + jobName);
 
     }
 
@@ -165,14 +193,15 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onUserDeletion(Application application, UserInfo user) throws AppFactoryException {
-        // Improvement : remove the user from project role created for
-        // application and the global roles assigned to him.
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void onUserDeletion(Application application, UserInfo user) throws AppFactoryException {
+		ServiceContainer.getJenkinsCISystemDriver()
+		                .removeUsersFromApplication(application.getId(),
+		                                            new String[] { user.getUserName() });
+	}
 
     /**
      * {@inheritDoc}.
@@ -180,4 +209,9 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
     public int getPriority() {
         return priority;
     }
+	@Override
+	public void onUserUpdate(Application application, UserInfo user) throws AppFactoryException {
+		// TODO update user roles in jenkins
+
+	}
 }

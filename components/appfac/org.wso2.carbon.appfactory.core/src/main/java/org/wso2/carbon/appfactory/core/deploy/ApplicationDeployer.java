@@ -1,38 +1,49 @@
 /*
- * Copyright (c) 2012, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.core.deploy;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.ServiceClient;
-//import org.apache.commons.io.FilenameUtils;
+import static org.wso2.carbon.appfactory.core.util.CommonUtil.getAdminUsername;
+import static org.wso2.carbon.appfactory.core.util.CommonUtil.getServerAdminPassword;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
-//import org.wso2.carbon.appfactory.core.ArtifactStorage;
 import org.wso2.carbon.appfactory.core.Storage;
+import org.wso2.carbon.appfactory.core.cache.AppVersionCache;
 import org.wso2.carbon.appfactory.core.governance.RxtManager;
 import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 import org.wso2.carbon.appfactory.core.util.AppFactoryCoreUtil;
-import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -41,20 +52,8 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappUploadData;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.xml.stream.XMLStreamException;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import static org.wso2.carbon.appfactory.core.util.CommonUtil.getAdminUsername;
-import static org.wso2.carbon.appfactory.core.util.CommonUtil.getServerAdminPassword;
+import com.google.common.io.Files;
 
 /**
  * This service will deploy an artifact (specified as a combination of
@@ -64,31 +63,64 @@ import static org.wso2.carbon.appfactory.core.util.CommonUtil.getServerAdminPass
 public class ApplicationDeployer {
 
     private static final Log log = LogFactory.getLog(ApplicationDeployer.class);
-    private static final String EVENT = "deployment";
-
-    public ArtifactDeploymentStatusBean[] deployArtifactByArtifactId(String applicationId, String autoTriggered,
-                                                                     String version, String artifactId)
-            throws Exception {
-
-        File file = null;
-        if (ServiceHolder.getContinuousIntegrationSystemDriver() == null) {
-            //TODO
-        } else {
-            file = ServiceHolder.getContinuousIntegrationSystemDriver().getArtifact(applicationId, version, artifactId);
+    
+    /**
+	 * Service method to get the latest deployed build information.
+	 * 
+	 * 
+	 * @throws AppFactoryException
+	 */
+    public String getDeployedArtifactInformation(String applicationId, String version, String stage) throws AppFactoryException{
+		String buildNumber = "-1" ;
+		
+		RxtManager rxtManager  = new RxtManager();
+		try {
+			buildNumber = rxtManager.getAppVersionRxtValue(applicationId, version,"appversion_lastdeployedid");
+		} catch (AppFactoryException e) {
+			throw new AppFactoryException(e.getMessage());
+		}
+		
+		return buildNumber ;
+	}
+    
+    
+    
+    /**
+	 * Service method to get the artifact information for the given applicationId.
+	 * 
+	 * 
+	 * @param applicationId
+	 * @throws AppFactoryException
+	 */
+    public List<Artifact> getArtifactInformation(String applicationId) throws AppFactoryException{
+		RxtManager rxtManager  = new RxtManager();
+		try {
+			List<Artifact> artifacts = rxtManager.getAppVersionRxtForApplication(applicationId);			
+			return artifacts;
+			
+		} catch (AppFactoryException e) {
+			log.error("Error while retrieving artifat information from rxt");
+			throw new AppFactoryException(e.getMessage());
+		} catch (RegistryException e) {
+			log.error("Error while retrieving artifat information from rxt");
+			throw new AppFactoryException(e.getMessage());
         }
+	}
+    
+    /**
+	 * Service method to update the latest deployed build information.
+	 * This service will be called from Jenkins when the deployment is done.
+	 * 
+	 * @throws AppFactoryException
+	 */
+	public void updateDeploymentInformation(String applicationId,String stage ,String version,String buildId) throws AppFactoryException {
 
-        String stage = AppFactoryCoreUtil.getStage(applicationId, version);
-        String revision = "";
-        String key = AppFactoryConstants.DEPLOYMENT_STAGES + "." + stage + "." + AppFactoryConstants.DEPLOYMENT_URL;
-        String[] deploymentServerUrls = ServiceHolder
-                .getAppFactoryConfiguration().getProperties(key);
-
-        if (deploymentServerUrls.length == 0) {
-            handleException("No deployment paths are configured for stage:" + stage);
-        }
-        return deployToServers(deploymentServerUrls, applicationId, file, stage, version, revision);
-
-    }
+		log.info("Deployment information updation service called.");
+		RxtManager rxtManager = new RxtManager();
+		rxtManager.updateAppVersionRxt(applicationId, version, "appversion_lastdeployedid", buildId);
+		AppVersionCache.getAppVersionCache().clearCacheForAppId(applicationId);
+		log.info("Deployment information successfuly updated ");
+	}
 
     /**
      * Deploys the Artifact to specified stage.
@@ -102,22 +134,16 @@ public class ApplicationDeployer {
      */
     public ArtifactDeploymentStatusBean[] deployArtifact(String applicationId,
                                                          String stage, String version,
-                                                         String tagName)
+                                                         String tagName, String deployAction)
             throws AppFactoryException {
-
-//        ArtifactStorage storage = ServiceHolder.getArtifactStorage();
-        //     File file = storage.retrieveArtifact(applicationId, version, revision, buildId);
-
-
+    	log.info("Deploy artifacti is called...." + applicationId + " ," + stage + " version " + version + " tagname " + tagName + " deployArtifac " + deployAction);
         String key = AppFactoryConstants.DEPLOYMENT_STAGES + "." + stage + "." + AppFactoryConstants.DEPLOYMENT_URL;
         String[] deploymentServerUrls = ServiceHolder.getAppFactoryConfiguration().getProperties(key);
 
         if (deploymentServerUrls.length == 0) {
             handleException("No deployment paths are configured for stage:" + stage);
         }
-
-        //return deployToServers(deploymentServerUrls, applicationId, file, stage, version, revision);
-        Storage jenkinsStorage = ServiceHolder.getStorage();
+        Storage storage = ServiceHolder.getStorage();
 
         // job name : <applicationId>-<version>-default
         String jobName = applicationId + '-' + version + '-' + "default";
@@ -129,51 +155,23 @@ public class ApplicationDeployer {
             handleException(errorMsg,e);
         }
 
-        // todo when we add the latest success under tags, can differentiate by tagName != LATEST_SUCCESS
-        if (tagName == null || tagName.equals("")) {
-            jenkinsStorage.deployLatestSuccessArtifact(jobName, applicationType, stage);
-        } else {
-            jenkinsStorage.deployTaggedArtifact(jobName, applicationType, tagName, stage);
+        log.info("Trying to deploy artifact with job name " + jobName);
+        if("deploy".equals(deployAction)) {
+            if (tagName == null || tagName.trim().isEmpty()) {
+            	log.info("Calling deployLatestSuccessArtifact with jobName -" + jobName + " applicationType -" + applicationType + " stage" + stage);
+                storage.deployLatestSuccessArtifact(jobName, applicationType, stage);
+            } else {
+            	log.info("Calling deployTaggedArtifact with jobName -" + jobName + " applicationType -" + applicationType + " stage" + stage + " tagname-" + tagName + " deplyAction -" + deployAction );
+                storage.deployTaggedArtifact(jobName, applicationType, tagName, stage, deployAction);
+            }
+        } else if ("promote".equals(deployAction)) {
+        	log.info("Calling deployTaggedArtifact with PROMOTE jobName -" + jobName + " applicationType -" + applicationType + " stage" + stage + " tagname-" + tagName + " deplyAction -" + deployAction );
+            storage.deployTaggedArtifact(jobName, applicationType, tagName, stage, deployAction);
+        } else if("rePromote".equals(deployAction)) {
+            ServiceHolder.getStorage().deployPromotedArtifact(jobName, applicationType, stage);
         }
         return null;
     }
-    
-    /**
-     * Service method to tag latest successful build as given {@code newTagName} of given {@code applicationId}.  
-     * @param applicationKey The key of the application to be tagged
-     * @param stage The stage of the tag to be created.
-     * @param version  Version of the application
-     * @param newTagName The name that the last success build to be tagged.
-     * @throws AppFactoryException
-     */
-	public ArtifactDeploymentStatusBean createNewTagByLastSuccessBuild(String applicationId, String stage,
-	                                              String version, String newTagName) throws AppFactoryException {
-		
-		log.debug("Service invoked : createNewTagByLastSuccessBuild with applicationKey - " + applicationId + " version -" + version + " newTagName" + newTagName);
-		
-		String key = new StringBuilder(AppFactoryConstants.DEPLOYMENT_STAGES).append(".")
-                        .append(stage)
-                        .append(".")
-                        .append(AppFactoryConstants.DEPLOYMENT_URL)
-                        .toString();
-		
-        Storage jenkinsStorage = ServiceHolder.getStorage();
-        String jobName = new StringBuilder(applicationId).append('-').append(version).append('-').append("default").toString();
-        
-        String applicationType = "";
-		try {
-			applicationType = getApplicationType(applicationId);
-		} catch (RegistryException e) {
-			String errorMsg = "Unable to find the application type for applicaiton id : " + applicationId;
-			log.error(errorMsg, e);
-			throw new AppFactoryException(errorMsg, e);
-		}
-        
-		jenkinsStorage.createNewTagByLastSuccessBuild(jobName, applicationType, newTagName, version,stage);
-		
-		return new ArtifactDeploymentStatusBean(applicationId, stage, version, null, null, true, null);
-
-	}
 
     public String getArtifactDetails(File file) throws AppFactoryException{
         String artifactDetails = null;
@@ -236,112 +234,6 @@ public class ApplicationDeployer {
         return new RxtManager().getStage(applicationId, version);
     }
 
-    private ArtifactDeploymentStatusBean[] deployToServers(
-            String[] deploymentServerUrls, String applicationId, File file, String stage, String version,
-            String revision) throws AppFactoryException {
-        String artifactDetailsKey = "artifactDetails";
-        String details = getArtifactDetails(file);
-//        String[] artifactDetails = {details};
-
-        RxtManager rxtManager = new RxtManager();
-        rxtManager.updateAppVersionRxt(applicationId, stage, version, "appversion_" + artifactDetailsKey, details);
-
-        DataHandler dataHandler = new DataHandler(new FileDataSource(file));
-        ArtifactDeploymentStatusBean[] artifactDeploymentStatuses =
-                new ArtifactDeploymentStatusBean[deploymentServerUrls.length];
-
-        String applicationType;
-
-        String event = "deployment of " + applicationId + " version " + version + " to " + stage;
-
-        // todo resolve cyclic dependency to utilities and use it
-        try {
-            applicationType = getApplicationType(applicationId);
-        } catch (RegistryException e) {
-            String errorMsg = String.format("Unable to find the application type for application id: %s",
-                    applicationId);
-            log.error(errorMsg, e);
-            AppFactoryCoreUtil.sendEventNotification(applicationId, event, "failed");
-            throw new AppFactoryException(errorMsg, e);
-        }
-
-        int noOfFailedDeployment = 0;
-
-        for (int i = 0; i < deploymentServerUrls.length; i++) {
-
-            try {
-                String deploymentServerIp = getDeploymentHostFromUrl(deploymentServerUrls[i]);
-
-                ArtifactUploadClient artifactUploadClient = new ArtifactUploadClient(
-                        deploymentServerUrls[i]);
-
-                if (AppFactoryConstants.FILE_TYPE_CAR.equals(applicationType)) {
-                    UploadedFileItem uploadedFileItem = new UploadedFileItem();
-                    uploadedFileItem.setDataHandler(dataHandler);
-                    uploadedFileItem.setFileName(file.getName());
-                    uploadedFileItem.setFileType("jar");
-                    UploadedFileItem[] uploadedFileItems = {uploadedFileItem};
-
-                    if (artifactUploadClient.authenticate(
-                            getAdminUsername(applicationId),
-                            getServerAdminPassword(), deploymentServerIp)) {
-
-                        artifactUploadClient.uploadCarbonApp(uploadedFileItems);
-                        log.debug(file.getName() + " is successfully uploaded.");
-                        artifactDeploymentStatuses[i] = new ArtifactDeploymentStatusBean(
-                                applicationId, stage, version, revision,
-                                deploymentServerUrls[i], true, null);
-                    } else {
-                        handleException("Failed to login to " + deploymentServerIp + " to deploy the artifact:" +
-                                file.getName());
-                    }
-
-                } else if (AppFactoryConstants.FILE_TYPE_WAR
-                        .equals(applicationType)) {
-                    WebappUploadData webappUploadData = new WebappUploadData();
-                    webappUploadData.setDataHandler(dataHandler);
-                    webappUploadData.setFileName(file.getName());
-                    WebappUploadData[] webAppUploadDataItems = {webappUploadData};
-                    if (artifactUploadClient.authenticate(
-                            getAdminUsername(applicationId),
-                            getServerAdminPassword(), deploymentServerIp)) {
-
-                        artifactUploadClient
-                                .uploadWebApp(webAppUploadDataItems);
-                        log.debug(file.getName() + " is successfully uploaded.");
-                        artifactDeploymentStatuses[i] = new ArtifactDeploymentStatusBean(
-                                applicationId, stage, version, revision,
-                                deploymentServerUrls[i], true, null);
-                    } else {
-                        handleException("Failed to login to " + deploymentServerIp + " to deploy the artifact:" +
-                                file.getName());
-                    }
-                }
-            } catch (Exception e) {
-                ++noOfFailedDeployment;
-                artifactDeploymentStatuses[i] = new ArtifactDeploymentStatusBean(
-                        applicationId, stage, version, revision,
-                        deploymentServerUrls[i], false, e.getMessage());
-
-                log.error("Failed to upload the artifact:" + file.getName() + " of application:" + applicationId +
-                        " to deployment location:" + deploymentServerUrls[i], e);
-            }
-
-        }
-       /* sendDeploymentNotification(
-                applicationId,
-                String.valueOf(isDeploymentSuccessful(artifactDeploymentStatuses)));*/
-
-        String result = "failed";
-        if (deploymentServerUrls.length > noOfFailedDeployment) {
-            result = "Successfully deployed to " + (deploymentServerUrls.length - noOfFailedDeployment)
-                    + " servers. Deployment for " + noOfFailedDeployment + " servers  failed";
-        }
-        AppFactoryCoreUtil.sendEventNotification(applicationId, event, result);
-
-        return artifactDeploymentStatuses;
-    }
-
     private String getApplicationType(String applicationId) throws RegistryException {
         try {
             String applicationType;
@@ -370,15 +262,6 @@ public class ApplicationDeployer {
         return ServiceHolder.getStorage().getTagNamesOfPersistedArtifacts(jobName);
     }
 
-    private Boolean isDeploymentSuccessful(ArtifactDeploymentStatusBean[] deploymentStatusBeans) {
-        for (ArtifactDeploymentStatusBean deploymentStatus : deploymentStatusBeans) {
-            if (deploymentStatus.isSuccessful()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void handleException(String msg) throws AppFactoryException {
         log.error(msg);
         throw new AppFactoryException(msg);
@@ -402,52 +285,6 @@ public class ApplicationDeployer {
         return hostName;
     }
 
-    private void sendDeploymentNotification(final String applicationId, final String result) {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ignored) {
-                }
-                try {
-                    AppFactoryConfiguration configuration = ServiceHolder.getAppFactoryConfiguration();
-                    final String NOTIFICATION_EPR = configuration.getFirstProperty(
-                            AppFactoryConstants.APPFACTORY_SERVER_URL) + "EventNotificationService";
-
-                    ServiceClient client = new ServiceClient();
-                    client.getOptions().setTo(new EndpointReference(NOTIFICATION_EPR));
-                    CarbonUtils.setBasicAccessSecurityHeaders(getAdminUsername(), getServerAdminPassword(), false,
-                            client);
-
-                    //Make the request and get the response
-                    client.sendRobust(getNotificationPayload(applicationId, EVENT, result));
-                } catch (AxisFault e) {
-                    log.error(e);
-//                    e.printStackTrace();
-                } catch (XMLStreamException e) {
-                    log.error(e);
-                }
-            }
-        }).start();
-    }
-
-    private static OMElement getNotificationPayload(String applicationId, String event,
-                                                    String result)
-            throws XMLStreamException {
-
-        String payload =
-                "<ser:publishEvent xmlns:ser=\"http://service.notification.events.appfactory.carbon.wso2.org\">" +
-                "<ser:event xmlns:ser=\"http://service.notification.events.appfactory.carbon.wso2.org\">" +
-                "<xsd:applicationId xmlns:xsd=\"http://service.notification.events.appfactory.carbon.wso2.org/xsd\">" +
-                        applicationId + "</xsd:applicationId>" +
-                "<xsd:event xmlns:xsd=\"http://service.notification.events.appfactory.carbon.wso2.org/xsd\">" + event +
-                        "</xsd:event>" +
-                "<xsd:result xmlns:xsd=\"http://service.notification.events.appfactory.carbon.wso2.org/xsd\">" +
-                        result + "</xsd:result>" +
-                "</ser:event></ser:publishEvent>";
-        return new StAXOMBuilder(new ByteArrayInputStream(payload.getBytes())).getDocumentElement();
-    }
-
     /**
      * Deleting an application from given environment
      *
@@ -456,20 +293,22 @@ public class ApplicationDeployer {
      * @return boolean
      * @throws AppFactoryException An error
      */
-    public boolean unDeployArtifact(String stage, String applicationId)
+    public boolean unDeployArtifact(String stage, String applicationId, String version)
             throws AppFactoryException {
-
-        log.info("Deleting application " + applicationId + ", from " + stage + " stage");
-        String event = "Deleting application: " + applicationId + ", from: " + stage + " stage";
-
-        String key = AppFactoryConstants.DEPLOYMENT_STAGES + "." + stage + "." + AppFactoryConstants.DEPLOYMENT_URL;
+    
+        String event = "Deleting application " + applicationId + " in version for " + version + ", from " + stage + " stage" ;
+        log.info(event);
+        
+        
+        /*String key = AppFactoryConstants.DEPLOYMENT_STAGES + "." + stage + "." + AppFactoryConstants.DEPLOYMENT_URL;
 
         String[] deploymentServerUrls = ServiceHolder.getAppFactoryConfiguration().getProperties(key);
 
         if (deploymentServerUrls.length == 0) {
             handleException("No deployment paths are configured for stage:" + stage);
         }
-
+        */
+        
         String applicationType;
         try {
             applicationType = getApplicationType(applicationId);
@@ -481,20 +320,269 @@ public class ApplicationDeployer {
             throw new AppFactoryException(errorMsg, e);
         }
 
-
-        if ("war".equals(applicationType)) {
-            // undeploy the webapp(war file)
-            deleteWebApp(applicationId, deploymentServerUrls);
-        } else if ("car".equals(applicationType)) {
+        /*
+        if (AppFactoryConstants.FILE_TYPE_WAR.equals(applicationType)|| AppFactoryConstants.FILE_TYPE_JAXWS.equals(applicationType)|| AppFactoryConstants.FILE_TYPE_JAXRS.equals(applicationType) ) {
+            // undeploy the webapp(war/jaxws/jaxrs file)
+            deleteWebApp(applicationId, deploymentServerUrls,AppFactoryConstants.FILE_TYPE_WAR,version);
+        } else if (AppFactoryConstants.FILE_TYPE_CAR.equals(applicationType)) {
             // un-deploy the cApp (car file)
-            deleteCApp(applicationId, deploymentServerUrls);
-        } else {
+            deleteCApp(applicationId, deploymentServerUrls,version);
+        }else if(AppFactoryConstants.FILE_TYPE_JAGGERY.equals(applicationType)){
+            deleteWebApp(applicationId, deploymentServerUrls,"",version);
+        }else if(AppFactoryConstants.FILE_TYPE_ESB.equals(applicationType)){
+            //deleteWebApp(applicationId, deploymentServerUrls,"");
+        }else if(AppFactoryConstants.FILE_TYPE_DBS.equals(applicationType)){
+        	deleteService(applicationId, deploymentServerUrls,"",version);
+        }else if(AppFactoryConstants.FILE_TYPE_PHP.equals(applicationType)){
+            //deleteWebApp(applicationId, deploymentServerUrls,"");
+        }else if(AppFactoryConstants.FILE_TYPE_BPEL.equals(applicationType)){
+            //deleteWebApp(applicationId, deploymentServerUrls,"");
+        }else {
             handleException("Can not detect application type to delete the application");
         }
-
+        */
+        
+        deleteFromDepSyncGitRepo(applicationId, version, applicationType, stage);
+        
         return true;
     }
 
+    protected String getParameterValue(Map metadata, String key) {
+        if (metadata.get(key) == null) {
+            return null;
+        }
+        if (metadata.get(key) instanceof String[]) {
+            String[] values = (String[]) metadata.get(key);
+            if (values.length > 0) {
+                return values[0];
+            }
+            return null;
+        } else if (metadata.get(key) instanceof String) {
+            return metadata.get(key).toString();
+        }
+
+        return null;
+    }
+
+    protected String[] getParameterValues(Map metadata, String key) {
+        if (metadata.get(key) == null) {
+            return null;
+        }
+        if (metadata.get(key) instanceof String[]) {
+            return (String[]) metadata.get(key);
+        } else if (metadata.get(key) instanceof String) {
+            return new String[]{metadata.get(key).toString()};
+        }
+
+        return null;
+    }
+
+    /**
+     * Generate the repository URL (to commit the application artifact)
+     * @param applicationId application Id
+     * @param applicationType type of the application
+     * @param stage the stage 
+     * @return the repository URL
+     */
+    private String generateRepoUrl(String applicationId, String applicationType, String stage) {
+        String baseUrl = getBaseUrl(applicationType, stage);
+        String template = getUrlPattern(applicationType, stage);
+        String gitRepoUrl = baseUrl + "git/" + template;
+        return gitRepoUrl.replace("{@application_key}", applicationId).replace("{@stage}", stage);
+    }
+
+
+    
+    /**
+     * Reads {@link AppFactoryConfiguration} and returns the repository provider
+     * URL pattern (of the repository).
+     * if a configuration doesn't exists for a particular application type
+     * default value will be returned ( - which is configured using '*' )
+     * 
+     * @param applicationType type of the application.
+     * @param stage the stage/environment
+     * @return the pattern
+     */
+    
+    private String getUrlPattern(String applicationType, String stage) {
+        String template = ServiceHolder.getAppFactoryConfiguration().getFirstProperty("ApplicationDeployment.DeploymentStage."  + 
+                stage + ".Deployer.ApplicationType." + applicationType + "RepositoryProvider.Property.URLPattern");
+        
+        if (StringUtils.isBlank(template)){
+            //default to "*"
+            template = ServiceHolder.getAppFactoryConfiguration().getFirstProperty("ApplicationDeployment.DeploymentStage."  + stage + 
+                    ".Deployer.ApplicationType.*.RepositoryProvider.Property.URLPattern" );
+        }
+        return template;
+    }
+
+
+    
+    /**
+     * Reads {@link AppFactoryConfiguration} and returns the repository provider
+     * URL.
+     * if a configuration doesn't exists for a particular application type
+     * default value will be returned ( - which is configured using '*' )
+     * 
+     * @param applicationType type of the application.
+     * @param stage the stage/environment
+     * @return the URL
+     */
+    private String getBaseUrl(String applicationType, String stage) {
+        String baseUrl =  ServiceHolder.getAppFactoryConfiguration().getFirstProperty("ApplicationDeployment.DeploymentStage."  + 
+                                     stage + ".Deployer.ApplicationType." + applicationType + "RepositoryProvider.Property.BaseURL");
+        if ( StringUtils.isBlank(baseUrl)){
+            //default to "*"
+            baseUrl = ServiceHolder.getAppFactoryConfiguration().getFirstProperty("ApplicationDeployment.DeploymentStage."  + stage + 
+                                                         ".Deployer.ApplicationType.*.RepositoryProvider.Property.BaseURL" );
+        }
+        return baseUrl;
+    }
+    
+    /**
+     * Reads {@link AppFactoryConfiguration} and returns the repository provider
+     * user name.
+     * if a configuration doesn't exists for a particular application type
+     * default value will be returned ( - which is configured using '*' )
+     * 
+     * @param applicationType type of the application.
+     * @param stage the stage/environment
+     * @return the user name
+     */
+    private String getRepositoryProviderAdminUser(String applicationType, String stage){
+        
+        
+        String adminUser =  ServiceHolder.getAppFactoryConfiguration().getFirstProperty("ApplicationDeployment.DeploymentStage."  + 
+                stage + ".Deployer.ApplicationType." + applicationType + "RepositoryProvider.Property.AdminUserName");
+        if ( StringUtils.isBlank(adminUser)){
+            //default to "*"
+            adminUser = ServiceHolder.getAppFactoryConfiguration().getFirstProperty("ApplicationDeployment.DeploymentStage."  + stage + 
+                                    ".Deployer.ApplicationType.*.RepositoryProvider.Property.AdminUserName" );
+        }
+        return adminUser;
+    }
+    
+    /**
+     * Reads {@link AppFactoryConfiguration} and returns the repository provider
+     * password.
+     * if a configuration doesn't exists for a particular application type
+     * default value will be returned ( - which is configured using '*' )
+     * 
+     * @param applicationType type of the application.
+     * @param stage the stage/environment
+     * @return the password
+     */
+    private String getRepositoryProviderAdminPassword(String applicationType, String stage){
+       
+        AppFactoryConfiguration appFactoryConfiguration = ServiceHolder.getAppFactoryConfiguration();
+        
+        String adminUser = appFactoryConfiguration.getFirstProperty("ApplicationDeployment.DeploymentStage."  + 
+                stage + ".Deployer.ApplicationType." + 
+                applicationType + "RepositoryProvider.Property.AdminPassword");
+        
+        if ( StringUtils.isBlank(adminUser)){
+            //default to "*"
+            adminUser = appFactoryConfiguration.getFirstProperty("ApplicationDeployment.DeploymentStage." 
+                        + stage + ".Deployer.ApplicationType.*.RepositoryProvider.Property.AdminPassword" );
+        }
+        return adminUser;
+    }
+    
+    /**
+     * Deletes a artifact corresponding to specified application id, version, stage 
+     * @param applicationId application Id
+     * @param version version of the application that needs be undeployed.
+     * @param applicationType type of the application (war, jaxrs etc)
+     * @param stage currently deployed stage 
+     * @throws AppFactoryException if an error occurs.
+     */
+    private void deleteFromDepSyncGitRepo(String applicationId, String version,
+                                          String applicationType, String stage)
+                                                                               throws AppFactoryException {
+
+        String repoProviderAdminName = getRepositoryProviderAdminUser(applicationType, stage);
+        String repoProviderAdminPassword =
+                                           getRepositoryProviderAdminPassword(applicationType,
+                                                                              stage);
+
+        File applicationTempLocation = Files.createTempDir(); // new
+                                                              // File(applicationTempPath);//
+                                                              // <appid>/developement
+
+        try {
+            AppfactoryRepositoryClient repositoryClient = new AppfactoryRepositoryClient("git");
+            String gitRepoUrl = generateRepoUrl(applicationId, applicationType, stage);
+            repositoryClient.init(repoProviderAdminName, repoProviderAdminPassword);
+            repositoryClient.checkOut(gitRepoUrl, applicationTempLocation);
+
+            // dbs files are copied to multiple server locations
+
+            String[] deployedServerPaths = getServerDeploymentPaths(applicationType);
+
+            for (String serverPath : deployedServerPaths) {
+
+                File applicationRootLocation = new File(applicationTempLocation, serverPath);
+                log.info("applicationRootLocation : " + applicationRootLocation.getAbsolutePath());
+                if (applicationRootLocation.isDirectory()) {
+                    String fileExtension = getFileExtension(applicationType);
+                    log.debug("search for a file corresponding to : " + applicationId +
+                              " version :" + version + " extension" + fileExtension);
+                    Collection<File> filesToDelete =
+                                                     getFilesToDelete(applicationId, version, applicationRootLocation, fileExtension, applicationType);
+
+                    for (File f : filesToDelete) {
+                        log.debug("git removing the file : " + f.getAbsolutePath());
+                        if (!repositoryClient.remove(gitRepoUrl, f,
+                                                     "Undeploying the file : " + f.getName())) {
+                            log.debug("unable to remove the file from git repository" +
+                                      f.getAbsolutePath());
+                        }
+                    }
+                } else {
+                    log.error("unable to find correct directory structure in git repository : " +
+                              applicationRootLocation.getAbsolutePath());
+                }
+            }
+
+            log.debug("checking in git at : " + applicationTempLocation);
+            repositoryClient.checkIn(gitRepoUrl, applicationTempLocation, "Undelpoying artifacts");
+        } catch (AppFactoryException e) {
+
+            String msg =
+                         "Undeploying application failed: Unable to delete files from git repository application id: " +
+                                 applicationId + " version :" + version + " stage : " + stage;
+            handleException(msg, e);
+        } finally {
+
+            try {
+                FileUtils.deleteDirectory(applicationTempLocation);
+            } catch (IOException ioe) {
+                // we ignore error of not being able to delete temporary
+                // directory.
+                log.error("Unable to delete the temporary directory after"
+                          + " application demote operation, error will be ignored", ioe);
+            }
+        }
+    }
+
+
+
+	@SuppressWarnings("unchecked")
+    private Collection<File> getFilesToDelete(String applicationId, String version,
+	                                    File applicationRootLocation, String fileExtension,
+	                                    String applicationType) {
+
+		if (AppFactoryConstants.APPLICATION_TYPE_ESB.equals(applicationType)) {
+
+			return FileUtils.listFiles(applicationRootLocation, new String[] { AppFactoryConstants.APPLICATION_TYPE_XML },
+			                           true);
+
+		} else {
+			return FileUtils.listFiles(applicationRootLocation,
+			                           new ArtifactFileFilter(applicationId, version, fileExtension),
+			                           null);
+		}
+	}
     /**
      * Delete CApp from given deployment servers
      *
@@ -502,7 +590,7 @@ public class ApplicationDeployer {
      * @param deploymentServerUrls deployment servers
      * @throws AppFactoryException an error
      */
-    private void deleteCApp(String applicationId, String[] deploymentServerUrls) throws AppFactoryException {
+    private void deleteCApp(String applicationId, String[] deploymentServerUrls,String version) throws AppFactoryException {
         for (String deploymentServerUrl : deploymentServerUrls) {
             try {
                 String deploymentServerIp = getDeploymentHostFromUrl(deploymentServerUrl);
@@ -531,7 +619,7 @@ public class ApplicationDeployer {
      * @param deploymentServerUrls deployment servers
      * @throws AppFactoryException an error
      */
-    private void deleteWebApp(String applicationId, String[] deploymentServerUrls) throws AppFactoryException {
+    private void deleteWebApp(String applicationId, String[] deploymentServerUrls,String type,String version) throws AppFactoryException {
         for (String deploymentServerUrl : deploymentServerUrls) {
             try {
                 String deploymentServerIp = getDeploymentHostFromUrl(deploymentServerUrl);
@@ -539,8 +627,36 @@ public class ApplicationDeployer {
 
                 if (applicationDeleteClient.authenticate(getAdminUsername(applicationId), getServerAdminPassword(),
                         deploymentServerIp)) {
-                    applicationDeleteClient.deleteWebApp(applicationId);
-                    log.debug(applicationId + " is successfully undeployed.");
+                    applicationDeleteClient.deleteWebApp(applicationId,type,version);
+                    log.info(applicationId + " is successfully undeployed.");
+                } else {
+                    handleException("Failed to login to " + deploymentServerIp +
+                            " to undeploy the artifact:" + applicationId);
+                }
+            } catch (Exception e) {
+                handleException("Error occurred when un-deploying war file for application ID : " + applicationId, e);
+
+            }
+        }
+    }
+    
+    /**
+     * Delete service from given deployment servers
+     *
+     * @param applicationId        application ID
+     * @param deploymentServerUrls deployment servers
+     * @throws AppFactoryException an error
+     */
+    private void deleteService(String applicationId, String[] deploymentServerUrls,String type,String version) throws AppFactoryException {
+        for (String deploymentServerUrl : deploymentServerUrls) {
+            try {
+                String deploymentServerIp = getDeploymentHostFromUrl(deploymentServerUrl);
+                ApplicationDeleteClient applicationDeleteClient = new ApplicationDeleteClient(deploymentServerUrl);
+
+                if (applicationDeleteClient.authenticate(getAdminUsername(applicationId), getServerAdminPassword(),
+                        deploymentServerIp)) {
+                    applicationDeleteClient.deleteService(applicationId,type,version);
+                    log.info(applicationId + " is successfully undeployed.");
                 } else {
                     handleException("Failed to login to " + deploymentServerIp +
                             " to undeploy the artifact:" + applicationId);
@@ -552,4 +668,80 @@ public class ApplicationDeployer {
         }
     }
 
+    /**
+     * Reads {@link AppFactoryConfiguration} and returns a list of locations (or
+     * most of the time one location) a specified application type is deployed
+     * in a server
+     * 
+     * @param applicationType
+     *            type of the application
+     * @return an array of String
+     */
+    private String[] getServerDeploymentPaths(String applicationType) {
+        String paths =
+                       ServiceHolder.getAppFactoryConfiguration()
+                                    .getFirstProperty("ApplicationType." + applicationType +
+                                                              ".Property.ServerDeploymentPaths");
+        return StringUtils.isNotBlank(paths) ? paths.trim().split(",") : null;
+    }
+
+    /**
+     * Reads {@link AppFactoryConfiguration} and returns file extension of a particular application type 
+     * @param applicationType type of the application ( war, jaxrs etc).
+     * @return file extension.
+     */
+    private String getFileExtension(String applicationType) {
+        String extension =
+                           ServiceHolder.getAppFactoryConfiguration()
+                                        .getFirstProperty("ApplicationType." + applicationType +
+                                                                  ".Property.Extension");
+        return StringUtils.isBlank(extension) || extension.equals("none") ? null : extension.trim();
+
+    }
+
+    /**
+     * Used to filter artifact(s)/ corresponding to specified application id, version and file extension 
+     * 
+     */
+    class ArtifactFileFilter implements IOFileFilter {
+        /**
+         * Name of the file.
+         */
+        private String fileName;
+
+        /**
+         * Constructor of the class.
+         * @param applicationId application Id
+         * @param version version
+         * @param extension file extension
+         */
+        public ArtifactFileFilter(String applicationId, String version, String extension) {
+
+            if (!version.equals("trunk")) { 
+                fileName = applicationId + "-" + version;
+            } else { //file naming convension for trunk is different.
+                fileName = applicationId + "-SNAPSHOT";
+            }
+
+            fileName = fileName + "." + extension;
+        }
+
+        /**
+         * Only files are accepted (not directories). they should match the expected file name.
+         */
+        @Override
+        public boolean accept(File file) {
+            return file.isFile() && file.getName().equals(fileName);
+        }
+
+        /**
+         * No directories are accepted.
+         */
+        @Override
+        public boolean accept(File dir, String name) {
+            return false;
+        }
+
+    }
+    
 }

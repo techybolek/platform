@@ -1,3 +1,19 @@
+/*
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.core;
 
 import org.wso2.carbon.appfactory.common.AppFactoryException;
@@ -8,18 +24,8 @@ public interface Storage {
 
     public void deployLatestSuccessArtifact(String jobName, String artifactType, String stage) throws AppFactoryException;
 
-    public void deployTaggedArtifact(String jobName, String artifactType, String tagName, String stage) throws AppFactoryException;
+    public void deployTaggedArtifact(String jobName, String artifactType, String tagName, String stage, String deployAction) throws AppFactoryException;
 
-    /**
-     * Latest success build of the given {@code applicationId} will be tagged as given {@code newTagName}.  
-     * @param newTagName The name that the last success build to be tagged.
-     * @param version TODO
-     * @param applicationKey The key of the application to be tagged.
-     * @param stage of the artifact to be tagged.
-     * @param version  Version of the application
-     * @throws AppFactoryException
-     */
-    public void createNewTagByLastSuccessBuild(String jobName, String artifactType, String newTagName, String version,
-                                               String stage) throws AppFactoryException;
+    public void deployPromotedArtifact(String jobName,String artifactType , String stage) throws AppFactoryException;
 
 }

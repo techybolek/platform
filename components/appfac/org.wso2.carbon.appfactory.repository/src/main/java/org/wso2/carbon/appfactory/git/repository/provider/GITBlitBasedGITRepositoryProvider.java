@@ -1,28 +1,29 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.git.repository.provider;
 
 import com.gitblit.Constants;
-import com.gitblit.models.RepositoryModel;
+import com.gitblit.models.*;
 import com.gitblit.utils.RpcUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.repository.mgt.RepositoryMgtException;
 import org.wso2.carbon.appfactory.repository.provider.common.AbstractRepositoryProvider;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
 
@@ -43,41 +44,103 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
 
     public static final String TYPE = "git";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String createRepository(String applicationKey) throws RepositoryMgtException {
-        String repoCreateUrl = config.getFirstProperty(BASE_URL) + "rpc?req=CREATE_REPOSITORY&name="
-                               + applicationKey;
+        CarbonContext ct=CarbonContext.getCurrentContext();
+        String tenantDomain= ct.getTenantDomain();
+        String repoName=tenantDomain+"/"+applicationKey;
+        String repoCreateUrl = config.getFirstProperty(BASE_URL);
         String adminUsername = config.getFirstProperty(GITBLIT_ADMIN_USERNAME);
         String adminPassword = config.getFirstProperty(GITBLIT_ADMIN_PASS);
-
         //Create the gitblit repository model
         RepositoryModel model = new RepositoryModel();
-        model.name = applicationKey;
+        model.name = repoName;
         //authenticated users can clone, push and view the repository
         model.accessRestriction = Constants.AccessRestrictionType.VIEW;
-        log.info(repoCreateUrl);
-
         try {
             isCreated = RpcUtils.createRepository(model, repoCreateUrl, adminUsername,
-                    adminPassword.toCharArray());
+                                                  adminPassword.toCharArray());           
             if (isCreated) {
                 String url = getAppRepositoryURL(applicationKey);
-                log.info(url);
                 return url;
+            } else {
+                String msg = "Repository is not created for " + applicationKey + " due to remote server error";
+                log.error(msg);
+                throw new RepositoryMgtException(msg);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            String msg = "Repository is not created for " + applicationKey + " due to " + e.getLocalizedMessage();
+            log.error(msg, e);
+            throw new RepositoryMgtException(msg, e);
         }
-        return null;
+      
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
         return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + applicationKey + ".git";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected String getType() {
         return TYPE;
+    }
+    
+    public boolean createTenantRepo(String tenantId) throws RepositoryMgtException {
+        String defaultTenantRepo=tenantId+"/defApp";
+        String repoCreateUrl =
+                               config.getFirstProperty(BASE_URL) +
+                                       "rpc?req=CREATE_REPOSITORY&name=/" + defaultTenantRepo;
+        String repoDeleteUrl =
+                config.getFirstProperty(BASE_URL) +
+                        "rpc?req=DELETE_REPOSITORY&name=/" + defaultTenantRepo;
+        String adminUsername = config.getFirstProperty(GITBLIT_ADMIN_USERNAME);
+        String adminPassword = config.getFirstProperty(GITBLIT_ADMIN_PASS);
+
+        // Create the gitblit repository model
+        RepositoryModel model = new RepositoryModel();
+        model.name = defaultTenantRepo;
+        // authenticated users can clone, push and view the repository
+        model.accessRestriction = Constants.AccessRestrictionType.VIEW;
+
+        try {
+            isCreated =
+                        RpcUtils.createRepository(model, repoCreateUrl, adminUsername,
+                                                  adminPassword.toCharArray());
+
+            if (isCreated) {
+                String url = getAppRepositoryURL(defaultTenantRepo);
+                RpcUtils.deleteRepository(model, repoDeleteUrl, adminUsername,
+                                          adminPassword.toCharArray());
+                
+                return true;
+            } else {
+                String msg =
+                             "Tenant Repsitory is not created for " + tenantId +
+                                     " due to remote server error";
+                log.error(msg);
+                throw new RepositoryMgtException(msg);
+                
+
+            }
+        } catch (IOException e) {
+            String msg =
+                         "Tenant Repsitory is not created for " + tenantId + " due to " +
+                                 e.getLocalizedMessage();
+            log.error(msg, e);
+            throw new RepositoryMgtException(msg, e);
+        }
+
+         
+
     }
 }

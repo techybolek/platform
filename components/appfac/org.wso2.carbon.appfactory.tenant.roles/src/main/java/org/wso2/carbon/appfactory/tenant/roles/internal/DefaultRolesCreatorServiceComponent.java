@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.tenant.roles.internal;
@@ -20,14 +20,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
-import org.wso2.carbon.appfactory.tenant.roles.AppFactoryTenantActivationListener;
-import org.wso2.carbon.appfactory.tenant.roles.DefaultRolesCreatorForSuperTenant;
-import org.wso2.carbon.appfactory.tenant.roles.DefaultRolesCreatorForTenant;
-import org.wso2.carbon.appfactory.tenant.roles.S2IntegrationTenantActivationListener;
+import org.wso2.carbon.appfactory.tenant.roles.*;
 import org.wso2.carbon.appfactory.tenant.roles.util.Util;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
  * @scr.component name=
@@ -49,6 +47,11 @@ import org.wso2.carbon.user.core.service.RealmService;
  *                cardinality="1..1" policy="dynamic"
  *                bind="setRegistryService"
  *                unbind="unsetRegistryService"
+ * @scr.reference name="configuration.context.service"
+ *                interface="org.wso2.carbon.utils.ConfigurationContextService"
+ *                cardinality="1..1" policy="dynamic"
+ *                bind="setConfigurationContextService"
+ *                unbind="unsetConfigurationContextService"
  */
 public class DefaultRolesCreatorServiceComponent {
     private static Log log = LogFactory.getLog(DefaultRolesCreatorServiceComponent.class);
@@ -56,19 +59,22 @@ public class DefaultRolesCreatorServiceComponent {
     protected void activate(ComponentContext context) {
 
         try {
-            DefaultRolesCreatorForTenant rolesCreatorForTenant = new DefaultRolesCreatorForTenant();
+           /* DefaultRolesCreatorForTenant rolesCreatorForTenant = new DefaultRolesCreatorForTenant();
             context.getBundleContext()
             .registerService(org.wso2.carbon.stratos.common.listeners.TenantMgtListener.class.getName(),
-                             rolesCreatorForTenant, null);
+                             rolesCreatorForTenant, null);*/
 
-            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
-                                                       new AppFactoryTenantActivationListener(),
-                                                       null);
-            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
+//            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
+//                                                       new AppFactoryTenantActivationListener(),
+//                                                       null);
+           /* context.getBundleContext().registerService(TenantMgtListener.class.getName(),
                                                        new S2IntegrationTenantActivationListener(),
-                                                       null);
+                                                       null);*/
+            context.getBundleContext().registerService(TenantMgtListener.class.getName(),
+                    new AppFactoryTenantMgtListener(),
+                    null);
             if (log.isDebugEnabled()) {
-                log.debug("*******DefaultRolesCreatorServiceComponent Service  bundle is activated ******* ");
+                log.debug("DefaultRolesCreatorServiceComponent Service  bundle is activated");
             }
         } catch (Exception e) {
             log.error("DefaultRolesCreatorServiceComponent activation failed.", e);
@@ -85,7 +91,7 @@ public class DefaultRolesCreatorServiceComponent {
 
     protected void deactivate(ComponentContext context) {
         if (log.isDebugEnabled()) {
-            log.debug("*******DefaultRolesCreatorServiceComponent Service  bundle is deactivated ******* ");
+            log.debug("DefaultRolesCreatorServiceComponent Service  bundle is deactivated ");
         }
     }
 
@@ -115,5 +121,10 @@ public class DefaultRolesCreatorServiceComponent {
     protected void unsetRegistryService(RegistryService registryService) {
         Util.setRegistryService(null);
     }
-
+    protected void setConfigurationContextService(ConfigurationContextService configurationContextService){
+        Util.setConfigurationContextService(configurationContextService);
+    }
+    protected void unsetConfigurationContextService(ConfigurationContextService configurationContextService){
+        Util.setConfigurationContextService(null);
+    }
 }

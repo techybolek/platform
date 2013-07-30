@@ -1,17 +1,17 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.jenkins.build;
@@ -48,9 +48,12 @@ public class JenkinsCIConstants {
             "repository.credentials.username";
     public static final String REPOSITORY_ACCESS_CREDENTIALS_PASSWORD =
             "repository.credentials.password";
+    public static final String SONAR_PDF_TASK_XPATH_SELECTOR =
+            "/*/postbuilders/hudson.tasks.Maven/targets";
 
     public static final String MAVEN3_CONFIG_NAME = "maven3.config.name";
     public static final String MAVEN3_CONFIG_NAME_XAPTH_SELECTOR = "mavenName";
+    public static final String ARTIFACT_ARCHIVER_CONFIG_NAME_XAPTH_SELECTOR = "/*/publishers/hudson.tasks.ArtifactArchiver/artifacts";
 
     public static final String APPLICATION_ID = AppFactoryConstants.APPLICATION_ID;
     public static final String APPLICATION_VERSION = AppFactoryConstants.APPLICATION_VERSION;
@@ -66,5 +69,25 @@ public class JenkinsCIConstants {
             PUBLISHERS_APPFACTORY_PLUGIN_XPATH_BASE + "/applicationArtifactExtension";
     public static final String APPLICATION_TRIGGER_PERIOD=
             "/*/triggers/hudson.triggers.SCMTrigger/spec";
+    
+    
+    
+    private static final String PUBLISHERS_ARTIFACT_ARCHIVER_XPATH_BASE = "/*/publishers/hudson.tasks.ArtifactArchiver/";
+    public static final String PUBLISHERS_APPFACTORY_ARTIFACT_XPATH_SELECTOR =
+    		PUBLISHERS_ARTIFACT_ARCHIVER_XPATH_BASE + "/artifacts";
+    
+    /**
+     * Defines constants related to jenkins role-strategy-pugin
+     */
+    public final static class RoleStrategy{
+    	
+    	public static final String ASSIGN_ROLE_SERVICE = "/descriptorByName/com.michelin.cio.hudson.plugins.rolestrategy"
+                + ".RoleBasedAuthorizationStrategy/assignRolesSubmit";
+    	
+		public static final String UNASSIGN_ROLE_SERVICE = "/descriptorByName/com.michelin.cio.hudson.plugins.rolestrategy"
+				+ ".RoleBasedAuthorizationStrategy/unAssignRolesSubmit";        
+    }
+    
+    
 }
 

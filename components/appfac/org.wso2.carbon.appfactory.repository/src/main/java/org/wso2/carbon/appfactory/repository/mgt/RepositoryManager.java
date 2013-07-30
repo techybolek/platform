@@ -1,23 +1,25 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 package org.wso2.carbon.appfactory.repository.mgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.repository.mgt.internal.Util;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.user.core.tenant.Tenant;
 
 /**
  * This is a class to manage all the repository operation by getting relevant repository provider
@@ -27,7 +29,7 @@ public class RepositoryManager {
     private static final Log log = LogFactory.getLog(RepositoryManager.class);
 
     public String createRepository(String applicationKey, String type)
-            throws RepositoryMgtException {
+            throws RepositoryMgtException {        
         String url = null;
         RepositoryProvider provider = Util.getRepositoryProvider(type);
         if (provider != null) {
@@ -111,15 +113,30 @@ public class RepositoryManager {
     public void provisionUser(String applicationKey, String type, String username)
             throws RepositoryMgtException {
         RepositoryProvider provider = Util.getRepositoryProvider(type);
-                if (provider != null) {
-                    provider.provisionUser(applicationKey, username);
-                } else {
-                    handleException((new StringBuilder()).
-                            append("Repository provider failed to provision user").
-                            append(username).
-                            append(" for the type ").
-                            append(type).
-                            append(" not found").toString());
-                }
+        if (provider != null) {
+            provider.provisionUser(applicationKey, username);
+        } else {
+            handleException((new StringBuilder()).
+                    append("Repository provider failed to provision user").
+                    append(username).
+                    append(" for the type ").
+                    append(type).
+                    append(" not found").toString());
+        }
+    }
+    public Boolean createTenantRepo(String tenantId,String type) throws RepositoryMgtException {
+        Boolean result = null;
+        RepositoryProvider provider = Util.getRepositoryProvider(type);
+        if (provider != null) {
+            result = provider.createTenantRepo(tenantId);
+        } else {
+            handleException((new StringBuilder()).
+                    append("Repository provider for the type ").
+                    append(type).
+                    append(" not found").toString());
+        }
+
+        return result;
+        
     }
 }

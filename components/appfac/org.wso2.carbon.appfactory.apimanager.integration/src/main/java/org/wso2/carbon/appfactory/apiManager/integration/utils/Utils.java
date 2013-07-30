@@ -1,7 +1,61 @@
+/*
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.apiManager.integration.utils;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.ACTION;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.ADD_SUBSCRIPTIONS_ENDPOINT;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.API_MANAGER_DEFAULT_AUTHORIZED_DOMAINS_ALL;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.API_MANAGER_DEFAULT_CALLBACK_URL;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.API_MANAGER_DEFAULT_TIER;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.CONTEXT;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.DESCRIPTION;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.ENDPOINT;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.MOUNT_PREFIX;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.MOUNT_SUFFIX;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.NAME;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.PRODUCTION_KEYS_PROPERTY;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.PROD_CONSUMER_KEY;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.PROD_CONSUMER_SECRET;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.PROD_KEY;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.PROVIDER;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.SANDBOX;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.SANDBOX_CONSUMER_KEY;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.SANDBOX_CONSUMER_SECRET;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.SANDBOX_KEY;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.SANDBOX_KEYS_PROPERTY;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.VERSION;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.WADL;
+import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.WSDL;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -20,25 +74,14 @@ import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.dto.API;
 import org.wso2.carbon.appfactory.core.dto.APIMetadata;
+import org.wso2.carbon.appfactory.core.util.DependencyUtil;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
-
-import static org.wso2.carbon.appfactory.apiManager.integration.utils.Constants.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class Utils {
 
@@ -46,6 +89,9 @@ public class Utils {
     private static String apiManagerRESTEndpointURL;
 
     private static String apiManagerDefaultTier;
+    private static String apiManagerDefaultCallbackURL;
+
+    private static Map<String, String[]> keyEnvironmentMap = new HashMap<String, String[]>();
 
     public static HttpResponse executeHttpMethod(HttpClient httpClient, HttpPost postMethod)
             throws AppFactoryException {
@@ -143,34 +189,34 @@ public class Utils {
         if (applicationSubscription.get(PROD_KEY) != null &&
                 !applicationSubscription.get(PROD_KEY).isJsonNull()) {
             keyList.add(new APIMetadata(PROD_KEY,
-                    applicationSubscription.get(PROD_KEY).getAsString(),null));
+                    applicationSubscription.get(PROD_KEY).getAsString(), null));
         }
         if (applicationSubscription.get(PROD_CONSUMER_KEY) != null &&
                 !applicationSubscription.get(PROD_CONSUMER_KEY).isJsonNull()) {
             keyList.add(new APIMetadata(PROD_CONSUMER_KEY,
-                    applicationSubscription.get(PROD_CONSUMER_KEY).getAsString(),null));
+                    applicationSubscription.get(PROD_CONSUMER_KEY).getAsString(), null));
         }
         if (applicationSubscription.get(PROD_CONSUMER_SECRET) != null &&
                 !applicationSubscription.get(PROD_CONSUMER_SECRET).isJsonNull()) {
             keyList.add(new APIMetadata(PROD_CONSUMER_SECRET,
-                    applicationSubscription.get(PROD_CONSUMER_SECRET).getAsString(),null));
+                    applicationSubscription.get(PROD_CONSUMER_SECRET).getAsString(), null));
         }
 
 //        Adding the sandbox keys
         if (applicationSubscription.get(SANDBOX_KEY) != null &&
                 !applicationSubscription.get(SANDBOX_KEY).isJsonNull()) {
             keyList.add(new APIMetadata(SANDBOX_KEY,
-                    applicationSubscription.get(SANDBOX_KEY).getAsString(),null));
+                    applicationSubscription.get(SANDBOX_KEY).getAsString(), null));
         }
         if (applicationSubscription.get(SANDBOX_CONSUMER_KEY) != null &&
                 !applicationSubscription.get(SANDBOX_CONSUMER_KEY).isJsonNull()) {
             keyList.add(new APIMetadata(SANDBOX_CONSUMER_KEY,
-                    applicationSubscription.get(SANDBOX_CONSUMER_KEY).getAsString(),null));
+                    applicationSubscription.get(SANDBOX_CONSUMER_KEY).getAsString(), null));
         }
         if (applicationSubscription.get(SANDBOX_CONSUMER_SECRET) != null &&
                 !applicationSubscription.get(SANDBOX_CONSUMER_SECRET).isJsonNull()) {
             keyList.add(new APIMetadata(SANDBOX_CONSUMER_SECRET,
-                    applicationSubscription.get(SANDBOX_CONSUMER_SECRET).getAsString(),null));
+                    applicationSubscription.get(SANDBOX_CONSUMER_SECRET).getAsString(), null));
         }
         apiInfo.setKeys(keyList.toArray(new APIMetadata[keyList.size()]));
 
@@ -179,12 +225,12 @@ public class Utils {
         if (applicationSubscription.get(ENDPOINT) != null &&
                 !applicationSubscription.get(ENDPOINT).isJsonNull()) {
             endpointList.add(new APIMetadata(ENDPOINT,
-                    applicationSubscription.get(ENDPOINT).getAsString(),null));
+                    applicationSubscription.get(ENDPOINT).getAsString(), null));
         }
         if (applicationSubscription.get(SANDBOX) != null &&
                 !applicationSubscription.get(SANDBOX).isJsonNull()) {
             endpointList.add(new APIMetadata(SANDBOX,
-                    applicationSubscription.get(SANDBOX).getAsString(),null));
+                    applicationSubscription.get(SANDBOX).getAsString(), null));
         }
         apiInfo.setEndpointUrls(endpointList.toArray(new APIMetadata[endpointList.size()]));
 
@@ -192,91 +238,124 @@ public class Utils {
         return apiInfo;
     }
 
-    public static void generateKey(String appId, URL apiManagerUrl, String keyType, HttpClient httpClient)
-            throws AppFactoryException {
-        List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-        parameters.add(new BasicNameValuePair(ACTION, "generateApplicationKey"));
-        parameters.add(new BasicNameValuePair("application", appId));
-        parameters.add(new BasicNameValuePair("keytype", keyType));
+	public static void generateKey(String appId, URL apiManagerUrl, String keyType,
+	                               HttpClient httpClient) throws AppFactoryException {
+		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+		parameters.add(new BasicNameValuePair(ACTION, "generateApplicationKey"));
+		parameters.add(new BasicNameValuePair("application", appId));
+		parameters.add(new BasicNameValuePair("keytype", keyType));
+		parameters.add(new BasicNameValuePair("callbackUrl", getDefaultCallbackURL()));
+		parameters.add(new BasicNameValuePair("authorizedDomains",
+		                                      API_MANAGER_DEFAULT_AUTHORIZED_DOMAINS_ALL));
+		HttpPost postMethod =
+		                      createHttpPostRequest(apiManagerUrl, parameters,
+		                                            ADD_SUBSCRIPTIONS_ENDPOINT);
 
-        HttpPost postMethod = createHttpPostRequest(apiManagerUrl, parameters, ADD_SUBSCRIPTIONS_ENDPOINT);
+		HttpResponse httpResponse = executeHttpMethod(httpClient, postMethod);
 
-        HttpResponse httpResponse = executeHttpMethod(httpClient, postMethod);
-        if (httpResponse != null) {
-            try {
+		if (httpResponse != null) {
+			try {
+				HttpEntity responseEntity = httpResponse.getEntity();
+				EntityUtils.toString(responseEntity);
+			} catch (IOException e) {
+				String msg = "Error reading the json response";
+				log.error(msg, e);
+				throw new AppFactoryException(msg, e);
+			} finally {
+				try {
+					EntityUtils.consume(httpResponse.getEntity());
+				} catch (IOException e) {
+					String msg = "Failed to consume http response";
+					log.error(msg, e);
+					throw new AppFactoryException(msg, e);
+				}
+			}
+		}
+	}
 
-                HttpEntity responseEntity = httpResponse.getEntity();
-                EntityUtils.toString(responseEntity);
-            } catch (IOException e) {
-                String msg = "Error reading the json response";
-                log.error(msg, e);
-                throw new AppFactoryException(msg, e);
-            }
-        }
-    }
+//    public static String registerSandboxKeys(Registry tenantRegistry, String name, String value)
+//            throws AppFactoryException {
+//
+//        writeToRegistry(tenantRegistry, DEVELOPMENT, name, value);
+//
+//        writeToRegistry(tenantRegistry, TESTING, name, value);
+//
+//        return DEVELOPMENT + "/" + TESTING;
+//
+//    }
+//
+//    public static String registerProdKeys(Registry tenantRegistry, String name, String value)
+//            throws AppFactoryException {
+//
+//        writeToRegistry(tenantRegistry, PRODUCTION, name, value);
+//
+//        return PRODUCTION;
+//    }
 
-    public static void registerSandboxKeys(Registry tenantRegistry ,String name,String value)
-            throws AppFactoryException{
-
-        writeToRegistry(tenantRegistry,DEVELOPMENT,name,value);
-
-        writeToRegistry(tenantRegistry,TESTING,name,value);
-
-    }
-    public static void registerProdKeys(Registry tenantRegistry,String name,String value)
-            throws AppFactoryException{
-
-        writeToRegistry(tenantRegistry,PRODUCTION,name,value);
-    }
-
-    public static void writeToRegistry(Registry tenantRegistry,String state, String name,
-                                       String value) throws AppFactoryException{
+    public static void writeToRegistry(Registry tenantRegistry, String state, String name,
+                                       String value) throws AppFactoryException {
         try {
-
-            String resourcePath = getResourcePathString(state,name);
-
+            String resourcePath = getResourcePathString(state, name);
             if (resourcePath != null) {
                 Resource resource;
-                if(tenantRegistry.resourceExists(resourcePath)){
+                if (tenantRegistry.resourceExists(resourcePath)) {
                     resource = tenantRegistry.get(resourcePath);
-                }else{
+                } else {
                     resource = tenantRegistry.newResource();
                 }
 
                 resource.setContent(value);
-                tenantRegistry.put(resourcePath,resource);
+                tenantRegistry.put(resourcePath, resource);
             }
         } catch (RegistryException e) {
             String msg = "Unable to write values to registry";
             log.error(msg);
-            throw new AppFactoryException(msg,e);
+            throw new AppFactoryException(msg, e);
         }
     }
+    
+    public static String readFromRegistry(Registry tenantRegistry, String state, String name) throws AppFactoryException {
+    	try {
+    		String resourcePath = getResourcePathString(state, name);
+    		if (resourcePath != null) {
+    			Resource resource;
+    			if (tenantRegistry.resourceExists(resourcePath)) {
+    				resource = tenantRegistry.get(resourcePath);
+    			} else {
+    				resource = tenantRegistry.newResource();
+    			}
+    			byte[] content = (byte[])resource.getContent();
+    			String value = new String(content);
+    			return value;
+    		}
+    		else {
+    			return "";
+    		}
+    	} catch (RegistryException e) {
+    		String msg = "Unable to read values from registry";
+    		log.error(msg);
+    		throw new AppFactoryException(msg, e);
+    	}
+    }
 
-    public static String getResourcePathString(String state,String name) throws AppFactoryException{
+    /**
+     * Method to store resources to /_system/governance/dependencies/{stage}
+     * TODO: Use AF dependency management service
+     * @param state
+     * @param name
+     * @return
+     * @throws AppFactoryException
+     */
+    public static String getResourcePathString(String state, String name) throws AppFactoryException {
         AppFactoryConfiguration configuration = ServiceHolder.getInstance().getAppFactoryConfiguration();
 
-        String devMount = configuration.getFirstProperty(DEV_MOUNT);
-        String testMount = configuration.getFirstProperty(TEST_MOUNT);
-        String prodMount = configuration.getFirstProperty(PROD_MOUNT);
+        String propName = MOUNT_PREFIX + state + MOUNT_SUFFIX;
 
-
-        if(state.equals(DEVELOPMENT)){
-            if(devMount == null){
-                return null;
-            }
-            return RegistryConstants.PATH_SEPARATOR + devMount + RegistryConstants.PATH_SEPARATOR + name;
-        }else if(state.equals(TESTING)){
-            if(testMount == null){
-                return null;
-            }
-            return RegistryConstants.PATH_SEPARATOR + testMount +  RegistryConstants.PATH_SEPARATOR + name;
-        }else if(state.equals(PRODUCTION)){
-            if(prodMount == null){
-                return null;
-            }
-            return RegistryConstants.PATH_SEPARATOR + prodMount + RegistryConstants.PATH_SEPARATOR + name;
-        }else{
+        if (configuration.getFirstProperty(propName) != null) {
+            String mount = configuration.getFirstProperty(propName);
+            return RegistryConstants.PATH_SEPARATOR+ org.wso2.carbon.appfactory.core.util.Constants.DEPENDENCIES_HOME
+                   +RegistryConstants.PATH_SEPARATOR + mount + RegistryConstants.PATH_SEPARATOR + name;
+        } else {
             String msg = "Could not recognise lifecycle state";
             log.error(msg);
             throw new AppFactoryException(msg);
@@ -324,12 +403,37 @@ public class Utils {
 
     }
 
-    public static String getDefaultTier(){
-        if (apiManagerDefaultTier != null) {
+    public static String getDefaultTier() {
+        if (apiManagerDefaultTier == null) {
             AppFactoryConfiguration configuration = ServiceHolder.getInstance().getAppFactoryConfiguration();
             apiManagerDefaultTier = configuration.getFirstProperty(API_MANAGER_DEFAULT_TIER);
         }
         return apiManagerDefaultTier;
+    }
+
+    public static String getDefaultCallbackURL() {
+        if (apiManagerDefaultCallbackURL == null) {
+            AppFactoryConfiguration configuration = ServiceHolder.getInstance().getAppFactoryConfiguration();
+            apiManagerDefaultCallbackURL = configuration.getFirstProperty(API_MANAGER_DEFAULT_CALLBACK_URL);
+        }
+        return apiManagerDefaultCallbackURL;
+    }
+
+    public static Map<String, String[]> getKeyEnvironmentMapping() {
+        if (keyEnvironmentMap.isEmpty()) {
+            AppFactoryConfiguration configuration = ServiceHolder.getInstance().getAppFactoryConfiguration();
+
+            if (configuration.getProperties(SANDBOX_KEYS_PROPERTY) != null) {
+                String suffix = SANDBOX_KEYS_PROPERTY.substring(SANDBOX_KEYS_PROPERTY.lastIndexOf(".") + 1);
+                keyEnvironmentMap.put(suffix, configuration.getProperties(SANDBOX_KEYS_PROPERTY));
+            }
+            if (configuration.getProperties(PRODUCTION_KEYS_PROPERTY) != null) {
+                String suffix = PRODUCTION_KEYS_PROPERTY.substring(PRODUCTION_KEYS_PROPERTY.lastIndexOf(".") + 1);
+                keyEnvironmentMap.put(suffix, configuration.getProperties(PRODUCTION_KEYS_PROPERTY));
+            }
+
+        }
+        return keyEnvironmentMap;
     }
 
 

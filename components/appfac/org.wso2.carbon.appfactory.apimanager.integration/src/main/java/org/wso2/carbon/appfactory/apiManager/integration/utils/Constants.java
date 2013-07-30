@@ -1,3 +1,19 @@
+/*
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.apiManager.integration.utils;
 
 public class Constants {
@@ -5,6 +21,8 @@ public class Constants {
             "store/site/blocks/user/login/ajax/login.jag";
     public static final String CREATE_APPLICATION_ENDPOINT =
             "store/site/blocks/application/application-add/ajax/application-add.jag";
+    public static final String DELETE_APPLICATION_ENDPOINT =
+            "store/site/blocks/application/application-remove/ajax/application-remove.jag";
     public static final String LIST_APPLICATION_ENDPOINT =
             "store/site/blocks/application/application-list/ajax/application-list.jag";
     public static final String LIST_SUBSCRIPTIONS_ENDPOINT =
@@ -40,9 +58,18 @@ public class Constants {
     public static final String TESTING = "Testing";
     public static final String PRODUCTION = "Production";
 
-    public static final String DEV_MOUNT = "ApplicationDeployment.DeploymentStage.Development.MountPoint";
-    public static final String TEST_MOUNT = "ApplicationDeployment.DeploymentStage.Testing.MountPoint";
-    public static final String PROD_MOUNT = "ApplicationDeployment.DeploymentStage.Production.MountPoint";
+//    Commented out since we don't hard-code the states
+//    public static final String DEV_MOUNT = "ApplicationDeployment.DeploymentStage.Development.MountPoint";
+//    public static final String TEST_MOUNT = "ApplicationDeployment.DeploymentStage.Testing.MountPoint";
+//    public static final String PROD_MOUNT = "ApplicationDeployment.DeploymentStage.Production.MountPoint";
+
+    public static final String MOUNT_PREFIX = "ApplicationDeployment.DeploymentStage.";
+    public static final String MOUNT_SUFFIX = ".MountPoint";
+
+    public static final String SANDBOX_KEYS_PROPERTY = "ApiManager.Keys.Property.Sandbox";
+    public static final String PRODUCTION_KEYS_PROPERTY = "ApiManager.Keys.Property.Prod";
 
     public static final String API_MANAGER_DEFAULT_TIER = "ApiManager.DefaultTier";
+    public static final String API_MANAGER_DEFAULT_CALLBACK_URL = "ApiManager.DefaultCallbackURL";
+    public static final String API_MANAGER_DEFAULT_AUTHORIZED_DOMAINS_ALL = "ALL";
 }

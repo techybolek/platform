@@ -1,10 +1,28 @@
+/*
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.core.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
+import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -14,6 +32,7 @@ import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class DependencyUtil {
@@ -56,14 +75,15 @@ public class DependencyUtil {
 
     public static String getDependenciesPath(String name) throws AppFactoryException {
         //            We store all these resources under a collection called dependencies.
-//            The path looks like "/dev/dependencies/foo". dev would be our development mount point
-        return RegistryConstants.PATH_SEPARATOR + Constants.DEPENDENCIES_HOME +
-                RegistryConstants.PATH_SEPARATOR + name;
+//            The path looks like "/dependencies/foo". dev would be our development mount point
+        //
+        return RegistryConstants.PATH_SEPARATOR + Constants.DEPENDENCIES_HOME + RegistryConstants.PATH_SEPARATOR+  name;
     }
-    public static String getMountedDependenciesPath(String stage, String name) throws AppFactoryException {
+    public static String getMountedDependenciesPath(String name,String stage) throws AppFactoryException {
         //            We store all these resources under a collection called dependencies.
-//            The path looks like "/dev/dependencies/foo". dev would be our development mount point
-        return RegistryConstants.PATH_SEPARATOR + DependencyUtil.getMountPoint(stage) + name;
+//            The path looks like "/dependencies/dev/foo". dev would be our development mount point
+        return RegistryConstants.PATH_SEPARATOR + Constants.DEPENDENCIES_HOME +
+               RegistryConstants.PATH_SEPARATOR +DependencyUtil.getMountPoint(stage)+RegistryConstants.PATH_SEPARATOR  +name;
     }
 
     public static Registry getGovernanceRegistry(int tenantId) throws AppFactoryException {
@@ -109,4 +129,52 @@ public class DependencyUtil {
         return null;
     }
 
+    public static String getDependenciesRootPath(String stage) throws AppFactoryException {
+        //dev/dependencies/
+        String rootDependencyPath=RegistryConstants.PATH_SEPARATOR +Constants.DEPENDENCIES_HOME+
+                                  RegistryConstants.PATH_SEPARATOR+DependencyUtil.getMountPoint(stage);
+        return rootDependencyPath;
+    }
+
+    /**
+     * Method to create mount points for dependency management
+     *
+     * @throws AppFactoryException
+     */
+    public static void createDependenciesMountPoints() throws AppFactoryException {
+        String stages[]=ServiceHolder.getAppFactoryConfiguration().getProperties(Constants.DEPLOYMENT_STAGES);
+        String dependencyMountPoint;
+        for(String stage:stages){
+            dependencyMountPoint=Constants.DEPENDENCIES_HOME+RegistryConstants.PATH_SEPARATOR+DependencyUtil.getMountPoint(stage);
+            Registry registry;
+            try {
+               registry=ServiceHolder.getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+            } catch (RegistryException e) {
+                String msg ="Could not get governance registry ";
+                log.error(msg,e);
+                throw new AppFactoryException(msg,e);
+            }
+            try {
+                if(!registry.resourceExists(dependencyMountPoint)){
+                try {
+                    Collection collection=registry.newCollection();
+                    registry.put(dependencyMountPoint,collection);
+                } catch (RegistryException e) {
+                    String msg ="Could not create a collection ";
+                    log.error(msg,e);
+                    throw new AppFactoryException(msg,e);
+                } catch (org.wso2.carbon.registry.api.RegistryException e1) {
+                    String msg ="Could not add collection to "+dependencyMountPoint;
+                    log.error(msg,e1);
+                    throw new AppFactoryException(msg,e1);
+                }
+                }
+            } catch (RegistryException e) {
+                String msg ="Error while checking existance of collection location "+dependencyMountPoint;
+                log.error(msg,e);
+                throw new AppFactoryException(msg,e);
+            }
+
+        }
+    }
 }

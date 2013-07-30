@@ -1,17 +1,17 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.git.repository.provider;
@@ -47,7 +47,6 @@ import java.util.ArrayList;
  */
 public class GithubRepositoryProvider extends AbstractRepositoryProvider {
     private static final Log log = LogFactory.getLog(GithubRepositoryProvider.class);
-
 
     public static final String GITHUB_AUTH_TOKEN =
             "RepositoryProviderConfig.git.Property.GithubAdminAuthToken";
@@ -153,8 +152,8 @@ public class GithubRepositoryProvider extends AbstractRepositoryProvider {
      */
     @Override
     public AppfactoryRepositoryClient getRepositoryClient() throws RepositoryMgtException {
-        this.appfactoryRepositoryClient = null;
-        this.appfactoryRepositoryClient = new AppfactoryRepositoryClient(getType());
+        //this.appfactoryRepositoryClient = null;
+        // this.appfactoryRepositoryClient = new AppfactoryRepositoryClient(getType());
         try {
             this.appfactoryRepositoryClient.init(appFactoryConfiguration.getFirstProperty(REPOSITORY_PROVIDER_CONFIG_GIT_PROPERTY_GITHUB_ADMIN_USER_NAME),
                                                  appFactoryConfiguration.getFirstProperty(REPOSITORY_PROVIDER_CONFIG_GIT_PROPERTY_GITHUB_ADMIN_PASSWORD));
@@ -329,5 +328,11 @@ public class GithubRepositoryProvider extends AbstractRepositoryProvider {
         } finally {
             post.releaseConnection();
         }
+    }
+
+    @Override
+    public boolean createTenantRepo(String tenantId) throws RepositoryMgtException {
+        // TODO Implement repo creation for tenant here
+        return false;
     }
 }

@@ -1,232 +1,266 @@
+/*
+ * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.tenant.roles.S2Integration;
 
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jaxen.JaxenException;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.tenant.roles.util.Util;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
-import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.hosting.mgt.stub.ApplicationManagementServiceStub;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
 
-import java.lang.String;
-import java.net.MalformedURLException;
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.wso2.carbon.appfactory.tenant.roles.util.CommonUtil.getAdminUsername;
-import static org.wso2.carbon.appfactory.tenant.roles.util.CommonUtil.getRemoteHost;
-import static org.wso2.carbon.appfactory.tenant.roles.util.CommonUtil.getServerAdminPassword;
+import javax.xml.stream.XMLStreamException;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This client is used to subscribe to cartridges for production application deployment.
+ * This client does 2 things.
+ * 1. Create git repositories for subscriptions
+ * 2. Subscribe to cartridges using the created git repo
  */
 public class SubscriptionManagerClient {
     private static final Log log = LogFactory.getLog(SubscriptionManagerClient.class);
 
-    private static Map<String, CartridgeInfo> deployerMap = new HashMap<String, CartridgeInfo>();
+
+    private static final String DEPLOYER_APPLICATION_TYPE = ".Deployer.ApplicationType";
+    /**
+     * Application deployment property prefix
+     */
+    private static final String APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE = "ApplicationDeployment.DeploymentStage.";
+
+    //    Holds to cartridge information of each stage
+    private static Map<String, Map<String,DeployerInfo>> deployerMap = new HashMap<String, Map<String,DeployerInfo>>();
+    private ExecutorService service;
+
 
     public SubscriptionManagerClient() {
         init();
     }
 
     private void init() {
-        if (deployerMap.isEmpty()) {
-            AppFactoryConfiguration configuration = Util.getConfiguration();
+        try {
+            if (deployerMap.isEmpty()) {
+                AppFactoryConfiguration configuration = Util.getConfiguration();
+                Map<String, List<String>> properties = configuration.getAllProperties();
 
-            Map<String, List<String>> properties = configuration.getAllProperties();
-            for (Map.Entry<String, List<String>> property : properties.entrySet()) {
-                String key = property.getKey();
-                if (key.startsWith("ApplicationDeployment.DeploymentStage.") &&
-                        key.contains(".Class.Properties")) {
-                    String stage = key.substring(0,key.indexOf(".Class.Properties")).
-                            replace("ApplicationDeployment.DeploymentStage.", "");
-                    if (deployerMap.containsKey(stage)) {
-                        continue;
+                Set<String> stagesList = new HashSet<String>();
+
+                for (Map.Entry<String, List<String>> property : properties.entrySet()) {
+                    String key = property.getKey();
+                    if (key.startsWith(APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE) &&
+                            key.contains(DEPLOYER_APPLICATION_TYPE)) {
+                        String stage = key.substring(APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE.length(),
+                                key.indexOf(DEPLOYER_APPLICATION_TYPE));
+                        stagesList.add(stage);
+
+
                     }
+                }
 
-                    CartridgeInfo cartridgeInfo = new CartridgeInfo();
-                    String minInstances = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.minInstances");
-                    if (minInstances != null && !minInstances.equals("")) {
-                        cartridgeInfo.setMinInstances(Integer.parseInt(minInstances));
+                for (String stage : stagesList) {
+                    String[] appType = configuration.getProperties(APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage +
+                            DEPLOYER_APPLICATION_TYPE);
+
+                    for (String type : appType) {
+                        initDeployerMap(configuration, stage, type);
                     }
-
-                    String maxInstances = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.maxInstances");
-                    if (maxInstances != null && !maxInstances.equals("")) {
-                        cartridgeInfo.setMaxInstances(Integer.parseInt(maxInstances));
-                    }
-
-                    String shouldActive = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.shouldActivate");
-                    if (shouldActive != null && !shouldActive.equals("")) {
-                        cartridgeInfo.setShouldActivate(Boolean.parseBoolean(shouldActive));
-                    }
-
-                    String alias = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.alias");
-                    if (alias != null) {
-                        cartridgeInfo.setAlias(alias);
-                    }
-
-                    String cartridgeType = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.cartridgeType");
-                    if (cartridgeType != null) {
-                        cartridgeInfo.setCartridgeType(cartridgeType);
-                    }
-
-                    String repoURL = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.repoURL");
-                    if (repoURL != null) {
-                        cartridgeInfo.setRepoURL(repoURL);
-                    }
-
-                    String dataCartridgeType = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.dataCartridgeType");
-                    if (dataCartridgeType != null) {
-                        cartridgeInfo.setDataCartridgeType(dataCartridgeType);
-                    }
-
-                    String dataCartridgeAlias = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Properties.Property.dataCartridgeAlias");
-                    if (dataCartridgeAlias != null) {
-                        cartridgeInfo.setDataCartridgeAlias(dataCartridgeAlias);
-                    }
-
-                    String endpoint = configuration.getFirstProperty(
-                            "ApplicationDeployment.DeploymentStage." + stage + ".Class.Endpoint");
-                    cartridgeInfo.setEndpoint(endpoint);
-
-                    deployerMap.put(stage, cartridgeInfo);
                 }
             }
+        } catch (AppFactoryException e) {
+            String msg = "Unable to read subscription properties from configuration";
+            log.error(msg, e);
         }
+    }
+
+    private void initDeployerMap(AppFactoryConfiguration configuration, String stage, String appType)
+            throws AppFactoryException {
+        Map<String,DeployerInfo> typeMap = new HashMap<String, DeployerInfo>();
+        if (deployerMap.containsKey(stage)) {
+            typeMap = deployerMap.get(stage);
+        }
+
+        DeployerInfo deployerInfo = new DeployerInfo();
+
+        String endpoint = configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Endpoint");
+
+//        No endpoint has been defined. This is not the S2 Deployer
+        if(endpoint == null || "".equals(endpoint)){
+            return;
+        }
+        deployerInfo.setEndpoint(endpoint);
+
+        String policyName = configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Properties.Property.policyName");
+        if (policyName != null && !policyName.equals("")) {
+            deployerInfo.setPolicyName(policyName);
+        }
+
+        deployerInfo.setAlias(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Properties.Property.alias"));
+
+        deployerInfo.setCartridgeType(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Properties.Property.cartridgeType"));
+
+        deployerInfo.setRepoURL(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Properties.Property.repoURL"));
+
+        deployerInfo.setDataCartridgeType(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Properties.Property.dataCartridgeType"));
+
+        deployerInfo.setDataCartridgeAlias(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Properties.Property.dataCartridgeAlias"));
+
+        deployerInfo.setEndpoint(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".Endpoint"));
+
+        String className = configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".RepositoryProvider.Property.Class");
+        deployerInfo.setClassName(className);
+
+        try {
+            ClassLoader loader = getClass().getClassLoader();
+            Class<?> repoProvider = Class.forName(className, true, loader);
+            deployerInfo.setRepoProvider(repoProvider);
+        } catch (ClassNotFoundException e) {
+            String msg = "Unable to load repository provider class";
+            log.error(msg, e);
+            throw new AppFactoryException(msg, e);
+        }
+
+        deployerInfo.setBaseURL(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".RepositoryProvider.Property.BaseURL"));
+
+        deployerInfo.setAdminUserName(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".RepositoryProvider.Property.AdminUserName"));
+
+        deployerInfo.setAdminPassword(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".RepositoryProvider.Property.AdminPassword"));
+
+        deployerInfo.setRepoPattern(configuration.getFirstProperty(
+                APPLICATION_DEPLOYMENT_DEPLOYMENT_STAGE + stage + DEPLOYER_APPLICATION_TYPE + "." + appType +
+                        ".RepositoryProvider.Property.URLPattern"));
+
+        deployerInfo.setAppType(appType);
+
+        typeMap.put(appType,deployerInfo);
+        deployerMap.put(stage, typeMap);
     }
 
     /**
      * This method does 2 things.
-     * 1. Subscribe to the given cartridge
-     * 2. Persist the git-repo URL in the registry resource
+     * 1. Create a git repo for subscription
+     * 2. Subscribe to the given cartridge
      *
      * @param applicationId The application ID of the newly created application
      * @throws AppFactoryException
      */
-    public void subscribe(String applicationId) throws AppFactoryException {
-        if (deployerMap.isEmpty()) {
-            init();
+    public void subscribe(String applicationId, int tenantId) throws AppFactoryException {
+        init();
+        String applicationType = null;
+
+        if (service == null) {
+            service = Executors.newFixedThreadPool(50);
         }
-
-        for (Map.Entry<String, CartridgeInfo> cartridgeInfoEntry : deployerMap.entrySet()) {
-            subscribeToStage(applicationId, cartridgeInfoEntry.getValue());
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully subscribed in to stage : " + cartridgeInfoEntry.getKey());
-            }
-        }
-
-    }
-
-    private void subscribeToStage(String applicationId, CartridgeInfo cartridgeInfo) throws AppFactoryException {
-
-        ApplicationManagementServiceStub serviceStub = initializeApplicationManagementServiceStub(applicationId,
-                cartridgeInfo.getEndpoint());
 
         try {
-            String gitRepoUrl = serviceStub.subscribe(cartridgeInfo.getMinInstances(), cartridgeInfo.getMaxInstances(),
-                    cartridgeInfo.isShouldActivate(), cartridgeInfo.getAlias(), cartridgeInfo.getCartridgeType(),
-                    cartridgeInfo.getRepoURL(), cartridgeInfo.getDataCartridgeType(), cartridgeInfo.getDataCartridgeAlias());
+            RegistryService registryService = Util.getRegistryService();
+            Registry registry = registryService.getGovernanceSystemRegistry();
 
-            if (gitRepoUrl == null) {
-                String msg = "No repository was created";
-                log.error(msg);
-                throw new AppFactoryException(msg);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Git repo URL : " + gitRepoUrl);
+            String path = "/repository/applications/" + applicationId + "/appinfo";
+            if (registry.resourceExists(path)) {
+                Resource resource = registry.get(path);
+
+                StAXOMBuilder builder = new StAXOMBuilder(resource.getContentStream());
+                OMElement configuration = builder.getDocumentElement();
+
+                AXIOMXPath xpath = new AXIOMXPath("//m:application/m:type");
+                xpath.addNamespace("m",configuration.getNamespace().getNamespaceURI());
+                Object selectedObject = xpath.selectSingleNode(configuration);
+                if (selectedObject != null) {
+                    OMElement selectedNode = (OMElement) selectedObject;
+                    applicationType = selectedNode.getText();
                 }
             }
-        } catch (RemoteException e) {
-            String msg = "Unable to subscribe to the production cartridge";
-            log.error(msg, e);
-            throw new AppFactoryException(msg, e);
-        }
-    }
 
-    /**
-     * We are initializing this every time because for different applications we need to login as different tenants
-     * This is because the ADC service creates a git-repo for the logged in tenant.
-     *
-     * @param applicationId The application ID of the newly created application
-     * @return an instance of the applicationManagementServiceStub which is authenticated as the tenant of application ID
-     * @throws AppFactoryException
-     */
-    private ApplicationManagementServiceStub initializeApplicationManagementServiceStub(String applicationId,
-                                                                                        String backEndEpr)
-            throws AppFactoryException {
-        ApplicationManagementServiceStub serviceStub;
-        String endpoint = backEndEpr + "ApplicationManagementService";
-        try {
-            String authCookie = authenticate(applicationId, backEndEpr);
-
-            serviceStub = new ApplicationManagementServiceStub(endpoint);
-            ServiceClient client = serviceStub._getServiceClient();
-            Options option = client.getOptions();
-            option.setManageSession(true);
-            option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
-                    authCookie);
-        } catch (AxisFault axisFault) {
-            String msg = "Unable to initialize application management service stub ";
-            log.error(msg, axisFault);
-            throw new AppFactoryException(msg, axisFault);
+        } catch (RegistryException e) {
+            String msg = "Unable to find the rxt resource : " + applicationId;
+            log.error(msg,e);
+            throw new AppFactoryException(msg,e);
+        } catch (XMLStreamException e) {
+            String msg = "Unable to read the rxt resource : " + applicationId;
+            log.error(msg,e);
+            throw new AppFactoryException(msg,e);
+        } catch (JaxenException e) {
+            String msg = "Unable to parse the rxt resource : " + applicationId;
+            log.error(msg,e);
+            throw new AppFactoryException(msg,e);
         }
 
-        return serviceStub;
-    }
+        if(applicationType == null){
+            return;
+        }
 
-    /**
-     * The authenticate method which will login to the ADC as a tenant.
-     *
-     * @param applicationId The application ID of the newly created application.
-     *                      this is used to create the tenant name.
-     *                      the name is created as 'admin@admin.com@applicationId'
-     * @return the cookie string
-     * @throws AppFactoryException
-     */
-    private String authenticate(String applicationId, String backEndEpr) throws AppFactoryException {
-        String serviceURL = backEndEpr + "AuthenticationAdmin";
-        String userName = getAdminUsername(applicationId);
-        String password = getServerAdminPassword();
-        boolean authenticate;
+        for (Map.Entry<String, Map<String,DeployerInfo>> deployerInfoEntry : deployerMap.entrySet()) {
+            String stage = deployerInfoEntry.getKey();
+            DeployerInfo deployerInfo = null;
 
-        try {
-            AuthenticationAdminStub authStub = new AuthenticationAdminStub(serviceURL);
-            authStub._getServiceClient().getOptions().setManageSession(true);
-            authenticate = authStub.login(userName, password, getRemoteHost(serviceURL));
-            if (authenticate) {
-                return (String) authStub._getServiceClient().getServiceContext()
-                        .getProperty(HTTPConstants.COOKIE_STRING);
+            if(deployerInfoEntry.getValue().containsKey(applicationType)){
+                deployerInfo = deployerInfoEntry.getValue().get(applicationType);
+            }else{
+                deployerInfo = deployerInfoEntry.getValue().get("*");
             }
-            return null;
-        } catch (RemoteException e) {
-            String msg = "Invalid remote address given";
-            log.error(msg, e);
-            throw new AppFactoryException(msg, e);
-        } catch (LoginAuthenticationExceptionException e) {
-            String msg = "Unable to login";
-            log.error(msg, e);
-            throw new AppFactoryException(msg, e);
-        } catch (MalformedURLException e) {
-            String msg = "The given URL is incorrect";
-            log.error(msg, e);
-            throw new AppFactoryException(msg, e);
+
+            SubscribeExecutor executor = new SubscribeExecutor();
+            executor.setApplicationId(applicationId);
+            executor.setDeployerInfo(deployerInfo);
+            executor.setStage(stage);
+            executor.setTenantId(tenantId);
+
+            service.execute(executor);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully sent subscription request to stage : " + deployerInfoEntry.getKey());
+            }
         }
+
     }
+
+
 }

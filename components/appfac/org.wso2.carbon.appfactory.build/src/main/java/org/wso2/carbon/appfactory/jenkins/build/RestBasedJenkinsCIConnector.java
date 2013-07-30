@@ -1,17 +1,17 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.jenkins.build;
@@ -31,6 +31,7 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
@@ -51,6 +52,7 @@ import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.dto.Statistic;
 import org.wso2.carbon.appfactory.jenkins.build.internal.ServiceContainer;
+import org.wso2.carbon.appfactory.utilities.project.ProjectUtils;
 
 /**
  * Connects to a jenkins server using its 'Remote API'.
@@ -164,8 +166,7 @@ public class RestBasedJenkinsCIConnector {
     public void assignUsers(String[] userIds, String[] projectRoleNames, String[] globalRoleNames)
             throws AppFactoryException {
 
-        String assignURL = "/descriptorByName/com.michelin.cio.hudson.plugins.rolestrategy" +
-                           ".RoleBasedAuthorizationStrategy/assignRolesSubmit";
+        String assignURL = JenkinsCIConstants.RoleStrategy.ASSIGN_ROLE_SERVICE;
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         for (String id : userIds) {
@@ -210,6 +211,59 @@ public class RestBasedJenkinsCIConnector {
         }
 
     }
+    
+    /**
+     * Assign set of users to the application given.
+     * <p>
+     * <b>NOTE: this method assumes a modified version (by WSO2) of
+     * 'role-strategy' plugin is installed in jenkins server</b>
+     * </p>
+     * 
+     * @param appicationKey
+     * @param users
+     * @throws AppFactoryException
+     */
+	public void unAssignUsers(String appicationKey, String[] users) throws AppFactoryException {
+		if (appicationKey == null) {
+			throw new NullPointerException("Application cannot be null.");
+		}
+
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		for (int i = 0; i < users.length; ++i) {
+			params.add(new NameValuePair("sid", users[i]));
+		}
+
+		params.add(new NameValuePair("projectRole", appicationKey));
+
+		PostMethod assignRolesMethod =
+		                               createPost(JenkinsCIConstants.RoleStrategy.UNASSIGN_ROLE_SERVICE,
+		                                          params.toArray(new NameValuePair[params.size()]),
+		                                          null);
+		try {
+			int httpStatusCode = getHttpClient().executeMethod(assignRolesMethod);
+			if (200 != httpStatusCode) {
+				String errorMsg =
+				                  String.format("Unable to un-assign roles to given application. jenkins returned, http status : %d",
+				                                new Object[] {
+
+				                                Integer.valueOf(httpStatusCode) });
+				log.error(errorMsg);
+				throw new AppFactoryException(errorMsg);
+			}
+		} catch (HttpException e) {
+			String errorMsg =
+			                  String.format("Error while un-assining user roles from aplication: %s",
+			                                new Object[] { e.getMessage() });
+			log.error(errorMsg, e);
+			throw new AppFactoryException(errorMsg, e);
+		} catch (IOException ex) {
+			String errorMsg =
+			                  String.format("Error while un-assining user roles from aplication: %s",
+			                                new Object[] { ex.getMessage() });
+			log.error(errorMsg, ex);
+			throw new AppFactoryException(errorMsg, ex);
+		}
+	}
 
     /**
      * Returns all the jobs defined in jenkins server.
@@ -328,7 +382,7 @@ public class RestBasedJenkinsCIConnector {
      */
     public void createJob(String jobName, Map<String, String> jobParams) throws AppFactoryException {
 
-        OMElement jobConfiguration = new JobConfigurator(jobParams).configure();
+        OMElement jobConfiguration = new JobConfigurator(jobParams).configure(jobParams.get(JenkinsCIConstants.APPLICATION_EXTENSION));
         NameValuePair[] queryParams = {new NameValuePair("name", jobName)};
         PostMethod createJob = null;
         boolean jobCreatedFlag = false;
@@ -547,12 +601,9 @@ public class RestBasedJenkinsCIConnector {
     public String getbuildStatus(String buildUrl) throws AppFactoryException {
 
         String buildStatus = "Unknown";
-
-        NameValuePair[] queryParameters = {new NameValuePair("xpath", "/*/result")};
-
         GetMethod checkJobExistsMethod =
                 createGet(buildUrl, "api/xml",
-                        queryParameters);
+                        null);
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(checkJobExistsMethod);
@@ -571,7 +622,11 @@ public class RestBasedJenkinsCIConnector {
                             checkJobExistsMethod.getResponseBodyAsStream());
             OMElement resultElement = builder.getDocumentElement();
             if (resultElement != null) {
-                buildStatus = resultElement.getText();
+                if("false".equals(getValueUsingXpath(resultElement,"/*/building")) ){
+                                        buildStatus =getValueUsingXpath(resultElement,"/*/result");
+                                    } else {
+                                        buildStatus="Building";
+                                    }
 
             }
 
@@ -674,7 +729,7 @@ public class RestBasedJenkinsCIConnector {
         return list;
 
     }
-    
+
     /**
      * Returns Jenkins-API information as a JSON array.
      * @param jobName       eg: applicationKey023-trunk-default
@@ -682,10 +737,16 @@ public class RestBasedJenkinsCIConnector {
      * @return  buildsInfo (Which is a JSON array with requested information
      * @throws AppFactoryException
      */
-    public String getValuesForJobAsJsonTree(String jobName,String treeStructure) throws AppFactoryException {
-
-        String buildUrl = String.format("%s/job/%s/", this.getJenkinsUrl(), jobName);
+    public String getJsonTree(String jobName,String treeStructure) throws AppFactoryException {
+        
+        String buildUrl = null;
         String buildsInfo = null;
+        log.info(String.format("getJsonTree - for %s > %s",jobName, treeStructure));
+        if(jobName==null || jobName.isEmpty() || jobName.equalsIgnoreCase("all") || jobName.equals("*")){
+            buildUrl=this.getJenkinsUrl()+"/";
+        }else{
+            buildUrl = String.format("%s/job/%s/", this.getJenkinsUrl(), jobName);
+        }
 
         NameValuePair[] queryParameters = {new NameValuePair("tree", treeStructure)};
 
@@ -711,7 +772,6 @@ public class RestBasedJenkinsCIConnector {
         } finally {
             getBuildsHistoryMethod.releaseConnection();
         }
-
         return buildsInfo;
     }
 
@@ -793,13 +853,13 @@ public class RestBasedJenkinsCIConnector {
 //        for (String serviceUrl : deploymentServerUrls) {
 //            parameters.add(new NameValuePair("deploymentServerUrl", serviceUrl));
 //        }
-        addStageSpecificParameters(stage, parameters);
+        addStageSpecificParameters(stage, artifactType, parameters);
 
 
         PostMethod deployLatestSuccessArtifactMethod = createPost(deployLatestSuccessArtifactUrl,
-                                                                  parameters.toArray(
-                                                                          new NameValuePair[
-                                                                          parameters.size()]), null);
+                                                                  null, null, parameters.toArray(
+                                                                                                 new NameValuePair[
+                                                                                                                   parameters.size()]));
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(deployLatestSuccessArtifactMethod);
@@ -819,19 +879,47 @@ public class RestBasedJenkinsCIConnector {
         }
     }
 
-    private void addStageSpecificParameters(String stage, List<NameValuePair> parameters) {
+    private void addStageSpecificParameters(String stage,String appType, List<NameValuePair> parameters) {
 //        We send all the configuration elements in the appfactory xml to jenkins
+        parameters.add(new NameValuePair("deployStage", stage));
         AppFactoryConfiguration configuration = ServiceContainer.getAppFactoryConfiguration();
 
         Map<String,List<String>> allProperties = configuration.getAllProperties();
+
+        boolean hasAppType= false;
 
         String prefix = AppFactoryConstants.DEPLOYMENT_STAGES + "." + stage;
         for (Map.Entry<String, List<String>> entry : allProperties.entrySet()) {
             if(entry.getKey().startsWith(prefix)){
                 String propName = entry.getKey().replace(prefix + ".","");
 
+                if (propName.contains("Deployer.ApplicationType." + appType)) {
+                    hasAppType = true;
+                    continue;
+                }
                 for (String value : entry.getValue()) {
                     parameters.add(new NameValuePair(propName,value));
+                }
+            }
+        }
+
+        for (Map.Entry<String, List<String>> entry : allProperties.entrySet()) {
+            if (entry.getKey().startsWith(prefix)) {
+                String propName = entry.getKey().replace(prefix + ".", "");
+                if (hasAppType) {
+                    if (propName.contains("Deployer.ApplicationType." + appType)) {
+                        propName = propName.replace(".ApplicationType." + appType,"");
+                        for (String value : entry.getValue()) {
+                            parameters.add(new NameValuePair(propName, value));
+                        }
+                    }
+                }else{
+                    if (propName.contains("Deployer.ApplicationType.*")) {
+                        propName = propName.replace(".ApplicationType.*","");
+                        for (String value : entry.getValue()) {
+                            parameters.add(new NameValuePair(propName, value));
+                        }
+                    }
                 }
             }
         }
@@ -846,7 +934,7 @@ public class RestBasedJenkinsCIConnector {
      * @throws AppFactoryException
      */
     public void deployTaggedArtifact(String jobName, String artifactType, String tagName,
-                                     String stage) throws AppFactoryException {
+                                     String stage, String deployAction) throws AppFactoryException {
 
         String deployTaggedArtifactUrl = "/plugin/appfactory-plugin/deployTaggedArtifact";
 
@@ -857,16 +945,17 @@ public class RestBasedJenkinsCIConnector {
         parameters.add(new NameValuePair("artifactType", artifactType));
         parameters.add(new NameValuePair("jobName", jobName));
         parameters.add(new NameValuePair("tagName", tagName));
+        parameters.add(new NameValuePair("deployAction", deployAction));
 //        for (String serviceUrl : deploymentServerUrls) {
 //            parameters.add(new NameValuePair("deploymentServerUrl", serviceUrl));
 //        }
 
-        addStageSpecificParameters(stage,parameters);
+        addStageSpecificParameters(stage,artifactType, parameters);
 
         PostMethod deployTaggedArtifactMethod = createPost(deployTaggedArtifactUrl,
-                                                           parameters.toArray(
-                                                                   new NameValuePair[
-                                                                   parameters.size()]), null);
+                                                           null, null, parameters.toArray(
+                                                                                          new NameValuePair[
+                                                                                                            parameters.size()]));
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(deployTaggedArtifactMethod);
@@ -884,6 +973,43 @@ public class RestBasedJenkinsCIConnector {
             throw new AppFactoryException(errorMsg, ex);
         } finally {
             deployTaggedArtifactMethod.releaseConnection();
+        }
+    }
+
+    public void deployPromotedArtifact(String jobName,String artifactType, String stage) throws AppFactoryException {
+
+        String deployPromotedArtifactUrl = "/plugin/appfactory-plugin/deployPromotedArtifact";
+
+        String applicationId = getAppId(jobName);
+
+        List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+        parameters.add(new NameValuePair("jobName", jobName));
+        parameters.add(new NameValuePair("applicationId", applicationId));
+        parameters.add(new NameValuePair("artifactType", artifactType));
+
+        addStageSpecificParameters(stage,artifactType,parameters);
+
+        PostMethod deployPromotedArtifactMethod = createPost(deployPromotedArtifactUrl,
+                null, null, parameters.toArray(
+                                               new NameValuePair[
+                                                                 parameters.size()]));
+
+        try {
+            int httpStatusCode = getHttpClient().executeMethod(deployPromotedArtifactMethod);
+            log.info("status code for deploy promoted artifact artifact : " + httpStatusCode);
+            if (HttpStatus.SC_OK != httpStatusCode) {
+                String errorMsg = "Unable to deploy the promoted artifact for job " + jobName +
+                        ". jenkins returned, http status : " + httpStatusCode;
+                log.error(errorMsg);
+                throw new AppFactoryException(errorMsg);
+            }
+        } catch (Exception ex) {
+            String errorMsg = "Unable to deploy the promoted artifact for job " + jobName +
+                    ": " + ex.getMessage();
+            log.error(errorMsg, ex);
+            throw new AppFactoryException(errorMsg, ex);
+        } finally {
+            deployPromotedArtifactMethod.releaseConnection();
         }
     }
 
@@ -949,6 +1075,7 @@ public class RestBasedJenkinsCIConnector {
      * @param pollingPeriod AD pollingPeriod
      * @throws AppFactoryException
      */
+    @Deprecated
     public void editJob(String jobName, String updateState, int pollingPeriod)
             throws AppFactoryException {
         OMElement configuration = getConfiguration(jobName, updateState, pollingPeriod);
@@ -958,7 +1085,79 @@ public class RestBasedJenkinsCIConnector {
 
     }
 
-    /**
+	public void setJobAutoBuildable(String jobName, String repositoryType,boolean isAutoBuild, int pollingPeriod)
+	                                                                                       throws AppFactoryException {
+		OMElement configuration =
+		                          getAutoBuildUpdatedConfiguration(jobName, repositoryType,isAutoBuild,
+		                                                           pollingPeriod);
+		OMElement tmpConfiguration = configuration.cloneOMElement();
+		setConfiguration(jobName, tmpConfiguration);
+		log.info("Job : " + jobName + " sccessfully configured for auto building " + isAutoBuild +" in jenkins");
+	}
+
+	private OMElement getAutoBuildUpdatedConfiguration(String jobName, String repositoryType,boolean isAutoBuild,
+	                                                   int pollingPeriod)
+	                                                                     throws AppFactoryException {
+		GetMethod getFetchMethod = createGet(String.format("/job/%s/config.xml", jobName), null);
+		OMElement configurations = null;
+		try {
+
+			int httpStatusCode = getHttpClient().executeMethod(getFetchMethod);
+			if (HttpStatus.SC_OK != httpStatusCode) {
+				String errorMsg =
+				                  String.format("Unable to retrieve available config urls from "
+				                                        + "jenkins for job %s. "
+				                                        + "jenkins returned, http status : %d",
+				                                jobName,
+				                                httpStatusCode);
+				log.error(errorMsg);
+				throw new AppFactoryException(errorMsg);
+			}
+
+			StAXOMBuilder builder = new StAXOMBuilder(getFetchMethod.getResponseBodyAsStream());
+			configurations = builder.getDocumentElement();
+
+			AXIOMXPath axiomxPath = new AXIOMXPath("//triggers");
+			Object selectedObject = axiomxPath.selectSingleNode(configurations);
+			if (isAutoBuild) {
+
+				if (selectedObject != null) {
+					OMElement selectedNode = (OMElement) selectedObject;
+					selectedNode.detach();
+				}
+
+				StringBuilder payload =new StringBuilder(
+				                 "<triggers class=\"vector\">" + "<hudson.triggers.SCMTrigger>");
+               if("git".equals(repositoryType)){
+                payload=payload.append("<spec></spec>");
+               }else {
+                payload=payload.append("<spec>*/" + pollingPeriod + " * * * *</spec>");
+               }
+			   payload=payload.append("</hudson.triggers.SCMTrigger>" + "</triggers>");
+				OMElement triggerParam = AXIOMUtil.stringToOM(payload.toString());
+				configurations.addChild(triggerParam);
+
+			} else {
+				if (selectedObject != null) {
+					OMElement selectedNode = (OMElement) selectedObject;
+					selectedNode.detach();
+				}
+			}
+
+		} catch (Exception ex) {
+			String errorMsg =
+			                  String.format("Unable to retrieve available jobs from jenkins : %s",
+			                                ex.getMessage());
+			log.error(errorMsg, ex);
+			throw new AppFactoryException(errorMsg, ex);
+		} finally {
+			getFetchMethod.releaseConnection();
+		}
+		return configurations;
+
+	}
+
+	/**
      * fetch job configurations from jenkins
      *
      * @param jobName job name of which we need to get the configuration of
@@ -967,6 +1166,7 @@ public class RestBasedJenkinsCIConnector {
      * @return configuration after adding or removing AD configurations
      * @throws AppFactoryException
      */
+	@Deprecated
     private OMElement getConfiguration(String jobName, String updateState, int pollingPeriod)
             throws AppFactoryException {
         GetMethod getFetchMethod = createGet(String.format("/job/%s/config.xml", jobName), null);
@@ -1039,7 +1239,7 @@ public class RestBasedJenkinsCIConnector {
             int httpStatusCode = getHttpClient().executeMethod(createJob);
 
             if (HttpStatus.SC_OK != httpStatusCode) {
-                String errorMsg = String.format("Unable to create the job: [%s]. jenkins " +
+                String errorMsg = String.format("Unable to set configuration: [%s]. jenkins " +
                                                 "returned, http status : %d",
                                 jobName, httpStatusCode);
                 log.error(errorMsg);
@@ -1049,7 +1249,7 @@ public class RestBasedJenkinsCIConnector {
             }
 
         } catch (Exception ex) {
-            String errorMsg = "Error while trying creating job: " + jobName;
+            String errorMsg = "Error while setting configuration: " + jobName;
             log.error(errorMsg, ex);
 
             //noinspection ConstantConditions
@@ -1102,10 +1302,8 @@ public class RestBasedJenkinsCIConnector {
         return get;
     }
 
-
     /**
-     * Util method to create a POST method
-     *
+     *  Overloaded Util method to create a POST method
      * @param urlFragment     Url fragments.
      * @param queryParameters Query parameters.
      * @param requestEntity   A request entity
@@ -1113,6 +1311,21 @@ public class RestBasedJenkinsCIConnector {
      */
     private PostMethod createPost(String urlFragment, NameValuePair[] queryParameters,
                                   RequestEntity requestEntity) {
+        return createPost(urlFragment, queryParameters, requestEntity, null);
+    }
+    
+    
+    /**
+     * Util method to create a POST method
+     *
+     * @param urlFragment     Url fragments.
+     * @param queryParameters Query parameters.
+     * @param postParameters  Post parameters.
+     * @param requestEntity   A request entity
+     * @return a {@link PostMethod}
+     */
+    private PostMethod createPost(String urlFragment, NameValuePair[] queryParameters,
+                                  RequestEntity requestEntity, NameValuePair[] postParameters) {
         PostMethod post = new PostMethod(getJenkinsUrl() + urlFragment);
         if (authenticate) {
             post.setDoAuthentication(true);
@@ -1126,63 +1339,101 @@ public class RestBasedJenkinsCIConnector {
             post.setRequestEntity(requestEntity);
         }
 
+        if ( postParameters != null){
+            post.addParameters(postParameters);
+        }
+        
         return post;
     }
+    private String getValueUsingXpath(OMElement template, String selector)
+             throws AppFactoryException {
+                String value = null;
+                try {
+                        AXIOMXPath axiomxPath = new AXIOMXPath(selector);
+                        Object selectedObject = axiomxPath.selectSingleNode(template);
 
-    /**
-     * Calls to Jenkins and creates a tag from the latest successful built artifact by given {@code newTagName}.
-     *
-     * @param jobName      Name of the job to be tagged.
-     * @param artifactType artifactType artifact type (car/war) that is going to get tagged.
-     * @param newTagName   the name that the new tag will be created.
-     * @param version      TODO
-     * @throws AppFactoryException
-     */
-    public void createNewTagByLastSuccessBuild(String jobName, String artifactType,
-                                               String newTagName, String version,String stage)
-            throws AppFactoryException {
+                        if (selectedObject != null && selectedObject instanceof OMElement) {
+                                OMElement selectedElement = (OMElement) selectedObject;
+                                value=selectedElement.getText();
+                            } else {
+                                log.warn("Unable to find xml element matching selector : " + selector);
+                            }
 
-        String createNewTagByLastSuccessBuildUrl =
-                "/plugin/appfactory-plugin/createNewTagByLastSuccessBuild";
+                            } catch (Exception ex) {
+                        throw new AppFactoryException("Unable to set value to job config", ex);
+                    }
+                return value;
+            }
 
-        String applicationId = getAppId(jobName);
+    public void setJobAutoDeployable(String jobName, boolean isAutoDeployable)
+                                                                              throws AppFactoryException {
 
-        List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-        parameters.add(new NameValuePair("applicationId", applicationId));
-        parameters.add(new NameValuePair("artifactType", artifactType));
-        parameters.add(new NameValuePair("jobName", jobName));
-        parameters.add(new NameValuePair("tagName", newTagName));
-        parameters.add(new NameValuePair("version", version));
+        OMElement configuration = getAutoDeployUpdatedConfiguration(jobName, isAutoDeployable);
+        OMElement tmpConfiguration = configuration.cloneOMElement();
+        setConfiguration(jobName, tmpConfiguration);
+        log.info("Job : " + jobName + " sccessfully configured for auto building " +
+                 isAutoDeployable + " in jenkins");
+    }
 
-        addStageSpecificParameters(stage,parameters);
+    private OMElement getAutoDeployUpdatedConfiguration(String jobName, boolean isAutoDeploy)
+                                                                                             throws AppFactoryException {
+        OMElement configurations = null;
 
-        PostMethod createNewTagByLastSuccessBuildMethod =
-                createPost(createNewTagByLastSuccessBuildUrl,
-                        parameters.toArray(new NameValuePair[parameters.size()]),
-                        null);
-        log.debug("Trying to invoke the jenkins service : createNewTagByLastSuccessBuild with applicationId -" +
-                applicationId + " tagName -" + newTagName);
+        GetMethod getFetchMethod = createGet(String.format("/job/%s/config.xml", jobName), null);
 
         try {
-            int httpStatusCode = getHttpClient().executeMethod(createNewTagByLastSuccessBuildMethod);
-            log.info("status code for create new tag from last successful build : " + httpStatusCode);
+            int httpStatusCode = getHttpClient().executeMethod(getFetchMethod);
             if (HttpStatus.SC_OK != httpStatusCode) {
                 String errorMsg =
-                        "Unable to crate tag from last successful build jenkins " +
-                                "returned, http status : " + httpStatusCode;
+                                  String.format("Unable to retrieve available config urls from "
+                                                        + "jenkins for job %s. "
+                                                        + "jenkins returned, http status : %d",
+                                                jobName,
+                                                httpStatusCode);
                 log.error(errorMsg);
                 throw new AppFactoryException(errorMsg);
             }
+
+            StAXOMBuilder builder = new StAXOMBuilder(getFetchMethod.getResponseBodyAsStream());
+            configurations = builder.getDocumentElement();
+
+            String paramValue = null;
+            if (isAutoDeploy) {
+                paramValue = "true";
+            } else {
+                paramValue = "false";
+            }
+
+            AXIOMXPath axiomxPath =
+                                    new AXIOMXPath(
+                                                   "//hudson.model.ParametersDefinitionProperty[1]/parameterDefinitions[1]/hudson.model.StringParameterDefinition[name='isAutomatic']/defaultValue");
+            Object selectedObject = axiomxPath.selectSingleNode(configurations);
+
+            if (selectedObject != null) {
+                OMElement selectedNode = (OMElement) selectedObject;
+                selectedNode.setText(paramValue);
+            } else {
+                AXIOMXPath axiomP =
+                                    new AXIOMXPath(
+                                                   "//hudson.model.ParametersDefinitionProperty[1]/parameterDefinitions[1]");
+                Object parameterDefsObject = axiomP.selectSingleNode(configurations);
+                OMElement parameterDefsNode = (OMElement) parameterDefsObject;
+
+                String payload = "<isAutomatic>" + paramValue + "</isAutomatic>";
+                OMElement triggerParam = AXIOMUtil.stringToOM(payload);
+                parameterDefsNode.addChild(triggerParam);
+            }
+
         } catch (Exception ex) {
             String errorMsg =
-                    "Unable to crate tag from last successful build jenkins : " +
-                            ex.getMessage();
+                              String.format("Unable to retrieve available jobs from jenkins : %s",
+                                            ex.getMessage());
             log.error(errorMsg, ex);
             throw new AppFactoryException(errorMsg, ex);
         } finally {
-            createNewTagByLastSuccessBuildMethod.releaseConnection();
+            getFetchMethod.releaseConnection();
         }
 
+        return configurations;
     }
-
 }

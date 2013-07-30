@@ -1,84 +1,61 @@
-var numberOfSlides = 5;
+var numberOfSlides = 4;
 var currentSlide = 1;
-var slideItems = function() {
-    var index = parseInt($(this).attr('data-value'));
-    if ($(this).hasClass('slide-right')) {
-        index++;
-    } else {
-        index--;
-    }
-    if (index > numberOfSlides) {
-        index = 1;
-    }
-    if (index < 1) {
-        index = numberOfSlides;
-    }
+var sliderTimer;
+var waitTimer;
 
-
-    goto(index);
-
-
-};
+function rotateSlides(){
+	$('#slider-buttons li').removeClass('active');
+	if (currentSlide >= numberOfSlides) {
+        currentSlide = 1;
+		$('.slide-left').addClass('active');
+    }else if (currentSlide < 1) {
+        currentSlide = numberOfSlides;
+		$('.slide-right').addClass('active');
+    }else{
+		currentSlide++;
+	}
+	
+	$('#slider-buttons li').each(function(index){
+			if(index == currentSlide -1){
+				$(this).addClass("active");
+			}
+	});
+    goto(currentSlide);
+}
 $(document).ready(function() {
-    $('.slide-left').click(slideItems);
-    $('.slide-right').click(slideItems);
-
     if ($.browser.msie && $.browser.version == 7.0) {
         $('.contentbox').hide();
         $("#slide_1").show();
         $("#slide_image_1").show();
     }
+	
+	sliderTimer = setInterval(rotateSlides,5000);
 });
-
+function selectSlide(index,obj){
+    clearInterval(waitTimer);
+    clearInterval(sliderTimer);
+    $('#slider-buttons li').removeClass('active');
+    $(obj).parent().addClass("active");
+     goto(index,obj);
+}
 function goto(index, t) {
     //animate to the div id.
-     if (index == numberOfSlides) {
-        $('.slide-left').show();
-        $('.slide-right').hide();
-    } else if (index == 1) {
-        $('.slide-left').hide();
-        $('.slide-right').show();
-    } else {
-        $('.slide-left').show();
-        $('.slide-right').show();
+    if(index==1){
+        $(".contentbox-wrapper").css('left',$("#slide_0").position().left);
+        $(".contentbox-image-wrapper").css('left',$("#slide_0").position().left);
+        $("#small-clouds").css('left',0);
+        $("#big-clouds").css('left',0);
     }
-
-    $('.slide-left').attr('data-value', index);
-    $('.slide-right').attr('data-value', index);
-
     if ($.browser.msie && $.browser.version == 7.0) {
         $('.contentbox').hide();
         $("#slide_" + index).show();
         $("#slide_image_" + index).show();
     }
-    $(".contentbox-wrapper").delay(100).animate({"left": -($("#slide_" + index).position().left)}, 600);
-    $(".contentbox-image-wrapper").delay(300).animate({"left": -($("#slide_" + index).position().left)}, 800);
-
-
+    //if(index!= numberOfSlides){
+        $(".contentbox-wrapper").delay(100).animate({"left": -($("#slide_" + index).position().left)}, 600);
+        $(".contentbox-image-wrapper").delay(300).animate({"left": -($("#slide_" + index).position().left)}, 800);
+    //}
     $("#small-clouds").animate({"left": -100 * index}, 700);
     $("#big-clouds").animate({"left": -350 * index}, 700);
-
-    //setting the header..
-    currentSlide = index;
-    $('.slide-headings h2').hide();
-    $('.slide-headings h2').each(function(index) {
-        if (currentSlide == index + 1) {
-            $(this).show();
-            $('span', this).hide();
-        } else {
-            $(this).hide();
-        }
-    });
-
-    $('.slide-headings h2').each(function(index) {
-        if (currentSlide == index + 1) {
-            $("span:first-child", this).show(100, function () {
-                // use callee so don't have to name the function
-                $(this).next().show(100, arguments.callee);
-            });
-        } else {
-            $(this).hide();
-        }
-    });
 }
 

@@ -1,17 +1,17 @@
 /*
  * Copyright 2005-2011 WSO2, Inc. (http://wso2.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 package org.wso2.carbon.appfactory.jenkins.build.internal;
@@ -25,12 +25,10 @@ import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.core.ApplicationEventsListener;
 import org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver;
 import org.wso2.carbon.appfactory.core.Storage;
-import org.wso2.carbon.appfactory.jenkins.build.JenkinsApplicationEventsListener;
-import org.wso2.carbon.appfactory.jenkins.build.JenkinsCIConstants;
-import org.wso2.carbon.appfactory.jenkins.build.JenkinsCISystemDriver;
-import org.wso2.carbon.appfactory.jenkins.build.JenkinsStorage;
-import org.wso2.carbon.appfactory.jenkins.build.RestBasedJenkinsCIConnector;
+import org.wso2.carbon.appfactory.core.TenantBuildManagerInitializer;
+import org.wso2.carbon.appfactory.jenkins.build.*;
 import org.wso2.carbon.appfactory.repository.mgt.RepositoryManager;
+import org.wso2.carbon.appfactory.utilities.application.ApplicationTypeManager;
 
 /**
  * @scr.component name="org.wso2.carbon.appfactory.jenkins.build"
@@ -45,6 +43,10 @@ import org.wso2.carbon.appfactory.repository.mgt.RepositoryManager;
  *                "org.wso2.carbon.appfactory.repository.mgt.RepositoryManager"
  *                cardinality="1..1" policy="dynamic"
  *                bind="setRepositoryManager" unbind="unsetRepositoryManager"
+ *@scr.reference name="app.type.manager"
+ *               interface="org.wso2.carbon.appfactory.utilities.application.ApplicationTypeManager"
+ *               cardinality="1..1" policy="dynamic" bind="setApplicationTypeManager"
+ *               unbind="unsetApplicationTypeManager"
  */
 public class JenkinsBuildServiceComponent {
 
@@ -70,7 +72,13 @@ public class JenkinsBuildServiceComponent {
     protected void unsetRepositoryManager(RepositoryManager repoManager) {
         ServiceContainer.setRepositoryManager(null);
     }
+    protected void setApplicationTypeManager(ApplicationTypeManager manager) {
+        ServiceContainer.setApplicationTypeManager(manager);
+    }
 
+    protected void unsetApplicationTypeManager(ApplicationTypeManager manager) {
+        ServiceContainer.setApplicationTypeManager(null);
+    }
     @SuppressWarnings("UnusedDeclaration")
     protected void activate(ComponentContext context) {
 
@@ -145,6 +153,7 @@ public class JenkinsBuildServiceComponent {
 
                 JenkinsStorage jenkinsStorage = new JenkinsStorage(connector);
                 bundleContext.registerService(Storage.class.getName(), jenkinsStorage, null);
+                bundleContext.registerService(TenantBuildManagerInitializer.class.getName(),new TenantBuildManagerInitializerImpl(),null);
             } else {
                 log.info("Jenkins is not enabled");
             }
