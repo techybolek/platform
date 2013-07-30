@@ -109,6 +109,8 @@ public class ActivityInHandler extends AbstractHandler {
                         if (aid != null) {
                             if (aid.equals("")) {
                                 element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
+                            } else {
+                                activityUUID = aid;
                             }
                         } else {
                             element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
