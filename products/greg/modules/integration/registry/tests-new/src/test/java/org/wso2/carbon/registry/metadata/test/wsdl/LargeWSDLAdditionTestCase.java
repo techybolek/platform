@@ -29,7 +29,9 @@ import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
@@ -93,6 +95,7 @@ public class LargeWSDLAdditionTestCase {
             throws RegistryException, RemoteException, ResourceAdminServiceExceptionException,
             LoginAuthenticationExceptionException {
         String pathPrefix = "/_system/governance";
+	GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
 
         Endpoint[] endpoints;
         endpoints = wsdl.getAttachedEndpoints();
