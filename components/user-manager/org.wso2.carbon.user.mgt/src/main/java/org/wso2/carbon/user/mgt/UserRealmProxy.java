@@ -239,7 +239,7 @@ public class UserRealmProxy {
 				                                                                             maxLimit);
 			} else {
 				throw new UserAdminException(
-				                             "Initialized User Store Magaer is not capable of getting the shared roles");
+				                             "Initialized User Store Manager is not capable of getting the shared roles");
 			}
 
 			List<FlaggedName> flaggedNames = new ArrayList<FlaggedName>();
@@ -261,10 +261,9 @@ public class UserRealmProxy {
 				if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
 					if (secManager != null &&
 					    (secManager.isReadOnly() || (secManager.getRealmConfiguration()
-                               .getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null &&
-                                secManager.getRealmConfiguration()
-					                                                                                                                          .getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES)
-					                                                                                                                          .equals("false")))) {
+                               .getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED) != null &&
+                                secManager.getRealmConfiguration().
+                                getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED).equals("false")))) {
 						fName.setEditable(false);
 					} else {
 						fName.setEditable(true);
@@ -365,18 +364,16 @@ public class UserRealmProxy {
 
                 if (domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
                     if (secManager!=null && (secManager.isReadOnly() ||
-                            (secManager.getRealmConfiguration().getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null &&
-                            secManager.getRealmConfiguration().getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES).equals("false")))) {
+                            ("false".equals(secManager.getRealmConfiguration().
+                            getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED))))) {
                         fName.setEditable(false);
                     } else {
                         fName.setEditable(true);
                     }
                 } else {
                     if (realm.getUserStoreManager().isReadOnly() ||
-                            (realm.getUserStoreManager().getRealmConfiguration().
-                                    getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES) != null &&
-                            realm.getUserStoreManager().getRealmConfiguration().
-                                    getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES).equals("false"))) {
+                        ("false".equals(realm.getUserStoreManager().getRealmConfiguration().
+                            getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED)))) {
                         fName.setEditable(false);
                     } else {
                         fName.setEditable(true);
@@ -956,8 +953,8 @@ public class UserRealmProxy {
                     if(domain != null && !UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)){
                         if(usMan.getSecondaryUserStoreManager(domain)!= null &&
                                 (usMan.getSecondaryUserStoreManager(domain).isReadOnly() ||
-                                        "false".equals(usMan.getSecondaryUserStoreManager(domain).getRealmConfiguration().
-                                                getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES)))){
+                                    "false".equals(usMan.getSecondaryUserStoreManager(domain).getRealmConfiguration().
+                                    getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED)))){
                             fName.setEditable(false);
                         }else{
                             fName.setEditable(true);
@@ -965,7 +962,7 @@ public class UserRealmProxy {
                     } else {
                         if(usMan.isReadOnly() || (usMan.getSecondaryUserStoreManager(domain) != null &&
                                 "false".equals(usMan.getRealmConfiguration().
-                                        getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES)))){
+                                    getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED)))){
                             fName.setEditable(false);
                         }else{
                             fName.setEditable(true);
@@ -1038,7 +1035,7 @@ public class UserRealmProxy {
                     if(usMan.getSecondaryUserStoreManager(domain)!= null &&
                             (usMan.getSecondaryUserStoreManager(domain).isReadOnly() ||
                         "false".equals(usMan.getSecondaryUserStoreManager(domain).getRealmConfiguration().
-                            getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES)))){
+                            getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED)))){
                         fName.setEditable(false);
                     }else{
                         fName.setEditable(true);
@@ -1046,7 +1043,7 @@ public class UserRealmProxy {
                 } else {
                     if(usMan.isReadOnly() || (usMan.getSecondaryUserStoreManager(domain) != null &&
                         "false".equals(usMan.getRealmConfiguration().
-                            getUserStoreProperty(LDAPConstants.WRITE_EXTERNAL_ROLES)))){
+                            getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED)))){
                         fName.setEditable(false);
                     }else{
                         fName.setEditable(true);
@@ -1340,7 +1337,8 @@ public class UserRealmProxy {
             }
             String exceededDomains = "";
             boolean isPrimaryExceeding = false;
-            Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_ROLE_LIST);
+            Map<String,Integer> maxUserListCount = ((AbstractUserStoreManager)realm.
+                    getUserStoreManager()).getMaxListCount(UserCoreConstants.RealmConfig.PROPERTY_MAX_ROLE_LIST);
             String[] domains = userCount.keySet().toArray(new String[userCount.keySet().size()]);
             for(int i=0;i<domains.length;i++){
                 if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domains[i])){
@@ -1397,6 +1395,8 @@ public class UserRealmProxy {
                     int combinerIndex = value.indexOf("|");
                     if (combinerIndex > 0) {
                         list.add(value.substring(0, combinerIndex));
+                    } else {
+                        list.add(value);
                     }
                 }
                 oldUserList = list.toArray(new String[list.size()]);
@@ -1705,7 +1705,7 @@ public class UserRealmProxy {
             }
 
             RealmConfiguration realmConfig = realm.getRealmConfiguration();
-            
+
             if(!realmConfig.getAdminUserName().equals(loggedInUserName)){
 
                 boolean isUserHadAdminPermission;
@@ -1772,32 +1772,6 @@ public class UserRealmProxy {
                     }
                 }
             }
-
-//            List<String> delRoles = new ArrayList<String>();
-//            List<String> addRoles = new ArrayList<String>();
-//
-//            if(newRoles != null){
-//                for(String name : newRoles){
-//                    if (Arrays.binarySearch(oldRoles, name) < 0) {
-//                        addRoles.add(name);
-//                    }
-//                }
-//                newRoles =  addRoles.toArray(new String[addRoles.size()]);
-//            }
-//
-//            if(!(oldRoles.length == 1 &&
-//                        oldRoles[0].equals(realm.getRealmConfiguration().getEveryOneRoleName()))){
-//                if(deletedRoles != null){
-//                    for(String name : deletedRoles){
-//                        if (Arrays.binarySearch(oldRoles, name) > -1) {
-//                            delRoles.add(name);
-//                        }
-//                    }
-//                }
-//                deletedRoles = delRoles.toArray(new String[delRoles.size()]);
-//            } else {
-//                deletedRoles = null;
-//            }
 
             realm.getUserStoreManager().updateRoleListOfUser(userName, deletedRoles , newRoles);
 
@@ -1875,8 +1849,8 @@ public class UserRealmProxy {
             throws UserAdminException {
         try {
 			if (((AbstractUserStoreManager) realm.getUserStoreManager()).isOthersSharedRole(roleName)) {
-				throw new UserAdminException(
-				                             "Logged in user is not authorized to assign permissions to a role belong to another tenant");
+				throw new UserAdminException("Logged in user is not authorized to assign " +
+                        "permissions to a role belong to another tenant");
 			}
             if (realm.getRealmConfiguration().getAdminRoleName().equals(roleName)) {
                 String msg = "UI permissions of Admin is not allowed to change";
