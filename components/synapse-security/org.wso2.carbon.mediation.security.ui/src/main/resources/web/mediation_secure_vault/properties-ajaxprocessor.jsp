@@ -56,16 +56,8 @@
 <%
         return;
     }
-    String requestedPage = request.getParameter("page");
-    int start;
-    int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
-    if (requestedPage != null) {
-        start = (int) ((Integer.parseInt(requestedPage) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
-    } else {
-        start = 1;
-    }
-    //PaginationContext.init(start, count, "", "", 1500);
-     PropertiesBean propertiesBean_ = client_.getProperties(request);
+    String requestedPage = request.getParameter("dynamicPageNumber");
+    PropertiesBean propertiesBean_ = client_.getProperties(request,Integer.parseInt(requestedPage ==null?"0":requestedPage));
     if (propertiesBean_ == null) {
         return;
     }
@@ -83,26 +75,7 @@
 <div id="middle">
 <div id="workArea" style="background-color:#F4F4F4;">
 
-	<div id="propertiesSum" class="summeryStyle">
-		<%
-            if (propertiesBean_.getSysProperties() == null ||
-                    propertiesBean_.getSysProperties().length == 0) {
-        %>
-		<fmt:message key="no.properties.defined.yet" />
-		<%
-            } else if (propertiesBean_.getSysProperties().length == 1) {
-        %>
-		<fmt:message key="one.property" />
-		<%
-        } else {
-        %>
-		<%=Integer.parseInt(session.getAttribute("row_count").toString())%>
-		<fmt:message key="properties" />
-		<%
-            }
-        %>
 
-	</div>
 
 	<div id="propertiesList">
 		<%
@@ -131,10 +104,10 @@
                     if (requestedPage != null && requestedPage.length() > 0) {
                         pageNumber = new Integer(requestedPage);
                     } else {
-                        pageNumber = 1;
+                        pageNumber = 0;
                     }
 
-                    int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+                    int rowCount = client_.getPropertiesLenght();
                     int numberOfPages;
                     if (rowCount % itemsPerPage == 0) {
                         numberOfPages = rowCount / itemsPerPage;
@@ -145,9 +118,7 @@
                 for (int i = 0; i < sysProperties.length; i++) {
                     String name = sysProperties[i];
                     String value = "";
-                    if (properties.get(name) != null) {
-                        value = "******************************************";//(String) properties.get(name);
-                    }
+
 
             %>
 

@@ -54,7 +54,7 @@ function setProperty() {
 				// +=validateEmptySV(document.getElementById('propValue'),
 				// org_wso2_carbon_mediation_secure_vault_ui_jsi18n["property.value"]);
 				// }
-                                //alert("kkk :" +reason);
+              
 
 				if (reason == "") {
 					reason += validateForInputSV(
@@ -70,7 +70,7 @@ function setProperty() {
 				var propertyName = document.getElementById('propName').value;
 				var propertyValue = document.getElementById('propValue').value;
 
-                                //alert("cc :" +reason);
+                 
 
 				if (reason == "") {
 					propertyName = propertyName.replace(/^\s\s*/, '').replace(
@@ -94,7 +94,7 @@ function setProperty() {
 				var foundPropName = false;
 				var allNodes = document.getElementById("propertiesList")
 						.getElementsByTagName("*");
-			        //alert("ccc@@@@@@@@-1");
+			  
 				for ( var i = 0; i < allNodes.length; i++) {
 					if (YAHOO.util.Dom.hasClass(allNodes[i],
 							"propEditNameSelector")) {
@@ -110,7 +110,6 @@ function setProperty() {
   					//alert("about to submit1");
 					cleanField($('propName'));
 					cleanField($('propValue'));
-					//alert("about to submit");
 					new Ajax.Request(
 							'../mediation_secure_vault/properties-ajaxprocessor.jsp',
 							{
@@ -121,11 +120,8 @@ function setProperty() {
 								},
 
 								onSuccess : function(transport) {
-									$('resourceProperties').innerHTML = transport.responseText;
-									$('propertiesList').style.display = "";
-									$('propertiesIconExpanded').style.display = "";
-									$('propertiesIconMinimized').style.display = "none";
-									refreshMetadataSection(resourcePath);
+									window.location.reload();
+                                                                        
 								},
 
 								onFailure : function(transport) {
@@ -141,6 +137,7 @@ function setProperty() {
 			},
 			org_wso2_carbon_mediation_secure_vault_ui_jsi18n["session.timed.out"]);
 	propertyOperationStarted = false;
+   
 }
 
 function editProperty(rowid) {
@@ -205,11 +202,7 @@ function editProperty(rowid) {
 								},
 
 								onSuccess : function(transport) {
-									$('resourceProperties').innerHTML = transport.responseText;
-									$('propertiesList').style.display = "";
-									$('propertiesIconExpanded').style.display = "";
-									$('propertiesIconMinimized').style.display = "none";
-									refreshMetadataSection(resourcePath);
+									window.location.reload();
 								},
 
 								onFailure : function(transport) {
@@ -261,11 +254,7 @@ function removeProperty(propertyName) {
 												},
 
 												onSuccess : function(transport) {
-													$('resourceProperties').innerHTML = transport.responseText;
-													$('propertiesList').style.display = "";
-													$('propertiesIconExpanded').style.display = "";
-													$('propertiesIconMinimized').style.display = "none";
-													refreshMetadataSection(resourcePath);
+													window.location.reload();
 												},
 
 												onFailure : function(transport) {
@@ -316,7 +305,7 @@ function showRetention() {
 function validateEmptySV(fld, fldName) {
 	var error = "";
 	fld.value = fld.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-	//alert("@@@@@@@@@" + fld.value.length);
+	
 	if (fld.value.length == 0) {
 		error = "The required field" + " " + fldName + " " + "Not fild"
 				+ "<br />";
@@ -327,8 +316,7 @@ function validateEmptySV(fld, fldName) {
 }
 
 function validateForInputSV(fld, fldName) {
-        //alert("validate input");
-	var error = "";
+  	var error = "";
 	var illegalChars = /(\<[a-zA-Z0-9\s\/]*>)/; // match any starting tag
 	if (illegalChars.test(fld.value)) {
 		error = "The"

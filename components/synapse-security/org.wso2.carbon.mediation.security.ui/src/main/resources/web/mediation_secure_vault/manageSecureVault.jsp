@@ -52,7 +52,7 @@
 	try {
 		org.wso2.carbon.mediation.security.vault.ui.PropertiesServiceClient client = new org.wso2.carbon.mediation.security.vault.ui.PropertiesServiceClient(config,
 		session);
-		propertiesBean = client.getProperties(request);
+		propertiesBean = client.getProperties(request,0);
 		if (propertiesBean == null) {
 	return;
 		}

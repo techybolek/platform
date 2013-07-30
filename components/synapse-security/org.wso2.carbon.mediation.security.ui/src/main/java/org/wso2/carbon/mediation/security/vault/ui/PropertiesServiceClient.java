@@ -33,9 +33,8 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.mediation.security.vault.SecureVaultConstants;
 import org.wso2.carbon.mediation.security.vault.cipher.tool.CipherTool;
 import org.wso2.carbon.registry.common.ui.UIConstants;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.utils.PaginationContext;
-import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.properties.stub.PropertiesAdminServiceStub;
 import org.wso2.carbon.registry.properties.stub.beans.xsd.PropertiesBean;
 import org.wso2.carbon.registry.properties.stub.beans.xsd.RetentionBean;
@@ -80,8 +79,28 @@ public class PropertiesServiceClient {
 			throw new RegistryException(msg, axisFault);
 		}
 	}
+	
+	/**
+	 * Retrieving the length of the properties in selected registry resource
+	 * 
+	 * @return
+	 * @throws RegistryException
+	 */
+	public int getPropertiesLenght() throws RegistryException{
+		String path = SecureVaultConstants.SYSTEM_CONFIG_CONNECTOR_SECURE_VAULT_CONFIG;
+		PropertiesBean bean = null;
+		try {
+			bean = stub.getProperties(path, "no");
+		} catch (Exception axisFault) {
+			String msg = "Failed to initiate resource service client. "
+				+ axisFault.getMessage();
+		log.error(msg, axisFault);
+		throw new RegistryException(msg, axisFault);
+		}
+		return bean.getSysProperties().length;
+	}
 
-	public PropertiesBean getProperties(HttpServletRequest request) throws Exception {
+	public PropertiesBean getProperties(HttpServletRequest request,int pageNumber) throws Exception {
 
 		String path = SecureVaultConstants.SYSTEM_CONFIG_CONNECTOR_SECURE_VAULT_CONFIG;
 		Boolean view = (Boolean) request.getSession().getAttribute(
@@ -97,20 +116,26 @@ public class PropertiesServiceClient {
 			viewProps = "no";
 		}
 		PropertiesBean bean = null;
-		try {
-			if (PaginationContext.getInstance() == null) {
-				bean = stub.getProperties(path, viewProps);
-			} else {
-				PaginationUtils.copyPaginationContext(stub._getServiceClient());
-				bean = stub.getProperties(path, viewProps);
-				int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
-				session.setAttribute("row_count", Integer.toString(rowCount));
+
+		bean = stub.getProperties(path, viewProps);
+		int itemPerPage = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+		int start = (int) ((pageNumber) * itemPerPage);
+		
+		if (start >= 0 && bean.getSysProperties() != null && bean.getSysProperties().length>0) {
+			int length =start>0?((bean.getSysProperties().length-start)-1):bean.getSysProperties().length;
+			if(length>itemPerPage){
+				length = itemPerPage;
 			}
-		} catch (Exception e) {
-			String msg = "Failed to get properties. " + e.getMessage();
-			log.error(msg, e);
-			throw new Exception(e);
+			String[] prams = new String[length>0?length:1];
+			for (int i = 0; i <=itemPerPage-1; i++) {
+				if (i<prams.length) {
+					prams[i] = bean.getSysProperties()[i + start];
+				}
+
+			}
+			bean.setSysProperties(prams);
 		}
+		
 		if (bean == null) {
 			return null;
 		}
@@ -130,6 +155,7 @@ public class PropertiesServiceClient {
 		return bean;
 	}
 
+	
 	public void setProperty(HttpServletRequest request) throws Exception {
 		String path = SecureVaultConstants.SYSTEM_CONFIG_CONNECTOR_SECURE_VAULT_CONFIG;
 		String name = (String) Utils.getParameter(request, "name");
