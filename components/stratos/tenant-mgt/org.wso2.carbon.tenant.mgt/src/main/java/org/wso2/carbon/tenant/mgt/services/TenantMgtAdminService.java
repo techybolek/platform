@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.tenant.mgt.services;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.multitenancy.persistence.TenantPersistor;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -26,7 +28,6 @@ import org.wso2.carbon.tenant.mgt.beans.PaginatedTenantInfoBean;
 import org.wso2.carbon.tenant.mgt.core.internal.TenantMgtCoreServiceComponent;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
-import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -35,13 +36,8 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.DataPaginator;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This is the admin Web service which is used for managing tenants
@@ -64,8 +60,9 @@ public class TenantMgtAdminService extends AbstractAdmin {
             log.error(msg, e);
             throw new Exception(msg, e);
         }
-        String tenantDomain = tenantInfoBean.getTenantDomain();
+        String tenantDomain = tenantInfoBean.getTenantDomain().toLowerCase();
         TenantMgtUtil.validateDomain(tenantDomain);
+        tenantInfoBean.setTenantDomain(tenantDomain);
         UserRegistry userRegistry = (UserRegistry) getGovernanceRegistry();
         if (userRegistry == null) {
             log.error("Security Alert! User registry is null. A user is trying create a tenant "
@@ -150,7 +147,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
         Tenant[] tenants;
         try {
-        	domain = domain.trim();
+        	domain = domain.toLowerCase().trim();
             tenants = (Tenant[]) tenantManager.getAllTenantsForTenantDomainStr(domain);
         } catch (UserStoreException e) {
             String msg = "Error in retrieving the tenant information.";
@@ -229,7 +226,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
      */
     public TenantInfoBean getTenant(String tenantDomain) throws Exception {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
-
+        tenantDomain = tenantDomain.toLowerCase();
         int tenantId;
         try {
             tenantId = tenantManager.getTenantId(tenantDomain);
@@ -286,7 +283,8 @@ public class TenantMgtAdminService extends AbstractAdmin {
         UserRegistry configSystemRegistry = TenantMgtServiceComponent.getConfigSystemRegistry(
                 tenantInfoBean.getTenantId());
 
-        String tenantDomain = tenantInfoBean.getTenantDomain();
+        String tenantDomain = tenantInfoBean.getTenantDomain().toLowerCase();
+        tenantInfoBean.setTenantDomain(tenantDomain);
 
         int tenantId;
         try {
@@ -418,6 +416,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
      */
     public void activateTenant(String tenantDomain) throws Exception {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        tenantDomain = tenantDomain.toLowerCase();
         int tenantId;
         try {
             tenantId = tenantManager.getTenantId(tenantDomain);
@@ -449,6 +448,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
      */
     public void deactivateTenant(String tenantDomain) throws Exception {
         TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        tenantDomain = tenantDomain.toLowerCase();
         int tenantId;
         try {
             tenantId = tenantManager.getTenantId(tenantDomain);
@@ -479,6 +479,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
      */
     public void deleteTenant(String tenantDomain) throws Exception {
         TenantManager tenantManager = TenantMgtCoreServiceComponent.getTenantManager();
+        tenantDomain = tenantDomain.toLowerCase();
         int tenantId = tenantManager.getTenantId(tenantDomain);
         try {
             TenantMgtServiceComponent.getBillingService().deleteBillingData(tenantId);
