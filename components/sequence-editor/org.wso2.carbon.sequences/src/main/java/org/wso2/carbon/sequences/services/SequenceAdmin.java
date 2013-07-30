@@ -211,6 +211,68 @@ public class SequenceAdmin extends AbstractServiceBusAdmin {
     }
 
     /**
+     * Delete Selected Sequence in the synapse configuration
+     *
+     * @param sequenceNames
+     * @throws SequenceEditorException
+     */
+
+    public void deleteSelectedSequence(String[] sequenceNames) throws SequenceEditorException {
+        final Lock lock = getLock();
+        try {
+            lock.lock();
+            SynapseConfiguration synCfg = getSynapseConfiguration();
+            List<String> list = new ArrayList<String>();
+            Collections.addAll(list, sequenceNames);
+            list.remove("main");
+            list.remove("fault");
+            sequenceNames = list.toArray(new String[list.size()]);
+            for (String sequenceName : sequenceNames) {
+                SequenceMediator sequence = synCfg.getDefinedSequences().get(sequenceName);
+                if (sequence != null) {
+                    synCfg.removeSequence(sequenceName);
+                    MediationPersistenceManager pm = getMediationPersistenceManager();
+                    pm.deleteItem(sequenceName, sequence.getFileName(),
+                            ServiceBusConstants.ITEM_TYPE_SEQUENCE);
+                }
+            }
+        } catch (Exception fault) {
+            handleException("Couldn't get the Synapse Configuration to delete the sequence", fault);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Delete all the sequences in the synapse configuration
+     *
+     * @throws SequenceEditorException
+     */
+    public void deleteAllSequence() throws SequenceEditorException {
+        final Lock lock = getLock();
+        Collection<SequenceMediator> sequences = null;
+        try {
+            lock.lock();
+            sequences = getSynapseConfiguration().getDefinedSequences().values();
+
+            SynapseConfiguration synCfg = getSynapseConfiguration();
+            for (SequenceMediator sequence : sequences) {
+                if (sequence != null) {
+                    if ((!sequence.getName().equals("main")) && (!sequence.getName().equals("fault"))) {
+                        synCfg.removeSequence(sequence.getName());
+                        MediationPersistenceManager pm = getMediationPersistenceManager();
+                        pm.deleteItem(sequence.getName(), sequence.getFileName(),
+                                ServiceBusConstants.ITEM_TYPE_SEQUENCE);
+                    }
+                }
+            }
+        } catch (Exception fault) {
+            handleException("Unable to delete entire sequences in the synapse configuration", fault);
+        } finally {
+            lock.unlock();
+        }
+    }
+    /**
      * Returns the OMelement representation of the sequence given by sequence
      * name
      *
