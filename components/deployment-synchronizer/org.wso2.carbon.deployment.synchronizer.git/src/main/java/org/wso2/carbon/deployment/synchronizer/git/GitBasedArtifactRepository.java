@@ -398,7 +398,11 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         TenantGitRepositoryContext gitRepoCtx = TenantGitRepositoryContextCache.getTenantRepositoryContextCache().
                 retrieveCachedTenantGitContext(tenantId);
 
-        if(!behaviour.syncInitialLocalArtifacts(gitRepoCtx) && !gitRepoCtx.cloneExists()) {
+        //TODO:add initial artifact sync
+        /*if(!behaviour.syncInitialLocalArtifacts(gitRepoCtx) && !gitRepoCtx.cloneExists()) {
+            cloneRepository(gitRepoCtx);
+        }*/
+        if(!gitRepoCtx.cloneExists()) {
             cloneRepository(gitRepoCtx);
         }
 
