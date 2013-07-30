@@ -19,7 +19,7 @@
   -->
 
 <!-- Splitter eip library function template shipped with the Apache Synapse -->
-<template xmlns="http://ws.apache.org/ns/synapse" name="twitter.send_direct_message">
+<template xmlns="http://ws.apache.org/ns/synapse" name="send_direct_message">
 	<parameter name="oauth.consumerKey"/>
 	<parameter name="oauth.consumerSecret"/>
 	<parameter name="oauth.accessToken"/>

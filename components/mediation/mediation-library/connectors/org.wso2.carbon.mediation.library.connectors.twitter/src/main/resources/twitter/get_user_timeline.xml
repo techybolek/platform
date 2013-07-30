@@ -19,7 +19,7 @@
   -->
 
 <!-- Splitter eip library function template shipped with the Apache Synapse -->
-<template xmlns="http://ws.apache.org/ns/synapse" name="twitter.get_user_timeline">
+<template xmlns="http://ws.apache.org/ns/synapse" name="get_user_timeline">
 	<parameter name="oauth.consumerKey"/>
 	<parameter name="oauth.consumerSecret"/>
 	<parameter name="oauth.accessToken"/>

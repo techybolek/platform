@@ -19,7 +19,7 @@
   -->
 
 <!-- Splitter eip library function template shipped with the Apache Synapse -->
-<template xmlns="http://ws.apache.org/ns/synapse" name="twitter.update_status">
+<template xmlns="http://ws.apache.org/ns/synapse" name="update_status">
 	<parameter name="oauth.consumerKey"/>
 	<parameter name="oauth.consumerSecret"/>
 	<parameter name="oauth.accessToken"/>

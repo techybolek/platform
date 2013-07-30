@@ -102,13 +102,13 @@ public class LibraryArtifact implements SynapseArtifact{
 
                     if (template instanceof TemplateMediator) {
                         String templateName = ((TemplateMediator) template).getName();
-                        library.addComponent(getQualifiedName(library.getPackage(), templateName), template);
+                        library.addComponent(getQualifiedName(library.getPackage(), templateName,library.getQName().getLocalPart()), template);
                     } else if (template instanceof Template) {
                         String templateName = ((Template) template).getName();
-                        library.addComponent(getQualifiedName(library.getPackage(), templateName), template);
+                        library.addComponent(getQualifiedName(library.getPackage(), templateName,library.getQName().getLocalPart()), template);
                     } else if (template != null) {
                         library.addComponent(getQualifiedName(library.getPackage(),
-                                                              artifact.getName()), template);
+                                                              artifact.getName(),library.getQName().getLocalPart()), template);
                     } else {
                         throw new SynapseArtifactDeploymentException("Cannot load components into " +
                                                                      "Synapse Library. Component " +
@@ -127,8 +127,8 @@ public class LibraryArtifact implements SynapseArtifact{
         artifact.file.setProperties(classLoadingProperties);
     }
 
-    private String getQualifiedName(String aPackage, String templateName) {
-        return aPackage + "." + templateName;
+    private String getQualifiedName(String aPackage, String templateName,String parentArtifact) {
+        return aPackage+"."+parentArtifact+ "." + templateName;
     }
 
     public void setPath(String path) {

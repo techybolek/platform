@@ -2,48 +2,48 @@
 <artifact name="twitter" type="synapse/template">
 
 	<subArtifacts>
-		<artifact name="twitter.update_status">
+		<artifact name="update_status">
 			<file>update_status.xml</file>
 			<description>twitter updates</description>
 		</artifact>
-		<artifact name="ttwitter.show_status">
+		<artifact name="show_status">
 			<file>show_status.xml</file>
 			<description>show status of the twitter</description>
 		</artifact>
-		<artifact name="twitter.retweet">
+		<artifact name="retweet">
 			<file>retweet_status.xml</file>
 			<description>retweeting</description>
 		</artifact>
-		<artifact name="twitter.login_user">
+		<artifact name="login_user">
 			<file>login_user.xml</file>
 			<description>login twitter user</description>
 		</artifact>
-		<artifact name="twitter.search">
+		<artifact name="search">
 			<file>search_string.xml</file>
 			<description>search twitter string</description>
 		</artifact>
 
-		<artifact name="twitter.search_places">
+		<artifact name="search_places">
 			<file>search_places.xml</file>
 			<description>search for places</description>
 		</artifact>
 
-		<artifact name="twitter.get_user_timeline">
+		<artifact name="get_user_timeline">
 			<file>get_user_timeline.xml</file>
 			<description>get user timeline</description>
 		</artifact>
 		
-		<artifact name="twitter.get_available_trends">
+		<artifact name="get_available_trends">
 			<file>get_available_trends.xml</file>
 			<description>get available trends</description>
 		</artifact>
 		
-		<artifact name="twitter.send_direct_message">
+		<artifact name="send_direct_message">
 			<file>send_direct_message.xml</file>
 			<description>send direct messages to user</description>
 		</artifact>
 
-		<artifact name="twitter.config">
+		<artifact name="config">
 			<file>config.xml</file>
 			<description>configure twitter related setup</description>
 		</artifact>
