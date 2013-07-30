@@ -361,15 +361,14 @@ public class APIMgtDAOTest extends TestCase {
 		String newTok = UUID.randomUUID().toString();
 		long validityTime = 5000;
 
-		apiMgtDAO.updateRefreshedApplicationAccessToken("PRODUCTION",
+		apiMgtDAO.updateRefreshedApplicationAccessToken(
 		                                                testRegisterApplicationAccessToken()[0],
-		                                                null, newTok, validityTime);
+		                                                "PRODUCTION", newTok, validityTime);
 		String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
 		assertNotNull(key1);
 
-		apiMgtDAO.updateRefreshedApplicationAccessToken("PRODUCTION",
-		                                                testRegisterApplicationAccessToken()[1],
-		                                                null, newTok, validityTime);
+		apiMgtDAO.updateRefreshedApplicationAccessToken(testRegisterApplicationAccessToken()[1],
+		                                                "PRODUCTION", newTok, validityTime);
 		String key2 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
 		assertNotNull(key1);
 		assertTrue(!key1.equals(key2));
