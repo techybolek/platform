@@ -1916,61 +1916,54 @@ public class ApiMgtDAO {
   /**
    * Update refresed ApplicationAccesstoken
    * @param keyType
-   * @param oldAccessToken
-   * @param accessAllowDomains
    * @param accessToken
    * @param validityPeriod
    * @return
    * @throws IdentityException
    * @throws APIManagementException
    */
-	public String updateRefreshedApplicationAccessToken(String keyType, String oldAccessToken,
-	                                 String[] accessAllowDomains, String accessToken,
+	public void updateRefreshedApplicationAccessToken(String oldAccessToken,String keyType, String newAccessToken,
 	                                 long validityPeriod) throws IdentityException,
 	                                                     APIManagementException {
-		String newAccessToken = accessToken;
-		String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-		if (APIUtil.checkUserNameAssertionEnabled()) {
-			String userName = APIUtil.getUserIdFromAccessToken(oldAccessToken);
-			// If the application key was generated with the
-			// UserName_Assertion=false and later changed it to true
-			// and regenerate the token, userName can be null.
-			if (userName != null && !userName.equalsIgnoreCase("")) {
-				// use ':' for token & userName separation
-				String accessTokenStrToEncode = accessToken + ":" + userName;
-				newAccessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
-			}
-
-			if (APIUtil.checkAccessTokenPartitioningEnabled()) {
-				accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(userName);
-			}
-		}
-
+		
+		String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;	
 		// Update Access Token
-		String sqlUpdateAccessToken = "UPDATE " + accessTokenStoreTable +
-		                                      " SET ACCESS_TOKEN=?, TOKEN_STATE=?, TIME_CREATED=?, VALIDITY_PERIOD=? " +
+		String sqlUpdateNewAccessToken = "UPDATE " + accessTokenStoreTable +
+		                                      " SET USER_TYPE=?, VALIDITY_PERIOD=? " +
 		                                      " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
 
+		
+		
 		Connection connection = null;
 		PreparedStatement prepStmt = null;
 		try {
 			connection = APIMgtDBUtil.getConnection();
 			connection.setAutoCommit(false);
-			prepStmt = connection.prepareStatement(sqlUpdateAccessToken);
-			prepStmt.setString(1, newAccessToken);
-			prepStmt.setString(2, APIConstants.TokenStatus.ACTIVE);
-			prepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()),
-			                      Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+			prepStmt = connection.prepareStatement(sqlUpdateNewAccessToken);
+			prepStmt.setString(1, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);			
 			if (validityPeriod < 0) {
-				prepStmt.setLong(4, Long.MAX_VALUE);
+				prepStmt.setLong(2, Long.MAX_VALUE);
 			} else {
-				prepStmt.setLong(4, validityPeriod * 1000);
+				prepStmt.setLong(2, validityPeriod * 1000);
 			}
-			prepStmt.setString(5, oldAccessToken);
-			prepStmt.setString(6, keyType);
+			prepStmt.setString(3, newAccessToken);
+			prepStmt.setString(4, keyType);
 
 			prepStmt.execute();
 			prepStmt.close();
+			
+			String sqlUpdateOldAccessTokenState = "UPDATE " + accessTokenStoreTable +
+	                " SET TOKEN_STATE=? " +
+	                " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
+			
+			prepStmt = connection.prepareStatement(sqlUpdateOldAccessTokenState);
+			prepStmt.setString(1, APIConstants.TokenStatus.REVOKED);	
+			prepStmt.setString(2, oldAccessToken);	
+			prepStmt.setString(3, keyType);	
+			
+			prepStmt.execute();
+			prepStmt.close();
+			
 			connection.commit();
 
 		} catch (SQLException e) {
@@ -1986,7 +1979,7 @@ public class ApiMgtDAO {
 		} finally {
 			IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
 		}
-		return newAccessToken;
+		
 	}
 
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
