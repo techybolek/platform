@@ -109,7 +109,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.gadget.initializer</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../etc/feature.properties</propertiesFile>
                             <bundles>
                             	<bundleDef>org.wso2.carbon:org.wso2.carbon.gadget.initializer</bundleDef>
                                 <bundleDef>org.apache.shindig.wso2:shindig</bundleDef>

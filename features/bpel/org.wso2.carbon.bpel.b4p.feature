@@ -48,7 +48,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.bpel.b4p</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>

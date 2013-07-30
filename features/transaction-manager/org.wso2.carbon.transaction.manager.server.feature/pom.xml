@@ -62,11 +62,11 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.transaction.manager</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <id>org.wso2.carbon.transaction.manager.server</id>
+                            <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
 				    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
                                 </properties>
                             </adviceFile>

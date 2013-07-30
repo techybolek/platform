@@ -54,13 +54,11 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.docrequestprocessor.server</id>
-                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:server
-                                    </propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
-                                    </propertyDef>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
                                 </properties>
                             </adviceFile>
                             <bundles>

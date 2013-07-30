@@ -49,11 +49,12 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.appserver.mandatory</id>
-                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.eclipse.equinox.p2.type.category:true</propertyDef>
 				    <propertyDef>org.wso2.carbon.p2.category.type:composite</propertyDef>                                    
+				    <propertyDef>org.wso2.carbon.p2.category.property:true</propertyDef>
                                 </properties>
                             </adviceFile> 
                             <importFeatures>

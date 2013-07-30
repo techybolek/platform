@@ -65,7 +65,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.databridge.datareceiver</id>
-			    <propertiesFile>../feature.properties</propertiesFile>
+			    <propertiesFile>../../etc/feature.properties</propertiesFile>
 							
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.databridge.core.server.feature:${project.version}</includedFeatureDef>
