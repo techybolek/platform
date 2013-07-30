@@ -206,7 +206,11 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.module.mgt.server.feature:${carbon.platform.version}</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature:${carbon.platform.version}</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.rm.server.feature:${carbon.platform.version}</featureArtifactDef>
+                                <!-- as runtime features-->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.as.runtimes.cxf.feature:${carbon.platform.version}</featureArtifactDef>
+                                <!-- end of as runtime features-->
                                 <!---->
+
                             </featureArtifacts>
                         </configuration>
                     </execution>
@@ -923,6 +927,13 @@
                                     <id>org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+                                <!-- as-runtimes-->
+                                <feature>
+                                <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
+                                <version>${carbon.platform.version}</version>
+                                </feature>
+
+                               <!-- end of as-runtimes-->
 				
                                 <!--End Stratos API Manager features-->
                             </features>
@@ -1249,6 +1260,13 @@
                                     <id>org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+                                <!-- as-runtimes-->
+                                <feature>
+                                    <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+
+                                <!-- end of as-runtimes-->
                             </features>
                         </configuration>
                     </execution>

@@ -238,6 +238,17 @@
         <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps/STRATOS_ROOT</outputDirectory>
         <fileMode>755</fileMode>
         </fileSet>
+        <!--copying runtimes-->
+        <fileSet>
+        <directory>../../p2-profile/product/target/wso2carbon-core-${carbon.platform.version}/lib/runtimes</directory>
+        <outputDirectory>${pom.artifactId}-${pom.version}/lib/runtimes/</outputDirectory>
+        <includes>
+        <include>*/**</include>
+        </includes>
+        <excludes>
+            <exclude>**/cxf/velocity-1.7.jar</exclude>
+        </excludes>
+        </fileSet>
 
         <!--End of  API Manager related -->
     </fileSets>
@@ -291,31 +302,6 @@
 				<include>org.apache.rampart:rampart:mar</include>
 			</includes>
 	</dependencySet>
-	<dependencySet>
-            <outputDirectory>wso2am-${pom.version}/lib/runtimes/cxf
-            </outputDirectory>
-            <includes>
-                <include>org.apache.cxf:cxf-bundle:jar</include>
-		<include>org.apache.httpcomponents:httpasyncclient:jar</include>
-                <include>org.apache.httpcomponents:httpclient:jar</include>
-                <include>org.apache.httpcomponents:httpcore:jar</include>
-                <include>org.apache.httpcomponents:httpcore-nio:jar</include>
-                <include>javax.ws.rs:javax.ws.rs-api:jar</include>
-                <include>org.apache.neethi:neethi:jar</include>
-                <include>org.apache.cxf.xjcplugins:cxf-xjc-dv:jar</include>
-                <include>org.apache.cxf.xjc-utils:cxf-xjc-runtime:jar</include>
-                <include>org.apache.cxf.xjcplugins:cxf-xjc-ts:jar</include>
-                <include>org.apache.cxf.xjcplugins:cxf-xjc-boolean:jar</include>
-                <include>org.apache.cxf.xjcplugins:cxf-xjc-bug671:jar</include>
-		<include>org.springframework:spring-aop:jar</include>
-                <include>org.springframework:spring-asm:jar</include>
-                <include>org.springframework:spring-beans:jar</include>
-                <include>org.springframework:spring-context:jar</include>
-                <include>org.springframework:spring-core:jar</include>
-                <include>org.springframework:spring-expression:jar</include>
-                <include>org.springframework:spring-web:jar</include>
-            </includes>
-        </dependencySet>
     </dependencySets>
 
     <files>
