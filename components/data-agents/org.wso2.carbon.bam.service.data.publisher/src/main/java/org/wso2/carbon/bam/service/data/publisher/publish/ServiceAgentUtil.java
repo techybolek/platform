@@ -166,14 +166,21 @@ public class ServiceAgentUtil {
 
     private static void addActivityMetaData(EventData event, List<Object> metaData) {
         // adding server host or more correctly monitored server url
-        metaData.add(PublisherUtil.getHostAddress());
-        
-        metaData.add(event.getRequestURL());
-        metaData.add(event.getRemoteAddress());
-        metaData.add(event.getContentType());
-        metaData.add(event.getUserAgent());
+        nullCheckAndAdd(metaData, event.getRequestURL(), "");
+        nullCheckAndAdd(metaData, event.getRemoteAddress(), "");
+        nullCheckAndAdd(metaData, event.getContentType(), "");
+        nullCheckAndAdd(metaData, event.getUserAgent(), "");
+        nullCheckAndAdd(metaData, PublisherUtil.getHostAddress(), "");
+        nullCheckAndAdd(metaData, event.getReferer(), "");
 
-        metaData.add(event.getReferer());
+    }
+
+    private static void nullCheckAndAdd(List<Object> dataArray, Object data, Object nullObject) {
+        if(data != null) {
+            dataArray.add(data);
+        } else {
+            dataArray.add(nullObject);
+        }
     }
 
 
