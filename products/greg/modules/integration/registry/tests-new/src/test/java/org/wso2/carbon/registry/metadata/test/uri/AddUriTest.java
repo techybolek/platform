@@ -59,11 +59,6 @@ public class AddUriTest {
     @Test(groups = "wso2.greg", description = "Test URI of type wsdl/schema/service/policy ")
     public void testUri() throws RegistryException, FileNotFoundException, InterruptedException {
 
-
-        if (governance.resourceExists("repository/components/org.wso2.carbon.governance/types/project-group.rxt")) {
-            governance.delete("repository/components/org.wso2.carbon.governance/types/project-group.rxt");
-        }
-
         GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         GenericArtifactManager artifactManager = new GenericArtifactManager(governance, "uri");
         GenericArtifact artifactWsdl = artifactManager.newGovernanceArtifact(new QName
@@ -163,12 +158,6 @@ public class AddUriTest {
         assertTrue(governance.resourceExists("uris/WSDL/Axis2Service_Wsdl_With_Wsdl_Imports.wsdl"),
                    "Axis2Service_Wsdl_With_Wsdl_Imports.wsdl URI doesn't exists");
         assertTrue(governance.resourceExists("uris/WSDL/Axis2ImportedWsdl.wsdl"), "Dependency Axis2ImportedWsdl.wsdl doesn't exists");
-
-        if (governance.resourceExists("repository/components/org.wso2.carbon.governance/types/project-group.rxt")) {
-            governance.delete("repository/components/org.wso2.carbon.governance/types/project-group.rxt");
-
-        }
-
 
         GenericArtifact artifactWsdlWithSchema = artifactManager.newGovernanceArtifact(new QName
                                                                                        ("wsdl_with_EncrOnlyAnonymous"));
@@ -331,7 +320,7 @@ public class AddUriTest {
                 serviceManager.removeService(s.getId());
             }
         }
-
+	
         governance.delete("trunk/endpoints");
         governance = null;
 
