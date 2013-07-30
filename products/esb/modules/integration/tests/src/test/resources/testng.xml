@@ -326,6 +326,12 @@
         </packages>
     </test>
 
+    <test name="GZIP-Compression-Test" preserve-order="true" verbose="2">
+        <packages>
+            <package name="org.wso2.carbon.esb.compression.test.gzip"/>
+        </packages>
+    </test>
+
 </suite>
 
 
