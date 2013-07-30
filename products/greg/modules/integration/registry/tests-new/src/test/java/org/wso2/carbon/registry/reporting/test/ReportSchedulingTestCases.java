@@ -52,24 +52,8 @@ public class ReportSchedulingTestCases extends ReportingTestCaseSuper {
 
     @BeforeClass
     public void initializeToTestScheduling() throws RemoteException, RegistryException,
-                                                    LoginAuthenticationExceptionException {
+            LoginAuthenticationExceptionException, MalformedURLException, ResourceAdminServiceExceptionException {
         init();
-    }
-
-    /**
-     * Add resources and artifacts to test report scheduling
-     *
-     * @throws MalformedURLException
-     * @throws RemoteException
-     * @throws ResourceAdminServiceExceptionException
-     *
-     * @throws RegistryException
-     */
-    @Test(groups = "wso2.greg", description = "Add resorces and artifacts to test report scheduling")
-    public void testAddResourcesToTestScheduling() throws MalformedURLException,
-                                                          RemoteException,
-                                                          ResourceAdminServiceExceptionException,
-                                                          RegistryException {
         testAddResourcesLCReport();
         testAddLCArtifact();
     }
