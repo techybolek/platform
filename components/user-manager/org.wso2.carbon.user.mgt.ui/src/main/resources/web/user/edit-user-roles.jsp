@@ -29,7 +29,6 @@
 <%@ page import="org.wso2.carbon.user.mgt.ui.Util" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
-<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserStoreInfo" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
@@ -413,7 +412,6 @@
                                       </tr>
                                     <%
                                                 }
-                                                index++;
                                             }
                                         }
                                     %>
