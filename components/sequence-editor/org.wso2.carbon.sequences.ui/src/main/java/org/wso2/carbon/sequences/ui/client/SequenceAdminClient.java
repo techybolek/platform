@@ -389,4 +389,30 @@ public class SequenceAdminClient implements EditorUIClient {
         log.error(message, e);
         throw new SequenceEditorException(message, e);
     }
+    /**
+     * Delete selected sequences from synapse configuration
+     *
+     * @param SequenceNames
+     * @throws Exception
+     */
+    public void deleteSelectedSequence(String[] SequenceNames) throws Exception {
+        try {
+            sequenceAdminStub.deleteSelectedSequence(SequenceNames);
+
+        } catch (Exception e) {
+            handleException("Couldn't delete Selected sequences ", e);
+        }
+    }
+    /**
+     * Delete all Sequences in the synapse configuration
+     *
+     * @throws Exception
+     */
+    public void deleteAllSequenceGroups() throws Exception {
+        try {
+            sequenceAdminStub.deleteAllSequence();
+        } catch (Exception e) {
+            handleException("Couldn't delete all sequences ", e);
+        }
+    }
 }

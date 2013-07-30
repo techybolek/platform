@@ -102,12 +102,9 @@
             sequences = sequenceAdminClient.getSequencesSearch(pageNumber, SequenceEditorConstants.SEQUENCE_PER_PAGE, sequenceSearchString);
             if (sequences == null) {
                 seqCount = sequenceAdminClient.getSequencesCount();
-
             } else {
                 seqCount = sequences.length;
             }
-
-
             dynamicSequences = sequenceAdminClient.getDynamicSequencesSearch(dynamicPageNumber, SequenceEditorConstants.SEQUENCE_PER_PAGE, sequenceSearchString);
             if (dynamicSequences == null) {
                 dynamicSequenceCount = sequenceAdminClient.getDynamicSequenceCount();
@@ -189,7 +186,7 @@
     var DISABLE = "disable";
     var STAT = "statistics";
     var TRACE = "Tracing";
-
+    var allSequencesSelected = false;
     var frondendURL = wso2.wsf.Util.getServerURL() + "/";
 
     function searchSequence() {
@@ -367,6 +364,101 @@
             $tabs.tabs('option', 'selected', 1);
         }
     });
+
+    function loadSequenceAfterBulkDeletion() {
+        window.location.href = "list_sequences.jsp?pageNumber=<%=pageNumber%>";
+    }
+
+    function deleteServices() {
+        var selected = false;
+        if (document.sequenceForm.sequenceGroups[0] != null) { // there is more than 1 sequences
+            for (var j = 0; j < document.sequenceForm.sequenceGroups.length; j++) {
+                selected = document.sequenceForm.sequenceGroups[j].checked;
+                if (selected) break;
+            }
+        }
+        else if (document.sequenceForm.sequenceGroups != null) { // only 1 sequence
+            selected = document.sequenceForm.sequenceGroups.checked;
+        }
+        if (!selected) {
+            CARBON.showInfoDialog('<fmt:message key="select.sequences.to.be.deleted"/>');
+            return;
+        }
+        if (allSequencesSelected) {
+            CARBON.showConfirmationDialog("<fmt:message key="delete.sequences.on.all.prompt"/>", function () {
+                $.ajax({
+                    type: 'POST',
+                    url: 'delete_sequence_groups-ajaxprocessor.jsp',
+                    data: 'deleteAllSequenceGroups=true',
+                    success: function (msg) {
+                        loadSequenceAfterBulkDeletion();
+                    }
+                });
+            });
+        } else {
+
+            var sequenceGroupsString = '';
+            jQuery('.chkBox').each(function (index) {
+                if (this.checked) {
+                    sequenceGroupsString += this.value + ':';
+                }
+            });
+
+
+            CARBON.showConfirmationDialog("<fmt:message key="delete.sequences.on.all.prompt"/>", function () {
+                $.ajax({
+                    type: 'POST',
+                    url: 'delete_sequence_groups-ajaxprocessor.jsp',
+                    data: 'sequenceGroupsString=' + sequenceGroupsString,
+                    success: function (msg) {
+                        loadSequenceAfterBulkDeletion();
+                    }
+                });
+            });
+        }
+    }
+
+    function selectAllInThisPage(isSelected) {
+        allSequencesSelected = false;
+        if (document.sequenceForm.sequenceGroups != null &&
+                document.sequenceForm.sequenceGroups[0] != null) { // there is more than 1 sequence
+            if (isSelected) {
+                for (var j = 0; j < document.sequenceForm.sequenceGroups.length; j++) {
+                    document.sequenceForm.sequenceGroups[j].checked = true;
+                }
+            } else {
+                for (j = 0; j < document.sequenceForm.sequenceGroups.length; j++) {
+                    document.sequenceForm.sequenceGroups[j].checked = false;
+                }
+            }
+        } else if (document.sequenceForm.sequenceGroups != null) { // only 1 sequence
+            document.sequenceForm.sequenceGroups.checked = isSelected;
+        }
+        return false;
+    }
+
+    function selectAllInAllPages() {
+        selectAllInThisPage(true);
+        allSequencesSelected = true;
+        return false;
+    }
+
+    function resetVars() {
+        allSequencesSelected = false;
+        var isSelected = false;
+        if (document.sequenceForm.sequenceGroups[0] != null) { // there is more than 1 sequence
+            for (var j = 0; j < document.sequenceForm.sequenceGroups.length; j++) {
+                if (document.sequenceForm.sequenceGroups[j].checked) {
+                    isSelected = true;
+                }
+            }
+        } else if (document.sequenceForm.sequenceGroups != null) { // only 1 sequence
+            if (document.sequenceForm.sequenceGroups.checked) {
+                isSelected = true;
+            }
+        }
+        return false;
+    }
 </script>
 
 <style type="text/css">
@@ -438,123 +530,160 @@
                       prevKey="prev" nextKey="next"
                       parameters="<%=""%>"/>
     <br>
-    <table class="styledLeft" cellspacing="1" id="sequencesTable">
-        <thead>
-        <tr>
-            <th>
-                <fmt:message key="sequence.name"/>
-            </th>
-            <th colspan="4">
-                <fmt:message key="sequence.actions"/>
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        <% for (SequenceInfo sequence : sequences) { %>
-        <tr>
-            <td>
-                <span href="#" <% if(sequence.getDescription()!= null){ %>onmouseover="showTooltip(this,'<%=sequence.getDescription()%>')" <% } %>><%= sequence.getName() %></span>
-            </td>
+    <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
+                              selectAllFunction="selectAllInAllPages()"
+                              selectNoneFunction="selectAllInThisPage(false)"
+                              addRemoveFunction="deleteServices()"
+                              addRemoveButtonId="delete2"
+                              resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
+                              selectAllInPageKey="selectAllInPage"
+                              selectAllKey="selectAll"
+                              selectNoneKey="selectNone"
+                              addRemoveKey="delete"
+                              numberOfPages="<%=numberOfPages%>"/>
+    <br/>
+    <form name="sequenceForm" action="delete_sequence_groups-ajaxprocessor.jsp" method="post">
+        <input type="hidden" name="pageNumberSequence" value="<%= pageNumber%>"/>
+        <table class="styledLeft" cellspacing="1" id="sequencesTable">
+            <thead>
+            <tr>
+                <th>
+                    <fmt:message key="sequence.select"/>
+                </th>
+                <th>
+                    <fmt:message key="sequence.name"/>
+                </th>
+                <th colspan="4">
+                    <fmt:message key="sequence.actions"/>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <% for (SequenceInfo sequence : sequences) { %>
+            <tr>
+                <td width="10px" style="text-align:center; !important">
+                    <input type="checkbox" name="sequenceGroups"
+                           value="<%=sequence.getName()%>"
+                           onclick="resetVars()" class="chkBox"/>
+                    &nbsp;
+                </td>
+                <td>
+                    <span href="#" <% if(sequence.getDescription()!= null){ %>onmouseover="showTooltip(this,'<%=sequence.getDescription()%>')" <% } %>><%= sequence.getName() %></span>
+                </td>
 
-            <% if (sequence.isEnableStatistics()) { %>
-            <td style="border-right:none;border-left:none;width:200px">
-                <div class="inlineDiv">
-                    <div id="disableStat<%= sequence.getName()%>">
-                        <a href="#" onclick="disableStat('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/static-icon.gif);"><fmt:message
-                                key="sequence.stat.disable.link"/></a>
+                <% if (sequence.isEnableStatistics()) { %>
+                <td style="border-right:none;border-left:none;width:200px">
+                    <div class="inlineDiv">
+                        <div id="disableStat<%= sequence.getName()%>">
+                            <a href="#" onclick="disableStat('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/static-icon.gif);"><fmt:message
+                                    key="sequence.stat.disable.link"/></a>
+                        </div>
+                        <div id="enableStat<%= sequence.getName()%>" style="display:none;">
+                            <a href="#" onclick="enableStat('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/static-icon-disabled.gif);"><fmt:message
+                                    key="sequence.stat.enable.link"/></a>
+                        </div>
                     </div>
-                    <div id="enableStat<%= sequence.getName()%>" style="display:none;">
-                        <a href="#" onclick="enableStat('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/static-icon-disabled.gif);"><fmt:message
-                                key="sequence.stat.enable.link"/></a>
+                </td>
+                <% } else { %>
+                <td style="border-right:none;border-left:none;width:200px">
+                    <div class="inlineDiv">
+                        <div id="enableStat<%= sequence.getName()%>">
+                            <a href="#" onclick="enableStat('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/static-icon-disabled.gif);"><fmt:message
+                                    key="sequence.stat.enable.link"/></a>
+                        </div>
+                        <div id="disableStat<%= sequence.getName()%>" style="display:none">
+                            <a href="#" onclick="disableStat('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/static-icon.gif);"><fmt:message
+                                    key="sequence.stat.disable.link"/></a>
+                        </div>
                     </div>
-                </div>
-            </td>
-            <% } else { %>
-            <td style="border-right:none;border-left:none;width:200px">
-                <div class="inlineDiv">
-                    <div id="enableStat<%= sequence.getName()%>">
-                        <a href="#" onclick="enableStat('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/static-icon-disabled.gif);"><fmt:message
-                                key="sequence.stat.enable.link"/></a>
+                </td>
+                <% } %>
+                <% if (sequence.isEnableTracing()) { %>
+                <td style="border-right:none;border-left:none;width:200px">
+                    <div class="inlineDiv">
+                        <div id="disableTracing<%= sequence.getName()%>">
+                            <a href="#"
+                               onclick="disableTracing('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/trace-icon.gif);"><fmt:message
+                                    key="sequence.trace.disable.link"/></a>
+                        </div>
+                        <div id="enableTracing<%= sequence.getName()%>"
+                             style="display:none;">
+                            <a href="#" onclick="enableTracing('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/trace-icon-disabled.gif);"><fmt:message
+                                    key="sequence.trace.enable.link"/></a>
+                        </div>
                     </div>
-                    <div id="disableStat<%= sequence.getName()%>" style="display:none">
-                        <a href="#" onclick="disableStat('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/static-icon.gif);"><fmt:message
-                                key="sequence.stat.disable.link"/></a>
+                </td>
+                <% } else { %>
+                <td style="border-right:none;border-left:none;width:200px">
+                    <div class="inlineDiv">
+                        <div id="enableTracing<%= sequence.getName()%>">
+                            <a href="#" onclick="enableTracing('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/trace-icon-disabled.gif);"><fmt:message
+                                    key="sequence.trace.enable.link"/></a>
+                        </div>
+                        <div id="disableTracing<%= sequence.getName()%>"
+                             style="display:none">
+                            <a href="#"
+                               onclick="disableTracing('<%= sequence.getName() %>')"
+                               class="icon-link"
+                               style="background-image:url(../admin/images/trace-icon.gif);"><fmt:message
+                                    key="sequence.trace.disable.link"/></a>
+                        </div>
                     </div>
-                </div>
-            </td>
+                </td>
+                <% } %>
+                <td style="border-left:none;border-right:none;width:100px">
+                    <div class="inlineDiv">
+                        <a href="#" onclick="editSequence('<%= sequence.getName() %>')"
+                           class="icon-link"
+                           style="background-image:url(../admin/images/edit.gif);"><fmt:message
+                                key="sequence.edit.action"/></a>
+                    </div>
+                </td>
+                <td style="border-left:none;width:100px">
+                    <div class="inlineDiv">
+                        <a href="#" onclick="deleteSequence('<%= sequence.getName() %>')"
+                           class="icon-link"
+                           style="background-image:url(../admin/images/delete.gif);"><fmt:message
+                                key="sequence.delete.action"/></a>
+                    </div>
+                </td>
+            </tr>
             <% } %>
-            <% if (sequence.isEnableTracing()) { %>
-            <td style="border-right:none;border-left:none;width:200px">
-                <div class="inlineDiv">
-                    <div id="disableTracing<%= sequence.getName()%>">
-                        <a href="#"
-                           onclick="disableTracing('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/trace-icon.gif);"><fmt:message
-                                key="sequence.trace.disable.link"/></a>
-                    </div>
-                    <div id="enableTracing<%= sequence.getName()%>"
-                         style="display:none;">
-                        <a href="#" onclick="enableTracing('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/trace-icon-disabled.gif);"><fmt:message
-                                key="sequence.trace.enable.link"/></a>
-                    </div>
-                </div>
-            </td>
-            <% } else { %>
-            <td style="border-right:none;border-left:none;width:200px">
-                <div class="inlineDiv">
-                    <div id="enableTracing<%= sequence.getName()%>">
-                        <a href="#" onclick="enableTracing('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/trace-icon-disabled.gif);"><fmt:message
-                                key="sequence.trace.enable.link"/></a>
-                    </div>
-                    <div id="disableTracing<%= sequence.getName()%>"
-                         style="display:none">
-                        <a href="#"
-                           onclick="disableTracing('<%= sequence.getName() %>')"
-                           class="icon-link"
-                           style="background-image:url(../admin/images/trace-icon.gif);"><fmt:message
-                                key="sequence.trace.disable.link"/></a>
-                    </div>
-                </div>
-            </td>
-            <% } %>
-            <td style="border-left:none;border-right:none;width:100px">
-                <div class="inlineDiv">
-                    <a href="#" onclick="editSequence('<%= sequence.getName() %>')"
-                       class="icon-link"
-                       style="background-image:url(../admin/images/edit.gif);"><fmt:message
-                            key="sequence.edit.action"/></a>
-                </div>
-            </td>
-            <td style="border-left:none;width:100px">
-                <div class="inlineDiv">
-                    <a href="#" onclick="deleteSequence('<%= sequence.getName() %>')"
-                       class="icon-link"
-                       style="background-image:url(../admin/images/delete.gif);"><fmt:message
-                            key="sequence.delete.action"/></a>
-                </div>
-            </td>
-        </tr>
-        <% } %>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </form>
 
     <script type="text/javascript">
         alternateTableRows('sequencesTable', 'tableEvenRow', 'tableOddRow');
     </script>
     <p>&nbsp;</p>
+    <br/>
+    <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
+                              selectAllFunction="selectAllInAllPages()"
+                              selectNoneFunction="selectAllInThisPage(false)"
+                              addRemoveFunction="deleteServices()"
+                              addRemoveButtonId="delete2"
+                              resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
+                              selectAllInPageKey="selectAllInPage"
+                              selectAllKey="selectAll"
+                              selectNoneKey="selectNone"
+                              addRemoveKey="delete"
+                              numberOfPages="<%=numberOfPages%>"/>
+    <br/>
     <carbon:paginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
                       page="list_sequences.jsp" pageNumberParameterName="pageNumber"
                       resourceBundle="org.wso2.carbon.sequences.ui.i18n.Resources"
