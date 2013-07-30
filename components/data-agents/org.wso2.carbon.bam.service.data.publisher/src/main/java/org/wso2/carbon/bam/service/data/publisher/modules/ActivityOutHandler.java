@@ -106,6 +106,9 @@ public class ActivityOutHandler extends AbstractHandler {
                     eventData = new EventData();
                 }
 
+                // Now set all values to response
+                engageSOAPHeaders(messageContext, activityID);
+
 /*                if (inMessageContext != null) {
                     timestamp = new Timestamp(Long.parseLong(inMessageContext.getProperty(
                             StatisticsConstants.REQUEST_RECEIVED_TIME).toString()));
@@ -140,9 +143,6 @@ public class ActivityOutHandler extends AbstractHandler {
                 Event event = ServiceAgentUtil.makeEventList(publishData, eventingConfigData);
                 EventPublisher publisher = new EventPublisher();
                 publisher.publish(event, eventingConfigData);
-
-                // Now set all values to response
-                engageSOAPHeaders(messageContext, activityID);
 
             }
         }
