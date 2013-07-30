@@ -380,5 +380,8 @@
 
 	<!-- Caching -->
         <wso2caching.version>4.0.2</wso2caching.version>
+
+	<!-- Jaggery version -->
+	<jaggery.version>0.9.0.ALPHA2-wso2v4</jaggery.version>
     </properties>
 </project>
