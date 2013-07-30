@@ -18,107 +18,215 @@
 
 package org.wso2.carbon.identity.tests.scim;
 
-/**
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.client.handlers.ClientHandler;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.automation.api.clients.user.mgt.UserManagementClient;
+import org.wso2.carbon.automation.core.environmentcontext.ContextProvider;
+import org.wso2.carbon.automation.core.environmentcontext.environmentvariables.EnvironmentContext;
+import org.wso2.carbon.automation.core.environmentcontext.environmentvariables.GroupContext;
+import org.wso2.carbon.automation.core.environmentcontext.GroupContextProvider;
+import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
+import org.wso2.carbon.automation.core.annotations.SetEnvironment;
 import org.wso2.carbon.automation.core.utils.UserInfo;
-import org.wso2.carbon.automation.api.clients.identity.*;
 import org.wso2.carbon.automation.core.utils.UserListCsvReader;
-import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
-import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
-import org.wso2.carbon.context.internal.CarbonContextDataHolder;
-import org.wso2.carbon.identity.tests.utils.BasicAuthHandler;
 import org.wso2.carbon.identity.tests.utils.BasicAuthInfo;
 import org.wso2.carbon.identity.tests.utils.SCIM.SCIMResponseHandler;
+import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.charon.core.client.SCIMClient;
-import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.objects.User;
 import org.wso2.charon.core.schema.SCIMConstants;
-*/
 
 import java.rmi.RemoteException;
 
-public class SCIMServiceProviderUserTestCase {
-/**
-    public static final String CRED_USER_NAME = "admin";
-    public static final String CRED_PASSWORD = "admin";
-    public static final int mainUserId = 2;
-    public static final String nodeId = "is001";
-    private static String userName = "HasiniG";
-    private static String externalID = "test";
-    private static String[] emails = {"hasini@gmail.com", "hasinig@yahoo.com"};
-    private static String displayName = "Hasini";
-    private static String password = "dummyPW1";
-    private static String language = "Sinhala";
-    private static String phone_number = "0772508354";
-    private UserInfo userInfo;
+public class SCIMServiceProviderUserTestCase extends MasterSCIMInitiator {
+    private static final Log log = LogFactory.getLog(SCIMServiceProviderUserTestCase.class);
+    public static final int providerUserId = 0;
+    public static final int consumerUserId = 0;
+    String scimUserId = null;
+    private UserInfo provider_userInfo;
+    UserManagementClient userMgtClient;
+    String scim_url;
     String serviceEndPoint = null;
-    String sessionCookie=null;
+    String backendUrl = null;
+    String sessionCookie = null;
 
     @BeforeClass(alwaysRun = true)
     public void initiate() throws RemoteException, LoginAuthenticationExceptionException {
-        userInfo = UserListCsvReader.getUserInfo(mainUserId);
-        EnvironmentBuilder builder = new EnvironmentBuilder().clusterNode(nodeId,mainUserId);
+        provider_userInfo = UserListCsvReader.getUserInfo(providerUserId);
+        GroupContextProvider consumerGroupContext = new GroupContextProvider();
+        GroupContext consumerGroup = consumerGroupContext.getGroupContext("node1");
 
-        ManageEnvironment environment = builder.build();
-        serviceEndPoint= environment.getClusterNode(nodeId).getBackEndUrl();
-        sessionCookie= environment.getClusterNode(nodeId).getSessionCookie();
-        System.setProperty("javax.net.ssl.trustStore",builder.getFrameworkSettings().getEnvironmentVariables().getKeystorePath());
-        System.setProperty("javax.net.ssl.trustStorePassword", builder.getFrameworkSettings().getEnvironmentVariables().getKeyStrorePassword());
+        ContextProvider consumer = new ContextProvider();
+        EnvironmentContext consumerNodeContext = consumer.getNodeContext(consumerGroup.getNode().getNodeId(), consumerUserId);
+        backendUrl = consumerNodeContext.getBackEndUrl();
+        scim_url = "https://" + consumerNodeContext.getWorkerVariables().getHostName() + ":" + consumerNodeContext.getWorkerVariables().getHttpsPort() + "/wso2/scim/";
+        serviceEndPoint = consumerNodeContext.getBackEndUrl();
+        sessionCookie = consumerNodeContext.getSessionCookie();
+        userMgtClient = new UserManagementClient(backendUrl, sessionCookie);
     }
-    @Test */
-/**
+
+    @BeforeMethod
+    public void initiateSkimClient() {
+        scimClient = new SCIMClient();
+    }
+
+    @Test(alwaysRun = true, description = "Add SCIM user", priority = 1)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     public void createUser() throws Exception {
+        //create SCIM client
+        String encodedUser = getScimUser();
+        //create a apache wink ClientHandler to intercept and identify response messages
+        Resource userResource = getResource(scimClient, scim_url);
+        BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(provider_userInfo);
+        String response = userResource.
+                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
+                contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON).
+                post(String.class, encodedUser);
+        log.info(response);
+        scimUserId = response.split(",")[0].split(":")[1].replace('"', ' ').trim();
+        userMgtClient.listUsers(userName, 100);
+        Assert.assertTrue(isUserExists());
+        Assert.assertNotNull(scimUserId);
+    }
 
-        SCIMAdminClient scimAdminClient = new SCIMAdminClient(serviceEndPoint,sessionCookie);
+    @Test(alwaysRun = true, description = "Get SCIM user", priority = 2)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    public void getUser() {
+        //create a apache wink ClientHandler to intercept and identify response messages
+        SCIMResponseHandler responseHandler = new SCIMResponseHandler();
+        responseHandler.setSCIMClient(scimClient);
+        //set the handler in wink client config
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.handlers(new ClientHandler[]{responseHandler});
+        //create a wink rest client with the above config
+        RestClient restClient = new RestClient(clientConfig);
+        BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(provider_userInfo);
+        //create resource endpoint to access a known user resource.
+        Resource userResource = restClient.resource(scim_url + "Users/" + scimUserId);
+        String response = userResource.
+                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
+                contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
+                .get(String.class);
 
-            //create SCIM client
-            SCIMClient scimClient = new SCIMClient();
-        scimAdminClient.addUserProvider(userInfo.getUserName(),"trestProvider",userName,password,"https://localhost:9445/wso2/scim/Users","https://localhost:9445/wso2/scim/Groups");
-            //create a user according to SCIM User Schema
-            User scimUser = scimClient.createUser();
-            scimUser.setUserName(userInfo.getUserName());
-            scimUser.setExternalId(externalID);
-            scimUser.setEmails(emails);
-            scimUser.setDisplayName(displayName);
-            scimUser.setPassword(password);
-            scimUser.setPreferredLanguage(language);
-            scimUser.setPhoneNumber(phone_number, null, false);
-            //encode the user in JSON format
-            String encodedUser = scimClient.encodeSCIMObject(scimUser, SCIMConstants.JSON);
-            //create a apache wink ClientHandler to intercept and identify response messages
-            SCIMResponseHandler responseHandler = new SCIMResponseHandler();
-            responseHandler.setSCIMClient(scimClient);
-            //set the handler in wink client config
-            ClientConfig clientConfig = new ClientConfig();
-            clientConfig.handlers(new ClientHandler[]{responseHandler});
-            //create a wink rest client with the above config
-            RestClient restClient = new RestClient(clientConfig);
-            //create resource endpoint to access User resource
-            Resource userResource = restClient.resource("https://localhost:9445/wso2/scim/Users");
+        //decode the response
+        log.info(response);
+        Assert.assertTrue(response.contains(userName));
+    }
 
-            BasicAuthInfo basicAuthInfo = new BasicAuthInfo();
-            basicAuthInfo.setUserName(CRED_USER_NAME);
-            basicAuthInfo.setPassword(CRED_PASSWORD);
+    @Test(alwaysRun = true, description = "list all SCIM users", priority = 3)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    public void listUser() throws Exception {
+        //create SCIM client
+        SCIMClient scimClient = new SCIMClient();
+        //create a apache wink ClientHandler to intercept and identify response messages
+        SCIMResponseHandler responseHandler = new SCIMResponseHandler();
+        responseHandler.setSCIMClient(scimClient);
+        //set the handler in wink client config
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.handlers(new ClientHandler[]{responseHandler});
+        //create a wink rest client with the above config
+        RestClient restClient = new RestClient(clientConfig);
 
-            BasicAuthHandler basicAuthHandler = new BasicAuthHandler();
-            BasicAuthInfo encodedBasicAuthInfo = (BasicAuthInfo) basicAuthHandler.getAuthenticationToken(basicAuthInfo);
+        BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(provider_userInfo);
+        //create resource endpoint to access a known user resource.
+        Resource userResource = restClient.resource(scim_url + "Users");
+        String response = userResource.
+                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
+                contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
+                .get(String.class);
+        Assert.assertTrue(isAllUsersExists(response));
+    }
+
+    @Test(alwaysRun = true, description = "Update SCIM user", priority = 4)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    public void UpdateUser() throws Exception {
+        String updatedMiddleName = "testChange11";
+        String updatedEmail = "test123@wso2.com";
+        //create a apache wink ClientHandler to intercept and identify response messages
+        SCIMResponseHandler responseHandler = new SCIMResponseHandler();
+        responseHandler.setSCIMClient(scimClient);
+        //set the handler in wink client config
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.handlers(new ClientHandler[]{responseHandler});
+        //create a wink rest client with the above config
+        RestClient restClient = new RestClient(clientConfig);
+        BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(provider_userInfo);
+        //create resource endpoint to access a known user resource.
+        Resource userResource = restClient.resource(scim_url + "Users/" + scimUserId);
+        User decodedUser = getScimUserUnEncoded();
+        decodedUser.setDisplayName(updatedMiddleName);
+        decodedUser.setWorkEmail(updatedEmail, true);
+
+        //encode updated user
+        String updatedUserString = scimClient.encodeSCIMObject(decodedUser, SCIMConstants.JSON);
+        //update user
+        Resource updateUserResource = restClient.resource(scim_url + "Users/" + scimUserId);
+        String responseUpdated = updateUserResource.
+                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
+                contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
+                .put(String.class, updatedUserString);
+        log.info("Updated user: " + responseUpdated);
+
+        String response = userResource.
+                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
+                contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
+                .get(String.class);
+        log.info("Retrieved user: " + response);
+        Assert.assertTrue(response.contains(updatedEmail));
+        Assert.assertTrue(response.contains(updatedMiddleName));
+    }
+
+    @Test(alwaysRun = true, description = "Delete SCIM user", priority = 5)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    public void DeleteUser() throws Exception {
+        ClientConfig clientConfig = new ClientConfig();
+        SCIMResponseHandler responseHandler = new SCIMResponseHandler();
+        responseHandler.setSCIMClient(scimClient);
+        clientConfig.handlers(new ClientHandler[]{responseHandler});
+        RestClient restClient = new RestClient(clientConfig);
+        BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(provider_userInfo);
+        Resource userResource = restClient.resource(scim_url + "Users/" + scimUserId);
+        String response = userResource.
+                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
+                accept(SCIMConstants.APPLICATION_JSON).
+                delete(String.class);
+        //decode the response
+        Assert.assertTrue(response.isEmpty());
+        Assert.assertFalse(isUserExists());
+    }
 
 
-            //TODO:enable, disable SSL. For the demo purpose, we make the calls over http
-            //send previously registered SCIM consumer credentials in http headers.
-            String response = userResource.
-                    header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
-                    contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON).
-                    post(String.class, encodedUser);
+    private boolean isUserExists() throws Exception {
+        boolean userExists = false;
+        FlaggedName[] nameList = userMgtClient.listUsers(userName, 100);
+        for (FlaggedName name : nameList) {
+            if (name.getItemName().contains(userName)) {
+                userExists = true;
+            }
+        }
+        return userExists;
+    }
 
-            //decode the response
-            System.out.println(response);
-
-    } */
+    private boolean isAllUsersExists(String response) throws Exception {
+        boolean usersExists = false;
+        FlaggedName[] nameList = userMgtClient.listUsers(userName, 100);
+        for (FlaggedName name : nameList) {
+            if (name.getItemName().contains("/")) {
+                if (response.contains(name.getItemName().split("/")[1])) {
+                    usersExists = true;
+                }
+            }
+        }
+        return usersExists;
+    }
 }
