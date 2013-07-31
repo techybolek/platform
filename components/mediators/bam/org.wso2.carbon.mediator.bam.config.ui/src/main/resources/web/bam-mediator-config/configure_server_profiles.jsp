@@ -536,38 +536,24 @@
 
             function updateStreamTableData(){
                 var tableData = "", inputs, numOfInputs;
-                var validateResult = "true";
                 inputs = document.getElementById("streamTable").getElementsByTagName("input");
                 numOfInputs = inputs.length;
-                for (var i = 0; i < numOfInputs; i = i + 5) {
-                    if (inputs[i].value != "" || inputs[i + 1].value != ""
-                                || inputs[i + 2].value != "" || inputs[i + 3].value != "") {
-                        if (i != 0) {
+                for(var i=0; i<numOfInputs; i=i+5){
+                    if(inputs[i].value != "" && inputs[i+1].value != ""){
+                        if(i != 0){
                             tableData = tableData + "~";
                         }
-
-                        validateResult = validateStreamsTable();
                         tableData = tableData + inputs[i].value + "^"
-                                            + inputs[i + 1].value + "^" + inputs[i + 2].value + "^"
-                                            + inputs[i + 3].value + "^" + inputs[i + 4].value;
+                                            + inputs[i+1].value + "^" + inputs[i+2].value + "^"
+                                            + inputs[i+3].value + "^" + inputs[i+4].value;
                     }
                 }
-
-                if (validateResult == "true") {
-                    document.getElementById("hfStreamTableData").value = tableData;
-                }
-
-                return validateResult;
+                document.getElementById("hfStreamTableData").value = tableData;
             }
 
-            function submitPage() {
-                var result = updateStreamTableData();
-                if (result == "true") {
-                    document.getElementById('hfAction').value = 'save';
-                } else {
-                    CARBON.showInfoDialog(result);
-                    return false;
-                }
+            function submitPage(){
+                updateStreamTableData();
+                document.getElementById('hfAction').value='save';
             }
 
             function testServer(){
@@ -919,16 +905,16 @@
                         <thead>
                             <tr>
                                 <th width="40%">
-                                    <fmt:message key="stream.name"/><span class="required">*</span>
+                                    <fmt:message key="stream.name"/>
                                 </th>
                                 <th width="40%">
-                                    <fmt:message key="stream.version"/><span class="required">*</span>
+                                    <fmt:message key="stream.version"/>
                                 </th>
                                 <th width="40%">
-                                    <fmt:message key="stream.nickName"/><span class="required">*</span>
+                                    <fmt:message key="stream.nickName"/>
                                 </th>
                                 <th width="40%">
-                                    <fmt:message key="stream.description"/><span class="required">*</span>
+                                    <fmt:message key="stream.description"/>
                                 </th>
                                 <th>
 
@@ -1149,7 +1135,7 @@
             </tr>
             <tr>
                 <td>
-                    <input type="submit" value="Save" onclick="return submitPage()"/>
+                    <input type="submit" value="Save" onclick="submitPage()"/>
                 </td>
             </tr>
         </table>
