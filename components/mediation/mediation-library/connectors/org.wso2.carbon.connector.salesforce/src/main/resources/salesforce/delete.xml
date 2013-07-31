@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template name="delete" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="allOrNone"/>
+    <parameter name="sobjects"/>
+    <sequence>
+        <class name="org.wso2.carbon.connector.salesforce.SetupCRUDParams"/>
+        <header expression="get-property('salesforce.serviceUrl')" name="To"/>
+        <payloadFactory>
+            <format>
+                <soapenv:Envelope
+                    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">
+                    <soapenv:Header>
+                        <urn:AllOrNoneHeader>
+                            <urn:allOrNone>$1</urn:allOrNone>
+                        </urn:AllOrNoneHeader>
+                        <urn:SessionHeader>
+                            <urn:sessionId>$2</urn:sessionId>
+                        </urn:SessionHeader>
+                    </soapenv:Header>
+                    <soapenv:Body>
+                        <urn:delete/>
+                    </soapenv:Body>
+                </soapenv:Envelope>
+            </format>
+            <args>
+                <arg expression="get-property('salesforce.crud.allOrNone')"/>
+                <arg expression="get-property('salesforce.sessionId')"/>
+            </args>
+        </payloadFactory>
+        <class name="org.wso2.carbon.connector.salesforce.SetupDeleteSobjects"/>
+        <callout action="urn:partner.soap.sforce.com/Soap/deleteRequest">
+            <source type="envelope"/>
+            <target xmlns:ns="http://org.apache.synapse/xsd"
+                xmlns:ns2="http://org.apache.synapse/xsd"
+                xmlns:s11="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:s12="http://www.w3.org/2003/05/soap-envelope" xpath="s11:Body/child::*[fn:position()=1] | s12:Body/child::*[fn:position()=1]"/>
+        </callout>
+    </sequence>
+</template>

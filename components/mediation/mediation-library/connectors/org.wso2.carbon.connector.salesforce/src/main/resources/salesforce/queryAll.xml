@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template name="queryAll" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="batchSize"/>
+    <parameter name="queryString"/>
+    <sequence>
+        <header expression="get-property('salesforce.serviceUrl')" name="To"/>
+        <payloadFactory>
+            <format>
+                <soapenv:Envelope
+                    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">
+                    <soapenv:Header>
+                        <urn:QueryOptions>
+                            <urn:batchSize>$1</urn:batchSize>
+                        </urn:QueryOptions>
+                        <urn:SessionHeader>
+                            <urn:sessionId>$2</urn:sessionId>
+                        </urn:SessionHeader>
+                    </soapenv:Header>
+                    <soapenv:Body>
+                        <urn:queryAll>
+                            <urn:queryString>$3</urn:queryString>
+                        </urn:queryAll>
+                    </soapenv:Body>
+                </soapenv:Envelope>
+            </format>
+            <args>
+                <arg expression="$func:batchSize"/>
+                <arg expression="get-property('salesforce.sessionId')"/>
+                <arg expression="$func:queryString"/>
+            </args>
+        </payloadFactory>
+        <callout action="urn:partner.soap.sforce.com/Soap/queryRequest">
+            <source type="envelope"/>
+            <target xmlns:ns="http://org.apache.synapse/xsd"
+                xmlns:ns2="http://org.apache.synapse/xsd"
+                xmlns:s11="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:s12="http://www.w3.org/2003/05/soap-envelope" xpath="s11:Body/child::*[fn:position()=1] | s12:Body/child::*[fn:position()=1]"/>
+        </callout>
+        <property expression="//ns:result/ns:done/text()"
+            name="salesforce.query.done" scope="default" type="STRING" xmlns:ns="urn:partner.soap.sforce.com"/>
+        <property expression="//ns:result/ns:queryLocator/text()"
+            name="salesforce.query.queryLocator" scope="default"
+            type="STRING" xmlns:ns="urn:partner.soap.sforce.com"/>
+        <property expression="//ns:result/ns:size/text()"
+            name="salesforce.query.recordSize" scope="default"
+            type="STRING" xmlns:ns="urn:partner.soap.sforce.com"/>
+        <class name="org.wso2.carbon.connector.salesforce.QueryMoreIterator"/>
+    </sequence>
+</template>
