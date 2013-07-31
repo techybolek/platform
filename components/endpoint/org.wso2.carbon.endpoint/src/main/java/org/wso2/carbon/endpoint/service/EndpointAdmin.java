@@ -32,6 +32,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayOutputStream;
+import java.lang.String;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -213,6 +214,76 @@ public class EndpointAdmin extends AbstractServiceBusAdmin {
             lock.unlock();
         }
         return true;
+    }
+
+    /**
+     * Delete selected endpoints
+     * @param endpointNames
+     * @throws EndpointAdminException
+     */
+    public void deleteSelectedEndpoint(String [] endpointNames) throws EndpointAdminException {
+        final Lock lock = getLock();
+        try {
+            lock.lock();
+            for(String endpointName : endpointNames){
+                assertNameNotEmpty(endpointName);
+                endpointName = endpointName.trim();
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting endpoint : " + endpointName + " from the configuration");
+                }
+                SynapseConfiguration synapseConfiguration = getSynapseConfiguration();
+                Endpoint endpoint = synapseConfiguration.getDefinedEndpoints().get(endpointName);
+                synapseConfiguration.removeEndpoint(endpointName);
+                MediationPersistenceManager pm = getMediationPersistenceManager();
+                String fileName = null;
+                if (endpoint instanceof AbstractEndpoint) {
+                    fileName = endpoint.getFileName();
+                }
+                pm.deleteItem(endpointName, fileName, ServiceBusConstants.ITEM_TYPE_ENDPOINT);
+                if (log.isDebugEnabled()) {
+                    log.debug("Endpoint : " + endpointName + " removed from the configuration");
+                }
+            }
+
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Delete
+     * @throws EndpointAdminException
+     */
+     public void deleteAllEndpointGroups() throws EndpointAdminException {
+        final Lock lock = getLock();
+        try {
+            lock.lock();
+            SynapseConfiguration synapseConfiguration = getSynapseConfiguration();
+            Map<String, Endpoint> namedEndpointMap = synapseConfiguration.getDefinedEndpoints();
+            Collection<String> namedEndpointCollection = namedEndpointMap.keySet();
+            if (namedEndpointCollection.size()>0) {
+                for (String endpointName : namedEndpointCollection) {
+                    assertNameNotEmpty(endpointName);
+                    endpointName = endpointName.trim();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Deleting endpoint : " + endpointName + " from the configuration");
+                    }
+                    Endpoint endpoint = synapseConfiguration.getDefinedEndpoints().get(endpointName);
+                    synapseConfiguration.removeEndpoint(endpointName);
+                    MediationPersistenceManager pm = getMediationPersistenceManager();
+                    String fileName = null;
+                    if (endpoint instanceof AbstractEndpoint) {
+                        fileName = endpoint.getFileName();
+                    }
+                    pm.deleteItem(endpointName, fileName, ServiceBusConstants.ITEM_TYPE_ENDPOINT);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Endpoint : " + endpointName + " removed from the configuration");
+                    }
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
