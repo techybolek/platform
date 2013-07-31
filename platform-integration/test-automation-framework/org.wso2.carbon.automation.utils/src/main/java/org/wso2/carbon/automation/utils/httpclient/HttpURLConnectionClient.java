@@ -264,6 +264,65 @@ public class HttpURLConnectionClient {
     }
 
     /**
+     * Reads data from the data reader and posts it to a server via POST request and read the response.
+     * data - The data you want to send
+     * endpoint - The server's address
+     * output - writes the server's response to output
+     * contentType   content type of the message
+     *
+     * @param data        Data to be sent
+     * @param endpoint    The endpoint to which the data has to be POSTed
+     * @param output      Output
+     * @param contentType content type of the message
+     * @throws Exception If an error occurs while POSTing
+     */
+    public static String sendPostRequestAndReadResponse(Reader data, URL endpoint, Writer output, String contentType)
+            throws Exception {
+        HttpURLConnection urlConnection = null;
+        String resultData;
+        try {
+            urlConnection = (HttpURLConnection) endpoint.openConnection();
+            try {
+                urlConnection.setRequestMethod("POST");
+            } catch (ProtocolException e) {
+                throw new Exception("Shouldn't happen: HttpURLConnection doesn't support POST??", e);
+            }
+            urlConnection.setDoOutput(true);
+            urlConnection.setDoInput(true);
+            urlConnection.setUseCaches(false);
+            urlConnection.setAllowUserInteraction(false);
+            urlConnection.setRequestProperty("Content-type", contentType);
+            OutputStream out = urlConnection.getOutputStream();
+            try {
+                Writer writer = new OutputStreamWriter(out, "UTF-8");
+                pipe(data, writer);
+                writer.close();
+            } catch (IOException e) {
+                throw new Exception("IOException while posting data", e);
+            } finally {
+                if (out != null) {
+                    out.close();
+                }
+            }
+            InputStream in = urlConnection.getInputStream();
+            resultData = getStringFromInputStream(in);
+
+            if (in != null) {
+                in.close();
+            }
+
+        } catch (IOException e) {
+            throw new Exception("Connection error (is server running at " + endpoint + " ?): " + e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+
+        return resultData;
+    }
+
+    /**
      * Sends an HTTP DELETE request to a url
      *
      * @param endpoint          - The URL of the server. (Example: " http://www.yahoo.com/search")
@@ -320,5 +379,39 @@ public class HttpURLConnectionClient {
             writer.write(buf, 0, read);
         }
         writer.flush();
+    }
+
+    /**
+     * Reads the response from inputstream
+     * @param is InputStream
+     * @return String
+     */
+    private static String getStringFromInputStream(InputStream is) {
+
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return sb.toString();
+
     }
 }
