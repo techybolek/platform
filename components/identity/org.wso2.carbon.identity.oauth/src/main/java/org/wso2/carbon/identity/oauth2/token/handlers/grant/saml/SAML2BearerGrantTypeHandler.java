@@ -78,12 +78,22 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
 
     public SAML2BearerGrantTypeHandler() throws IdentityOAuth2Exception {
         super();
+
+        Thread thread = Thread.currentThread();
+        ClassLoader loader = thread.getContextClassLoader();
+        thread.setContextClassLoader(this.getClass().getClassLoader());
+
         try {
+
             DefaultBootstrap.bootstrap();
+
         } catch (ConfigurationException e) {
             log.error(e.getMessage(),e);
             throw new IdentityOAuth2Exception("Error in bootstrapping the OpenSAML2 library");
+        } finally {
+            thread.setContextClassLoader(loader);
         }
+
         profileValidator =  new SAMLSignatureProfileValidator();
 
     }
