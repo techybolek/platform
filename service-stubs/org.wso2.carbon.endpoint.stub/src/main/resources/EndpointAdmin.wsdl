@@ -209,6 +209,14 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="deleteSelectedEndpoint">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="endpointNames" nillable="true"
+                                    type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="deleteEndpoint">
                 <xs:complexType>
                     <xs:sequence>
@@ -235,6 +243,11 @@
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean"/>
                     </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="deleteAllEndpointGroups">
+                <xs:complexType>
+                    <xs:sequence/>
                 </xs:complexType>
             </xs:element>
             <xs:element name="addEndpoint">
@@ -310,6 +323,9 @@
     </wsdl:message>
     <wsdl:message name="addEndpointResponse">
         <wsdl:part name="parameters" element="ns1:addEndpointResponse"/>
+    </wsdl:message>
+    <wsdl:message name="deleteSelectedEndpointRequest">
+        <wsdl:part name="parameters" element="ns1:deleteSelectedEndpoint"/>
     </wsdl:message>
     <wsdl:message name="enableStatisticsRequest">
         <wsdl:part name="parameters" element="ns1:enableStatistics"/>
@@ -407,6 +423,9 @@
     <wsdl:message name="getDynamicEndpointResponse">
         <wsdl:part name="parameters" element="ns1:getDynamicEndpointResponse"/>
     </wsdl:message>
+    <wsdl:message name="deleteAllEndpointGroupsRequest">
+        <wsdl:part name="parameters" element="ns1:deleteAllEndpointGroups"/>
+    </wsdl:message>
     <wsdl:portType name="EndpointAdminPortType">
         <wsdl:operation name="getEndpointConfiguration">
             <wsdl:input message="tns:getEndpointConfigurationRequest" wsaw:Action="urn:getEndpointConfiguration"/>
@@ -420,6 +439,11 @@
             <wsdl:output message="tns:addEndpointResponse" wsaw:Action="urn:addEndpointResponse"/>
             <wsdl:fault message="tns:EndpointAdminEndpointAdminException" name="EndpointAdminEndpointAdminException"
                         wsaw:Action="urn:addEndpointEndpointAdminEndpointAdminException"/>
+        </wsdl:operation>
+        <wsdl:operation name="deleteSelectedEndpoint">
+            <wsdl:input message="tns:deleteSelectedEndpointRequest" wsaw:Action="urn:deleteSelectedEndpoint"/>
+            <wsdl:fault message="tns:EndpointAdminEndpointAdminException" name="EndpointAdminEndpointAdminException"
+                        wsaw:Action="urn:deleteSelectedEndpointEndpointAdminEndpointAdminException"/>
         </wsdl:operation>
         <wsdl:operation name="enableStatistics">
             <wsdl:input message="tns:enableStatisticsRequest" wsaw:Action="urn:enableStatistics"/>
@@ -522,6 +546,11 @@
             <wsdl:fault message="tns:EndpointAdminEndpointAdminException" name="EndpointAdminEndpointAdminException"
                         wsaw:Action="urn:getDynamicEndpointEndpointAdminEndpointAdminException"/>
         </wsdl:operation>
+        <wsdl:operation name="deleteAllEndpointGroups">
+            <wsdl:input message="tns:deleteAllEndpointGroupsRequest" wsaw:Action="urn:deleteAllEndpointGroups"/>
+            <wsdl:fault message="tns:EndpointAdminEndpointAdminException" name="EndpointAdminEndpointAdminException"
+                        wsaw:Action="urn:deleteAllEndpointGroupsEndpointAdminEndpointAdminException"/>
+        </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="EndpointAdminSoap11Binding" type="tns:EndpointAdminPortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
@@ -551,6 +580,15 @@
         </wsdl:operation>
         <wsdl:operation name="enableStatistics">
             <soap:operation soapAction="urn:enableStatistics" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="EndpointAdminEndpointAdminException">
+                <soap:fault use="literal" name="EndpointAdminEndpointAdminException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="deleteSelectedEndpoint">
+            <soap:operation soapAction="urn:deleteSelectedEndpoint" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -747,6 +785,15 @@
                 <soap:fault use="literal" name="EndpointAdminEndpointAdminException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="deleteAllEndpointGroups">
+            <soap:operation soapAction="urn:deleteAllEndpointGroups" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="EndpointAdminEndpointAdminException">
+                <soap:fault use="literal" name="EndpointAdminEndpointAdminException"/>
+            </wsdl:fault>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="EndpointAdminSoap12Binding" type="tns:EndpointAdminPortType">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
@@ -776,6 +823,15 @@
         </wsdl:operation>
         <wsdl:operation name="enableStatistics">
             <soap12:operation soapAction="urn:enableStatistics" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="EndpointAdminEndpointAdminException">
+                <soap12:fault use="literal" name="EndpointAdminEndpointAdminException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="deleteSelectedEndpoint">
+            <soap12:operation soapAction="urn:deleteSelectedEndpoint" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -972,6 +1028,15 @@
                 <soap12:fault use="literal" name="EndpointAdminEndpointAdminException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="deleteAllEndpointGroups">
+            <soap12:operation soapAction="urn:deleteAllEndpointGroups" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="EndpointAdminEndpointAdminException">
+                <soap12:fault use="literal" name="EndpointAdminEndpointAdminException"/>
+            </wsdl:fault>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="EndpointAdminHttpBinding" type="tns:EndpointAdminPortType">
         <http:binding verb="POST"/>
@@ -995,6 +1060,12 @@
         </wsdl:operation>
         <wsdl:operation name="enableStatistics">
             <http:operation location="enableStatistics"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="deleteSelectedEndpoint">
+            <http:operation location="deleteSelectedEndpoint"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -1142,6 +1213,12 @@
             <wsdl:output>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="deleteAllEndpointGroups">
+            <http:operation location="deleteAllEndpointGroups"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="EndpointAdmin">
