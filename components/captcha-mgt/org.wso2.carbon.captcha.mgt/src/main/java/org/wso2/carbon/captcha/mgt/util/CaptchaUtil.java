@@ -27,6 +27,8 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.captcha.mgt.beans.CaptchaInfoBean;
 import org.wso2.carbon.captcha.mgt.constants.CaptchaMgtConstants;
 import org.wso2.carbon.captcha.mgt.internal.CaptchaMgtServiceComponent;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
@@ -54,7 +56,7 @@ import java.util.UUID;
  */
 public class CaptchaUtil {
     private static final Log log = LogFactory.getLog(CaptchaUtil.class);
-
+    
     /**
      * Clean the old captcha's from the registry.
      *
@@ -62,8 +64,12 @@ public class CaptchaUtil {
      */
     public static void cleanOldCaptchas() throws Exception {
         // we will clean captchas older than 20mins
-        new Thread() {
+        new Thread() {            
             public void run() {
+                //  As this is a util method. setting the  super tenant
+                PrivilegedCarbonContext context = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                context.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                context.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
                 try {
                     Registry superTenantRegistry =
                             CaptchaMgtServiceComponent.getConfigSystemRegistry(
