@@ -150,7 +150,7 @@
                                     org.wso2.carbon:org.wso2.carbon.attachment.mgt.feature:${carbon.platform.patch.version.412}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.stratos.common.server.feature:${stratos.version}
+                                    org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}
                                 </featureArtifactDef>
 
                                 <!-- capp uploading features-->
@@ -305,7 +305,7 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.carbon.stratos.common.server.feature.group</id>
+                                    <id>org.wso2.carbon.stratos.common.feature.group</id>
                                     <version>${stratos.version}</version>
                                 </feature>
 
