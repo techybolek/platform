@@ -35,6 +35,7 @@ import org.wso2.carbon.mediator.bam.util.BamMediatorConstants;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -47,6 +48,7 @@ public class ActivityIDSetter {
     private SOAPEnvelope soapEnvelope;
     private OMNamespace omNs;
     private MessageContext synapseContext;
+    private Map headers;
 
     public void setActivityIdInSOAPHeader(MessageContext synapseContext) {
 
@@ -59,6 +61,9 @@ public class ActivityIDSetter {
 
             Axis2MessageContext axis2smc = (Axis2MessageContext) synapseContext;
             org.apache.axis2.context.MessageContext axis2MessageContext = axis2smc.getAxis2MessageContext();
+
+            headers = (Map) ((Axis2MessageContext) synapseContext).getAxis2MessageContext().
+                    getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
             OMFactory fac = OMAbstractFactory.getOMFactory();
             this.omNs = fac.createOMNamespace(BamMediatorConstants.BAM_HEADER_NAMESPACE_URI, "ns");
@@ -92,7 +97,6 @@ public class ActivityIDSetter {
                 if (!itr.hasNext()) {
                     this.processActivityIDWhenSOAPHeaderIsNull();
                 } else {// If header is not null check for  BAM headers
-
                     // If the BAM header already present
                     //    1. If activity id is not present generate a one and include it to BAM header
                     //    2. Set activity id in synapse context for response path
@@ -126,13 +130,23 @@ public class ActivityIDSetter {
     private void processActivityIDWhenSOAPHeaderIsNull() throws BamMediatorException {
         try {
             SOAPHeaderBlock soapHeaderBlock = this.soapEnvelope.getHeader().addHeaderBlock(BamMediatorConstants.BAM_EVENT, this.omNs);
-            if (this.synapseContext.getProperty(BamMediatorConstants.MSG_ACTIVITY_ID) == null) { // this if
-                // condition we add
-                // to track failure messages coming from
-                // DS.That is a new message. So, doesn't have activityID.Getting activityID
-                // from the synapseContext.property
-                soapHeaderBlock.addAttribute(BamMediatorConstants.ACTIVITY_ID, this.uuidString, null);
-                this.synapseContext.setProperty(BamMediatorConstants.MSG_ACTIVITY_ID, this.uuidString);
+            if (this.synapseContext.getProperty(BamMediatorConstants.MSG_ACTIVITY_ID) == null) {
+                // Try to get activity ID from transport header
+                if(this.headers.containsKey(BamMediatorConstants.MSG_ACTIVITY_ID)) {
+                    soapHeaderBlock.addAttribute(BamMediatorConstants.ACTIVITY_ID,
+                                                 (String)this.headers.get(BamMediatorConstants.MSG_ACTIVITY_ID),
+                                                 null);
+                    this.synapseContext.setProperty(BamMediatorConstants.MSG_ACTIVITY_ID,
+                                                    (String)this.headers.get(BamMediatorConstants.MSG_ACTIVITY_ID));
+                } else {
+                    // this else
+                    // condition we add
+                    // to track failure messages coming from
+                    // DS.That is a new message. So, doesn't have activityID.Getting activityID
+                    // from the synapseContext.property
+                    soapHeaderBlock.addAttribute(BamMediatorConstants.ACTIVITY_ID, this.uuidString, null);
+                    this.synapseContext.setProperty(BamMediatorConstants.MSG_ACTIVITY_ID, this.uuidString);
+                }
             } else {
                 soapHeaderBlock.addAttribute(BamMediatorConstants.ACTIVITY_ID, (String) this.synapseContext
                         .getProperty(BamMediatorConstants.MSG_ACTIVITY_ID), null);
