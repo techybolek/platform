@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template xmlns="http://ws.apache.org/ns/synapse" name="search">
+    <parameter name="oauth.consumerKey"/>
+    <parameter name="oauth.consumerSecret"/>
+    <parameter name="oauth.accessToken"/>
+    <parameter name="oauth.accessTokenSecret"/>
+    <parameter name="search"/>
+    <parameter name="lang"/>
+    <parameter name="locale"/>
+    <parameter name="maxId"/>
+    <parameter name="since"/>
+    <parameter name="sinceId"/>
+    <parameter name="geocode"/>
+    <parameter name="radius"/>
+    <parameter name="unit"/>
+    <parameter name="until"/>
+    <sequence>
+        <!-- <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator"/> -->
+        <class name="org.wso2.carbon.connector.twitter.TwitterSearch"/>
+    </sequence>
+</template>

@@ -1,0 +1,13 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="show_status">
+	<parameter name="oauth.consumerKey" />
+	<parameter name="oauth.consumerSecret" />
+	<parameter name="oauth.accessToken" />
+	<parameter name="oauth.accessTokenSecret" />
+	<parameter name="id" />
+	<sequence>
+		<!-- <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" /> -->
+		
+		<class
+			name="org.wso2.carbon.connector.twitter.TwitterShowStatus" />
+	</sequence>
+</template>	
