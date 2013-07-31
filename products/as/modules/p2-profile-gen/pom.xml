@@ -101,7 +101,7 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.core.runtime.feature:${carbon.kernel.version}
                                 </featureArtifactDef>
-				<featureArtifactDef>
+                                <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
@@ -274,7 +274,7 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.bam.service.agent.feature:${carbon.platform.version}
                                 </featureArtifactDef>
-				<featureArtifactDef>
+                                <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.bam.webapp.agent.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
@@ -335,12 +335,16 @@
                                     org.wso2.carbon:org.wso2.carbon.reporting.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <!-- end reporting features -->
-           
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.platform.version}</featureArtifactDef>
-				
-				<!-- as runtime features-->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.as.runtimes.cxf.feature:${carbon.platform.version}</featureArtifactDef>
-				<!-- end of as runtime features-->
+
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+
+                                <!-- as runtime features-->
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.as.runtimes.cxf.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <!-- end of as runtime features-->
 
                             </featureArtifacts>
                         </configuration>
@@ -371,7 +375,9 @@
                             <productConfigurationFile>${basedir}/carbon.product</productConfigurationFile>
                             <metadataRepository>file:${basedir}/target/p2-repo</metadataRepository>
                             <artifactRepository>file:${basedir}/target/p2-repo</artifactRepository>
-                            <targetPath>file:${basedir}/target/wso2carbon-core-${carbon.kernel.version}/repository/components</targetPath>
+                            <targetPath>
+                                file:${basedir}/target/wso2carbon-core-${carbon.kernel.version}/repository/components
+                            </targetPath>
                             <profile>worker</profile>
                         </configuration>
                     </execution>
@@ -624,7 +630,7 @@
                                     <id>org.wso2.carbon.bam.service.agent.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-				<feature>
+                                <feature>
                                     <id>org.wso2.carbon.bam.webapp.agent.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -717,18 +723,17 @@
                                 </feature>
 
                                 <feature>
-                                   <id>org.wso2.carbon.user.mgt.feature.group</id>
-                                   <version>${carbon.platform.version}</version>
-                               </feature>
-				
-				<!-- as-runtimes-->
-				<feature>
-                                   <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
-                                   <version>${carbon.platform.version}</version>
-                               </feature>
+                                    <id>org.wso2.carbon.user.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
 
-				<!-- end of as-runtimes-->
+                                <!-- as-runtimes-->
+                                <feature>
+                                    <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
 
+                                <!-- end of as-runtimes-->
 
 
                                 <!--<feature>
@@ -755,18 +760,18 @@
                             <deleteOldProfileFiles>true</deleteOldProfileFiles>
                             <features>
 
-				<feature>
+                                <feature>
                                     <id>org.wso2.carbon.core.common.feature.group</id>
                                     <version>${carbon.platform.version}</version>
-                                </feature>  
-				<feature>
+                                </feature>
+                                <feature>
                                     <id>org.wso2.carbon.core.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-				<feature>
+                                <feature>
                                     <id>org.wso2.carbon.core.runtime.feature.group</id>
                                     <version>${carbon.platform.version}</version>
-                                </feature>                                
+                                </feature>
                                 <feature>
                                     <id>org.wso2.carbon.ntask.feature.group</id>
                                     <version>${carbon.platform.version}</version>
@@ -957,11 +962,11 @@
                                     <id>org.wso2.carbon.deployment.synchronizer.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-				<feature>
+                                <feature>
                                     <id>org.wso2.carbon.deployment.synchronizer.subversion.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-				<feature>
+                                <feature>
                                     <id>org.wso2.carbon.deployment.synchronizer.git.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -1089,16 +1094,16 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
-                                   <id>org.wso2.carbon.user.mgt.server.feature.group</id>
-                                   <version>${carbon.platform.version}</version>
-                               </feature>
-				
-				<!-- as -runtime features -->
-				<feature>
-                                   <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
-                                   <version>${carbon.platform.version}</version>
-                               </feature>
-			       	<!-- end of as -runtime features -->
+                                    <id>org.wso2.carbon.user.mgt.server.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+
+                                <!-- as -runtime features -->
+                                <feature>
+                                    <id>org.wso2.carbon.as.runtimes.cxf.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <!-- end of as -runtime features -->
 
                             </features>
                         </configuration>
