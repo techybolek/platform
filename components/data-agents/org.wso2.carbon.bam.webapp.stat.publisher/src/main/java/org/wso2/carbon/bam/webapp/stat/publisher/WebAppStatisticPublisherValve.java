@@ -32,6 +32,7 @@ import org.wso2.carbon.bam.webapp.stat.publisher.publish.WebappAgentUtil;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.BrowserInfoUtils;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.TenantEventConfigData;
 import org.wso2.carbon.bam.webapp.stat.publisher.util.WebappStatisticsPublisherConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -115,8 +116,10 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         * Checks weather requested url contains favicon.ico
         * if any of those becomes false next valve is invoked and exit from executing further.
         */
+        String serverRoot = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
+        boolean isMgtConsoleRequest = requestURI.startsWith(serverRoot) || requestURI.startsWith("/carbon");
         boolean isTenantPublishingEnabled = WebappAgentUtil.getPublishingEnabled() && webappStatsEnable;
-        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico"))) {
+        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico")) || isMgtConsoleRequest) {
             return;
         }
 
