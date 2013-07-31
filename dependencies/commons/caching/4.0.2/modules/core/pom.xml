@@ -15,6 +15,20 @@
     <packaging>bundle</packaging>
     <name>WSO2 Caching Module - Core</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-saaj_1.3_spec</artifactId>
+            <version>${geronimo.saaj.version.caching}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-saaj</artifactId>
+            <version>1.6.1-wso2v10</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
            <plugin>
@@ -93,11 +107,20 @@
                             !org.wso2.caching.*,
                             *;resolution:=optional
                         </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
+                        <Embed-Dependency>
+                            geronimo-saaj_1.3_spec;scope=compile|runtime;inline=true;
+                            axis2-saaj;scope=compile|runtime;inline=true;
+                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <properties>
+    <geronimo.saaj.version.caching>1.0.0</geronimo.saaj.version.caching>
+    </properties>
+
 
 
 </project>
