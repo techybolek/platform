@@ -187,13 +187,13 @@ public class EventDispatcher {
         }
     }
 
-    private synchronized void updateDomainNameStreamTypeHolderCache(
+    private void updateDomainNameStreamTypeHolderCache(
             StreamDefinition streamDefinition, Credentials credentials) {
         StreamTypeHolder streamTypeHolder = getStreamDefinitionHolder(credentials);
         streamTypeHolder.putStreamDefinition(streamDefinition);
     }
 
-    private synchronized StreamTypeHolder initDomainNameStreamTypeHolderCache(
+    private StreamTypeHolder initDomainNameStreamTypeHolderCache(
             Credentials credentials) {
         StreamTypeHolder streamTypeHolder = domainNameStreamTypeHolderCache.get(credentials.getDomainName());
         if (null == streamTypeHolder) {
@@ -216,7 +216,7 @@ public class EventDispatcher {
         return streamTypeHolder;
     }
 
-    private synchronized StreamTypeHolder updateDomainNameStreamTypeHolderCache(
+    private StreamTypeHolder updateDomainNameStreamTypeHolderCache(
             Credentials credentials) {
         StreamTypeHolder streamTypeHolder = domainNameStreamTypeHolderCache.get(credentials.getDomainName());
         if (null != streamTypeHolder) {
