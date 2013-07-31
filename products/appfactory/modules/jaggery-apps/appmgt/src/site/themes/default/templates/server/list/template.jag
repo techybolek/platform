@@ -1,0 +1,89 @@
+<% jagg.template("server/list", function(inputs, outputs, jagg) { %>
+
+ 	<%
+        var applicationName = request.getParameter("applicationName");
+ 		var applicationKey = request.getParameter("applicationKey");
+ 		var modApplication = jagg.module("application");
+ 	%>
+
+    <%
+    var appVersions = modApplication.getUserAccess(applicationKey, userName);
+    var parsedVersions = parse(appVersions);
+    var stages = getProperties('ApplicationDeployment.DeploymentStage'); 
+    %>
+       
+
+
+
+<div class="container">
+				<article class="main" id="server_logs">
+                        <header class="separator">
+                        	<div class="content">
+                                <h1>Server logs</h1>
+                             </div>
+                        </header>
+                        <section class="separator">
+                            <div class="content well">
+                            	<h2 class="big">Runtime Logs</h2>
+                                <form action="../blocks/logdownload/ajax/logdownload.jag">
+                                <ul class="list_table push_top_20" >
+
+                                   <li class="list_row_item first_list_row_item">
+                                        <ul class="list_row first_list_row">
+                                            <li class="list_col first_list_col server_environment_col">
+                                                <h2 class="list_col_heading">Environment</h2>
+                                            </li>
+                                            <li class="list_col server_download_col">
+                                            	<h2 class="list_col_heading">&nbsp;</h2>
+                                            </li>
+                                        </ul>
+                                   </li>
+
+
+
+
+
+                                        <input type="hidden" name="action" value="downloadFile">
+                                        <input type="hidden" name="applicationKey" value='<%=applicationKey%>'>
+
+                                           <%
+
+                                           var stages = getProperties('ApplicationDeployment.DeploymentStage');
+                                           var hasVisibilityPermissions = outputs.hasVisibilityPermissions;
+
+                                           for(var i=0; i < stages.length ; i++){
+                                               var stage = stages[i];
+
+
+                                               if(hasVisibilityPermissions[stage]) {
+                                                %>
+                                           <li class="list_row_item first_list_row_item">
+                                                <ul class="list_row first_list_row">
+                                                    <li class="list_col first_list_col server_environment_col">
+                                                        <h2 class="list_col_heading">Environment</h2>
+                                                        <div class="list_col_content">
+                                                            <%=stage%>
+                                                        </div>
+                                                    </li>
+                                                    <li class="list_col server_download_col">
+                                                        <h2 class="list_col_heading">&nbsp;</h2>
+                                                        <div class="list_col_content">
+                                                            <button class="icon_link icon-download-alt" type="submit" name="stage" value="<%=stage%>">Download</button>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                           </li>
+                                           <%
+                                                }
+
+                                              }
+                                              %>
+
+                               </ul>
+                                </form>
+                            </div>
+                        </section>
+                        <div class="clearfix"></div>
+                </article>
+            </div><!-- /container -->
+<% }); %>

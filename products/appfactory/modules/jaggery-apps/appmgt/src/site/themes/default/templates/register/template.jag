@@ -1,0 +1,158 @@
+<% jagg.template("register", function(inputs, outputs, jagg) { %>
+ 
+<script type="text/javascript">
+
+
+    function doSubmit() {
+    
+    	
+    	
+    	
+            jagg.post("../blocks/application/users/add/ajax/add.jag", { 
+            		action:"createUserAccount",
+            		firstName:$("#firstName").attr('value'),
+            		lastName:$("#lastName").attr('value'),
+            		email:$("#email").attr('value'),
+            		userName:$("#email").attr('value'),
+            		password:$("#password").attr('value')
+              },
+              function (result) {
+		jagg.message({content:'You have successfully registered to WSO2 AppFactory.Please check your mail to continue.',type:'info',cbk:function(){
+            		window.location.href = "index.jag";
+     			}
+		});        
+              },
+              function (jqXHR, textStatus, errorThrown) {
+                  jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted. Please check your mail to continue.',type:'info', cbk:function(){
+            		window.location.href = "index.jag";
+                  	}
+                  });
+        });
+    }
+    
+    function validateEmail(){
+    	  jagg.post("../blocks/application/users/get/ajax/list.jag", { 
+    		action:"validateUser",
+    		userName:$("#email").attr('value')
+	      },
+	      function (result) {
+	    	result = result.replace(/[\r\n]/g, "");
+	    	if(result=="false"){
+	    		doSubmit();
+			}else{
+				jagg.message({content:'Your email address is already registered.',type:'warning'});
+			}
+	      },
+	      function (jqXHR, textStatus, errorThrown) {
+              jagg.message({content:jqXHR+textStatus+errorThrown,type:'error',id:'myuniqeid' });
+	    	  return false ;
+	      });
+    	  
+    }
+
+
+    $(document).ready(function($){
+        jQuery.validator.setDefaults({
+                errorElement:'span'
+            });
+		$('#registerForm').validate({
+			submitHandler: function(form) {
+				validateEmail();
+		   	}
+		});
+    });
+</script>
+
+
+
+
+
+
+<div class="container">
+                	<article class="main">
+                	<% jagg.includeBlock("page/messages", null); %>
+                        <header class="separator">
+                        	<div class="content">
+                                    <ol class="breadcrumb">
+                                            <li class="breadcrumb_item"><a class="breadcrumb_link" href="<%=jagg.getAbsoluteUrl("/")%>">Home</a></li>
+                                            <li class="breadcrumb_item"><h1>Sign-up for WSO2 App Factory</h1></li>
+                                    </ol>
+                            </div>
+                        </header>
+                        <section class="content push_top_40">
+
+                            <div class="form-container">
+                                <form method='post' name="inputData" class='right_label hold' id='registerForm'>
+                                  <fieldset>
+                                        <div class="input_row">
+                                         	<label for="firstName" ><strong>First Name</strong> <em>*</em></label>
+                                            <input type="text" id="firstName" name="firstName" class="required" />
+                                        </div>
+
+                                        <div class="input_row">
+                                         	<label for="lastName"><strong>Last Name</strong> <em>*</em></label>
+                                            <input type="text" id="lastName" name="lastName" />
+                                        </div>
+
+                                        <div class="input_row">
+                                         	<label for="email"><strong>Email</strong> <em>*</em></label>
+                                            <input type="text" id="email" name="email" class="required email" />
+                                            <p class="note">Please make sure that you provide a valid Email address. This address will be use to validate your account</p>
+                                        </div>
+
+                                        <div class="input_row">
+                                         	<label for="password"><strong>Password</strong> <em>*</em></label>
+                                            <input type="password" id="password" name="password" class="required" />
+                                            <p class="note"> For a more secure password:<br /> * - Use both letters and numbers. <br /> * - Add special characters (such as @, ?, %). <br />* - Mix capital and lowercase letters.</p>
+
+                                            <!--<p class="note">
+                                                For a more secure password:<ul><li>Use both letters and numbers</li><li>Add special characters (such as @, ?, %)</li><li>Mix capital and lowercase letters</li></ul>
+                                            </p>-->
+                                        </div>
+
+                                        <div class="input_row">
+                                         	<label for="repeatedPassword"><strong>Password (Repeat)</strong> <em>*</em></label>
+                                         	<input type="password" id="repeatedPassword" equalTo="#password" name="repeatedPassword" class="required" />
+                                        </div>
+
+
+
+                                  </fieldset>
+
+                                 <div class="buttonrow">
+                                    <input id="submitbtn" type='submit' value='Create My Account' class='btn btn-primary' />
+                                     <a href="javascript:location.href='index.jag'">Cancel</a>
+                                </div>
+
+                                </form>
+                             </div><!-- /form-container -->
+
+                        <div class="clearfix"></div>
+                        </section>
+                        <div class="clearfix"></div>
+                      </article>
+            </div><!-- /container -->
+
+ <!--<link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/lib/bootstrap/css/bootstrap.css'))%>">-->
+<!-- Button to trigger modal -->
+<!--<a href="#myModal" role="button" class="btn" data-toggle="modal">Launch demo modal</a>-->
+
+
+ <!-- Modal -->
+<!--<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">-->
+  <!--<div class="modal-header">-->
+    <!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>-->
+    <!--<h3 id="myModalLabel">Modal header</h3>-->
+  <!--</div>-->
+  <!--<div class="modal-body">-->
+    <!--<p>One fine body…</p>-->
+  <!--</div>-->
+  <!--<div class="modal-footer">-->
+    <!--<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>-->
+    <!--<button class="btn btn-primary">Save changes</button>-->
+  <!--</div>-->
+<!--</div>-->
+
+
+        
+<% }); %>

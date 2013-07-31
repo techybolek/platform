@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<AppFactory xmlns="http://www.wso2.org/appfactory/">
+
+    <WebContextRoot>appmgt</WebContextRoot>
+    <AdminUserName>admin</AdminUserName>
+    <AdminPassword>admin</AdminPassword>
+    <!--Application creation delay in queue   -->
+    <ApplicationCreatorDelay>10000</ApplicationCreatorDelay>
+    <EmailSend>true</EmailSend>
+    <RegistrationLink>../appmgt/site/pages/register.jag</RegistrationLink>
+    <!--To Register in WSO2 Oxygen Tank
+    <RegistrationLink>http://wso2.org/user/register</RegistrationLink-->
+    <SignUpText>Sign up and start developing</SignUpText>
+    <SignInText>Already a Member? Sign In.</SignInText>
+
+    <ApplicationRoles>
+        <Role name="developer">
+            <DisplayName>Developer</DisplayName>
+            <Permission>
+                /permission/admin/login,
+                /permission/admin/appfactory/develop,
+                /permission/admin/appfactory/repository/readwrite,
+                /permission/admin/appfactory/build,
+                /permission/admin/appfactory/repository/branch,
+                /permission/admin/appfactory/deployTo/Development,
+                /permission/admin/appfactory/deployTo/Testing,
+                /permission/admin/appfactory/configure/db/Development,
+                /permission/admin/appfactory/configure/api/subscribe,
+                /permission/admin/appfactory/configure/resources/Development,
+                /permission/admin/appfactory/datasource/create,
+                /permission/admin/appfactory/datasource/update/Development,
+                /permission/admin/appfactory/datasource/update/Testing,
+                /permission/admin/appfactory/resource/create,
+                /permission/admin/appfactory/resource/update/Development,
+                /permission/admin/appfactory/resource/update/Testing,
+                /permission/admin/appfactory/promoteTo/Testing,
+                /permission/admin/appfactory/visibility/Development,
+                /permission/admin/appfactory/visibility/Testing,
+                /permission/admin/appfactory/configuration/apimanager
+            </Permission>
+        </Role>
+        <Role name="devOps">
+            <DisplayName>DevOps</DisplayName>
+            <Permission>
+                /permission/admin/login,
+                /permission/admin/appfactory/deployTo/Production,
+                /permission/admin/appfactory/configure/db/Staging,
+                /permission/admin/appfactory/configure/db/Production,
+                /permission/admin/appfactory/configure/resources/Staging,
+                /permission/admin/appfactory/configure/resources/Production,
+                /permission/admin/appfactory/datasource/update/Staging,
+                /permission/admin/appfactory/datasource/update/Production,
+                /permission/admin/appfactory/resource/update/Staging,
+                /permission/admin/appfactory/resource/update/Production,
+                /permission/admin/appfactory/promoteTo/Production,
+                /permission/admin/appfactory/promoteTo/Staging,
+                /permission/admin/appfactory/demoteTo/Staging,
+                /permission/admin/appfactory/demoteTo/Testing,
+                /permission/admin/appfactory/retire,
+                /permission/admin/appfactory/visibility/Staging,
+                /permission/admin/appfactory/visibility/Production
+            </Permission>
+        </Role>
+        <Role name="qa">
+            <DisplayName>QA</DisplayName>
+            <Permission>
+                /permission/admin/login,
+                /permission/admin/appfactory/deployTo/Staging,
+                /permission/admin/appfactory/configure/db/Staging,
+                /permission/admin/appfactory/configure/db/Testing,
+                /permission/admin/appfactory/deployTo/Staging,
+                /permission/admin/appfactory/configure/db/Staging,
+                /permission/admin/appfactory/configure/db/Testing,
+                /permission/admin/appfactory/configure/resources/Staging,
+                /permission/admin/appfactory/configure/resources/Testing,
+                /permission/admin/appfactory/datasource/update/Staging,
+                /permission/admin/appfactory/datasource/update/Testing,
+                /permission/admin/appfactory/resource/update/Staging,
+                /permission/admin/appfactory/resource/update/Testing,
+                /permission/admin/appfactory/promoteTo/Staging,
+                /permission/admin/appfactory/demoteTo/Development,
+                /permission/admin/appfactory/visibility/Development,
+                /permission/admin/appfactory/visibility/Testing,
+                /permission/admin/appfactory/visibility/Staging,
+                /permission/admin/appfactory/visibility/Production
+            </Permission>
+        </Role>
+        <Role name="appOwner">
+            <DisplayName>Application Owner</DisplayName>
+            <Permission>
+                /permission/admin/login,
+                /permission/admin/appfactory/develop,
+                /permission/admin/appfactory/repository/readwrite,
+                /permission/admin/appfactory/build,
+                /permission/admin/appfactory/repository/branch,
+                /permission/admin/appfactory/deployTo/Development,
+                /permission/admin/appfactory/deployTo/Testing,
+                /permission/admin/appfactory/deployTo/Staging,
+                /permission/admin/appfactory/configure/db/Development,
+                /permission/admin/appfactory/configure/db/Testing,
+                /permission/admin/appfactory/configure/db/Staging,
+                /permission/admin/appfactory/configure/api/subscribe,
+                /permission/admin/appfactory/configure/resources/Development,
+                /permission/admin/appfactory/configure/resources/Testing,
+                /permission/admin/appfactory/configure/resources/Staging,
+                /permission/admin/appfactory/datasource/create,
+                /permission/admin/appfactory/datasource/update/Development,
+                /permission/admin/appfactory/datasource/update/Testing,
+                /permission/admin/appfactory/datasource/update/Staging,
+                /permission/admin/appfactory/resource/create,
+                /permission/admin/appfactory/resource/update/Development,
+                /permission/admin/appfactory/resource/update/Testing,
+                /permission/admin/appfactory/resource/update/Staging,
+                /permission/admin/appfactory/promoteTo/Testing,
+                /permission/admin/appfactory/promoteTo/Staging,
+                /permission/admin/appfactory/demoteTo/Development,
+                /permission/admin/appfactory/demoteTo/Testing,
+                /permission/admin/appfactory/visibility/Development,
+                /permission/admin/appfactory/visibility/Testing,
+                /permission/admin/appfactory/visibility/Staging,
+                /permission/admin/appfactory/visibility/Production,
+                /permission/admin/appfactory/usermgt/invite,
+                /permission/admin/appfactory/configuration/apimanager
+            </Permission>
+        </Role>
+    </ApplicationRoles>
+    <PlatformRoles>
+        <DefaultUserRole name="appFactoryUsers">
+            <Permission>
+                /permission/admin/appfactory/application/create,
+                /permission/admin/login,
+                /permission/admin/manage/api/subscribe,
+                /permission/admin/manage/api/create,
+                /permission/admin/manage/api/publish,
+                /permission/admin/configure/governance,
+                /permission/admin/manage/resources
+            </Permission>
+        </DefaultUserRole>
+        <Role name="admin">
+            <Permission>
+		CreateApplication/CreateApplication:invoke-service,
+		/permission/admin/appfactory/ceo/dashboard
+	    </Permission>
+        </Role>
+        <Role name="ceo">
+            <Permission>
+                /permission/admin/login,
+                /permission/admin/appfactory/,
+		/permission/admin/appfactory/ceo/dashboard
+            </Permission>
+        </Role>
+	<Role name="globalAPIPublisher">
+            <Permission>
+       		/_system/governance:http://www.wso2.org/projects/registry/actions/get,
+		/_system/governance:http://www.wso2.org/projects/registry/actions/add,
+	        /_system/governance:http://www.wso2.org/projects/registry/actions/delete,
+	        /permission/admin/configure/governance,
+	        /permission/admin/manage/api/create,
+	        /permission/admin/manage/api/publish,
+	        event/topics:subscribe,
+	        event/topics:publish    
+	</Permission>
+        </Role>
+
+    </PlatformRoles>
+
+    <!--SSO relying party configuration.-->
+    <SSORelyingParty>
+        <Name>WSO2 AppFactory Application Management</Name>
+                <DashboardName>WSO2 AppFactory Dashboard</DashboardName>
+        <IdentityProviderURL>https://AF_HOST/samlsso</IdentityProviderURL>
+        <KeyStorePassword>wso2carbon</KeyStorePassword>
+        <IdentityKeyAlias>wso2carbon</IdentityKeyAlias>
+        <KeyStoreName>${carbon.home}/repository/resources/security/wso2carbon.jks</KeyStoreName>
+    </SSORelyingParty>
+
+
+    <!-- Server URLs -->
+    <ServerUrls>
+        <AppFactory>https://AF_HOST:9443/services/</AppFactory>
+        <BPS>https://AF_HOST:9443/services/</BPS>
+        <Greg>https://AF_HOST:9443/services/</Greg>
+    </ServerUrls>
+
+
+    <ApiManager>
+        <DefaultTier>Unlimited</DefaultTier>
+        <Server>
+            <Url>http://apimanager.AF_HOST:9769</Url>
+        </Server>
+        <Store>
+            <Url>http://apimanager.AF_HOST:9769/store</Url>
+        </Store>
+        <Service>
+            <Name>APIManagerIntegrationService</Name>
+            <Namespace>http://integration.apiManager.appfactory.carbon.wso2.org</Namespace>
+        </Service>
+        <Keys>
+            <Property name="Sandbox">Development</Property>
+            <Property name="Sandbox">Testing</Property>
+            <Property name="Sandbox">Staging</Property>
+            <Property name="Prod">Production</Property>
+        </Keys>
+    </ApiManager>
+
+
+    <!--Application repository related configurations-->
+
+
+    <RepositoryProviderConfig name="git" enabled="true">
+        <Property name="Class">
+            org.wso2.carbon.appfactory.git.repository.provider.GITBlitBasedGITRepositoryProvider
+        </Property>
+        <Property name="BaseURL">https://AF_HOST:8443/</Property>
+        <Property name="GitblitAdminUserName">admin</Property>
+        <Property name="GitblitAdminPassword">admin</Property>
+        <Property name="ReadWritePermission">/permission/admin/appfactory/repository/readwrite</Property>
+        <Property name="DisplayName">Git</Property>
+        <Property name="Provider">git</Property>
+    </RepositoryProviderConfig>
+
+    <RepositoryProviderConfig name="svn" enabled="true">
+        <Property name="Class">
+            org.wso2.carbon.appfactory.webdavsvn.svn.repository.provider.Apache2WebDAVSVNRepositoryProvider
+        </Property>
+        <Property name="BaseURL">https://AF_HOST:8082</Property>
+        <Property name="BackendURL">http://localhost:8081</Property>
+        <Property name="SCMServerAdminUserName">admin</Property>
+        <Property name="SCMServerAdminPassword">admin</Property>
+        <Property name="ReadWritePermission">/permission/admin/appfactory/repository/readwrite</Property>
+        <Property name="DisplayName">SVN</Property>
+        <Property name="Provider">svn</Property>
+    </RepositoryProviderConfig>
+
+
+
+ <!--This element defines the set of staging servers, where the application applications are deployed. -->
+ <ApplicationDeployment>
+
+         <DeploymentStage name="Development">
+        <Deployer>
+                <ApplicationType name="*">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                            </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/as</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">asdev</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">asdev</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+		<ApplicationType name="esb">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                            </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/esb</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">esbdev</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">esbdev</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+            </Deployer>
+    
+	<AllowDirectDeploy>true</AllowDirectDeploy>
+    <!--if autodeployment is enabled, the selected versions to autodeploy will be built and deployed after every commit-->
+	    <AutomaticDeployment enabled="true">
+				<!--time period to poll the repository-->
+                <PollingPeriod>6</PollingPeriod>
+            </AutomaticDeployment>
+             <DeploymentArtifact>
+                 <TriggerBuild>
+                     <ArtifactStoragePolicy>Latest</ArtifactStoragePolicy> 
+					<!-- Latest, Tagged artifact will be deployed -->
+                 </TriggerBuild>
+             </DeploymentArtifact>
+             <Promote>
+                 <DeploymentPolicy>Latest</DeploymentPolicy>
+		<TargetStage>Testing</TargetStage>
+                 <!-- Tagged/Promoted artifact will be deployed to the promoted stage-->
+             </Promote>
+            <CreateArtifact>Always</CreateArtifact>
+            <ProcessEndPoint>https://local.AF_HOST:9444/services/DeployToStage</ProcessEndPoint>
+            <DeploymentServerURL>https://appserver.dev.AF_HOST:8343/services/</DeploymentServerURL>
+            <MountPoint>dev</MountPoint>
+	    <BaseAccessUrl>https://appserver.dev.AF_HOST:8343</BaseAccessUrl>
+            <TenantMgtUrl>https://appserver.dev.AF_HOST</TenantMgtUrl>
+           <Buildable>true</Buildable>
+ 	<StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>
+        <RssName>Development</RssName>
+
+        </DeploymentStage>
+
+        <DeploymentStage name="Testing">
+ <Deployer>
+                <ApplicationType name="*">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                        </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/as</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">astest</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">astest</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+		<ApplicationType name="esb">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                            </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/esb</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">esbtest</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">esbtest</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+            </Deployer>
+            
+<AllowDirectDeploy>true</AllowDirectDeploy>
+            <AutomaticDeployment enabled="false">
+                <PollingPeriod>6</PollingPeriod>
+            </AutomaticDeployment>
+            <DeploymentArtifact>
+                <TriggerBuild>
+                    <ArtifactStoragePolicy>Tagged</ArtifactStoragePolicy> <!-- Latest, Marked-->
+                </TriggerBuild>
+            </DeploymentArtifact>
+            <Promote>
+                <DeploymentPolicy>Promoted</DeploymentPolicy>
+                <!-- Latest/Tagged artifact will be deployed to the promoted stage-->
+		<TargetStage>Staging</TargetStage>
+            </Promote>
+		<Demote>
+			<TargetStage>Development</TargetStage>
+		</Demote>
+            <CreateArtifact>UserInput</CreateArtifact>
+            <ProcessEndPoint>https://local.AF_HOST:9444/services/DeployToStage</ProcessEndPoint>
+            <DeploymentServerURL>https://appserver.test.AF_HOST:8343/services/</DeploymentServerURL>
+            <MountPoint>test</MountPoint>
+	    <BaseAccessUrl>https://appserver.test.AF_HOST:8343</BaseAccessUrl>
+ <TenantMgtUrl>https://appserver.test.AF_HOST</TenantMgtUrl>
+		<Buildable>false</Buildable>       
+ 		<StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>
+                <RssName>Testing</RssName>
+
+ </DeploymentStage>
+              
+         <DeploymentStage name="Staging">
+        <Deployer>
+                <ApplicationType name="*">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                         </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/as</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">asstaging</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">asstaging</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+		<ApplicationType name="esb">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                            </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/esb</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">esbstaging</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">esbstaging</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+            </Deployer>
+    
+	<AllowDirectDeploy>true</AllowDirectDeploy>
+            <AutomaticDeployment enabled="false">
+                <PollingPeriod>6</PollingPeriod>
+            </AutomaticDeployment>
+            <DeploymentArtifact>
+                <TriggerBuild>
+                    <ArtifactStoragePolicy>Tagged</ArtifactStoragePolicy> <!-- Latest, Marked-->
+                </TriggerBuild>
+            </DeploymentArtifact>
+            <Promote>
+                <DeploymentPolicy>Promoted</DeploymentPolicy>
+                <!-- Tagged/Promoted artifact will be deployed to the promoted stage-->
+		<TargetStage>Production</TargetStage>
+            </Promote>
+		<Demote>
+			<TargetStage>Testing</TargetStage>
+		</Demote>
+            <CreateArtifact>UserInput</CreateArtifact>
+            <ProcessEndPoint>https://local.AF_HOST:9444/services/DeployToStage</ProcessEndPoint>
+            <DeploymentServerURL>https://appserver.staging.AF_HOST:8343/services/</DeploymentServerURL>
+            <MountPoint>staging</MountPoint>
+            <BaseAccessUrl>https://appserver.staging.AF_HOST:8343</BaseAccessUrl>
+            <TenantMgtUrl>https://appserver.staging.AF_HOST</TenantMgtUrl>
+	<Buildable>false</Buildable>
+	<StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>
+                        <RssName>Staging</RssName>
+
+        </DeploymentStage>
+
+        <DeploymentStage name="Production">
+         <Deployer>
+                <ApplicationType name="*">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                            </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/as</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">asprod</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">asprod</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+		 <ApplicationType name="esb">
+
+                        <ClassName>org.wso2.carbon.appfactory.jenkins.deploy.S2Deployer</ClassName>
+                        <Endpoint>https://sc.s2.AF_HOST:9444/services/</Endpoint>
+                         <RepositoryProvider>
+                            <Property name="Class">
+                                org.wso2.carbon.appfactory.tenant.roles.S2Integration.GITBlitBasedGITRepositoryProvider
+                            </Property>
+                            <Property name="BaseURL">http://gitblit.s2.wso2.com:8181/</Property>
+                            <Property name="URLPattern">{@application_key}/{@stage}/esb</Property>
+                            <Property name="AdminUserName">admin</Property>
+                            <Property name="AdminPassword">admin</Property>
+                        </RepositoryProvider>
+                        <Properties>
+                            <Property name="minInstances">1</Property>
+                            <Property name="maxInstances">1</Property>
+                            <Property name="shouldActivate"></Property>
+                            <Property name="alias">esbprod</Property> <!--asdev is the value -->
+                            <Property name="cartridgeType">esbprod</Property> <!--asdev is the value -->
+                            <Property name="repoURL"></Property>
+                            <Property name="dataCartridgeType"></Property>
+                            <Property name="dataCartridgeAlias"></Property>
+                        </Properties>
+
+                </ApplicationType>
+            </Deployer>
+    
+	<AllowDirectDeploy>true</AllowDirectDeploy>
+	    <AutomaticDeployment enabled="false">
+                <PollingPeriod>6</PollingPeriod>
+            </AutomaticDeployment>
+            <DeploymentArtifact>
+                <PersistedArtifacts>Tagged</PersistedArtifacts>
+            </DeploymentArtifact>
+		
+	<Demote>
+			<TargetStage>Staging</TargetStage>
+		</Demote>
+            <CreateArtifact>Never</CreateArtifact>
+            <ProcessEndPoint>https://local.AF_HOST:9444/services/DeployToStage</ProcessEndPoint>
+            <DeploymentServerURL>https://appserver.AF_HOST:8343/services/</DeploymentServerURL>
+            <MountPoint>prod</MountPoint>
+            <BaseAccessUrl>https://appserver.AF_HOST:8343</BaseAccessUrl>
+ <TenantMgtUrl>https://appserver.prod.AF_HOST</TenantMgtUrl>
+<Semantic>Production</Semantic>        
+<Buildable>false</Buildable>
+                        <StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>
+                        <RssName>Production</RssName>
+</DeploymentStage>
+    </ApplicationDeployment>
+
+         <ApplicationType name="war">
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.MavenBasedApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">Web Application</Property>
+        <Property name="Extension">war</Property>
+        <Property name="Description">Web Application Archive file</Property>
+        <Property name="BuildJobTemplate">maven</Property>
+	<Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.webapparchetype 
+		-DarchetypeArtifactId=webapp-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT -DinteractiveMode=false 
+		-DarchetypeCatalog=local
+	</Property>
+        <Property name="ServerDeploymentPaths">webapps</Property>
+	<Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <ApplicationType name="jaxrs">
+        <DisplayName>JAX-RS Application</DisplayName>
+        <Extension>war</Extension>
+        <Description>JAX-RS Service Web Application Archive file</Description>
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.MavenBasedApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">JAX-RS Application</Property>
+        <Property name="Extension">war</Property>
+        <Property name="Description">JAX-RS Application</Property>
+        <Property name="BuildJobTemplate">maven</Property>
+        <Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.jaxrsarchetype
+            -DarchetypeArtifactId=jaxrs-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT
+            -DinteractiveMode=false -DarchetypeCatalog=local
+        </Property>
+        <Property name="ServerDeploymentPaths">jaxwebapps</Property>
+	<Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <ApplicationType name="jaxws">
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.MavenBasedApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">JAX-WS Application</Property>
+        <Property name="Extension">war</Property>
+        <Property name="Description">JAX-WS Service Web Application Archive file</Property>
+        <Property name="BuildJobTemplate">maven</Property>
+        <Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.jaxwsarchetype
+            -DarchetypeArtifactId=jaxws-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT
+            -DinteractiveMode=false -DarchetypeCatalog=local
+        </Property>
+        <Property name="ServerDeploymentPaths">jaxwebapps</Property>
+	<Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <ApplicationType name="jaggery">
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.MavenBasedApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">Jaggery Application</Property>
+        <Property name="Extension">war</Property>
+        <Property name="Description">Applications with server-side and client-side in Java Script
+            <a>http://jaggeryjs.org/</a>
+        </Property>
+        <Property name="BuildJobTemplate">maven</Property>
+        <Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.jaggeryarchetype
+            -DarchetypeArtifactId=jaggery-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT
+            -DinteractiveMode=false -DarchetypeCatalog=local
+        </Property>
+	<Property name="ServerDeploymentPaths">jaggeryapps</Property>
+        <Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <ApplicationType name="dbs">
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.DataServiceApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">DataService</Property>
+        <Property name="Extension">dbs</Property>
+        <Property name="Description">Data as a Service</Property>
+        <Property name="BuildJobTemplate">freestyle</Property>
+        <Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.dbsarchetype
+            -DarchetypeArtifactId=dbs-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT
+            -DinteractiveMode=false -DarchetypeCatalog=local
+        </Property>
+        <Property name="ServerDeploymentPaths">dataservices,servicemetafiles</Property>
+	<Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <ApplicationType name="bpel">
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.BPELApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">BPEL</Property>
+        <Property name="Extension">zip</Property>
+        <Property name="Description">>BPEL process Zip file</Property>
+        <Property name="BuildJobTemplate">maven</Property>
+        <Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.bpelarchetype
+            -DarchetypeArtifactId=bpel-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT
+            -DinteractiveMode=false -DarchetypeCatalog=local
+        </Property>
+	<Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <ApplicationType name="php">
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.PHPApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">PHP</Property>
+        <Property name="Extension">none</Property>
+        <Property name="Description">php web application</Property>
+        <Property name="BuildJobTemplate">freestyle</Property>
+        <Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.phparchetype
+            -DarchetypeArtifactId=php-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT
+            -DinteractiveMode=false -DarchetypeCatalog=local
+        </Property>
+	<Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <ApplicationType name="esb">
+        <Property name="ProcessorClassName">
+            org.wso2.carbon.appfactory.utilities.application.type.ESBApplicationTypeProcessor
+        </Property>
+        <Property name="DisplayName">ESB</Property>
+        <Property name="Extension">xml</Property>
+        <Property name="Description">ESB Service</Property>
+        <Property name="BuildJobTemplate">freestyle</Property>
+        <Property name="MavenArcheTypeRequest">-DarchetypeGroupId=org.wso2.carbon.appfactory.maven.esbarchetype
+            -DarchetypeArtifactId=esb-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=default-SNAPSHOT
+            -DinteractiveMode=false -DarchetypeCatalog=local
+        </Property>
+	<Property name="Enable">enabled</Property>
+	<Property name="Comment">test</Property>
+    </ApplicationType>
+    <!-- API-Token should be set according to the running instance of Jenkins-->
+    <ContinuousIntegrationProvider name="jenkins" enabled="true">
+	<Property name="BaseURL">https://jenkins.AF_HOST</Property>
+        <Property name="Authenticate">true</Property>
+        <Property name="Maven3ConfigName">m3</Property>
+        <Property name="DefaultGlobalRoles">readonly</Property>
+<Property name="ProjectRolePermissions">hudson.model.Item.Configure,hudson.model.Item.Build,hudson.model.Item.Workspace,hudson.model.Item.Read</Property>  
+      <Property name="ListenerPriority">50</Property>
+        <Property name="ResourceUserId">admin</Property>
+        <Property name="API-Token">7ea3f81bbe068aab15690c443ae1ae2c</Property>
+    </ContinuousIntegrationProvider>
+  <OtherServices>
+        <Service name="ViewVC">
+            <Link>http://www.viewvc.org/</Link>
+            <Description>Browse the repository, view files, display diffs between versions.</Description>
+            <Title>ViewVC</Title>
+        </Service>
+        <Service name="Forums">
+            <Link>http://www.forums.com/</Link>
+            <Description>Let the app users hold conversations in the form of posted messages.</Description>
+            <Title>Forums</Title>
+        </Service>
+        <ShowOtherServicesTab>false</ShowOtherServicesTab>
+    </OtherServices>
+
+    <LCButton>
+        <PromoteButton>
+            <Key>Promote</Key>
+            <Value>Promote</Value>
+        </PromoteButton>
+        <DemoteButton>
+            <Key>Demote</Key>
+            <Value>Demote</Value>
+        </DemoteButton>
+        <RetireButton>
+            <Key>Retire</Key>
+            <Value>Retire</Value>
+        </RetireButton>
+    </LCButton>
+    <!-- This is used to create an event buffer with this number of elements-->
+    <!-- two buffers will be created with this size to store application and user events-->
+    <EventBufferSize>32</EventBufferSize>
+    <EnableSonar>true</EnableSonar>
+    <SonarURL>http://localhost:9000</SonarURL>
+    <EnableUserSearch>true</EnableUserSearch>
+    <CookieRefreshInterval>300000</CookieRefreshInterval>
+    <SampleDbHostUrl>wso2admin.czrket1hdi7t.us-east-1.rds.amazonaws.com</SampleDbHostUrl>
+    <DatabaseUserDefaultPassword>root</DatabaseUserDefaultPassword>
+</AppFactory>

@@ -1,0 +1,90 @@
+<%
+include('/jagg/constants.jag');
+include('/jagg/config_reader.jag');
+jagg.block("administration/datasource/edit", {
+    initialize:function (data) {
+
+    },
+    
+    getInputs: function () {
+        return {
+            "applicationKey": null
+        }   
+    },  
+
+    getOutputs: function (inputs) {
+        var log = new Log();
+        var mod = jagg.module("manager");
+        var deploymentStages = getProperties(DEPLOYMENT_STAGES);
+        var applicationKey = request.getParameter("applicationKey");
+        var dsName = request.getParameter("dsName");
+        try {
+        	var emptydataSource={};
+        	emptydataSource.applicationKey = applicationKey;
+        	emptydataSource.name = dsName;
+        	emptydataSource.type = "";
+        	emptydataSource.desc = "";
+        	emptydataSource.driver = "";
+            emptydataSource.url = "";
+            emptydataSource.username = "";
+            emptydataSource.password = "";
+            emptydataSource.isEmpty = true;
+        	
+            try{
+            	var dsDevelopment = mod.getDataSource(applicationKey, "Development", dsName);
+            }catch(e){
+        		var dsDevelopment = emptydataSource;
+        	}
+            
+            try{
+            	var dsTesting = mod.getDataSource(applicationKey, "Testing", dsName);
+            }catch(e){
+        		var dsTesting = emptydataSource;
+        	}
+            
+            try{
+            	var dsStaging = mod.getDataSource(applicationKey, "Staging", dsName);
+            }catch(e){
+        		var dsStaging = emptydataSource;
+        	}
+            
+        	try{
+        		var dsProduction = mod.getDataSource(applicationKey, "Production", dsName);
+        	}catch(e){
+        		var dsProduction = emptydataSource;
+        	}
+        	var hasDevPermission = jagg.module("permission").isUserAccessGranted(inputs.applicationKey, PERMISSION_DATASOURCE_UPDATE_OF_STAGE + "Development");
+        	var hasTestingPermission = jagg.module("permission").isUserAccessGranted(inputs.applicationKey, PERMISSION_DATASOURCE_UPDATE_OF_STAGE + "Testing");
+        	var hasStagingPermission = jagg.module("permission").isUserAccessGranted(inputs.applicationKey, PERMISSION_DATASOURCE_UPDATE_OF_STAGE + "Staging");
+        	var hasProductionPermission = jagg.module("permission").isUserAccessGranted(inputs.applicationKey, PERMISSION_DATASOURCE_UPDATE_OF_STAGE + "Production");
+        	
+        	var response = {
+			                    dataSource : {
+			                      "name" : dsName,
+			                      "desc" : dsDevelopment.desc,	
+			                      "stageInfo" : {
+				                      "Development" : dsDevelopment,
+				          			  "Testing" : dsTesting,
+				          			  "Staging" : dsStaging,
+				          			  "Production" : dsProduction
+			                      }
+			          			 },
+					          deploymentStages : deploymentStages,
+					          permission : {
+					        	  hasDevPermission : hasDevPermission, hasTestingPermission : hasTestingPermission, 
+					        	  hasStagingPermission : hasStagingPermission, hasProductionPermission : hasProductionPermission
+					          }
+					       };
+        	log.info(response);
+            return response;
+            
+        } catch(e) {
+            throw "Error while getting the datasource";
+        }
+        
+         
+    }   
+
+
+});
+%>

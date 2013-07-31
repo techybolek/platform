@@ -1,0 +1,34 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+(function () {
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json");
+
+    if (action == "setBuildDelpymentConfigs") {
+    	mod = jagg.module("lifecycle");
+	    var applicationKey = request.getParameter("applicationKey");
+	    var stageName = request.getParameter("stageName");
+	    var version = request.getParameter("version");
+	    var isAutoBuildEnable = request.getParameter("autoBuild");
+	    var isAutoDeployEnable = request.getParameter("autoDep");
+	    try {
+	        var autoDep= mod.updateAutoDeployment(applicationKey, stageName, version, isAutoDeployEnable);
+	        var autoBuild=mod.updateAutoBuild(applicationKey, stageName, version, isAutoBuildEnable);
+	        var Result={};
+	        Result.autoDeploy=autoDep;
+	        Result.autoBuild=autoBuild;
+
+	        print(Result);
+	    } catch (e) {
+	    	throw e.message;
+	    }
+
+    }else {
+        throw new Error("No action specified");
+    }
+}());
+%>

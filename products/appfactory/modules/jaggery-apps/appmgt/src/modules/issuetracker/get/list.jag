@@ -1,0 +1,373 @@
+<%
+    include("/jagg/constants.jag");
+    include("/jagg/config_reader.jag");
+
+// used for logging
+    var log = new Log();
+    var modManager = jagg.module("manager");
+    
+    var getAllIssuesOfApplication = function(applicationKey)
+    {
+        jagg.module("permission").checkUserActionPermission(applicationKey, PERMISSION_APPLICATION_MEMBER);
+        var ws = require('ws');
+        var getUrlForReportIssueRequest = new ws.WSRequest();
+        var options = new Array();
+        options.useSOAP = 1.1;
+        options.action = "urn:getAllIssuesOfApplication";
+        options["HTTPHeaders"] = [
+                                  { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) }
+                                  ];
+        var payload = '<p:getAllIssuesOfApplication xmlns:p="http://service.issuetracking.appfactory.carbon.wso2.org"><xs:appId xmlns:xs="http://service.issuetracking.appfactory.carbon.wso2.org">' + applicationKey + '</xs:appId></p:getAllIssuesOfApplication>';
+
+        var result;
+
+        try {
+        	var endPoint = getProperty(APPFACTORY_SERVER_URL) + 'IssueTrackerService';
+        	getUrlForReportIssueRequest.open(options,endPoint, false);
+        	getUrlForReportIssueRequest.send(payload);
+        	result = getUrlForReportIssueRequest.responseE4X;
+        } catch (e) {
+        	log.error("Error while getting issues of " + applicationKey + "\n" + e.message);
+        	throw "Error while getting issues of " + applicationKey + "\n";
+        }
+
+        return result;
+    };
+    
+    var getIssuesSummary = function(applicationKey)
+    {
+ 
+        jagg.module("permission").checkUserActionPermission(applicationKey, PERMISSION_APPLICATION_MEMBER);
+        var ws = require('ws');
+        var getUrlForReportIssueRequest = new ws.WSRequest();
+        var options = new Array();
+        options.useSOAP = 1.2;
+        options.action = "urn:getIssuesSummary";
+        options["HTTPHeaders"] = [
+                                  { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) }
+                                  ];
+        var payload = '<getIssuesSummary xmlns="http://service.issuetracking.appfactory.carbon.wso2.org"><xs:appID xmlns:xs="http://service.issuetracking.appfactory.carbon.wso2.org">' + applicationKey + '</xs:appID></getIssuesSummary>';
+
+        var result;
+        var issues = {};
+        var i = 0;
+        try {
+        	
+        	var endPoint = getProperty(APPFACTORY_SERVER_URL) + 'IssueTrackerService';
+        	getUrlForReportIssueRequest.open(options,endPoint, false);
+        	getUrlForReportIssueRequest.send(payload);
+        	
+        	result = getUrlForReportIssueRequest.responseE4X;
+        	
+        	
+        	var ns = new Namespace("http://service.issuetracking.appfactory.carbon.wso2.org");
+            var ax264 = new Namespace("http://beans.issuetracking.appfactory.carbon.wso2.org/xsd");
+          
+        	var resultElems = result.ns::["return"];
+        	
+        	for (var resultElem in resultElems){
+        		
+                var obj = resultElems[resultElem];
+                var appKey = obj.ax264::["appKey"].text();
+                var bugCount = obj.ax264::["bugCount"].text();
+                var featureCount = obj.ax264::["featureCount"].text();
+                var supportCount = obj.ax264::["supportCount"].text();
+                var totalCount = obj.ax264::["totalCount"].text();
+                var version = obj.ax264::["version"].text();
+                
+                var issueSummaryInStatusForBug = obj.ax264::["issueSummaryInStatusForBug"];
+                var issueSummaryInStatusForFeature = obj.ax264::["issueSummaryInStatusForFeature"];
+                var issueSummaryInStatusForSupport = obj.ax264::["issueSummaryInStatusForSupport"];
+                
+                var sumBug = {} ; 
+                sumBug.openCount = issueSummaryInStatusForBug.ax264::["openCount"].text();
+                sumBug.inProgressCount = issueSummaryInStatusForBug.ax264::["inProgressCount"].text();
+                sumBug.closedCount = issueSummaryInStatusForBug.ax264::["closedCount"].text();
+                sumBug.feedbackCount = issueSummaryInStatusForBug.ax264::["feedbackCount"].text();
+                sumBug.resolvedCount = issueSummaryInStatusForBug.ax264::["resolvedCount"].text();
+                sumBug.rejectedCount = issueSummaryInStatusForBug.ax264::["rejectedCount"].text();
+                sumBug.totalCount = getTotal(sumBug);
+                
+                var sumFeature = {} ; 
+                sumFeature.openCount = issueSummaryInStatusForFeature.ax264::["openCount"].text();
+                sumFeature.inProgressCount = issueSummaryInStatusForFeature.ax264::["inProgressCount"].text();
+                sumFeature.closedCount = issueSummaryInStatusForFeature.ax264::["closedCount"].text();
+                sumFeature.feedbackCount = issueSummaryInStatusForFeature.ax264::["feedbackCount"].text();
+                sumFeature.resolvedCount = issueSummaryInStatusForFeature.ax264::["resolvedCount"].text();
+                sumFeature.rejectedCount = issueSummaryInStatusForFeature.ax264::["rejectedCount"].text();
+                sumFeature.totalCount = getTotal(sumFeature);
+                
+                
+                var sumSupport = {} ;
+                sumSupport.openCount = issueSummaryInStatusForSupport.ax264::["openCount"].text();
+                sumSupport.inProgressCount = issueSummaryInStatusForSupport.ax264::["inProgressCount"].text();
+                sumSupport.closedCount = issueSummaryInStatusForSupport.ax264::["closedCount"].text();
+                sumSupport.feedbackCount = issueSummaryInStatusForSupport.ax264::["feedbackCount"].text();
+                sumSupport.resolvedCount = issueSummaryInStatusForSupport.ax264::["resolvedCount"].text();
+                sumSupport.rejectedCount = issueSummaryInStatusForSupport.ax264::["rejectedCount"].text();
+                sumSupport.totalCount = getTotal(sumSupport);
+                
+                
+               
+                var issue = {};
+                issue.appKey = appKey;
+                
+                issue.issueSummaryInStatusForBug = sumBug ;
+                issue.issueSummaryInStatusForFeature = sumFeature ;
+                issue.issueSummaryInStatusForSupport = sumSupport ;
+                
+                
+                issue.bugCount = "0";
+                if(bugCount){
+                	issue.bugCount = bugCount;
+                }
+                issue.featureCount = "0";
+                if(featureCount){
+                	issue.featureCount = featureCount;
+                }
+                issue.supportCount = "0";
+                if(supportCount){
+                	issue.supportCount = supportCount;
+                }
+                
+                
+                
+                
+                
+                issue.totalCount = parseInt(issue.bugCount) + parseInt(issue.featureCount) + parseInt(issue.supportCount);
+                issue.version = version;
+
+                issues[i] = issue;
+
+                i++;
+            }
+        	
+        } catch (e) {
+        	log.error("Error while getting issues of " + applicationKey + "\n" + e.message);
+        	throw "Error while getting issues of " + applicationKey + "\n";
+        }
+        
+        return issues;
+    };
+    
+    var getTotal = function(sumObj){
+    	var ret = "0";
+    	try{
+    		//ret = parseInt(sumObj.openCount) + parseInt(sumObj.inProgressCount) + parseInt(sumObj.closedCount)+parseInt(sumObj.feedbackCount) + parseInt(sumObj.resolvedCount) + parseInt(sumObj.rejectedCount);
+    		ret = parseInt(sumObj.openCount) + parseInt(sumObj.inProgressCount) ;
+    	}catch(e){
+    		
+    	}
+    	return ret
+    }
+
+    var getOpenIssues = function(applicationKey)
+    {
+        jagg.module("permission").checkUserActionPermission(applicationKey, PERMISSION_APPLICATION_MEMBER);
+        var result;
+        var issues = new Array();
+
+        try {
+            result = getAllIssuesOfApplication(applicationKey);
+
+            var ns = new Namespace("http://service.issuetracking.appfactory.carbon.wso2.org");
+            var ax239 = new Namespace("http://beans.issuetracking.appfactory.carbon.wso2.org/xsd");
+
+            var i = 0;
+
+            var resultElems = result.ns::["return"];
+
+            for (var resultElem in
+            resultElems){
+                var obj = resultElems[resultElem];
+                var summary = obj.ax239::["summary"].text();
+                var type = obj.ax239::["type"].text();
+                var issueKey = obj.ax239::["issueKey"].text();
+                var status = obj.ax239::["status"].text();
+                var url = obj.ax239::["url"].text();
+
+                if (!(status == "New" || status == "In Progress")) {
+                    continue;
+                }
+
+                var issue = {};
+                issue.title = summary;
+                issue.type = type;
+                issue.id = issueKey;
+                issue.status = status;
+                issue.url = url;
+
+                issues[i] = issue;
+
+                i++;
+            }
+
+        } catch (e) {
+            log.error("Error while getting issues of " + applicationKey + "\n" + e.message);
+            throw "Error while getting issues of " + applicationKey + "\n";
+        }
+
+        return issues;
+
+    }
+    ;
+
+    var getIssueTrackerInfo = function(applicationKey)
+    {
+        // no need to secure, internal calls are secured already.
+        var result;
+        var returnObject = {};
+        var bugInProgress = 0;
+        var bugOpen = 0;
+        var featureInProgress = 0;
+        var featureOpen = 0;
+        var supportInProgress = 0;
+        var supportOpen = 0;
+
+        try {
+            result = getAllIssuesOfApplication(applicationKey);
+
+            var ns = new Namespace("http://service.issuetracking.appfactory.carbon.wso2.org");
+            var ax239 = new Namespace("http://beans.issuetracking.appfactory.carbon.wso2.org/xsd");
+
+            var resultElems = result.ns::["return"];
+            for (var resultElem in
+            resultElems){
+                var obj = resultElems[resultElem];
+                var type = obj.ax239::["type"];
+                var status = obj.ax239::["status"];
+
+                if (type == "Bug") {
+                    if (status == "New") {
+                        bugOpen += 1;
+                    } else if (status == "In Progress") {
+                        bugInProgress += 1;
+                    }
+                } else if (type == "Feature") {
+                    if (status == "New") {
+                        featureOpen += 1;
+                    } else if (status == "In Progress") {
+                        featureInProgress += 1;
+                    }
+                } else if (type == "Support") {
+                    if (status == "New") {
+                        supportOpen += 1;
+                    } else if (status == "In Progress") {
+                        supportInProgress += 1;
+                    }
+                }
+            }
+
+        } catch (e) {
+            log.error("Error while getting issues of " + applicationKey + "\n" + e.message);
+            throw "Error while getting issues of " + applicationKey + "\n";
+        }
+
+        var bug = {};
+        bug.open = bugOpen;
+        bug.inProgress = bugInProgress;
+        bug.total = bugOpen + bugInProgress;
+        returnObject.bug = bug;
+
+        var feature = {};
+        feature.open = featureOpen;
+        feature.inProgress = featureInProgress;
+        feature.total = featureOpen + featureInProgress;
+        returnObject.feature = feature;
+
+        var support = {};
+        support.open = supportOpen;
+        support.inProgress = supportInProgress;
+        support.total = supportOpen + supportInProgress;
+        returnObject.support = support;
+
+        return returnObject;
+
+    }
+    ;
+
+    var getIssuesWithParameters = function(queryString)
+    {
+        jagg.module("permission").checkUserAuthenticated();
+        var ws = require('ws');
+        var request = new ws.WSRequest();
+        var options = new Array();
+        options.useSOAP = 1.1;
+        options.action = "urn:getAllIssuesWithParameters";
+        options["HTTPHeaders"] = [
+                                  { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) }
+                                  ];
+        var payload = '<p:getAllIssuesWithParameters xmlns:p="http://service.issuetracking.appfactory.carbon.wso2.org">\< xs:queryString xmlns: xs = "http://service.issuetracking.appfactory.carbon.wso2.org" > ' + queryString + ' </xs:queryString >\</p:getAllIssuesWithParameters > ';
+
+        try {
+        	var endPoint = getProperty(APPFACTORY_SERVER_URL) + 'IssueTrackerService';
+        	request.open(options,endPoint, false);
+        	request.send(payload);
+        	result = request.responseE4X;
+
+        	var ns = new Namespace("http://service.issuetracking.appfactory.carbon.wso2.org");
+        	var ax239 = new Namespace("http://beans.issuetracking.appfactory.carbon.wso2.org/xsd");
+
+        	var resultElems = result.ns::["return"];
+
+        	if (log.isDebugEnabled()) {
+        		log.debug("result elements : " + resultElems);
+        	}
+        	return resultElems;
+        } catch (e) {
+        	log.error("Error while getting issues \n" + e.message);
+        	throw "Error while getting issues";
+        }
+    }
+
+    var getCountForIssuesWithParameters = function(queryString)
+    {
+        // no need to secure, internal calls are secured already.
+        try {
+            var resultElems = getIssuesWithParameters(queryString);
+            return resultElems.length();
+        } catch (e) {
+            log.error("Error while getting issues count \n" + e.message);
+            throw "Error while getting issues count";
+        }
+    }
+
+    var getIssueCountsByStatus = function()
+    {
+        // no need to secure, internal calls are secured already.
+        var issues =[];
+        var newIssueCount = getCountForIssuesWithParameters("status_id=1");
+        var inProgressIssueCount = getCountForIssuesWithParameters("status_id=2");
+        var resolvedIssueCount = getCountForIssuesWithParameters("status_id=3");
+        var feedbackIssueCount = getCountForIssuesWithParameters("status_id=4");
+        var closedIssueCount = getCountForIssuesWithParameters("status_id=5");
+        var rejectedIssueCount = getCountForIssuesWithParameters("status_id=6");
+        issues.push(['New', newIssueCount]);
+        issues.push(['In-progress', inProgressIssueCount]);
+        issues.push(['Resolved', resolvedIssueCount]);
+        issues.push(['Feedback', feedbackIssueCount]);
+        issues.push(['Closed', closedIssueCount]);
+        issues.push(['Rejected', rejectedIssueCount]);
+
+        if (log.isDebugEnabled()) {
+            log.debug("issues: " + issues);
+        }
+        return issues;
+    }
+
+    var getIssueCountsByPriority = function()
+    {
+        // no need to secure, internal calls are secured already.
+        var issues =[];
+        issues.push(['Low', getCountForIssuesWithParameters("priority_id=1")]);
+        issues.push(['Normal', getCountForIssuesWithParameters("priority_id=2")]);
+        issues.push(['High ', getCountForIssuesWithParameters("priority_id=3")]);
+        issues.push(['Urgent ', getCountForIssuesWithParameters("priority_id=4")]);
+        issues.push(['Immediate ', getCountForIssuesWithParameters("priority_id=5")]);
+        if (log.isDebugEnabled()) {
+            log.debug("issues: " + issues);
+        }
+        return issues;
+    }
+
+%>

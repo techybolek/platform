@@ -1,0 +1,14 @@
+<%
+jagg.block("administration/rssmanager/add", {
+    initialize:function (data) {
+
+    },
+    getInputs: function () {
+        return {
+            "applicationKey": null
+        }
+    }
+
+
+});
+%>

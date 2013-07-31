@@ -1,0 +1,8 @@
+<%
+jagg.initializer("configureenvironment/resources/add", {
+
+    preInitialize:function () {
+
+    }
+});
+%>

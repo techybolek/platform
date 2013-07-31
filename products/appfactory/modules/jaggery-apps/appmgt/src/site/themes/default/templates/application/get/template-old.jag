@@ -1,0 +1,942 @@
+<% include("/jagg/constants.jag"); %>
+<% jagg.template("application/get", function(inputs, outputs, jagg) { %>
+
+<%
+    var log = new Log();
+    var applicationName = request.getParameter("applicationName");
+    var applicationKey = request.getParameter("applicationKey");
+    var hasConfigureAPIManagerPermission= outputs.hasConfigureAPIManagerPermission;
+%>
+<script type="text/javascript" charset="utf-8">
+var processIndicatorHTML='<img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/processing.gif"))%>" id="processIndicator" style="width:22px;height:22px;"/>';
+//[cdata[
+$(document).ready(function(){
+    updateIssueTracker("<%=applicationKey%>");
+    generateApplicationsVersionsDetails();
+    loadAppUsersWithRoles();
+    loadApplicationInfo();
+    loadDatasourceInfo();
+    loadAPIsInfo();
+    loadDependanciesInfo();
+    loadRssDatabasesInfo();
+    
+    $('#commentsAnchor').click(function(){
+	   $('html, body').animate({
+	       scrollTop: $( $(this).attr('href') ).offset().top
+	   }, 500);
+	   return false;
+	});
+    
+    $('#appDescriptionEditBtn').click(
+		function(){
+	        $('#description').hide();
+	        $('#appDescriptionEdit').show();
+		}
+	);
+	$('#description').click(
+		function(){
+	        $('#description').hide();
+	        $('#appDescriptionEdit').show();
+		}
+	);
+	$('#description').bind('mouseover',
+        function(){
+            $(this).css("background-color","#eeeeee");
+        }
+    ).bind('mouseout',
+        function(){
+            $(this).css("background-color","#ffffff");
+        }
+    );
+
+	$('#appDescriptionSaveBtn').click(
+    	function(){
+        	$('#description').show();
+        	$('#appDescriptionEdit').hide();
+    	}
+	);
+
+	$('#appDescriptionCancelBtn').click(
+    	function(){
+        	$('#description').show();
+        	$('#appDescriptionEdit').hide();
+    	}
+	);
+    
+});
+
+function toErrorHtml(message){
+    var html="<span style=\"color:#D16666\">"+message+"</span>";
+    return html;
+}
+
+function toInfoHtml(message){
+    var html="<span style=\"color:#363636\">"+message+"</span>";
+    return html;
+}
+
+function loadRssDatabasesInfo(){
+    var resourceCount=0;
+    $("div#databases>table>tbody").html("");
+    $("div#databases>span.info").html(processIndicatorHTML);
+    $("div#databases>table").hide();
+    jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
+        action:"getDatabases",
+        applicationKey:$("#applicationKey").attr('value')
+    },function (result) {
+        $("div#databases>span.info").html("");
+        $("div#databases>table>tbody").html("");
+        var databases=[];
+        if (result != undefined) {
+            databases = jQuery.parseJSON(result);
+            
+            if(databases.length>0){
+                for (var index in databases) {
+                    var database=databases[index];
+                    
+                    var tableRow="<tr><td>"+database.name+"</td>\
+                                <td>"+database.rssInstanceName+"</td>\
+                                <td>"+database.url+"</td></tr>";
+                    $("div#databases>table>tbody").append(tableRow);
+                }
+                $("div#databases>table").fadeIn();
+            }else{
+                $("div#datasources").hide();
+                $("div#databases>span.info").html(toInfoHtml("No Databases found!"));
+            }
+        }
+        resourceCount=databases.length;
+        $("#dbCount").text(resourceCount);
+    },function (jqXHR, textStatus, errorThrown) {
+        $("div#databases>span.info").html(toErrorHtml("Error occurred while loading Databases information!"));
+    });
+    
+}
+
+function loadDatasourceInfo(){
+    var resourceCount=0;
+    $("div#datasources>table>tbody").html("");
+    $("div#datasources>span.info").html(processIndicatorHTML);
+    $("div#datasources>table").hide();
+    jagg.post("../blocks/datasource/get/ajax/list.jag", {
+    	action:"getDatasources",
+    	applicationKey:'<%=applicationKey%>'
+    },function(result) {
+        $("div#datasources>span.info").html("");
+        var dbCount=0;
+        if(result!=undefined){
+            var stages = jQuery.parseJSON(result);
+            for(var stage in stages){
+                var stageValues=stages[stage];
+                if(stageValues instanceof Array && stageValues.length>0){
+                    for(var index in stageValues){
+                        var dataSource=stageValues[index];
+                        var tableRow="<tr><td>"+dataSource.name+"</td>\
+                                <td>"+dataSource.description+"</td>\
+                                <td>"+stage+"</td></tr>";
+                        $("div#datasources>table>tbody").append(tableRow);
+                        resourceCount++;
+                    }
+                }
+            }
+            if(resourceCount>0){
+                $("div#datasources").show(); 
+                $("div#datasources>table").fadeIn(); 
+            }else{
+                $("div#datasources>span.info").html(toInfoHtml("No Datasources found!"));
+            }
+        }else{
+            $("div#datasources>span.info").html(toInfoHtml("No Datasources found!"));
+        }
+        $("#dsCount").text(resourceCount);
+    },function (jqXHR, textStatus, errorThrown) {
+        $("div#datasources>span.info").html(toErrorHtml("Error occurred while loading Datasources information!"));
+    });
+}
+
+function loadAPIsInfo(){
+    var resourceCount=0;
+    $("div#api>table>tbody").html("");
+    $("div#api>span.info").html(processIndicatorHTML);
+    $("div#api>table").hide();
+    jagg.post("../blocks/apimanager/get/ajax/get.jag", {
+    	action:"getApplicationAPI",
+      	applicationKey:'<%=applicationKey%>'
+  	},function (result) {
+  	    $("div#api>span.info").html("");
+        var APIs=[];
+  	    if(result!=undefined){
+  	        var apiInfoJson =jQuery.parseJSON(result);
+      	    var APIs =apiInfoJson.apiInfo;
+      	    if(APIs.length>0){
+                for (var index in APIs) {
+                    var API=APIs[index];
+                    var tableRow="<tr><td>"+API.name+"</td>\
+                                <td>"+API.version+"</td>\
+                                <td>"+API.provider+"</td></tr>";
+                        $("div#api>table>tbody").append(tableRow);
+                }
+                $("div#api").show(); 
+                $("div#api>table").fadeIn(); 
+            }else{
+                $("div#api>span.info").html(toInfoHtml("No APIs found!"));
+            }
+      	}
+      	resourceCount=APIs.length;
+      	$("#apiCount").text(resourceCount);
+  	},function (jqXHR, textStatus, errorThrown) {
+        $("div#api>span.info").html(toErrorHtml("Error occurred while loading APIs information!"));
+  	});
+  	
+}
+
+function loadDependanciesInfo(){
+    var resourceCount=0;
+    $("div#properties>table>tbody").html("");
+    $("div#properties>span.info").html(processIndicatorHTML);
+    $("div#properties>table").hide();
+    jagg.post("../blocks/resources/get/ajax/get.jag", {
+      action:"getAllDependencies",
+      applicationKey:'<%=applicationKey%>'
+    },function (result) {
+        $("div#properties>span.info").html("");
+        if(result!=undefined){
+            var parsedResult = jQuery.parseJSON(result);
+            for(var stageKey in parsedResult){
+                var innerObject=parsedResult[stageKey];
+                var dependencyArray=innerObject.dependencies;
+                if(dependencyArray.length>0){
+                    for(var index in dependencyArray){
+                        var property=dependencyArray[index];
+                        var tableRow="<tr><td>"+property.name+"</td>\
+                                <td>"+property.value+"</td>\
+                                <td>"+property.description+"</td>\
+                                <td>"+stageKey+"</td></tr>";
+                        $("div#properties>table>tbody").append(tableRow);
+                        resourceCount++;
+                    }
+                }
+            }
+            if(resourceCount>0){
+                $("div#properties").show(); 
+                $("div#properties>table").fadeIn(); 
+            }else{
+                $("div#properties>span.info").html(toInfoHtml("No endpoints found!"));
+            }
+        }else{
+            $("div#properties>span.info").html(toInfoHtml("No endpoints found!"));
+        } 
+        $("#propCount").text(resourceCount); 
+    },function (jqXHR, textStatus, errorThrown) {
+        $("div#properties>span.info").html(toErrorHtml("Error occurred while loading endpoints information!"));
+    });
+    
+}
+
+function isDeployed(applicationKey, version, stage) {
+	var butLaunch = applicationKey.replace(/\./g, '_') + '_' + version.replace(/\./g, '_') + "_try";
+	jagg.post("../blocks/application/get/ajax/list.jag", {
+		action: "getDeployedBuildId",
+		applicationKey: applicationKey,
+		version: version,
+		stage: stage
+	},
+
+	function (res) {
+		if (res || res != ""){
+			$("#" + butLaunch).removeAttr('disabled');
+		}
+	},
+
+	function (jqXHR, textStatus, errorThrown) {
+	});
+
+}
+
+function VersionComparator(a,b) {
+    return b.version.localeCompare(a.version);
+}
+function generateApplicationsVersionsDetails(){
+	$("#repoLoaderForVersionsMain").hide();
+	$("#repoLoaderForRepoMain").hide();
+	$("#repoLoaderForVersions").html(processIndicatorHTML);
+	$("#repoLoaderForRepo").html(processIndicatorHTML);
+	$("#buildinfoForVersions").html("");
+	$("#buildinfoForRepo").html("");
+	$("#buildinfoTrunkForRepo").html("");
+	$("#buildinfoTrunkForVersions").html("");
+	jagg.post("../blocks/application/get/ajax/list.jag", { 
+		action:"getAppVersionsInStages",
+		userName:$("#userName").attr('value'),
+		applicationKey:'<%=applicationKey%>'
+	},function (result) {
+		$("#repoLoaderForVersions").html("");
+		$("#repoLoaderForRepo").html("");
+		var parsedArray = jQuery.parseJSON(result);
+
+		var versions = Array();
+		for (var i = 0; i < parsedArray.length; i++) {
+			var application = parsedArray[i];
+			versions = versions.concat(application.versions);
+		}
+		versions.sort(VersionComparator);
+
+		if(versions.length > 0){
+			$("#repoLoaderForVersionsHeader").show();
+			$("#repoLoaderForRepoHeader").show();
+			$("#repoLoaderForVersionsMain").show();
+			$("#repoLoaderForRepoMain").show();
+		} else {
+			$("#repoLoaderForVersionsHeader").hide();
+			$("#repoLoaderForRepoHeader").hide();
+			$("#repoLoaderForVersionsMain").hide();
+			$("#repoLoaderForRepoMain").hide();
+		}
+		
+		for (var j = 0; j < versions.length; j++) {			
+			var versionInfo = versions[j];
+			var buildIcon="icon-failed";
+			var success=new RegExp("success");
+			if(success.test(versionInfo.lastBuildResult)){
+				buildIcon="icon-success";
+			}
+
+			var repoCloneURL = versionInfo.repoURL;
+			var repoBrowseURL = repoCloneURL;
+			if( application.repositoryType == "git") {
+				repoBrowseURL = repoCloneURL.replace("/git/", "/summary/");
+			}
+
+			var butLaunch = '<%=applicationKey%>'.replace(/\./g, '_') + '_' + versionInfo.version.replace(/\./g, '_') + "_try";
+
+			var domContentForRepo = '<tr>\
+				<td>' + versionInfo.version + '</td>'+
+				<% if (outputs.hasRepoReadWritePermission) { %>
+				'<td style="word-wrap:break-word;min-width:330px;max-width:330px;">\
+				<strong>(Clone/check-out): </strong><a href="'+repoCloneURL+'" target="_blank" class="git-url">'+repoCloneURL+'</a><br>\
+				<strong>(Browse): </strong><a href="'+repoBrowseURL+'" target="_blank">'+repoBrowseURL+'</a></td> '+
+				<% } %>
+				'</tr>';
+
+				var domContentForVersions='<tr>\
+					<td>' + versionInfo.version + '</td>\
+					<td><i class="'+buildIcon+'"></i></td>\
+					<td>\
+					<span class="label">' + versionInfo.stage + '</span>\
+					<span id="eta_' + versionInfo.version.replace(/\./g,"_") + '"></span></td><td style="max-width:55px;">\
+					<button class="btn" id="' + butLaunch + '" disabled onclick="launchApp(\''+versionInfo.stage+'\',\''+versionInfo.version+'\')">\
+					<i class="icon-launch"></i> Launch</button></td>\
+					</tr>';
+
+				if(versionInfo.version != "trunk"){
+					//domContent +=  '<tr><td></td><td colspan="4" id="eta_' + versionInfo.version.replace(/\./g,"_") + '"></td></tr>';
+					getCalculatedETAValue(versionInfo.stage, versionInfo.version);
+				}       
+
+				var rowForVersions = $(domContentForVersions);                 
+				var rowForRepo = $(domContentForRepo);
+
+				if(versions[j].version == 'trunk') {
+					$("#buildinfoTrunkForRepo").append(rowForRepo);
+					$("#buildinfoTrunkForVersions").append(rowForVersions);
+
+				}else{
+					$("#buildinfoForRepo").append(rowForRepo);
+					$("#buildinfoForVersions").append(rowForVersions);
+				}
+
+				isDeployed('<%=applicationKey%>', versionInfo.version, versionInfo.stage);
+		}	                
+	},function (jqXHR, textStatus, errorThrown) {
+		$("#repoLoaderForVersions").html("");
+		$("#buildinfoForVersions").html("<tr><td colspan=\"5\" style=\"color:#D16666\">Error occurred while retrieving Versions information</td></tr>");
+		$("#repoLoaderForRepo").html("");
+		$("#buildinfoForRepo").html("<tr><td colspan=\"5\" style=\"color:#D16666\">Error occurred while retrieving repository information</td></tr>");
+	});
+}
+
+function updateIssueTracker(appKey){
+    $("#trackerStatus").html(processIndicatorHTML);
+    $(".issuetracker").hide();
+    var issueSet={};
+
+    jagg.post("../blocks/issuetracker/list/ajax/list.jag", {
+    	action:"getIssueTrackerInfo",
+    	applicationKey:appKey
+    },function (result) {
+        $("#trackerStatus").html("");
+        issueSet= jQuery.parseJSON(result);
+
+        $(".issuetracker-bug-open").text(issueSet.bug.open);
+        $(".issuetracker-bug-inprogress").text(issueSet.bug.inProgress);
+        $(".issuetracker-bug-total").text(issueSet.bug.total);
+        
+        $(".issuetracker-feature-open").text(issueSet.feature.open);
+        $(".issuetracker-feature-inprogress").text(issueSet.feature.inProgress);
+        $(".issuetracker-feature-total").text(issueSet.feature.total);
+        
+        $(".issuetracker-support-open").text(issueSet.support.open);
+        $(".issuetracker-support-inprogress").text(issueSet.support.inProgress);
+        $(".issuetracker-support-total").text(issueSet.support.total);
+        
+        $(".issuetracker").fadeIn();
+        
+    },function (jqXHR, textStatus, errorThrown) {
+	    $("#trackerStatus").text("Error occured while retrieving Issue Tracker information!");
+	    $(".issuetracker").hide();
+    });
+}
+
+function loadAppUsersWithRoles(){
+	$("#usercontent").html(processIndicatorHTML);
+    jagg.post("../blocks/application/users/get/ajax/list.jag", {
+    	action:"getAppUsersByRoles",
+    	applicationKey:'<%=applicationKey%>'
+    },function (result) {
+        var roles = jQuery.parseJSON(result);
+        
+        var dom="";
+        for(var roleKey in roles){
+         var role = roles[roleKey];
+         dom+="<h5 class=\"" + roleKey + "-icon\"><span>" + role.displayName + "</span></h5><ul>";
+          var users=role.users;
+          for(var userIndex in users){
+            var userName=users[userIndex];
+            dom+="<li>" + userName + "</li>";
+            if(roleKey==="appOwner"){
+                $('#appOwner').text(userName);
+            }
+          }
+          dom+="</ul>";
+        }
+
+        $("#usercontent").html(dom);
+    },function (jqXHR, textStatus, errorThrown) {
+        $("#usercontent").html("<span style=\"color:#D16666\">Error occured while retrieving User-role information!</span>");
+    });
+}
+
+function loadApplicationInfo(){
+    jagg.post("../blocks/application/get/ajax/list.jag", {
+	    action:"getAppInfo",
+	    applicationKey:'<%=applicationKey%>'
+	},function (result) {
+
+	    var parsedArray = jQuery.parseJSON(result);
+	    $("#description").html(parsedArray.description);
+		$('#appDescriptionEdit_textarea').text(parsedArray.description);
+        var applicationType =  parsedArray.type.toUpperCase();
+        if(applicationType == "WEBAPP" || applicationType == "WAR")
+        {
+            var webAppIcon="icon-webapp";
+            var iconForWebapp='<i class="'+webAppIcon+'" title="Webapp"></i> &nbsp;';
+            var rowForWebApp = $(iconForWebapp);
+            $("#apptype").append(rowForWebApp);
+             $("#apptype").append("WEBAPP");
+        }
+        else if(applicationType == "JAXRS"){
+           var jaxrsIcon="icon-jaxrs";
+            var iconForJaxrs='<i class="'+jaxrsIcon+'" title="JaxRS"></i> &nbsp;';
+            var rowForJaxrs = $(iconForJaxrs);
+            $("#apptype").append(rowForJaxrs);
+             $("#apptype").append("JAXRS");
+        }
+        else if(applicationType == "JAXWS"){
+           var jaxrsIcon="icon-jaxrs";
+            var iconForJaxrs='<i class="'+jaxrsIcon+'" title="JaxWS"></i> &nbsp;';
+            var rowForJaxrs = $(iconForJaxrs);
+            $("#apptype").append(rowForJaxrs);
+             $("#apptype").append("JAXWS");
+        }
+        else if(applicationType == "JAGGERY"){
+            var jaggeryIcon="icon-jaggery";
+            var iconForJaggery='<i class="'+jaggeryIcon+'" title="Jaggery"></i> &nbsp;';
+            var rowForJaggery = $(iconForJaggery);
+            $("#apptype").append(rowForJaggery);
+             $("#apptype").append("JAGGERY");
+        }
+        else if(applicationType == "DBS"){
+              var dbsIcon="icon-dbs";
+            var iconForDbs='<i class="'+dbsIcon+'" title="Dbs"></i> &nbsp;';
+            var rowForDbs = $(iconForDbs);
+            $("#apptype").append(rowForDbs);
+             $("#apptype").append("DBS");
+        }
+        else if(applicationType == "BPEL"){
+            var bpelIcon="icon-bpel";
+            var iconForBpel='<i class="'+bpelIcon+'" title="BPEL"></i> &nbsp;';
+            var rowForBpel = $(iconForBpel);
+            $("#apptype").append(rowForBpel);
+             $("#apptype").append("BPEL");
+        }
+        else if(applicationType == "CAR"){
+           var carIcon="icon-car";
+            var iconForCar='<i class="'+carIcon+'" title="CAR"></i> &nbsp;';
+            var rowForCar = $(iconForCar);
+            $("#apptype").append(rowForCar);
+             $("#apptype").append("CAR");
+        }
+        else if(applicationType == "PHP"){
+           var phpIcon="icon-php";
+            var iconForPhp='<i class="'+phpIcon+'" title="php"></i> &nbsp;';
+            var rowForPhp = $(iconForPhp);
+            $("#apptype").append(rowForPhp);
+            $("#apptype").append("PHP");
+        }
+        else if(applicationType == "ESB"){
+            var esbIcon="icon-esb";
+            var iconForEsb='<i class="'+esbIcon+'" title="ESB"></i> &nbsp;';
+            var rowForEsb = $(iconForEsb);
+            $("#apptype").append(rowForEsb);
+            $("#apptype").append("ESB");
+        }
+        else{
+            var unknownIcon="icon-unknown";
+            var iconForUnknown='<i class="'+unknownIcon+'" title="unknown type"></i> &nbsp;';
+            var rowForUnknown = $(iconForUnknown);
+            $("#apptype").append(rowForUnknown);
+            $("#apptype").append(" Unknown App Type");
+        }
+
+		$('#repotype').text(parsedArray.repositoryType.toUpperCase());
+	},function (jqXHR, textStatus, errorThrown) {
+	    jagg.message({content:'Could not load Application information',type:'error' });
+	});
+}
+
+function launchApp(stage,version,btn){
+
+    jagg.post("../blocks/application/get/ajax/list.jag", {
+        action:"getMetaDataForAppVersion",
+        version:version,
+        applicationKey:'<%=applicationKey%>',
+        stage:stage,
+        state:"started",
+        type:""
+    },function (res) {
+    	var resJSON = jQuery.parseJSON(res);
+    	var msg = "" ;
+        var type= resJSON.type ;
+    	if(resJSON.appStatusMD=='started'){
+
+    		if(type=="war"){
+    				window.open(resJSON.baseURLMD +  resJSON.accessURLMD,"_blank");
+    
+    		}else if(type=="jaxws"){
+    				window.open(resJSON.baseURLMD +  resJSON.accessURLMD,"_blank");
+
+            }else if(type=="jaxrs"){
+    				window.open(resJSON.baseURLMD +  resJSON.accessURLMD,"_blank");
+
+    		}else if(type=="car"){
+    			var msg = 'Deployed Carbon Application contains these services.</br>' ;
+            	for(var u in resJSON.accessURLMD){
+            		var tmp = resJSON.baseURLMD + "services/t/" + applicationKey + "/"  + resJSON.accessURLMD[u]+ "?wsdl";
+            		msg += resJSON.accessURLMD[u] + ' Service WSDL <a  target="_blank"  href="'+ tmp +'">Launch</a></br>' ;
+            
+                }
+                jagg.message({content: msg, type:'info' });
+            
+            }else if(type=="bpel" || type=="dbs"){
+                var msg = 'Deployed Carbon Application contains these services.</br>' ;
+                for(var u in resJSON.accessURLMD){
+                  var url= resJSON.accessURLMD[u];
+                  var protocol=url.split("://")[0];
+                  if(protocol=='https' || protocol=='http'){
+                    var tmp =  resJSON.accessURLMD[u]+ "?wsdl";
+                    msg += protocol + ' Service WSDL <a  target="_blank"  href="'+ tmp +'">Launch</a></br>' ;
+                  }
+                }
+                jagg.message({content: msg, type:'info' });
+        
+            }else if(type=="jaggery"){
+                window.open(resJSON.baseURLMD +  resJSON.accessURLMD,"_blank");
+    
+            }
+        //end of "if(resJSON.appStatusMD=='started'){"
+    	}else if(resJSON.appStatusMD=='stopped'){
+    
+    		msg += 'Application is already deployed but not in running state.' ;
+    		msg += ' To get the application URL, click <a  target="_blank"  href="'+(resJSON.baseURLMD +  resJSON.accessURLMD)+'">here</a>' ;
+    		jagg.message({content: msg, type:'warn' });
+    
+    	} else if(resJSON.appStatusMD=='faulty'){
+    
+    		msg += 'Deployment fail.' ;
+    		jagg.message({content: msg, type:'error' });
+    
+    	} else if(resJSON.appStatusMD=='serverfaulty'){
+    
+    		msg += 'Deployment server not respond.' ;
+    		jagg.message({content: msg, type:'error' });
+    
+    	}  else {
+    
+    		msg += 'Application is not deployed yet.' ;
+    		jagg.message({content: msg, type:'error' });
+    
+    	}
+    },function (jqXHR, textStatus, errorThrown) {
+        jagg.message({content:'Could not launch the application',type:'error' });
+    });
+}
+
+function updateDescription(newDescription) {
+    $("#processIndicator").show();
+    $("#description").text(newDescription).fadeOut();
+    jagg.post("../blocks/application/update/ajax/update.jag", {
+        action:"updateDescription",
+        applicationKey:'<%=applicationKey%>',
+        newDescription:newDescription
+    },function (result) {
+        $("#processIndicator").hide();
+        $("#description").text(newDescription).fadeIn();
+    },function (jqXHR, textStatus, errorThrown) {
+        jagg.message({content:'Error occured while updating description!',type:'error' });
+    });
+}
+
+function getCalculatedETAValue(stage, version){
+	
+	jagg.post("../blocks/eta/calculate/ajax/get.jag", {
+        action:"calculate",
+        applicationKey:'<%= applicationKey %>',
+        version:version,
+        stage:stage
+        
+    },function (result) {
+    	var parsedObject = jQuery.parseJSON(result);    	
+    	if(!result.error && parsedObject.eta.endDate.length != 0){
+    		var str = " Expected Completion : <b>" + parsedObject.eta.endDate + "</b>";
+    		$("#eta_" + version.replace(/\./g,"_")).html("<br />" + str).css("color","#9C9C9C");
+    	}
+        
+        
+    },function (jqXHR, textStatus, errorThrown) {
+        jagg.message({content:'Could not launch the application',type:'error' });
+    });
+	
+}
+
+//]]
+</script>
+<input type="hidden" name="userName" id="userName" value="<%=userName%>"/>
+<input type="hidden" name="applicationKey" id="applicationKey" value="<%=applicationKey%>"/>
+
+<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('templates/application/get/js/get.js'))%>"></script>
+<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/common.js'))%>"></script>
+
+
+<!--global panel title:start-->
+<div class="container">
+   <div class="title-section">
+       <div class="row">
+           <div class="span12">
+               <% jagg.includeBlock("breadcrumb", {"applicationName":applicationName,"applicationKey" :applicationKey,"pageName":"home","pos":"titlebar" }); %>
+           </div>
+       </div>
+   </div>
+</div>
+<!--global panel title:end-->
+<!--notification panel:start-->
+<!-- div class="container">
+    <div class="event-streamer-panel">
+        <div id="event-streamer-panel-header">Notifications</div>
+        <ul id="event-streamer">
+
+        </ul>
+    </div>
+</div -->
+    <!--notification panel:end-->
+<!--main content container:start-->
+<div class="container content-container wrapper">
+
+
+
+    <div class="row">
+        <div class="span12 content-section shadow-up">
+            <div class="content-data">
+                <div class="container-fluid space-killer">
+                    <!--issues info + team info + resource info:start-->
+                    <div class="row-fluid section-block">
+                        <div class="span12">
+                            <table class="table table-striped table-bordered">
+                                <tbody>
+                                <tr>
+                                    <td class="first-cell">Application Type</td>
+                                    <td id="apptype">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Repository Type</td>
+                                    <td>
+                                        <span class="property-delimiter"></span>
+                                        <span id="repotype" class="property-value"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Application Owner</td>
+                                    <td>
+                                        <span class="property-delimiter"></span>
+                                        <span id="appOwner" class="property-value"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Description</td>
+                                    <td>
+                                        <div id="appDescriptionView" class="property">
+                                            <div id="description" class="property-value" style="min-height:3.0em;"
+                                                 title="Click here to edit the description">&nbsp;</div>
+                                            <!--application description-edit:start-->
+                                            <div id="appDescriptionEdit" class="property-value"
+                                                 style="display:none;overflow: hidden;">
+                                                <textarea id="appDescriptionEdit_textarea"
+                                                          style="width:98%"></textarea>
+                                                <button class="btn" type="button"
+                                                        onclick="updateDescription(appDescriptionEdit_textarea.value)"
+                                                        id="appDescriptionSaveBtn">
+                                                    Save
+                                                </button>
+                                                <button class="btn" id="appDescriptionCancelBtn">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                            <!--application description-edit:end-->
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                    <div class="row-fluid section-block">
+                        <div class="span12">
+                            <!--issues info:start-->
+                            <h2>Issues <a title="Refresh" onclick="updateIssueTracker('<%=applicationKey%>');"><i class="icon-refresh inside-h2-refresh"></i></a></h2>
+                                <!--START OF ISSUE TRACKER GADGET-->
+
+                                    <span id="trackerStatus" style="color:#D16666">&nbsp;</span>
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Bug</th>
+                                                <th>Feature</th>
+                                                <th>Support</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Open&nbsp;-&nbsp;<span class="issuetracker-bug-open">&nbsp;</span></td>
+                                                <td>Open&nbsp;-&nbsp;<span class="issuetracker-feature-open">&nbsp;</span></td>
+                                                <td>Open&nbsp;-&nbsp;<span class="issuetracker-support-open">&nbsp;</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>In progress&nbsp;-&nbsp;<span class="issuetracker-bug-inprogress">&nbsp;</span></td>
+                                                <td>In progress&nbsp;-&nbsp;<span class="issuetracker-feature-inprogress">&nbsp;</span></td>
+                                                <td>In progress&nbsp;-&nbsp;<span class="issuetracker-support-inprogress">&nbsp;</span></td>
+                                            </tr>
+                                            <tr class="success">
+                                                <td>Total&nbsp;-&nbsp;<span class="issuetracker-bug-total">&nbsp;</span></td>
+                                                <td>Total&nbsp;-&nbsp;<span class="issuetracker-feature-total">&nbsp;</span></td>
+                                                <td>Total&nbsp;-&nbsp;<span class="issuetracker-support-total">&nbsp;</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                        </div>
+                        <!--END OF ISSUE TRACKER GADGET-->
+                            <!--issues info:end-->
+
+                    <!--versions info:start-->
+                    <div class="row-fluid section-block">
+                        <div class="span12">
+                            <h2 id="repoLoaderForVersionsHeader" style="display:none;">Current Status <a title="Refresh" onclick="generateApplicationsVersionsDetails();"><i class="icon-refresh inside-h2-refresh" style="margin-top:4px;"></i></a></h2>
+                            <div id="repoLoaderForVersions">&nbsp;</div>
+                            <table class="table table-striped table-bordered current-status-table" id="repoLoaderForVersionsMain" style="display:none;">
+                                <thead>
+                                <tr>
+                                    <th class="first-cell">
+                                        Version
+                                    </th>
+                                    <th>Last Build Status</th>
+                                    <th>Life Cycle</th>
+                                    <th>Launch</th>
+                                </tr>
+                                </thead>
+                                <tbody id="buildinfoForVersions">
+
+                                </tbody>
+                                <tbody id="buildinfoTrunkForVersions">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!--versions info:end-->
+
+                    <!--resources info:start-->
+                   <div class="row-fluid section-block">
+                       <div class="span12">
+                           <h2>Resources</h2>
+
+                           <div class="toggle-panel">
+                               <div class="toggle-panel-header" title="Click here to collapse this section">
+	                               <span class="icon-chevron-down">
+		                               <b>Datasources &nbsp; (<i
+		                            		   id="dsCount">0</i>) 
+		                            		   <a title="Refresh" onclick="loadDatasourceInfo();"><i class="icon-refresh inside-h2-refresh" style="margin-top:4px;"></i></a>
+		                            	</b>		                               
+	                               </span>	                               
+                               </div>
+                               <div class="toggle-panel-body" id="datasources">
+                                   <table class="table table-striped table-bordered">
+                                       <thead>
+                                       <th>Name</th>
+                                       <th>Description</th>
+                                       <th>Stage</th>
+                                       </thead>
+                                       <tbody>
+
+                                       </tbody>
+                                   </table>
+                                   <span class="info">&nbsp;</span>
+                               </div>
+                           </div>
+                           <div class="toggle-panel">
+                               <div class="toggle-panel-header" title="Click here to expand this section">
+	                               <span class="icon-chevron-right">
+		                               <b>Databases &nbsp; (<i id="dbCount">0</i>) 
+		                               		<a title="Refresh" onclick="loadRssDatabasesInfo();"><i class="icon-refresh inside-h2-refresh" style="margin-top:4px;"></i></a>
+		                               </b>		                               
+	                               </span>	                               
+                               </div>
+                               <div class="toggle-panel-body" id="databases">
+                                   <table class="table table-striped table-bordered">
+                                       <thead>
+                                       <th>Name</th>
+                                       <th>RSS Instance name</th>
+                                       <th>URL</th>
+                                       </thead>
+                                       <tbody>
+
+                                       </tbody>
+                                   </table>
+                                   <span class="info">&nbsp;</span>
+                               </div>
+                           </div>
+                           <% if(hasConfigureAPIManagerPermission){ %>
+                           <div class="toggle-panel">
+                               <div class="toggle-panel-header" title="Click here to expand this section">
+	                               <span class="icon-chevron-right">
+		                               <b>APIs &nbsp; (<i id="apiCount">0</i>) 
+		                               		<a title="Refresh" onclick="loadAPIsInfo();"><i class="icon-refresh inside-h2-refresh" style="margin-top:4px;"></i></a>
+		                               </b>		                               
+	                               </span>
+                               </div>
+                               <div class="toggle-panel-body" id="api">
+                                   <table class="table table-striped table-bordered">
+                                       <thead>
+                                       <th>Name</th>
+                                       <th>Version</th>
+                                       <th>Provider</th>
+                                       </thead>
+                                       <tbody>
+
+                                       </tbody>
+                                   </table>
+                                   <span class="info">&nbsp;</span>
+                               </div>
+                           </div>
+                           <% } %>
+                           <div class="toggle-panel">
+                               <div class="toggle-panel-header" title="Click here to expand this section">
+	                               <span class="icon-chevron-right">
+		                               <b>Endpoints (<i id="propCount">0</i>) 
+		                               		<a title="Refresh" onclick="loadDependanciesInfo();"><i class="icon-refresh inside-h2-refresh" style="margin-top:4px;"></i></a>
+		                               </b>		                               
+	                               </span>
+                               </div>
+                               <div class="toggle-panel-body" id="properties">
+                                   <table class="table table-striped table-bordered">
+                                       <thead>
+                                       <th>Endpoint</th>
+                                       <th>Value</th>
+                                       <th>Description</th>
+                                       <th>Stage</th>
+                                       </thead>
+                                       <tbody>
+
+                                       </tbody>
+                                   </table>
+                                   <span class="info">&nbsp;</span>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+
+                    <!--team info:start-->
+
+                    <div class="row-fluid section-block">
+                        <div class="span12">
+                            <h2>Team <a title="Refresh" onclick="loadAppUsersWithRoles();"><i class="icon-refresh inside-h2-refresh"></i></a></h2>
+
+                            <div class="boundary-marker" id="usercontent">
+
+                            </div>
+                        </div>
+                    </div>
+                    <!--team info:end-->
+
+
+                    <!--repository info:end-->
+
+                    <!--repository info:start-->
+                    <%
+                   if (outputs.hasRepoReadWritePermission) {
+                   %>
+                    <div class="row-fluid section-block">
+                        <div class="span12">
+                            <h2 id="repoLoaderForRepoHeader" style="display:none;">Repository <a title="Refresh" onclick="generateApplicationsVersionsDetails();"><i class="icon-refresh inside-h2-refresh"></i></a></h2>
+                                <div id="repoLoaderForRepo">&nbsp;</div>
+                                <table class="table table-striped table-bordered" id="repoLoaderForRepoMain" style="display:none;">
+                                    <thead>
+                                        <tr>
+                                            <th class="first-cell">Version</th>
+                                            <% if (outputs.hasRepoReadWritePermission) { %>
+                                                <th style="max-width:330px;">Repository URL</th>
+                                            <% } %>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="buildinfoForRepo">
+
+                                    </tbody>
+                                    <tbody id="buildinfoTrunkForRepo">
+
+                                    </tbody>
+                                </table>
+                        </div>
+                    </div>
+                   <%}%>
+
+                    <!--repository info:end-->
+
+                    <!--comments:start-->
+                    <div class="row-fluid section-block">
+                        <div class="span12">
+                            <h2>Comments </h2>
+                                <div>
+                                    <% jagg.includeBlock("comment/comment-add", {"reference":"/repository/applications/"+ applicationKey +"/appinfo"}); %>
+                                    <% jagg.includeBlock("comment/comment-list", {"reference":"/repository/applications/"+ applicationKey +"/appinfo"}); %>
+                                </div>
+                        </div>
+                    </div>
+                    <!--comments:end-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="push">&nbsp;</div>
+</div>
+<% }); %>

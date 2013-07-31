@@ -1,0 +1,107 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+var log=new Log();
+
+(function () {
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json");
+
+    if (action == "getKeysFromRegistry"){
+    	mod = jagg.module("apimanager");
+    	var applicationKey = request.getParameter("applicationKey");
+    	try{
+    		 var result = mod.getKeysFromRegistry(applicationKey);
+    		 if (result != null) {
+                 print(result);
+             } else {
+                 throw "No Keys found for appKey "+ applicationKey;
+             }
+    	} catch(e) {
+            throw "Error while getting API keys from registry for the appKey "+ applicationKey ;
+        }
+    }else if (action == "getAPIsOfAppOwnerApp"){
+    	mod = jagg.module("apimanager");
+    	var appOwnerId = request.getParameter("appOwnerId");
+    	var applicationKey = request.getParameter("applicationKey");
+    	try{
+    		 var result = mod.getAPIsOfUserApp(appOwnerId,applicationKey);
+    		 if (result != null) {
+                 print(result);
+             } else {
+                 throw "No APIs found for the Appowner "+ appOwnerId + " for appKey "+ applicationKey;
+             }
+    	} catch(e) {
+            throw "Error while getting the list of APIs of Appowner "+ appOwnerId +" for appKey "+ applicationKey ;
+        }
+    }else if (action == "getApplicationAPI") {
+    	mod = jagg.module("apimanager");
+    	var applicationKey = request.getParameter("applicationKey");
+//    	jagg.module("permission").checkUserActionPermission(applicationKey,PERMISSION.CONFIGURATION.API.MANAGER);
+        try {
+            result = mod.getApplicationAPI(applicationKey);
+            if (result != null) {
+                print(result);
+            } else {
+                throw "Error while getting the APIs of application";
+            }
+        } catch(e) {
+            throw "Error while getting the list of APIs";
+        }
+    } else if (action == "getAPI"){
+        mod = jagg.module("apimanager");
+
+        var apiName = request.getParameter("apiName");
+        var apiVersion = request.getParameter("apiVersion");
+        var apiProvider = request.getParameter("apiProvider");
+
+        var apiDescriptions = {};
+        if (session.get("apiDetails") != null) {
+            apiDescriptions = session.get("apiDetails");
+
+            if (apiDescriptions[apiName] != null) {
+                print(apiDescriptions[apiName]);
+            } else {
+                try {
+                    var result = mod.getAPIInformation(apiName, apiVersion, apiProvider);
+                    if (result != null) {
+                        apiDescriptions[apiName] = result;
+                        session.put("apiDetails", apiDescriptions);
+                        print(result);
+                    }
+                } catch (e) {
+                    var errMsg = "Error while getting the API information of " + apiName + "-"+ apiVersion +"-"+ apiProvider +" \n";
+                    log.error(errMsg);
+                }
+            }
+        } else {
+            try {
+                var result = mod.getAPIInformation(apiName, apiVersion, apiProvider);
+                if (result != null) {
+                    apiDescriptions[apiName] = result;
+                    session.put("apiDetails", apiDescriptions);
+                    print(result);
+                }
+            } catch (e) {
+                var errMsg = "Error while getting the API information of " + apiName + "-"+ apiVersion +"-"+ apiProvider +" \n";
+                log.error(errMsg);
+            }
+        }
+    } else if (action == "getAPICount") {
+    	mod = jagg.module("apimanager");
+    	var applicationKey = request.getParameter("applicationKey");
+
+        try {
+            result = mod.getAPICount(applicationKey);
+			print(result);
+        } catch(e) {
+            print(0);
+        }
+    } else {
+        throw new Error("No action specified");
+    }
+}());
+%>

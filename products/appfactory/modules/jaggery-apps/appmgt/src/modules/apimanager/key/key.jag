@@ -1,0 +1,118 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+// used for logging
+var log = new Log();
+var modManager = jagg.module("manager");
+
+var generateKeys = function (applicationKey, apiName, apiVersion, apiProvider){
+    var ws = require('ws');
+    var apiManagerIntegration = new ws.WSRequest();
+    var options = new Array();
+    options.useSOAP = 1.1;
+    options.action = "urn:generateKeys";
+    options["HTTPHeaders"] = [
+                              { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) },
+                              { name : "username", value :session.get("LOGGED_IN_USER") },
+                              { name : "SAMLToken" , value : session.get("SAML_TOKEN") }
+                              ];
+
+    var namespace = getProperty(API_MANAGER_SERVICE_NAMESPACE);
+    var payload = '<int:generateKeys xmlns:int="' + namespace+ '"><int:appId>' + applicationKey + '</int:appId><int:apiName>'
+            + apiName + '</int:apiName><int:apiVersion>' + apiVersion + '</int:apiVersion><int:apiProvider>'
+            + apiProvider + '</int:apiProvider></int:generateKeys>';
+    var result;
+
+    try {
+    	var serviceName =getProperty(API_MANAGER_SERVICE_NAME);
+    	var serverUrl = getProperty(APPFACTORY_SERVER_URL);
+
+    	var endPoint = serverUrl + serviceName;
+
+    	apiManagerIntegration.open(options,endPoint, false);
+    	apiManagerIntegration.send(payload);
+    	result = apiManagerIntegration.responseE4X;
+    	if(log.isDebugEnabled()){
+    		log.debug("Invoking service endpoint:"+endPoint+" returned result:"+result);
+    	}
+    } catch (e) {
+    	log.error("Error while generating keys of application "+ applicationKey + "\n"+e.message);
+    	throw "Error while generating keys of application "+ applicationKey;
+    }
+}
+
+var getSavedKeys = function(applicationId, isSync){
+    var ws = require('ws');
+    var apiManagerIntegration = new ws.WSRequest();
+    var options = new Array();
+    options.useSOAP = 1.1;
+    options.action = "urn:getSavedKeys";
+    options["HTTPHeaders"] = [
+            { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) },
+            { name : "username", value :session.get("LOGGED_IN_USER") },
+            { name : "SAMLToken" , value : session.get("SAML_TOKEN") }
+        ];
+
+    var namespace = getProperty(API_MANAGER_SERVICE_NAMESPACE);
+    var payload = '<int:getSavedKeys xmlns:int="' + namespace+ '"><int:applicationId xmlns:int="' + namespace+ '">'
+                    + applicationId + '</int:applicationId><int:isSyncStr xmlns:int="' + namespace+ '">'
+                    + isSync + '</int:isSyncStr></int:getSavedKeys>';
+    var result;
+
+    try {
+        var serviceName =getProperty(API_MANAGER_SERVICE_NAME);
+        var serverUrl = getProperty(APPFACTORY_SERVER_URL);
+
+        var endPoint = serverUrl + serviceName;
+
+        apiManagerIntegration.open(options,endPoint, false);
+        apiManagerIntegration.send(payload);
+        result = apiManagerIntegration.responseE4X;
+        if(log.isDebugEnabled()){
+        	log.debug("Invoking service endpoint:"+endPoint+" returned result:"+result);
+        }
+
+        var elements = result.*::["return"];
+        //var elementsArray = [];
+        var mainDictionary = {};
+        var prodDictionary = {};
+        var sandboxDictionary = {};
+
+        for(var i in elements){
+            var entry = elements[i];
+
+            var ref = entry.*::reference.text();
+            var object = {};
+            object.name = entry.*::type.text();
+            object.value = entry.*::value.text();
+            object.isSynced = entry.*::isSynced.text();
+                        
+            if(object.name.indexOf(API_MANAGER_PROD) !== -1){
+            	if(prodDictionary[object.name] == null){
+            		prodDictionary[object.name] = object;
+                }
+            } else if(object.name.indexOf(API_MANAGER_SANDBOX) !== -1){
+            	if(sandboxDictionary[object.name] == null){
+            		sandboxDictionary[object.name] = object;
+                }
+            } else {
+            	log.error("Undefined environment "+ applicationKey);
+            	throw "Error while retrieving saved keys for "+ applicationKey;
+            }            
+        }
+        mainDictionary[API_MANAGER_PROD] = prodDictionary;
+        mainDictionary[API_MANAGER_SANDBOX] = sandboxDictionary;
+         if(log.isDebugEnabled()){
+            log.debug("Main Dictionary: "+mainDictionary);
+        }
+        var finalValue = {};
+        finalValue.dependencies = mainDictionary;
+        return stringify(finalValue);
+    } catch (e) {
+        log.error("Error while retrieving saved keys for "+ applicationKey + "\n"+e.message);
+        throw "Error while retrieving saved keys for "+ applicationKey;
+    }
+}
+%>

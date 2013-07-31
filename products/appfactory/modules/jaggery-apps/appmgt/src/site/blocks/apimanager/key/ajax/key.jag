@@ -1,0 +1,44 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+(function () {
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json");
+
+    if (action == "generateKeys"){
+        mod = jagg.module("apimanager");
+
+        var applicationId = request.getParameter("applicationKey");
+        var apiName = request.getParameter("apiName");
+        var apiVersion = request.getParameter("apiVersion");
+        var apiProvider = request.getParameter("apiProvider");
+
+        try{
+            result = mod.generateKeys(applicationId, apiName, apiVersion, apiProvider);
+            print(true);
+        }catch(e){
+            throw "Error while getting API information"
+        }
+    } else if(action == "getSavedKeys"){
+        mod = jagg.module("apimanager");
+
+        var applicationId = request.getParameter("applicationKey");
+        var isSync = request.getParameter("isSync");
+        try{
+            result = mod.getSavedKeys(applicationId, isSync);
+            if(result != null){
+                print(result);
+            }else{
+                throw "Error while retrieving saved keys";
+            }
+        }catch(e){
+            throw "Error while retrieving saved keys"
+        }
+    } else {
+        throw new Error("No action specified");
+    }
+}());
+%>

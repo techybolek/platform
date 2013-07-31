@@ -1,0 +1,186 @@
+<% jagg.template("datasource/add", function(inputs, outputs, jagg) { %>
+
+<script type="text/javascript">
+    function createDatasource()
+    {
+
+		var stages = $("[name='stage']");
+
+		for (var i = 0; i < stages.length; i++) {
+		    var varStage = stages[i].value;
+            var varUrl = $("#url" + varStage).attr('value');
+            var varDriverName = $("#driverClass" + varStage).attr('value');
+            var varDbUsername = $("#username" + varStage).attr('value');
+            var varDbPassword = $("#password" + varStage).attr('value');
+
+	        jagg.post("../blocks/datasource/add/ajax/add.jag", {
+		    		action:"createDatasource",
+		    		applicationKey:$("#applicationKey").attr('value'),
+		    		datasourceName:$("#datasourceName").attr('value'),
+		    		datasourceDescription:$("#datasourceDescription").attr('value'),
+		    		stage:varStage,
+		    		url:varUrl,
+		    		driverName:varDriverName,
+		    		dbUsername:varDbUsername,
+		    		dbPassword:varDbPassword
+		      },
+		       function (result) {
+		      	  if(result != undefined){
+			     if(result != "true") {
+                                 jagg.message({content:'Datasource has been created',type:'info' });
+                             } else {
+                                jagg.message({content:'Error occurred while creating datasource: Datasource already exsist',type:'error' });
+                            }
+                       
+	              }
+		      },
+		      function (jqXHR, textStatus, errorThrown) {
+                  jagg.message({content:'Error occurred while creating datasource',type:'error' });
+		    });
+		}
+    }
+</script>
+<div class="container">
+				<article class="main">
+				    <% jagg.includeBlock("page/messages", null); %>
+                        <header>
+                        	<div class="content">
+                                <h1>Resources</h1>
+                             </div>
+                        </header>
+                        <% jagg.includeBlock("resources/menu", {page:'endpoints_registry',applicationName:applicationName,applicationKey:applicationKey}); %>
+                        <section class="separator">
+                            <div class="page_nav">
+                                <div class="content clear">
+                                    <ol class="breadcrumb">
+                                            <li class="breadcrumb_item"><a href="#" class="breadcrumb_link">Datasources</a></li>
+                                            <li class="breadcrumb_item"><h2>Create New Datasource</h2></li>
+                                    </ol>
+                                 </div>
+                            </div>
+                            <div class="content clear well">
+                            	<div class="form-container">
+
+                                    <form action="#" method="post" class="hold right_label">
+                                      <fieldset>
+                                            <div class="input_row">
+                                                <label for="datasource_name"><strong>Datasource Name</strong> <em>*</em></label>
+                                                <input type="text" name="datasource_name" id="datasource_name" class="half" />
+                                            </div>
+                                            <div class="input_row">
+                                                <label for="datasource_description"><strong>Description</strong></label>
+                                                <textarea name="datasource_description" id="datasource_description" rows="5" class="full"></textarea>
+                                            </div>
+                                            <div class="input_row">
+                                                <label for="datasource_url"><strong>Database URL</strong> <em>*</em></label>
+                                                    <select class="select_list full big datasource_url" id="datasource_url" name="datasource_url">
+                                                        <option>jdbc:mysql://dev.appfactoryblablabla</option>
+                                                        <option>jdbc:mysql://dev.appfactoryblablablablabla</option>
+                                                        <option>jdbc:mysql://dev.appfactoryblablabla</option>
+                                                    </select>
+                                             </div>
+                                            <div class="input_row">
+                                                <label for="database_driver"><strong>Database Driverrr</strong> <em>*</em></label>
+                                                    <select class="select_list half big" id="database_driver" name="database_driver">
+                                                        <option>mySqldsadsa</option>
+                                                        <option>postgreSQL</option>
+                                                        <option>Oracle</option>
+                                                    </select>
+                                             </div>
+                                            <div class="input_row">
+                                                <label for="datasource_username"><strong>Username</strong> <em>*</em></label>
+                                                <input type="text" name="datasource_username" id="datasource_username" class="half" />
+                                            </div>
+                                            <div class="input_row">
+                                                <label for="datasource_password"><strong>Password</strong> <em>*</em></label>
+                                                <input type="password" name="datasource_password" id="datasource_password" class="half" />
+                                            </div>
+                                            <div class="controlset">
+                                                <div class="input_row no_padding_top">
+                                                                <label><input type="checkbox" value="" /> Copy datasource to Testing</label><br />
+                                                                <label><input type="checkbox" value="" /> Copy datasource to Staging</label><br />
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                         <div class="buttonrow">
+                                            <input type="submit" value="Create Datasource" class="btn main" />
+                                            <a href="#">Cancel</a>
+                                        </div>
+
+
+                                     </form>
+
+								</div>
+                            </div>
+                        </section>
+                        <div class="clearfix"></div>
+                 </article>
+            </div><!-- /container -->
+
+            
+            
+            
+            
+
+<form method='post' class='well'>
+	<table class="table table-bordered table-striped"  id="datasourceInputTbl">
+		<thead>
+		    <tr>
+		        <th colspan="2">Please enter the following information.</th>
+		    </tr>
+	    </thead>
+	    <tr>
+	        <td>Datasource  Name:</td>
+	        <td class="formRow"><input type='text' id='datasourceName' size='50'/></td>
+	    </tr>
+	    <tr>
+	        <td>DataSource Description:</td>
+			<td><textarea id='datasourceDescription' rows=5 cols=50></textarea></td>
+	    </tr>
+	    <input type="hidden" id='applicationKey' value='<%=request.getParameter("applicationKey")%>' />
+		<%
+ 			var stages = getProperties('ApplicationDeployment.DeploymentStage');
+ 	 	    for(var i=0; i<stages.length;i++){
+     			var stage = stages[i];
+	    %>
+	            <table class="table table-bordered table-stripe">
+	            	<thead>
+	                	<tr>
+	                    	<th colspan="2">Create datasource for <%=stage%>.</th>
+	                    </tr>
+	                </thead>
+	                <tr>
+	                	<td>Database URL:</td>
+	                    <td class="formRow"><input type='text' id='<%="url" + stage%>' size='50'/></td>
+	                </tr>
+	 				<tr>
+	                	<td>Database Driver:</td>
+	                    <td class="formRow"><input type='text' id='<%="driverClass"+stage%>' size='50'/></td>
+	                </tr>
+	 				<tr>
+	                	<td>Username:</td>
+	                    <td class="formRow"><input type='text' id='<%="username"+stage%>' size='50'/></td>
+	                </tr>
+	  				<tr>
+	                	<td>Password:</td>
+	                	<td class="formRow"><input type='password' id='<%="password"+stage%>' size='50'/></td>
+	                </tr>
+	                <input type="hidden" name='stage' value='<%=stage%>'/>
+	            </table>
+         <%
+             }
+         %>
+	
+	
+	</table>
+	<table class="styledLeft">
+	    <tr>
+	    	<td class="buttonRow">
+	            <input type='button' name='Submit' value='Submit' onclick="createDatasource();" class='btn btn-primary'/>
+	            <input type="button" onclick="location.href='index.jag?'" value='Cancel' class='btn btn-primary'/>
+	        </td>
+	    </tr>
+	</table>
+</form>
+        
+<% }); %>

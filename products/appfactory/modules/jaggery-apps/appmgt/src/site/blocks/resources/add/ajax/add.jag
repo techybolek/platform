@@ -1,0 +1,89 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+(function () {
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json");
+    var log=new Log();
+    if (action == "createResource") {
+    	mod = jagg.module("resources");
+    	var applicationKey = request.getParameter("applicationKey");
+    	var resourceName = request.getParameter("resourceName");
+    	var resourceDescription = request.getParameter("resourceDescription");
+    	//var stage = request.getParameter("stage");
+    	var deploymentStages = getProperties(DEPLOYMENT_STAGES);
+    	var resourceMediaType = request.getParameter("resourceMediaType");
+    	var contentValue = request.getParameter("contentValue");
+
+        try {
+         for (var i = 0; i < deploymentStages.length; i++) {
+        	 		result = mod.createResource(applicationKey,deploymentStages[i],resourceName,resourceDescription, resourceMediaType, contentValue);
+                }
+        } catch(e) {
+            throw "Error while creating an resources";
+        }
+    } else if (action == "updateResource") {
+        mod = jagg.module("resources");
+        var applicationKey = request.getParameter("applicationKey");
+        var resourceName = request.getParameter("resourceName");
+        var resourceDescription = request.getParameter("resourceDescription");
+        var resourceMediaType = request.getParameter("resourceMediaType");
+        var contentValue = request.getParameter("contentValue");
+        var deploymentStage = request.getParameter("deploymentStage");
+
+        try {
+            result = mod.updateResource(applicationKey, deploymentStage,resourceName,resourceDescription, resourceMediaType, contentValue);
+
+        } catch(e) {
+            throw "Error while creating an resources";
+        }
+
+    } else if (action == "deleteResource") {
+        mod = jagg.module("resources");
+        var applicationKey = request.getParameter("applicationKey");
+        var resourceName = request.getParameter("resourceName");
+        var deploymentStages = getProperties(DEPLOYMENT_STAGES);
+
+        try {
+	        for (var i = 0; i < deploymentStages.length; i++) {
+	        	
+	        	try{
+	        		result = mod.deleteResource(applicationKey, deploymentStages[i],resourceName);
+	        	}catch(err){
+	        		if(err.indexOf("Un-authorized!!!") == -1){
+	            		throw "Error";
+	            	}else{
+	            		log.info("User do not have permission to delete resource in the stage - " + deploymentStages[i]);
+	            	}
+	        	}	
+	        }
+        } catch(e) {
+        	throw "Error while creating an resources";
+        }
+
+    } else if(action == "updateResourceDesc"){ 
+    	mod = jagg.module("resources");
+    	var applicationKey = request.getParameter("applicationKey");
+        var resourceName = request.getParameter("resourceName");
+        var stage = request.getParameter("stage");
+        var desc = request.getParameter("desc");
+        
+        var resource = mod.getResource(applicationKey, stage, resourceName);
+        var dependency = resource.dependencies;
+        log.info(desc);
+        try {
+            result = mod.updateResource(applicationKey, stage,resourceName, desc, dependency[0].mediaType, dependency[0].value);
+            lod.info("Updated the resource - " + resourceName + " with desc - " + desc + " stage - " + stage);
+        } catch(e) {
+        	log.error(e);
+            throw "Error while updating the resoure description";
+        }
+    	
+	} else {
+        throw new Error("No action specified");
+    }
+}());
+%>

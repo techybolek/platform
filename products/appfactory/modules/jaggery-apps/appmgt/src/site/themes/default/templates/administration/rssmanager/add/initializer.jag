@@ -1,0 +1,8 @@
+<%
+jagg.initializer("administration/rssmanager/add", {
+
+    preInitialize:function () {
+
+    }
+});
+%>

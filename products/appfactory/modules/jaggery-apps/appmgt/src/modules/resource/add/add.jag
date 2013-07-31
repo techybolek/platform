@@ -1,0 +1,40 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+var log = new Log();
+
+var registry = new MetadataStore(getProperty(ADMIN_USERNAME), getProperty(ADMIN_PASSWORD));
+
+//application icon upload to the registry
+var uploadAppIcon = function (applicationKey, file){
+	
+	var serverUrl = getProperty(APPFACTORY_SERVER_URL);
+	var carbon = require('carbon');
+	var registryOsgi = new carbon.registry.Registry(serverUrl, {
+	   username: getProperty(ADMIN_USERNAME),
+	   password: getProperty(ADMIN_PASSWORD)
+	});
+	var path = "/_system/governance/repository/appicon/icon_"+ applicationKey ;
+	log.info("Icon ["+path+"] uploading to the registry ... " );
+	registryOsgi.put(path, {
+	   mediaType: 'image/jpg',
+	   content: file.getStream()
+	});
+	
+};
+
+
+
+var createResource = function () {
+    jagg.module("permission").checkUserAuthenticated();
+    try {
+        return registry.newResource();
+    } catch (e) {
+        log.error("Error while creating registry resource \n" + e.message);
+        throw "Error while creating registry resource";
+    }
+};
+
+%>

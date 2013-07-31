@@ -1,0 +1,75 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+var log=new Log();
+
+(function () {
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json");
+
+    if(action == "getAppIcon") {
+    	
+    	mod = jagg.module("resource");
+        var applicationKey = request.getParameter("applicationKey");
+        
+        try {
+            var resp = mod.loadAppIcon(applicationKey);
+            response.addHeader('Content-Type', 'image/jpg');
+            print(resp.content);
+        	
+        } catch (e) {
+            var errMsg = "Error  while loading the icon for "+ applicationKey +" application  \n" ;    
+            log.error(errMsg);
+        }
+     
+    }else if(action == "isAppIconAvailable") {
+        var applicationKey = request.getParameter("applicationKey");
+        mod = jagg.module("resource");
+        var iconList= {};
+       
+        if (session.get("iconsNotAvailableApps") != null) {
+        	iconList = session.get("iconsNotAvailableApps");
+        	
+        	if(iconList[applicationKey] != null){
+        		print("101"); //Image URL is incorrect
+            	return;
+        	}else{
+    	        try {
+    	            var resp = mod.loadAppIcon(applicationKey);
+    	            if (resp == null){
+    	            	iconList[applicationKey]="true";
+    	            	session.put("iconsNotAvailableApps", iconList);
+        	        	var errMsg = "App icon is not available for "+ applicationKey +" application  \n" ;    
+        	            log.error(errMsg);
+    	            	print("101"); //Image URL is incorrect
+    	            }
+    	        } catch (e) {
+    	        	var errMsg = "Error while checking App icon availability for "+ applicationKey +" application  \n" ;    
+    	            log.error(errMsg);
+    	        }
+        	}
+        }else{
+        	
+        	 try {
+ 	            var resp = mod.loadAppIcon(applicationKey);
+ 	            if (resp == null){
+ 	            	iconList[applicationKey]="true";
+	            	session.put("iconsNotAvailableApps", iconList);
+    	        	var errMsg = "App icon is not available for "+ applicationKey +" application  \n" ;    
+    	            log.error(errMsg);
+	            	print("101"); //Image URL is incorrect
+ 	            }
+ 	        } catch (e) {
+ 	        	var errMsg = "Error checking App icon availability for "+ applicationKey +" application  \n" ;    
+ 	            log.error(errMsg);
+ 	        }
+        }
+    } else {
+        throw new Error("No action specified");
+    }
+    
+}());
+%>

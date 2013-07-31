@@ -1,0 +1,58 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+var log = new Log();
+
+var registry = new MetadataStore(getProperty(ADMIN_USERNAME), getProperty(ADMIN_PASSWORD));
+
+
+//application icon resource read from registry
+var loadAppIcon = function (applicationKey) {
+	 try{
+	  	var serverUrl = getProperty(APPFACTORY_SERVER_URL);
+	  	var carbon = require('carbon');
+	  	var registryOsgi = new carbon.registry.Registry(serverUrl, {
+	  	   username: getProperty(ADMIN_USERNAME),
+	  	   password: getProperty(ADMIN_PASSWORD)
+	  	});
+	  	var path = "/_system/governance/repository/appicon/icon_"+ applicationKey ;
+	  	var res = registryOsgi.get(path);
+	  	return res;
+  	
+	  } catch (e) {
+		  var errMsg = "Error  while loading the icon for "+ applicationKey +" application  \n" ;
+        log.error( errMsg );
+        throw errMsg;
+	  }
+};
+
+
+var getResource = function (path) {
+    jagg.module("permission").checkUserAuthenticated();
+    try {
+        return registry.get(path);
+    } catch (e) {
+        log.error("Error while retrieving registry resource \n" + path);
+        throw "Error while retrieving registry resource";
+    }
+};
+
+// checks whether any resource exists in the given path
+var resourceExists = function (path) {
+    jagg.module("permission").checkUserAuthenticated();
+    try {
+        if (registry.resourceExists(path)) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (e) {
+        log.error("Error while accessing registry resource \n" + e.message);
+        return false;
+    }
+};
+
+
+%>

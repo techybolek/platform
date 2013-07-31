@@ -1,0 +1,845 @@
+<% jagg.template("configureenvironment/environments/list", function(inputs, outputs, jagg) { %>
+<%
+    var applicationName = request.getParameter("applicationName");
+    var applicationKey = request.getParameter("applicationKey");
+    var hasConfigureDbAdministrationPermission= outputs.hasConfigureDbAdministrationPermission;
+    var hasConfigureAPIManagerPermission= outputs.hasConfigureAPIManagerPermission;
+    var hasConfigureResourcePermission= outputs.hasConfigureResourcePermission;
+    var hasDataSourceCreatePermission= outputs.hasDataSourceCreatePermission;
+    var hasDataSourceModifyPermission= outputs.hasDataSourceModifyPermission;
+    //var datasources = outputs.datasources;
+    var log = new Log();
+    if(log.isDebugEnabled()){
+         log.debug("hasDataSourceModifyPermission: " + hasDataSourceModifyPermission);
+         log.debug("hasDataSourceCreatePermission: " + hasDataSourceCreatePermission);
+     }
+    
+    var apiManagerStoreUrl = getProperty(API_MANAGER_STORE_URL);
+    var apiManagerServerUrl = getProperty(API_MANAGER_SERVER_URL);
+    
+    var hasCreatePermission = jagg.module("permission").isUserAccessGranted(inputs.applicationKey, PERMISSION_DATASOURCE_CREATE);
+%>
+
+<input type="hidden" name="userName"  id="userName" value='<%= session.get("LOGGED_IN_USER") %>'/>
+
+<script type="text/javascript">
+ 
+//[cdata[
+function isAppOwner(userName) {
+    jagg.post("../blocks/application/get/ajax/list.jag", {
+                action:"isAppOwner",
+                applicationKey:$("#applicationKey").val(),
+                userName:userName
+            },
+            function (result) {
+                userPermitted=result;
+                if(userPermitted=='true'){
+                	var $elm = $('<a class="btn main" href="<%=apiManagerStoreUrl%>" target="_blank">Subscribe to APIs</a>').click(function(){addApi('<%=applicationKey%>')});
+                    $('#subcscribe_btn_container').append($elm);
+                    //attr('onclick', "addApi('<%=applicationKey%>')");
+                }else{
+                }
+            },
+            function (jqXHR, textStatus, errorThrown) {
+                //add the error label in the grid
+
+            });
+}
+
+function showUneditableMsg(name){
+    jagg.message({
+        content: 'Resource ' + name + ' is an uneditable resource',
+        type: 'warning'
+    });
+}
+
+function drawPropertiesTable() {
+    jagg.post("../blocks/resources/get/ajax/get.jag", {
+        action: "getAllDependencies",
+        applicationKey: $("#applicationKey").val()
+    },
+
+    function (response) {
+
+        if (response !== undefined) {
+
+            response = jQuery.parseJSON(response);
+            var hasData=false;
+            for(var tmpStage in response){
+                if(response[tmpStage].dependencies.length>0){
+                    hasData=true;
+                    break;
+                }
+            }
+
+            var tableHeading='<li class="list_row_item first_list_row_item">'+
+                               '<ul class="list_row first_list_row">'+
+                               '<li class="list_col first_list_col resources_endregname_col">'+
+                                 '<h2 class="list_col_heading">Name & Version</h2>'+
+                            '</li>'/*+
+                            '<li class="list_col resources_endregdescription_col">'+
+                               '<h2 class="list_col_heading">Description</h2>'+
+                            '</li>'+
+                            '<li class="list_col last_list_col resources_endregyype_col">'+
+                                '<h2 class="list_col_heading">Type</h2>'+
+                            '</li>'*/+
+                            '</ul>'+
+                            '</li>';
+            if(hasData){
+            var tableModel = {};
+
+            for (var stageIndex in response) {
+                var stage = response[stageIndex];
+                var propertyList = stage.dependencies;
+                for (var propIndex in propertyList) {
+                    var property = propertyList[propIndex];
+                    var tableRowModel = tableModel[property.name] || (tableRowModel = {});
+                    tableRowModel.description = property.description;
+                    tableRowModel.mediaType = property.mediaType;
+                    var valuesMap = tableRowModel.values || (valuesMap = {});
+                    valuesMap[stageIndex] = property.value;
+                    tableRowModel.values = valuesMap;
+
+                    tableModel[property.name] = tableRowModel;
+                }
+            }
+            //console.log(tableModel);
+
+            var dom = tableHeading;
+
+            var url = "#";
+
+            for (var name in tableModel) {
+                var row = tableModel[name];
+
+                var values = row.values;
+                var mediaType = row.mediaType;
+                var displayMediaType = "Registry" ;
+
+                if(mediaType == "application/vnd.wso2.endpoint"){
+                    displayMediaType = "Endpoint"
+                }
+
+                url = "<%=jagg.getAbsoluteUrl("/site/pages/resources-add.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey %>&pagePath=configureenvironment&isEdit=true&resourceName=" +name ;
+
+
+                var htmlTag = "";
+
+                if(name == "consumersecret" || name == "consumerkey" || name == "key"){
+                    htmlTag  = '<li><a href="#" onclick="showUneditableMsg(\''+name+'\')">'+name+'</a></li>';
+                }
+                else{
+                    htmlTag  = '<li><a href="' +url +'">'+name+'</a></li>';
+                }
+
+                dom+='<li class="list_row_item  ">'+
+                            '<ul class="list_row  ">'+
+                                '<li class="list_col first_list_col resources_endregname_col">'+
+                                    '<div class="list_col_content">'+
+                                        '<ul class="list">'+
+                                            htmlTag +
+                                         '</ul>'+
+                                    '</div>'+
+                                '</li>'+
+                                '<li class="list_col resources_endregdescription_col">'+
+                                    '<div class="list_col_content">'+
+                                      row.description +
+                                    '</div>'+
+                                '</li>'+
+                                '<li class="list_col last_list_col resources_endregyype_col">'+
+                                    '<div class="list_col_content">'+
+                                        '<span class="prime">' + displayMediaType + '</span>'+
+                                    '</div>'+
+                                '</li>'+
+                            '</ul>'+
+                      ' </li>'
+            }
+
+            if (dom !== "") {
+                $("#propertiesSection").html($("#propertiesSection").html()+dom);
+
+            } else {
+                //$("#propertiesSection").html('');
+            }
+        }else {
+                $("#propertiesSection").html('<div class="noData-message">Registries or End points have not been created yet.</div>');
+        }
+        }
+    },
+
+    function (jqXHR, textStatus, errorThrown) {
+	hideSpin();
+        $("#propertiesTableReplaceWarning").html("Error occurred while reading endpoints").fadeIn();
+        $("#propertiesTable").hide();
+
+    });
+
+}
+
+function hideSpin(){
+	$('div#configlist> span.icon-spinner').remove();
+}
+
+function drawDatasourceTable() {
+
+    jagg.post("../blocks/datasource/get/ajax/list.jag", {
+        action: "getDatasources",
+        applicationKey: $("#applicationKey").val()
+    }, function (result) {
+        if (result !== undefined) {
+            var datasources = jQuery.parseJSON(result);
+            var hasData=false;
+            var firstLine = "";
+            var tableHeading = "";
+            var datasourceDom = "";
+            var tableFooter = "";
+            var shown = false;
+            var isData = false;
+            if(datasources == null){
+            	$("#dssSection").html('<li class="list_row_item first_list_row_item">Error occurred while reading datasource.</li>');
+            	return;
+            }
+            <% if(hasDataSourceModifyPermission){ %>
+            firstLine =  '<ul class="list_table push_top_20">' ;
+            tableHeading = '<li class="list_row_item first_list_row_item" id="ds_view">' +
+					'<ul class="list_row first_list_row">' +
+						'<li class="list_col first_list_col resources_bdname_col">' +
+							'<h2 class="list_col_heading">Name</h2>' +
+						'</li>' +
+						'<li class="list_col resources_dbdescription_col">' +
+							'<h2 class="list_col_heading">Description</h2>' +
+						'</li>' +
+						'<li class="list_col last_list_col resources_dbprovider_col">' +
+							'<h2 class="list_col_heading">Provider</h2>' +
+						'</li>' +
+					'</ul>' +
+			   '</li>';
+            <% }%> 
+            tableFooter = '<li class="list_row_item no_bottom_border">' +
+		            '<ul class="list_row">' +		
+		            <% if(hasDataSourceCreatePermission){ %>
+			            '<li class="list_col first_list_col resources_bdname_col">' +
+			                 '<div class="list_col_content">' + 			                 
+			                 <% var disableTxt = "";
+			         			if(!hasCreatePermission){
+			         				disableTxt= 'disabled="disabled"';
+			         			}			         		
+			         		 %>			                 
+			                    '<a href="<%=jagg.getAbsoluteUrl("/site/pages/dbadministration.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>" class="btn main" <%=disableTxt%>>Create Datasource</a>' + 
+			                '</div>' +
+			            '</li>' +
+			            <% } %>
+			            '<li class="list_col resources_dbdescription_col">' +
+			                 '<div class="list_col_content">' +
+			                 '</div>' +
+			            '</li>' +
+			            '<li class="list_col last_list_col resources_dbprovider_col">' +
+			                 '<div class="list_col_content">' +
+			                 '</div>' +
+			            '</li>' +
+			        '</ul>' +
+			   '</li>' +
+			'</ul>' ;
+			
+            <% if(hasDataSourceModifyPermission){ %>
+            for(var stageName in datasources){
+                if(!shown){
+                    shown = true;
+                    if(datasources[stageName] != "" || datasources[stageName]!= null){
+                    	if(datasources[stageName].length != 0){
+                    		isData = true;
+                    	}
+                        for(var i=0; i< datasources[stageName].length; i++){
+                            var ds=datasources[stageName][i];
+                            if(ds.name!=null){
+                                datasourceDom += '<li class="list_row_item">' +
+                                    '<ul class="list_row">' +
+                                        '<li class="list_col first_list_col resources_bdname_col">' + 
+                                            '<div class="list_col_content">' +
+                                                '<ul class="list">' +
+                                                   '<li><a href="<%=jagg.getAbsoluteUrl("/site/pages/editdatasource.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&dsName=' + ds.name + '">' + ds.name + '</a></li>' +
+                                                '</ul>' + 
+                                            '</div>' +
+                                        '</li>' +
+                                        '<li class="list_col resources_dbdescription_col">' +
+                                            '<div class="list_col_content">' + ds.description + '</div>' +
+                                        '</li>' +
+                                        '<li class="list_col last_list_col resources_dbprovider_col">' +
+                                            '<div class="list_col_content">' +
+                                                '<span class="prime upper">' + ds.type + '</span>' +
+                                            '</div>' +
+                                        '</li>' +
+                                    '</ul>' +
+                               '</li>' ;
+                            }
+                        }
+                    }
+                }
+            }
+            <% }%> 
+            hideSpin();
+            if(isData){            	
+                $("#dssSection").html(firstLine + tableHeading + datasourceDom + tableFooter);
+            } else {
+                $("#dssSection").html(firstLine + '<div class="noData-message">Datasources have not been created yet.</div>' + tableFooter);
+            }
+        }
+    },
+
+    function (jqXHR, textStatus, errorThrown) {
+    });
+
+}
+
+function drawDatabasesTable() {
+
+    jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
+        action: "getDbUserTemplateInfoForStages",
+        applicationKey: $("#applicationKey").val()
+    }, function (result) {
+
+        if (result !== undefined) {
+
+            var parsedArray = jQuery.parseJSON(result);
+            var hasData=false;
+
+            for(var j in parsedArray){
+                if(parsedArray[j].dbs.length>0){
+                    hasData=true;
+                    break;
+                }
+            }
+            var tableHeadings=   '<li class="list_row_item first_list_row_item">'+
+                    '<ul class="list_row first_list_row">'+
+                    '<li class="list_col first_list_col resources_environment_col" style="width: 8.3%;">'+
+                    '<h2 class="list_col_heading">Environment</h2>'+
+                    '</li>'+
+                    '<li class="list_col resources_databases_col">'+
+                    '<h2 class="list_col_heading">Databases</h2>'+
+                    '</li>'+
+                    /*'<li class="list_col last_list_col resources_db_users_col">'+
+                    '<h2 class="list_col_heading">DB Users</h2>'+
+                    '</li>'+
+                    '<li class="list_col last_list_col resources_db_permission_col">'+
+                    '<h2 class="list_col_heading">DB Permission Templates</h2>'+
+                    '</li>'+*/
+                    '</ul>'+
+                    '</li>';
+
+            if (hasData) {
+
+                var domRSStbl = tableHeadings;
+
+                for (var index in parsedArray) {
+                    var instance = parsedArray[index];
+
+		    var dbsli = '';
+                     if(instance.dbs != null) {
+                        for(var i = 0; i < instance.dbs.length; i++) {
+                            var db = instance.dbs[i];
+			    var dbsUrl = '<%=jagg.getAbsoluteUrl("/site/pages/editdatabase.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&dbName='+db.dbName+'&environment='+instance.stage;
+			    dbsli += '<li><a href="'+dbsUrl+'">'+db.dbName+'</a></li>';
+
+
+                        }
+                    }
+		   /* var usersli='';
+                    if(instance.users != null) {
+                        for(var i = 0; i < instance.users.length; i++) {
+                            var username = instance.users[i].name;                   
+			    var dbUserUrl = '<%=jagg.getAbsoluteUrl("/site/pages/createdbuser.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&isDefaultMode=true&isEdit=true&user='+username+'&environment='+instance.stage;
+			    usersli += '<li><a href="'+dbUserUrl+'">'+username+'</a></li>';			    
+                        }
+                    } 
+
+		    var templateli = '';
+                    if(instance.templates != null) {
+                        for(var i = 0; i < instance.templates.length; i++) {
+                            var template = instance.templates[i].name;
+			    var templateUrl = '<%=jagg.getAbsoluteUrl("/site/pages/createdbtemplate.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&isDefaultMode=true&isEdit=true&templateName='+template;
+ 			    	templateli += '<li><a href="'+templateUrl+'">'+template+'</a></li>';
+                        }
+                    } */
+
+                    domRSStbl += '<li class="list_row_item  ">'+
+                            '<ul class="list_row  ">'+
+                                '<li class="list_col first_list_col resources_environment_col" style="width: 8.3%;">'+
+                                    '<div class="list_col_content">'+
+                                        '<i class="tag">'+instance.stage+'</i>'+
+                                    '</div>'+
+                                '</li>'+
+                                '<li class="list_col resources_databases_col" >'+
+                                    '<div class="list_col_content">'+
+                                        '<ul class="list">'+
+                                            dbsli +
+                                        '</ul>'+
+                                    '</div>'+
+                                '</li>'+
+                               /* '<li class="list_col last_list_col resources_db_users_col">'+
+                                    '<div class="list_col_content">'+
+                                        '<ul class="list">'+
+                                            usersli+
+                                         '</ul>'+
+                                    '</div>'+
+                                '</li>'+
+                                '<li class="list_col last_list_col resources_db_permission_col">'+
+                                    '<div class="list_col_content">'+
+                                        '<ul class="list">'+
+                                           templateli+
+                                         '</ul>'+
+                                    '</div>'+
+                                '</li>'+*/
+                            '</ul>'+
+                       '</li>';
+
+
+                }
+                $("#dbSection").html($("#dbSection").html()+domRSStbl);
+
+            } else {
+                $('#dbSection').html('<div class="noData-message">Databases have not been created yet.</div>');
+                $("#dbTableReplaceInfo").text("No databases found.").fadeIn();
+                $("#dbTable").hide();
+            }
+	    hideSpin();
+        } else {
+            $("#dbTableReplaceInfo").text("No databases found.").fadeIn();
+            $("#dbTable").hide();
+        }
+
+    },
+
+    function (jqXHR, textStatus, errorThrown) {
+        $("#dbTableReplaceWarning").text("Error occurred while reading databases.").fadeIn();
+        $("#dbTable").hide();
+	hideSpin();
+    });
+
+}
+
+function drawAPIsTable() {
+    jagg.post("../blocks/apimanager/get/ajax/get.jag", {
+        action: "getApplicationAPI",
+        applicationKey: $("#applicationKey").val()
+    }, function (result) {
+        var parsedResult,
+            APIList = [],
+            APICount = 0;
+
+        if (result !== undefined) {
+            parsedResult=jQuery.parseJSON(result);
+            APIList = parsedResult.apiInfo;
+            APICount = APIList.length;
+        }
+        
+	   	 var tableBodyHTML = '<li class="list_row_item first_list_row_item">'
+				+'<ul class="list_row first_list_row">'
+					+'<li class="list_col first_list_col resources_apiname_col">'
+						+'<h2 class="list_col_heading">Name & Version</h2>'   
+					+'</li>'
+	             +'<li class="list_col resources_apidescription_col">'
+	             	+'<h2 class="list_col_heading">Description</h2>'   
+	             +'</li>'
+	             +'<li class="list_col last_list_col resources_apiprovider_col">'
+	             	+'<h2 class="list_col_heading">Provider</h2>'    
+	             +'</li>'
+	           +'</ul>'
+	   +'</li>';
+
+        if (APICount > 0) {
+
+            for (var i = (APICount - 1); i >= 0; i--) {
+                var API = APIList[i];
+                tableBodyHTML +='<li class="list_row_item  ">'+
+                            '<ul class="list_row  ">'+
+                                '<li class="list_col first_list_col resources_apiname_col">'+
+                                    '<div class="list_col_content">'+
+                                        '<ul class="list">'+
+                                            '<li><a href="#">' + API.name + '</a></li>'+
+                                            '<li class="small">' + API.version + '</li>'+
+                                        '</ul>'+
+                                    '</div>'+
+                                '</li>'+
+                                '<li class="list_col resources_apidescription_col">'+
+                                    '<div class="list_col_content" id="'+ API.name +'"></div>'+
+                                '</li>'+
+                                '<li class="list_col last_list_col resources_apiprovider_col">'+
+                                    '<div class="list_col_content">'+
+                                        '<span class="prime">' + API.provider + '</span>'+
+                                    '</div>'+
+                                '</li>'+
+                            '</ul>'+
+                       '</li>';
+                
+                addDescription(API.name, API.version, API.provider);
+
+            }
+        	$("#apiSection").html($("#apiSection").html()+tableBodyHTML);
+        }else{
+            $("#apiSection").html('<div class="noData-message">APIs have not been subscribed to yet.</div>');
+
+        }
+
+    }, function (jqXHR, textStatus, errorThrown) {
+        $("#APITableReplaceWarning").text("Error occurred while reading API information").fadeIn();
+        $("#APITable").hide();
+    });
+
+}
+
+function toggleEditMode(editBtn) {
+    var self = $(editBtn);
+    $('.hiddenEditMode', self.parent()).show('fast');
+    self.hide(); //Hide the button
+    self.next().show('fast'); //Show the edit pane
+}
+
+function toggleEditModeWithCancel(cancel) {
+    var hiddenEditFormElement = $(cancel).parent().parent();
+    hiddenEditFormElement.hide(); //Hide the edit plane
+    hiddenEditFormElement.prev().show(); //Show the edit button
+}
+
+function saveMyDataSource(button) {
+
+    var self = $(button);
+
+    var hiddenEditFormElement = self.parent().parent();
+
+    var newURL = $('.newURL', hiddenEditFormElement).val();
+    var username = $('.username', hiddenEditFormElement).val();
+    var password = $('.password', hiddenEditFormElement).val();
+    var datasourceName = $('.datasourceName', hiddenEditFormElement).val();
+    var driverName = $('.driverName', hiddenEditFormElement).val();
+    var stage = $('.stage', hiddenEditFormElement).val();
+    var description = $('.description', hiddenEditFormElement).val();
+
+    var applicationKey = $('#applicationKey').val();
+
+    jagg.syncPost("../blocks/datasource/add/ajax/add.jag", {
+        action: "editDatasource",
+        applicationKey: applicationKey,
+        datasourceName: datasourceName,
+        datasourceDescription: description,
+        stage: stage,
+        url: newURL,
+        driverName: driverName,
+        dbUsername: username,
+        dbPassword: password
+    },
+
+    function (result) {
+        if (result !== undefined) {
+
+            //hiddenEditFormElement.prev().prev().val(newURL); //Setting the old url value to new one
+            //Now save the dam thing
+            hiddenEditFormElement.hide(); //Hiding the edit pane
+            hiddenEditFormElement.prev().show(); //Show the edit button
+            jagg.message({
+                content: 'Datasource has been updated.',
+                type: 'info'
+            });
+            hiddenEditFormElement.prev().prev().html(newURL);
+        } else {
+            jagg.message({
+                content: 'Error occurred while updating datasource.',
+                type: 'error'
+            });
+        }
+    },
+
+    function (jqXHR, textStatus, errorThrown) {
+        jagg.message({
+            content: 'Error occurred while creating datasource',
+            type: 'error'
+        });
+    });
+
+}
+
+
+function getAppOnwer() {
+    jagg.post("../blocks/application/users/get/ajax/list.jag", {
+        action:"getAppOwner",
+        applicationKey:$("#applicationKey").val(),
+    },
+    function (result) {
+    	var appOwnerId = result;
+        if($("#userName").val() == appOwnerId ){
+        	drawAPIsTable();
+        }else{
+        	getAPIsOfAppOwnerApp(appOwnerId);
+        }
+    },
+    function (jqXHR, textStatus, errorThrown) {
+    //add the error label in the grid
+    });
+}
+
+$(document).ready(function(){
+    var un=$('#loggeduserName').val();
+    isAppOwner(un);
+    drawDatabasesTable();
+    getAppOnwer();
+    drawPropertiesTable();
+    drawDatasourceTable();
+
+});
+
+
+function getAPIsOfAppOwnerApp(appOwnerId) {
+    jagg.post("../blocks/apimanager/get/ajax/get.jag", {
+        action:"getAPIsOfAppOwnerApp",
+        applicationKey:$("#applicationKey").val(),
+        appOwnerId:appOwnerId
+    },
+    function (result) {
+    	parsedResult=jQuery.parseJSON(result);
+		if(parsedResult.length == 0){
+            $("#apiSection").html("<div class='noData-message'>APIs have not been subscribed to yet.</div>");
+        }
+
+    	 var tableBodyHTML = '<li class="list_row_item first_list_row_item">'
+				+'<ul class="list_row first_list_row">'
+					+'<li class="list_col first_list_col resources_apiname_col">'
+						+'<h2 class="list_col_heading">Name & Version</h2>'   
+					+'</li>'
+	                +'<li class="list_col resources_apidescription_col">'
+	                	+'<h2 class="list_col_heading">Description</h2>'   
+	                +'</li>'
+	                +'<li class="list_col resources_apidescription_col">'
+	                	+'<h2 class="list_col_heading">Endpoints</h2>'   
+	                +'</li>'
+	                +'<li class="list_col last_list_col resources_apiprovider_col">'
+	                	+'<h2 class="list_col_heading">Provider</h2>'    
+	                +'</li>'
+	              +'</ul>'
+          +'</li>';
+    	
+    	for(var i=0; i < parsedResult.length;i++){
+    		var x = parsedResult[i].apiInfo;
+    		for(var j=0; j < x.length;j++){
+        		var API = x[j];
+        		var endpointUrl = ' <%=apiManagerStoreUrl%>'+'/'+API.name+'/'+API.version;
+            	
+        		 tableBodyHTML +='<li class="list_row_item  ">'+
+                 '<ul class="list_row  ">'+
+                     '<li class="list_col first_list_col resources_apiname_col">'+
+                         '<div class="list_col_content">'+
+                             '<ul class="list">'+
+                                 '<li><a href="#">' + API.name + '</a></li>'+
+                                 '<li class="small">' + API.version + '</li>'+
+                             '</ul>'+
+                         '</div>'+
+                     '</li>'+
+                     '<li class="list_col resources_apidescription_col">'+
+                         '<div class="list_col_content">'+ API.context + '</div>'+
+                     '</li>'+
+                     '<li class="list_col resources_apidescription_col">'+
+                     	'<div class="list_col_content">'+ endpointUrl + '</div>'+
+                     '</li>'+
+                     '<li class="list_col last_list_col resources_apiprovider_col">'+
+                         '<div class="list_col_content">'+
+                             '<span class="prime">' + API.provider + '</span>'+
+                         '</div>'+
+                     '</li>'+
+                 '</ul>'+
+            '</li>';
+     
+        	}
+    	}
+
+    	$("#apiSection").html($("#apiSection").html()+tableBodyHTML);
+    
+    },
+    function (jqXHR, textStatus, errorThrown) {
+    	 $("#APITableReplaceWarning").text("Error occurred while reading API information").fadeIn();
+         $("#APITable").hide();
+    });
+}
+
+function addDescription(apiName, apiVersion, apiProvider){
+	jagg.post("../blocks/apimanager/get/ajax/get.jag", {
+    action:"getAPI",
+	apiName:apiName,
+	apiVersion:apiVersion,
+	apiProvider:apiProvider
+	},
+	 function (result) {
+        var parsedResult = jQuery.parseJSON(result);
+        var apiInfo = jQuery.parseJSON(parsedResult.apiInfo[0]);
+        $('#'+apiName).text(apiInfo.context);
+       
+    },
+    function (jqXHR, textStatus, errorThrown) {
+    });
+}
+
+function addApi(applicationKey) {
+    jagg.post("../blocks/apimanager/add/ajax/add.jag", {
+        action:"createApplication",
+        applicationKey:applicationKey
+    });
+}
+
+//]]
+</script>
+
+<script>
+/*
+These are not in use for the time being. drawRSSInstancesOptions() was created having isolated
+an AJAX call related functionality which has been written directly in the dom.ready function.
+Delete these if unneccessary.
+
+function tabShowHide(obj) {
+    var toShow = $(obj).attr('data-value');
+    $('.tag-content').hide();
+    $('#' + toShow).show();
+}
+
+function drawRSSInstancesOptions() {
+    jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
+        action: "getRSSinstances",
+        applicationKey: $("#applicationKey").attr('value')
+    },function (result) {
+        if (result != undefined) {
+            var parsedArray = jQuery.parseJSON(result);
+            if (parsedArray.length > 0) {
+                var domRss = "";
+                for (var i = 0; i < parsedArray.length; i++) {
+                    domRss += '<option>' + parsedArray[i].name + '</option>';
+                }
+                $("#rssInstances").append(domRss);
+            } else {
+            }
+        } else {
+        }
+    },
+    function (jqXHR, textStatus, errorThrown) {
+        jagg.message({
+            content: 'Error occurred while reading rssInstances',
+            type: 'error'
+        });
+    });
+}
+*/
+</script>
+
+<input type="hidden" name="applicationKey" id="applicationKey" value="<%=applicationKey%>"/>
+<input type="hidden" name="userName" id="userName" value="<%=userName%>"/>
+
+<div class="container">
+    <article class="main">
+            
+            <header><div><% jagg.includeBlock("page/messages", null); %></div>
+                <div class="content">
+                    <h1>Resources</h1>
+                 </div>
+            </header>
+
+            <% jagg.includeBlock("resources/menu", {page:'overview',applicationName:applicationName,applicationKey:applicationKey}); %>
+            <section class="separator">
+                <div class="content clear well" >
+                    <h2 class="next_page"><a href="<%=jagg.getAbsoluteUrl("/site/pages/listdatabases.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>">Database Configurations <span class="icon-circle-arrow-right"></span></a></h2>
+
+                    <ul class="list_table push_top_20" id="dbSection" >
+
+                     </ul>
+					<div align="center" id="configlist" style="margin-top: 10px;">
+						<span class="icon-spinner icon-spin icon-large"></span>
+					</div>
+                     <ul class="list_table push_top_20">
+                        <li class="list_row_item no_bottom_border">
+                            <ul class="list_row  ">
+                                <!--<li class="list_col first_list_col resources_environment_col">
+                                     <div class="list_col_content">
+
+                                    </div>
+                                </li>-->
+                                <li class="list_col resources_databases_col" style="width: 8.3%;">
+                                     <div class="list_col_content">
+                                        <a href="javascript:location.href='<%=jagg.getAbsoluteUrl("/site/pages/newdatabase.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&isDefaultMode=true'" class="btn main">Create Database</a>
+                                    </div>
+                                </li>
+                                <li class="list_col last_list_col resources_db_users_col" style="width: 8.3%;">
+                                     <div class="list_col_content">
+                                        <a href="javascript:location.href='<%=jagg.getAbsoluteUrl("/site/pages/createdbuser.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&isDefaultMode=true'" class="btn main">Create DB User</a>
+                                    </div>
+                                </li>
+                                <li class="list_col last_list_col resources_db_permission_col" style="width: 8.3%;">
+                                     <div class="list_col_content">
+                                        <a href="javascript:location.href='<%=jagg.getAbsoluteUrl("/site/pages/createdbtemplate.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&isDefaultMode=true'" class="btn main">Create Template</a>
+                                    </div>
+                                </li>
+                            </ul>
+                       </li>
+                    </ul>
+                </div>
+            </section>
+            <section class="separator">
+                <div class="content clear well">
+                    <h2 class="next_page"><a href="<%=jagg.getAbsoluteUrl("/site/pages/listDatasources.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>">Datasources <span class="icon-circle-arrow-right"></span></a></h2>
+                    	<div id="dssSection"></div>
+                </div>
+            </section>
+            <div class="clearfix"></div>
+            <section class="separator">
+                <div class="content clear well">
+                    <h2 class="next_page"><a href="<%=jagg.getAbsoluteUrl("/site/pages/apimanager.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>">APIs <span class="icon-circle-arrow-right"></span></a></h2>
+
+                    <ul class="list_table push_top_20" id="apiSection"></ul>
+                    <ul class="list_table push_top_20" >
+                        <li class="list_row_item no_bottom_border">
+                            <ul class="list_row">
+                                <li class="list_col first_list_col resources_apiname_col">
+                                     <div id="subcscribe_btn_container"class="list_col_content"></div>
+                                </li>
+                                <li class="list_col resources_apidescription_col">
+                                     <div class="list_col_content">
+                                     </div>
+                                </li>
+                                <li class="list_col last_list_col resources_apiprovider_col">
+                                     <div class="list_col_content">
+                                     </div>
+                                </li>
+                            </ul>
+                       </li>
+                    </ul>
+                </div>
+            </section>
+            <div class="clearfix"></div>
+            <section class="separator">
+                <div class="content clear well">
+                    <h2 class="next_page"><a href="<%=jagg.getAbsoluteUrl("/site/pages/resources.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>">Endpoints & Registry <span class="icon-circle-arrow-right"></span></a></h2>
+
+                    <ul class="list_table push_top_20" id="propertiesSection" >
+
+
+                        </ul>
+                    <ul class="list_table push_top_20">
+                        <li class="list_row_item no_bottom_border">
+                            <ul class="list_row">
+                                <li class="list_col first_list_col resources_endregname_col">
+                                     <div class="list_col_content">
+                                         <a class="btn main" href="<%=jagg.getAbsoluteUrl("/site/pages/resources-add.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>&pagePath=configureenvironment">Add Properties</a>
+                                    </div>
+                                </li>
+                                <li class="list_col resources_endregdescription_col">
+                                     <div class="list_col_content">
+                                     </div>
+                                </li>
+                                <li class="list_col last_list_col resources_endregyype_col">
+                                     <div class="list_col_content">
+                                     </div>
+                                </li>
+                            </ul>
+                       </li>
+                    </ul>
+                </div>
+            </section>
+            <div class="clearfix"></div>
+    </article>
+    <input type="hidden" name="userName"  id="loggeduserName" value='<%= session.get("LOGGED_IN_USER") %>'/>
+</div><!-- /container -->
+
+<% }); %>

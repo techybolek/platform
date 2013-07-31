@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:sample="http://wso2.org/bps/sample" xmlns:services.core.appfactory.carbon.wso2.org="http://services.core.appfactory.carbon.wso2.org" xmlns:services.mgt.tenant.appfactory.carbon.wso2.org="http://services.mgt.tenant.appfactory.carbon.wso2.org" xmlns:services.mgt.tenant.carbon.wso2.org="http://services.mgt.tenant.carbon.wso2.org">
+  <process name="sample:CreateTenant">
+    <active>true</active>
+    <retired>false</retired>
+    <process-events generate="all"/>
+    <provide partnerLink="client">
+      <service name="sample:CreateTenant" port="CreateTenantPort"/>
+    </provide>
+    <invoke partnerLink="TenantMgtAdminServicePL">
+      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
+        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/TenantMgtService.epr" />
+      </service>
+    </invoke>
+    <invoke partnerLink="AppFactoryTenantToolInitializerServicePL">
+      <service name="services.core.appfactory.carbon.wso2.org:AppFactoryTenantToolInitializerService" port="AppFactoryTenantToolInitializerServiceHttpsSoap12Endpoint">
+        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/AppFactoryTenantToolInitializerService.epr" />
+      </service>
+    </invoke>
+    <invoke partnerLink="AppFactoryTenantMgtAdminServicePL">
+      <service name="services.mgt.tenant.appfactory.carbon.wso2.org:AppFactoryTenantMgtAdminService" port="AppFactoryTenantMgtAdminServiceHttpsSoap12Endpoint">
+         <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/AppFactoryTenantMgtAdminService.epr" />
+      </service>
+    </invoke>
+  </process>
+</deploy>

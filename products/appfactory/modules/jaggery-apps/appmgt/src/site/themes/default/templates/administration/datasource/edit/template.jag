@@ -1,0 +1,620 @@
+<% jagg.template("administration/datasource/edit", function(inputs, outputs, jagg) { %>
+<%
+var applicationName = request.getParameter("applicationName");
+var applicationKey = request.getParameter("applicationKey");
+var dataSource = outputs.dataSource;
+var permission = outputs.permission;
+
+var stages = getProperties('ApplicationDeployment.DeploymentStage');
+
+%>
+
+<script type="text/javascript">
+    //[cdata[
+
+	var dsdescoriginal;
+
+    var uiStages = new Array();
+    var editedValues;
+    var firstPermissionStage = "None";
+
+    <% if(permission.hasDevPermission){ %>
+    uiStages.push("Development");
+    if(firstPermissionStage == "None"){
+        firstPermissionStage = "Development";
+    }
+    <% } %>
+
+    <% if(permission.hasTestingPermission){ %>
+    uiStages.push("Testing");
+    if(firstPermissionStage == "None"){
+        firstPermissionStage = "Testing";
+    }
+    <% } %>
+
+    <% if(permission.hasStagingPermission){ %>
+    uiStages.push("Staging");
+    if(firstPermissionStage == "None"){
+        firstPermissionStage = "Staging";
+    }
+    <% } %>
+
+    <% if(permission.hasProductionPermission){ %>
+    uiStages.push("Production");
+    if(firstPermissionStage == "None"){
+        firstPermissionStage = "Production";
+    }
+    <% } %>
+
+	// get global dbname, rssname, url of edit datasource
+	var g_dbname="";
+	var g_rssname="";
+	var g_url="";
+
+    function updateUIForStage() {
+	 	drawDatabaseURLsList();
+        var stage = $("#stage").val();
+        var url = editedValues.stageInfo[stage].url;
+
+        editedValues = jQuery.parseJSON('<%= stringify(dataSource) %>');
+
+        //$("#database_driver").val(editedValues.stageInfo[stage].driver);
+        $("#database_driver" ).select2("val", editedValues.stageInfo[stage].driver);
+        $("#datasource_url_text").val(editedValues.stageInfo[stage].url);
+        $("#datasource_description").val(editedValues.stageInfo[stage].desc);
+
+        var valuesElements = $("#datasource_url_select>option").map(function () {
+            return $(this);
+        });
+        var isFound = false;
+        var selectedElement;
+        for (var j=0; j < valuesElements.length; j++) {
+
+            if (url != "" && valuesElements[j].val() == url) {
+                isFound = true;
+                selectedElement = valuesElements[j];
+                break;
+            }
+        }
+        if (!isFound) {
+            $("#datasource_url_text" ).show();
+            $("#datasource_url_select" ).select2("val", "Custom");
+            $("#datasource_username_text" ).show();
+            $("#datasource_username_div").hide();
+            $("#datasource_username_text").val(editedValues.stageInfo[stage].username);
+        } else {
+            $("#datasource_url_select" ).select2("val", url);
+            dbUrlSelected(selectedElement.attr("data-dbname"), selectedElement.attr("data-rssname"), url);
+            $("#datasource_url_text" ).hide();
+            $("#datasource_username_text").hide();
+            $("#datasource_username_div").show();
+        }
+
+        $("#datasource_password").val(editedValues.stageInfo[stage].password);
+
+    }
+
+
+    function changeDriver(){
+        $("#datasource_username_text" ).show();
+        $("#datasource_username_div").hide();
+        $("#datasource_username_text").val(editedValues.stageInfo[stage].username);
+        $("#datasource_password").val(editedValues.stageInfo[stage].password);
+
+    }
+
+
+    function dbCustomUrlSelected() {
+
+        $("#datasource_url_text").show().val("");
+        $("#datasource_username_text").show().val("");
+        $("#datasource_username_div").hide();
+    }
+
+    function bindDatabaseURLListChangeEvent() {
+
+	        $("#datasource_url_select").bind("change", function () {
+	            var selectedOption = $(this).find(":selected");
+	            var selectedValue = selectedOption.val();
+
+	            if (selectedValue === 'Custom') {
+	                dbCustomUrlSelected();
+
+	            } else {
+	                var selectedDBName = selectedOption.attr('data-dbname');
+	                var selectedRSSInstanceName = selectedOption.attr('data-rssname');
+
+	                dbUrlSelected(selectedDBName, selectedRSSInstanceName, selectedValue);
+	            }
+	        });
+
+    }
+
+    function drawDatabaseURLsList() {
+
+        var stage = $("#stage").attr('value');
+
+        jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
+            action: "getDatabasesForStage",
+            applicationKey: "<%= applicationKey %>",
+            stage: stage
+        },
+
+        function (result) {
+            if (result !== undefined) {
+
+                var parsedArray = jQuery.parseJSON(result);
+                var dom = "";
+                var domWithURLs = ""
+                var isCustomURL = true;
+
+                var loopCount = parsedArray.length;
+                var selectedVal = "";
+
+
+                editedValues = jQuery.parseJSON('<%= stringify(dataSource) %>');
+                var existingURL = editedValues.stageInfo[stage].url;
+
+                for (var i = 0; i < loopCount; i++) {
+                    var element = parsedArray[i];
+
+                    dom += '<option data-dbname="' + element.name + '"data-rssname="' + element.rssInstanceName + '" value="' + element.url + '">' + element.url + '</option>';
+
+                    if(element.url == existingURL){
+                        // if this never reached, then the url is a custom one
+                        isCustomURL = false;
+                    }
+                }				
+
+                if(!isCustomURL) {
+                    dom += '<option value="Custom">Custom Database</option>';
+                    dbUrlSelected(element.name, element.rssInstanceName, element.url);
+
+                }
+                else {
+                    dom += '<option index=0 value="Custom" selected="selected">Custom Database</option>';
+                    dbCustomUrlSelected(stage);
+                }
+
+
+                if (loopCount !== 0) {
+                    bindDatabaseURLListChangeEvent();
+                }
+                
+                $('#datasource_url_select').empty();
+ 
+                $("#datasource_url_select").append(dom);
+                $("#datasource_url_select" ).select2("val", "Custom");
+		
+
+            } else {
+                dbCustomUrlSelected(stage);
+            }
+            setEditValues();
+        },
+
+        function (jqXHR, textStatus, errorThrown) {
+            dbCustomUrlSelected(stage);
+            setEditValues();
+        });
+    }
+
+    function setPageStatus() {
+        if ($('#useSameDataSource').attr('checked') == "checked") {
+            $('.dataSource-section').hide();
+            $($('.dataSource-section')[0]).show();
+        } else {
+            $('.dataSource-section').hide();
+            $($('.dataSource-section')[0]).show();
+        }
+    }
+
+    function updateDataSource() {
+    	var varDsName = $("#datasource_name").val();
+    	var varDsDesc = $("#datasource_description").val();
+
+    	var varUrl = $("#datasource_url_text").val();
+        var varDriverName = $("#database_driver").val();
+        var varDbUsername = $("#datasource_username_text").val();
+        var varDbPassword = $("#datasource_password").val();
+
+        var stage = $("#stage").attr('value');
+
+        if(editedValues.stageInfo[stage].isEmpty == undefined){
+        	var action = "editDatasource";
+        }else{
+        	var action = "addDataSource";
+        }
+        
+        if(dsdescoriginal == varDsDesc){
+        	update(varDsName, varDsDesc, stage, varUrl, varDriverName, varDbUsername, varDbPassword, action);
+        }
+        else{
+        	var stagesValue = $("[name='stages']").val();
+            var stages = jQuery.parseJSON(stagesValue);
+            for (var i = 0; i < stages.length; i++) {
+            	var stage = stages[i];
+            	var varUrl = editedValues.stageInfo[stage].url;
+            	var varDriverName = editedValues.stageInfo[stage].driver;
+            	var varDbUsername = editedValues.stageInfo[stage].username;
+            	var varDbPassword = editedValues.stageInfo[stage].password;
+            	update(varDsName, varDsDesc, stage, varUrl, varDriverName, varDbUsername, varDbPassword, action);
+            }
+        }
+
+    }
+
+    function update(varDsName, varDsDesc, varStage, varUrl, varDriverName, varDbUsername, varDbPassword, action){
+
+    	 jagg.syncPost("../blocks/datasource/add/ajax/add.jag", {
+             action: action,
+             applicationKey: $("#applicationKey").val(),
+             datasourceName: varDsName,
+             datasourceDescription: varDsDesc,
+             stage: varStage,
+             url: varUrl,
+             driverName: varDriverName,
+             dbUsername: varDbUsername,
+             dbPassword: varDbPassword
+         },
+
+         function (result) {
+             if (result) {
+                 location.href = 'listDatasources.jag?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>';
+             } else {
+                 jagg.message({
+                     content: 'Error occurred while creating datasource: Datasource already exsist',
+                     type: 'error'
+                 });
+             }
+
+         },
+
+         function (jqXHR, textStatus, errorThrown) {
+             jagg.message({
+                 content: 'Error occurred while creating datasource',
+                 type: 'error'
+             });
+         });
+
+    }
+
+    function dbUrlSelected(databasename, rssinstancename, url) {
+        $("#datasource_url_text").hide();
+        $("#datasource_url_text").val(url);
+
+        $("#datasource_username_text").hide();
+        $("#datasource_username_div").show();
+
+ 
+        jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
+            action: "getAttachedUsers",
+            applicationKey: $("#applicationKey").attr('value'),
+            dbname: databasename,
+            rssInstance: rssinstancename
+        },
+
+        function (result) {
+            if (result != undefined) {
+                var parsedArray = jQuery.parseJSON(result);
+                $("#datasource_username_select").empty();
+                $("#datasource_username_text").val("");
+                var i = 0;
+                for (i = 0; i < parsedArray.length; i++) {
+                    var name = parsedArray[i].name;
+
+                    var row = '<option value="' + name + '">' + name + '</option>';
+                    $("#datasource_username_select").append(row);
+                    if (i == 0) {
+                        userSelected(name);
+                    }
+                }
+
+                if (i == 0) {
+                    $("#no_users_error").show();
+                    $("#datasource_username_div").hide();
+                } else {
+                    $("#no_users_error").hide();
+                    $("#datasource_username_select").select2("val", parsedArray[0].name);
+                }
+            }
+        },
+
+        function (jqXHR, textStatus, errorThrown) {
+           /* jagg.message({
+                content: 'Error loading Users',
+                type: 'error'
+            }); */
+        });
+
+    }
+
+    function userSelected(value) {
+        $("#datasource_username_text").val(value);
+    }
+
+    function validateForm() {
+
+        var errorMsg = "";
+        var datasourceName = $("#datasource_name").val();
+        var uiStage = $("#stage").val();
+
+        if (datasourceName == "") {
+        	errorMsg = "Data Source name cannot be empty";
+        }
+
+        var url = $("#datasource_url_text").val();
+        if (url == "") {
+        	errorMsg += "<br />Invalid Data Source Url - Enter/Select Valid Data Source Url.";
+        }
+
+        var username = $("#datasource_username_text").val();
+        if (username == "") {
+        	errorMsg += "<br />Invalid Username - Enter/Select Valid Username.";
+        }
+
+        var password = $("#datasource_password").val();
+        if (password == "") {
+        	errorMsg += "<br />Invalid Password - Enter Valid Password.";
+        }
+
+        if(errorMsg.length > 0){
+        	jagg.message({
+        		content: errorMsg,
+        		type: 'error'
+        		});
+        	return false;
+        }
+        return true;
+    }
+
+
+    function setEditValues(){
+        var firstPermissionStage = $('#stage').val();
+ 
+        editedValues = jQuery.parseJSON('<%= stringify(dataSource) %>');
+        //$("#database_driver").val(editedValues.stageInfo[firstPermissionStage].driver);
+        $("#database_driver" ).select2("val", editedValues.stageInfo[firstPermissionStage].driver);
+        $("#datasource_url_text").val(editedValues.stageInfo[firstPermissionStage].url);
+        
+        var valuesElements = $("#datasource_url_select>option").map(function () {
+            return $(this);
+        });
+        
+        var isFound = false;
+        var selectedUrlElement;
+        var url = editedValues.stageInfo[firstPermissionStage].url;
+        for (var j=0; j < valuesElements.length; j++) {
+            if (url != "" && valuesElements[j].val() == url) {
+                isFound = true;
+                selectedUrlElement = valuesElements[j];
+                g_dbname=selectedUrlElement.attr("data-dbname");
+                g_rssname=selectedUrlElement.attr("data-rssname");
+                g_url=valuesElements[j].val();
+                break;
+            }
+        }
+        if (!isFound) {
+            $("#datasource_url_text").show();
+            $("#datasource_username_text").show();
+            $("#datasource_username_div").hide();
+        } else {
+            $("#datasource_url_select" ).select2("val", url);
+            dbUrlSelected(selectedUrlElement.attr("data-dbname"), selectedUrlElement.attr("data-rssname"), url);
+            $("#datasource_username_text").hide();
+            $("#datasource_username_div").show();
+        }
+
+        $("#datasource_username_text").val(editedValues.stageInfo[firstPermissionStage].username);
+        $("#datasource_password").val(editedValues.stageInfo[firstPermissionStage].password);
+
+    }
+
+    function deleteDataSource(){
+    	var varDsName = $("#datasource_name").val();
+    	var stagesValue = $("[name='stages']").val();
+        var stages = jQuery.parseJSON(stagesValue);
+        for (var i = 0; i < stages.length; i++) {
+            var varStage = stages[i];
+            jagg.syncPost("../blocks/datasource/add/ajax/add.jag", {
+                action: "deleteDatasource",
+                applicationKey: $("#applicationKey").val(),
+                datasourceName: varDsName,
+                stage: varStage
+            },
+
+            function (result) {
+                if (result) {
+                    location.href = 'listDatasources.jag?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>';
+                } else {
+                    jagg.message({
+                        content: 'Error occurred while deleting datasource.',
+                        type: 'error'
+                    });
+                }
+
+
+            },
+
+            function (jqXHR, textStatus, errorThrown) {
+                jagg.message({
+                    content: 'Error occurred while deleting datasource',
+                    type: 'error'
+                });
+            });
+        }
+
+    }
+
+
+    /** -----------------Document Ready -----------------**/
+    $(document).ready(function () {
+
+    	dsdescoriginal = "<%= dataSource.desc %>";
+    	
+        $("#stage").val(firstPermissionStage);
+        drawDatabaseURLsList();
+        
+        $('#delete_button_div').click(function(event){
+        	jagg.popMessage({type:'confirm',title:'Delete Datasource',content:'Are you sure you want to delete datasource \'<%=dataSource.name%>\'?', okCallback:function(){ deleteDataSource();}, 			cancelCallback:function(){}});
+    	});
+
+    });
+    /** -----------------Document Ready -----------------**/
+
+    //]]
+</script>
+
+
+<div class="container">
+    <article class="main">
+         
+        <header><div> <% jagg.includeBlock("page/messages", null); %></div>
+            <div class="content">
+                <h1>Resources</h1>
+            </div>
+        </header>
+        <% jagg.includeBlock("resources/menu", {page:'datasources',applicationName:applicationName,applicationKey:applicationKey}); %>
+        <section class="separator">
+            <div class="page_nav">
+                <div class="content clear">
+                    <ol class="breadcrumb left">
+                        <li class="breadcrumb_item"><a
+                                href="<%=jagg.getAbsoluteUrl("/site/pages/listDatasources.jag")%>?applicationName=<%=inputs.applicationName%>&applicationKey=<%=inputs.applicationKey%>"
+                                class="breadcrumb_link">Datasources</a></li>
+                        <li class="breadcrumb_item"><h2><%= dataSource.name %></h2></li>
+                    </ol>
+
+                    <div class="right btn_group" id="delete_button_div">
+                        <div class="right btn_list_box">
+							<ul class="inline_box inline_list btn_list">
+								<li class="inline_item"><a id="delete_button_div" href="#" class="btn main btn_list_first">Delete Datasource</a></li>
+							</ul>
+	                        <div class="clearfix"></div>
+	                    </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="content clear well">
+                <div class="form-container">
+
+                    <form action="#" method="post" class="hold right_label" onsubmit="return false;">
+                        <fieldset>
+                            <input type="hidden" name="datasource_name" id="datasource_name"
+                                   value="<%= dataSource.name %>"/>
+
+                            <div class="input_row">
+                            	<label for="datasource_description"><strong>Description</strong></label>
+                            	<textarea name="datasource_description" id="datasource_description" rows="5"
+                            	class="full"><%= dataSource.desc %></textarea>
+                            </div>
+                            
+                            <hr/>
+
+                            <div class="input_row">
+                                <label for="stage"><strong>Stage</strong> <em>*</em></label>
+                                <select class="select_list half big" id="stage" name="stage"
+                                        onchange="drawDatabaseURLsList()">
+                                    <option disabled="disabled" selected value=''>Select Stage</option>
+                                    <%
+
+                                    for (var i = 0; i < stages.length; i++) {
+                                    var stage = stages[i];
+                                    var permissionToStage = false;
+
+                                    permissionToStage = jagg.module("permission").isUserAccessGranted(applicationKey, PERMISSION_DATASOURCE_UPDATE_OF_STAGE+stage);
+
+                                    if(permissionToStage){
+
+                                     %>
+
+                                    <option value=<%=stage%>><%=stage%></option>
+
+                                    <%
+                                        }
+                                    }
+                                    %>
+                                </select>
+                            </div>
+                            
+                            <div class="input_row">
+                                <label for="datasource_url"><strong>Database URL</strong> <em>*</em></label>
+
+                                <div>
+                                    <select class="select_list full big datasource_url" id="datasource_url_select"
+                                            name="datasource_url_select">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="input_row">
+                                <label for="datasource_password"><strong>&nbsp;&nbsp;&nbsp;</strong></label>
+                                <input type="text" id="datasource_url_text" class="half" style="display:none;"/>
+                            </div>
+
+                            <div class="input_row">
+                                <label for="database_driver"><strong>Database Driver</strong> <em>*</em></label>
+                                <select class="select_list half big" id="database_driver"
+                                        name="database_driver" onchange="changeDriver();">
+                                    <option value="com.mysql.jdbc.Driver">mySql</option>
+                                    <!--option value="org.h2.Driver">H2</option-->
+                                </select>
+                            </div>
+
+                            <div class="input_row">
+                                <label for="datasource_username"><strong>Username</strong> <em>*</em></label>
+
+                                <div id="datasource_username_div">
+                                    <select class="select_list half big" id="datasource_username_select"
+                                            onchange="userSelected(this.value, 'dev')"></select>
+                                </div>
+                                <div>
+                                    <label id="no_users_error" generated="true" class="error" style="display:none;">There
+                                        are no attached users for the selected Database. Please attach users to the
+                                        Database.</label>
+                                </div>
+
+                                <div>
+                                    <input type="text" style="display:none;" name="datasource_username_text"
+                                           id="datasource_username_text" class="half"/>
+                                </div>
+                            </div>
+
+                            <div class="input_row">
+                                <label for="datasource_password"><strong>Password</strong> <em>*</em></label>
+                                <input type="password" name="datasource_password" id="datasource_password"
+                                       class="half"/>
+                            </div>
+
+                            <div class="buttonrow">
+                                <input type='button' name='Submit' value='Update Datasource'
+                                       onclick="if(validateForm()){updateDataSource();}"
+                                       class='btn main'/>
+                                <a href="listDatasources.jag?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>">Cancel</a>
+                            </div>
+
+
+                            <hr/>
+                            <div class="controlset">
+                                <input type="hidden" id='applicationKey'
+                                       value='<%=request.getParameter("applicationKey")%>'/>
+                                <input type="hidden" name="stages" id='stages' value='<%=outputs.deploymentStages%>'/>
+                            </div>
+
+                        </fieldset>
+
+
+                    </form>
+
+                </div>
+            </div>
+        </section>
+        <div class="clearfix"></div>
+    </article>
+    </div><!-- /container -->
+
+
+<% }); %>

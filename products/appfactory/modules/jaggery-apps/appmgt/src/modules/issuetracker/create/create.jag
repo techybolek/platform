@@ -1,0 +1,41 @@
+<%
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+// used for logging
+var log = new Log();
+var modManager = jagg.module("manager");
+
+var getUrlForReportIssue = function getUrlForReportIssue(applicationKey){
+    jagg.module("permission").checkUserActionPermission(applicationKey,PERMISSION_APPLICATION_MEMBER);
+    var ws = require('ws');
+       var getUrlForReportIssueRequest = new ws.WSRequest();
+       var options = new Array();
+       options.useSOAP = 1.1;
+       options.action = "urn:getUrlForReportIssue";
+       options["HTTPHeaders"] = [
+                                 { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) }
+                                 ];
+       var payload = '   <p:getUrlForReportIssue xmlns:p="http://service.issuetracking.appfactory.carbon.wso2.org">'+
+                               ' <xs:appID xmlns:xs="http://service.issuetracking.appfactory.carbon.wso2.org">'+applicationKey+'</xs:appID> '+
+                        ' </p:getUrlForReportIssue>';
+       var result;
+   
+       try {
+    	   var endPoint =getProperty(APPFACTORY_SERVER_URL)+'IssueTrackerService';
+    	   getUrlForReportIssueRequest.open(options,endPoint, false);
+    	   getUrlForReportIssueRequest.send(payload);
+    	   result = getUrlForReportIssueRequest.responseE4X;
+
+    	   if(log.isDebugEnabled()){
+    		   log.debug("Invoking service endpoint :"+endPoint+" returned result:"+result);
+    	   }
+    	   return result.*::["return"].text();
+       } catch (e) {
+    	   log.error("Error while getting url to report issues of "+applicationKey + "\n"+e.message);
+    	   throw "Error while getting url to report issues of "+applicationKey + "\n"+e.message;
+       }
+};
+
+
+%>

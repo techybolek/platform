@@ -1,0 +1,318 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+
+var log= new Log();
+
+
+(function () {
+	var mod, obj, result,
+	action = request.getParameter("action"),
+	site = require("/site/conf/site.json");
+
+	if (action == "createDatabaseWithAttachedUsers") {
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var databaseName = request.getParameter("databaseName");
+		var databaseServerInstanceName = request.getParameter("databaseServerInstanceName");
+		var isDefaultPass = request.getParameter("isDefaultPass");
+		var customPassword = request.getParameter("customPassword");
+		log.info("Modules databaseServerInstanceName "+databaseServerInstanceName);
+		try {
+			var result = mod.createDatabaseWithAttachedUsers(applicationKey,databaseName,databaseServerInstanceName,isDefaultPass,customPassword);
+            if(result != null & result == 'true') {
+                var returnResult= {};
+                returnResult.successMsg = "Db creation successful";
+                print(returnResult);
+            }
+		} catch(e) {
+			//throw "Error while creating the database";
+			var errorMsg = ""+e.javaException.cause;
+			if(errorMsg.split(":").length > 1 ) {
+				errorMsg = errorMsg.split(":")[1];
+			}
+			var returnError = {};
+			returnError.errorMsg = errorMsg;
+			print(returnError);
+		}
+	}else if (action == "createDatabaseAndAttachUser") {
+        mod = jagg.module("rssmanager");
+        var applicationKey = request.getParameter("applicationKey");
+        var databaseName = request.getParameter("databaseName");
+        var databaseServerInstanceName = request.getParameter("databaseServerInstanceName");
+        var customPassword = request.getParameter("customPassword");
+        var isBasic = request.getParameter("isBasic");
+        var userName;
+        var templateName;
+		var isSuccess = true;
+		var dbResult = "";
+        try{
+            if(isBasic == "true") {
+                // default user is created with db name
+                userName = databaseName;
+                templateName = databaseName +'@'+ databaseServerInstanceName;
+		 
+                dbResult = mod.createDatabaseUser(applicationKey, customPassword, databaseServerInstanceName, userName);
+
+                // user name is updated with full qualified user name to attach user to db
+                var carbon = require('carbon');
+                var server = carbon.server;
+                var fullUserName =server.osgiService('org.wso2.carbon.appfactory.application.mgt.service.ApplicationManagementService').getFullyQualifiedDbUsername(userName, applicationKey);
+                userName = fullUserName;
+                
+                if(dbResult=='success'){
+                    // default template is created with <db name>@<rssInstanceName> with all permissions
+                	var setPermission = "Y";
+                	dbResult = mod.createTemplate(applicationKey,databaseServerInstanceName,templateName,setPermission,setPermission, setPermission,setPermission, setPermission, setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission,setPermission);								
+                	if(dbResult!='success'){
+                		isSuccess = false;
+                	}
+                }else{
+                	isSuccess = false;
+                }              
+            } else {
+                userName = request.getParameter("userName");
+                templateName = request.getParameter("templateName");
+            }
+	 
+            //create db   createDatabase
+	    	if(isSuccess){
+	            dbResult = mod.createDatabase(applicationKey,databaseName,databaseServerInstanceName);
+			    if(dbResult=="success"){
+			    	// attach user        attachNewUser			
+	            	dbResult = mod.attachNewUser(applicationKey,databaseServerInstanceName, databaseName, userName, templateName);					
+    		    } else {
+					isSuccess = false;
+		    	}	            
+	    	}            
+        } catch (e) {
+			dbResult = e.javaException.cause; 
+        }
+		print(dbResult);
+
+
+    }else if (action == "createDbWithUserAndTemplate") {
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var databaseName = request.getParameter("databaseName");
+		var userName = request.getParameter("userName");
+		var templateName = request.getParameter("templateName");
+		var databaseServerInstanceName = request.getParameter("databaseServerInstanceName");
+		var customPassword = request.getParameter("customPassword");
+        var alterPriv=createValue(request.getParameter("alterPriv"));
+        var alterRoutinePriv=createValue(request.getParameter("alterRoutinePriv"));
+        var createPriv=createValue(request.getParameter("createPriv"));
+        var createRoutinePriv=createValue(request.getParameter("createRoutinePriv"));
+        var createTmpTablePriv=createValue(request.getParameter("createTmpTablePriv"));
+        var createViewPriv=createValue(request.getParameter("createViewPriv"));
+        var deletePriv=createValue(request.getParameter("deletePriv"));
+        var dropPriv=createValue(request.getParameter("dropPriv"));
+        var eventPriv=createValue(request.getParameter("eventPriv"));
+        var executePriv=createValue(request.getParameter("executePriv"));
+        var grantPriv=createValue(request.getParameter("grantPriv"));
+        var indexPriv=createValue(request.getParameter("indexPriv"));
+        var insertPriv=createValue(request.getParameter("insertPriv"));
+        var lockTablesPriv=createValue(request.getParameter("lockTablesPriv"));
+        var referencesPriv=createValue(request.getParameter("referencesPriv"));
+        var selectPriv=createValue(request.getParameter("selectPriv"));
+        var showViewPriv=createValue(request.getParameter("showViewPriv"));
+        var triggerPriv=createValue(request.getParameter("triggerPriv"));
+        var updatePriv=createValue(request.getParameter("updatePriv"));
+		log.info("Modules databaseServerInstanceName "+databaseServerInstanceName);
+		try {
+			var result = mod.createDbWithUserAndTemplate(applicationKey,databaseName,userName,templateName, databaseServerInstanceName,customPassword, alterPriv,alterRoutinePriv, createPriv,createRoutinePriv, createTmpTablePriv, createViewPriv,deletePriv,dropPriv,eventPriv,executePriv,grantPriv,indexPriv,insertPriv,lockTablesPriv,referencesPriv,selectPriv,showViewPriv,triggerPriv,updatePriv);
+            if(result != null & result == 'true') {
+                var returnResult= {};
+                returnResult.successMsg = "Db creation successful";
+                print(returnResult);
+            }
+		} catch(e) {
+			//throw "Error while creating the database";
+			var errorMsg = ""+e.javaException.cause;
+			if(errorMsg.split(":").length > 1 ) {
+				errorMsg = errorMsg.split(":")[1];
+			}
+			var returnError = {};
+			returnError.errorMsg = errorMsg;
+			print(returnError);
+		}
+	}else if (action == "createDatabase") {
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var databaseName = request.getParameter("databaseName");
+		var databaseServerInstanceName = request.getParameter("databaseServerInstanceName");
+		log.info("Modules databaseServerInstanceName "+databaseServerInstanceName);
+		try {
+			result = mod.createDatabase(applicationKey,databaseName,databaseServerInstanceName);
+			print(result);
+		} catch(e) {
+			throw "Error while creating the database";
+		}
+	}else if(action == "getDatabases"){   
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+
+		try {
+			result = mod.getDatabases(applicationKey); 
+			print(result);
+
+		} catch(e) {
+			throw "Error while getting the database";
+		}
+
+	}else if(action == "getDatabasesForStage"){
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var stage = request.getParameter("stage");
+
+		log.info(applicationKey);
+		log.info(stage);
+
+		try {
+			result = mod.getDatabasesForStage(applicationKey, stage);
+			print(result);
+
+		} catch(e) {
+			throw "Error while getting the database";
+		}
+
+	}
+	else if(action == "getDbUserTemplateInfoForStages"){
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+
+		try {
+			result = mod.getDbUserTemplateInfoForStages(applicationKey);
+			print(result);
+
+		} catch(e) {
+			throw "Error while getting the database";
+		}
+
+	}else if(action == "getRSSinstances"){
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+
+		try {
+			result = mod.getRSSinstances(applicationKey);
+			print(result);
+
+		} catch(e) {
+			throw "Error while reading the rssInstances";
+		}
+
+	}else if(action == "getAttachedUsers"){
+
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var dbname = request.getParameter("dbname");
+		var rssInstance = request.getParameter("rssInstance");
+
+		try {
+			result = mod.getAttachedUsers(applicationKey, dbname, rssInstance);
+			print(result);
+
+		} catch(e) {
+			throw "Error while reading the database";
+		}
+
+	}else if(action == "attachNewUser"){
+
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var dbname = request.getParameter("databaseName");
+		var rssInstance = request.getParameter("dbServerInstanceName");
+		var users = request.getParameter("users");
+		var templates = request.getParameter("templates");
+
+		try {
+			result = mod.attachNewUser(applicationKey,rssInstance, dbname, users, templates);
+			print(result);
+		} catch(e) {
+			throw "Error while reading the database";
+		}
+
+	}else if(action == "detachUser"){
+
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var dbname = request.getParameter("databaseName");
+		var rssInstance = request.getParameter("dbServerInstanceName");
+		var username = request.getParameter("username");
+
+		try {
+			result = mod.detachUser(applicationKey,rssInstance, dbname, username);
+            print(result);
+		} catch(e) {
+			throw "Error while reading the database";
+		}
+
+	}else if(action == "getUserPrivileges"){
+
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var dbname = request.getParameter("dbname");
+		var rssInstance = request.getParameter("rssInstanceName");
+		var username = request.getParameter("username");
+
+		try {
+			result = mod.getUserPrivileges(applicationKey,rssInstance, dbname, username);
+			print(result);
+		} catch(e) {
+			throw "Error while reading permissions";
+		}
+
+	} else if(action == "editUserPermissions"){
+
+		mod = jagg.module("rssmanager");
+		var applicationKey = request.getParameter("applicationKey");
+		var dbname = request.getParameter("databaseName");
+		var rssInstance = request.getParameter("rssInstanceName");
+		var username = request.getParameter("username");
+		var password = request.getParameter("password");
+		var alterPriv=createValue(request.getParameter("alterPriv"));
+		var alterRoutinePriv=createValue(request.getParameter("alterRoutinePriv"));
+		var createPriv=createValue(request.getParameter("createPriv"));
+		var createRoutinePriv=createValue(request.getParameter("createRoutinePriv"));
+		var createTmpTablePriv=createValue(request.getParameter("createTmpTablePriv"));
+		var createViewPriv=createValue(request.getParameter("createViewPriv"));
+		var deletePriv=createValue(request.getParameter("deletePriv"));
+		var dropPriv=createValue(request.getParameter("dropPriv"));
+		var eventPriv=createValue(request.getParameter("eventPriv"));
+		var executePriv=createValue(request.getParameter("executePriv"));
+		var grantPriv=createValue(request.getParameter("grantPriv"));
+		var indexPriv=createValue(request.getParameter("indexPriv"));
+		var insertPriv=createValue(request.getParameter("insertPriv"));
+		var lockTablesPriv=createValue(request.getParameter("lockTablesPriv"));
+		var referencesPriv=createValue(request.getParameter("referencesPriv"));
+		var selectPriv=createValue(request.getParameter("selectPriv"));
+		var showViewPriv=createValue(request.getParameter("showViewPriv"));
+		var triggerPriv=createValue(request.getParameter("triggerPriv"));
+		var updatePriv=createValue(request.getParameter("updatePriv"));
+
+		try {
+			mod.editUserPermissions(applicationKey,dbname,rssInstance,username,password,alterPriv,alterRoutinePriv, createPriv,createRoutinePriv, createTmpTablePriv, createViewPriv,deletePriv,dropPriv,eventPriv,executePriv,grantPriv,indexPriv,insertPriv,lockTablesPriv,referencesPriv,selectPriv,showViewPriv,triggerPriv,updatePriv);
+
+		} catch(e) {
+			throw "Error while reading permissions";
+		}
+
+	} else {
+		throw new Error("No action specified");
+	}
+}());
+
+
+function createValue(value){
+
+	if(value=='true'){
+		value="Y";
+	}else{
+		value="N";
+	}
+	return value;
+
+}
+%>

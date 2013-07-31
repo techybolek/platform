@@ -1,0 +1,273 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+// used for logging
+var log = new Log();
+var cookieRefreshInterval = getProperty(COOKIE_REFRESH_INTERVAL);
+var clock = new Date();
+
+var getAdminCookie = function (serverUrl) {
+	var timeNow = clock.getTime();
+	if(application.get("adminCookieLastUpdatedTime" + serverUrl) == null) {
+		application.put("adminCookieLastUpdatedTime" + serverUrl , timeNow);    	
+	}
+	var adminCookieLastUpdatedTime = application.get("adminCookieLastUpdatedTime" + serverUrl);
+	if(((timeNow - adminCookieLastUpdatedTime) > cookieRefreshInterval) || (application.get("authenticatedCookie" + serverUrl) == null)){
+		updateAdminCookie(serverUrl);
+		application.put("adminCookieLastUpdatedTime" + serverUrl , timeNow); 
+	}
+	return application.get("authenticatedCookie" + serverUrl);
+};
+
+var updateAdminCookie = function (serverUrl) {
+	var xhr = new XMLHttpRequest();
+	var endPoint = serverUrl + "AuthenticationAdmin";
+	xhr.open("POST", endPoint);
+	var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:aut="http://authentication.services.core.carbon.wso2.org"><soap:Header/><soap:Body><aut:login><aut:username>' + getProperty(ADMIN_USERNAME) + '</aut:username><aut:password>' + getProperty(ADMIN_PASSWORD) + '</aut:password><aut:remoteAddress>localhost</aut:remoteAddress></aut:login></soap:Body></soap:Envelope>';
+	xhr.send(payload);
+	var cookie = (xhr.getAllResponseHeaders());
+	var authenticatedCookie = cookie.split(";")[0].split(":")[1];
+	application.put("authenticatedCookie" + serverUrl , authenticatedCookie ) ;
+};
+
+var getAdminCookieBySAMLToken = function () {
+   var security =require("sso");
+   var ssoRelyingParty = new security.SSORelyingParty(getProperty(SSO_NAME));
+   var token = ssoRelyingParty.getSAMLToken(session.getId());
+
+//No need to do this since we have a Base64 encoded string here
+//   token = token.replace('<?xml version="1.0" encoding="UTF-8"?>',"");
+//   token = ssoRelyingParty.xmlEncode(token);
+   var xhr = new XMLHttpRequest();
+   var endPoint = getProperty(APPFACTORY_SERVER_URL) + "SAML2SSOAuthenticationService";
+   xhr.open("POST", endPoint);
+
+   var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:sso="http://sso.saml2.authenticator.identity.carbon.wso2.org" xmlns:xsd="http://dto.sso.saml2.authenticator.identity.carbon.wso2.org/xsd"><soap:Header/><soap:Body><sso:login><sso:authDto><xsd:response>'+token+'</xsd:response></sso:authDto></sso:login></soap:Body></soap:Envelope>';
+
+   xhr.send(payload);
+   var cookie = (xhr.getAllResponseHeaders());
+   return cookie.split(";")[0].split(":")[1];
+};
+
+var encodeString = function(stringValue){
+   var security =require("sso");
+   var ssoRelyingParty = new security.SSORelyingParty(getProperty(SSO_NAME));
+
+   return ssoRelyingParty.encode(stringValue);
+};
+
+var getDataSource = function (applicationId, stageName, dbname) {
+    var ws = require('ws');
+    var getDataSourceService = new ws.WSRequest();
+    var options = [];
+    options.useSOAP = 1.1;
+    options.action = "urn:getDataSource";
+    
+    var payload = '<xsd:getDataSource xmlns:xsd="http://org.apache.axis2/xsd">' +
+    				'<xsd:dsName>' + dbname + '</xsd:dsName>' +
+    			  '</xsd:getDataSource>';
+    
+    var result;
+    try {
+        var endPoint = getProperty('ApplicationDeployment.DeploymentStage.' + stageName + '.DeploymentServerURL') + 'NDataSourceAdmin';
+        getDataSourceService.open(options, endPoint, false, getProperty(ADMIN_USERNAME) + '@' + applicationId, getProperty(ADMIN_PASSWORD));
+        getDataSourceService.send(payload);
+        
+       var result = getDataSourceService.responseE4X;
+       var ns = new Namespace("http://org.apache.axis2/xsd");
+       var ax2223 = new Namespace("http://services.core.ndatasource.carbon.wso2.org/xsd");
+       
+       var response = result.ns::["return"];       
+       var responseDS = response[0];
+       
+       var configuration = responseDS.ax2223::["dsMetaInfo"][0].ax2223::["definition"][0].ax2223::["dsXMLConfiguration"];
+       var definition = responseDS.ax2223::["dsMetaInfo"][0].ax2223::["definition"][0];
+       
+       var type = definition.ax2223::["type"][0].text();
+       
+       var desc = responseDS.ax2223::["dsMetaInfo"][0].ax2223::["description"][0].text();
+       
+       var name = responseDS.ax2223::["dsMetaInfo"][0].ax2223::["name"][0].text();;
+       
+       var configToXml = new XML(configuration.toString());
+       
+       var driverClassName= configToXml.*::driverClassName.text();
+       var url= configToXml.*::url.text();
+       var username= configToXml.*::username.text();
+       var password= configToXml.*::password.text();
+       
+       var dataSource={};
+       dataSource.applicationKey = applicationId;
+       dataSource.name = name;
+       dataSource.type = type;
+       dataSource.desc = desc;
+       dataSource.driver = driverClassName;
+       dataSource.url = url;
+       dataSource.username = username;
+       dataSource.password = password;
+       
+       return dataSource;
+
+    } catch (e) {
+        log.error("Error while getting datasource " + stageName + "\n" + e.message);
+        throw "Error while deleting datasource  " + stageName;
+    }
+};
+
+var deleteDatasource = function (applicationId, stageName, name) {
+    jagg.module("permission").checkUserActionPermission(applicationId,PERMISSION_DATASOURCE_UPDATE_OF_STAGE+stageName);
+    var ws = require('ws');
+    var deleteDataSourceService = new ws.WSRequest();
+    var options = [];
+    options.useSOAP = 1.1;
+    options.action = "urn:deleteDataSource";
+
+    var payload = '<xsd:addDataSource xmlns:xsd="http://org.apache.axis2/xsd">' +
+                  '<xsd:dsName>'+name+'</xsd:dsName>'+
+                  '</xsd:addDataSource>';
+    var result;
+    try {
+        var endPoint = getProperty('ApplicationDeployment.DeploymentStage.' + stageName + '.DeploymentServerURL') + 'NDataSourceAdmin';
+        deleteDataSourceService.open(options, endPoint, false, getProperty(ADMIN_USERNAME) + '@' + applicationId, getProperty(ADMIN_PASSWORD));
+        deleteDataSourceService.send(payload);
+        return {
+        	error:false
+        };
+
+    } catch (e) {
+        log.error("Error while deleting datasource " + stageName + "\n" + e.message);
+        throw "Error while deleting datasource  " + stageName;
+    }
+};
+
+var addDataSource = function (applicationId, stageName, name, url, driverClass, username,
+        password, description) {
+	
+	jagg.module("permission").checkUserActionPermission(applicationId,PERMISSION_DATASOURCE_UPDATE_OF_STAGE+stageName);
+    var ws = require('ws');
+    var createDataSourcesService = new ws.WSRequest();
+    var options = [];
+    options.useSOAP = 1.1;
+    options.action = "urn:addDataSource";
+
+    var payload = '<xsd:addDataSource xmlns:xsd="http://org.apache.axis2/xsd"' +
+                  ' xmlns:xsd1="http://services.core.ndatasource.carbon.wso2.org/xsd"' +
+                  ' xmlns:xsd2="http://core.ndatasource.carbon.wso2.org/xsd">' +
+                  '<xsd:dsmInfo>' +
+                  '<xsd1:definition>' +
+                  '<xsd1:dsXMLConfiguration>' +
+                  ' <![CDATA[<configuration>' +
+                  '<url>' + url + '</url>' +
+                  '<username>' + username + '</username>' +
+                  '<password>' + password + '</password>' +
+                  '<driverClassName>' + driverClass + '</driverClassName>' +
+                  '<maxActive>50</maxActive>' +
+                  '<maxWait>60000</maxWait>' +
+                  '<testOnBorrow>true</testOnBorrow>' +
+                  '<validationQuery>SELECT 1</validationQuery>' +
+                  '<validationInterval>30000</validationInterval>' +
+                  '</configuration>]]>' +
+                  '</xsd1:dsXMLConfiguration>' +
+                  '<xsd1:type>RDBMS</xsd1:type>' +
+                  '</xsd1:definition>' +
+                  '<xsd1:description>' + description + '</xsd1:description>' +
+                  '<xsd1:jndiConfig>' +
+
+                  '<xsd2:name>' + 'jdbc/' + name + '</xsd2:name>' +
+                  '<xsd2:useDataSourceFactory>false</xsd2:useDataSourceFactory>' +
+                  '</xsd1:jndiConfig>' +
+                  '<xsd1:name>' + name + '</xsd1:name>' +
+                  '<xsd1:system>false</xsd1:system>' +
+                  '</xsd:dsmInfo>' +
+                  '</xsd:addDataSource>';
+    var result;
+    try {
+        var endPoint = getProperty('ApplicationDeployment.DeploymentStage.' + stageName + '.DeploymentServerURL') + 'NDataSourceAdmin';
+        log.info("printing end point ..........................................................");
+        log.info(endPoint);
+        createDataSourcesService.open(options, endPoint, false, getProperty(ADMIN_USERNAME) + '@' + applicationId, getProperty(ADMIN_PASSWORD));
+        createDataSourcesService.send(payload);
+	    result = createDataSourcesService.responseE4X;
+        var datasources = buildResponse(result);
+         log.info("Created data source: " + datasources);
+        return datasources;
+
+
+    } catch (e) {
+        log.error("Error while creating datasource " + stageName + "\n" + e.message);
+        throw "Error while creating datasource  " + stageName;
+    }
+	
+};
+
+var createDataSource = function (applicationId, stageName, name, url, driverClass, username,
+                                 password, description) {
+    jagg.module("permission").checkUserActionPermission(applicationId,PERMISSION_DATASOURCE_CREATE);
+    var ws = require('ws');
+    var createDataSourcesService = new ws.WSRequest();
+    var options = [];
+    options.useSOAP = 1.1;
+    options.action = "urn:addDataSource";
+
+    var payload = '<xsd:addDataSource xmlns:xsd="http://org.apache.axis2/xsd"' +
+                  ' xmlns:xsd1="http://services.core.ndatasource.carbon.wso2.org/xsd"' +
+                  ' xmlns:xsd2="http://core.ndatasource.carbon.wso2.org/xsd">' +
+                  '<xsd:dsmInfo>' +
+                  '<xsd1:definition>' +
+                  '<xsd1:dsXMLConfiguration>' +
+                  ' <![CDATA[<configuration>' +
+                  '<url>' + url + '</url>' +
+                  '<username>' + username + '</username>' +
+                  '<password>' + password + '</password>' +
+                  '<driverClassName>' + driverClass + '</driverClassName>' +
+                  '<maxActive>50</maxActive>' +
+                  '<maxWait>60000</maxWait>' +
+                  '<testOnBorrow>true</testOnBorrow>' +
+                  '<validationQuery>SELECT 1</validationQuery>' +
+                  '<validationInterval>30000</validationInterval>' +
+                  '</configuration>]]>' +
+                  '</xsd1:dsXMLConfiguration>' +
+                  '<xsd1:type>RDBMS</xsd1:type>' +
+                  '</xsd1:definition>' +
+                  '<xsd1:description>' + description + '</xsd1:description>' +
+                  '<xsd1:jndiConfig>' +
+
+                  '<xsd2:name>' + 'jdbc/' + name + '</xsd2:name>' +
+                  '<xsd2:useDataSourceFactory>false</xsd2:useDataSourceFactory>' +
+                  '</xsd1:jndiConfig>' +
+                  '<xsd1:name>' + name + '</xsd1:name>' +
+                  '<xsd1:system>false</xsd1:system>' +
+                  '</xsd:dsmInfo>' +
+                  '</xsd:addDataSource>';
+    var result;
+    try {
+        var endPoint = getProperty('ApplicationDeployment.DeploymentStage.' + stageName + '.DeploymentServerURL') + 'NDataSourceAdmin';
+        log.info("printing end point ..........................................................");
+        log.info(endPoint);
+        createDataSourcesService.open(options, endPoint, false, getProperty(ADMIN_USERNAME) + '@' + applicationId, getProperty(ADMIN_PASSWORD));
+        createDataSourcesService.send(payload);
+	    result = createDataSourcesService.responseE4X;
+        var datasources = buildResponse(result);
+         log.info("Created data source: " + datasources);
+        return datasources;
+
+
+    } catch (e) {
+        log.error("Error while creating datasource " + stageName + "\n" + e.message);
+        throw "Error while creating datasource  " + stageName;
+    }
+};
+
+function buildResponse(result){
+   var databaseObject=[];
+   
+   if(result != undefined){    
+   var response=result.*::["return"].text();
+   var entry=response[0];
+   return entry;
+ }
+}
+
+%>

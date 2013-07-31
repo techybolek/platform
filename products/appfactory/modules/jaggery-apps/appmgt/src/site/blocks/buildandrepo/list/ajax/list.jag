@@ -1,0 +1,79 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+var log=new Log();
+(function () {
+    var mod, obj, result,
+    action = request.getParameter("action"),
+    site = require("/site/conf/site.json");    
+    if(action=="getbuildandrepodata"){
+        modBuild = jagg.module("build");
+        //gathering requeat parameters
+        var applicationKey = request.getParameter("applicationKey");
+        var userName = request.getParameter("userName");
+        var isRoleBasedPermissionAllowed = request.getParameter("isRoleBasedPermissionAllowed");
+        var metaDataNeed = request.getParameter("metaDataNeed");
+        var buildable = request.getParameter("buildable");
+
+        //calling module build
+ //       var buildinfobyappid=modBuild.getBuildInfoByApplicationId(applicationKey);
+ //      var jenkinsbuilds=modBuild.getJenkinsBuilds(applicationKey);
+ //       var AllJenkinsBuildsStats=modBuild.getAllJenkinsBuildsStats();
+
+        modApp = jagg.module("application");
+        //calling module app
+        var appInfo=parse(modApp.getAppVersionsInStages(applicationKey, userName, metaDataNeed, buildable, isRoleBasedPermissionAllowed));
+        var buildableStages=parse(modApp.getBuildableStages());
+        var appDetails=[];
+
+        for(var appIndex in appInfo ){
+        var elementAppInfo=appInfo[appIndex];
+        var versions=elementAppInfo.versions;
+       // print(appInfo);
+        //print(versions);
+        for(var index in versions){
+
+       // var tempAppDetail=tempAppDetail||{},
+       //     version=version||{},
+       //     build=build||{},
+      //      deployment=deployment||{};
+              var tempAppDetail={};
+              var version={};
+              var build={};
+              var deployment={};
+            var versionElement=versions[index];
+
+            version.current=versionElement.version;
+            version.stage=versionElement.stage;
+            version.parent=" ";
+            version.repoURL=versionElement.repoURL;
+            version.isAutoDeploy=versionElement.isAutoDeploy;
+            version.isAutoBuild=versionElement.isAutoBuild;
+
+            var buildInfo=versionElement.lastBuildResult.split(' ');
+            build.lastBuildId=buildInfo[1];
+            build.status=buildInfo[2];
+            build.triggeredBy="";
+            build.triggeredTime="";
+
+            deployment.deployedBuildId=versionElement.deployedBuildId;
+            deployment.triggeredBy="";
+            deployment.triggeredTime="";
+            tempAppDetail.type=appInfo[0].type;
+            tempAppDetail.version=version;
+            tempAppDetail.build=build;
+            tempAppDetail.deployment=deployment;
+
+            appDetails.push(tempAppDetail);
+        }
+        }
+       appDetails.buildableStages=buildableStages;
+       print(appDetails);
+
+    }else {
+        throw new Error("No action specified"+action);
+    }
+
+}());
+%>

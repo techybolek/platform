@@ -1,0 +1,16 @@
+<%
+jagg.block("resource/get", {
+    initialize:function (data) {
+
+    } ,
+    getInputs:function () {
+        return {
+            "api":null,
+            "applicationKey":null,
+            "applicationValue":null
+        }
+    }
+
+
+});
+%>

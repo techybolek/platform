@@ -1,0 +1,27 @@
+<%
+jagg.module("resource", {
+	
+	loadAppIcon:function () {
+        return jagg.require(jagg.getModulesDir() + "resource/get/list.jag").loadAppIcon.apply(this, arguments);
+    },
+    uploadAppIcon:function () {
+        return jagg.require(jagg.getModulesDir() + "resource/add/add.jag").uploadAppIcon.apply(this, arguments);
+    },
+    createResource:function () {
+        return jagg.require(jagg.getModulesDir() + "resource/add/add.jag").createResource.apply(this, arguments);
+    },
+    
+    getResource:function () {
+        return jagg.require(jagg.getModulesDir() + "resource/get/list.jag").getResource.apply(this, arguments);
+    },
+    
+    resourceExists:function () {
+        return jagg.require(jagg.getModulesDir() + "resource/get/list.jag").resourceExists.apply(this, arguments);
+    },
+    
+    putResource:function () {
+        return jagg.require(jagg.getModulesDir() + "resource/update/update.jag").putResource.apply(this, arguments);
+    }
+
+});
+%>
