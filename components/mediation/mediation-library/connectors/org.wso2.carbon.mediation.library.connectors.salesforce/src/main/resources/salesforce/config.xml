@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template name="config" onError="fault" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="username"/>
+    <parameter name="password"/>
+    <parameter name="login.url"/>
+    <sequence>
+        <filter xpath="get-property('salesforce.login.done') = 'true'">
+            <then>
+                <property name="Connection" value="Already login to Salesforce ....."/>
+            </then>
+            <else>
+                <enrich>
+                    <source clone="true" type="body"/>
+                    <target property="ORIGINAL_MSG_PAYLOAD" type="property"/>
+                </enrich>
+                <header expression="$func:login.url" name="To"/>
+                <payloadFactory>
+                    <format>
+                        <soapenv:Envelope
+                            xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">
+                            <soapenv:Body>
+                                <urn:login>
+                                    <urn:username>$1</urn:username>
+                                    <urn:password>$2</urn:password>
+                                </urn:login>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    </format>
+                    <args>
+                        <arg expression="$func:username"/>
+                        <arg expression="$func:password"/>
+                    </args>
+                </payloadFactory>
+                <log level="custom">
+                    <property name="Connection" value="Login to Salesforce ....."/>
+                </log>
+                <callout action="urn:partner.soap.sforce.com/Soap/loginRequest">
+                    <source xmlns:ns="http://org.apache.synapse/xsd"
+                        xmlns:ns2="http://org.apache.synapse/xsd"
+                        xmlns:s11="http://schemas.xmlsoap.org/soap/envelope/"
+                        xmlns:s12="http://www.w3.org/2003/05/soap-envelope" xpath="s11:Body/child::*[fn:position()=1] | s12:Body/child::*[fn:position()=1]"/>
+                    <target xmlns:ns="http://org.apache.synapse/xsd"
+                        xmlns:ns2="http://org.apache.synapse/xsd"
+                        xmlns:s11="http://schemas.xmlsoap.org/soap/envelope/"
+                        xmlns:s12="http://www.w3.org/2003/05/soap-envelope" xpath="s11:Body/child::*[fn:position()=1] | s12:Body/child::*[fn:position()=1]"/>
+                </callout>
+                <property
+                    expression="//ns:loginResponse/ns:result/ns:sessionId/text()"
+                    name="salesforce.sessionId" scope="default"
+                    type="STRING" xmlns:ns="urn:partner.soap.sforce.com"/>
+                <property
+                    expression="//ns:loginResponse/ns:result/ns:serverUrl/text()"
+                    name="salesforce.serviceUrl" scope="default"
+                    type="STRING" xmlns:ns="urn:partner.soap.sforce.com"/>
+                <property name="salesforce.login.done" scope="default"
+                    type="STRING" value="true"/>
+                <enrich>
+                    <source clone="true" type="body"/>
+                    <target property="SALESFORCE_LOGIN_RESPONSE" type="property"/>
+                </enrich>
+                <enrich>
+                    <source clone="true" property="ORIGINAL_MSG_PAYLOAD" type="property"/>
+                    <target type="body"/>
+                </enrich>
+            </else>
+        </filter>
+        <property name="query.batchSize" value="200"/>
+    </sequence>
+</template>
