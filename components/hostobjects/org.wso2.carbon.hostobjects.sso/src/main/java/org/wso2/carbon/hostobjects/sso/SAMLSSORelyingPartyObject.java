@@ -108,19 +108,27 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                        Object[] args,
                                                        Function funObj)
             throws Exception {
+
         int argLength = args.length;
         if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. SAML response is missing.");
         }
+
         String decodedString = Util.decode((String) args[0]);
+
         XMLObject samlObject = Util.unmarshall(decodedString);
+        String tenantDomain = Util.getDomainName(samlObject);
+
+        int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
+
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
             SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
             return Util.validateSignature(samlResponse,
                                           relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
                                           relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
-                                          relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS));
+                                          relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                                          tenantId, tenantDomain);
         }
         if (log.isWarnEnabled()) {
             log.warn("SAML response in signature validation is not a SAML Response.");
@@ -282,7 +290,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                          Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 1 || !(args[0] instanceof String)) {
+        if (argLength == 0 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. The user to be logout is missing.");
         }
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;

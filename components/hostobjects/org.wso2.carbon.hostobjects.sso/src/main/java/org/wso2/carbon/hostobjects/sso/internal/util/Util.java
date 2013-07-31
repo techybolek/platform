@@ -18,6 +18,25 @@
 
 package org.wso2.carbon.hostobjects.sso.internal.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.util.Random;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Response;
@@ -32,37 +51,30 @@ import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
-
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.util.Random;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class Util {
 
     private static boolean bootStrapped = false;
 
     private static Random random = new Random();
+    
+    private static RealmService realmService = null;
 
     private static final char[] charMapping = {
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
             'p'};
-
+    
+    private static Log log = LogFactory.getLog(Util.class);
+    
     /**
      * This method is used to initialize the OpenSAML2 library. It calls the bootstrap method, if it
      * is not initialized yet.
@@ -242,14 +254,26 @@ public class Util {
      * @param resp SAML Response
      * @return true, if signature is valid.
      */
-    public static boolean validateSignature(Response resp, String keyStoreName, String keyStorePassword, String alias) {
+    public static boolean validateSignature(Response resp, String keyStoreName,
+                                            String keyStorePassword, String alias, int tenantId,
+                                            String tenantDomain) {
         boolean isSigValid = false;
         try {
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(new FileInputStream(new File(keyStoreName)),
-                          keyStorePassword.toCharArray());
-            java.security.cert.X509Certificate cert = (java.security.cert.X509Certificate)
-                    keyStore.getCertificate(alias);
+            KeyStore keyStore = null;
+            java.security.cert.X509Certificate cert = null;
+            if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                // get an instance of the corresponding Key Store Manager instance
+                KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(tenantId);
+                keyStore = keyStoreManager.getKeyStore(generateKSNameFromDomainName(tenantDomain));
+                log.info(keyStore.getCertificate(tenantDomain));
+                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(tenantDomain);
+                log.info(cert.getSubjectDN().getName());
+            } else {
+                keyStore = KeyStore.getInstance("JKS");
+                keyStore.load(new FileInputStream(new File(keyStoreName)), keyStorePassword.toCharArray());
+                cert = (java.security.cert.X509Certificate) keyStore.getCertificate(alias);
+            }
+
             X509CredentialImpl credentialImpl = new X509CredentialImpl(cert);
             SignatureValidator signatureValidator = new SignatureValidator(credentialImpl);
             signatureValidator.validate(resp.getSignature());
@@ -260,6 +284,34 @@ public class Util {
             return isSigValid;
         }
     }
+    
+    public static String getDomainName(XMLObject samlObject) {
+        NodeList list = samlObject.getDOM().getElementsByTagNameNS("urn:oasis:names:tc:SAML:2.0:assertion", "NameID");
+        String domainName = null;
+        if (list.getLength() > 0) {
+            String userName = list.item(0).getTextContent();
+            domainName = MultitenantUtils.getTenantDomain(userName);
+        }
+        return domainName;
+    }
+    
+    /**
+     * Generate the key store name from the domain name
+     * @param tenantDomain tenant domain name
+     * @return key store file name
+     */
+    private static String generateKSNameFromDomainName(String tenantDomain) {
+        String ksName = tenantDomain.trim().replace(".", "-");
+        return (ksName + ".jks");
+    }
+    
+    
+    public static void setRealmService(RealmService realmService) {
+        Util.realmService = realmService;
+    }
 
+    public static RealmService getRealmService() {
+        return Util.realmService;
+    }
 
 }
