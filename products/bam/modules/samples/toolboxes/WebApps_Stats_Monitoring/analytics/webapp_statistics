@@ -5,7 +5,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS WARD
   webappDisplayName STRING, webappContext STRING, sessionId STRING, httpMethod STRING,
   contentType STRING, responseContentType STRING, responseHttpStatusCode INT, remoteAddress STRING, referer STRING,
   remoteUser STRING, authType STRING, userAgent STRING, responseTime BIGINT,
-  serverAddess STRING, serverName STRING, tenantId INT, userTenant STRING, requestCount INT, responceCount INT, faultCount INT)  STORED BY
+  serverAddess STRING, serverName STRING, tenantId INT, userTenant STRING, requestCount INT, responceCount INT, faultCount INT, requestSizeBytes BIGINT, responseSizeBytes BIGINT)  STORED BY
 	'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
  	"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
 	"cassandra.cf.name" = "bam_webapp_statistics",
@@ -17,7 +17,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS WARD
 	payload_sessionId, payload_httpMethod, payload_contentType, payload_responseContentType,
 	payload_responseHttpStatusCode, payload_remoteAddress, payload_referer, payload_remoteUser,
 	payload_authType, payload_userAgent, payload_responseTime, meta_serverAddess,
-	meta_serverName, meta_tenantId, meta_userTenant, payload_requestCount, payload_responceCount, payload_faultCount");
+	meta_serverName, meta_tenantId, meta_userTenant, payload_requestCount, payload_responceCount, payload_faultCount, payload_requestSizeBytes, payload_responseSizeBytes");
 
 
 CREATE EXTERNAL TABLE IF NOT EXISTS WebappsStatsPerMinutes
