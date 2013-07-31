@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="jira_core" type="synapse/template">
+	<subArtifacts>
+		<artifact name="configure">
+			<file>configure.xml</file>
+			<description>basic configuration for jira</description>
+		</artifact>
+
+		<artifact name="getIssue">
+			<file>getIssue.xml</file>
+			<description>get issues available</description>
+		</artifact>
+
+		<artifact name="getProject">
+			<file>getProject.xml</file>
+			<description>get project information</description>
+		</artifact>
+
+		<artifact name="getUser">
+			<file>getUser.xml</file>
+			<description>get user information</description>
+		</artifact>
+
+		<artifact name="searchJira">
+			<file>searchJira.xml</file>
+			<description>search jira tasks</description>
+		</artifact>
+
+	</subArtifacts>
+</artifact>
