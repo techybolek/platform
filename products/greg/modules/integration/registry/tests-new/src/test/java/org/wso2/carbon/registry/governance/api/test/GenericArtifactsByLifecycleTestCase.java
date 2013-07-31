@@ -41,6 +41,9 @@ public class GenericArtifactsByLifecycleTestCase {
                         ProductConstant.GREG_SERVER_NAME);
         governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
 
+        //Clean the old resource.
+        governance.delete("/trunk");
+
         genericArtifactManager = new GenericArtifactManager(governance, "service");
         GenericArtifact genericArtifact = genericArtifactManager.
                 newGovernanceArtifact(new QName("https://www.wso2.com/greg/store", "StoreService"));

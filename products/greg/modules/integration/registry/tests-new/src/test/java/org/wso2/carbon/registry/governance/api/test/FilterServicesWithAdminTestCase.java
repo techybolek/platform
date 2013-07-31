@@ -53,9 +53,8 @@ public class FilterServicesWithAdminTestCase {
     private static final String SERVICE_LIFE_CYCLE = "ServiceLifeCycle";
     int userId = 2;
     private final static String WSDL_URL =
-            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-            + "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/"
-            + "src/main/resources/artifacts/GREG/wsdl/info.wsdl";
+            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules/integration/registry/tests-new/" +
+                    "src/test/resources/artifacts/GREG/wsdl/info.wsdl";
     ServiceManager serviceManager;
     ResourceAdminServiceClient resourceAdminServiceClient;
     private LifeCycleManagementClient lifeCycleManagerAdminService;

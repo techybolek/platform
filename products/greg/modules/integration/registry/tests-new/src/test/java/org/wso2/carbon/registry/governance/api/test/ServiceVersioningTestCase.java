@@ -39,13 +39,11 @@ public class ServiceVersioningTestCase {
 
     int userId = 2;
     private final static String WSDL_URL_1 =
-            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-            + "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/"
-            + "src/main/resources/artifacts/GREG/wsdl/info.wsdl";
+            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules/integration/registry/tests-new/" +
+                    "src/test/resources/artifacts/GREG/wsdl/info.wsdl";
     private final static String WSDL_URL_2 =
-            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/"
-            + "platform-integration/clarity-tests/org.wso2.carbon.automation.test.repo/"
-            + "src/main/resources/artifacts/GREG/wsdl/ops.wsdl";
+            "https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules/integration/registry/tests-new" +
+                    "/src/test/resources/artifacts/GREG/wsdl/ops.wsdl";
     ServiceManager serviceManager;
     Service versionService;
 
