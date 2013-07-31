@@ -74,6 +74,8 @@ String pageNumberStr = request.getParameter("pageNumber");
 
 
 <script type="text/javascript">
+
+var allServicesSelected = false;
 //Script for search Endpoints
 function searchSequence() {
     document.searchForm.submit();
@@ -228,6 +230,10 @@ function deleteEndpoint(endpointName) {
 
 }
 
+function loadEndpointAfterBulkDeletion(){
+    window.location.href = "index.jsp?pageNumber=<%=endpointPageNumber%>";
+}
+
 function loadEndpointsAfterDeletion() {
     var url = "ajaxprocessors/deleteEndpoint-ajaxprocessor.jsp?loadpage=true&pageNumber=<%=endpointPageNumber%>";
     jQuery("#tabs-1").load(url, null, function (responseText, status, XMLHttpRequest) {
@@ -276,17 +282,104 @@ function editDynamicEndpoint(key) {
     }
 }
 
-</script>
+function deleteServices() {
+    var selected = false;
+    if (document.endpointForm.endpointGroups[0] != null) { // there is more than 1 endpoints
+        for (var j = 0; j < document.endpointForm.endpointGroups.length; j++) {
+            selected = document.endpointForm.endpointGroups[j].checked;
+            if (selected) break;
+        }
+    }
 
+    else if (document.endpointForm.endpointGroups != null) { // only 1 endpoint
+        selected = document.endpointForm.endpointGroups.checked;
+    }
+    if (!selected) {
+        CARBON.showInfoDialog('<fmt:message key="select.endpoint.to.be.deleted"/>');
+        return;
+    }
+    if (allServicesSelected) {
+        CARBON.showConfirmationDialog("<fmt:message key="delete.endpoint.on.all.prompt"/>", function() {
+            $.ajax({
+                type: 'POST',
+                url: 'ajaxprocessors/delete_endpoint_groups.jsp',
+                data: 'deleteAllEndpointGroups=true',
+                success: function(msg) {
+                    loadEndpointAfterBulkDeletion();
+                }
+            });
+        });
+    } else {
+
+        var endpointGroupsString = '';
+        jQuery('.chkBox').each(function(index) {
+            if(this.checked) {
+                endpointGroupsString += this.value + ':';
+            }
+        });
+
+        CARBON.showConfirmationDialog("<fmt:message key="delete.endpoint.on.page.prompt"/>",function() {
+            $.ajax({
+                type: 'POST',
+                url: 'ajaxprocessors/delete_endpoint_groups.jsp',
+                data: 'endpointGroupsString='+ endpointGroupsString,
+                success: function(msg) {
+                    loadEndpointAfterBulkDeletion();
+                }
+            });
+        });
+    }
+}
+
+function selectAllInThisPage(isSelected) {
+    allServicesSelected = false;
+    if (document.endpointForm.endpointGroups != null &&
+            document.endpointForm.endpointGroups[0] != null) { // there is more than 1 endpoint
+        if (isSelected) {
+            for (var j = 0; j < document.endpointForm.endpointGroups.length; j++) {
+                document.endpointForm.endpointGroups[j].checked = true;
+            }
+        } else {
+            for (j = 0; j < document.endpointForm.endpointGroups.length; j++) {
+                document.endpointForm.endpointGroups[j].checked = false;
+            }
+        }
+    } else if (document.endpointForm.endpointGroups != null) { // only 1 endpoint
+        document.endpointForm.endpointGroups.checked = isSelected;
+    }
+    return false;
+}
+
+function selectAllInAllPages() {
+    selectAllInThisPage(true);
+    allServicesSelected = true;
+    return false;
+}
+
+function resetVars() {
+    allServicesSelected = false;
+    var isSelected = false;
+    if (document.endpointForm.endpointGroups[0] != null) { // there is more than 1 endpoint
+        for (var j = 0; j < document.endpointForm.endpointGroups.length; j++) {
+            if (document.endpointForm.endpointGroups[j].checked) {
+                isSelected = true;
+            }
+        }
+    } else if (document.endpointForm.endpointGroups != null) { // only 1 endpoint
+        if (document.endpointForm.endpointGroups.checked) {
+            isSelected = true;
+        }
+    }
+    return false;
+}
+</script>
 <%
     int numberOfPages = 0;
     int numberOfDynamicPages = 0;
-
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-
     EndpointAdminClient client;
     EndpointMetaData[] ePMetaData = null;
     String[] dynamicEndpoints = null;
@@ -344,7 +437,6 @@ function editDynamicEndpoint(key) {
     String anonymousOriginator = null;
     boolean isAnonymous = false;
     String anonymousEndpointXML = null;
-
     // came through clicking menu on the left
     if (request.getParameter("region") != null && request.getParameter("item") != null) {
         session.removeAttribute("epMode");
@@ -452,10 +544,24 @@ function editDynamicEndpoint(key) {
                   prevKey="prev" nextKey="next"
                   parameters="<%=""%>" />
     <br/>
-
-    <table class="styledLeft" cellpadding="1" id="endpointListTable">
+    <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
+                              selectAllFunction="selectAllInAllPages()"
+                              selectNoneFunction="selectAllInThisPage(false)"
+                              addRemoveFunction="deleteServices()"
+                              addRemoveButtonId="delete2"
+                              resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
+                              selectAllInPageKey="selectAllInPage"
+                              selectAllKey="selectAll"
+                              selectNoneKey="selectNone"
+                              addRemoveKey="delete"
+                              numberOfPages="<%=numberOfPages%>"/>
+    <br/>
+    <form name="endpointForm" action="ajaxprocessors/delete_endpoint_groups.jsp" method="post">
+        <input type="hidden" name="pageNumberEndpoint" value="<%= pageNumberStr%>"/>
+        <table class="styledLeft" cellpadding="1" id="endpointListTable">
         <thead>
         <tr>
+            <th style="width:4%"><fmt:message key="endpoint.select"/></th>
             <th style="width:20%"><fmt:message key="endpoint.name"/></th>
             <th style="width:20%"><fmt:message key="type"/></th>
             <th colspan="4"><fmt:message key="action"/></th>
@@ -465,6 +571,12 @@ function editDynamicEndpoint(key) {
         <tbody>
         <%for (EndpointMetaData endpoint : ePMetaData) {%>
         <tr>
+            <td width="10px" style="text-align:center; !important">
+                <input type="checkbox" name="endpointGroups"
+                       value="<%=endpoint.getName()%>"
+                       onclick="resetVars()" class="chkBox"/>
+                &nbsp;
+            </td>
             <td><% if (endpoint.getDescription() != null) { %>
                     <span href="#">
                           <%= endpoint.getName()%>
@@ -577,6 +689,19 @@ function editDynamicEndpoint(key) {
         <%}%>
         </tbody>
     </table>
+    </form>
+    <br/>
+    <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
+                              selectAllFunction="selectAllInAllPages()"
+                              selectNoneFunction="selectAllInThisPage(false)"
+                              addRemoveFunction="deleteServices()"
+                              addRemoveButtonId="delete2"
+                              resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
+                              selectAllInPageKey="selectAllInPage"
+                              selectAllKey="selectAll"
+                              selectNoneKey="selectNone"
+                              addRemoveKey="delete"
+                              numberOfPages="<%=numberOfPages%>"/>
     <br/>
     <carbon:paginator pageNumber="<%=endpointPageNumber%>" numberOfPages="<%=numberOfPages%>"
                           page="index.jsp" pageNumberParameterName="pageNumber"

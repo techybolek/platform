@@ -112,6 +112,29 @@ public class EndpointAdminClient {
             handleFault(e);
         }
     }
+    /**
+     * Delete selected endpoints from synapse configuration
+     * @param epNames
+     * @throws Exception
+     */
+    public void deleteSelectedEndpoints(String[] epNames) throws Exception{
+        try {
+            stub.deleteSelectedEndpoint(epNames);
+        }catch (Exception e){
+            handleFault(e);
+        }
+    }
+    /**
+     *  Delete all endpoints in the synapse configuration
+     * @throws Exception
+     */
+    public void deleteAllEndpointGroups() throws Exception{
+        try {
+            stub.deleteAllEndpointGroups();
+        } catch (Exception e) {
+            handleFault(e);
+        }
+    }
 
     /**
      * Delete an endpoint from the registry
