@@ -530,11 +530,17 @@ public class GovernanceArtifactManager {
             	for (String aggregatedKey : attributeKeys2) {
             		String[] keys = aggregatedKey.split("_");
             		String key = null;
-            		for (int i = 0; i < keys.length - 1; i++) {
+            		for (int i = 0; i < keys.length; i++) {
             			key = keys[i];
             			if (mainElementMap.get(key) == null){
             				mainElementMap.put(key, new HashMap<String, String[]>());
             			}
+
+                        // Handing the situations where we don't have '_' in aggregatedKey
+                        // and assume we hare having only one '_" in aggregatedKey and not more
+                        if (keys.length > 1) {
+                            break;
+                        }
             		}
             		String[] attributeValues = artifact.getAttributes(aggregatedKey);
                     String elementName = keys[keys.length - 1];
