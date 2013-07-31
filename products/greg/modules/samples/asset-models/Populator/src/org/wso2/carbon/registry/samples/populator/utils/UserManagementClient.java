@@ -26,8 +26,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceStub;
 import org.wso2.carbon.tenant.mgt.stub.TenantMgtAdminServiceStub;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
-import org.wso2.carbon.user.mgt.common.ClaimValue;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.types.carbon.ClaimValue;
 import org.wso2.carbon.user.mgt.ui.Util;
 
 import java.util.Calendar;
@@ -118,7 +118,7 @@ public class UserManagementClient {
      * @throws Exception
      */
     public void addRole(String roleName, String[] userList, String[] permissions) throws Exception {
-        userAdminStub.addRole(roleName, userList, permissions);
+        userAdminStub.addRole(roleName, userList, permissions, false);
     }
 
     /**
@@ -133,7 +133,7 @@ public class UserManagementClient {
      */
     public void addUser(String userName, String password, String[] roles, ClaimValue[] claims,
                         String profileName) throws Exception {
-        userAdminStub.addUser(userName, password, roles, Util.toADBClaimValues(claims), profileName);
+        userAdminStub.addUser(userName, password, roles, claims, profileName);
     }
 
     /**

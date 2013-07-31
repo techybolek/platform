@@ -39,7 +39,7 @@ import org.wso2.carbon.registry.resource.services.utils.InputStreamBasedDataSour
 import org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient;
 import org.wso2.carbon.registry.samples.populator.utils.*;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
-import org.wso2.carbon.user.mgt.common.ClaimValue;
+import org.wso2.carbon.user.mgt.stub.types.carbon.ClaimValue;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;

@@ -114,11 +114,10 @@ public class CommandHandler {
      * @return
      */
     public static String getBaseUrl() {
-        String contextRoot = inputs.get("-cr");
-        String domain = getDomain();
+        String contextRoot = inputs.get("-cr") != null ? "/" + inputs.get("-cr") : "";
+        String domain = getDomain() != null ? "/t/" + getDomain() : "";
         return "https://" + inputs.get("-h") + ":" + inputs.get("-p") +
-                domain != null ? "/t/" + domain : "" +
-                contextRoot != null ? "/" + contextRoot : "";
+                domain  + contextRoot;
     }
 
     /**
