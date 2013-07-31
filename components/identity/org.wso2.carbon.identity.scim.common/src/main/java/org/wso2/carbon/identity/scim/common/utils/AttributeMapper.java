@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.charon.core.attributes.Attribute;
 import org.wso2.charon.core.attributes.ComplexAttribute;
 import org.wso2.charon.core.attributes.DefaultAttributeFactory;
@@ -47,6 +49,9 @@ import org.wso2.charon.core.util.AttributeUtil;
  * carbon claims and vice versa
  */
 public class AttributeMapper {
+	
+	private static Log log = LogFactory.getLog(AttributeMapper.class);
+	private static final boolean debug = log.isDebugEnabled();
 
     /**
      * Return claims as a map of <ClaimUri (which is mapped to SCIM attribute uri),ClaimValue>
@@ -217,14 +222,21 @@ public class AttributeMapper {
         switch (scimObjectType) {
             case SCIMConstants.GROUP_INT:
                 scimObject = new Group();
+                log.debug("Building Group Object");
                 break;
             case SCIMConstants.USER_INT:
                 scimObject = new User();
+                log.debug("Building User Object");
                 break;
         }
         for (Map.Entry<String, String> attributeEntry : attributes.entrySet()) {
+        	
+			if (debug) {
+				log.debug("AttributeKey: " + attributeEntry.getKey() + " AttributeValue:" +
+				          attributeEntry.getValue());
+			}
+        	
             String attributeURI = attributeEntry.getKey();
-
             String[] attributeURIParts = attributeURI.split(":");
             String attributeNameString = attributeURIParts[attributeURIParts.length - 1];
             String[] attributeNames = attributeNameString.split("\\.");
