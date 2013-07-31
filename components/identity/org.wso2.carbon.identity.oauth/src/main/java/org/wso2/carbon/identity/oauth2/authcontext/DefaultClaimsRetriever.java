@@ -96,8 +96,9 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                 claimsLocalCache.addToCache(cacheKey, userClaims);
             }
         } catch (UserStoreException e) {
+        	log.debug("Error while reading user claims ", e);
             throw new IdentityOAuth2Exception("Error while retrieving user claim values from "
-                    + "user store");
+                    + "user store: " + e.getMessage());
         }
         return claimValues;
     }

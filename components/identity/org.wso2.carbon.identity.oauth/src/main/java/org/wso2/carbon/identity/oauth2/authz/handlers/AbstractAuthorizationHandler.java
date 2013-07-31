@@ -77,14 +77,21 @@ public abstract class AbstractAuthorizationHandler implements AuthorizationHandl
 			if (OIDCAuthzServerUtil.isOIDCAuthzRequest(authorizationReqDTO.getScopes())) {
 				RememberMeStore.getInstance().addUserToStore(authorizationReqDTO.getUsername());
 			}
-            if(authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0){
-                authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR +
-                        authorizationReqDTO.getUsername());
-            }else if(authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0){
-                authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR +
-                        authorizationReqDTO.getUsername().substring(authorizationReqDTO.getUsername().
-                                indexOf(CarbonConstants.DOMAIN_SEPARATOR)+1));
-            }
+			if (authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0) {
+				String userName = authorizationReqDTO.getUsername();
+				if (UserCoreUtil.getDomainFromThreadLocal() != null) {
+					userName =
+					               UserCoreUtil.getDomainFromThreadLocal() +
+					                       CarbonConstants.DOMAIN_SEPARATOR + userName;
+				}
+				authorizationReqDTO.setUsername(userName);
+			} else if (authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0) {
+				authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() +
+				                                CarbonConstants.DOMAIN_SEPARATOR +
+				                                authorizationReqDTO.getUsername()
+				                                                   .substring(authorizationReqDTO.getUsername()
+				                                                                                 .indexOf(CarbonConstants.DOMAIN_SEPARATOR) + 1));
+			}
         }
         return authStatus;
     }
