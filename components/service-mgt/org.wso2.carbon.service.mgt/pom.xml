@@ -150,6 +150,7 @@
                     <excludes>
                         <exclude>**/BaseTestCase.java</exclude>
                         <exclude>**/TestServiceAdmin.java</exclude>
+                        <exclude>**/TestServiceGroupAdmin.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
