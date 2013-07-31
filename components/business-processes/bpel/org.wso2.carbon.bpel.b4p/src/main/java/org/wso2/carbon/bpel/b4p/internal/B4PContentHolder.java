@@ -17,6 +17,8 @@
 package org.wso2.carbon.bpel.b4p.internal;
 
 import org.wso2.carbon.bpel.core.ode.integration.BPELServer;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * Data holder for the B4PServiceComponent
@@ -26,6 +28,8 @@ public final class B4PContentHolder {
     private static B4PContentHolder instance;
 
     private BPELServer bpelServer;
+
+    private static RealmService realmService;
 
     private B4PContentHolder() {}
 
@@ -42,5 +46,13 @@ public final class B4PContentHolder {
 
     public void setBpelServer(BPELServer bpelServer) {
         this.bpelServer = bpelServer;
+    }
+    
+    public void setRealmService(RealmService realm) {
+        this.realmService = realm;
+    }
+    
+    public RealmService getRealmService(){
+        return this.realmService;
     }
 }

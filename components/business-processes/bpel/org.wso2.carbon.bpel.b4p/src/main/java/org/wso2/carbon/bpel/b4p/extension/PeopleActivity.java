@@ -42,13 +42,18 @@ import org.apache.ode.store.DeploymentUnitDir;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.bpel.b4p.internal.B4PContentHolder;
 import org.wso2.carbon.bpel.b4p.internal.B4PServiceComponent;
 import org.wso2.carbon.bpel.b4p.utils.SOAPHelper;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
 import org.wso2.carbon.bpel.core.ode.integration.BPELMessageContext;
 import org.wso2.carbon.bpel.core.ode.integration.store.ProcessConfigurationImpl;
 import org.wso2.carbon.bpel.core.ode.integration.utils.AxisServiceUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.unifiedendpoint.core.UnifiedEndpoint;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
@@ -440,6 +445,7 @@ public class PeopleActivity {
                 extensionContext.getProcessModel().getQName().getLocalPart() + "-" +
                         du.getStaticVersion());
 
+
         isTwoWay = activityType.equals(InteractionType.TASK);
 
         deriveServiceEPR(du, extensionContext);
@@ -654,11 +660,26 @@ public class PeopleActivity {
 
     public String invoke(ExtensionContext extensionContext) throws FaultException {
         BPELMessageContext taskMessageContext = new BPELMessageContext(hiWSDL);
+
+        int tenantId = B4PServiceComponent.getBPELServer().getMultiTenantProcessStore().
+                getTenantId(processId);
+        String tenantDomain = null;
+        try {
+            tenantDomain = B4PContentHolder.getInstance().getRealmService().getTenantManager().getDomain(tenantId);
+        } catch (UserStoreException e) {
+            log.error(" Cannot find the tenant domain " + e.toString());
+        }
+
+        if(tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+
         try {
             //Setting the attachment id attachmentIDList
             List<Long> attachmentIDList = extractAttachmentIDsToBeSentToHumanTask(extensionContext,
                     taskMessageContext);
-
             taskMessageContext.setOperationName(getOperationName());
 
             SOAPHelper soapHelper = new SOAPHelper(getBinding(), getSoapFactory(), isRPC);
@@ -668,6 +689,8 @@ public class PeopleActivity {
             Have to fix. Here we can't embed attachments in MessageContext, as we have only a
             list of attachment ids.
             */
+
+
             soapHelper.createSoapRequest(messageContext,
                     (Element) extensionContext.readVariable(inputVarName),
                     getOperation(extensionContext), attachmentIDList);

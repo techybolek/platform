@@ -21,12 +21,17 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.bpel.core.BPELEngineService;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServer;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * @scr.component name="org.wso2.carbon.bpel.B4PServiceComponent" immediate="true"
  * @scr.reference name="bpel.engine"
  * interface="org.wso2.carbon.bpel.core.BPELEngineService"
  * cardinality="1..1" policy="dynamic" bind="setBPELServer" unbind="unsetBPELServer"
+ * @scr.reference name="user.realmservice.default"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService"
+ * unbind="unsetRealmService"
  */
 
 public class B4PServiceComponent {
@@ -38,7 +43,7 @@ public class B4PServiceComponent {
         }
     }
 
-protected void setBPELServer(BPELEngineService bpelEngineService) {
+    protected void setBPELServer(BPELEngineService bpelEngineService) {
         if (log.isDebugEnabled()) {
             log.debug("BPELEngineService bound to the B4P component");
         }
@@ -55,5 +60,13 @@ protected void setBPELServer(BPELEngineService bpelEngineService) {
 
     public static BPELServer getBPELServer() {
         return B4PContentHolder.getInstance().getBpelServer();
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        B4PContentHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        B4PContentHolder.getInstance().setRealmService(null);
     }
 }
