@@ -1957,7 +1957,7 @@ public class ApiMgtDAO {
 	                " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
 			
 			prepStmt = connection.prepareStatement(sqlUpdateOldAccessTokenState);
-			prepStmt.setString(1, APIConstants.TokenStatus.REVOKED);	
+			prepStmt.setString(1, APIConstants.TokenStatus.INACTIVE);	
 			prepStmt.setString(2, oldAccessToken);	
 			prepStmt.setString(3, keyType);	
 			

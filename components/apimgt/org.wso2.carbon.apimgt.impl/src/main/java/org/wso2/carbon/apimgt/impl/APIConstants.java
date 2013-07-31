@@ -169,6 +169,7 @@ public final class APIConstants {
         public static final String ACTIVE = "ACTIVE";
         public static final String BLOCKED = "BLOCKED";
         public static final String REVOKED = "REVOKED";
+        public static final String INACTIVE = "INACTIVE";
     }
     public static class SubscriptionStatus {
         public static final String BLOCKED = "BLOCKED";
