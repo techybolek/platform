@@ -21,6 +21,7 @@ package org.apache.synapse.transport.vfs;
 
 import org.apache.axis2.transport.OutTransportInfo;
 import org.apache.axis2.transport.base.BaseUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs2.provider.UriParser;
@@ -57,8 +58,7 @@ public class VFSOutTransportInfo implements OutTransportInfo {
             String vfsURI = outFileURI.substring(VFSConstants.VFS_PREFIX.length());
             String queryParams = UriParser.extractQueryString(new StringBuilder(vfsURI));
 
-            //Lets get rid of unwanted query params and clean the URI - we can't do this with java.net.URI as it does not support multiple
-            //protocols in the URI, for example "vfs:file:/".
+            //Lets get rid of unwanted query params and clean the URI
             if(null != queryParams && !"".equals(queryParams) && vfsURI.contains(VFSConstants.APPEND)) {
                this.outFileURI = cleanURI(vfsURI, queryParams, outFileURI);
             } else {
@@ -109,21 +109,27 @@ public class VFSOutTransportInfo implements OutTransportInfo {
     }
 
     private String cleanURI(String vfsURI, String queryParams, String originalFileURI) {
-        vfsURI = vfsURI.replace("?"+queryParams, "");
-        queryParams = queryParams.replace(VFSConstants.APPEND+"=true", "");
-        queryParams = queryParams.replace(VFSConstants.APPEND+"=false", "");
-        queryParams = queryParams.replace("&&", "&");
+        // Using Apache Commons StringUtils and Java StringBuilder for improved performance.
+        vfsURI = StringUtils.replace(vfsURI, "?" + queryParams, "");
+        queryParams = StringUtils.replace(queryParams, VFSConstants.APPEND+"=true", "");
+        queryParams = StringUtils.replace(queryParams, VFSConstants.APPEND+"=false", "");
+        queryParams = StringUtils.replace(queryParams, "&&", "&");
+
+        // We can sometimes be left with && in the URI
         if(!"".equals(queryParams) && queryParams.toCharArray()[0] == "&".charAt(0)) {
             queryParams = queryParams.substring(1);
+        } else if("".equals(queryParams)) {
+            return vfsURI;
         }
 
         String[] queryParamsArray = queryParams.split("&");
-        String newQueryParams = "";
+        StringBuilder newQueryParams = new StringBuilder("");
         if(queryParamsArray.length > 0) {
             for(String param : queryParamsArray) {
-                newQueryParams = newQueryParams.concat(param) + "&";
+                newQueryParams.append(param);
+                newQueryParams.append("&");
             }
-            newQueryParams = newQueryParams.substring(0, newQueryParams.length()-1);
+            newQueryParams = newQueryParams.deleteCharAt(newQueryParams.length()-1);
             if(!"".equals(newQueryParams)) {
                 return vfsURI + "?" + newQueryParams;
             } else {
