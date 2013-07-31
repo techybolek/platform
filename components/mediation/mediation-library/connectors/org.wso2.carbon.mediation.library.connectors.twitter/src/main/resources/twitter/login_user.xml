@@ -1,9 +1,0 @@
-<template xmlns="http://ws.apache.org/ns/synapse" name="login_user">
-	<parameter name="oauth.consumerKey"/>
-        <parameter name="oauth.consumerSecret"/>
-        <parameter name="oauth.accessToken"/>
-        <parameter name="oauth.accessTokenSecret"/>
-        <sequence>
-        	<class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" />
-        </sequence>
-    </template>

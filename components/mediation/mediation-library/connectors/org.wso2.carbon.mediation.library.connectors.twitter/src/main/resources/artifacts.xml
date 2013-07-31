@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<artifacts>
-    <artifact name="twitter" package="org.wso2.carbon.connectors" >
-        <dependency artifact="twitter" />
-        <description>synapse library for twitter connector</description>
-    </artifact>
-</artifacts>
