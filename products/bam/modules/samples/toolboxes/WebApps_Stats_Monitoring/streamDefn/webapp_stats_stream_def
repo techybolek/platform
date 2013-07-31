@@ -39,7 +39,7 @@
         {"name":"requestCount","type":"INT"},
         {"name":"responceCount","type":"INT"},
         {"name":"faultCount","type":"INT"},
-        {"name":"requestSizeBytes","type":"BIGINT"},
-        {"name":"responseSizeBytes","type":"BIGINT"}
+        {"name":"requestSizeBytes","type":"LONG"},
+        {"name":"responseSizeBytes","type":"LONG"}
         ]
 }
