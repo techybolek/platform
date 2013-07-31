@@ -32,31 +32,31 @@ public class HealthCareScenarioTestCase extends ESBIntegrationTest {
         resourceAdminServiceStub.addResource(
                 "/_system/governance/service_integration/wsdls/HCCService.wsdl", "application/wsdl+xml", "wsdl+xml files",
                 new DataHandler(new URL("file:///" + getESBResourceLocation() +
-                        "/synapseconfig/healthcarescenario/HCCService.wsdl")));
+                                        "/synapseconfig/healthcarescenario/HCCService.wsdl")));
 
         loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/healthcarescenario/synapse.xml");
     }
 
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     @Test(groups = {"wso2.esb"}, description = "Health Care Scenario Test Case")
-    public void testScenario() throws IOException {
-        try {
-            OMElement requestXML = AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
-                    "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n" +
-                    "                          xmlns:heal=\"http://healthcare.wso2\">\n" +
-                    "            <soapenv:Body>\n" +
-                    "                <heal:getHealthcareCenterInfo>\n" +
-                    "                    <heal:longitude>34.3</heal:longitude>\n" +
-                    "                    <heal:latitude>-43.2</heal:latitude>\n" +
-                    "                </heal:getHealthcareCenterInfo>\n" +
-                    "            </soapenv:Body>\n" +
-                    "</soapenv:Envelope>");
+    public void testScenario() throws IOException, XMLStreamException {
 
-            String proxyServiceEP = getProxyServiceURL("HCCProxyService");
-            OMElement response = a2Client.sendReceive(requestXML, proxyServiceEP, "getHealthcareCenterInfo");
-            assertTrue(response.getLocalName() == "getHCCenterInfoResponse" ? this.countSiblings(response, 1) == 5 : false, "Received 5 aggregated HCCenterInfoResponse elements in response.");
-            //System.out.println("==== Response: " + response.toString());
-        } catch (XMLStreamException e) {}
+        OMElement requestXML = AXIOMUtil.stringToOM("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
+                                                    "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n" +
+                                                    "                          xmlns:heal=\"http://healthcare.wso2\">\n" +
+                                                    "            <soapenv:Body>\n" +
+                                                    "                <heal:getHealthcareCenterInfo>\n" +
+                                                    "                    <heal:longitude>34.3</heal:longitude>\n" +
+                                                    "                    <heal:latitude>-43.2</heal:latitude>\n" +
+                                                    "                </heal:getHealthcareCenterInfo>\n" +
+                                                    "            </soapenv:Body>\n" +
+                                                    "</soapenv:Envelope>");
+
+        String proxyServiceEP = getProxyServiceURL("HCCProxyService");
+        OMElement response = a2Client.sendReceive(requestXML, proxyServiceEP, "getHealthcareCenterInfo");
+        assertTrue(response.getLocalName() == "getHCCenterInfoResponse" ? this.countSiblings(response, 1) == 5 : false, "Received 5 aggregated HCCenterInfoResponse elements in response.");
+        //System.out.println("==== Response: " + response.toString());
+
 
     }
 
@@ -69,11 +69,11 @@ public class HealthCareScenarioTestCase extends ESBIntegrationTest {
      * should return adding up each of the 1's.
      *
      * @param sibling OMNode
-     * @param count initial count (i.e. first sibling, this should always be 1).
+     * @param count   initial count (i.e. first sibling, this should always be 1).
      * @return total sibling count.
      */
     private int countSiblings(OMNode sibling, int count) {
-        if(sibling.getNextOMSibling() != null) {
+        if (sibling.getNextOMSibling() != null) {
             count = 1; // I am a sibling.
             return count + countSiblings(sibling.getNextOMSibling(), 1);
         } else {
