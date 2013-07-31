@@ -42,6 +42,7 @@ import org.wso2.carbon.identity.tests.utils.BasicAuthInfo;
 import org.wso2.carbon.identity.tests.utils.SCIM.SCIMResponseHandler;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.charon.core.client.SCIMClient;
+import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.objects.Group;
 import org.wso2.charon.core.schema.SCIMConstants;
 
@@ -51,7 +52,7 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
     public static final String EXTERNAL_ID = "eng";
     String scimUserId = null;
     String scimGroupId = null;
-    String skim_url;
+    String scim_url;
     public static final int providerUserId = 0;
     public static final int consumerUserId = 0;
 
@@ -70,7 +71,7 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
         ContextProvider consumer = new ContextProvider();
         EnvironmentContext consumerNodeContext = consumer.getNodeContext(consumerGroup.getNode().getNodeId(), consumerUserId);
         backendUrl = consumerNodeContext.getBackEndUrl();
-        skim_url = "https://" + consumerNodeContext.getWorkerVariables().getHostName() + ":" + consumerNodeContext.getWorkerVariables().getHttpsPort() + "/wso2/scim/";
+        scim_url = "https://" + consumerNodeContext.getWorkerVariables().getHostName() + ":" + consumerNodeContext.getWorkerVariables().getHttpsPort() + "/wso2/scim/";
         serviceEndPoint = consumerNodeContext.getBackEndUrl();
         sessionCookie = consumerNodeContext.getSessionCookie();
         userMgtClient = new UserManagementClient(backendUrl, sessionCookie);
@@ -80,7 +81,7 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
         createUser();
     }
 
-    @Test(alwaysRun = true, description = "Add SCIM user", priority = 2)
+    @Test(alwaysRun = true, description = "Add SCIM Group", priority = 1)
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     public void createGroupTest() throws Exception {
         //create a group according to SCIM Group Schema
@@ -91,7 +92,7 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
         scimGroup.setMember(scimUserId, userName);
 
         String encodedGroup = scimClient.encodeSCIMObject(scimGroup, SCIMConstants.JSON);
-        Resource groupResource = getGroupResource(scimClient, skim_url);
+        Resource groupResource = getGroupResource(scimClient, scim_url);
         BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
 
         //send previously registered SCIM consumer credentials in http headers.
@@ -105,7 +106,7 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
         Assert.assertTrue(userMgtClient.roleNameExists(DISPLAY_NAME));
     }
 
-    @Test(alwaysRun = true, description = "Add SCIM user", priority = 3)
+    @Test(alwaysRun = true, description = "Get SCIM Group", priority = 2)
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     public void getGroup() throws Exception {
 
@@ -118,41 +119,17 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
         RestClient restClient = new RestClient(clientConfig);
         BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
         //create resource endpoint to access a known user resource.
-        Resource groupResource = restClient.resource(skim_url + "Groups/" + scimGroupId);
+        Resource groupResource = restClient.resource(scim_url + "Groups/" + scimGroupId);
         String response = groupResource.
                 header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
                 contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
                 .get(String.class);
-        //  Assert.assertTrue(response.split(",")[0].split(":")[1].replace('"', ' ').trim().equals(scimGroupId));
         log.info(response.toString());
+        Assert.assertTrue(response.split(",")[0].split(":")[1].replace('"', ' ').trim().contains(scimGroupId));
     }
 
 
-    @Test(alwaysRun = true, description = "Add SCIM user", priority = 6)
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
-    public void deleteGroup() throws Exception {
-        SCIMResponseHandler responseHandler = new SCIMResponseHandler();
-        responseHandler.setSCIMClient(scimClient);
-        //set the handler in wink client config
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.handlers(new ClientHandler[]{responseHandler});
-        //create a wink rest client with the above config
-        RestClient restClient = new RestClient(clientConfig);
-        BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
-        //create resource endpoint to access a known user resource.
-        Resource groupResource = restClient.resource(skim_url + "Groups/" + scimGroupId);
-        //had to set content type for the delete request as well, coz wink client sets */* by default.
-        String response = groupResource.
-                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
-                accept(SCIMConstants.APPLICATION_JSON).
-                delete(String.class);
-
-        //decode the response
-        log.info(response.toString());
-        Assert.assertFalse(userMgtClient.roleNameExists(DISPLAY_NAME));
-    }
-
-    @Test(alwaysRun = true, description = "Add SCIM user", priority = 5)
+    @Test(alwaysRun = true, description = "list SCIM Groups", priority = 3)
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     public void listGroup() throws Exception {
         SCIMResponseHandler responseHandler = new SCIMResponseHandler();
@@ -165,17 +142,19 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
         RestClient restClient = new RestClient(clientConfig);
         BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
         //create resource endpoint to access a known user resource.
-        Resource groupResource = restClient.resource(skim_url + "Groups/" + scimGroupId);
+        Resource groupResource = restClient.resource(scim_url + "Groups/" + scimGroupId);
         String response = groupResource.
                 header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
                 contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
                 .get(String.class);
-
-        FlaggedName[] roleNames = userMgtClient.listRoles("", 100);
-        for (FlaggedName role : roleNames) {
-            role.getDomainName();
-        }
         log.info(response.toString());
+        FlaggedName[] roleNames = userMgtClient.listRoles("eng", 100);
+        for (FlaggedName role : roleNames) {
+            if (!role.getItemName().contains("false")) {
+                Assert.assertTrue(response.contains(role.getItemName()));
+            }
+        }
+
     }
 
 
@@ -191,7 +170,7 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
         RestClient restClient = new RestClient(clientConfig);
         BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
         //create resource endpoint to access a known user resource.
-        Resource groupResource = restClient.resource(skim_url + "Groups/" + scimGroupId);
+        Resource groupResource = restClient.resource(scim_url + "Groups/" + scimGroupId);
         String response = groupResource.
                 header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
                 contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
@@ -199,29 +178,55 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
 
         log.info("Retrieved group: " + response);
         //decode retrieved group
-        Group decodedGroup = (Group) scimClient.decodeSCIMResponse(response, SCIMConstants.JSON, 2);
+        Group decodedGroup = (Group) scimClient.decodeSCIMResponse(response.replace("PRIMARY/",""), SCIMConstants.JSON, 2);
 
-        decodedGroup.setDisplayName("eng2");
+        decodedGroup.setDisplayName("testeng2");
         String updatedGroupString = scimClient.encodeSCIMObject(decodedGroup, SCIMConstants.JSON);
 
-        Resource updateGroupResource = restClient.resource(skim_url + "Groups/" + scimGroupId);
+        Resource updateGroupResource = restClient.resource(scim_url + "Groups/" + scimGroupId);
         String responseUpdated = updateGroupResource.
                 header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
                 contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON)
                 .put(String.class, updatedGroupString);
-       log.info("Updated group: " + responseUpdated);
+        log.info("Updated group: " + responseUpdated);
+        Assert.assertTrue(response.contains("eng2"));
     }
+
+    @Test(alwaysRun = true, description = "Add SCIM user", priority = 6)
+    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
+    public void deleteGroup() throws Exception {
+        SCIMResponseHandler responseHandler = new SCIMResponseHandler();
+        responseHandler.setSCIMClient(scimClient);
+        //set the handler in wink client config
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.handlers(new ClientHandler[]{responseHandler});
+        //create a wink rest client with the above config
+        RestClient restClient = new RestClient(clientConfig);
+        BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
+        //create resource endpoint to access a known user resource.
+        Resource groupResource = restClient.resource(scim_url + "Groups/" + scimGroupId);
+        //had to set content type for the delete request as well, coz wink client sets */* by default.
+        String response = groupResource.
+                header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
+                accept(SCIMConstants.APPLICATION_JSON).
+                delete(String.class);
+
+        //decode the response
+        log.info(response.toString());
+        Assert.assertFalse(userMgtClient.roleNameExists(DISPLAY_NAME));
+    }
+
 
     @AfterClass(alwaysRun = true)
     public void cleanOut() throws Exception {
         deleteUser();
     }
 
-    public void createUser() throws Exception {
+    public void createUser() throws CharonException {
         //create SCIM client
         String encodedUser = getScimUser();
         //create a apache wink ClientHandler to intercept and identify response messages
-        Resource userResource = getResource(scimClient, skim_url);
+        Resource userResource = getResource(scimClient, scim_url);
         BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
         String response = userResource.
                 header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
@@ -231,17 +236,17 @@ public class SCIMServiceProviderGroupTestCase extends MasterSCIMInitiator {
     }
 
 
-    public void deleteUser() throws Exception {
-        //create SCIM client
-        String encodedUser = getScimUser();
-        //create a apache wink ClientHandler to intercept and identify response messages
-
-        Resource userResource = getResource(scimClient, skim_url, scimUserId);
+    public void deleteUser() {
+        ClientConfig clientConfig = new ClientConfig();
+        SCIMResponseHandler responseHandler = new SCIMResponseHandler();
+        responseHandler.setSCIMClient(scimClient);
+        clientConfig.handlers(new ClientHandler[]{responseHandler});
+        RestClient restClient = new RestClient(clientConfig);
         BasicAuthInfo encodedBasicAuthInfo = getBasicAuthInfo(userInfo);
+        Resource userResource = restClient.resource(scim_url + "Users/" + scimUserId);
         String response = userResource.
                 header(SCIMConstants.AUTHORIZATION_HEADER, encodedBasicAuthInfo.getAuthorizationHeader()).
-                contentType(SCIMConstants.APPLICATION_JSON).accept(SCIMConstants.APPLICATION_JSON).
-                post(String.class, encodedUser);
-        scimUserId = response.split(",")[0].split(":")[1].replace('"', ' ').trim();
+                accept(SCIMConstants.APPLICATION_JSON).
+                delete(String.class);
     }
 }
