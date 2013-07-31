@@ -31,8 +31,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 
 import javax.activation.MimetypesFileTypeMap;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -274,7 +273,7 @@ public class ThemeUtil {
     private static void addResourcesRecursively(String sourcePath, String targetPath,
                                                 Registry superRegistry, Registry tenantRegistry)
             throws RegistryException {
-        Resource resource = superRegistry.get(sourcePath);
+        /*Resource resource = superRegistry.get(sourcePath);
         tenantRegistry.put(targetPath, resource);
 
         if (resource instanceof Collection) {
@@ -283,7 +282,11 @@ public class ThemeUtil {
                 String childName = child.substring(child.lastIndexOf("/"), child.length());
                 addResourcesRecursively(child, targetPath + childName, superRegistry, tenantRegistry);
             }
-        }
+        }*/
+        StringWriter writer = new StringWriter();
+        superRegistry.dump(sourcePath, writer);
+        Reader input = new StringReader(writer.toString());
+        tenantRegistry.restore(targetPath, input);
     }
 
     public static String getCurrentTheme(String tenantPass, UserRegistry registry) throws Exception {
