@@ -46,9 +46,9 @@ public class LoginAndManageTestCase {
     public void initialize() throws Exception {
         PermissionTestUtil.setUpTestRoles();
         EnvironmentBuilder builderNonAdmin;
-        ManageEnvironment nonAdminEnvironment = null;
+        ManageEnvironment nonAdminEnvironment;
         EnvironmentBuilder builderNonAdmin2;
-        ManageEnvironment nonAdmin2Environment = null;
+        ManageEnvironment nonAdmin2Environment;
 
         builderNonAdmin = new EnvironmentBuilder().greg(2);
         nonAdminEnvironment = builderNonAdmin.build();
@@ -78,7 +78,7 @@ public class LoginAndManageTestCase {
     }
 
     @Test(groups = "wso2.greg", description = "Test whether a non admin can view others profiles",
-          expectedExceptions = RemoteException.class)
+          expectedExceptions = org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException.class)
     public void testProfile() throws UserProfileMgtServiceUserProfileExceptionException, RemoteException {
         UserProfileDTO userProfileDTO = new UserProfileDTO();
         userProfileDTO.setProfileName("testuser2_profile1");
@@ -93,7 +93,8 @@ public class LoginAndManageTestCase {
 
         userProfileMgtServiceClient.setUserProfile("testuser2", userProfileDTO);
         assertNotNull(userProfileMgtServiceClient.getUserProfile("testuser2", "testuser2_profile1"));
-        userProfileMgtServiceClient2.getUserProfile("testuser2", "testuser2_profile1"); // should give exception
+        //should give exception -- org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException
+        userProfileMgtServiceClient2.getUserProfile("testuser2", "testuser2_profile1");
     }
 
     @AfterClass(alwaysRun = true)

@@ -57,10 +57,7 @@ public class PermissionInheritanceTestCase {
     private UserManagementClient userManagementClient;
 
     @BeforeClass(alwaysRun = true)
-    public void initialize() throws LoginAuthenticationExceptionException, RemoteException,
-                                    ResourceAdminServiceExceptionException, MalformedURLException,
-                                    LogoutAuthenticationExceptionException, RegistryException,
-                                    ResourceAdminServiceResourceServiceExceptionException {
+    public void initialize() throws Exception {
         EnvironmentBuilder builderAdmin = new EnvironmentBuilder().greg(ProductConstant.ADMIN_USER_ID);
         ManageEnvironment adminEnvironment = builderAdmin.build();
 
@@ -103,6 +100,10 @@ public class PermissionInheritanceTestCase {
         adminResourceAdminClient.addResourcePermission(TEST_DIR_PATH + ALLOWED_DIR,
                                                        PermissionTestConstants.NON_ADMIN_ROLE, PermissionTestConstants.AUTHORIZE_ACTION,
                                                        PermissionTestConstants.PERMISSION_DISABLED);
+        userManagementClient = new UserManagementClient(adminEnvironment.getGreg().getBackEndUrl(),
+                adminEnvironment.getGreg().getSessionCookie());
+        //Add  testuser2 to testRole.
+        userManagementClient.updateUserListOfRole(PermissionTestConstants.NON_ADMIN_ROLE, new String[]{"testuser2"},new String[]{});
     }
 
     @Test(groups = "wso2.greg", description = "Test read access inheritance")
@@ -243,8 +244,6 @@ public class PermissionInheritanceTestCase {
 
     @Test(groups = "wso2.greg", description = "Test authorization access inheritance")
     public void testAllowAuthPermission() throws Exception {
-        //Add  testuser2 to testRole.
-        userManagementClient.updateUserListOfRole(PermissionTestConstants.NON_ADMIN_ROLE, new String[]{"testuser2"},new String[]{});
         //Allow denied permission
         adminResourceAdminClient.addResourcePermission(TEST_DIR_PATH + ALLOWED_DIR,
                                                        PermissionTestConstants.NON_ADMIN_ROLE, PermissionTestConstants.AUTHORIZE_ACTION,
