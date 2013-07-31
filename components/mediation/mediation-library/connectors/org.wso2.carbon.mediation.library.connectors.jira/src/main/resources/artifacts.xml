@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<artifacts>
-    <artifact name="jiraConnector" package="org.wso2.carbon.connectors" >
-        <dependency artifact="jira_core" />
-        <description>WSO2 Carbon iPaaS Cloud Connectors - JIRA Connector</description>
-    </artifact>
-</artifacts>
