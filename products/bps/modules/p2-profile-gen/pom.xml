@@ -100,6 +100,8 @@
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.sts.feature:${carbon.version}</featureArtifactDef>
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.tryit.feature:${carbon.version}</featureArtifactDef>
 
+		  <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.wsdl.tools.feature:${carbon.version}</featureArtifactDef>
+
                                     <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.datasource.feature:${carbon.version}</featureArtifactDef>
 
                                     <!-- registry related features-->
@@ -234,6 +236,10 @@
                                     </feature>
                                     <feature>
                                         <id>org.wso2.carbon.tryit.feature.group</id>
+                                        <version>${carbon.version}</version>
+                                    </feature>
+		  <feature>
+                                        <id>org.wso2.carbon.wsdl.tools.feature.group</id>
                                         <version>${carbon.version}</version>
                                     </feature>
                                     <feature>
