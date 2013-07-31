@@ -49,6 +49,7 @@ import org.wso2.carbon.governance.api.schema.dataobjects.Schema;
 import org.wso2.carbon.governance.api.services.ServiceFilter;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
@@ -59,6 +60,7 @@ import org.wso2.carbon.humantask.stub.ui.task.client.api.IllegalArgumentFault;
 import org.wso2.carbon.humantask.stub.ui.task.client.api.IllegalStateFault;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.info.stub.RegistryExceptionException;
 import org.wso2.carbon.registry.info.stub.beans.xsd.SubscriptionBean;
 import org.wso2.carbon.registry.properties.stub.PropertiesAdminServiceRegistryExceptionException;
@@ -134,6 +136,7 @@ public class ServicesResourceInformationManagementTestCase {
                                                          ProductConstant.GREG_SERVER_NAME);
 
         governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         governance2 = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry2, userId2);
         serviceManager = new ServiceManager(governance);
         serviceManager2 = new ServiceManager(governance2);
