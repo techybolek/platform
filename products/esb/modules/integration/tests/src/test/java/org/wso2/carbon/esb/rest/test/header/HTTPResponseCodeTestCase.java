@@ -18,30 +18,27 @@
 
 package org.wso2.carbon.esb.rest.test.header;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.automation.core.customservers.SimpleWebServer;
 import org.wso2.carbon.automation.core.utils.ClientConnectionUtil;
 import org.wso2.carbon.automation.core.utils.httpserverutils.SimpleHttpClient;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
-public class ESBJAVA2283ReturnContentTypeTestCase extends ESBIntegrationTest {
-    private Log log = LogFactory.getLog(ESBJAVA2283ReturnContentTypeTestCase.class);
+public class HTTPResponseCodeTestCase extends ESBIntegrationTest {
+    private Log log = LogFactory.getLog(HTTPResponseCodeTestCase.class);
 
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
@@ -49,28 +46,58 @@ public class ESBJAVA2283ReturnContentTypeTestCase extends ESBIntegrationTest {
         loadESBConfigurationFromClasspath("/artifacts/ESB/synapseconfig/esbjava2283/synapse.xml");
     }
 
-    @Test(groups = {"wso2.esb"}, description = "test return content type")
-    public void testReturnContentType() throws Exception {
-        SimpleWebServer simpleWebServer = new SimpleWebServer(9006, 200);
+    @Test(groups = {"wso2.esb"}, description = "Test different response codes",
+          dataProvider = "getResponseCodes")
+    public void testReturnResponseCode(int responseCode) throws Exception {
+        int port = 9006;
+        String contentType = "text/xml";
+        SimpleWebServer simpleWebServer = new SimpleWebServer(port, responseCode);
+        log.info("Running the test for context type -" + contentType);
         try {
             simpleWebServer.start();
             SimpleHttpClient httpClient = new SimpleHttpClient();
             Map<String, String> headers = new HashMap<String, String>();
-            headers.put("Content-Type", "text/xml");
+            headers.put("Content-Type", contentType);
             HttpResponse response = httpClient.doGet(esbServer.getServiceUrl() + "/passThoughProxy", headers);
             log.info(response.getEntity().getContentType());
             log.info(response.getStatusLine().getStatusCode());
+            simpleWebServer.terminate();
 
-            assertEquals(response.getEntity().getContentType().getValue(), "text/xml", "Expected content type doesn't match");
-            assertEquals(response.getStatusLine().getStatusCode(), 200, "response code doesn't match");
+            assertEquals(response.getEntity().getContentType().getValue(), contentType, "Expected content type doesn't match");
+            assertEquals(response.getStatusLine().getStatusCode(), responseCode, "response code doesn't match");
         } finally {
             simpleWebServer.terminate();
-            ClientConnectionUtil.waitForPort(9006, InetAddress.getLocalHost().getHostName());
+            waitForPortCloser(port);
         }
     }
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         super.cleanup();
+    }
+
+    @DataProvider(name = "responseCodeProvider")
+    public Object[][] getResponseCodes() {
+        return new Object[][]{
+                {200},
+                {400},
+                {403},
+                {404},
+                {500},
+                {501},
+                {503},
+        };
+    }
+
+    public boolean waitForPortCloser(int port) throws UnknownHostException {
+        long time = System.currentTimeMillis() + 5000;
+        boolean isPortAvailable = true;
+        while (System.currentTimeMillis() < time) {
+            isPortAvailable = ClientConnectionUtil.isPortOpen(port, InetAddress.getLocalHost().getHostName());
+            if (!isPortAvailable) {
+                return isPortAvailable;
+            }
+        }
+        return isPortAvailable;
     }
 }
