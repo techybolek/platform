@@ -116,7 +116,7 @@ public class LCInGenericArtifactTestCase {
     @Test(groups = {"wso2.greg"}, description = "add an artefact with multiple longer lines", enabled = true, dependsOnMethods = "testAddNewRxtFile")
     public void testAddNewGenericArtifactWithLC() throws Exception {
         GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
-        GenericArtifactManager artifactManager = new GenericArtifactManager(governance, "events_lc");
+        GenericArtifactManager artifactManager = new GenericArtifactManager(governance, "evlc");
         GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName
                 ("EventWithLC"));
         artifact.setAttribute("details_venue", "Colombo");
@@ -153,7 +153,7 @@ public class LCInGenericArtifactTestCase {
     @AfterClass()
     public void endTest() throws RegistryException {
 
-        GenericArtifactManager artifactManager = new GenericArtifactManager(governance, "events_lc");
+        GenericArtifactManager artifactManager = new GenericArtifactManager(governance, "evlc");
         GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
         for (GenericArtifact genericArtifact : artifacts) {
             artifactManager.removeGenericArtifact(genericArtifact.getId());

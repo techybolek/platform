@@ -37,6 +37,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceFilter;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.services.ArrayOfString;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
@@ -44,6 +45,7 @@ import org.wso2.carbon.governance.list.stub.ListMetadataServiceRegistryException
 import org.wso2.carbon.governance.services.stub.AddServicesServiceRegistryExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -84,6 +86,7 @@ public class FilterServicesTestCase {
                 new RegistryProviderUtil().getWSRegistry(userId,
                                                          ProductConstant.GREG_SERVER_NAME);
         governance = new RegistryProviderUtil().getGovernanceRegistry(wsRegistry, userId);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         serviceManager = new ServiceManager(governance);
         EnvironmentBuilder builder = new EnvironmentBuilder().greg(userId);
         ManageEnvironment environment = builder.build();
