@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService
 import org.wso2.carbon.utils.ThriftSession;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,11 +91,19 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
 
                     //obtain a dummy carbon context holder
                     PrivilegedCarbonContext carbonContextHolder = PrivilegedCarbonContext.getCurrentContext();
-
+                    int tenantId = carbonContextHolder.getTenantId();
+                    String tenantDomain = carbonContextHolder.getTenantDomain();
 
                     /*start tenant flow to stack up any existing carbon context holder base,
                     and initialize a raw one*/
-                     PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.startTenantFlow();
+                    if (tenantDomain == null) {
+                    PrivilegedCarbonContext.getCurrentContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,true);
+                    PrivilegedCarbonContext.getCurrentContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+                    } else {
+                    PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
+                    PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
+                    }
 
                     try {
 
