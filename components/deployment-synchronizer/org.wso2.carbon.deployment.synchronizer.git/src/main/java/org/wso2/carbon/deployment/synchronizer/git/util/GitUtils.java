@@ -18,17 +18,29 @@
 
 package org.wso2.carbon.deployment.synchronizer.git.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.RepositoryInformation;
 import org.wso2.carbon.deployment.synchronizer.RepositoryManager;
+import org.wso2.carbon.deployment.synchronizer.git.internal.GitDeploymentSynchronizerConstants;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Utility methods specific for Git
  */
 
 public class GitUtils {
+
+    private static final Log log = LogFactory.getLog(GitUtils.class);
 
     /**
      * Checks if an existing local repository is a valid git repository
@@ -72,6 +84,71 @@ public class GitUtils {
             return new UsernamePasswordCredentialsProvider("", "");
         }
 
+    }
+
+    /**
+     * Initialize local git repository
+     *
+     * @param gitRepoDir directory in the local file system
+     */
+    public static void InitGitRepository (File gitRepoDir) {
+
+        try {
+            Git.init().setDirectory(gitRepoDir).setBare(false).call();
+
+        } catch (GitAPIException e) {
+            String errorMsg = "Initializing local repo at " + gitRepoDir.getPath() + " failed";
+            handleError(errorMsg, e);
+        }
+    }
+
+    /**
+     * Adds the remote repository at remoteUrl to the given local repository
+     *
+     * @param repository Repository instance representing local repo
+     * @param remoteUrl remote repository url
+     * @return true if remote successfully added, else false
+     */
+    public static boolean addRemote (Repository repository, String remoteUrl) {
+
+        boolean remoteAdded = false;
+
+        StoredConfig config = repository.getConfig();
+        config.setString(GitDeploymentSynchronizerConstants.REMOTE,
+                GitDeploymentSynchronizerConstants.ORIGIN,
+                GitDeploymentSynchronizerConstants.URL,
+                remoteUrl);
+
+        config.setString(GitDeploymentSynchronizerConstants.REMOTE,
+                GitDeploymentSynchronizerConstants.ORIGIN,
+                GitDeploymentSynchronizerConstants.FETCH,
+                GitDeploymentSynchronizerConstants.FETCH_LOCATION);
+
+        config.setString(GitDeploymentSynchronizerConstants.BRANCH,
+                GitDeploymentSynchronizerConstants.MASTER,
+                GitDeploymentSynchronizerConstants.REMOTE,
+                GitDeploymentSynchronizerConstants.ORIGIN);
+
+        config.setString(GitDeploymentSynchronizerConstants.BRANCH,
+                GitDeploymentSynchronizerConstants.MASTER,
+                GitDeploymentSynchronizerConstants.MERGE,
+                GitDeploymentSynchronizerConstants.GIT_REFS_HEADS_MASTER);
+
+        try {
+            config.save();
+            remoteAdded = true;
+
+        } catch (IOException e) {
+            log.error("Error in adding remote origin " + remoteUrl + " for local repository " +
+                    repository.toString(), e);
+        }
+
+        return remoteAdded;
+    }
+
+    private static void handleError (String errorMsg, Exception e) throws DeploymentSynchronizerException {
+        log.error(errorMsg, e);
+        throw new DeploymentSynchronizerException(errorMsg, e);
     }
 
 }

@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.deployment.synchronizer.git.stratos2;
 
-import org.wso2.carbon.deployment.synchronizer.RepositoryManager;
-import org.wso2.carbon.deployment.synchronizer.git.TenantGitRepositoryContext;
 import org.wso2.carbon.deployment.synchronizer.git.internal.AbstractBehaviour;
 
 /**
@@ -28,18 +26,9 @@ import org.wso2.carbon.deployment.synchronizer.git.internal.AbstractBehaviour;
 
 public class S2Behaviour extends AbstractBehaviour {
 
-    /**
-     * Constructor
-     *
-     * @param repositoryManager RepositoryManager instance
-     */
-    public S2Behaviour(RepositoryManager repositoryManager) {
-        super(repositoryManager);
-    }
-
     @Override
-    public boolean syncInitialLocalArtifacts(TenantGitRepositoryContext tenantGitRepoCtx) {
-        return false;  //no initial artifact sync in Stratos2
+    public boolean requireInitialLocalArtifactSync() {
+        return false;
     }
 
     public boolean requireSynchronizeRepositoryRequest () {

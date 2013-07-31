@@ -30,6 +30,7 @@ public class TenantGitRepositoryContext extends TenantRepositoryContext {
     private String password;
     private Repository localRepo;
     private Git git;
+    private boolean initialArtifactsSynced;
     private boolean cloneExists;
     private int tenantId;
 
@@ -42,6 +43,7 @@ public class TenantGitRepositoryContext extends TenantRepositoryContext {
         localRepo = null;
         git = null;
         cloneExists = false;
+        initialArtifactsSynced = false;
         tenantId = 0;
     }
 
@@ -107,5 +109,13 @@ public class TenantGitRepositoryContext extends TenantRepositoryContext {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean initialArtifactsSynced() {
+        return initialArtifactsSynced;
+    }
+
+    public void setInitialArtifactsSynced(boolean initialArtifactsSynced) {
+        this.initialArtifactsSynced = initialArtifactsSynced;
     }
 }

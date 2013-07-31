@@ -80,12 +80,12 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
             else if (gitDepsyncConfig.getGitServer().equals(GitDeploymentSynchronizerConstants.SCM)) {
                 repositoryManager = new DefaultGitRepositoryManager(new SCMBasedRepositoryCreator());
             }
-            behaviour = new DefaultBehaviour(repositoryManager);
+            behaviour = new DefaultBehaviour();
         }
         //Stratos 2 specific deployment
         else {
             repositoryManager = new S2GitRepositoryManager();
-            behaviour = new S2Behaviour(repositoryManager);
+            behaviour = new S2Behaviour();
         }
     }
 
@@ -398,31 +398,80 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         TenantGitRepositoryContext gitRepoCtx = TenantGitRepositoryContextCache.getTenantRepositoryContextCache().
                 retrieveCachedTenantGitContext(tenantId);
 
-        //TODO:add initial artifact sync
-        /*if(!behaviour.syncInitialLocalArtifacts(gitRepoCtx) && !gitRepoCtx.cloneExists()) {
-            cloneRepository(gitRepoCtx);
-        }*/
-        if(!gitRepoCtx.cloneExists()) {
-            cloneRepository(gitRepoCtx);
+        File gitRepoDir = new File(gitRepoCtx.getLocalRepoPath());
+        if (!gitRepoDir.exists()) {
+             return cloneRepository(gitRepoCtx);
+        }
+        else {
+            if (GitUtils.isValidGitRepo(gitRepoCtx.getLocalRepo())) {
+                log.info("Existing git repository detected for tenant " + gitRepoCtx.getTenantId() +
+                        ", no clone required");
+                return pullArtifacts(gitRepoCtx);
+            }
+            else {
+                if (behaviour.requireInitialLocalArtifactSync()) {
+                    return syncInitialLocalArtifacts(gitRepoCtx);
+                }
+                else {
+                    if(log.isDebugEnabled()) {
+                        log.debug("Repository for tenant " + gitRepoCtx.getTenantId() + " is not a valid git repo, will try to delete");
+                    }
+                    FileUtils.deleteFolderStructure(gitRepoDir);
+                    return cloneRepository(gitRepoCtx);
+                }
+            }
         }
 
-        return pullArtifacts(gitRepoCtx);
+        /*if(behaviour.requireInitialLocalArtifactSync() && !gitRepoCtx.initialArtifactsSynced()) {
+            return syncInitialLocalArtifacts(gitRepoCtx);
+        }
+        else if(!gitRepoCtx.cloneExists()) {
+            return cloneRepository(gitRepoCtx);
+        }
+        else {
+            return pullArtifacts(gitRepoCtx);
+        }*/
+    }
+
+    /**
+     * Sync any local artifact that are initially available with a remote repository
+     *
+     * @param gitRepoCtx TenantGitRepositoryContext instance
+     * @return true if sync is success, else false
+     */
+    private boolean syncInitialLocalArtifacts(TenantGitRepositoryContext gitRepoCtx) {
+
+        boolean syncedLocalArtifacts = false;
+
+        Status status = getGitStatus(gitRepoCtx);
+        if(status != null && !status.isClean()) {
+            //initialize repository
+            GitUtils.InitGitRepository(new File(gitRepoCtx.getLocalRepoPath()));
+            //add the remote repository (origin)
+            syncedLocalArtifacts = GitUtils.addRemote(gitRepoCtx.getLocalRepo(),
+                    gitRepoCtx.getRemoteRepoUrl());
+        }
+
+        return syncedLocalArtifacts;
     }
 
     /**
      * Clones the remote repository to the local repository path
      *
      * @param gitRepoCtx TenantGitRepositoryContext for the tenant
+     * @return true if clone is success, else false
      */
-    private void cloneRepository (TenantGitRepositoryContext gitRepoCtx) { //should happen only at the beginning
+    private boolean cloneRepository (TenantGitRepositoryContext gitRepoCtx) { //should happen only at the beginning
+
+        boolean cloneSuccess = false;
 
         File gitRepoDir = new File(gitRepoCtx.getLocalRepoPath());
-        if (gitRepoDir.exists()) {
+        /*if (gitRepoDir.exists()) {
             if(GitUtils.isValidGitRepo(gitRepoCtx.getLocalRepo())) { //check if a this is a valid git repo
                 log.info("Existing git repository detected for tenant " + gitRepoCtx.getTenantId() +
                         ", no clone required");
                 gitRepoCtx.setCloneExists(true);
-                return;
+                return true;
             }
             else {
                 if(log.isDebugEnabled()) {
@@ -430,7 +479,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
                 }
                 FileUtils.deleteFolderStructure(gitRepoDir); //if not a valid git repo but non-empty, delete it (else the clone will not work)
             }
-        }
+        }*/
 
         CloneCommand cloneCmd =  Git.cloneRepository().
                 setURI(gitRepoCtx.getRemoteRepoUrl()).
@@ -443,7 +492,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         if (credentialsProvider == null) {
             log.warn ("Remote repository credentials not available for tenant " + gitRepoCtx.getTenantId() +
                     ", aborting clone");
-            return;
+            return false;
         }
         cloneCmd.setCredentialsProvider(credentialsProvider);
 
@@ -451,6 +500,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
             cloneCmd.call();
             log.info("Git clone operation for tenant " + gitRepoCtx.getTenantId() + " successful");
             gitRepoCtx.setCloneExists(true);
+            cloneSuccess = true;
 
         } catch (TransportException e) {
             log.error("Accessing remote git repository failed for tenant " + gitRepoCtx.getTenantId(), e);
@@ -458,6 +508,8 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         } catch (GitAPIException e) {
             log.error("Git clone operation for tenant " + gitRepoCtx.getTenantId() + " failed", e);
         }
+
+        return cloneSuccess;
     }
 
     /**

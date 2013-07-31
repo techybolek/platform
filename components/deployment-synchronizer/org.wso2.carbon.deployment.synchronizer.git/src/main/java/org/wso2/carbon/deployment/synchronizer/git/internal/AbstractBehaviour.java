@@ -18,33 +18,18 @@
 
 package org.wso2.carbon.deployment.synchronizer.git.internal;
 
-import org.wso2.carbon.deployment.synchronizer.RepositoryManager;
-import org.wso2.carbon.deployment.synchronizer.git.TenantGitRepositoryContext;
-
 /**
- * Defines abstractions for methods that are differ across various deployments
+ * Defines abstractions for behaviours that differ across various deployments
  */
 
 public abstract class AbstractBehaviour {
 
-    protected RepositoryManager repositoryManager;
-
     /**
-     * Constructor
+     * Specify whether to synchronize any initial artifacts
      *
-     * @param repositoryManager RepositoryManager instance
+     * @return true if initial local artifacts must be synced, else false
      */
-    public AbstractBehaviour (RepositoryManager repositoryManager) {
-        this.repositoryManager = repositoryManager;
-    }
-
-    /**
-     * Synchronize any initial artifacts in the tenant's axis2 repository
-     *
-     * @param tenantGitRepoCtx TenantGitRepositoryContext instance for the tenant
-     * @return true if successfully synched, else false
-     */
-    public abstract boolean syncInitialLocalArtifacts(TenantGitRepositoryContext tenantGitRepoCtx);
+    public abstract boolean requireInitialLocalArtifactSync();
 
     /**
      * Specify sending/not sending SynchronizeRepositoryRequest from carbon kernel
