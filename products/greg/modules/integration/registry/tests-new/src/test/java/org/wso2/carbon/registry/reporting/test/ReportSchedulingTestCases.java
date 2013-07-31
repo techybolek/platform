@@ -64,7 +64,7 @@ public class ReportSchedulingTestCases extends ReportingTestCaseSuper {
      *
      * @throws Exception
      */
-    @Test(groups = "wso2.greg", description = "Schedule a report and verify", dependsOnMethods = "testAddResourcesToTestScheduling")
+    @Test(groups = "wso2.greg", description = "Schedule a report and verify")
     public void testScheduleReport() throws Exception {
 
         ReportConfigurationBean configurationBean = new ReportConfigurationBean();
