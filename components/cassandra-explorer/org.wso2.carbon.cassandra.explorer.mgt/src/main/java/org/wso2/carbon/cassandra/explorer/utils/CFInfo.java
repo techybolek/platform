@@ -53,7 +53,8 @@ public class CFInfo {
         ColumnFamilyDefinition cfDef = ConnectionManager.getColumnFamilyDefinition(
                 cluster, keyspace, getColumnFamilyName());
 
-        this.keySerializer.setSerializer(CassandraUtils.getSerializer(cfDef.getKeyValidationClass()));
+        Serializer tmpKeySerializer = CassandraUtils.getSerializer(cfDef.getKeyValidationClass());
+        this.keySerializer.setSerializer(tmpKeySerializer != null ? tmpKeySerializer : new StringSerializer());
 
         if(this.keySerializer.getSerializer() instanceof CompositeSerializer) {
             this.keySerializer.setCompositeSerializerList(cfDef.getKeyValidationClass());
@@ -65,8 +66,8 @@ public class CFInfo {
             comparatorType = cfDef.getComparatorType();
             columnMetaData = cfDef.getColumnMetadata();
 
-            this.columnSerializer.setSerializer(CassandraUtils.getSerializer(comparatorType.getClassName()) != null ?
-                    CassandraUtils.getSerializer(comparatorType.getClassName()) : new StringSerializer());
+            Serializer tmpColumnSerializer = CassandraUtils.getSerializer(comparatorType.getClassName());
+            this.columnSerializer.setSerializer(tmpColumnSerializer != null ? tmpColumnSerializer : new StringSerializer());
 
             if(this.columnSerializer.getSerializer() instanceof CompositeSerializer) {
                 this.columnSerializer.setCompositeSerializerList(comparatorType.getClassName());
@@ -74,9 +75,9 @@ public class CFInfo {
         }
 
         for (ColumnDefinition columnDefinition : columnMetaData) {
-            CassandraSerializer valueSerializer =  new CassandraSerializer(
-                    CassandraUtils.getSerializer(columnDefinition.getValidationClass()) != null ?
-                            CassandraUtils.getSerializer(columnDefinition.getValidationClass()) : new StringSerializer());
+            Serializer tmpValueSerializer = CassandraUtils.getSerializer(columnDefinition.getValidationClass());
+            CassandraSerializer valueSerializer =  new CassandraSerializer(tmpValueSerializer != null ?
+                    tmpValueSerializer : new StringSerializer());
             if(valueSerializer.getSerializer() instanceof CompositeSerializer) {
                 valueSerializer.setCompositeSerializerList(columnDefinition.getValidationClass());
             }
@@ -84,8 +85,9 @@ public class CFInfo {
             valueSerializerMap.put(columnDefinition.getName(), valueSerializer);
         }
 
-        this.defaultValidationSerializer.setSerializer(CassandraUtils.getSerializer(cfDef.getDefaultValidationClass()) != null ?
-                CassandraUtils.getSerializer(cfDef.getDefaultValidationClass()) : new StringSerializer());
+        Serializer tmpDefaultValidationSerializer = CassandraUtils.getSerializer(cfDef.getDefaultValidationClass());
+        this.defaultValidationSerializer.setSerializer(tmpDefaultValidationSerializer != null ?
+                tmpDefaultValidationSerializer : new StringSerializer());
 
         if(this.defaultValidationSerializer.getSerializer() instanceof CompositeSerializer) {
             this.defaultValidationSerializer.setCompositeSerializerList(cfDef.getDefaultValidationClass());

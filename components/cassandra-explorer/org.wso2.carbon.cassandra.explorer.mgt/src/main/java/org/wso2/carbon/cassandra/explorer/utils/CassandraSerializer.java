@@ -42,7 +42,7 @@ public class CassandraSerializer {
         return isCompositeSerializer;
     }
 
-    public void setCompositeSerializer(boolean compositeSerializer) {
+    private void setCompositeSerializer(boolean compositeSerializer) {
         isCompositeSerializer = compositeSerializer;
     }
 
@@ -53,13 +53,12 @@ public class CassandraSerializer {
     public void setCompositeSerializerList(String comparatorStr) {
         this.compositeSerializerList = new ArrayList<Serializer>();
         setCompositeSerializer(true);
-        String serializeStr = comparatorStr.substring(comparatorStr.indexOf("(") + 1,comparatorStr.lastIndexOf(")"));
-
-        String [] serializeStrArr = serializeStr.split(",");
+        String serializeStr     = comparatorStr.substring(comparatorStr.indexOf("(") + 1,comparatorStr.lastIndexOf(")"));
+        String[] serializeStrArr= serializeStr.split(",");
 
         for(String className : serializeStrArr) {
-            compositeSerializerList.add(CassandraUtils.getSerializer(className) != null ?
-                    CassandraUtils.getSerializer(className) : new StringSerializer());
+            Serializer tempSerializer = CassandraUtils.getSerializer(className);
+            compositeSerializerList.add(tempSerializer != null ? tempSerializer : new StringSerializer());
         }
     }
 }

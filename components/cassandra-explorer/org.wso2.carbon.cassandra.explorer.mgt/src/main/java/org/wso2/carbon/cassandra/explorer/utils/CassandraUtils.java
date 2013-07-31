@@ -85,19 +85,23 @@ public class CassandraUtils {
         }
         Object columnName = serializer.fromByteBuffer(data);
 
-        if(columnName instanceof Composite && cassandraSerializer.getCompositeSerializerList() != null) {
-            boolean isAdded = false;
-            StringBuilder stringBuilder = new StringBuilder();
+        if(columnName == null) {
+            return "";
+        }
+
+        if(columnName instanceof Composite && cassandraSerializer.isCompositeSerializer()) {
+            boolean isAdded     = false;
             Composite composite = (Composite) columnName;
+            StringBuilder sb    = new StringBuilder();
             for(int i = 0; i < cassandraSerializer.getCompositeSerializerList().size(); i++) {
                 if(isAdded) {
-                    stringBuilder.append(":");
+                    sb.append(":");
                 }
                 Object compositeColName = composite.get(i, cassandraSerializer.getCompositeSerializerList().get(i));
                 isAdded = true;
-                stringBuilder.append(compositeColName.toString());
+                sb.append(compositeColName.toString());
             }
-            return stringBuilder.toString();
+            return sb.toString();
         }
 
         return columnName.toString();
