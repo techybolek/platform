@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -31,9 +31,8 @@ import twitter4j.TwitterException;
 public class TwitterRetweetStatusMediator extends AbstractConnector {
 
 	private static Log log = LogFactory.getLog(TwitterRetweetStatusMediator.class);
-	
+
 	public static final String ID = "id";
-	
 
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
@@ -42,8 +41,7 @@ public class TwitterRetweetStatusMediator extends AbstractConnector {
 			Status status = twitter.retweetStatus(Long.parseLong(id));
 			TwitterMediatorUtils.storeResponseStatus(messageContext, status);
 			if (log.isDebugEnabled()) {
-				log.info("@" + status.getUser().getScreenName() + " - "
-						+ status.getText());
+				log.info("@" + status.getUser().getScreenName() + " - " + status.getText());
 			}
 
 		} catch (TwitterException te) {

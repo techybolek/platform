@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -41,7 +41,7 @@ import twitter4j.json.DataObjectFactory;
 public class TwitterSearchPlaces extends AbstractTwitterConnector {
 
 	private static Log log = LogFactory.getLog(TwitterSearchPlaces.class);
-	
+
 	public static final String SEARCH_BY_LATITUDE = "latitude";
 
 	public static final String SEARCH_LONGITUDE = "longitude";
@@ -59,8 +59,7 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector {
 					SEARCH_BY_LATITUDE);
 			String longitude = TwitterMediatorUtils.lookupFunctionParam(messageContext,
 					SEARCH_LONGITUDE);
-			String ip = TwitterMediatorUtils.lookupFunctionParam(messageContext,
-					SEARCH_IP);
+			String ip = TwitterMediatorUtils.lookupFunctionParam(messageContext, SEARCH_IP);
 			GeoQuery query = new GeoQuery(new GeoLocation(Double.parseDouble(latitude),
 					Double.parseDouble(longitude)));
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
@@ -89,8 +88,8 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	private OMElement performSearch(Twitter twitter, GeoQuery query)
-			throws XMLStreamException, TwitterException, JSONException, IOException {
+	private OMElement performSearch(Twitter twitter, GeoQuery query) throws XMLStreamException,
+			TwitterException, JSONException, IOException {
 		OMElement resultElement = AXIOMUtil.stringToOM("<XMLPayload/>");
 		List<Place> results = twitter.searchPlaces(query);
 		if (log.isDebugEnabled()) {

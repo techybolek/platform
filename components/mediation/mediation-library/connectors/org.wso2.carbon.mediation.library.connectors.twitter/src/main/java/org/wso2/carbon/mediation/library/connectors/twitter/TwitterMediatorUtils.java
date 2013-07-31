@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import org.apache.synapse.MessageContext;
@@ -26,23 +27,21 @@ import twitter4j.Status;
 public class TwitterMediatorUtils {
 
 	public static String lookupFunctionParam(MessageContext ctxt, String paramName) {
-		return (String)ConnectorUtils.lookupFunctionParam(ctxt, paramName);
-		
+		return (String) ConnectorUtils.lookupFunctionParam(ctxt, paramName);
+
 	}
 
 	public static void storeResponseStatus(MessageContext ctxt, Status status) {
-		ctxt.setProperty(TwitterConnectConstants.TWITTER_STATUS_USER_SCREEN_NAME, status
-				.getUser().getScreenName());
-		ctxt.setProperty(TwitterConnectConstants.TWITTER_STATUS_STATUS_TEXT,
-				status.getText());
+		ctxt.setProperty(TwitterConnectConstants.TWITTER_STATUS_USER_SCREEN_NAME, status.getUser()
+				.getScreenName());
+		ctxt.setProperty(TwitterConnectConstants.TWITTER_STATUS_STATUS_TEXT, status.getText());
 		ctxt.setProperty(TwitterConnectConstants.TWITTER_API_RESPONSE, status);
 	}
 
 	public static void storeLoginUser(MessageContext ctxt, String consumerKey,
 			String consumerSecret, String accessToken, String accessTokenSecret) {
 		ctxt.setProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_KEY, consumerKey);
-		ctxt.setProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_SECRET,
-				consumerSecret);
+		ctxt.setProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_SECRET, consumerSecret);
 		ctxt.setProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN, accessToken);
 		ctxt.setProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN_SECRET,
 				accessTokenSecret);

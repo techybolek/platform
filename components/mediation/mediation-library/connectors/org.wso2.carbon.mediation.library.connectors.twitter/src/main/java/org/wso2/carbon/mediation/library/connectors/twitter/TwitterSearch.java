@@ -42,7 +42,7 @@ import twitter4j.json.DataObjectFactory;
 public class TwitterSearch extends AbstractTwitterConnector {
 
 	private static Log log = LogFactory.getLog(TwitterSearch.class);
-	
+
 	public static final String SEARCH_STRING = "search";
 	public static final String LANG = "lang";
 	public static final String LOCALE = "locale";
@@ -65,13 +65,13 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
 
-			Query query = new Query(TwitterMediatorUtils.lookupFunctionParam(
-					messageContext, SEARCH_STRING));
+			Query query = new Query(TwitterMediatorUtils.lookupFunctionParam(messageContext,
+					SEARCH_STRING));
 			polulateOptionalParamters(messageContext, query);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			OMElement element = this.performSearch(twitter, query);
-			if(log.isDebugEnabled()){
-				log.error("seach twitter result"+ element.toString());
+			if (log.isDebugEnabled()) {
+				log.error("seach twitter result" + element.toString());
 			}
 			super.preparePayload(messageContext, element);
 		} catch (TwitterException te) {
@@ -95,10 +95,8 @@ public class TwitterSearch extends AbstractTwitterConnector {
 		String locale = TwitterMediatorUtils.lookupFunctionParam(messageContext, LOCALE);
 		String maxID = TwitterMediatorUtils.lookupFunctionParam(messageContext, MAX_ID);
 		String since = TwitterMediatorUtils.lookupFunctionParam(messageContext, SINCE);
-		String sinceID = TwitterMediatorUtils.lookupFunctionParam(messageContext,
-				SINCE_ID);
-		String geocode = TwitterMediatorUtils.lookupFunctionParam(messageContext,
-				GEO_CODE);
+		String sinceID = TwitterMediatorUtils.lookupFunctionParam(messageContext, SINCE_ID);
+		String geocode = TwitterMediatorUtils.lookupFunctionParam(messageContext, GEO_CODE);
 		String radius = TwitterMediatorUtils.lookupFunctionParam(messageContext, RADIUS);
 		String unit = TwitterMediatorUtils.lookupFunctionParam(messageContext, UNIT);
 		String until = TwitterMediatorUtils.lookupFunctionParam(messageContext, UNITL);
@@ -122,8 +120,8 @@ public class TwitterSearch extends AbstractTwitterConnector {
 				&& unit != null && !unit.isEmpty()) {
 			String[] codes = geocode.split(",");
 			query.setGeoCode(
-					new GeoLocation(Double.parseDouble(codes[0]), Double
-							.parseDouble(codes[1])), Double.parseDouble(radius), unit);
+					new GeoLocation(Double.parseDouble(codes[0]), Double.parseDouble(codes[1])),
+					Double.parseDouble(radius), unit);
 		}
 
 		if (until != null && !until.isEmpty()) {
@@ -142,8 +140,8 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	private OMElement performSearch(Twitter twitter, Query query)
-			throws XMLStreamException, TwitterException, JSONException, IOException {
+	private OMElement performSearch(Twitter twitter, Query query) throws XMLStreamException,
+			TwitterException, JSONException, IOException {
 		OMElement resultElement = AXIOMUtil.stringToOM("<XMLPayload/>");
 		QueryResult result;
 		result = twitter.search(query);

@@ -31,75 +31,75 @@ import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
 import java.util.Iterator;
 
 /**
- * The QueryMoreIterator inject Payload that can be used with
- * WSO2-ESB Iterator mediator to use Salesforce query more 
+ * The QueryMoreIterator inject Payload that can be used with WSO2-ESB Iterator
+ * mediator to use Salesforce query more
  */
 
 public class QueryMoreIterator extends AbstractConnector {
 
+	public void connect(MessageContext synCtx) {
 
-    public void connect(MessageContext synCtx) {
+		SynapseLog synLog = getLog(synCtx);
 
-    	SynapseLog synLog = getLog(synCtx);
+		if (synLog.isTraceOrDebugEnabled()) {
+			synLog.traceOrDebug("Start : Salesforce QueryMoreIterator mediator");
 
-        if (synLog.isTraceOrDebugEnabled()) {
-            synLog.traceOrDebug("Start : Salesforce QueryMoreIterator mediator");
+			if (synLog.isTraceTraceEnabled()) {
+				synLog.traceTrace("Message : " + synCtx.getEnvelope());
+			}
+		}
 
-            if (synLog.isTraceTraceEnabled()) {
-                synLog.traceTrace("Message : " + synCtx.getEnvelope());
-            }
-        }    	
-    	
-        SOAPEnvelope envelope = synCtx.getEnvelope();
+		SOAPEnvelope envelope = synCtx.getEnvelope();
 
-        SOAPBody body = envelope.getBody();
+		SOAPBody body = envelope.getBody();
 
-        Iterator<OMElement>bodyChildElements = body.getChildElements();
-        
-        if (bodyChildElements.hasNext()) {
-        	try{
-	            String strQueryLocator = (String)synCtx.getProperty("salesforce.query.queryLocator");
-	            String strRecordSize = (String)synCtx.getProperty("salesforce.query.recordSize");
-	        	
-	            String [] arrQueryLocator = strQueryLocator.split("-");
-	            
-	            if(arrQueryLocator.length >= 2){	            
-		            int iBatchSize = Integer.valueOf(arrQueryLocator[1]);
-		            int iRecordSize = Integer.valueOf(strRecordSize);
-		            int fPageSize = iRecordSize/iBatchSize;
-		            if((fPageSize*iBatchSize) < iRecordSize){
-		            	fPageSize++;
-		            }
-		            if(fPageSize >= 2){
-			            OMElement bodyElement = bodyChildElements.next();
-			
-			
-			            OMFactory fac = OMAbstractFactory.getOMFactory();
-			            OMNamespace omNs = fac.createOMNamespace("http://wso2.org/salesforce/adaptor", "sfdc");
-			            OMElement value = fac.createOMElement("iterators", omNs);
-			            for(int i=2;i <= fPageSize;i++){
-			            	OMElement subValue = fac.createOMElement("iterator", omNs);
-			            	subValue.addChild(fac.createOMText(value, "Page"+i));          
-			            	value.addChild(subValue);          
-			            }
-			            bodyElement.addChild(value);
-		            }
-	            }
-        	}catch(NumberFormatException nfe){
-        		synLog.auditWarn("Saleforce adaptor - invalid value returned : " + nfe);      		
-        	}catch(Exception e){
-        		synLog.error("Saleforce adaptor - error generating the iterator payload : " + e);
-        	}
-        	
-        }
+		Iterator<OMElement> bodyChildElements = body.getChildElements();
 
-        if (synLog.isTraceOrDebugEnabled()) {
-            synLog.traceOrDebug("End : Salesforce QueryMoreIterator mediator");
+		if (bodyChildElements.hasNext()) {
+			try {
+				String strQueryLocator = (String) synCtx
+						.getProperty("salesforce.query.queryLocator");
+				String strRecordSize = (String) synCtx.getProperty("salesforce.query.recordSize");
 
-            if (synLog.isTraceTraceEnabled()) {
-                synLog.traceTrace("Message : " + synCtx.getEnvelope());
-            }
-        } 
-    }
+				String[] arrQueryLocator = strQueryLocator.split("-");
+
+				if (arrQueryLocator.length >= 2) {
+					int iBatchSize = Integer.valueOf(arrQueryLocator[1]);
+					int iRecordSize = Integer.valueOf(strRecordSize);
+					int fPageSize = iRecordSize / iBatchSize;
+					if ((fPageSize * iBatchSize) < iRecordSize) {
+						fPageSize++;
+					}
+					if (fPageSize >= 2) {
+						OMElement bodyElement = bodyChildElements.next();
+
+						OMFactory fac = OMAbstractFactory.getOMFactory();
+						OMNamespace omNs = fac.createOMNamespace(
+								"http://wso2.org/salesforce/adaptor", "sfdc");
+						OMElement value = fac.createOMElement("iterators", omNs);
+						for (int i = 2; i <= fPageSize; i++) {
+							OMElement subValue = fac.createOMElement("iterator", omNs);
+							subValue.addChild(fac.createOMText(value, "Page" + i));
+							value.addChild(subValue);
+						}
+						bodyElement.addChild(value);
+					}
+				}
+			} catch (NumberFormatException nfe) {
+				synLog.auditWarn("Saleforce adaptor - invalid value returned : " + nfe);
+			} catch (Exception e) {
+				synLog.error("Saleforce adaptor - error generating the iterator payload : " + e);
+			}
+
+		}
+
+		if (synLog.isTraceOrDebugEnabled()) {
+			synLog.traceOrDebug("End : Salesforce QueryMoreIterator mediator");
+
+			if (synLog.isTraceTraceEnabled()) {
+				synLog.traceTrace("Message : " + synCtx.getEnvelope());
+			}
+		}
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.mediation.library.connectors.twitter;
 
 import org.apache.synapse.MessageContext;
@@ -40,10 +39,8 @@ public class TwitterClientLoader {
 	public Twitter loadApiClient() throws TwitterException {
 		Twitter twitter;
 		if (messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_KEY) != null
-				&& messageContext
-						.getProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_SECRET) != null
-				&& messageContext
-						.getProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN) != null
+				&& messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_CONSUMER_SECRET) != null
+				&& messageContext.getProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN) != null
 				&& messageContext
 						.getProperty(TwitterConnectConstants.TWITTER_USER_ACCESS_TOKEN_SECRET) != null) {
 			ConfigurationBuilder build = new ConfigurationBuilder();
