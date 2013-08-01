@@ -33,9 +33,9 @@
             <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.throttle</groupId>
-            <artifactId>wso2throttle-core</artifactId>
-            <version>${throttle.version.handlers}</version>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.throttle.core</artifactId>
+            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
