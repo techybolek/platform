@@ -587,7 +587,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     	APIIdentifier identifier = api.getId(); 
     	
     	try{
-    		String jsonText = createSwaggerJSONContent(api);
+    		String jsonText = APIUtil.createSwaggerJSONContent(api);
     		
     		String resourcePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion()); 
     		
@@ -607,103 +607,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
     }
     
-    /**
-     * Create API Definition in JSON
-     *
-     * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     *          if failed to generate the content and save
-     */
-    private String createSwaggerJSONContent(API api) throws APIManagementException {
-    	APIIdentifier identifier = api.getId();    	
-
-		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        Environment environment = config.getApiGatewayEnvironments().get(0);
-        String endpoints = environment.getApiEndpointURL();
-        String[] endpointsSet = endpoints.split(",");
-        String apiContext = api.getContext();
-        String version = identifier.getVersion();
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        String description = api.getDescription();
-        String urlPrefix = apiContext + "/" +version;
-                        
-        if (endpointsSet.length < 1) {
-        	throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
-        }
-    	if (description == null || description.equals("")) {
-    		description = "no-info";
-    	}
-    	
-    	Map<String, List<Operation>> uriTemplateDefinitions = new HashMap<String, List<Operation>>();
-    	List<APIResource> apis = new ArrayList<APIResource>();
-    	for (URITemplate template : uriTemplates) {
-    		List<Operation> ops;
-    		List<Parameter> parameters = null;
-    		String path = urlPrefix + 
-    				APIUtil.removeAnySymbolFromUriTempate(template.getUriTemplate());
-    		/* path exists in uriTemplateDefinitions */
-    		if (uriTemplateDefinitions.get(path) != null) {
-    			ops = uriTemplateDefinitions.get(path);
-    			parameters = new ArrayList<Parameter>();
-    			if (!(template.getAuthType().equals(APIConstants.AUTH_NO_AUTHENTICATION))) {
-    				Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME, 
-    						APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, true, false, "String");
-    				parameters.add(authParam);
-    			}
-    			String httpVerb = template.getHTTPVerb();
-    			/* For GET and DELETE Parameter name - Query Parameters*/
-    			if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
-    					httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
-    				Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME, 
-    						APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-    				parameters.add(queryParam);
-    			} else {/* For POST and PUT Parameter name - Payload*/
-    				Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, 
-    						APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-    				parameters.add(payLoadParam);
-    			}
-    			Operation op = new Operation(httpVerb, description, description, parameters);
-    			ops.add(op);
-    		} else {/* path not exists in uriTemplateDefinitions */
-    			ops = new ArrayList<Operation>();
-    			parameters = new ArrayList<Parameter>();
-				if (!(template.getAuthType().equals(APIConstants.AUTH_NO_AUTHENTICATION))) {
-    				Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME, 
-    						APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, true, false, "String");
-    				parameters.add(authParam);
-    			}
-				String httpVerb = template.getHTTPVerb();
-				/* For GET and DELETE Parameter name - Query Parameters*/
-    			if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
-    					httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
-    				Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME, 
-    						APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-    				parameters.add(queryParam);
-    			} else {/* For POST and PUT Parameter name - Payload*/
-    				Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, 
-    						APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
-    				parameters.add(payLoadParam);
-    			}
-    			Operation op = new Operation(httpVerb, description, description, parameters);
-    			ops.add(op);
-    			uriTemplateDefinitions.put(path, ops);
-    		}
-    	}
-    	
-    	Set<String> resPaths = uriTemplateDefinitions.keySet();
-		
-		for (String resPath: resPaths) {
-			APIResource apiResource = new APIResource(resPath, description, uriTemplateDefinitions.get(resPath));
-			apis.add(apiResource);
-    	}
-			
-		APIDefinition apidefinition = new APIDefinition(version, APIConstants.SWAGGER_VERSION, endpointsSet[0], apiContext, apis);
-    	    		    		
-    	Gson gson = new Gson();
-    	return gson.toJson(apidefinition); 
-     }
+    
     
     public void changeAPIStatus(API api, APIStatus status, String userId,
                                 boolean updateGatewayConfig) throws APIManagementException {
@@ -964,7 +868,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             	/* If the document is API Definition for swagger */
             	if (doc.getName().equals(APIConstants.API_DEFINITION_DOC_NAME)) {
             		/* Create the JSON Content again for API with new definition */
-            		String content = createSwaggerJSONContent(newAPI);
+            		String content = APIUtil.createSwaggerJSONContent(newAPI);
             		addAPIDefinitionContent(newId, doc.getName(), content);
             	} else {
 	                addDocumentation(newId, doc);

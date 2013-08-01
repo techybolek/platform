@@ -20,15 +20,21 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.doc.model.Operation;
+import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -59,6 +65,8 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import com.google.gson.Gson;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -1470,5 +1478,103 @@ public final class APIUtil {
         }
 
     }
+    
+    /**
+     * Create API Definition in JSON
+     *
+     * @param api API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          if failed to generate the content and save
+     */
+    public static String createSwaggerJSONContent(API api) throws APIManagementException {
+    	APIIdentifier identifier = api.getId();    	
+
+		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        Environment environment = config.getApiGatewayEnvironments().get(0);
+        String endpoints = environment.getApiEndpointURL();
+        String[] endpointsSet = endpoints.split(",");
+        String apiContext = api.getContext();
+        String version = identifier.getVersion();
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        String description = api.getDescription();
+        String urlPrefix = apiContext + "/" +version;
+                        
+        if (endpointsSet.length < 1) {
+        	throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
+        }
+    	if (description == null || description.equals("")) {
+    		description = "no-info";
+    	}
+    	
+    	Map<String, List<Operation>> uriTemplateDefinitions = new HashMap<String, List<Operation>>();
+    	List<APIResource> apis = new ArrayList<APIResource>();
+    	for (URITemplate template : uriTemplates) {
+    		List<Operation> ops;
+    		List<Parameter> parameters = null;
+    		String path = urlPrefix + 
+    				APIUtil.removeAnySymbolFromUriTempate(template.getUriTemplate());
+    		/* path exists in uriTemplateDefinitions */
+    		if (uriTemplateDefinitions.get(path) != null) {
+    			ops = uriTemplateDefinitions.get(path);
+    			parameters = new ArrayList<Parameter>();
+    			if (!(template.getAuthType().equals(APIConstants.AUTH_NO_AUTHENTICATION))) {
+    				Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME, 
+    						APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, true, false, "String");
+    				parameters.add(authParam);
+    			}
+    			String httpVerb = template.getHTTPVerb();
+    			/* For GET and DELETE Parameter name - Query Parameters*/
+    			if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
+    					httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
+    				Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME, 
+    						APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(queryParam);
+    			} else {/* For POST and PUT Parameter name - Payload*/
+    				Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, 
+    						APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(payLoadParam);
+    			}
+    			Operation op = new Operation(httpVerb, description, description, parameters);
+    			ops.add(op);
+    		} else {/* path not exists in uriTemplateDefinitions */
+    			ops = new ArrayList<Operation>();
+    			parameters = new ArrayList<Parameter>();
+				if (!(template.getAuthType().equals(APIConstants.AUTH_NO_AUTHENTICATION))) {
+    				Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME, 
+    						APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, true, false, "String");
+    				parameters.add(authParam);
+    			}
+				String httpVerb = template.getHTTPVerb();
+				/* For GET and DELETE Parameter name - Query Parameters*/
+    			if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
+    					httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
+    				Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME, 
+    						APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(queryParam);
+    			} else {/* For POST and PUT Parameter name - Payload*/
+    				Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, 
+    						APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+    				parameters.add(payLoadParam);
+    			}
+    			Operation op = new Operation(httpVerb, description, description, parameters);
+    			ops.add(op);
+    			uriTemplateDefinitions.put(path, ops);
+    		}
+    	}
+    	
+    	Set<String> resPaths = uriTemplateDefinitions.keySet();
+		
+		for (String resPath: resPaths) {
+			APIResource apiResource = new APIResource(resPath, description, uriTemplateDefinitions.get(resPath));
+			apis.add(apiResource);
+    	}
+			
+		APIDefinition apidefinition = new APIDefinition(version, APIConstants.SWAGGER_VERSION, endpointsSet[0], apiContext, apis);
+    	    		    		
+    	Gson gson = new Gson();
+    	return gson.toJson(apidefinition); 
+     }
 
 }
