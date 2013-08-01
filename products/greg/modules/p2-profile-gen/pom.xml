@@ -154,6 +154,7 @@
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.interceptor.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.publisher.feature:${carbon.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.store.feature:${carbon.version}</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.startup.publisher.feature:${carbon.version}</featureArtifactDef>
                                 <!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.ui.feature:1.0.6</featureArtifactDef-->
 				
 				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:${carbon.version}</featureArtifactDef>
@@ -477,6 +478,10 @@
                                 </feature>
 				<feature>
                                     <id>org.wso2.carbon.apimgt.store.feature.group</id>
+                                    <version>${carbon.version}</version>
+                                </feature>
+				<feature>
+                                    <id>org.wso2.carbon.apimgt.startup.publisher.feature.group</id>
                                     <version>${carbon.version}</version>
                                 </feature>
                                 <!--feature>
