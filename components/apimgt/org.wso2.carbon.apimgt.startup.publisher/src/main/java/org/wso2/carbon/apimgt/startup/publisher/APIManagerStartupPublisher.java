@@ -41,7 +41,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler{
 	
 	@Override
 	public void invoke() {
-		if (log.isisDebugEnabled()) {
+		if (log.isDebugEnabled()) {
 			log.info("Startup Publisher Invoked");
 		}
 		
