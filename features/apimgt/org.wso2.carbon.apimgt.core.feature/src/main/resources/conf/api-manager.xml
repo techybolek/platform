@@ -7,7 +7,7 @@
     <DataSourceName>jdbc/WSO2AM_DB</DataSourceName>
 
     <!-- This parameter is used when adding api management capability to other products like GReg, AS, DSS etc.-->
-    <GatewayType>GReg</GatewayType>
+    <GatewayType>Synapse</GatewayType>
 
     <!--
         Database configuration used by API publisher, API store and API key manager.
@@ -90,7 +90,11 @@
 		Enable/Disable JWT generation. Default is false.
 	-->
 	<!--EnableTokenGeneration>false</EnableTokenGeneration-->
-
+	
+	<!-- 
+		Remove OAuth headers from outgoing message or keep with it.
+	-->
+	<!--RemoveOAuthHeadersFromOutMessage>true</RemoveOAuthHeadersFromOutMessage-->
     </APIConsumerAuthentication>
 
     <!--
@@ -99,29 +103,42 @@
         create/update published API configurations.
     -->
     <APIGateway>
-        <!--
-            Server URL of the API gateway.
-        -->
-        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}/services/</ServerURL>
-
-        <!--
-            Admin username for the API gateway.
-        -->
-        <Username>admin</Username>
-
-        <!--
-            Admin password for the API gateway.
-        -->
-        <Password>admin</Password>
-
-        <!--
-            Endpoint URLs for the APIs hosted in this API gateway.
-        -->
-        <APIEndpointURL>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</APIEndpointURL>
+	<!-- The environments to which an API will be published -->
+	<Environments>
+		<!-- Environments can be of different types. Allowed values are 'hybrid', 'production' and 'sandbox'.
+		     An API deployed on a 'production' type gateway will only support production keys
+		     An API deployed on a 'sandbox' type gateway will only support sandbox keys
+		     An API deployed on a 'hybrid' type gateway will support both production and sandbox keys -->
+                <Environment type="hybrid">
+                        <Name>Production and Sandbox</Name>
+			<!--
+            			Server URL of the API gateway.
+        		-->
+                        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}/services/</ServerURL>
+			<!--
+            			Admin username for the API gateway.
+        		-->
+                        <Username>admin</Username>
+			<!--
+            			Admin password for the API gateway.
+        		-->
+                        <Password>admin</Password>
+			<!--
+            			Endpoint URLs for the APIs hosted in this API gateway.
+        		-->
+                        <APIEndpointURL>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</APIEndpointURL>
+                </Environment>
+        </Environments>
+        
         <!--
             Enable/Disable caching at gateway node.
         -->
         <EnableGatewayKeyCache>false</EnableGatewayKeyCache>
+
+	<!-- Header name can be configurable, as you preferred. When API invocation is restricted to access only for authorized domains, 
+		client request should send his domain, as the value of this header. 
+	-->
+	<ClientDomainHeader>referer</ClientDomainHeader>
 
     </APIGateway>
 
@@ -230,34 +247,25 @@
         In a distributed environment;
         -If you are at the Gateway node, you need to point "ThriftClientPort" value to the "ThriftServerPort" value given at KeyManager node.
         -If you need to start two API Manager instances in the same machine, you need to give different ports to "ThriftServerPort" value in two nodes.
+        -ThriftServerHost - Allows to configure a hostname for the thrift server. It uses the carbon hostname by default.
         -->
 
         <KeyValidatorClientType>ThriftClient</KeyValidatorClientType>
         <ThriftClientPort>10397</ThriftClientPort>
         <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
         <ThriftServerPort>10397</ThriftServerPort>
+	<!--ThriftServerHost>localhost</ThriftServerHost-->
 	<EnableThriftServer>true</EnableThriftServer>
+	<!--
+	   This parameter is used to specify Thrift server host name. In a distributed deployment we must set this parameter
+	   if keymanager running on separate machine. Gateway use this parameter to connect key validation thrift service
+	-->
+	<!--ThriftServerHost>127.0.0.1</ThriftServerHost-->
+
         <!--
             Remove UserName from JWT Token
         -->
        <!-- <RemoveUserNameToJWTForApplicationToken>true</RemoveUserNameToJWTForApplicationToken>-->
-
-	<!-- Assertions can be used to embedd parameters into access token.-->
-	<EnableAssertions>
-		<UserName>false</UserName>
-	</EnableAssertions>
-
-	<!-- This should be set to true when using multiple user stores and keys should saved 
-			into different tables according to the user store. By default all the application keys are saved in to the same table.
-			UserName Assertion should be 'true' to use this.-->
-	<AccessTokenPartitioning>
-		<EnableAccessTokenPartitioning>false</EnableAccessTokenPartitioning>
-		<!-- user store domain names and mappings to new table names.
-				eg: if you provide 'A:foo.com', foo.com should be the user store domain name and 'A' represent the relavant mapping of 
-				token storing table, i.e. tokens relevant to the users comming from foo.com user store will be added to a table called
-				IDN_OAUTH2_ACCESS_TOKEN_A. --> 
-		<AccessTokenPartitioningDomains><!-- A:foo.com, B:bar.com --></AccessTokenPartitioningDomains>
-	</AccessTokenPartitioning>
 
     </APIKeyManager>
 
@@ -360,5 +368,28 @@
       </SelfSignIn>
     </WorkFlowExtensions>
 
+    <!-- 
+	Use this configuration Publish APIs at the Server startup
+    -->
+    <!--StartupAPIPublisher-->
+
+	<!--Define many API elements as below to publish many APIs -->
+	<!--API>	
+		<Context>/resource</Context>
+		<Provider>admin</Provider>
+		<Endpoint>http://localhost:9763/resource</Endpoint>
+		<Version>1.0.0</Version>
+	</API-->
+
+		
+    <!--/StartupAPIPublisher-->
+
+    <!--
+	When an API is invoked, a list of handlers get engaged to its execution flow. This
+	property defines the position of the Extension Handler.
+	Supported values: top, bottom
+	Defaults to: bottom
+    -->	
+    <!--ExtensionHandlerPosition>top|bottom</ExtensionHandlerPosition-->
 </APIManager>
 
