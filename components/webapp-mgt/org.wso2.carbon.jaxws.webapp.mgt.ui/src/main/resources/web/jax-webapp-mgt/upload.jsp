@@ -29,17 +29,22 @@
     <script type="text/javascript">
         function validate() {
 
+            var validFileNames = true;
+
             if (document.webappUploadForm.warFileName.value != null) {
+
                 var jarinput = document.webappUploadForm.warFileName.value;
                 if (jarinput == '') {
                     CARBON.showWarningDialog('<fmt:message key="select.webapp.file"/>');
+                    validFileNames = false;
                 } else if (jarinput.lastIndexOf(".war") == -1) {
                     CARBON.showWarningDialog('<fmt:message key="invalid.webapp.file"/>');
-                } else {
-                    document.webappUploadForm.submit();
+                    validFileNames = false;
+                } else if(jarinput.indexOf("#") != -1) {
+                    CARBON.showWarningDialog('<fmt:message key="hash.included.webapp"/>');
+                    validFileNames = false;
                 }
             } else if (document.webappUploadForm.warFileName[0].value != null) {
-                var validFileNames = true;
 
                 for (var i=0; i<document.webappUploadForm.warFileName.length; i++) {
                     var jarinput = document.webappUploadForm.warFileName[i].value;
@@ -49,8 +54,29 @@
                     } else if (jarinput.lastIndexOf(".war") == -1) {
                         CARBON.showWarningDialog('<fmt:message key="invalid.webapp.file"/>');
                         validFileNames = false; break;
+                    } else if(jarinput.indexOf("#") != -1) {
+                        CARBON.showWarningDialog('<fmt:message key="hash.included.webapp"/>');
+                        validFileNames = false; break;
                     }
                 }
+            }
+
+             if(document.webappUploadForm.version.value != null){
+
+                 var appVersion =  document.webappUploadForm.version.value;
+                 if(appVersion.indexOf("#")!=-1) {
+                     CARBON.showWarningDialog('<fmt:message key="hash.included.version"/>');
+                     validFileNames = false;
+                 }
+             } else if (document.webappUploadForm.version[0].value != null){
+                 for (var i=0; i<document.webappUploadForm.version.length; i++) {
+                     var appVersion =  document.webappUploadForm.version.value;
+                     if(appVersion.indexOf("#")!=-1) {
+                         CARBON.showWarningDialog('<fmt:message key="hash.included.version"/>');
+                         validFileNames = false; break;
+                     }
+                 }
+             }
 
                 if(validFileNames) {
                     document.webappUploadForm.submit();
@@ -58,7 +84,6 @@
                     return;
                 }
 
-            }
 
         }
 
