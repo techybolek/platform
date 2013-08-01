@@ -92,7 +92,7 @@ var addGenericArtifact = function addGenericArtifact(key,content,lifecycleAttrib
   	options.useSOAP = 1.1;
   	options.action = "urn:addArtifact";
   	options["HTTPHeaders"] = [
-  	                          { name : "Cookie", value :modManager.getAdminCookie(getProperty(GREG_SERVER_URL)) }
+  	                          { name : "Cookie", value :modManager.getBackendCookie() }
   	                          ];
 	var payload = "";
 

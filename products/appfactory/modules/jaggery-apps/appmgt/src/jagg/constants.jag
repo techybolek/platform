@@ -100,6 +100,7 @@ var PERMISSION_DATASOURCE_UPDATE_OF_STAGE="/permission/admin/appfactory/datasour
 var USER_SEARCH_STATUS = "EnableUserSearch";
 
 var COOKIE_REFRESH_INTERVAL = "CookieRefreshInterval";
+var APPFAC_BACKEND_COOKIE = "APPFAC.backendCookie";
 
 //Rss related
 var RSS_CREATION_ERROR_HEADING = "RSSCreationError";

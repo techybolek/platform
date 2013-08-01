@@ -270,4 +270,26 @@ function buildResponse(result){
  }
 }
 
+/* 
+ * getBackendCookie returns returns logged in user's server session string.
+ */
+var getBackendCookie = function () {
+	if(session.get(APPFAC_BACKEND_COOKIE) == null){
+		var token = session.get("SAML_TOKEN");
+		var security =require("sso");
+		var ssoRelyingParty = new security.SSORelyingParty(getProperty(SSO_NAME));
+		token=ssoRelyingParty.decode(token);           
+		var encodedToken = ssoRelyingParty.xmlEncode(token);
+		var xhr = new XMLHttpRequest();
+		var endPoint = getProperty(APPFACTORY_SERVER_URL) + "services/SAML2SSOAuthenticationService";
+		xhr.open("POST", endPoint);
+		var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:sso="http://sso.saml2.authenticator.identity.carbon.wso2.org" xmlns:xsd="http://dto.sso.saml2.authenticator.identity.carbon.wso2.org/xsd"><soap:Header/><soap:Body><sso:login><sso:authDto><xsd:response>'+encodedToken+'</xsd:response></sso:authDto></sso:login></soap:Body></soap:Envelope>';
+		xhr.send(payload);
+		var cookieString = xhr.getResponseHeader("Set-Cookie");
+	   	var cookie = cookieString.split(";")[0];
+		session.put(APPFAC_BACKEND_COOKIE, cookie.toString());
+	} 
+   	return session.get(APPFAC_BACKEND_COOKIE);   
+}
+
 %>

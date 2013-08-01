@@ -63,7 +63,7 @@ var createApplication = function (applicationName, applicationKey, applicationDe
         options.action = "urn:createApplication";
         options.timeout = 1000000;
         options["HTTPHeaders"] = [
-                                  { name : "Cookie", value :modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL)) }
+                                  { name : "Cookie", value :modManager.getBackendCookie() }
                                   ];
 
         var payload='<p:createApplication xmlns:p="http://service.mgt.application.appfactory.carbon.wso2.org">';
