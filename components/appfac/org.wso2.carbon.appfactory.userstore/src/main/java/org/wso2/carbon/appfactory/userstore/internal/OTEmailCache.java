@@ -16,22 +16,25 @@
 
 package org.wso2.carbon.appfactory.userstore.internal;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 public class OTEmailCache {
     private static Log log = LogFactory.getLog(OTEmailCache.class);
 
     public static final String OT_EMAIL_CACHE_NAME = "OT_EMAIL_CACHE_NAME";
+    public static final String OT_EMAIL_CACHE_MANAGER = "OT_EMAIL_CACHE_MANAGER";
 
-    protected Cache cache = null;
+    protected Cache<String, String> cache = null;
 
     private static OTEmailCache emailCache = null;
 
     private OTEmailCache() {
-        this.cache = CacheManager.getInstance().getCache(OT_EMAIL_CACHE_NAME);
+        this.cache = Caching.getCacheManager(OT_EMAIL_CACHE_MANAGER).getCache(OT_EMAIL_CACHE_NAME);
         if (log.isDebugEnabled()) {
             if (cache != null) {
                 log.debug(OT_EMAIL_CACHE_NAME + " is successfully initiated.");
@@ -66,8 +69,8 @@ public class OTEmailCache {
         Object cacheValue = this.cache.get(uid);
         if (cacheValue instanceof String) {
             email = (String) cacheValue;
-            if(log.isDebugEnabled()){
-                log.debug("Email: "+ email +" was loaded from cache.");
+            if (log.isDebugEnabled()) {
+                log.debug("Email: " + email + " was loaded from cache.");
             }
         }
         return email;

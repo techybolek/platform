@@ -16,22 +16,25 @@
 
 package org.wso2.carbon.appfactory.userstore.internal;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 public class OTUserIdCache {
     private static Log log = LogFactory.getLog(OTUserIdCache.class);
 
     public static final String OT_USER_ID_CACHE_NAME = "OT_USER_ID_CACHE";
+    public static final String OT_USER_ID_CACHE_MANAGER = "OT_USER_ID_MANAGER";
 
-    protected Cache cache = null;
+    protected Cache<String, String> cache = null;
 
     private static OTUserIdCache userIdCache = null;
 
     private OTUserIdCache() {
-        this.cache = CacheManager.getInstance().getCache(OT_USER_ID_CACHE_NAME);
+        this.cache = Caching.getCacheManager(OT_USER_ID_CACHE_MANAGER).getCache(OT_USER_ID_CACHE_NAME);
         if (log.isDebugEnabled()) {
             if (cache != null) {
                 log.debug(OT_USER_ID_CACHE_NAME + " is successfully initiated.");
@@ -66,8 +69,8 @@ public class OTUserIdCache {
         Object cacheValue = this.cache.get(username);
         if (cacheValue instanceof String) {
             userId = (String) cacheValue;
-            if(log.isDebugEnabled()){
-                log.debug("Uid: "+ userId +" was loaded from cache.");
+            if (log.isDebugEnabled()) {
+                log.debug("Uid: " + userId + " was loaded from cache.");
             }
         }
         return userId;
