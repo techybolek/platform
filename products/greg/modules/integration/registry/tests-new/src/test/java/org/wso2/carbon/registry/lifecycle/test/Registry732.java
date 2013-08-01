@@ -176,14 +176,9 @@ public class Registry732 {
         ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
         
         assertNotNull(data, "Service not found");
-	System.out.println("+++++++++++++ " + serviceManager + "+++++++++++++++++++++++++++");
-//        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
-//	serviceManager = new ServiceManager(registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId));
-	
+
 	Service[] services = serviceManager.getAllServices();
-//        ServiceBean service = listMetadataServiceClient.listServices(null);
         for (Service service : services) {
-		System.out.println("----------Path-----------: " + service.getPath() );
 	    String path = service.getPath();
             if (path.contains("IntergalacticService")) {
                 serviceString = path;
