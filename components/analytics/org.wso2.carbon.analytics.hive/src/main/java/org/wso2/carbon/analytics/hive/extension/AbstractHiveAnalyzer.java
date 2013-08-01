@@ -29,7 +29,7 @@ public abstract class AbstractHiveAnalyzer {
         return HiveContext.getCurrentContext().getProperty(key);
     }
 
-    public void removeProperty(String key, String value) {
+    public void removeProperty(String key) {
         HiveContext.getCurrentContext().setProperty(key, null);
     }
 

@@ -13,13 +13,14 @@ public class AnnotationTest extends AbstractHiveAnnotation {
 
     @Override
     public void clear() {
-
+        removeProperty("TEST");
     }
 
 
     @Override
     public void execute() {
-        String a= getParameter("ss");
+        String a= getParameter("foo");
+        setProperty("TEST", a);
     }
 
 }

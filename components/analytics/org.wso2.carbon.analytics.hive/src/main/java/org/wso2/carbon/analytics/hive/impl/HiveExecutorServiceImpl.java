@@ -298,8 +298,6 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                 ScriptResult result = new ScriptResult();
 
-                String regexAnnot = "((@)(?:[a-z][a-z]+)\\()";
-
                 Set cleanAnnotations = new HashSet();
 
 
@@ -322,37 +320,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                     if (trimmedCmdLine.startsWith("class") ||
                             trimmedCmdLine.startsWith("CLASS")) { // Class analyzer for executing custom logic
-                        String[] tokens = trimmedCmdLine.split("\\s+");
-                        if (tokens != null && tokens.length >= 2) {
-                            String className = tokens[1];
-
-                            Class clazz = null;
-                            try {
-                                clazz = Class.forName(className, true,
-                                        this.getClass().getClassLoader());
-                            } catch (ClassNotFoundException e) {
-                                log.error("Unable to find custom analyzer class..", e);
-                            }
-
-                            if (clazz != null) {
-                                Object analyzer = null;
-                                try {
-                                    analyzer = clazz.newInstance();
-                                } catch (InstantiationException e) {
-                                    log.error("Unable to instantiate custom analyzer class..", e);
-                                } catch (IllegalAccessException e) {
-                                    log.error("Unable to instantiate custom analyzer class..", e);
-                                }
-
-                                if (analyzer instanceof AbstractHiveAnalyzer) {
-                                    AbstractHiveAnalyzer hiveAnalyzer =
-                                            (AbstractHiveAnalyzer) analyzer;
-                                    hiveAnalyzer.execute();
-                                } else {
-                                    log.error("Custom analyzers should extend AbstractHiveAnalyzer..");
-                                }
-                            }
-                        }
+                        executeClassAnalyzer(trimmedCmdLine);
 
                         if (!cleanAnnotations.isEmpty()) {
                             for (Object s : cleanAnnotations) {
@@ -360,78 +328,20 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                                 cAnn.clear();
                             }
                         }
-                    } else if (trimmedCmdLine.matches(regexAnnot)) {
+                    } else if (trimmedCmdLine.startsWith("@")) {
                         AbstractHiveAnnotation cAnnotation = executeAnnotation(trimmedCmdLine);
                         cleanAnnotations.add(cAnnotation);
 
                     } else { // Normal hive query
-                        QueryResult queryResult = new QueryResult();
+                        executeHiveQuery(result,trimmedCmdLine,stmt);
 
-                        queryResult.setQuery(trimmedCmdLine);
-
-                        //Append the tenant ID to query
-                        //trimmedCmdLine += Utils.TENANT_ID_SEPARATOR_CHAR_SEQ + tenantId;
-
-                        ResultSet rs = stmt.executeQuery(trimmedCmdLine);
-                        ResultSetMetaData metaData = rs.getMetaData();
-
-                        int columnCount = metaData.getColumnCount();
-                        List<String> columnsList = new ArrayList<String>();
-                        for (int i = 1; i <= columnCount; i++) {
-                            columnsList.add(metaData.getColumnName(i));
-                        }
-
-                        queryResult.setColumnNames(columnsList.toArray(new String[]{}));
-
-                        List<QueryResultRow> results = new ArrayList<QueryResultRow>();
-                        while (rs.next()) {
-                            QueryResultRow resultRow = new QueryResultRow();
-
-                            List<String> columnValues = new ArrayList<String>();
-
-                            int noOfColumns = rs.getMetaData().getColumnCount();
-
-                            boolean isTombstone = true;
-                            for (int k = 1; k <= noOfColumns; k++) {
-                                Object obj = rs.getObject(k);
-                                if (obj != null) {
-                                    isTombstone = false;
-                                    break;
-                                }
+                        if (!cleanAnnotations.isEmpty()) {
+                            for (Object s : cleanAnnotations) {
+                                AbstractHiveAnnotation cAnn = (AbstractHiveAnnotation) s;
+                                cAnn.clear();
                             }
-
-                            if (!isTombstone) {
-                                Object resObject = rs.getObject(1);
-                                if (resObject.toString().contains("\t")) {
-                                    columnValues = Arrays.asList(resObject.toString().split("\t"));
-                                } else {
-                                    for (int i = 1; i <= columnCount; i++) {
-                                        Object resObj = rs.getObject(i);
-                                        if (null != resObj) {
-                                            columnValues.add(rs.getObject(i).toString());
-                                        } else {
-                                            columnValues.add("");
-                                        }
-                                    }
-                                }
-                                resultRow.setColumnValues(columnValues.toArray(new String[]{}));
-
-                                results.add(resultRow);
-                            }
-
-                        }
-
-                        queryResult.setResultRows(results.toArray(new QueryResultRow[]{}));
-                        result.addQueryResult(queryResult);
-                    }
-
-                    if (!cleanAnnotations.isEmpty()) {
-                        for (Object s : cleanAnnotations) {
-                            AbstractHiveAnnotation cAnn = (AbstractHiveAnnotation) s;
-                            cAnn.clear();
                         }
                     }
-
                 }
 
                 StringBuffer sb = new StringBuffer();
@@ -496,7 +406,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
         private String resolveGlobalAnnotations(String script) {
             String newScript = script;
-            String regex = "((Global)\\{.*?\\})";
+            String regex = "((Global)\\{.*?\\};)";
             String globalConf = null;
             newScript = newScript.replaceAll("\n", " ");
             newScript = newScript.replaceAll("\t", " ");
@@ -513,7 +423,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 String[] contentSet = a.split("Global");
                 String txt = contentSet[1];
 
-                String s = txt.substring(1, txt.length() - 1);
+                String s = txt.substring(1, txt.length() - 2);
 
 
                 String aa = formatScript(s).trim();
@@ -572,7 +482,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
             String className = AnnotationBuilder.getAnnotationClass(txt2);
 
-            if (className == null) {
+            if (className != null) {
 
                 Class clazz = null;
                 try {
@@ -717,6 +627,101 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
             return con;
 
+        }
+
+        private void executeHiveQuery(ScriptResult result, String trimmedCmdLine, Statement stmt) throws SQLException {
+            QueryResult queryResult = new QueryResult();
+
+            queryResult.setQuery(trimmedCmdLine);
+
+            //Append the tenant ID to query
+            //trimmedCmdLine += Utils.TENANT_ID_SEPARATOR_CHAR_SEQ + tenantId;
+
+            ResultSet rs = stmt.executeQuery(trimmedCmdLine);
+            ResultSetMetaData metaData = rs.getMetaData();
+
+            int columnCount = metaData.getColumnCount();
+            List<String> columnsList = new ArrayList<String>();
+            for (int i = 1; i <= columnCount; i++) {
+                columnsList.add(metaData.getColumnName(i));
+            }
+
+            queryResult.setColumnNames(columnsList.toArray(new String[]{}));
+
+            List<QueryResultRow> results = new ArrayList<QueryResultRow>();
+            while (rs.next()) {
+                QueryResultRow resultRow = new QueryResultRow();
+
+                List<String> columnValues = new ArrayList<String>();
+
+                int noOfColumns = rs.getMetaData().getColumnCount();
+
+                boolean isTombstone = true;
+                for (int k = 1; k <= noOfColumns; k++) {
+                    Object obj = rs.getObject(k);
+                    if (obj != null) {
+                        isTombstone = false;
+                        break;
+                    }
+                }
+
+                if (!isTombstone) {
+                    Object resObject = rs.getObject(1);
+                    if (resObject.toString().contains("\t")) {
+                        columnValues = Arrays.asList(resObject.toString().split("\t"));
+                    } else {
+                        for (int i = 1; i <= columnCount; i++) {
+                            Object resObj = rs.getObject(i);
+                            if (null != resObj) {
+                                columnValues.add(rs.getObject(i).toString());
+                            } else {
+                                columnValues.add("");
+                            }
+                        }
+                    }
+                    resultRow.setColumnValues(columnValues.toArray(new String[]{}));
+
+                    results.add(resultRow);
+                }
+
+            }
+
+            queryResult.setResultRows(results.toArray(new QueryResultRow[]{}));
+            result.addQueryResult(queryResult);
+        }
+
+        private void executeClassAnalyzer(String trimmedCmdLine){
+            String[] tokens = trimmedCmdLine.split("\\s+");
+            if (tokens != null && tokens.length >= 2) {
+                String className = tokens[1];
+
+                Class clazz = null;
+                try {
+                    clazz = Class.forName(className, true,
+                            this.getClass().getClassLoader());
+                } catch (ClassNotFoundException e) {
+                    log.error("Unable to find custom analyzer class..", e);
+                }
+
+                if (clazz != null) {
+                    Object analyzer = null;
+                    try {
+                        analyzer = clazz.newInstance();
+                    } catch (InstantiationException e) {
+                        log.error("Unable to instantiate custom analyzer class..", e);
+                    } catch (IllegalAccessException e) {
+                        log.error("Unable to instantiate custom analyzer class..", e);
+                    }
+
+                    if (analyzer instanceof AbstractHiveAnalyzer) {
+                        AbstractHiveAnalyzer hiveAnalyzer =
+                                (AbstractHiveAnalyzer) analyzer;
+                        hiveAnalyzer.execute();
+                    } else {
+                        log.error("Custom analyzers should extend AbstractHiveAnalyzer..");
+                    }
+                }
+            }
         }
 
     }
