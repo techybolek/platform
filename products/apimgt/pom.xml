@@ -326,7 +326,7 @@
 
     <properties>
 	  <carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
-	  <apimserver.version>1.4.0-SNAPSHOT</apimserver.version>
+	  <apimserver.version>1.5.0-SNAPSHOT</apimserver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <log4j.version>1.2.13</log4j.version>
         <commons.logging.version>1.1</commons.logging.version>
