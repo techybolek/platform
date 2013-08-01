@@ -167,9 +167,7 @@ public class APIManagerConfiguration {
             list.add(value);
             configuration.put(key, list);
         } else {
-            if (!list.contains(value)) {
-                list.add(value);
-            }
+            list.add(value);
         }
     }
 
