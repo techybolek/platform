@@ -918,16 +918,31 @@
                </execution>
            </executions>
            <configuration>
-               <file>${basedir}/src/main/resources/carbon-home/conf/api-manager.xml</file>
+               <file>${basedir}/../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/api-manager.xml</file>
                <replacements>
                    <replacement>
 			<xpath>/APIManager/APIKeyManager/EnableThriftServer</xpath>
                        <token>(true)</token>
                        <value>false</value>
-                   </replacement>         
-               </replacements>
+                   </replacement>
+	 	   <replacement>
+		       <xpath>/APIManager/APIGateway/Environments/Environment/APIEndpointURL</xpath>
+                       <token>(http.nio.port)</token>
+                       <value>mgt.transport.http.port</value>
+                   </replacement>
+		   <replacement>
+		       <xpath>/APIManager/APIGateway/Environments/Environment/APIEndpointURL</xpath>
+                       <token>(https.nio.port)</token>
+                       <value>mgt.transport.https.port</value>
+                   </replacement>
+		   <replacement>
+		       <xpath>/APIManager/GatewayType</xpath>
+                       <token>(Synapse)</token>
+                       <value>GReg</value>
+                   </replacement>  
+                </replacements>
            </configuration>
-       </plugin>
+	</plugin>
 
 
 
