@@ -106,6 +106,7 @@
 	<module>url-mapper</module>
 	<module>user-manager</module>
 	<module>identity</module>
+	<module>idp-mgt</module>
         <module>application-mgt</module>
         <module>application-deployers</module>
         <module>remote-usermgt</module>
