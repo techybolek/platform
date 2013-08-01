@@ -39,5 +39,12 @@ $(document).ready(function() {
         return this.optional(element) || valid == true;
     }, 'Invalid role name[s]');
 
+    $.validator.addMethod('validateEndpoints', function (value, element){
+        var productionEP = $('#endpoint').val();
+        var sandboxEP = $('#sandbox').val();
+
+        return productionEP != "" || sandboxEP != "";
+    }, 'A Production or Sandbox URL must be provided.');
+
 
 });

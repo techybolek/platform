@@ -148,9 +148,9 @@ API Definition for Swagger will not be overriden with the changes you will do to
            </div>
               
           <div class="control-group">
-                <label class="control-label" for="editEndpoint"><%=i18n.localize("endpoint")%>:<span class="requiredAstrix">*</span></label>
+                <label class="control-label" for="editEndpoint"><%=i18n.localize("endpoint")%>:</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge required" id="editEndpoint" name="endpoint" value="<%=api.endpoint%>"/>
+                    <input type="text" class="input-xlarge validateEndpoints" id="editEndpoint" name="endpoint" value="<%=api.endpoint%>"/>
                      <input type="button" onclick="checkURLValid($('#editEndpoint').val(),this)" value="<%=i18n.localize("testURI")%>"/>
                     <p class="help-block"><%=i18n.localize("endpointHelpMsg")%></p>
                 </div>
@@ -159,7 +159,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
             <div class="control-group">
                 <label class="control-label" for="editEndpoint"><%=i18n.localize("sandbox")%>:</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge" id="editSandbox" name="sandbox" value="<%=api.sandbox%>"/>
+                    <input type="text" class="input-xlarge validateEndpoints" id="editSandbox" name="sandbox" value="<%=api.sandbox%>"/>
                      <input type="button" onclick="checkURLValid($('#editSandbox').val(),this)" value="<%=i18n.localize("testURI")%>"/>
                     <p class="help-block"><%=i18n.localize("sandboxHelpMsg")%></p>
                 </div>

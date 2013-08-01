@@ -129,9 +129,9 @@
 
                 
                 <div class="control-group">
-                    <label class="control-label" for="endpoint"><%=i18n.localize("endpoint")%>:<span class="requiredAstrix">*</span></label>
+                    <label class="control-label" for="endpoint"><%=i18n.localize("endpoint")%>:</label>
                     <div class="controls">
-                        <input type="text" class="input-xlarge required" id="endpoint" name="endpoint"/>
+                        <input type="text" class="input-xlarge validateEndpoints" id="endpoint" name="endpoint"/>
                         <input type="button" value="<%=i18n.localize("testURI")%>" onclick="checkURLValid($('#endpoint').val(),this)"/>
                         <p class="help-block"><%=i18n.localize("endpointHelpMsg")%></p>
                     </div>
@@ -142,7 +142,7 @@
                 <div class="control-group">
                     <label class="control-label" for="endpoint"><%=i18n.localize("sandbox")%>:</label>
                     <div class="controls">
-                        <input type="text" class="input-xlarge" id="sandbox" name="sandbox"/>
+                        <input type="text" class="input-xlarge validateEndpoints" id="sandbox" name="sandbox"/>
                         <input type="button" onclick="checkURLValid($('#sandbox').val(),this)" value="<%=i18n.localize("testURI")%>"/>
                         <p class="help-block"><%=i18n.localize("sandboxHelpMsg")%></p>
                     </div>
