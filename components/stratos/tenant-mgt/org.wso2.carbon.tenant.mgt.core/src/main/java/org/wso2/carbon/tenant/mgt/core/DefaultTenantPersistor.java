@@ -142,7 +142,7 @@ public class DefaultTenantPersistor implements TenantPersistor {
      * @param tenant - the tenant
      * @throws RegistryException, if storing the domain validation flag failed.
      */
-    private void storeDomainValidationFlagToRegistry(Tenant tenant) throws RegistryException {
+    protected void storeDomainValidationFlagToRegistry(Tenant tenant) throws RegistryException {
 
         try {
             String domainValidationPath = StratosConstants.TENANT_DOMAIN_VERIFICATION_FLAG_PATH +
@@ -217,7 +217,7 @@ public class DefaultTenantPersistor implements TenantPersistor {
      * @param tenantId - tenant id
      * @throws Exception - UserStoreException
      */
-    private void copyUIPermissions(int tenantId) throws Exception {
+    protected void copyUIPermissions(int tenantId) throws Exception {
         try {
             UserRealm realm = (UserRealm) TenantMgtCoreServiceComponent.
                     getRealmService().getTenantUserRealm(tenantId);
@@ -240,7 +240,7 @@ public class DefaultTenantPersistor implements TenantPersistor {
         }
     }
     
-    private void setActivationFlags(int tenantId, String originalService) throws Exception {
+    protected void setActivationFlags(int tenantId, String originalService) throws Exception {
 
         boolean useDefaultConfig = true;
         try {
