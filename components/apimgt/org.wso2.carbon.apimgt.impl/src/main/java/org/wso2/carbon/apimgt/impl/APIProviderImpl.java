@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -436,7 +437,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
+                boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
                 String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
                 boolean isAPIPublished = false;
                 // gatewayType check is required when API Management is deployed on other servers to avoid synapse
@@ -462,21 +463,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (gatewayExists && gatewayKeyCacheEnabled) {
                     if (isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                         Set<URITemplate> resourceVerbs = api.getUriTemplates();
-                        APIAuthenticationAdminClient client=new APIAuthenticationAdminClient();
-                        if(resourceVerbs != null){
-                            for(URITemplate resourceVerb : resourceVerbs){
-                                String resourceURLContext = resourceVerb.getUriTemplate();
-                                //If url context ends with the '*' character.
-                                if(resourceURLContext.endsWith("*")){
-                                    //Remove the ending '*'
-                                    resourceURLContext = resourceURLContext.substring(0, resourceURLContext.length() - 1);
-                                }
-                                client.invalidateResourceCache(api.getContext(),api.getId().getVersion(),resourceURLContext,resourceVerb.getHTTPVerb());
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling invalidation cache");
+
+                        List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                        for(Environment environment : gatewayEnvs){
+                            APIAuthenticationAdminClient client =
+                                    new APIAuthenticationAdminClient(environment);
+                            if(resourceVerbs != null){
+                                for(URITemplate resourceVerb : resourceVerbs){
+                                    String resourceURLContext = resourceVerb.getUriTemplate();
+                                    //If url context ends with the '*' character.
+                                    if(resourceURLContext.endsWith("*")){
+                                        //Remove the ending '*'
+                                        resourceURLContext = resourceURLContext.substring(0, resourceURLContext.length() - 1);
+                                    }
+                                    client.invalidateResourceCache(api.getContext(),api.getId().getVersion(),resourceURLContext,resourceVerb.getHTTPVerb());
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Calling invalidation cache");
+                                    }
                                 }
                             }
                         }
+
                     }
                 }
                 /* Update API Definition for Swagger 
@@ -612,7 +619,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String endpoints = config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT);
+
+        Environment environment = config.getApiGatewayEnvironments().get(0);
+        String endpoints = environment.getApiEndpointURL();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
         String version = identifier.getVersion();
@@ -741,70 +750,59 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void publishToGateway(API api) throws APIManagementException {
-        try {
-            RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId());
-            APITemplateBuilder builder;        	
-        	String tenantDomain = null; 
-			if (api.getId().getProviderName().contains("AT")) {
-				String provider = api.getId().getProviderName().replace("-AT-", "@");
-				tenantDomain = MultitenantUtils.getTenantDomain( provider);			
-			}
-            if (api.getStatus().equals(APIStatus.BLOCKED)) {
-                Map<String, String> apiMappings = new HashMap<String, String>();
-                apiMappings.put(APITemplateBuilder.KEY_FOR_API_NAME, api.getId().getProviderName() +
-                                                                     "--" + api.getId().getApiName());
-                apiMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
-                apiMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
-                builder = new BasicTemplateBuilder(apiMappings);
-            } else {
-                builder = getTemplateBuilder(api);
-            }
+        APITemplateBuilder builder;
+        String tenantDomain = null;
+        if (api.getId().getProviderName().contains("AT")) {
+            String provider = api.getId().getProviderName().replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain( provider);
+        }
+        if (api.getStatus().equals(APIStatus.BLOCKED)) {
+            Map<String, String> apiMappings = new HashMap<String, String>();
+            apiMappings.put(APITemplateBuilder.KEY_FOR_API_NAME, api.getId().getProviderName() +
+                    "--" + api.getId().getApiName());
+            apiMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
+            apiMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
+            builder = new BasicTemplateBuilder(apiMappings);
+        } else {
+            builder = getTemplateBuilder(api);
+        }
 
-            if (client.getApi(tenantDomain) != null) {
-                client.updateApi(builder,tenantDomain);
-			} else {			
-				client.addApi(builder,tenantDomain);
-			}
-        } catch (AxisFault axisFault) {
-            handleException("Error while creating new API in gateway", axisFault);
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        try {
+            gatewayManager.publishToGateway(api, builder, tenantDomain);
+        } catch (Exception e) {
+            handleException("Error while publishing to Gateway ", e);
         }
     }
 
     private void removeFromGateway(API api) throws APIManagementException {
+        String tenantDomain = null;
+        if (api.getId().getProviderName().contains("AT")) {
+            String provider = api.getId().getProviderName().replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain( provider);
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         try {
-            RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId());          
-        	String tenantDomain = null; 
-			if (api.getId().getProviderName().contains("AT")) {
-				String provider = api.getId().getProviderName().replace("-AT-", "@");
-				tenantDomain = MultitenantUtils.getTenantDomain( provider);			
-			}
-            if (client.getApi(tenantDomain) != null) {
-                client.deleteApi(tenantDomain);
-            }
-            
-        } catch (AxisFault axisFault) {
-            handleException("Error while creating new API in gateway", axisFault);
+            gatewayManager.removeFromGateway(api, tenantDomain);
+        } catch (Exception e) {
+            handleException("Error while removing API from Gateway ", e);
         }
     }
 
     private boolean isAPIPublished(API api) throws APIManagementException {
-    	boolean isExist = false;
-    	
         try {
-            RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId());
-            String tenantDomain = null;            
+            String tenantDomain = null;
 			if (api.getId().getProviderName().contains("AT")) {
 				String provider = api.getId().getProviderName().replace("-AT-", "@");
 				tenantDomain = MultitenantUtils.getTenantDomain( provider);			
 			}
-			if(client.getApi(tenantDomain) !=null) {
-				isExist = true;
-			}			
-            return isExist;
-        } catch (AxisFault axisFault) {
-            handleException("Error while checking API status", axisFault);
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            return gatewayManager.isAPIPublished(api, tenantDomain);
+        } catch (Exception e) {
+            handleException("Error while checking API status", e);
         }
-		return isExist;     
+		return false;
     }
 
     private APITemplateBuilder getTemplateBuilder(API api) throws APIManagementException {
@@ -1397,15 +1395,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
+            boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             API api = new API(identifier);
             // gatewayType check is required when API Management is deployed on other servers to avoid synapse
             if (gatewayExists && gatewayType.equals("Synapse")) {
-                if (isAPIPublished(api)) {
+                //if (isAPIPublished(api)) {
                     removeFromGateway(api);
-                }
+                //}
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }

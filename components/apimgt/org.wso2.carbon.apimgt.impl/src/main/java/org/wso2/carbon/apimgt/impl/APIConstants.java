@@ -343,4 +343,8 @@ public final class APIConstants {
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
+
+    public static final String GATEWAY_ENV_TYPE_HYBRID = "hybrid";
+    public static final String GATEWAY_ENV_TYPE_PRODUCTION = "production";
+    public static final String GATEWAY_ENV_TYPE_SANDBOX = "sandbox";
 }

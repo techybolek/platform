@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.template;
 import junit.framework.TestCase;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class TemplateBuilderTest extends TestCase {
         handlerMappings.add(testHandlerMappings_3);
         
         BasicTemplateBuilder builder = new BasicTemplateBuilder(apiMappings, resourceMappings, handlerMappings);
-        String output = builder.getConfigStringForTemplate();
+        String output = builder.getConfigStringForTemplate(new Environment());
         String expected = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"TestAPI\" context=\"/test\" " +
                 "version=\"1.0.0\" version-type=\"url\"><resource url-mapping=\"/*\" methods=\"GET\"><inSequence>" +
                 "<property name=\"POST_TO_URI\" value=\"true\" scope=\"axis2\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
@@ -113,7 +114,7 @@ public class TemplateBuilderTest extends TestCase {
         handlerMappings.add(testHandlerMappings_3);
 
         BasicTemplateBuilder builder = new BasicTemplateBuilder(apiMappings, resourceMappings, handlerMappings);
-        String output = builder.getConfigStringForTemplate();
+        String output = builder.getConfigStringForTemplate(new Environment());
         String expected = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"TestAPI\" context=\"/test\" " +
                 "version=\"1.0.0\" version-type=\"url\"><resource url-mapping=\"/*\" methods=\"GET\"><inSequence>" +
                 "<property name=\"POST_TO_URI\" value=\"true\" scope=\"axis2\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
@@ -165,7 +166,7 @@ public class TemplateBuilderTest extends TestCase {
         handlerMappings.add(testHandlerMappings_3);
 
         BasicTemplateBuilder builder = new BasicTemplateBuilder(apiMappings, resourceMappings, handlerMappings);
-        String output = builder.getConfigStringForTemplate();
+        String output = builder.getConfigStringForTemplate(new Environment());
         String expected = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"TestAPI\" context=\"/test\" " +
                 "version=\"1.0.0\" version-type=\"url\"><resource url-mapping=\"/*\" methods=\"GET\"><inSequence>" +
                 "<property name=\"POST_TO_URI\" value=\"true\" scope=\"axis2\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +

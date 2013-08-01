@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.template;
 
 import org.apache.axiom.om.OMElement;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 
 public interface APITemplateBuilder {
 
@@ -35,8 +36,8 @@ public interface APITemplateBuilder {
     public static final String KEY_FOR_ENDPOINT_USERNAME = "key_for_endpoint_username";
     public static final String KEY_FOR_ENDPOINT_PASSWORD = "key_for_endpoint_password";
     
-    public String getConfigStringForTemplate() throws APITemplateException;
+    public String getConfigStringForTemplate(Environment environment) throws APITemplateException;
 
-    public OMElement getConfigXMLForTemplate() throws APITemplateException;
+    public OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException;
 
 }

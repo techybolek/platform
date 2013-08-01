@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -60,11 +61,11 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
         this.blockedAPI = true;
     }
 
-    public String getConfigStringForTemplate() throws APITemplateException {
+    public String getConfigStringForTemplate(Environment environment) throws APITemplateException {
         String configAPI = constructAPIConfig();
         OMElement configAPIOM = createOMElementFrom(configAPI);
 
-        List<String> configResources = constructResourceConfig();
+        List<String> configResources = constructResourceConfig(environment);
         for (String configResource : configResources) {
             OMElement configResourceOM = createOMElementFrom(configResource);
             if (configResourceOM != null) {
@@ -91,8 +92,8 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
         return configAPIOM.toString();
     }
 
-    public OMElement getConfigXMLForTemplate() throws APITemplateException {
-        return createOMElementFrom(getConfigStringForTemplate());
+    public OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException {
+        return createOMElementFrom(getConfigStringForTemplate(environment));
     }
 
     private String constructAPIConfig() throws APITemplateException {
@@ -116,7 +117,7 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
         return null;
     }
 
-    private List<String> constructResourceConfig() throws APITemplateException {
+    private List<String> constructResourceConfig(Environment environment) throws APITemplateException {
         List<String> resourceListString = new ArrayList<String>();
         if (resourceMappings == null) {
             return resourceListString;
@@ -126,48 +127,58 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
         int i = 0;
         while (resourceMaps.hasNext()) {
             Map<String,String> singleResMap = resourceMaps.next();
-            if (singleResMap != null && singleResMap.get(KEY_FOR_RESOURCE_METHODS) != null &&
-                    singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE) != null &&
-                    singleResMap.get(KEY_FOR_RESOURCE_URI) != null &&
-                    singleResMap.get(KEY_FOR_RESOURCE_SANDBOX_URI) != null) {
-                String resourceTemplate;
-                if(ApiMgtDAO.jwtGenerator != null){
-                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_COMPLEX_RESOURCE_WITH_JWT);
-                }else{
-                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_COMPLEX_RESOURCE);
-                }
-                String endpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
-                        singleResMap.get(KEY_FOR_RESOURCE_URI)));
-                String testEndpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
-                        singleResMap.get(KEY_FOR_RESOURCE_SANDBOX_URI)));
-                String replacedStr = resourceTemplate.
-                        replaceAll("\\[1\\]", singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE)).
-                        replaceAll("\\[2\\]", singleResMap.get(KEY_FOR_RESOURCE_METHODS)).
-                        replaceAll("\\[3\\]", endpoint).
-                        replaceAll("\\[4\\]", apiMappings.get(KEY_FOR_API_NAME)).
-                        replaceAll("\\[5\\]", String.valueOf(i)).
-                        replaceAll("\\[6\\]", testEndpoint);
-                resourceListString.add(replacedStr);
-            } else if (singleResMap != null && singleResMap.get(KEY_FOR_RESOURCE_METHODS) != null &&
-                    singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE) != null &&
-                    singleResMap.get(KEY_FOR_RESOURCE_URI) != null) {
-                String resourceTemplate;
-                if(ApiMgtDAO.jwtGenerator != null){
-                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_RESOURCE_WITH_JWT);
-                }else{
-                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_RESOURCE);
-                }
+            if(singleResMap != null && singleResMap.get(KEY_FOR_RESOURCE_METHODS) != null &&
+                    singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE) != null){
 
-                String endpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
-                        singleResMap.get(KEY_FOR_RESOURCE_URI)));
-                String replacedStr = resourceTemplate.
-                        replaceAll("\\[1\\]", singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE)).
-                        replaceAll("\\[2\\]", singleResMap.get(KEY_FOR_RESOURCE_METHODS)).
-                        replaceAll("\\[3\\]", endpoint).
-                        replaceAll("\\[4\\]", apiMappings.get(KEY_FOR_API_NAME)).
-                        replaceAll("\\[5\\]", String.valueOf(i));
-                resourceListString.add(replacedStr);
-            } else {
+                ResourceTemplateBuilder resourceTemplateBuilder = 
+                        ResourceTemplateFactory.getInstance().getResourceTemplateBuilder(environment.getType());
+                
+                String resourceString = resourceTemplateBuilder.getResourceString(singleResMap, apiMappings, i);
+                resourceListString.add(resourceString);
+
+                //If both Production and Sandbox URL exists
+                /*if (singleResMap.get(KEY_FOR_RESOURCE_SANDBOX_URI) != null) {
+                    //Use the complex resource templates which have a sandbox endpoint as well.
+                    String resourceTemplate;
+                    if(ApiMgtDAO.jwtGenerator != null){
+                        resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_COMPLEX_RESOURCE_WITH_JWT);
+                    }else{
+                        resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_COMPLEX_RESOURCE);
+                    }
+                    String endpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
+                            singleResMap.get(KEY_FOR_RESOURCE_URI)));
+                    String testEndpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
+                            singleResMap.get(KEY_FOR_RESOURCE_SANDBOX_URI)));
+                    String replacedStr = resourceTemplate.
+                            replaceAll("\\[1\\]", singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE)).
+                            replaceAll("\\[2\\]", singleResMap.get(KEY_FOR_RESOURCE_METHODS)).
+                            replaceAll("\\[3\\]", endpoint).
+                            replaceAll("\\[4\\]", apiMappings.get(KEY_FOR_API_NAME)).
+                            replaceAll("\\[5\\]", String.valueOf(i)).
+                            replaceAll("\\[6\\]", testEndpoint);
+                    resourceListString.add(replacedStr);
+                }
+                else {
+                    //Use the normal resource templates which do not have a sandbox endpoint specified.
+                    String resourceTemplate;
+                    if(ApiMgtDAO.jwtGenerator != null){
+                        resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_RESOURCE_WITH_JWT);
+                    }else{
+                        resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_RESOURCE);
+                    }
+
+                    String endpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
+                            singleResMap.get(KEY_FOR_RESOURCE_URI)));
+                    String replacedStr = resourceTemplate.
+                            replaceAll("\\[1\\]", singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE)).
+                            replaceAll("\\[2\\]", singleResMap.get(KEY_FOR_RESOURCE_METHODS)).
+                            replaceAll("\\[3\\]", endpoint).
+                            replaceAll("\\[4\\]", apiMappings.get(KEY_FOR_API_NAME)).
+                            replaceAll("\\[5\\]", String.valueOf(i));
+                    resourceListString.add(replacedStr);
+                }*/
+            }
+             else {
                 handleException("Required resource mapping not provided");
             }           
 			

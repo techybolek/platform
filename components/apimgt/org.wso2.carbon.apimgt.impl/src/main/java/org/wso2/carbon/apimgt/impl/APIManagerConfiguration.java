@@ -18,12 +18,15 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +48,8 @@ public class APIManagerConfiguration {
     private SecretResolver secretResolver;
 
     private boolean initialized;
+
+    private List<Environment> apiGatewayEnvironments = new ArrayList<Environment>();
 
     /**
      * Populate this configuration by reading an XML file at the given location. This method
@@ -103,7 +108,8 @@ public class APIManagerConfiguration {
         for (Iterator childElements = serverConfig.getChildElements(); childElements
                 .hasNext();) {
             OMElement element = (OMElement) childElements.next();
-            nameStack.push(element.getLocalName());
+            String localName = element.getLocalName();
+            nameStack.push(localName);
             if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = element.getText();
@@ -111,6 +117,27 @@ public class APIManagerConfiguration {
                     value = secretResolver.resolve(key);
                 }
                 addToConfiguration(key, replaceSystemProperty(value));
+            }
+            else if("Environments".equals(localName)){
+                Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
+                apiGatewayEnvironments = new ArrayList<Environment>();
+
+                while(environmentIterator.hasNext()){
+                    Environment environment = new Environment();
+                    OMElement environmentElem = (OMElement)environmentIterator.next();
+                    environment.setType(environmentElem.getAttributeValue(new QName("type")));
+                    environment.setName(replaceSystemProperty(
+                                        environmentElem.getFirstChildWithName(new QName("Name")).getText()));
+                    environment.setServerURL(replaceSystemProperty(
+                                        environmentElem.getFirstChildWithName(new QName("ServerURL")).getText()));
+                    environment.setUserName(replaceSystemProperty(
+                                        environmentElem.getFirstChildWithName(new QName("Username")).getText()));
+                    environment.setPassword(replaceSystemProperty(
+                                        environmentElem.getFirstChildWithName(new QName("Password")).getText()));
+                    environment.setApiEndpointURL(replaceSystemProperty(
+                                        environmentElem.getFirstChildWithName(new QName("APIEndpointURL")).getText()));
+                    apiGatewayEnvironments.add(environment);
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -173,6 +200,10 @@ public class APIManagerConfiguration {
             }
         }
         return text;
+    }
+
+    public List<Environment> getApiGatewayEnvironments() {
+        return apiGatewayEnvironments;
     }
 
 }

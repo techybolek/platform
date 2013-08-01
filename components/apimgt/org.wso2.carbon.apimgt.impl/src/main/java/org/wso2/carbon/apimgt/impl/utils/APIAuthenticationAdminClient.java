@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.handlers.security.stub.APIAuthenticationServiceStu
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
@@ -44,9 +45,9 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
 
     private APIAuthenticationServiceStub stub;
 
-    public APIAuthenticationAdminClient() throws AxisFault {
-        stub = new APIAuthenticationServiceStub(null, getServiceEndpointToClearCache("APIAuthenticationService"));
-        setup(stub);
+    public APIAuthenticationAdminClient(Environment environment) throws AxisFault {
+        stub = new APIAuthenticationServiceStub(null, getServiceEndpointToClearCache(environment, "APIAuthenticationService"));
+        setup(stub, environment);
     }
 
     public void invalidateKeys(List<APIKeyMapping> mappings) throws AxisFault {
@@ -82,7 +83,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * @param stub A client stub to be setup
      * @throws AxisFault if an error occurs when logging into the API gateway
      */
-    protected void setup(Stub stub) throws AxisFault {
+    protected void setup(Stub stub, Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         //By default login to keyMgt server
@@ -92,7 +93,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
         if (gatewayKeyCacheEnabledString != null) {
             Boolean gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
             if (gatewayKeyCacheEnabled) {
-                cookie = loginGateway();
+                cookie = loginGateway(environment);
             }
         }
         ServiceClient client = stub._getServiceClient();
@@ -110,12 +111,12 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * @return A session cookie string
      * @throws AxisFault if an error occurs while logging in
      */
-    private String loginGateway() throws AxisFault {
+    private String loginGateway(Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String user = config.getFirstProperty(APIConstants.API_GATEWAY_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_GATEWAY_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL);
+        String user = environment.getUserName();
+        String password = environment.getPassword();
+        String url = environment.getServerURL();
 
         if (url == null || user == null || password == null) {
             throw new AxisFault("Required API gateway admin configuration unspecified");
@@ -189,10 +190,11 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
     /**
      * Computes endpoint to clear Key validation information cache
      *
+     * @param environment Environment of the Gateway on which we need to invalidate the cache
      * @param serviceName Name of the admin service
      * @return A String representation of the service endpoint
      */
-    private String getServiceEndpointToClearCache(String serviceName) {
+    private String getServiceEndpointToClearCache(Environment environment, String serviceName) {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
@@ -200,8 +202,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
         if (gatewayKeyCacheEnabledString != null) {
             Boolean gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
             if (gatewayKeyCacheEnabled) {
-                String url = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL);
-                return url + serviceName;
+                return environment.getServerURL() + serviceName;
             }
         }
         String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_KEY_MANAGER_ENABLE_VALIDATION_INFO_CACHE);

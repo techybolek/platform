@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -887,7 +888,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private void invalidateCachedKeys(int applicationId, APIIdentifier identifier) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) == null) {
+        if (config.getApiGatewayEnvironments().size() <= 0) {
             return;
         }
 
@@ -904,8 +905,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             try {
-                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
-                client.invalidateKeys(mappings);
+                List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                for(Environment environment : gatewayEnvs){
+                    APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                    client.invalidateKeys(mappings);
+                }
             } catch (AxisFault axisFault) {
                 log.warn("Error while invalidating API keys at the gateway", axisFault);
             }
@@ -944,7 +948,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void removeApplication(Application application) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
+        boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
         Set<SubscribedAPI> apiSet = null;
         Set<String> keys = null;
         if (gatewayExists) {
@@ -979,8 +983,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             if (mappings.size() > 0) {
                 try {
-                    APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
-                    client.invalidateKeys(mappings);
+                    List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                    for(Environment environment : gatewayEnvs){
+                        APIAuthenticationAdminClient client =
+                                new APIAuthenticationAdminClient(environment);
+                        client.invalidateKeys(mappings);
+                    }
                 } catch (AxisFault axisFault) {
                     // Just logging the error is enough - We have already deleted the application
                     // which is what's important

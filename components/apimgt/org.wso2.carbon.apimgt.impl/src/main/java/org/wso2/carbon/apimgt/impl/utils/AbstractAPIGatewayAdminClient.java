@@ -24,6 +24,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
@@ -48,8 +49,8 @@ public abstract class AbstractAPIGatewayAdminClient {
      * @param stub A client stub to be setup
      * @throws AxisFault if an error occurs when logging into the API gateway
      */
-    protected void setup(Stub stub) throws AxisFault {
-        String cookie = login();
+    protected void setup(Stub stub, Environment environment) throws AxisFault {
+        String cookie = login(environment);
         ServiceClient client = stub._getServiceClient();
         Options options = client.getOptions();
         options.setTimeOutInMilliSeconds(15 * 60 * 1000);
@@ -65,25 +66,23 @@ public abstract class AbstractAPIGatewayAdminClient {
      * @return A session cookie string
      * @throws AxisFault if an error occurs while logging in
      */
-    private String login() throws AxisFault {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String user = config.getFirstProperty(APIConstants.API_GATEWAY_USERNAME);
-        String password = config.getFirstProperty(APIConstants.API_GATEWAY_PASSWORD);
-        String url = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL);
-
-        if (url == null || user == null || password == null) {
+    private String login(Environment environment) throws AxisFault {
+        String user = environment.getUserName();
+        String password = environment.getPassword();
+        String serverURL = environment.getServerURL();
+        
+        if (serverURL == null || user == null || password == null) {
             throw new AxisFault("Required API gateway admin configuration unspecified");
         }
 
         String host;
         try {
-            host = new URL(url).getHost();
+            host = new URL(serverURL).getHost();
         } catch (MalformedURLException e) {
             throw new AxisFault("API gateway URL is malformed", e);
         }
 
-        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url + "AuthenticationAdmin");
+        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
         ServiceClient client = authAdminStub._getServiceClient();
         Options options = client.getOptions();
         options.setManageSession(true);
@@ -100,16 +99,4 @@ public abstract class AbstractAPIGatewayAdminClient {
         }
     }
 
-    /**
-     * Compute the endpoint of the given API gateway admin service
-     *
-     * @param serviceName Name of the admin service
-     * @return A String representation of the service endpoint
-     */
-    protected String getServiceEndpoint(String serviceName) {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String url = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL);
-        return url + serviceName;
-    }
 }
