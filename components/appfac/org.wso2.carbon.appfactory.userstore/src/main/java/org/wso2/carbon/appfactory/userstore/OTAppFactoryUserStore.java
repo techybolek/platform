@@ -16,6 +16,18 @@
 
 package org.wso2.carbon.appfactory.userstore;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.userstore.internal.OTLDAPUtil;
@@ -24,20 +36,11 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.claim.ClaimManager;
 import org.wso2.carbon.user.core.ldap.LDAPConstants;
 import org.wso2.carbon.user.core.profile.ProfileConfigurationManager;
 import org.wso2.carbon.user.core.util.JNDIUtil;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
-
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /*
     This class is used to convert incoming email address into uid and convert results back to email.
@@ -61,12 +64,12 @@ public class OTAppFactoryUserStore extends AppFactoryUserStore {
     }
 
     @Override
-    public boolean authenticate(String userName, Object credential) throws UserStoreException {
+    public boolean doAuthenticate(String userName, Object credential) throws UserStoreException {
         return super.doAuthenticate(doConvert(userName), credential);
     }
 
     @Override
-    public void updateRoleListOfUser(String userName, String[] deletedRoles, String[] newRoles)
+    public void doUpdateRoleListOfUser(String userName, String[] deletedRoles, String[] newRoles)
             throws UserStoreException {
         super.updateRoleListOfUser(doConvert(userName), deletedRoles, newRoles);
     }
@@ -75,11 +78,6 @@ public class OTAppFactoryUserStore extends AppFactoryUserStore {
     public void doUpdateUserListOfRole(String userName, String[] deletedRoles, String[] newRoles)
             throws UserStoreException {
         super.doUpdateUserListOfRole(doConvert(userName), deletedRoles, newRoles);
-    }
-
-    @Override
-    public boolean doAuthenticate(String userName, Object password) throws UserStoreException {
-        return super.doAuthenticate(doConvert(userName), password);
     }
 
     @Override
@@ -107,11 +105,6 @@ public class OTAppFactoryUserStore extends AppFactoryUserStore {
         return super.isExistingUser(doConvert(userName));
     }
 
-    @Override
-    public boolean isUserHasTheRole(String userName, String roleName) throws UserStoreException {
-        return super.isUserHasTheRole(doConvert(userName), roleName);
-    }
-
     private String doConvert(String email) throws UserStoreException {
         if (email == null) {
             throw new UserStoreException("User name can not be null.");
@@ -121,22 +114,7 @@ public class OTAppFactoryUserStore extends AppFactoryUserStore {
     }
 
     @Override
-    public String getUserClaimValue(String userName, String claim, String profileName) throws UserStoreException {
-        return super.getUserClaimValue(doConvert(userName), claim, profileName);
-    }
-
-    @Override
-    public Claim[] getUserClaimValues(String userName, String profileName) throws UserStoreException {
-        return super.getUserClaimValues(doConvert(userName), profileName);
-    }
-
-    @Override
-    public Map<String, String> getUserClaimValues(String userName, String[] claims, String profileName) throws UserStoreException {
-        return super.getUserClaimValues(doConvert(userName), claims, profileName);
-    }
-
-    @Override
-    public String[] listUsers(String filter, int maxItemLimit) throws UserStoreException {
+    public String[] doListUsers(String filter, int maxItemLimit) throws UserStoreException {
         String[] userNames = new String[0];
 
         if (maxItemLimit == 0) {
@@ -197,7 +175,7 @@ public class OTAppFactoryUserStore extends AppFactoryUserStore {
                     if (attrSurname != null) {
                         String serviceName = (String) attrSurname.get();
                         if (serviceName != null
-                                && serviceName.equals(SERVER_PRINCIPAL_ATTRIBUTE_VALUE)) {
+                                && serviceName.equals(LDAPConstants.SERVER_PRINCIPAL_ATTRIBUTE_VALUE)) {
                             continue;
                         }
                     }
