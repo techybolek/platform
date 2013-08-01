@@ -4,6 +4,7 @@
 <%
 var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
 var urlPrefix;
+var log = new Log();
 var tenant=request.getParameter("tenant");
 if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
 %>
@@ -16,10 +17,14 @@ if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
    var subsPermitted = jagg.module("subscription").hasSubscribePermission().permitted;
    session.put("apiPath",request.getQueryString());
 
-   var serverEndpoints = api.serverURL.split(",");
-   var endpointUrl = serverEndpoints[0]+api.context+'/'+api.version;
-
-   session.put("endpointUrl",endpointUrl);
+   var environments = api.serverURL.split("|");
+   for(i=0; i<environments.length; i++){
+        var environment = environments[i];
+        var epParams = environment.split(",");
+        var endpointUrl = epParams[1] + api.context + '/' + api.version;
+        session.put("endpointUrl",endpointUrl);
+        break;
+   }
 %>
 <div class="title-section">
 

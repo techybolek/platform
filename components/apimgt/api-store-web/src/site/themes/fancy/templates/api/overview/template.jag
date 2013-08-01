@@ -1,5 +1,5 @@
 <% jagg.template("api/overview", function(inputs, outputs, jagg) { %>
-<% var api = outputs.api, user = outputs.user; %>
+<% var api = outputs.api, user = outputs.user, log = new Log(); %>
  <%
 var discoveryUrl = outputs.discoveryURL;
 %>
@@ -7,11 +7,21 @@ var discoveryUrl = outputs.discoveryURL;
     <h6><%=i18n.localize("urls")%>:</h6>
     <ul>
     <%
-    var serverEndpoints = api.serverURL.split(",");
-    for (i = 0; i < serverEndpoints.length; i++) {
-    %>
-    <li><%=serverEndpoints[i]%><%=api.context%>/<%=api.version%></li>
-    <%
+    var environments = api.serverURL.split("|");
+    for (j=0; j<environments.length; j++){
+        var environment = environments[j];
+        var epParams =  environment.split(",");
+        %>
+            <ul><h6><%=epParams[0]%></h6>
+        <%
+        for (i = 1; i < epParams.length; i++) {
+            %>
+            <li><%=epParams[i]%><%=api.context%>/<%=api.version%></li>
+            <%
+        }
+        %>
+            </ul>
+        <%
     }
     %>
     </ul>
