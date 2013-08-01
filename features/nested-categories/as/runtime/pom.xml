@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.appserver.runtime.nested.category.feature</artifactId>
     <packaging>pom</packaging>
-    <name>AS-Runtime</name>
+    <name>Runtimes</name>
     <url>http://wso2.org</url>
     <description>Nested feature category for all as-runtime features</description>
  
