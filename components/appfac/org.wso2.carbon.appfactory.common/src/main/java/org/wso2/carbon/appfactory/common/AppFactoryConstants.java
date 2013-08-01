@@ -133,7 +133,9 @@ public class AppFactoryConstants {
     public static final String ESB_ARTIFACT_DEPLOYMENT_PATH = "synapse-configs" + File.separator + "default";
     
     public static final String APP_VERSION_CACHE = "af.appversion.cache";
+    public static final String APP_VERSION_CACHE_MANAGER = "af.appversion.cache.manager";
     public static final String APP_VERSION_STAGE_CACHE = "af.appversion.stage.cache";
+    public static final String APP_VERSION_STAGE_CACHE_MANAGER = "af.appversion.stage.cache.manager";
 
 
 	
