@@ -32,6 +32,12 @@
     OAuthClientResponse oAuthResponse = oAuthClient.accessToken(accessRequest);
     String accessToken = oAuthResponse.getParam(OAuth2Constants.ACCESS_TOKEN);
     session.setAttribute(OAuth2Constants.ACCESS_TOKEN,accessToken);
+    
+    String idToken = oAuthResponse.getParam("id_token");
+    if(idToken != null) {
+        session.setAttribute("id_token", idToken);
+    }
+    
     } catch (Exception e) {
 %>
       	 <script type="text/javascript">

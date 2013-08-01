@@ -1,5 +1,8 @@
 <%@page import="com.wso2.identity.oauth.sample.OAuth2Constants"%>
 <%@page import="org.apache.amber.oauth2.client.response.OAuthAuthzResponse"%>
+<%@page import="org.json.simple.parser.JSONParser"%>
+<%@page import="org.json.simple.JSONObject"%>
+<%@page import="org.apache.commons.codec.binary.Base64"%>
 
 <%
 
@@ -9,6 +12,8 @@ String grantType = (String) session.getAttribute(OAuth2Constants.OAUTH2_GRANT_TY
 OAuthAuthzResponse authzResponse = null;
 String code = null;
 String accessToken = null;
+String idToken = null;
+String name = null;
 
 try {
     
@@ -18,6 +23,7 @@ try {
     	session.removeAttribute(OAuth2Constants.OAUTH2_GRANT_TYPE);
     	session.removeAttribute(OAuth2Constants.ACCESS_TOKEN);
     	session.removeAttribute(OAuth2Constants.CODE);
+    	session.removeAttribute("id_token");
     }    
     
     if (grantType != null && OAuth2Constants.OAUTH2_GRANT_TYPE_CODE.equals(grantType)) {
@@ -28,6 +34,7 @@ try {
         	session.setAttribute(OAuth2Constants.CODE,code);
     	} else {
         	accessToken = (String) session.getAttribute(OAuth2Constants.ACCESS_TOKEN);
+        	idToken = (String) session.getAttribute("id_token");
     	}   
     } else if (grantType != null && OAuth2Constants.OAUTH2_GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType)) {
     	accessToken = (String) session.getAttribute(OAuth2Constants.ACCESS_TOKEN);
@@ -247,8 +254,54 @@ try {
                </form>
                                       
               </div>
-              <%} else if (accessToken!=null) { %>
-               <div>
+              <%
+              	} else if (accessToken!=null) {
+              		
+                    if (idToken != null) { 
+                    	try {
+            				String base64Body = idToken.split("\\.")[1];
+            				byte[] decoded = Base64.decodeBase64(base64Body.getBytes());
+            				String json = new String(decoded);
+            				JSONParser parser = new JSONParser();
+            				Object obj = parser.parse(json);
+            				JSONObject jsonObject = (JSONObject) obj;
+            				name = (String) jsonObject.get("sub");
+            			} catch (Exception e) {
+            				//ignore
+            			}
+                    %>
+                    
+                <div>
+                <form action="oauth2-access-resource.jsp" id="loginForm" method="post">
+ 
+                   <table class="user_pass_table">
+                        <tbody>  
+                          <tr>
+                              <td><label>Logged In User :</label></td>
+                              <td><label><%=name%></label></td>
+                          </tr> 
+                          <tr>
+                              <td><label>Access Token :</label></td>
+                              <td><input  id="accessToken" name="accessToken" style= "width:350px" value="<%=accessToken%>" />
+                          </tr>
+                          <tr>
+                              <td><label>Resource URL :</label></td>
+                              <td><input  id="resource_url" name="resource_url" type="text" style= "width:350px"/>
+                          </tr>
+                 
+                          <tr>
+                              <td>
+                                  <input type="submit" class="button" value="Get Photos">
+                               </td>
+                          </tr>     
+                        </tbody>
+                    </table>
+
+               </form>                                    
+              </div>
+              			
+              		<%} else { %>
+              	<div>
                 <form action="oauth2-access-resource.jsp" id="loginForm" method="post">
  
                    <table class="user_pass_table">
@@ -272,6 +325,8 @@ try {
 
                </form>                                    
               </div>
+              		<%} %>
+             
               <% } else if (grantType != null && OAuth2Constants.OAUTH2_GRANT_TYPE_IMPLICIT.equals(grantType)) {%>
               <div>
               <form action="oauth2-access-resource.jsp" id="loginForm" method="post">
