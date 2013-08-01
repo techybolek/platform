@@ -245,9 +245,6 @@
         <includes>
         <include>*/**</include>
         </includes>
-        <excludes>
-            <exclude>**/cxf/velocity-1.7.jar</exclude>
-        </excludes>
         </fileSet>
 
         <!--End of  API Manager related -->
