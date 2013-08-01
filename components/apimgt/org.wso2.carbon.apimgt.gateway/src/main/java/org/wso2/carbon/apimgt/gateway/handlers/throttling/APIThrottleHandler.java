@@ -41,7 +41,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.throttle.*;
+import org.wso2.carbon.throttle.core.*;
 
 import java.util.Date;
 import java.util.Map;
@@ -276,10 +276,10 @@ public class APIThrottleHandler extends AbstractHandler {
                     if (callerId != null) {  // there is configuration for this domain name
 
                         //If this is a clustered env.
-                        if (isClusteringEnable) {
-                            context.setConfigurationContext(cc);
+                        //if (isClusteringEnable) {
+                        //    context.setConfigurationContext(cc);
                             context.setThrottleId(id);
-                        }
+                       // }
 
                         try {
                             //Checks for access state
@@ -339,10 +339,10 @@ public class APIThrottleHandler extends AbstractHandler {
                             if (callerId != null) {   // there is configuration for this ip
 
                                 //For clustered env.
-                                if (isClusteringEnable) {
-                                    context.setConfigurationContext(cc);
+                                //if (isClusteringEnable) {
+                               //     context.setConfigurationContext(cc);
                                     context.setThrottleId(id);
-                                }
+                              //  }
                                 //Checks access state
                                 AccessInformation accessInformation = accessController.canAccess(
                                         context,
@@ -448,10 +448,10 @@ public class APIThrottleHandler extends AbstractHandler {
 
                     ThrottleContext applicationThrottleContext =
                             ApplicationThrottleController.getApplicationThrottleContext(synCtx, cc, applicationId);
-                    if (isClusteringEnable) {
-                        applicationThrottleContext.setConfigurationContext(cc);
+                //    if (isClusteringEnable) {
+                  //      applicationThrottleContext.setConfigurationContext(cc);
                         applicationThrottleContext.setThrottleId(id);
-                    }
+                  //  }
                     //First throttle by application
                     try {
                         info = applicationRoleBasedAccessController.canAccess(applicationThrottleContext, applicationId, applicationRoleId);
@@ -500,10 +500,10 @@ public class APIThrottleHandler extends AbstractHandler {
                 String consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
                 if (consumerRoleID != null) {
                     // If this is a clustered env.
-                    if (isClusteringEnable) {
-                        context.setConfigurationContext(cc);
+                //    if (isClusteringEnable) {
+                 //       context.setConfigurationContext(cc);
                         context.setThrottleId(id);
-                    }
+                   // }
 
                     try {
                         //If the application has not been subscribed to the Unlimited Tier and

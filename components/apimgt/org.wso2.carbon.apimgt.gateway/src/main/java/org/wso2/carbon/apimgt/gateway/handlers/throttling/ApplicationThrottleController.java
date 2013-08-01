@@ -21,7 +21,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.throttle.*;
+import org.wso2.carbon.throttle.core.*;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;
