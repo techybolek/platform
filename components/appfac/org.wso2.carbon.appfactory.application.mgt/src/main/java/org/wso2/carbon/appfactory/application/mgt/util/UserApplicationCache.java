@@ -16,22 +16,25 @@
 
 package org.wso2.carbon.appfactory.application.mgt.util;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 public class UserApplicationCache {
     private static Log log = LogFactory.getLog(UserApplicationCache.class);
 
     public static final String USER_APPLICATIONS_CACHE_NAME = "USER_APPLICATIONS_CACHE";
+    public static final String USER_APPLICATIONS_CACHE_MANAGER = "USER_APPLICATIONS_MANAGER";
 
-    protected Cache cache = null;
+    protected Cache<String, String[]> cache = null;
 
     private static UserApplicationCache userApplicationCache = new UserApplicationCache();
 
     private UserApplicationCache() {
-        this.cache = CacheManager.getInstance().getCache(USER_APPLICATIONS_CACHE_NAME);
+        this.cache = Caching.getCacheManager(USER_APPLICATIONS_CACHE_MANAGER).getCache(USER_APPLICATIONS_CACHE_NAME);
         if (log.isDebugEnabled()) {
             if (cache != null) {
                 log.debug(USER_APPLICATIONS_CACHE_NAME + " is successfully initiated.");
