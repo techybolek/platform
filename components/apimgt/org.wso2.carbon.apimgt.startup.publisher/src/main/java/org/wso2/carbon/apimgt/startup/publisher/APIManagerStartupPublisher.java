@@ -41,7 +41,9 @@ public class APIManagerStartupPublisher implements ServerStartupHandler{
 	
 	@Override
 	public void invoke() {
-		log.info("Startup Publisher Invoked");
+		if (log.isisDebugEnabled()) {
+			log.info("Startup Publisher Invoked");
+		}
 		
 		String apiManagementEnabled = CarbonUtils.getServerConfiguration().getFirstProperty(APIManagerConstants.API_MANGEMENT_ENABLED);
         String externalAPIManagerGatewayURL = CarbonUtils.getServerConfiguration().getFirstProperty(APIManagerConstants.EXTERNAL_API_GATEWAY);
@@ -59,7 +61,6 @@ public class APIManagerStartupPublisher implements ServerStartupHandler{
 					if (log.isDebugEnabled()) {
 						log.info("StartupAPIPublisher is not configured or invalid StartupAPIPublisher configuration");
 					}
-					log.info("StartupAPIPublisher is not configured or invalid StartupAPIPublisher configuration");
 					return;
 				}
 	        	
@@ -79,7 +80,6 @@ public class APIManagerStartupPublisher implements ServerStartupHandler{
 							if (log.isDebugEnabled()) {
 								log.info("StartupAPIPublisher is not configured or invalid StartupAPIPublisher configuration");
 							}
-							log.info("StartupAPIPublisher is not configured or invalid StartupAPIPublisher configuration");
 							return;
 						}
 						
