@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIConsumer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -733,7 +734,18 @@ public class APIStoreHostObject extends ScriptableObject {
             row.put("userRate", row, userRate);
             }
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-            row.put("serverURL", row, config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT));
+            List<Environment> environments = config.getApiGatewayEnvironments();
+            String envDetails = "";
+            for(int i=0; i<environments.size(); i++){
+                Environment environment = environments.get(i);
+                envDetails += environment.getName() + ",";
+                envDetails += environment.getApiEndpointURL();
+                if(i < environments.size() - 1){
+                    envDetails += "|";
+                }
+            }
+            //row.put("serverURL", row, config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT));
+            row.put("serverURL", row, envDetails);
 
             //TODO : need to pass in the full available tier list to front end
             StringBuffer tiersSet = new StringBuffer("");
@@ -760,7 +772,7 @@ public class APIStoreHostObject extends ScriptableObject {
             if (api.getThumbnailUrl() == null) {
                 row.put("thumbnailurl", row, "images/api-default.png");
             } else {
-                row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+             row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
             }
             row.put("bizOwner", row, api.getBusinessOwner());
             row.put("bizOwnerMail", row, api.getBusinessOwnerEmail());

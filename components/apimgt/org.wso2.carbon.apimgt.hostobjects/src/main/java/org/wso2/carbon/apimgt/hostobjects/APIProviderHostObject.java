@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -260,7 +262,11 @@ public class APIProviderHostObject extends ScriptableObject {
             sandboxUrl = null;
         }
 
-        if(!endpoint.startsWith("http") && !endpoint.startsWith("https")){
+        if (endpoint != null && endpoint.trim().length() == 0) {
+            endpoint = null;
+        }
+
+        if(endpoint != null && !endpoint.startsWith("http") && !endpoint.startsWith("https")){
             endpoint = "http://" + endpoint;
         }
         if(sandboxUrl != null && !sandboxUrl.startsWith("http") && !sandboxUrl.startsWith("https")){
@@ -458,7 +464,11 @@ public class APIProviderHostObject extends ScriptableObject {
             sandboxUrl = null;
         }
 
-        if(!endpoint.startsWith("http") && !endpoint.startsWith("https")){
+        if (endpoint != null && endpoint.trim().length() == 0) {
+            endpoint = null;
+        }
+
+        if(endpoint != null && !endpoint.startsWith("http") && !endpoint.startsWith("https")){
             endpoint = "http://" + endpoint;
         }
         if(sandboxUrl != null && !sandboxUrl.startsWith("http") && !sandboxUrl.startsWith("https")){
@@ -2230,8 +2240,14 @@ public class APIProviderHostObject extends ScriptableObject {
                 mappings.add(mapping);
             }
             if (mappings.size() > 0) {
-                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
-                client.invalidateKeys(mappings);
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+                for(Environment environment : gatewayEnvs){
+                    APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                    client.invalidateKeys(mappings);
+                }
+
 
             }
         } catch (Exception e) {
