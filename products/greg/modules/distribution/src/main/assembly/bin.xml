@@ -295,14 +295,21 @@
             <includes>
                 <include>**/**.xml</include>
             </includes>
-        </fileSet>        
-        <fileSet>
+        </fileSet>
+	<fileSet>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf</directory>
+            <outputDirectory>${pom.artifactId}-${build.version}/repository/conf</outputDirectory>
+	    <includes>
+                <include>**/api-manager.xml</include>
+            </includes>
+	</fileSet>        
+        <!--fileSet>
             <directory>src/main/resources/carbon-home/conf</directory>
             <outputDirectory>${pom.artifactId}-${build.version}/repository/conf</outputDirectory>
             <includes>
                 <include>**/api-manager.xml</include>
             </includes>
-        </fileSet>        
+        </fileSet-->        
         <fileSet>
             <directory>src/main/resources/carbon-home/conf</directory>
             <outputDirectory>${pom.artifactId}-${build.version}/repository/conf/datasources</outputDirectory>
