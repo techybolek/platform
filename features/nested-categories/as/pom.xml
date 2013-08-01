@@ -42,6 +42,7 @@
         <module>monitoring</module>
         <module>tooling</module>
         <module>styling</module>
+        <module>runtime</module>
     </modules>
 
 

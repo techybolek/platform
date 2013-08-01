@@ -140,6 +140,8 @@
 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}</featureArtifactDef>
 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.reporting.feature:${carbon.platform.version}</featureArtifactDef>
 
+<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.as.runtimes.cxf.feature:${carbon.platform.version}</featureArtifactDef>
+<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.as.runtimes.j2ee.feature:${carbon.platform.version}</featureArtifactDef>
 
 <!--
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.feature:${platform.version}</featureArtifactDef>
@@ -210,7 +212,9 @@
 				<featureArtifactDef>org.wso2.appserver:org.wso2.appserver.registry-repository.nested.category.feature:${as.version}</featureArtifactDef>	
 				<featureArtifactDef>org.wso2.appserver:org.wso2.appserver.monitoring.nested.category.feature:${as.version}</featureArtifactDef>				
 				<featureArtifactDef>org.wso2.appserver:org.wso2.appserver.tooling.nested.category.feature:${as.version}</featureArtifactDef>				
-				<featureArtifactDef>org.wso2.appserver:org.wso2.appserver.styling.nested.category.feature:${as.version}</featureArtifactDef>				
+				<featureArtifactDef>org.wso2.appserver:org.wso2.appserver.styling.nested.category.feature:${as.version}</featureArtifactDef>
+                <featureArtifactDef>org.wso2.appserver:org.wso2.appserver.runtime.nested.category.feature:${as.version}</featureArtifactDef>
+
                             </featureArtifacts>
 
 			    <categories>
@@ -260,6 +264,11 @@
                                             <id>org.wso2.appserver.styling.nested.category</id>
                                             <version>${as.version}</version>
                                         </catFeature>
+					<catFeature>
+                                            <id>org.wso2.appserver.runtime.nested.category</id>
+                                            <version>${as.version}</version>
+                                        </catFeature>
+
                                     </features>
                                 </category>
 			    </categories>
