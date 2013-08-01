@@ -54,6 +54,14 @@ import org.wso2.carbon.registry.resource.stub.common.xsd.ResourceData;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.xml.sax.InputSource;
 
+import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.services.ServiceManager;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+
 import javax.activation.DataHandler;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -83,6 +91,8 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
     private GovernanceServiceClient governanceServiceClient;
     private ListMetaDataServiceClient listMetadataServiceClient;
     private ResourceAdminServiceClient resourceAdminServiceClient;
+
+    private ServiceManager serviceManager;
 
     private static final String SERVICE_NAME = "IntergalacticService";
     private static final String LC_NAME = "DiffEnvironmentLC";
@@ -136,6 +146,9 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         wsRegistryServiceClient =
                 registryProviderUtil.getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME);
 
+	Registry reg = registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)reg);
+        serviceManager = new ServiceManager(reg);
     }
 
     /**
@@ -212,12 +225,16 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException {
+                                            ResourceAdminServiceExceptionException,
+					    GovernanceException {
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+        //service = listMetadataServiceClient.listServices(null);
+
+        Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
                 break;
             }
         }
@@ -252,7 +269,8 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
                                               CustomLifecyclesChecklistAdminServiceExceptionException,
                                               LifeCycleManagementServiceExceptionException,
                                               RegistryExceptionException,
-                                              ResourceAdminServiceExceptionException {
+                                              ResourceAdminServiceExceptionException,
+					      GovernanceException {
 
         ArrayOfString[] parameters = new ArrayOfString[5];
         String[] dependencyList =
@@ -271,10 +289,12 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceString,
                                                            LC_NAME, ACTION_PROMOTE, null,
                                                            parameters);
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService") && services.contains("/testing/")) {
-                serviceString = services;
+     //   service = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService") && path.contains("/testing/")) {
+                serviceString = path;
             }
         }
         lifeCycle =
@@ -347,17 +367,20 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
                                                CustomLifecyclesChecklistAdminServiceExceptionException,
                                                LifeCycleManagementServiceExceptionException,
                                                RegistryExceptionException,
-                                               ResourceAdminServiceExceptionException {
+                                               ResourceAdminServiceExceptionException, 
+					       GovernanceException {
 
         ArrayOfString[] parameters = new ArrayOfString[1];
         parameters[0] = new ArrayOfString();
         parameters[0].setArray(new String[]{"preserveOriginal", "false"});
         lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceString,
                                                            LC_NAME, ACTION_DEMOTE, null, parameters);
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("/abb/1.0.0")) {
-                serviceString = services;
+//        service = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("/abb/1.0.0")) {
+                serviceString = path;
             }
         }
         lifeCycle =

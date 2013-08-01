@@ -56,6 +56,14 @@ import org.wso2.carbon.registry.search.stub.beans.xsd.CustomSearchParameterBean;
 import org.wso2.carbon.registry.search.stub.common.xsd.ResourceData;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
+import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.services.ServiceManager;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -87,6 +95,7 @@ public class LifeCycleListTestCase {
     private ListMetaDataServiceClient listMetadataServiceClient;
     private ResourceAdminServiceClient resourceAdminServiceClient;
     private SearchAdminServiceClient searchAdminServiceClient;
+    private ServiceManager serviceManager;
 
     private static final String[] SERVICE_NAMES = {"IntergalacticService", "abc", "def"};
     private static final String[] LC_NAMES = {"StateDemoteLC", "MultiplePromoteDemoteLC",
@@ -131,7 +140,9 @@ public class LifeCycleListTestCase {
         searchAdminServiceClient =
                 new SearchAdminServiceClient(environment.getGreg().getProductVariables().getBackendUrl(),
                                              environment.getGreg().getSessionCookie());
-
+	Registry reg = registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)reg);
+        serviceManager = new ServiceManager(reg);
 
     }
 
@@ -149,7 +160,8 @@ public class LifeCycleListTestCase {
     public void testCreateServices() throws XMLStreamException, IOException,
                                             AddServicesServiceRegistryExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException {
+                                            ResourceAdminServiceExceptionException,
+					    GovernanceException {
 
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
@@ -182,14 +194,15 @@ public class LifeCycleListTestCase {
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ServiceBean bean = listMetadataServiceClient.listServices(null);
+//        ServiceBean bean = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
 
         int serviceCount = 0;
 
-        if (bean.getNames() != null) {
+        if (services.length > 0) {
             for (String serviceName : SERVICE_NAMES) {
-                for (String name : bean.getNames()) {
-                    if (name.equals(serviceName)) {
+                for (Service service : services) {
+                    if (service.getQName().getLocalPart().equals(serviceName)) {
                         serviceCount++;
                     }
                 }
@@ -262,14 +275,17 @@ public class LifeCycleListTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException {
+                                            ResourceAdminServiceExceptionException, 
+				 	    GovernanceException {
 
-        service = listMetadataServiceClient.listServices(null);
+        //service = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
         String serviceString = "";
-        for (String services : service.getPath()) {
-            if (services.contains(SERVICE_NAMES[0])) {
-                serviceString = services;
-                servicePath1 = services;
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains(SERVICE_NAMES[0])) {
+                serviceString = path;
+                servicePath1 = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAMES[0]);
@@ -286,10 +302,11 @@ public class LifeCycleListTestCase {
             }
         }
         assertTrue(lcStatus, "LifeCycle not added to service");
-        for (String services : service.getPath()) {
-            if (services.contains(SERVICE_NAMES[1])) {
-                serviceString = services;
-                servicePath2 = services;
+        for (Service service2 : services) {
+	    String path = service2.getPath();
+            if (path.contains(SERVICE_NAMES[1])) {
+                serviceString = path;
+                servicePath2 = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAMES[0]);
@@ -409,10 +426,12 @@ public class LifeCycleListTestCase {
      */
     @AfterClass(alwaysRun = true)
     public void clear() throws Exception {
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains(SERVICE_NAMES[0]) || services.contains(SERVICE_NAMES[1]) || services.contains(SERVICE_NAMES[2])) {
-                String servicePathToDelete = "/_system/governance/" + services;
+//        service = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains(SERVICE_NAMES[0]) || path.contains(SERVICE_NAMES[1]) || path.contains(SERVICE_NAMES[2])) {
+                String servicePathToDelete = "/_system/governance/" + path;
                 if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
                     resourceAdminServiceClient.deleteResource(servicePathToDelete);
                 }

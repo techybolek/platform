@@ -48,6 +48,14 @@ import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionExcep
 import org.wso2.carbon.registry.resource.stub.common.xsd.ResourceData;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
+import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.services.ServiceManager;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -75,6 +83,8 @@ public class LCCheckListPermissionTestCase {
     private ListMetaDataServiceClient listMetadataServiceClient;
     private UserManagementClient userManagementClient;
     private ResourceAdminServiceClient resourceAdminServiceClient;
+
+    private ServiceManager serviceManager;
 
     private static final String SERVICE_NAME = "IntergalacticService";
     private static final String LC_NAME = "CheckListPermissionLC";
@@ -119,6 +129,10 @@ public class LCCheckListPermissionTestCase {
         resourceAdminServiceClient =
                 new ResourceAdminServiceClient(environment.getGreg().getProductVariables()
                                                        .getBackendUrl(), environment.getGreg().getSessionCookie());
+
+	Registry reg = registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)reg);
+        serviceManager = new ServiceManager(reg);
     }
 
     /**
@@ -195,13 +209,17 @@ public class LCCheckListPermissionTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException {
+                                            ResourceAdminServiceExceptionException,
+					    GovernanceException {
 
-        ServiceBean service = listMetadataServiceClient.listServices(null);
-        String servicePathDev[] = service.getPath();
-        for (String services : servicePathDev) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+       // ServiceBean service = listMetadataServiceClient.listServices(null);
+
+        Service[] services = serviceManager.getAllServices();
+        //String servicePathDev[] = service.getPath();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);

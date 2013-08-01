@@ -54,6 +54,15 @@ import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionExcep
 import org.wso2.carbon.registry.resource.stub.common.xsd.ResourceData;
 import org.wso2.carbon.registry.search.stub.SearchAdminServiceRegistryExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
+import org.wso2.carbon.registry.core.Registry;
+
+import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.services.ServiceManager;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLStreamException;
@@ -80,6 +89,8 @@ public class Registry732 {
     private RelationAdminServiceClient relationServiceClient;
     private SearchAdminServiceClient searchAdminServiceClient;
     private WSRegistryServiceClient wsRegistryServiceClient;
+
+    private ServiceManager serviceManager;	
 
     private static final String SERVICE_NAME = "IntergalacticService";
     private static final String ROOT = "/";
@@ -138,6 +149,9 @@ public class Registry732 {
 
         wsRegistryServiceClient =
                 new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME);
+	Registry reg = registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId);
+	GovernanceUtils.loadGovernanceArtifacts((UserRegistry)reg);
+	serviceManager = new ServiceManager(reg);
 
     }
 
@@ -146,7 +160,8 @@ public class Registry732 {
                                            AddServicesServiceRegistryExceptionException,
                                            ListMetadataServiceRegistryExceptionException,
                                            ResourceAdminServiceExceptionException,
-                                           CustomLifecyclesChecklistAdminServiceExceptionException {
+                                           CustomLifecyclesChecklistAdminServiceExceptionException, 
+	 				   GovernanceException {
 
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
@@ -161,11 +176,17 @@ public class Registry732 {
         ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
         
         assertNotNull(data, "Service not found");
-
-        ServiceBean service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+	System.out.println("+++++++++++++ " + serviceManager + "+++++++++++++++++++++++++++");
+//        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governanceRegistry);
+//	serviceManager = new ServiceManager(registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId));
+	
+	Service[] services = serviceManager.getAllServices();
+//        ServiceBean service = listMetadataServiceClient.listServices(null);
+        for (Service service : services) {
+		System.out.println("----------Path-----------: " + service.getPath() );
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
 

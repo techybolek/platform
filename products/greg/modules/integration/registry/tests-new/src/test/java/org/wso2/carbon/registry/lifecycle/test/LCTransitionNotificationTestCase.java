@@ -49,6 +49,15 @@ import org.wso2.carbon.registry.resource.stub.common.xsd.ResourceData;
 import org.wso2.carbon.registry.subscription.test.util.WorkItemClient;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
+import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.services.ServiceManager;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+
+
 public class LCTransitionNotificationTestCase {
 
 	private int userId = 2;
@@ -64,6 +73,7 @@ public class LCTransitionNotificationTestCase {
 	private InfoServiceAdminClient infoServiceAdminClient;
 	private HumanTaskAdminClient humanTaskAdminClient;
 	private ManageEnvironment environment;
+	private ServiceManager serviceManager;
 
 	private static final String SERVICE_NAME = "IntergalacticService";
 	private static final String LC_NAME = "TransitionApprovalLC";
@@ -114,6 +124,9 @@ public class LCTransitionNotificationTestCase {
 				.getGreg().getSessionCookie());
 		wsRegistryServiceClient = registryProviderUtil.getWSRegistry(userId,
 				ProductConstant.GREG_SERVER_NAME);
+		Registry reg = registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId);
+        	GovernanceUtils.loadGovernanceArtifacts((UserRegistry)reg);
+	        serviceManager = new ServiceManager(reg);
 
 	}
 
@@ -182,14 +195,17 @@ public class LCTransitionNotificationTestCase {
 	 * 
 	 */
 	@Test(groups = "wso2.greg", description = "Subscribe LC Approval Needed notification while state change", dependsOnMethods = "testCreateNewLifeCycle")
-	public void testSubscribeLCApprovalNeededNotification() throws Exception{
+	public void testSubscribeLCApprovalNeededNotification() throws Exception, GovernanceException {
 		
 		addRole();
 
-		ServiceBean service = listMetadataServiceClient.listServices(null);
-		for (String services : service.getPath()) {
-			if (services.contains("IntergalacticService")) {
-				serviceString = services;
+	//	ServiceBean service = listMetadataServiceClient.listServices(null);
+
+		Service[] services = serviceManager.getAllServices();
+		for (Service service : services) {
+		        String path = service.getPath();
+			if (path.contains("IntergalacticService")) {
+				serviceString = path;
 			}
 		}
 		assertTrue(consoleSubscribe("/_system/governance" + serviceString,	"LifeCycleApprovalNeeded"));
