@@ -36,7 +36,7 @@ public class JMeterInstallationProvider {
 
     private JMeterInstallationProvider() {
         log.info("Creating jmeter installation directory structure");
-        File targetDir = new File(getReportLocation());
+        File targetDir = new File(getTargetLocation());
         File libDir;
         File binDir;
 
@@ -153,14 +153,8 @@ public class JMeterInstallationProvider {
         }
     }
 
-    private static String getReportLocation() {
-        String reportLocation;
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            reportLocation = (System.getProperty("basedir", ".")) + File.separator + "target";
+    private static String getTargetLocation() {
 
-        } else {
-            reportLocation = (System.getProperty("basedir", ".")) + File.separator + "target";
-        }
-        return reportLocation;
+        return (System.getProperty("basedir", ".")) + File.separator + "target";
     }
 }

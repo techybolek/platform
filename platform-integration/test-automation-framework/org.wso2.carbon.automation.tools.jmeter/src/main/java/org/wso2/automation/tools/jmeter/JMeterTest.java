@@ -19,28 +19,28 @@ package org.wso2.automation.tools.jmeter;
 import java.io.File;
 
 public class JMeterTest {
-    public String jmeterLogLevel = "1";
+    private String jmeterLogLevel = "1";
     private File testFile = null;
     private File jMeterPropertyFile = null;
 
-    public JMeterTest(File script) {
-        testFile = script;
-    }
-
-    public void setTestFile(File testFile) {
-        testFile = testFile;
+    public JMeterTest(File testScript) {
+        testFile = testScript;
     }
 
     public String getLogLevel() {
-        return jmeterLogLevel;
+        return this.jmeterLogLevel;
+    }
+
+    public void setLogLevel(String level) {
+        this.jmeterLogLevel = level;
     }
 
     public File getTestFile() {
-        return testFile;
+        return this.testFile;
     }
 
     public File getJMeterPropertyFile() {
-        return jMeterPropertyFile;
+        return this.jMeterPropertyFile;
     }
 
     public void setJMeterPropertyFile(File jMeterPropertyFile) {
