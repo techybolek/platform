@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
@@ -243,7 +244,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     public void revokeAccessTokenForApplication(Application application) throws APIManagementException, AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
+        boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
         Set<SubscribedAPI> apiSet = null;
         Set<String> keys = null;
         ApiMgtDAO dao;
@@ -265,9 +266,11 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
         }
         if (mappings.size() > 0) {
-            APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
-            client.invalidateKeys(mappings);
-
+            List<Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+            for(Environment environment : gatewayEnvs){
+                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                client.invalidateKeys(mappings);
+            }
         }
     }
 
