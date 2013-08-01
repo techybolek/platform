@@ -208,6 +208,12 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
     private boolean isSkippedWebapp(File webappFile) {
         String webappFilePath = webappFile.getPath();
         boolean isSkipped = true;
+
+        if(webappFilePath.contains( WebappsConstants.VERSION_MARKER)) {
+            log.info("Unsupported file path format : " + webappFile);
+            return  true;
+        }
+
         // Here we are checking WebappDeployer with .war extension or null extension
         // If foo.war and foo dir is found, then we will allow  .war based WebappDeployer to deploy that webapp.
         // If only foo dir found then directory based WebappDeployer will deploy that webapp.
