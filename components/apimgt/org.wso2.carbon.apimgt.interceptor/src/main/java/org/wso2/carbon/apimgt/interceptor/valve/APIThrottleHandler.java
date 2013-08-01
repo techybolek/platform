@@ -30,11 +30,11 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.interceptor.valve.internal.DataHolder;
 import org.wso2.carbon.apimgt.core.throttle.ThrottleManager;
 import org.wso2.carbon.apimgt.core.APIManagerConstants;
-import org.wso2.throttle.ConcurrentAccessController;
-import org.wso2.throttle.Throttle;
-import org.wso2.throttle.ThrottleConstants;
-import org.wso2.throttle.ThrottleException;
-import org.wso2.throttle.ThrottleFactory;
+import org.wso2.carbon.throttle.core.ConcurrentAccessController;
+import org.wso2.carbon.throttle.core.Throttle;
+import org.wso2.carbon.throttle.core.ThrottleConstants;
+import org.wso2.carbon.throttle.core.ThrottleException;
+import org.wso2.carbon.throttle.core.ThrottleFactory;
 
 public class APIThrottleHandler {
 	
