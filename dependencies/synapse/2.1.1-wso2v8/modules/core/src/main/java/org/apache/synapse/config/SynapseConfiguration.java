@@ -1680,11 +1680,7 @@ public class SynapseConfiguration implements ManagedLifecycle, SynapseArtifact {
      * @param synImport instance
      */
     public void addSynapseImport(String name, SynapseImport synImport) {
-        if (!(synapseImports.containsKey(name))) {
-            synapseImports.put(name, synImport);
-        } else {
-            handleException("Duplicate Synapse Library " + name);
-        }
+    	 synapseImports.put(name, synImport);
     }
 
     /**
