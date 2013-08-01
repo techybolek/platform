@@ -103,8 +103,18 @@
             </includes>
         </fileSet>
 
-        <!--  copying samples -->
         <fileSet>
+            <directory>
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/dbscripts/service-provider/
+            </directory>
+            <outputDirectory>wso2is-${pom.version}/dbscripts/service-provider</outputDirectory>
+            <includes>
+                <include>**/**.sql</include>
+            </includes>
+        </fileSet>
+
+        <!--  copying samples -->
+        <!--fileSet>
             <directory>../samples</directory>
             <outputDirectory>wso2is-${pom.version}/samples</outputDirectory>
             <excludes>
@@ -112,17 +122,17 @@
                 <exclude>**/pom.xml</exclude>
                 <exclude>**/target/**</exclude>
             </excludes>
-        </fileSet>
+        </fileSet-->
 
         <!-- copy executables in samples with execute permissions -->
-        <fileSet>
+        <!--fileSet>
             <directory>../samples</directory>
             <outputDirectory>wso2is-${pom.version}/samples</outputDirectory>
             <includes>
                 <include>**/**.sh</include>
             </includes>
             <fileMode>755</fileMode>
-        </fileSet>
+        </fileSet-->
 
         <!-- copy the landing page webapp -->
         <fileSet>
@@ -397,6 +407,14 @@
                 ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/identity.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
+            <fileMode>644</fileMode>
+        </file>
+
+        <file>
+            <source>
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/security/trusted-idp-config.xml
+            </source>
+            <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
             <fileMode>644</fileMode>
         </file>
 

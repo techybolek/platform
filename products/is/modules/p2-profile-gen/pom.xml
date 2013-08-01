@@ -97,7 +97,7 @@
 								<!-- identity related features -->
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.core.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.provider.feature:4.2.0-SNAPSHOT</featureArtifactDef>
-								<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.provider.mgt.feature:4.2.0-SNAPSHOT</featureArtifactDef-->
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.idp.mgt.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.relying.party.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.feature:4.2.0-SNAPSHOT</featureArtifactDef>
@@ -240,10 +240,10 @@
 									<version>4.2.0-SNAPSHOT</version>
 								</feature>
 
-								<!--feature>
-                                                                        <id>org.wso2.carbon.identity.provider.mgt.feature.group</id>
+								<feature>
+                                                                        <id>org.wso2.carbon.idp.mgt.feature.group</id>
                                                                         <version>4.2.0-SNAPSHOT</version>
-                                                                </feature-->
+                                                                </feature>
 
 								<feature>
                                                                         <id>org.wso2.carbon.identity.mgt.feature.group</id>
@@ -361,10 +361,6 @@
                                    					 <id>org.wso2.carbon.user.cassandra.feature.group</id>
 				                                         <version>4.2.0-SNAPSHOT</version>
 				                                </feature-->
-								<!-- feature>
-									<id>org.wso2.carbon.identity.mgt.feature.group</id>
-									<version>4.2.0-SNAPSHOT</version>
-								</feature -->
 								<feature>
 								    <id>org.wso2.carbon.event.server.feature.group</id>
 								    <version>4.2.0-SNAPSHOT</version>
@@ -402,6 +398,6 @@
 		</plugins>
 	</build>
 	<properties>
-        <stratos.version>2.1.0-SNAPSHOT</stratos.version>
-    </properties>
+        	<stratos.version>2.1.0-SNAPSHOT</stratos.version>
+    	</properties>
 </project>
