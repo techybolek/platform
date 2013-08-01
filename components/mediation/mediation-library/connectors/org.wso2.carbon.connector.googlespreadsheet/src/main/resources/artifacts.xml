@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifacts>
+    <artifact name="googlespreadsheet" package="org.wso2.carbon.connectors" >
+        <dependency artifact="googlespreadsheet" />
+        <description>synapse library for googlespreadsheet</description>
+    </artifact>
+</artifacts>

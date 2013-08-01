@@ -1,0 +1,17 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="create_worksheet">
+	<parameter name="worksheet.name"/>	
+	<parameter name="spreadsheet.name"/>	
+	<parameter name="worksheet.rows"/>
+	<parameter name="worksheet.columns"/>
+	<sequence>
+		<log level="custom">
+			<property name="FLW" value="GoogleSpreadsheet : Create Worksheet"/>
+			<property name="worksheet.name" expression="$ctx:worksheet.name"/>
+			<property name="spreadsheet.name" expression="$ctx:spreadsheet.name"/>
+			<property name="worksheet.rows" expression="$ctx:worksheet.rows"/>
+			<property name="worksheet.columns" expression="$ctx:worksheet.columns"/>
+		</log>
+		<class
+			name="org.wso2.carbon.connector.googlespreadsheet.GoogleSpreadsheetCreateWorksheet" />
+	</sequence>
+</template>	

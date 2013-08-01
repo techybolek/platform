@@ -1,0 +1,12 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="username_login">
+	<parameter name="username"/>
+	<parameter name="password"/>	
+	<sequence>
+		<log level="custom">
+			<property name="FLW" value="GoogleSpreadsheet : Username Login"/>			
+			<property name="username" expression="$ctx:username"/>
+			<property name="password" expression="$ctx:password"/>			
+		</log>
+		<class name="org.wso2.carbon.connector.googlespreadsheet.GoogleSpreadsheetLoginUser" />
+	</sequence>
+</template>	

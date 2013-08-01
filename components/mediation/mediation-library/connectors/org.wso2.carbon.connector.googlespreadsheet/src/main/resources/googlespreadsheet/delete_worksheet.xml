@@ -1,0 +1,13 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="delete_worksheet">
+	<parameter name="worksheet.name"/>	
+	<parameter name="spreadsheet.name"/>	
+	<sequence>
+		<log level="custom">
+			<property name="FLW" value="GoogleSpreadsheet : Delete Worksheet"/>
+			<property name="worksheet.name" expression="$ctx:worksheet.name"/>
+			<property name="spreadsheet.name" expression="$ctx:spreadsheet.name"/>			
+		</log>
+		<class
+			name="org.wso2.carbon.connector.googlespreadsheet.GoogleSpreadsheetDeleteWorksheet" />
+	</sequence>
+</template>	

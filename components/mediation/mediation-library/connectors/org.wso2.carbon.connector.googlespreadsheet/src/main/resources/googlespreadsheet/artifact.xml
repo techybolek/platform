@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="googlespreadsheet" type="synapse/template" >
+
+    <subArtifacts> 
+	<artifact name="create_worksheet" >
+    		<file>create_worksheet.xml</file>
+    		<description>Create a worksheet with a given name</description>
+	</artifact>
+	<artifact name="import_csv" >
+    		<file>import_csv.xml</file>
+    		<description>Import CSV data into a worksheet</description>
+	</artifact>
+	<artifact name="username_login" >
+    		<file>username_login.xml</file>
+    		<description>Log in to the google account with username and password</description>
+	</artifact>
+    <artifact name="search_cell" >
+    		<file>search_cell.xml</file>
+    		<description>Search a cell with a given string</description>
+	</artifact>
+	<artifact name="purge_worksheet" >
+    		<file>purge_worksheet.xml</file>
+    		<description>Purge (delete) data in a worksheet</description>
+	</artifact>
+	<artifact name="delete_worksheet" >
+    		<file>delete_worksheet.xml</file>
+    		<description>Delete an entire worksheet with its data</description>
+	</artifact>
+	<artifact name="get_all_spreadsheets" >
+    		<file>get_all_spreadsheets.xml</file>
+    		<description>Retrieve all spreadsheets for a particular google account</description>
+	</artifact>
+	<artifact name="get_all_worksheets" >
+    		<file>get_all_worksheets.xml</file>
+    		<description>Retrieve all worksheets for a given spreadsheet</description>
+	</artifact>
+	<artifact name="update_worksheet_metadata" >
+    		<file>update_worksheet_metadata.xml</file>
+    		<description>Update metadata of a given worksheet</description>
+	</artifact>
+	<artifact name="get_all_cells" >
+    		<file>get_all_cells.xml</file>
+    		<description>Retrieve all cells with data for a given worksheet</description>
+	</artifact>
+	<artifact name="get_all_cells_csv" >
+    		<file>get_all_cells_csv.xml</file>
+    		<description>Retrieve all cells with data for a given worksheet in csv format</description>
+	</artifact>
+	<artifact name="get_authors" >
+    		<file>get_authors.xml</file>
+    		<description>Retrieve authors of a given spreadsheet or worksheet</description>
+	</artifact>
+	<artifact name="get_cell_range" >
+    		<file>get_cell_range.xml</file>
+    		<description>Retrieve cells containing data for a given cell range</description>
+	</artifact>
+	<artifact name="get_cell_range_csv" >
+    		<file>get_cell_range_csv.xml</file>
+    		<description>Retrieve cells containing data for a given cell range in csv format</description>
+	</artifact>
+	<artifact name="get_column_headers" >
+    		<file>get_column_headers.xml</file>
+    		<description>Retrieve column headers for a given worksheet</description>
+	</artifact>
+	<artifact name="set_row" >
+    		<file>set_row.xml</file>
+    		<description>Set a specific row with the given data</description>
+	</artifact>
+			<artifact name="config">
+			<file>config.xml</file>
+			<description>configure googlespreadsheet related setup</description>
+	</artifact>
+    </subArtifacts>
+    
+</artifact>

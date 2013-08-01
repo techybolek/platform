@@ -1,0 +1,17 @@
+<template xmlns="http://ws.apache.org/ns/synapse" name="set_row">
+	<parameter name="worksheet.name"/>	
+	<parameter name="spreadsheet.name"/>	
+	<parameter name="row.id" />
+	<parameter name="row.data"/>
+	<sequence>
+		<log level="custom">
+			<property name="FLW" value="GoogleSpreadsheet : Set Row"/>
+			<property name="worksheet.name" expression="$ctx:worksheet.name"/>
+			<property name="spreadsheet.name" expression="$ctx:spreadsheet.name"/>	
+			<property name="row.id" expression="$ctx:row.id"/>	
+			<property name="row.data" expression="$ctx:row.data"/>			
+		</log>
+		<class
+			name="org.wso2.carbon.connector.googlespreadsheet.GoogleSpreadsheetSetRow" />
+	</sequence>
+</template>	
