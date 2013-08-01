@@ -1008,6 +1008,10 @@
                                     <id>org.wso2.carbon.bam.service.agent.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+				<feature>
+                                    <id>org.wso2.carbon.bam.webapp.agent.server.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
                                 <feature>
                                     <id>org.wso2.carbon.event.ui.feature.group</id>
                                     <version>${carbon.platform.version}</version>
