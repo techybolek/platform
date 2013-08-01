@@ -28,7 +28,6 @@
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ArrayList" %>
 <jsp:useBean id="userBean"
              type="org.wso2.carbon.user.mgt.ui.UserBean"
@@ -41,7 +40,6 @@
 <%
 UserStoreInfo userStoreInfo = null;
 UserRealmInfo userRealmInfo = null;
-UserStoreInfo selectedStoreInfo = null;
 UserStoreInfo[] allUserStoreInfo = null;
 
 List<String> domainNames = null;

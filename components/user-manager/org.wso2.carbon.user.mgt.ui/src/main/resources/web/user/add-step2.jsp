@@ -22,7 +22,8 @@
 <jsp:include page="../dialog/display_messages.jsp"/>
 <jsp:include page="../userstore/display-messages.jsp"/>
 
-<jsp:useBean id="userBean" type="org.wso2.carbon.user.mgt.ui.UserBean" scope="session"/>
+<jsp:useBean id="userBean" type="org.wso2.carbon.user.mgt.ui.UserBean"
+             class="org.wso2.carbon.user.mgt.ui.UserBean" scope="session"/>
 <jsp:setProperty name="userBean" property="*" />
 
 <%

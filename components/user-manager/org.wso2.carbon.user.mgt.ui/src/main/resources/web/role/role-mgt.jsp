@@ -29,6 +29,7 @@
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
+<%@ page import="java.text.MessageFormat" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 <jsp:include page="../dialog/display_messages.jsp"/>
@@ -183,8 +184,16 @@
                 session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE, flaggedNameMap);
             }
         } catch (Exception e) {
-            showFilterMessage = true;
-            session.setAttribute(UserAdminUIConstants.DO_ROLE_LIST, "error");
+            String message =  MessageFormat.format(resourceBundle.getString("error.while.role.filtered"),
+                    e.getMessage());
+%>
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>', null);
+    });
+</script>
+<%
         }
     }
 

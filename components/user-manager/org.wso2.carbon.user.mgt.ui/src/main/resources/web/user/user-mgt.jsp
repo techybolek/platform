@@ -30,6 +30,7 @@
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
+<%@ page import="java.text.MessageFormat" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
@@ -42,7 +43,8 @@
     boolean doUserList = true;
     boolean showFilterMessage = false;
     boolean multipleUserStores = false;
-
+    String forwardTo = "user-mgt.jsp";
+               
     FlaggedName[] datas = null;
     FlaggedName exceededDomains = null;
     String[] claimUris = null;
@@ -196,10 +198,16 @@
             }
             
         } catch (Exception e) {
-            session.setAttribute(UserAdminUIConstants.DO_USER_LIST, "error");
-            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
-                                                request);
-            return;
+            String message =  MessageFormat.format(resourceBundle.getString("error.while.user.filtered"),
+                    e.getMessage());
+%>
+        <script type="text/javascript">
+
+            jQuery(document).ready(function () {
+                CARBON.showErrorDialog('<%=message%>', null);
+            });
+        </script>
+<%
         }
     }
 
@@ -212,7 +220,6 @@
         }
     }
 %>
-
 <fmt:bundle basename="org.wso2.carbon.userstore.ui.i18n.Resources">
     <carbon:breadcrumb label="users"
                        resourceBundle="org.wso2.carbon.userstore.ui.i18n.Resources"
