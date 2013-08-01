@@ -33,7 +33,7 @@
         {"name":"operatingSystemVersion","type":"STRING"},
         {"name":"searchEngine","type":"STRING"},
         {"name":"country","type":"STRING"},
-        {"name":"timestamp","type":"STRING"},
+        {"name":"timestamp","type":"LONG"},
         {"name":"responseHttpStatusCode","type":"INT"},
         {"name":"responseTime","type":"LONG"},
         {"name":"requestCount","type":"INT"},
