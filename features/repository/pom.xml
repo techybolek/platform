@@ -81,6 +81,7 @@
 
 
 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.platform.version}</featureArtifactDef>
+<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.idp.mgt.feature:${carbon.platform.version}</featureArtifactDef>
 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.xacml.filter.feature:${carbon.platform.version}</featureArtifactDef>
 <featureArtifactDef>org.wso2.carbon:org.apache.synapse.wso2.feature:${synapse.version}</featureArtifactDef>
 
