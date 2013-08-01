@@ -33,7 +33,7 @@ import java.util.StringTokenizer;
 public class TrustedIdPDBInitializer {
 
     private static Log log = LogFactory.getLog(TrustedIdPDBInitializer.class);
-    private static final String DB_CHECK_SQL = "select * from IDN_BASE_TABLE";
+    private static final String DB_CHECK_SQL = "select * from IDP_BASE_TABLE";
     private DataSource dataSource;
     private String delimiter = ";";
     Statement statement;
