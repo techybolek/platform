@@ -368,6 +368,22 @@
       </SelfSignIn>
     </WorkFlowExtensions>
 
+    <!-- 
+	Use this configuration Publish APIs at the Server startup
+    -->
+    <!--StartupAPIPublisher-->
+
+	<!--Define many API elements as below to publish many APIs -->
+	<!--API>	
+		<Context>/resource</Context>
+		<Provider>admin</Provider>
+		<Endpoint>http://localhost:9763/resource</Endpoint>
+		<Version>1.0.0</Version>
+	</API-->
+
+		
+    <!--/StartupAPIPublisher-->
+
     <!--
 	When an API is invoked, a list of handlers get engaged to its execution flow. This
 	property defines the position of the Extension Handler.
