@@ -194,7 +194,10 @@ var jagg = jagg || {};
 
 
         if(jagg.sessionExpired()){
-            if(params.e != undefined){  //Canceling the href call
+		if(params.ssoEnabled != null && params.ssoEnabled === true){
+			return;		
+		}
+           if(params.e != undefined){  //Canceling the href call
                 if ( params.e.preventDefault ) {
                     params.e.preventDefault();
 
