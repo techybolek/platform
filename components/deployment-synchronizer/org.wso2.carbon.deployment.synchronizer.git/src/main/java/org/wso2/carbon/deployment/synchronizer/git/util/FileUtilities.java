@@ -10,9 +10,9 @@ import java.util.Collection;
 /**
  * String Utility methods
  */
-public class FileUtils {
+public class FileUtilities {
 
-    private static final Log log = LogFactory.getLog(FileUtils.class);
+    private static final Log log = LogFactory.getLog(FileUtilities.class);
 
     /**
      * Filter and clean files in the directory

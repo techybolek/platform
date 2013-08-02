@@ -24,7 +24,6 @@ import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.*;
 import org.eclipse.jgit.storage.file.FileRepository;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.RepositoryManager;
@@ -35,8 +34,9 @@ import org.wso2.carbon.deployment.synchronizer.git.repository_creator.GitBlitBas
 import org.wso2.carbon.deployment.synchronizer.git.repository_creator.SCMBasedRepositoryCreator;
 import org.wso2.carbon.deployment.synchronizer.git.stratos2.S2Behaviour;
 import org.wso2.carbon.deployment.synchronizer.git.stratos2.S2GitRepositoryManager;
-import org.wso2.carbon.deployment.synchronizer.git.util.FileUtils;
-import org.wso2.carbon.deployment.synchronizer.git.util.GitUtils;
+import org.wso2.carbon.deployment.synchronizer.git.util.CarbonUtilities;
+import org.wso2.carbon.deployment.synchronizer.git.util.FileUtilities;
+import org.wso2.carbon.deployment.synchronizer.git.util.GitUtilities;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.internal.util.RepositoryConfigParameter;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -92,13 +92,13 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
     private boolean isGitDeploymentSyncEnabled () {
 
         //check if deployment synchronization is enabled
-        String depSyncEnabledParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.ENABLED);
+        String depSyncEnabledParam = CarbonUtilities.readConfigurationParameter(GitDeploymentSynchronizerConstants.ENABLED);
 
         //Check if deployment synchronization is enabled
         if (depSyncEnabledParam != null && depSyncEnabledParam.equals("true")) {
 
             //check if repository type is 'git', else no need to create GitBasedArtifactRepository instance
-            String repoTypeParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.REPOSITORY_TYPE);
+            String repoTypeParam = CarbonUtilities.readConfigurationParameter(GitDeploymentSynchronizerConstants.REPOSITORY_TYPE);
             if (repoTypeParam != null && repoTypeParam.equals(DeploymentSynchronizerConstants.REPOSITORY_TYPE_GIT)) {
                  return true;
             }
@@ -114,25 +114,15 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
 
         gitDepsyncConfig = new GitDeploymentSyncronizerConfiguration();
 
-        String standardDeploymentParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.DEPLOYMENT_METHOD);
+        String standardDeploymentParam = CarbonUtilities.readConfigurationParameter(GitDeploymentSynchronizerConstants.DEPLOYMENT_METHOD);
         if (standardDeploymentParam != null && (standardDeploymentParam.equalsIgnoreCase("true") || standardDeploymentParam.equalsIgnoreCase("false"))) {
             gitDepsyncConfig.setStandardDeployment(Boolean.parseBoolean(standardDeploymentParam));
         }
 
-        String gitServerParam = readConfigurationParameter(GitDeploymentSynchronizerConstants.GIT_SERVER);
+        String gitServerParam = CarbonUtilities.readConfigurationParameter(GitDeploymentSynchronizerConstants.GIT_SERVER);
         if (gitServerParam != null) {
             gitDepsyncConfig.setGitServer(gitServerParam);
         }
-    }
-
-    /**
-     * Reads the relevant configuration parameter
-     *
-     * @param parameterKey parameter key
-     * @return configuration value
-     */
-    private String readConfigurationParameter(String parameterKey) {
-        return ServerConfiguration.getInstance().getFirstProperty(parameterKey);
     }
 
     /**
@@ -362,7 +352,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
 
         PushCommand pushCmd = gitRepoCtx.getGit().push();
 
-        UsernamePasswordCredentialsProvider credentialsProvider = GitUtils.createCredentialsProvider(repositoryManager,
+        UsernamePasswordCredentialsProvider credentialsProvider = GitUtilities.createCredentialsProvider(repositoryManager,
                 gitRepoCtx.getTenantId());
 
         if (credentialsProvider == null) {
@@ -403,7 +393,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
              return cloneRepository(gitRepoCtx);
         }
         else {
-            if (GitUtils.isValidGitRepo(gitRepoCtx.getLocalRepo())) {
+            if (GitUtilities.isValidGitRepo(gitRepoCtx.getLocalRepo())) {
                 log.info("Existing git repository detected for tenant " + gitRepoCtx.getTenantId() +
                         ", no clone required");
                 return pullArtifacts(gitRepoCtx);
@@ -416,7 +406,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
                     if(log.isDebugEnabled()) {
                         log.debug("Repository for tenant " + gitRepoCtx.getTenantId() + " is not a valid git repo, will try to delete");
                     }
-                    FileUtils.deleteFolderStructure(gitRepoDir);
+                    FileUtilities.deleteFolderStructure(gitRepoDir);
                     return cloneRepository(gitRepoCtx);
                 }
             }
@@ -446,9 +436,9 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
         Status status = getGitStatus(gitRepoCtx);
         if(status != null && !status.isClean()) {
             //initialize repository
-            GitUtils.InitGitRepository(new File(gitRepoCtx.getLocalRepoPath()));
+            GitUtilities.InitGitRepository(new File(gitRepoCtx.getLocalRepoPath()));
             //add the remote repository (origin)
-            syncedLocalArtifacts = GitUtils.addRemote(gitRepoCtx.getLocalRepo(),
+            syncedLocalArtifacts = GitUtilities.addRemote(gitRepoCtx.getLocalRepo(),
                     gitRepoCtx.getRemoteRepoUrl());
         }
 
@@ -467,7 +457,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
 
         File gitRepoDir = new File(gitRepoCtx.getLocalRepoPath());
         /*if (gitRepoDir.exists()) {
-            if(GitUtils.isValidGitRepo(gitRepoCtx.getLocalRepo())) { //check if a this is a valid git repo
+            if(GitUtilities.isValidGitRepo(gitRepoCtx.getLocalRepo())) { //check if a this is a valid git repo
                 log.info("Existing git repository detected for tenant " + gitRepoCtx.getTenantId() +
                         ", no clone required");
                 gitRepoCtx.setCloneExists(true);
@@ -477,7 +467,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
                 if(log.isDebugEnabled()) {
                     log.debug("Repository for tenant " + gitRepoCtx.getTenantId() + " is not a valid git repo, will try to delete");
                 }
-                FileUtils.deleteFolderStructure(gitRepoDir); //if not a valid git repo but non-empty, delete it (else the clone will not work)
+                FileUtilities.deleteFolderStructure(gitRepoDir); //if not a valid git repo but non-empty, delete it (else the clone will not work)
             }
         }*/
 
@@ -486,7 +476,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
                 setDirectory(gitRepoDir).
                 setBranch(GitDeploymentSynchronizerConstants.GIT_REFS_HEADS_MASTER);
 
-        UsernamePasswordCredentialsProvider credentialsProvider = GitUtils.createCredentialsProvider(repositoryManager,
+        UsernamePasswordCredentialsProvider credentialsProvider = GitUtilities.createCredentialsProvider(repositoryManager,
                 gitRepoCtx.getTenantId());
 
         if (credentialsProvider == null) {
@@ -523,7 +513,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
 
         PullCommand pullCmd = gitRepoCtx.getGit().pull();
 
-        UsernamePasswordCredentialsProvider credentialsProvider = GitUtils.createCredentialsProvider(repositoryManager,
+        UsernamePasswordCredentialsProvider credentialsProvider = GitUtilities.createCredentialsProvider(repositoryManager,
                 gitRepoCtx.getTenantId());
 
         if (credentialsProvider == null) {
@@ -538,7 +528,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
 
         } catch (InvalidConfigurationException e) {
             log.warn("Git pull unsuccessful for tenant " + gitRepoCtx.getTenantId() + ", " + e.getMessage());
-            FileUtils.deleteFolderStructure(new File(gitRepoCtx.getLocalRepoPath()));
+            FileUtilities.deleteFolderStructure(new File(gitRepoCtx.getLocalRepoPath()));
             cloneRepository(gitRepoCtx);
             return true;
 
@@ -552,7 +542,7 @@ public class GitBasedArtifactRepository implements ArtifactRepository {
 
         } catch (CheckoutConflictException e) { //TODO: handle conflict efficiently. Currently the whole directory is deleted and re-cloned
             log.warn("Git pull for the path " + e.getConflictingPaths().toString() + " failed due to conflicts");
-            FileUtils.deleteFolderStructure(new File(gitRepoCtx.getLocalRepoPath()));
+            FileUtilities.deleteFolderStructure(new File(gitRepoCtx.getLocalRepoPath()));
             cloneRepository(gitRepoCtx);
             return true;
 

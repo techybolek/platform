@@ -29,6 +29,8 @@ import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.RepositoryCreator;
 import org.wso2.carbon.deployment.synchronizer.RepositoryInformation;
 import org.wso2.carbon.deployment.synchronizer.git.GitRepositoryInformation;
+import org.wso2.carbon.deployment.synchronizer.git.internal.GitDeploymentSynchronizerConstants;
+import org.wso2.carbon.deployment.synchronizer.git.util.CarbonUtilities;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,7 +49,14 @@ public class GitBlitBasedRepositoryCreator implements RepositoryCreator{
 
         RepositoryInformation repoInfo;
         baseUrl = (baseUrl.endsWith("/")) ? baseUrl : baseUrl + "/";
-        String repositoryName = "tenant_" + Integer.toString(tenantId) + ".git";
+
+        String serverKeyParam = CarbonUtilities.
+                readConfigurationParameter(GitDeploymentSynchronizerConstants.SERVER_KEY);
+
+        String repositoryName =  (serverKeyParam != null) ?
+                serverKeyParam.toLowerCase() + "/tenant_" + Integer.toString(tenantId) + ".git" :
+                "tenant_" + Integer.toString(tenantId) + ".git";
+
         String repoUrl = baseUrl + "git/" + repositoryName;
 
         UserModel userModel = getUserModel(baseUrl, username, username, password);

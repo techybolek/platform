@@ -15,6 +15,9 @@ public class GitDeploymentSynchronizerConstants {
     //CartridgeAlias property name from carbon.xml
     public static final String CARTRIDGE_ALIAS = "CartridgeAlias";
 
+    //ServerKey property from the carbon.xml
+    public static final String SERVER_KEY = "ServerKey";
+
     //Configuration parameter names read from carbon.xml
     public static final String REPOSITORY_TYPE = DEPLOYMENT_SYNCHRONIZER + ".RepositoryType";
     public static final String DEPLOYMENT_METHOD = DEPLOYMENT_SYNCHRONIZER + ".StandardDeployment";

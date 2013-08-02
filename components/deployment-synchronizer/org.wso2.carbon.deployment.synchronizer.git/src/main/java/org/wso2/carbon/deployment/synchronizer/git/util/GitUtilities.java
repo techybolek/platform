@@ -38,9 +38,9 @@ import java.io.IOException;
  * Utility methods specific for Git
  */
 
-public class GitUtils {
+public class GitUtilities {
 
-    private static final Log log = LogFactory.getLog(GitUtils.class);
+    private static final Log log = LogFactory.getLog(GitUtilities.class);
 
     /**
      * Checks if an existing local repository is a valid git repository
