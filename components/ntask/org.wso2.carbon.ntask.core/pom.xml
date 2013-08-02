@@ -93,6 +93,7 @@
 		            *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
+                            !org.wso2.carbon.ntask.internal,
                             org.wso2.carbon.ntask.core.*
                         </Export-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
