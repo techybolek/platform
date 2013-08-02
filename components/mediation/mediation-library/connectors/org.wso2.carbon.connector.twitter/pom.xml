@@ -6,7 +6,7 @@
 
 	<groupId>org.wso2.carbon.connector</groupId>
 	<artifactId>org.wso2.carbon.connector.twitter</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 	<version>4.2.0-SNAPSHOT</version>
 	<name>WSO2 Carbon - Cloud Connector For Twitter</name>
 	<url>http://wso2.org</url>
@@ -100,56 +100,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Name>${project.artifactId}</Bundle-Name>
-						<Export-Package>
-							!javax.servlet,
-							!javax.servlet.http,
-							org.wso2.carbon.mediation.library.connectors.twitter.*
-                        </Export-Package>
-						<Import-Package>
-							!javax.xml.soap,
-							javax.xml.stream.*;
-							version="1.0.1",
-							org.apache.axis2.rpc.receivers;
-							version="${axis2.osgi.version.range}",
-							org.apache.axiom.*;
-							version="${axiom.osgi.version.range}",
-							org.apache.axis2;
-							version="${axis2.osgi.version.range}",
-							org.apache.axis2.description;
-							version="${axis2.osgi.version.range}",
-							org.apache.axis2.engine;
-							version="${axis2.osgi.version.range}",
-							org.apache.axis2.context;
-							version="${axis2.osgi.version.range}",
-							org.apache.commons.logging,
-							org.apache.synapse,
-							org.apache.synapse.config,
-							org.apache.synapse.config.xml,
-							org.apache.synapse.core,
-							org.apache.synapse.core.axis2,
-							org.apache.synapse.endpoints.*,
-							org.apache.synapse.mediators.base,
-							org.apache.synapse.libraries.*,
-							org.apache.axis2.transport.base,
-							org.wso2.carbon.core,
-							org.wso2.carbon.registry.core.service;
-							version=1.0.1,
-							javax.xml.soap; version=1.0.0,
-							*;resolution:=optional
-                        </Import-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-
+			
 		</plugins>
 	</build>
 
