@@ -47,7 +47,7 @@ public class SystemHostObjectServiceComponent {
 
     private static final Log log = LogFactory.getLog(SystemHostObjectServiceComponent.class);
 
-    private ConfigurationContext configurationContext = null;
+    private static ConfigurationContext configurationContext = null;
     
     private static TaskService taskService;
     
@@ -94,6 +94,10 @@ public class SystemHostObjectServiceComponent {
             log.debug("Setting the Task Service");
         }
         SystemHostObjectServiceComponent.taskService = taskService;
+    }
+
+    public static ConfigurationContext getConfigurationContext() {
+        return SystemHostObjectServiceComponent.configurationContext;
     }
 
     protected void unsetTaskService(TaskService taskService) {

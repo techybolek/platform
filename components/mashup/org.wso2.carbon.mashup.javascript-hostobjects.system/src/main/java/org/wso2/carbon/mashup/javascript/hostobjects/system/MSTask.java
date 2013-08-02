@@ -29,6 +29,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ScriptableObject;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.mashup.javascript.hostobjects.system.internal.SystemHostObjectServiceComponent;
 import org.wso2.carbon.mashup.javascript.messagereceiver.JavaScriptEngine;
 import org.wso2.carbon.mashup.utils.MashupConstants;
 import org.wso2.carbon.ntask.core.AbstractTask;
@@ -69,7 +70,7 @@ public class MSTask extends AbstractTask {
             ConfigurationContext configurationContext;
             // retrieves the ConfigurationContext object from the Rhino Engine
             Object configurationContextObject =
-            		TasksDSComponent.getConfigurationContextService().getServerConfigContext();;
+                    SystemHostObjectServiceComponent.getConfigurationContext();
             if (configurationContextObject != null &&
                 configurationContextObject instanceof ConfigurationContext) {
                 configurationContext = (ConfigurationContext) configurationContextObject;
