@@ -758,3 +758,10 @@ body {
 	display:block;
 	padding: 2px 1em 0 0;
 }
+.form-horizontal div.transport-styles {
+    margin-bottom:30px;
+}
+
+.transport-styles label.error{
+    display:block;position:absolute;margin-top:40px;margin-left:-23px;
+}

@@ -30,6 +30,14 @@ function loadTiers() {
 
 $(document).ready(function() {
 
+    $('.transports_check').change(function(){
+        if($(this).is(":checked")){
+            $(this).next().val($(this).val());
+        }else{
+            $(this).next().val("");
+        }
+    });
+
     $("select[name='tier']").change(function() {
         // multipleValues will be an array
         var multipleValues = $(this).val() || [];

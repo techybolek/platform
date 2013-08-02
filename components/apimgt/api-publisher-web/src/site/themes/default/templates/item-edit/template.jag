@@ -146,6 +146,24 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
             </div>
            </div>
+
+           <div class="control-group transport-styles">
+               <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
+               <div class="controls">
+                   <div class="checkbox">
+                       <label>
+                           <input type="checkbox" class="required transports_check" id="transport_http" name="transports" value="http" <%=api.transport_http%>/>
+                           <input type="hidden" name="http_checked" value="http"/>
+                           <%=i18n.localize("httpTransport")%>
+                       </label>
+                       <label>
+                           <input type="checkbox" class="required transports_check" id="transport_https" name="transports" value="https" <%=api.transport_https%>/>
+                           <input type="hidden" name="https_checked" value="https"/>
+                           <%=i18n.localize("httpsTransport")%>
+                       </label>
+                   </div>
+               </div>
+           </div>
               
           <div class="control-group">
                 <label class="control-label" for="editEndpoint"><%=i18n.localize("endpoint")%>:</label>

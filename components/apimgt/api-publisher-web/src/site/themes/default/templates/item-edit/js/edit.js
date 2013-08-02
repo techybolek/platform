@@ -17,6 +17,14 @@ $(document).ready(function() {
 
     });
 
+    $('.transports_check').change(function(){
+        if($(this).is(":checked")){
+            $(this).next().val($(this).val());
+        }else{
+            $(this).next().val("");
+        }
+    });
+
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
     });

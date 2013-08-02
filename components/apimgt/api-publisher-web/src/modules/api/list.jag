@@ -35,7 +35,9 @@ var getAPI = function (api) {
             epUsername:result[23],
             epPassword:result[24],
             endpointTypeSecured:result[25],
-            provider:result[26]
+            provider:result[26],
+            transport_http:result[27],
+            transport_https:result[28]
         };
         return {
             error:false,
