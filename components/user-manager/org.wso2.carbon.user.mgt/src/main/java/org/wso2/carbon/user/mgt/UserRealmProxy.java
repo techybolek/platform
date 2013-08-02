@@ -755,7 +755,9 @@ public class UserRealmProxy {
                 if(Arrays.binarySearch(permissions, "/permission/admin") > -1 ||
                         Arrays.binarySearch(permissions, "/permission/admin/") > -1 ||
                         Arrays.binarySearch(permissions, "/permission") > -1 ||
-                        Arrays.binarySearch(permissions, "/permission/") > -1){
+                        Arrays.binarySearch(permissions, "/permission/") > -1 ||
+                        Arrays.binarySearch(permissions, "/permission/protected") > -1 ||
+                        Arrays.binarySearch(permissions, "/permission/protected/") > -1){
                     log.warn("An attempt to create role with admin permission by user " + loggedInUserName);
                     throw new UserStoreException("You have not privilege to create a role with Admin permission");
                 }
@@ -806,7 +808,9 @@ public class UserRealmProxy {
                 if(Arrays.binarySearch(permissions, "/permission/admin") > -1 ||
                         Arrays.binarySearch(permissions, "/permission/admin/") > -1 ||
                         Arrays.binarySearch(permissions, "/permission") > -1 ||
-                        Arrays.binarySearch(permissions, "/permission/") > -1){
+                        Arrays.binarySearch(permissions, "/permission/") > -1 ||
+                        Arrays.binarySearch(permissions, "/permission/protected")  > -1 ||
+                        Arrays.binarySearch(permissions, "/permission/protected/")  > -1){
                     log.warn("An attempt to create role with admin permission by user " + loggedInUserName);
                     throw new UserStoreException("You have not privilege to create a role with Admin permission");
                 }
@@ -1863,6 +1867,7 @@ public class UserRealmProxy {
                     !realm.getRealmConfiguration().getAdminUserName().equals(loggedInUserName)){
                 Arrays.sort(rawResources);
                 if(Arrays.binarySearch(rawResources, "/permission/admin") > -1 ||
+                        Arrays.binarySearch(rawResources, "/permission/protected")  > -1 ||
                                 Arrays.binarySearch(rawResources, "/permission") > -1){
                     log.warn("An attempt to Assign admin permission for role by user : " +
                                                                                 loggedInUserName);
