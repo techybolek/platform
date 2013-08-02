@@ -206,7 +206,7 @@
                                     org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.feature:2.1.0
+                                    org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.feature:${stratos.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.identity.relying.party.feature:${carbon.platform.version}
@@ -234,9 +234,6 @@
                                 <!-- webapp management feature -->
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.webapp.mgt.feature:${carbon.platform.version}
-                                </featureArtifactDef>
-				                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.registry.commentstream.feature:${carbon.platform.registry.commentstream.version}
                                 </featureArtifactDef>
 
                             </featureArtifacts>
@@ -413,7 +410,7 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.stratos.identity.saml2.sso.mgt.feature.group</id>
-                                    <version>2.1.0</version>
+                                    <version>${stratos.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.identity.core.feature.group</id>
@@ -428,10 +425,6 @@
                                 <feature>
                                     <id>org.wso2.carbon.webapp.mgt.feature.group</id>
                                     <version>${carbon.platform.version}</version>
-                                </feature>
-				                 <feature>
-                                    <id>org.wso2.carbon.registry.commentstream.feature.group</id>
-                                    <version>${carbon.platform.registry.commentstream.version}</version>
                                 </feature>
 
                             </features>
@@ -449,7 +442,7 @@
                         <configuration>
                             <tasks>
                                 <replace token="false" value="true"
-                                         dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components/configuration/org.eclipse.equinox.simpleconfigurator">
+                                         dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components">
                                     <include name="**/bundles.info"/>
                                 </replace>
                             </tasks>
@@ -469,7 +462,7 @@
         <carbon.platform.version>4.1.2</carbon.platform.version>
         <carbon.platform.version>4.1.3</carbon.platform.version>-->
       <!--  <appfactory.version>1.0.2</appfactory.version>-->
-        <jaggeryjs.version>0.9.0.ALPHA3-wso2v6</jaggeryjs.version>
+        <jaggeryjs.version>0.9.0-07262013</jaggeryjs.version>
 	<carbon.platform.registry.commentstream.version>1.0.0</carbon.platform.registry.commentstream.version>
     </properties>
 
