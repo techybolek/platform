@@ -15,4 +15,4 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<api xmlns="http://ws.apache.org/ns/synapse"  name="[1]" context="[2]" version="[3]" version-type="url"/>
+<api xmlns="http://ws.apache.org/ns/synapse"  name="[1]" context="[2]" version="[3]" transports="[4]" version-type="url"/>
