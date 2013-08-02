@@ -19,11 +19,14 @@
 package org.wso2.carbon.mediation.configadmin;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ServerContextInformation;
@@ -33,7 +36,9 @@ import org.apache.synapse.commons.executors.PriorityExecutor;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.config.SynapseConfigUtils;
 import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.config.SynapsePropertiesLoader;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
+import org.apache.synapse.config.xml.SynapseXMLConfigurationFactory;
 import org.apache.synapse.config.xml.XMLConfigurationBuilder;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
@@ -45,6 +50,7 @@ import org.apache.synapse.endpoints.Template;
 import org.apache.synapse.eventing.SynapseEventSource;
 import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.libraries.model.Library;
+import org.apache.synapse.libraries.util.LibDeployerUtils;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.mediators.template.TemplateMediator;
 import org.apache.synapse.message.processors.MessageProcessor;
@@ -72,6 +78,8 @@ import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
@@ -526,6 +534,7 @@ public class ConfigurationUpdater {
             newConfig.getSynapseLibraries().put(name, libraryMap.get(name));
             String fileName = libraryMap.get(name).getFileName();
             SynapseArtifactDeploymentStore store = newConfig.getArtifactDeploymentStore();
+            LibDeployerUtils.deployingLocalEntries(libraryMap.get(name), newConfig);
             if (!store.containsFileName(fileName)) {
                 store.addArtifact(fileName, name);
             }
@@ -539,7 +548,7 @@ public class ConfigurationUpdater {
         }
     }
 
-    private void safeRemoveService(String serviceName) {
+   private void safeRemoveService(String serviceName) {
         AxisService service = axisCfg.getServiceForActivation(serviceName);
         if (service != null) {
             try {

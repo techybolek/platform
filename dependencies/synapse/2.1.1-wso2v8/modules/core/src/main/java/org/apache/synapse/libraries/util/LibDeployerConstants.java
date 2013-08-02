@@ -37,4 +37,6 @@ public class LibDeployerConstants {
     public static final String ARTIFACTS_XML = "artifacts.xml";
 
     public static final String SYNAPSE_LIB_FORMAT = "zip";
+    
+    public static final String LOCAL_ENTRIES = "local-entries";
 }

@@ -18,19 +18,32 @@
 package org.apache.synapse.deployers;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ServerState;
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.config.Entry;
+import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.config.SynapsePropertiesLoader;
+import org.apache.synapse.config.xml.SynapseXMLConfigurationFactory;
 import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.libraries.model.Library;
 import org.apache.synapse.libraries.util.LibDeployerUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+
+import javax.xml.stream.XMLStreamException;
 
 public class LibraryArtifactDeployer extends AbstractSynapseArtifactDeployer {
     private static final Log log = LogFactory.getLog(LibraryArtifactDeployer.class);
@@ -124,7 +137,12 @@ public class LibraryArtifactDeployer extends AbstractSynapseArtifactDeployer {
                 log.debug("Loading Synapse Library: " + libArtifactName + " into memory for Import");
             }
         }
+       
+        //deploying local entries for meidation library artifacts
+        LibDeployerUtils.deployingLocalEntries(lib, getSynapseConfiguration());
     }
+    
+       
 
     public void undeploy(String fileName) throws DeploymentException {
         fileName = FilenameUtils.normalize(fileName);

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SynapseLibrary implements Library {
     private String packageN = null;
@@ -39,7 +40,9 @@ public class SynapseLibrary implements Library {
     private Map<String, Object> libComponentIndex = new HashMap<String, Object>();
 
     private Map<String, String> libArtifactDetails = new HashMap<String, String >();
-
+    
+    private final Map<String, Object> localEntryArtifacts = new ConcurrentHashMap<String, Object>();
+    
     private String description;
 
     private boolean isLoaded = false;
@@ -202,5 +205,10 @@ public class SynapseLibrary implements Library {
         this.libClassLoader = libClassLoader;
     }
 
+	public Map<String, Object> getLocalEntryArtifacts() {
+		return localEntryArtifacts;
+	}
 
+
+	
 }

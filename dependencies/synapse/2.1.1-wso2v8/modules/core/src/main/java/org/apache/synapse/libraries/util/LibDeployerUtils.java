@@ -23,9 +23,13 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.util.Utils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
+import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.config.SynapsePropertiesLoader;
+import org.apache.synapse.config.xml.SynapseXMLConfigurationFactory;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentException;
 import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.libraries.model.Library;
@@ -74,11 +78,27 @@ public class LibDeployerUtils {
         }
         //resolve synapse lib artifacts
         LibDeployerUtils.searchAndResolveDependencies(extractPath, synapseLib);
+        
+        //TODO:reslove local-entry references
+        LibDeployerUtils.populateLocalEnties(synapseLib,extractPath+LibDeployerConstants.LOCAL_ENTRIES);
+        
         synapseLib.setFileName(libFilePath);
         return synapseLib;
     }
 
-    /**
+    private static void populateLocalEnties(SynapseLibrary synapseLibrary,String localEntriesFilePath) {
+		// TODO Auto-generated method stub
+    	  File dir = new File(localEntriesFilePath);
+    	  if(dir.isDirectory()){
+    		  File [] entries = dir.listFiles();
+    		  for(File file :entries){
+    			  synapseLibrary.getLocalEntryArtifacts().put(file.getName(), file);
+    		  }
+    	  }
+		
+	}
+
+	/**
      * populate Dependencies using main root artifacts.xml.. Schema for artifacts.xml is follwing
      *
      *<artifacts>
@@ -451,6 +471,57 @@ public class LibDeployerUtils {
         if (!temp.exists() && !temp.mkdir()) {
             log.error("Error while creating directory : " + path);
         }
+    }
+    
+    
+    public static void deployingLocalEntries(Library library,SynapseConfiguration config) {
+		Properties properties = SynapsePropertiesLoader.loadSynapseProperties();
+		for (Map.Entry<String, Object> libararyEntryMap : library.getLocalEntryArtifacts()
+				.entrySet()) {
+			File localEntryFileObj = (File) libararyEntryMap.getValue();
+			OMElement document = getOMElement(localEntryFileObj);
+			try {
+			     SynapseXMLConfigurationFactory.defineEntry(config,
+						document, properties,library);
+			} catch (Exception ex) {
+				handleDeploymentError("Error while deploying local entries", ex);
+			}
+		}
+
+	}
+    
+    private static void handleDeploymentError(String msg, Exception e){
+        log.error(msg, e);
+    }
+    
+    
+    private static OMElement getOMElement(File file) {
+        FileInputStream is;
+        OMElement document = null;
+
+        try {
+            is = FileUtils.openInputStream(file);
+        } catch (IOException e) {
+            handleException("Error while opening the file: " + file.getName() + " for reading", e);
+            return null;
+        }
+
+        try {
+            document = new StAXOMBuilder(is).getDocumentElement();
+            document.build();
+            is.close();
+        } catch (XMLStreamException e) {
+            handleException("Error while parsing the content of the file: " + file.getName(), e);
+        } catch (IOException e) {
+            log.warn("Error while closing the input stream from the file: " + file.getName(), e);
+        }
+
+        return document;
+    }
+    
+    private static void handleException(String msg, Exception e) {
+        log.error(msg, e);
+        throw new SynapseException(msg, e);
     }
 
     private static void copyInputStream(InputStream in, OutputStream out)

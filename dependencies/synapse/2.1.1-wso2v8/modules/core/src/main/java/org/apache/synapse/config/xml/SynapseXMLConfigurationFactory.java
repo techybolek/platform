@@ -168,6 +168,23 @@ public class SynapseXMLConfigurationFactory implements ConfigurationFactory {
         }
         return entry;
     }
+    
+	public static Entry defineEntry(SynapseConfiguration config, OMElement elem,
+			Properties properties,Library library) {
+		Entry entry = null;
+		try {
+			entry = EntryFactory.createEntry(elem, properties);
+			if (entry != null) {
+				config.addEntry(library.getQName().getLocalPart()+"."+entry.getKey(), entry);
+			}
+		} catch (Exception e) {
+			String msg = "Local entry configuration: "
+					+ elem.getAttributeValue((new QName(XMLConfigConstants.NULL_NAMESPACE, "key")))
+					+ " cannot be built";
+			handleConfigurationError(SynapseConstants.FAIL_SAFE_MODE_LOCALENTRIES, msg, e);
+		}
+		return entry;
+	}
 
     public static Mediator defineSequence(SynapseConfiguration config, OMElement ele,
                                           Properties properties) {

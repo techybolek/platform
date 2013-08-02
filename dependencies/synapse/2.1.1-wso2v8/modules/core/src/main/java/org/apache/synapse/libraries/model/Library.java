@@ -23,64 +23,82 @@ import org.apache.synapse.SynapseArtifact;
 import javax.xml.namespace.QName;
 import java.util.Map;
 
+/**
+ * @author dushan
+ * 
+ */
+/**
+ * @author dushan
+ *
+ */
 public interface Library extends SynapseArtifact {
 
-    /**
-     * get Fully qualified Name of the Library
-     * @return returns the logical name of the Synapse library which constitutes of [package + library name]
-     */
-    public QName getQName();
+	/**
+	 * get Fully qualified Name of the Library
+	 * 
+	 * @return returns the logical name of the Synapse library which constitutes
+	 *         of [package + library name]
+	 */
+	public QName getQName();
 
-    /**
-     * returns the package that this Library belongs to
-     * @return  package name
-     */
-    public String getPackage();
+	/**
+	 * returns the package that this Library belongs to
+	 * 
+	 * @return package name
+	 */
+	public String getPackage();
 
-    /**
-     * return synapse lib artifact deployed by this library with the given artifact name
-     *
-     * @param artifacName
-     * @return
-     */
-    public Object getArtifact(String artifacName);
+	/**
+	 * return synapse lib artifact deployed by this library with the given
+	 * artifact name
+	 * 
+	 * @param artifacName
+	 * @return
+	 */
+	public Object getArtifact(String artifacName);
 
-    /**
-     * gives the Artifact description for the given artifact name (if available)
-     * @param artifactName
-     * @return
-     */
-    public String getArtifactDescription(String  artifactName);
+	/**
+	 * gives the Artifact description for the given artifact name (if available)
+	 * 
+	 * @param artifactName
+	 * @return
+	 */
+	public String getArtifactDescription(String artifactName);
 
+	public Map<String, String> getLibArtifactDetails();
 
-    public Map<String, String> getLibArtifactDetails();
+	/**
+	 * load all library artifacts on this library for each and every namespace
+	 * this should be called when a import is taking place
+	 * 
+	 * @return success
+	 */
+	public boolean loadLibrary();
 
-    /**
-     * load all library artifacts on this library for each and every namespace
-     * this should be called when a import is taking place
-     *
-     * @return success
-     */
-    public boolean loadLibrary();
+	/**
+	 * unload all library artifacts on this library this should be called when a
+	 * import is no longer valid/ non-existent or library being undeployed
+	 * 
+	 * @return success
+	 */
+	public boolean unLoadLibrary();
 
-    /**
-     * unload all library artifacts on this library
-     * this should be called when a import is no longer valid/ non-existent or library being
-     * undeployed
-     *
-     * @return success
-     */
-    public boolean unLoadLibrary();
+	/**
+	 * 
+	 * @return the Class loader that can be used to load classes/resources under
+	 *         this library
+	 */
+	public ClassLoader getLibClassLoader();
 
-    /**
-     *
-     * @return the Class loader that can be used to load classes/resources under this library
-     */
-    public ClassLoader getLibClassLoader();
+	public String getFileName();
 
-    public String getFileName();
+	public void setFileName(String fileName);
 
-    public void setFileName(String fileName);
-
+	/**
+	 * Returns the list of local entry definitions
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> getLocalEntryArtifacts();
 
 }
