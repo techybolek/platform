@@ -20,7 +20,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.core.multitenancy.persistence.TenantPersistor;
 import org.wso2.carbon.identity.relyingparty.util.RPDeploymentInterceptor;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -44,11 +43,6 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  *                cardinality="1..1" policy="dynamic"
  *                bind="setConfigurationContextService"
  *                unbind="unsetConfigurationContextService" 
- * @scr.reference name="tenant.mgt.core.TenantPersistor"
- *                interface="org.wso2.carbon.core.multitenancy.persistence.TenantPersistor"
- *                cardinality="0..1" policy="dynamic"
- *                bind="setTenantPersistor"
- *                unbind="unsetTenantPersistor" 
  */
 public class IdentityRPServiceComponent {
 
@@ -59,8 +53,6 @@ public class IdentityRPServiceComponent {
     private static RealmService realmService;
     
     private static ConfigurationContextService configurationContextService;
-    
-    private static TenantPersistor tenantPersistor;
     
     public static RegistryService getRegistryService() {
         return registryService;
@@ -146,27 +138,8 @@ public class IdentityRPServiceComponent {
         log.debug("Unsetting ConfigurationContext Service");
         setConfigurationContextService(null);
     }
-
-    
-    protected void setTenantPersistor(TenantPersistor tenantPersistor) {
-        log.debug("Setting TenantPersistor");
-        IdentityRPServiceComponent.tenantPersistor = tenantPersistor;
-    }
-    
-    protected void unsetTenantPersistor(TenantPersistor tenantPersistor) {
-        log.debug("Unsetting TenantPersistor");
-        setTenantPersistor(null);
-    }
-
-    public static ConfigurationContextService getConfigurationContextService() {
+ 
+   public static ConfigurationContextService getConfigurationContextService() {
         return configurationContextService;
     }
-
-    public static TenantPersistor getTenantPersistor() {
-        return tenantPersistor;
-    }
-    
-    
-    
-
 }
