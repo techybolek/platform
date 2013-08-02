@@ -311,8 +311,8 @@ public final class APIConstants {
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String NO_MATCHING_AUTH_SCHEME = "noMatchedAuthScheme";
 
-    public static final String EVERYONE_ROLE = "everyone";
-    public static final String ANONYMOUS_ROLE = "wso2.anonymous.role";
+    public static final String EVERYONE_ROLE = "internal/everyone";
+    public static final String ANONYMOUS_ROLE = "system/wso2.anonymous.role";
 
     public static final String READ_ACTION = "2";
     public static final String WRITE_ACTION = "3";
