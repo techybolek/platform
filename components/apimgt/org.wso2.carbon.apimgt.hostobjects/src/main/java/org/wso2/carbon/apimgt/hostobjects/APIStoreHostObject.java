@@ -739,7 +739,7 @@ public class APIStoreHostObject extends ScriptableObject {
             for(int i=0; i<environments.size(); i++){
                 Environment environment = environments.get(i);
                 envDetails += environment.getName() + ",";
-                envDetails += environment.getApiEndpointURL();
+                envDetails += filterUrls(environment.getApiEndpointURL(),api.getTransports());
                 if(i < environments.size() - 1){
                     envDetails += "|";
                 }
@@ -793,6 +793,34 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         }
         return myn;
+    }
+
+    private static String filterUrls(String apiData, String transports) {
+        if(apiData != null && transports !=null){
+            List<String> urls = new ArrayList<String>();
+            List<String> transportList = new ArrayList<String>();
+            urls.addAll(Arrays.asList(apiData.split(",")));
+            transportList.addAll(Arrays.asList(transports.split(",")));
+            urls = filterUrlsByTransport(urls, transportList, "https");
+            urls = filterUrlsByTransport(urls, transportList, "http");
+            String urlString = urls.toString();
+            return urlString.substring(1, urlString.length() - 1);
+        }
+        return apiData;
+    }
+
+    private static List<String> filterUrlsByTransport(List<String> urlsList, List<String> transportList, String transportName) {
+        if(!transportList.contains(transportName)){
+            ListIterator<String> it = urlsList.listIterator();
+            while(it.hasNext()){
+                String url = it.next();
+                if(url.startsWith(transportName+":")){
+                    it.remove();
+                }
+            }
+            return urlsList;
+        }
+        return urlsList;
     }
 
     public static boolean jsFunction_isSubscribed(Context cx, Scriptable thisObj,

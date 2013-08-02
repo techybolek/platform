@@ -287,6 +287,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 tag.add(tags);
             }
         }
+
+        String transport = getTransports(apiData);
+
         String tier = (String) apiData.get("tier", apiData);
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
         String contextVal = (String) apiData.get("context", apiData);
@@ -369,6 +372,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setUrl(endpoint);
         api.setSandboxUrl(sandboxUrl);
         api.addTags(tag);
+        api.setTransports(transport);
 
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
@@ -420,6 +424,17 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return success;
 
+    }
+
+    private static String getTransports(NativeObject apiData) {
+        String transportStr = (String) apiData.get("transports", apiData);
+        String transport  = transportStr;
+        if (transportStr != null) {
+            if ((transportStr.indexOf(",") == 0) || (transportStr.indexOf(",") == (transportStr.length()-1))) {
+                transport =transportStr.replace(",","");
+            }
+        }
+        return transport;
     }
 
     public static boolean jsFunction_updateAPI(Context cx, Scriptable thisObj,
@@ -494,6 +509,8 @@ public class APIProviderHostObject extends ScriptableObject {
         APIProvider apiProvider = getAPIProvider(thisObj);
 
         API oldApi = apiProvider.getAPI(oldApiId);
+
+        String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
         String contextVal = (String) apiData.get("context", apiData);
@@ -578,6 +595,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setBusinessOwnerEmail(bizOwnerEmail);
         api.setTechnicalOwner(techOwner);
         api.setTechnicalOwnerEmail(techOwnerEmail);
+        api.setTransports(transport);
 
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
@@ -814,6 +832,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(24, myn, checkValue(api.getEndpointUTPassword()));
                 myn.put(25, myn, checkValue(Boolean.toString(api.isEndpointSecured())));
                 myn.put(26, myn, APIUtil.replaceEmailDomainBack(checkValue(api.getId().getProviderName())));
+                myn.put(27, myn, checkTransport("http",api.getTransports()));
+                myn.put(28, myn, checkTransport("https",api.getTransports()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                                 "-" + version);
@@ -988,6 +1008,22 @@ public class APIProviderHostObject extends ScriptableObject {
             return subscriberNames.size();
         } else {
             return 0;
+        }
+    }
+
+    private static String checkTransport(String compare, String transport)
+            throws APIManagementException {
+        if(transport!=null){
+            List<String> transportList = new ArrayList<String>();
+            transportList.addAll(Arrays.asList(transport.split(",")));
+            if(transportList.contains(compare)){
+                return "checked";
+            }else{
+                return "";
+            }
+
+        }else{
+            return "";
         }
     }
 
