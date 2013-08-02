@@ -56,12 +56,12 @@
           </elementProp>
           <elementProp name="apinm" elementType="Argument">
             <stringProp name="Argument.name">apinm</stringProp>
-            <stringProp name="Argument.value">Twitter_Search</stringProp>
+            <stringProp name="Argument.value">Youtube</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="context" elementType="Argument">
             <stringProp name="Argument.name">context</stringProp>
-            <stringProp name="Argument.value">/twitter</stringProp>
+            <stringProp name="Argument.value">/youtube</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="storeIP" elementType="Argument">
@@ -759,7 +759,7 @@ FileOutputStream f = new FileOutputStream(currentDir + &quot;/results.csv&quot;)
                     </elementProp>
                     <elementProp name="endpoint" elementType="HTTPArgument">
                       <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                      <stringProp name="Argument.value">http://search.twitter.com</stringProp>
+                      <stringProp name="Argument.value">http://gdata.youtube.com/feeds/api/standardfeeds</stringProp>
                       <stringProp name="Argument.metadata">=</stringProp>
                       <boolProp name="HTTPArgument.use_equals">true</boolProp>
                       <stringProp name="Argument.name">endpoint</stringProp>
@@ -1501,7 +1501,7 @@ print(&quot;domain&quot;+ tenant_count+&quot;.com&quot; + &quot;@@@&quot; + acce
                   <stringProp name="HTTPSampler.response_timeout"></stringProp>
                   <stringProp name="HTTPSampler.protocol"></stringProp>
                   <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-                  <stringProp name="HTTPSampler.path">/t/domain${input_value}.com${context}${api_id}/${version}/search.atom?q=wso2&amp;rpp=1</stringProp>
+                  <stringProp name="HTTPSampler.path">/t/domain${input_value}.com${context}${api_id}/${version}/most_popular</stringProp>
                   <stringProp name="HTTPSampler.method">GET</stringProp>
                   <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
                   <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2662,12 +2662,12 @@ FileWriter writer = new FileWriter(outPath);
             </elementProp>
             <elementProp name="apinm" elementType="Argument">
               <stringProp name="Argument.name">apinm</stringProp>
-              <stringProp name="Argument.value">Twitter_Search</stringProp>
+              <stringProp name="Argument.value">Youtube</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="context" elementType="Argument">
               <stringProp name="Argument.name">context</stringProp>
-              <stringProp name="Argument.value">/twitter</stringProp>
+              <stringProp name="Argument.value">/youtube</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="storeIP" elementType="Argument">
@@ -2805,7 +2805,7 @@ vars.put(&quot;contextAndAPIId&quot;,contextAndAPIId);</stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/t/${domain}${contextAndAPIId}/${version}/search.atom?q=wso2&amp;rpp=${search_arg_gateway}</stringProp>
+          <stringProp name="HTTPSampler.path">/t/${domain}${contextAndAPIId}/${version}/most_popular</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
