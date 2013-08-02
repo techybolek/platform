@@ -74,8 +74,15 @@
     } catch (Exception e) {
 	    String message = MessageFormat.format(resourceBundle.getString("role.cannot.update"),
                 CharacterEncoder.getSafeText(roleName), e.getMessage());
-	    CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
-        //forwardTo = "role-mgt.jsp?ordinal=1";
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "role-mgt.jsp";
+        });
+    });
+</script>
+<%
     }
 %>
 

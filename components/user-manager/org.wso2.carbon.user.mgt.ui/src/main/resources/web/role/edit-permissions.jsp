@@ -29,6 +29,8 @@
 <%@page import="javax.servlet.jsp.JspWriter"%>
 <%@page import="java.io.IOException"%>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UIPermissionNode" %>
+<%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.text.MessageFormat" %>
 
 
 <script type="text/javascript" src="../admin/js/main.js"></script>
@@ -54,7 +56,7 @@
 }
 </style>
 
-    <%! 
+    <%!
         private void printNodesOfTree(UIPermissionNode parentNode, String parentNodeName,
                                                     int count, JspWriter out) throws IOException{
             if(parentNode == null){
@@ -76,13 +78,16 @@
                     }
                 }
             }catch(IOException e){
-                e.printStackTrace();
                 throw e;
             }
         }
     %>
 
     <%
+
+        String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
+        ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+
         String prevPage =  request.getParameter("prevPage");
         String prevUser = request.getParameter("prevUser");
         String prevPageNumber = request.getParameter("prevPageNumber");
@@ -98,12 +103,17 @@
             UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
             rootNode = client.getRolePermissions(roleName);
         } catch (Exception e) {
-            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-            session.setAttribute(CarbonUIMessage.ID, uiMsg);
+            String message = MessageFormat.format(resourceBundle.getString("error.while.loading.ui.permission"),
+                    e.getMessage());
     %>
-            <jsp:include page="../admin/error.jsp"/>
+            <script type="text/javascript">
+                jQuery(document).ready(function () {
+                    CARBON.showErrorDialog('<%=message%>',  function () {
+                        location.href = "role-mgt.jsp";
+                    });
+                });
+            </script>
     <%
-            return;
         }
     %>
 

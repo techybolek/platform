@@ -31,6 +31,7 @@
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
+<%@ page import="java.text.MessageFormat" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 <jsp:include page="../dialog/display_messages.jsp"/>
@@ -168,10 +169,17 @@
                 session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, userRealmInfo);
             }
         } catch (Exception e) {
-            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-            session.setAttribute(CarbonUIMessage.ID, uiMsg);
-
-            return;
+            String message = MessageFormat.format(resourceBundle.getString("error.while.loading.roles"),
+                    e.getMessage());
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "user-mgt.jsp";
+        });
+    });
+</script>
+<%
         }
     }
     Util.updateCheckboxStateMap((Map<String,Boolean>)session.getAttribute("checkedRolesMap"),flaggedNameMap,

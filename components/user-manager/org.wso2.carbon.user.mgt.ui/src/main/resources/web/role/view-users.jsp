@@ -32,6 +32,7 @@
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="java.util.*" %>
+<%@ page import="java.text.MessageFormat" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 <jsp:include page="../dialog/display_messages.jsp"/>
@@ -193,17 +194,17 @@
 				}
 			}
 		} catch (Exception e) {
-			//            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-			//            session.setAttribute(CarbonUIMessage.ID, uiMsg);
-			//            return;
-			CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
-			                                    request);
+            String message = MessageFormat.format(resourceBundle.getString("error.while.loading.users.of"),
+                    CharacterEncoder.getSafeText(roleName),e.getMessage());
 %>
-            <script type="text/javascript">
-                doCancel();
-            </script>
-    <%
-            return;            
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "role-mgt.jsp";
+        });
+    });
+</script>
+<%
         }
     }
     Util.updateCheckboxStateMap((Map<String,Boolean>)session.getAttribute("checkedUsersMap"),flaggedNameMap,
