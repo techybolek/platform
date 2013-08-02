@@ -22,7 +22,7 @@ import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.jenkins.build.internal.ServiceContainer;
 import org.wso2.carbon.core.AbstractAdmin;
 
-public class JenkinsCISystemDriverService extends AbstractAdmin {
+public class ContinousIntegrationSystemDriverService extends AbstractAdmin {
      ////////// TODO check whether this class is used anywhere ??????
      public void createJob(String applicationId, String version,
                           String revision) throws AppFactoryException {
