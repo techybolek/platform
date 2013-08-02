@@ -101,18 +101,23 @@ public class ExtensionPermissionTestCase {
         }
     }
 
-    @Test(groups = "wso2.greg", description = "Test whether a non admin can add an extension", expectedExceptions =
-            RemoteException.class, dependsOnMethods = "testAdminExtensionDeletePermissions")
+    @Test(groups = "wso2.greg", description = "Test whether a non admin can add an extension",
+            dependsOnMethods = "testAdminExtensionDeletePermissions")
     public void testNonAdminExtensionAddPermissions()
             throws MalformedURLException, ResourceAdminServiceExceptionException, RemoteException {
         String resourcePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" + File.separator
                               + "GREG" + File.separator + "reports" + File.separator + "TestingLCReportGenerator.jar";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + resourcePath));
-        nonAdminResourceAdminClient.addExtension("TestingLCReportGenerator.jar", dataHandler);  //Not allowed
+
+        //nonAdminResourceAdminClient created from testuser3 , that user in testRole and testRole has "Extension" permission
+        //in the permission tree.
+        boolean statues = nonAdminResourceAdminClient.addExtension("TestingLCReportGenerator.jar", dataHandler);
+
+       assertTrue(statues ,"Failed to add extension from testuser3");
+
     }
 
-    @Test(expectedExceptions = RemoteException.class,
-          dependsOnMethods = "testNonAdminExtensionAddPermissions")
+    @Test(dependsOnMethods = "testNonAdminExtensionAddPermissions")
     public void testNonAdminListExtensionPermissions()
             throws MalformedURLException, ResourceAdminServiceExceptionException, RemoteException {
         nonAdminResourceAdminClient.listExtensions(); //Not allowed

@@ -38,6 +38,9 @@ import java.io.File;
 import java.net.URL;
 import java.rmi.RemoteException;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 public class NotificationPermissionTest {
 
     private static final String NEW_RESOURCE_PATH = "/_system/config/test.txt";
@@ -101,7 +104,7 @@ public class NotificationPermissionTest {
     }
 
     @Test(groups = "wso2.greg", description = "Test deny to resource notifications",
-          expectedExceptions = RemoteException.class, dependsOnMethods = "testAccessToNotifications")
+           dependsOnMethods = "testAccessToNotifications")
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
     public void testDenyNotifications() throws Exception {
         adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH, ROLE_NAME,
@@ -110,8 +113,16 @@ public class NotificationPermissionTest {
         adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH, ROLE_NAME,
                                                        PermissionTestConstants.WRITE_ACTION,
                                                        PermissionTestConstants.PERMISSION_DISABLED);
-        jmxSubscription.init(NEW_RESOURCE_PATH, "ResourceUpdated", adminEnvironment,
+
+        //userId 2 has read and write permission to NEW_RESOURCE_PATH, therefore disable.
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+                ,PermissionTestConstants.WRITE_ACTION,PermissionTestConstants.PERMISSION_DISABLED);
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+                ,PermissionTestConstants.READ_ACTION,PermissionTestConstants.PERMISSION_DISABLED);
+
+       boolean status = jmxSubscription.init(NEW_RESOURCE_PATH, "ResourceUpdated", adminEnvironment,
                              UserListCsvReader.getUserInfo(2));
+        assertFalse(status , "un-authorize user can add resource to  "+ NEW_RESOURCE_PATH);
     }
 
 
@@ -122,6 +133,12 @@ public class NotificationPermissionTest {
         userManagementClient.updateUserListOfRole(PermissionTestConstants.NON_ADMIN_ROLE,
                                                   ROLE_USERS, new String[]{});
         adminResourceAdminClient.deleteResource(NEW_RESOURCE_PATH);
+
+        //Re-set permission created at testDenyNotifications().
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+                ,PermissionTestConstants.WRITE_ACTION,PermissionTestConstants.PERMISSION_ENABLED);
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+                ,PermissionTestConstants.READ_ACTION,PermissionTestConstants.PERMISSION_ENABLED);
         jmxSubscription.disconnect();
 
         adminResourceAdminClient = null;
