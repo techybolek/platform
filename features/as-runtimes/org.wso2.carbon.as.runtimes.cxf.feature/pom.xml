@@ -263,7 +263,7 @@
                                 </properties>
                             </adviceFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.webapp.mgt.feature:${carbon.platform.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.webapp.mgt:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
