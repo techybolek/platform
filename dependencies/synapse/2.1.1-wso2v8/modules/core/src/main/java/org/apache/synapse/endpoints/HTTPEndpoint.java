@@ -28,7 +28,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.util.xpath.SynapseXPath;
 import com.damnhandy.uri.template.UriTemplate;
 
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -43,6 +42,7 @@ public class HTTPEndpoint extends AbstractEndpoint {
 
     /*Todo*/
     /*Do we need HTTP Headers here?*/
+
 
     public void onFault(MessageContext synCtx) {
 
@@ -122,23 +122,13 @@ public class HTTPEndpoint extends AbstractEndpoint {
             }
         }
 
-        // We have to create a local UriTemplate object, or else the UriTemplate.set(variables) call will fill up a list of variables and since uriTemplate
-        // is not thread safe, this list won't be clearing.
-        UriTemplate template = null;
-        template = UriTemplate.fromTemplate(uriTemplate.getTemplate());
-
-        if(template != null) {
-            template.set(variables);
-        }
-
+        uriTemplate.set(variables);
         String evaluatedUri = "";
         try {
-            evaluatedUri = new java.net.URI(template.expand()).getPath();
+            evaluatedUri = uriTemplate.expand();
         } catch(ExpressionParseException e) {
             log.debug("No URI Template variables defined in HTTP Endpoint: " + this.getName());
-            evaluatedUri = template.getTemplate();
-        } catch (URISyntaxException e) {
-            evaluatedUri = template.getTemplate();
+            evaluatedUri = uriTemplate.getTemplate();
         }
         if (evaluatedUri != null) {
             synCtx.setTo(new EndpointReference(evaluatedUri));
@@ -146,6 +136,8 @@ public class HTTPEndpoint extends AbstractEndpoint {
                 super.getDefinition().setAddress(evaluatedUri);
             }
         }
+
+
     }
 
     public String getHttpMethod() {
