@@ -23,6 +23,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.dispatch.DispatcherHelper;
@@ -47,6 +48,11 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
 
     private String fileName;
 
+    /**
+     * The transport/s over which this API should be exposed, or defaults to all available
+     */
+    private ArrayList<String> transports = new ArrayList<String>();
+
     public API(String name, String context) {
         super(name);
         if (!context.startsWith("/")) {
@@ -70,6 +76,14 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
 
     public String getAPIName() {
         return name;
+    }
+
+    public ArrayList getTransports() {
+        return transports;
+    }
+
+    public void setTransports(ArrayList transports) {
+        this.transports = transports;
     }
 
     public String getVersion(){
@@ -174,9 +188,10 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
                 return false;
             }
 
+            org.apache.axis2.context.MessageContext msgCtx =
+                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+
             if (host != null || port != -1) {
-                org.apache.axis2.context.MessageContext msgCtx =
-                        ((Axis2MessageContext) synCtx).getAxis2MessageContext();
                 String hostHeader = getHostHeader(msgCtx);
                 if (hostHeader != null) {
                     if (host != null && !host.equals(extractHostName(hostHeader))) {
@@ -201,6 +216,12 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
                     }
                     return false;
                 }
+            }
+            if(!transports.isEmpty() && !transports.contains(msgCtx.getTransportIn().getName())){
+                synCtx.setProperty(SynapseConstants.TRANSPORT_DENIED,new Boolean(true));
+                synCtx.setProperty(SynapseConstants.IN_TRANSPORT,msgCtx.getTransportIn().getName());
+                log.warn("Trying to access API : "+name+" on restricted transport chanel ["+msgCtx.getTransportIn().getName()+"]");
+                return false;
             }
         }
 

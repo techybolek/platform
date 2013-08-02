@@ -168,6 +168,12 @@ public final class SynapseConstants {
         /** The Synapse MC property that marks to Exception to be thrown on SOAPFault(Retry on SOAPFault)*/
         public static final String RETRY_ON_SOAPFAULT = "RETRY_ON_SOAPFAULT";
 
+        //Properties for Rest API transport level validation
+        /** The Synapse MC property that indicates the in-transport */
+        public static final String IN_TRANSPORT = "IN_TRANSPORT";
+        /** The Synapse MC property that marks if the message was denied on the accessed transport */
+        public static final String TRANSPORT_DENIED = "TRANSPORT_DENIED";
+
         /**
          * The name of the property which specifies the operation name that is
          * invoked by an endpoint
