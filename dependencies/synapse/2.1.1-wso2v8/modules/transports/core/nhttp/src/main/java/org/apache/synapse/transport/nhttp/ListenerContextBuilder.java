@@ -91,7 +91,12 @@ class ListenerContextBuilder {
         }
 
         port = port + portOffset;
-        
+
+        if (param != null) {
+            param.setValue(String.valueOf(port));
+            param.getParameterElement().setText(String.valueOf(port));
+        }
+
         param = transportIn.getParameter(NhttpConstants.BIND_ADDRESS);
         if (param != null) {
             String s = ((String) param.getValue()).trim();
