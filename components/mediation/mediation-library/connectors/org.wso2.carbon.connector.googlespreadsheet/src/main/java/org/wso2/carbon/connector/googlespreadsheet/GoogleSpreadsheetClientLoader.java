@@ -37,6 +37,11 @@ public class GoogleSpreadsheetClientLoader {
     		spreadsheetService = gssService.getSpreadsheetService();
     		GoogleSpreadsheetAuthentication gssAuthentication = new GoogleSpreadsheetAuthentication();
         	gssAuthentication.login(messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_USERNAME).toString(), messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_PASSWORD).toString(), spreadsheetService);
+    	} else if (messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_CONSUMER_KEY) != null && messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_CONSUMER_SECRET) != null && messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_ACCESS_TOKEN) != null && messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_ACCESS_TOKEN_SECRET) != null) {
+    		GoogleSpreadsheetService gssService = new GoogleSpreadsheetService();
+    		spreadsheetService = gssService.getSpreadsheetService();
+    		GoogleSpreadsheetAuthentication gssAuthentication = new GoogleSpreadsheetAuthentication();
+        	gssAuthentication.loginOAuth2(messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_CONSUMER_KEY).toString(), messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_CONSUMER_SECRET).toString(),messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_ACCESS_TOKEN).toString(),messageContext.getProperty(GoogleSpreadsheetConstants.GOOGLE_SPREADSHEET_USER_ACCESS_TOKEN_SECRET).toString(), spreadsheetService);
     	}
     	return spreadsheetService;
     }

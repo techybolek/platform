@@ -47,9 +47,7 @@ public class GoogleSpreadsheetGetAllWorksheets extends AbstractConnector {
 			
 			String spreadsheetName = GoogleSpreadsheetUtils
 					.lookupFunctionParam(messageContext, SPREADSHEET_NAME);			
-			if (spreadsheetName == null || "".equals(spreadsheetName.trim())
-					|| spreadsheetName == null
-					|| "".equals(spreadsheetName.trim())
+			if (spreadsheetName == null || "".equals(spreadsheetName.trim())					
 					) {
 				log.info("Please make sure you have given a name for the spreadsheet");
 				return;

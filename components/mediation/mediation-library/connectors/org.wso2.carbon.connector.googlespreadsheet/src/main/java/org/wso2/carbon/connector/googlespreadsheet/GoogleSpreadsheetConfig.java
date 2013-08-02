@@ -2,6 +2,10 @@ package org.wso2.carbon.connector.googlespreadsheet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
+import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
+
 /*
  *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -20,13 +24,8 @@ import org.apache.commons.logging.LogFactory;
  * under the License.
  */
 
-
-import org.apache.synapse.MessageContext;
-import org.wso2.carbon.mediation.library.connectors.core.AbstractConnector;
-import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
-
 public class GoogleSpreadsheetConfig extends AbstractConnector {
-	
+
 	private static Log log = LogFactory.getLog(GoogleSpreadsheetConfig.class);
 
 	public static final String CONSUMER_KEY = "oauth.consumerKey";
@@ -34,27 +33,27 @@ public class GoogleSpreadsheetConfig extends AbstractConnector {
 	public static final String ACCESS_TOKEN = "oauth.accessToken";
 	public static final String ACCESS_TOKEN_SECRET = "oauth.accessTokenSecret";
 
+	boolean USE_RSA_SIGNING = false;
+
 	@Override
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
-			String consumerKey = GoogleSpreadsheetUtils.lookupFunctionParam(messageContext,
-					CONSUMER_KEY);
+			String consumerKey = GoogleSpreadsheetUtils.lookupFunctionParam(
+					messageContext, CONSUMER_KEY);
 			String consumerSecret = GoogleSpreadsheetUtils.lookupFunctionParam(
 					messageContext, CONSUMER_SECRET);
-			String accessToken = GoogleSpreadsheetUtils.lookupFunctionParam(messageContext,
-					ACCESS_TOKEN);
-			String accessTokenSecret = GoogleSpreadsheetUtils.lookupFunctionParam(
-					messageContext, ACCESS_TOKEN_SECRET);
+			String accessToken = GoogleSpreadsheetUtils.lookupFunctionParam(
+					messageContext, ACCESS_TOKEN);
+			String accessTokenSecret = GoogleSpreadsheetUtils
+					.lookupFunctionParam(messageContext, ACCESS_TOKEN_SECRET);
 
 			GoogleSpreadsheetUtils.storeLoginUser(messageContext, consumerKey,
 					consumerSecret, accessToken, accessTokenSecret);
-			if (log.isDebugEnabled()) {
-				log.info("login user status done");
-			}
+
 		} catch (Exception e) {
 			log.error("Failed to login user: " + e.getMessage(), e);
 			GoogleSpreadsheetUtils.storeErrorResponseStatus(messageContext, e);
 		}
-	}
+	}	
 
 }

@@ -95,12 +95,12 @@ public class GoogleSpreadsheetBatchUpdater {
 	      if (!BatchUtils.isSuccess(entry)) {
 	        isSuccess = false;
 	        BatchStatus status = BatchUtils.getBatchStatus(entry);
-	        log.info(String.format("%s failed (%s) %s\n", batchId, status.getReason(), status.getContent()));
+	        log.info(String.format("%s failed (%s) %s", batchId, status.getReason(), status.getContent()));
 	      }
 	    }
 
 	    log.info(isSuccess ? "\nBatch operations successful." : "\nBatch operations failed");
-	    log.info(String.format("\n%s ms elapsed\n", System.currentTimeMillis() - startTime));
+	    log.info(String.format("%s ms elapsed", System.currentTimeMillis() - startTime));
 	  }
 
 	  /**
@@ -135,7 +135,7 @@ public class GoogleSpreadsheetBatchUpdater {
 	    Map<String, CellEntry> cellEntryMap = new HashMap<String, CellEntry>(cellAddrs.size());
 	    for (CellEntry entry : queryBatchResponse.getEntries()) {
 	      cellEntryMap.put(BatchUtils.getBatchId(entry), entry);
-	      log.info(String.format("batch %s {CellEntry: id=%s editLink=%s inputValue=%s\n",
+	      log.info(String.format("batch %s {CellEntry: id=%s editLink=%s inputValue=%s",
 	          BatchUtils.getBatchId(entry), entry.getId(), entry.getEditLink().getHref(),
 	          entry.getCell().getInputValue()));
 	    }
