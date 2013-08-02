@@ -17,10 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provider's & system's view of API
@@ -63,7 +60,17 @@ public class API {
     private boolean endpointSecured = false;
 	private String endpointUTUsername;
     private String endpointUTPassword;
-    
+
+    private String transports;
+
+    public String getTransports() {
+        return transports;
+    }
+
+    public void setTransports(String transports) {
+        this.transports = transports;
+    }
+
     public String getTechnicalOwner() {
         return technicalOwner;
     }
