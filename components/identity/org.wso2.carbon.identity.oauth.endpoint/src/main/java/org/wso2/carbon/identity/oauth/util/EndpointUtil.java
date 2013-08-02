@@ -165,7 +165,7 @@ public class EndpointUtil {
             loginPage =
                 loginPage + "?" + OAuthConstants.SCOPE + "=" +
                         URLEncoder.encode(getScope(params), "UTF-8") + "&" + "application" + "=" +
-                        URLEncoder.encode(params.getApplicationName(), "UTF-8");
+                        URLEncoder.encode(EndpointUtil.getSafeText(params.getApplicationName()), "UTF-8");
             if("true".equals(oidcRequest)) {
             	loginPage = loginPage + "&oidcRequest=true";
             }
@@ -207,9 +207,24 @@ public class EndpointUtil {
     private static String getScope(OAuth2Parameters params) {
         StringBuffer scopes = new StringBuffer();
         for(String scope : params.getScopes() ) {
-            scopes.append(scope+" ");
+            scopes.append(EndpointUtil.getSafeText(scope)+" ");
         }
         return scopes.toString();
     }
+    
+	public static String getSafeText(String text) {
+		if (text == null) {
+			return text;
+		}
+		text = text.trim();
+		if (text.indexOf('<') > -1) {
+			text = text.replace("<", "&lt;");
+		}
+		if (text.indexOf('>') > -1) {
+			text = text.replace(">", "&gt;");
+		}
+		return text;
+	}
+
 
 }

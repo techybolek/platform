@@ -17,6 +17,21 @@
  */
 package org.wso2.carbon.identity.oauth.endpoint.authz;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+
 import org.apache.amber.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
@@ -38,17 +53,6 @@ import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
-import org.wso2.carbon.ui.util.CharacterEncoder;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @Path("/authorize")
 public class OAuth2AuthzEndpoint {
@@ -61,12 +65,12 @@ public class OAuth2AuthzEndpoint {
     @Produces("text/html")
     public Response authorize(@Context HttpServletRequest request) throws URISyntaxException {
 
-            String clientId = CharacterEncoder.getSafeText(request.getParameter("client_id"));
+            String clientId = EndpointUtil.getSafeText(request.getParameter("client_id"));
             OAuth2Parameters oauth2Params = (OAuth2Parameters) request.getSession().getAttribute(OAuthConstants.OAUTH2_PARAMS);
-            String consent = CharacterEncoder.getSafeText(request.getParameter("consent"));
+            String consent = EndpointUtil.getSafeText(request.getParameter("consent"));
 		try {
 			if (clientId != null) { // request from the client
-				String redirectURL = CharacterEncoder.getSafeText(request.getParameter("redirect_uri"));
+				String redirectURL = EndpointUtil.getSafeText(request.getParameter("redirect_uri"));
 				try {
 					redirectURL = handleOAuthAuthorizationRequest(request, clientId, redirectURL);
 				} catch (OAuthProblemException e) {
