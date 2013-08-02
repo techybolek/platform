@@ -1,6 +1,7 @@
 <%@page import="com.wso2.identity.oauth.sample.OAuth2ServiceClient"%>
 <%@page import="org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationRequestDTO" %>
 <%@ page import="java.net.URL" %>
+<%@ page import="java.net.URLConnection"%>
 <%@ page import="java.net.HttpURLConnection" %>
 <%@ page import="java.io.DataOutputStream" %>
 <%@ page import="java.io.InputStream" %>
@@ -33,8 +34,15 @@
 </script>
 <%
             }
-            RequestDispatcher view = request.getRequestDispatcher("my-photos.jsp");
-            view.forward(request, response);
+            
+            if(resource_url != null && resource_url.contains("userinfo")) {
+            	String result = executeGet(resource_url,"",accessToken);
+            	session.setAttribute("result", result);
+                response.sendRedirect("user-info.jsp");
+            } else {
+                RequestDispatcher view = request.getRequestDispatcher("my-photos.jsp");
+                view.forward(request, response);
+            }
         } catch(Exception e) {
 %>
 <script type="text/javascript">
@@ -107,4 +115,33 @@
             }
         }
     }
+
+public static String executeGet(String targetURL, String urlParameters,String accessToken){
+	try {
+	    URL myURL = new URL(targetURL);
+	    URLConnection myURLConnection = myURL.openConnection();
+	    myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        myURLConnection.setRequestProperty("Authorization","Bearer "+accessToken);
+        myURLConnection.setRequestProperty("Content-Language", "en-US");
+        myURLConnection.setUseCaches (false);
+        myURLConnection.setDoInput(true);
+        myURLConnection.setDoOutput(true);
+        
+	    BufferedReader br = new BufferedReader(
+	                                           new InputStreamReader(myURLConnection.getInputStream()));
+	    String line;
+        StringBuffer response = new StringBuffer();
+        while((line = br.readLine()) != null) {
+            response.append(line);
+            response.append('\r');
+        }
+        br.close();
+        return response.toString();
+	} 
+	catch (Exception e) { 
+	    // new URL() failed
+	    // ...
+	} 
+	return "";
+}
 %>

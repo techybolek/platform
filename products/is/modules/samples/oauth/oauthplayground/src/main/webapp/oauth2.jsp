@@ -24,6 +24,7 @@ try {
     	session.removeAttribute(OAuth2Constants.ACCESS_TOKEN);
     	session.removeAttribute(OAuth2Constants.CODE);
     	session.removeAttribute("id_token");
+    	session.removeAttribute("result");
     }    
     
     if (grantType != null && OAuth2Constants.OAUTH2_GRANT_TYPE_CODE.equals(grantType)) {
@@ -285,13 +286,13 @@ try {
                               <td><input  id="accessToken" name="accessToken" style= "width:350px" value="<%=accessToken%>" />
                           </tr>
                           <tr>
-                              <td><label>Resource URL :</label></td>
+                              <td><label>UserInfo Endpoint :</label></td>
                               <td><input  id="resource_url" name="resource_url" type="text" style= "width:350px"/>
                           </tr>
                  
                           <tr>
                               <td>
-                                  <input type="submit" class="button" value="Get Photos">
+                                  <input type="submit" class="button" value="Get UserInfo">
                                </td>
                           </tr>     
                         </tbody>
