@@ -21,6 +21,7 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
+<%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.util.ResourceBundle" %>
 
@@ -41,6 +42,10 @@
             userStoreConfigAdminServiceClient.deleteUserStores(checkedList);
             String message = resourceBundle.getString("successful.delete");
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
+
+            // Session need to be update according to new user store info 
+            session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
+            session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE, null);
         } catch (Exception e) {
             String message = resourceBundle.getString("error.delete");
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);

@@ -95,6 +95,7 @@
 
             // Session need to be update according to new user store info 
             session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
+            session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE, null);
             
         String message = resourceBundle.getString("successful.update");
         CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
