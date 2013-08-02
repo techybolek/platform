@@ -83,6 +83,16 @@
            <artifactId>wso2throttle-core</artifactId>
            <version>3.3.0</version>
        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>com.jayway.jsonpath</artifactId>
+            <version>0.8.1.wso2v1</version>
+        </dependency>
+      	<dependency>
+		<groupId>com.damnhandy.wso2</groupId>
+		<artifactId>handy-uri-templates</artifactId>
+		<version>1.1.7.wso2v1</version>
+	</dependency>
     </dependencies>
 
     <build>
@@ -118,6 +128,8 @@
                                 <bundleDef>com.google.code.gson:gson:2.1</bundleDef>
                                 <bundleDef>org.wso2.caching:wso2caching-core</bundleDef>
                                 <bundleDef>org.wso2.throttle:wso2throttle-core</bundleDef>
+                                <bundleDef>com.damnhandy.wso2:handy-uri-templates:1.1.7.wso2v1</bundleDef>
+                                <bundleDef>com.jayway.jsonpath:com.jayway.jsonpath:0.8.1.wso2v1</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
