@@ -110,7 +110,8 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
             String apiConfig = apiTemplate.toString().
                     replaceAll("\\[1\\]", apiMappings.get(KEY_FOR_API_NAME)).
                     replaceAll("\\[2\\]", apiMappings.get(KEY_FOR_API_CONTEXT)).
-                    replaceAll("\\[3\\]", apiMappings.get(KEY_FOR_API_VERSION));
+                    replaceAll("\\[3\\]", apiMappings.get(KEY_FOR_API_VERSION)).
+                    replaceAll("\\[4\\]", apiMappings.get(KEY_FOR_API_TRANSPORTS));
             return apiConfig;
         }
         handleException("Required API mapping not provided");

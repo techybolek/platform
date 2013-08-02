@@ -666,6 +666,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "--" + api.getId().getApiName());
             apiMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
             apiMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
+            if (api.getTransports()!=null) {
+                String transport = api.getTransports().replace(",", " ");
+                apiMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, transport);
+            }
             builder = new BasicTemplateBuilder(apiMappings);
         } else {
             builder = getTemplateBuilder(api);
@@ -716,6 +720,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                  "--" + api.getId().getApiName());
         testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
         testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
+        if (api.getTransports() != null) {
+            String transport = api.getTransports().replace(",", " ");
+            testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, transport);
+        }
 
         if (api.getUriTemplates() == null || api.getUriTemplates().size() == 0) {
             throw new APIManagementException("At least one resource is required");

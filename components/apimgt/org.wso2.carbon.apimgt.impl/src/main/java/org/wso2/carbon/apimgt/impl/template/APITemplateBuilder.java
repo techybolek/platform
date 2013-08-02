@@ -24,6 +24,7 @@ public interface APITemplateBuilder {
     public static final String KEY_FOR_API_NAME = "key_for_api_name";
     public static final String KEY_FOR_API_CONTEXT = "key_for_api_context";
     public static final String KEY_FOR_API_VERSION = "key_for_api_version";
+    public static final String KEY_FOR_API_TRANSPORTS = "key_for_api_transports";
 
     public static final String KEY_FOR_RESOURCE_URI_TEMPLATE = "key_for_resource_uri_template";
     public static final String KEY_FOR_RESOURCE_METHODS = "key_for_resource_methods";

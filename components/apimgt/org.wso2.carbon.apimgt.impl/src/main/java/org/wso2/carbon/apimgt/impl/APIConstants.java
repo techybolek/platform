@@ -108,6 +108,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_SECURED = "overview_endpointSecured";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
+    public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
 
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME= "overview_name";
