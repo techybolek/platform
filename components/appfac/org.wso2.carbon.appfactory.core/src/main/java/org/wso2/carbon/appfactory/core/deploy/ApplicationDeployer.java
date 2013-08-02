@@ -320,6 +320,7 @@ public class ApplicationDeployer {
             throw new AppFactoryException(errorMsg, e);
         }
 
+        /*
         if (AppFactoryConstants.FILE_TYPE_WAR.equals(applicationType)|| AppFactoryConstants.FILE_TYPE_JAXWS.equals(applicationType)|| AppFactoryConstants.FILE_TYPE_JAXRS.equals(applicationType) ) {
             // undeploy the webapp(war/jaxws/jaxrs file)
             deleteWebApp(applicationId, deploymentServerUrls,AppFactoryConstants.FILE_TYPE_WAR,version);
@@ -339,8 +340,9 @@ public class ApplicationDeployer {
         }else {
             handleException("Can not detect application type to delete the application");
         }
-
-        //deleteFromDepSyncGitRepo(applicationId, version, applicationType, stage);
+        */
+        
+        deleteFromDepSyncGitRepo(applicationId, version, applicationType, stage);
         
         return true;
     }
