@@ -2045,7 +2045,28 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         return myn;
     }
+    
+    public static NativeArray jsFunction_getDeniedTiers(Context cx, Scriptable thisObj,
+			Object[] args,
+			Function funObj) throws APIManagementException {
 
+
+    	NativeArray myn = new NativeArray(0);
+    	APIConsumer apiConsumer = getAPIConsumer(thisObj);
+    	try {
+    		Set<String> tiers = apiConsumer.getDeniedTiers();
+    		int i = 0;
+    		for (String tier : tiers) {
+    			NativeObject row = new NativeObject();
+    			row.put("tierName", row, tier);
+    			myn.put(i, myn, row);
+    			i++;
+    		}
+    	} catch (Exception e) {
+    		log.error("Error while getting available tiers", e);
+    	}
+    	return myn;
+	}
     public static NativeArray jsFunction_getUserFields(Context cx,
                                                        Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException {

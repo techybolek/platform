@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -724,6 +725,58 @@ public class APIProviderHostObject extends ScriptableObject {
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
+    }
+    
+    public static boolean jsFunction_updateTierPermissions(Context cx, Scriptable thisObj,
+            Object[] args,
+            Function funObj)
+            		throws APIManagementException {
+    	if (args == null ||args.length == 0) {
+    		handleException("Invalid input parameters.");
+    	}
+
+    	NativeObject tierData = (NativeObject) args[0];
+    	boolean success = false;
+    	String tierName = (String) tierData.get("tierName", tierData);
+    	String permissiontype = (String) tierData.get("permissiontype", tierData);
+    	String roles = (String) tierData.get("roles", tierData);
+    	
+    	try {
+    		APIProvider apiProvider = getAPIProvider(thisObj);
+    		apiProvider.updateTierPermissions(tierName, permissiontype, roles);
+    		return true;
+
+    	} catch (APIManagementException e) {
+    		handleException("Error while updating subscription status", e);
+    		return false;
+    	}
+
+    }
+    
+    public static NativeArray jsFunction_getTierPermissions(Context cx, Scriptable thisObj,
+            Object[] args,
+            Function funObj) {
+    	 NativeArray myn = new NativeArray(0);
+         APIProvider apiProvider = getAPIProvider(thisObj);
+         try {
+             Set<TierPermissionDTO> tiers = apiProvider.getTierPermissions();
+             int i = 0;
+             if (tiers != null) {
+                 for (TierPermissionDTO permission : tiers) {
+                     NativeObject row = new NativeObject();
+                     row.put("tierName", row, permission.getTierName());
+                     row.put("permissionType", row,
+                    		 permission.getPermissionType());
+                     row.put("roles", row,
+                    		 permission.getRoles());
+                     myn.put(i, myn, row);
+                     i++;
+                 }
+             }
+         } catch (Exception e) {
+             log.error("Error while getting available tiers", e);
+         }
+         return myn;
     }
 
     /**
