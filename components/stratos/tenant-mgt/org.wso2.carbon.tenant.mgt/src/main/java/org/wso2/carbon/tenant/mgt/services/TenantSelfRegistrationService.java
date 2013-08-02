@@ -17,22 +17,21 @@
  */
 package org.wso2.carbon.tenant.mgt.services;
 
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.captcha.mgt.beans.CaptchaInfoBean;
 import org.wso2.carbon.captcha.mgt.constants.CaptchaMgtConstants;
 import org.wso2.carbon.captcha.mgt.util.CaptchaUtil;
-import org.wso2.carbon.core.multitenancy.persistence.TenantPersistor;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.util.CommonUtil;
+import org.wso2.carbon.tenant.mgt.core.TenantPersistor;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -100,9 +99,9 @@ public class TenantSelfRegistrationService {
         }
         // persists the tenant.
         Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
-        TenantPersistor persistor = TenantMgtServiceComponent.getTenantPersistor();
+        TenantPersistor  persistor = new TenantPersistor();
         int tenantId = persistor.persistTenant(tenant, true, tenantInfoBean.getSuccessKey(), 
-                tenantInfoBean.getOriginatedService());
+                tenantInfoBean.getOriginatedService(),false);
         tenantInfoBean.setTenantId(tenantId);
         TenantMgtUtil.addClaimsToUserStoreManager(tenant);
         

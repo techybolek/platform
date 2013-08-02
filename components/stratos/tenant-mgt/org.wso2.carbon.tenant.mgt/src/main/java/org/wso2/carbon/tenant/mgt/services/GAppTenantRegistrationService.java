@@ -1,8 +1,11 @@
 package org.wso2.carbon.tenant.mgt.services;
 
-import org.wso2.carbon.core.multitenancy.persistence.TenantPersistor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ws.security.util.UUIDGenerator;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
+import org.wso2.carbon.tenant.mgt.core.TenantPersistor;
 import org.wso2.carbon.tenant.mgt.exception.TenantManagementException;
 import org.wso2.carbon.tenant.mgt.internal.TenantMgtServiceComponent;
 import org.wso2.carbon.tenant.mgt.util.TenantMgtUtil;
@@ -13,10 +16,6 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.config.multitenancy.MultiTenantRealmConfigBuilder;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ws.security.util.UUIDGenerator;
 
 public class GAppTenantRegistrationService {
 	
@@ -63,7 +62,7 @@ public class GAppTenantRegistrationService {
         try {
             int tenantId = -1;
             Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
-            TenantPersistor tenantPersistor = TenantMgtServiceComponent.getTenantPersistor();
+            TenantPersistor tenantPersistor = new TenantPersistor();
 
             MultiTenantRealmConfigBuilder builder =
                     TenantMgtServiceComponent.getRealmService().getMultiTenantRealmConfigBuilder();
