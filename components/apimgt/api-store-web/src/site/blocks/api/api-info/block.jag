@@ -15,7 +15,7 @@ jagg.block("api/api-info", {
 
     getOutputs:function (inputs) {
 
-        var applications, application, i, j, lenI, lenJ, subscriptions,isRatingActivated, subscription, username, result,
+        var applications, application, i, j, lenI, lenJ, subscriptions,isRatingActivated, subscription, username, result,deniedTiers,
                 list = [],
                 api = inputs.api,
                 discoveryURL = inputs.discoveryURL,
@@ -48,12 +48,14 @@ jagg.block("api/api-info", {
                         }
                         list.push(application);
                     }
-
+			result = jagg.module("tiers").getDeniedTiers();
+			deniedTiers = result.tiers;
 
             }
 
         return {
             "api":api,
+            "deniedTiers":deniedTiers,
             "discoveryURL":discoveryURL,
             "applications":list,
             "user":user,

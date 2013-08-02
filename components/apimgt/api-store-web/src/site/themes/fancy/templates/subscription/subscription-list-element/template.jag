@@ -280,7 +280,7 @@
                                                     <span class="label label-warning"><%=i18n.localize("deprecated")%></span>
                                                     <% } else if(api.status == "RETIRED") { %>
                                                     <span class="label label-important"><%=i18n.localize("retired")%></span>
-                                                    <% }else if(api.status == "BLOCKED" || api.subStatus == "BLOCKED") { %>
+                                                    <% }else if(api.status == "BLOCKED" || api.subStatus == "BLOCKED" || api.subStatus == "PROD_ONLY_BLOCKED") { %>
                                                     <span class="label label-important"><%=i18n.localize("blocked")%></span>
                                                     <% } %>
                                                 </div>
@@ -290,7 +290,7 @@
                                                             <a href="<%=path%>" class="thumbnailInsideLink"><img width="70" alt="" src="<% if(api.thumburl) { %><%=api.thumburl%><% } else { %><%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%><% }%>"/></a>
                                                         </div>
                                                         <div class="span8">
-                                                            <% if(api.subStatus != "BLOCKED"){ %>
+                                                            <% if(api.subStatus != "BLOCKED" || api.subStatus != "PROD_ONLY_BLOCKED"){ %>
                                                             <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/close.png"))%>" onClick="removeSubscription('<%=api.name%>','<%=api.version%>','<%=api.provider%>','<%=app.id%>',this)" align="right" data-master-id="accordionContent<%=str_i%>" class="closeBtn" />
                                                             <%}%>
                                                             <a href="<%=path%>" class="service-name" title="<%=api.name%>-<%=api.version%>"><%=apiName%> - <%=api.version%></a>

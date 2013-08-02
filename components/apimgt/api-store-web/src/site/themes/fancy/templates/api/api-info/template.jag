@@ -2,7 +2,7 @@
 <% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js"));  %>
 
 <%
-var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
+var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, deniedTiers = outputs.deniedTiers, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
 var urlPrefix;
 var log = new Log();
 var tenant=request.getParameter("tenant");
@@ -128,13 +128,23 @@ if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
                      <% }if(user && api) { %>
                       <Label><b><%=i18n.localize("tiers")%></b></Label>
                       <select id="tiers-list" name="tiers-list">
-                            <%var tiers = api.tierName;
+                            <%var tiers = api.tierName, denied;
                             var tiersList=tiers.split(",");
                             for(var j=0;j<tiersList.length;j++){
-                            var tier=tiersList[j];
+                            	for (var k=0;k<deniedTiers.length;k++) {
+                            		if (tiersList[j] == deniedTiers[k].tierName) {
+                            			denied = true;
+                            		}
+                            	}
+                            	if (!denied) {
+                            		var tier=tiersList[j];
+                            	
+                            	
                             %>
                             <option value="<%=tier%>"><%=tier%></option>
-                            <% } %>
+                            <%}
+                            denied = false;
+                             } %>
                         </select>
                         <%var firstTierDesc=api.tierDescription.split(",")[0];
                         if(firstTierDesc=="null"){firstTierDesc='';}
