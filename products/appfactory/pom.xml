@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-products</artifactId>
-        <version>4.0.0</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
     <groupId>org.wso2.appfactory</groupId>
     <artifactId>wso2appfactory-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>1.1.0-SNAPSHOT</version>
     <name>WSO2 AppFacotry - Parent</name>
     <url>http://wso2.org/projects/appfactory/java</url>
     <description>WSO2 Business Process Server</description>
@@ -271,20 +271,15 @@
     </issueManagement>
 
     <properties>
-        <carbon.platform.version>4.1.0</carbon.platform.version>
+        <carbon.platform.version>4.2.0-SNAPSHOT</carbon.platform.version>
         <carbon.version>${wso2carbon.version}</carbon.version>
-        <carbon.patch.version.401>4.0.1</carbon.patch.version.401>
-        <carbon.patch.version.402>4.0.2</carbon.patch.version.402>
-        <carbon.patch.version.403>4.0.3</carbon.patch.version.403>
-        <carbon.patch.version.404>4.0.4</carbon.patch.version.404>
-        <carbon.patch.version.405>4.0.5</carbon.patch.version.405>
-        <carbon.patch.version.406>4.0.6</carbon.patch.version.406>
-        <carbon.kernel.version>4.1.0</carbon.kernel.version>
+        <carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
         <stratos.version>2.0.0</stratos.version>
         <axis2.aar.maven.plugin.version>1.6.1-wso2v1</axis2.aar.maven.plugin.version>
         <eclipse.version>3.2.0</eclipse.version>
         <servlet-api.version>2.4</servlet-api.version>
         <spring.version>2.5.1.wso2v1</spring.version>
+        <appfactory.version>1.1.0-SNAPSHOT</appfactory.version>
         <sonia.scm.version>1.14</sonia.scm.version>
         <jenkins.ci.version>1.479</jenkins.ci.version>
     </properties>
