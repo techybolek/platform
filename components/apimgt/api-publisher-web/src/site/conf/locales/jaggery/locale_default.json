@@ -57,6 +57,12 @@
     "revokeTokens":"Revoke Tokens",
     "blockProduction":"Production Only",
     "blockAll":"Production & Sandbox",
+    "tierPermissions":"Tier Permissions",
+    "tiers":"Tier",
+    "permissions":"Permissions",
+    "allow":"Allow",
+    "deny":"Deny",
+    "updatePermissions":"Update Permissions",
 
     "addNewDoc":"Add New Document",
     "summary":"Summary",
@@ -203,6 +209,7 @@
     "revokeHelpMsg2":"By Access Token [Default] or",
     "revokeHelpMsg3":"By Authorized User - Syntax - user:xxxxx or",
     "revokeHelpMsg4":"By Created Date - Syntax - after:yyyy-mm-dd  or before:yyyy-mm-dd",
+    "tierPermissionSuccessMsg":"Successfully updated Tier Permissions.",
 
     "secured": "Secured",
     "nonsecured": "Non Secured",

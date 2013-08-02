@@ -1,0 +1,97 @@
+<% jagg.template("tiers", function(inputs, outputs, jagg) { %>
+	<%
+		var tiers = outputs.tiers; 
+		var tierPermissions = outputs.tierPermissions;
+	%>
+	<div id="tiers">
+		<div class="title-section">
+                <h2><%=i18n.localize("tierPermissions")%></h2>
+        </div>
+        <div class="content-section shadow-up">
+        	<div class="content-data">
+        		<table class="table table-bordered">
+        			<thead>
+        				<tr>
+        					<th class="tierSpecialCell"><%=i18n.localize("tiers")%></th>
+        					<th class="appSpecialCell"><%=i18n.localize("permissions")%></th>
+        				</tr>
+        			</thead>
+        			<tbody id="tiers">
+        			<%
+        			
+        			for (var i = 0; i < tiers.length; i++) {
+        				var permissionsDefined = false, denied = false, roleList = "", roleArray;
+        				for (var j = 0; j < tierPermissions.length; j++) {
+        					if (tierPermissions[j].tierName == tiers[i].tierName) {
+        						permissionsDefined = true;
+        						if (tierPermissions[j].permissionType == 'deny') {
+        							denied = true;
+        						}
+        						roleArray = tierPermissions[j].roles;
+        						for (var a = 0; a < roleArray.length; a ++) {
+        							roleList = roleList + roleArray[a];
+        						}
+        						break;
+        					}
+        				} 
+        				var radioInputName = "permissionType" + i; 
+        				var roleInputName = "roles" + i;
+        				var tierInputName = "tier" + i;
+        				var statusUpdateMsgName = "statusUpdateMsg" +i;
+        			%>
+                         <tr>
+	        					<td><%=tiers[i].tierName%></td>
+	        					<td>
+	        					<div class="form-actions" style="border-top:none;padding-top:0;padding-bottom:0">
+		        					<div id="radiodev" class="form-inline">
+		        					<% if (denied) {%>
+		        						<label class="checkbox-inline radio">
+			        						<input type="radio"  name="<%=radioInputName%>" value="allow" id="y"/>
+			       							<%=i18n.localize("allow")%>
+			       						</label>
+			       						<label class="checkbox-inline radio">
+			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z" checked/>
+			        						<%=i18n.localize("deny")%>
+			        					</label>
+		        					 <%} else {
+		        					 	if (roleList == "") {
+		        					 		roleList = "Internal/everyone";
+		        					 	}
+		        					 %>
+		        					 	<label class="checkbox-inline radio">
+		        					 		<input type="radio"  name="<%=radioInputName%>" value="allow" id="y" checked/>
+			       							<%=i18n.localize("allow")%>
+			       						</label>
+			       						<label class="checkbox-inline radio">
+			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z"/>
+			        						<%=i18n.localize("deny")%>
+			        					</label>
+		        					 <%}%>
+		        					 </div>
+		        					 <br />
+		        					 <div class="form-inline">
+		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">roles</label>
+		        					 	<input type="text" class="input required"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
+		        					 </div>
+	        					</div> 
+		                	
+		                		
+	                        	
+		            			
+		            			
+		            			<div class="form-actions" id="saveButtons">
+                    				<input type="submit" id="addNewAPIButton" name="addNewAPIButton" class="btn btn-primary" value="<%=i18n.localize("updatePermissions")%>" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>)"/>
+                				</div>
+                				
+                				<div class="alert alert-success" id="<%=statusUpdateMsgName%>" style="display:none;">
+        							<%=i18n.localize("tierPermissionSuccessMsg")%>
+     							</div>
+        					</td>
+        					</tr>
+                      <%}
+        			%>
+        			</tbody>
+        		</table>
+        	</div>
+	</div>
+<%});%>

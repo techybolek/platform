@@ -312,6 +312,9 @@ a.powered-by-logo {
 .appSpecialCell{
     width:150px;
 }
+.tierSpecialCell{
+    width:50px;
+}
 /*
 @media all and (max-width: 850px) {
     #left{
