@@ -1,4 +1,4 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://services.mgt.identity.carbon.wso2.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2284="http://mgt.identity.carbon.wso2.org/xsd" xmlns:ax2286="http://beans.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2290="http://dto.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2288="http://beans.mgt.captcha.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.mgt.identity.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://services.mgt.identity.carbon.wso2.org" xmlns:ax2282="http://beans.mgt.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2284="http://beans.mgt.captcha.carbon.wso2.org/xsd" xmlns:ax2286="http://dto.mgt.identity.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax2280="http://mgt.identity.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.mgt.identity.carbon.wso2.org">
     <wsdl:documentation>UserInformationRecoveryService</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://beans.mgt.captcha.carbon.wso2.org/xsd">
@@ -10,7 +10,7 @@
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax2289="http://beans.mgt.captcha.carbon.wso2.org/xsd" xmlns:ax2285="http://mgt.identity.carbon.wso2.org/xsd" xmlns:ax2287="http://beans.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2291="http://dto.mgt.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://services.mgt.identity.carbon.wso2.org">
+        <xs:schema xmlns:ax2281="http://mgt.identity.carbon.wso2.org/xsd" xmlns:ax2283="http://beans.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2285="http://beans.mgt.captcha.carbon.wso2.org/xsd" xmlns:ax2287="http://dto.mgt.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://services.mgt.identity.carbon.wso2.org">
             <xs:import namespace="http://mgt.identity.carbon.wso2.org/xsd"></xs:import>
             <xs:import namespace="http://beans.mgt.identity.carbon.wso2.org/xsd"></xs:import>
             <xs:import namespace="http://beans.mgt.captcha.carbon.wso2.org/xsd"></xs:import>
@@ -18,7 +18,7 @@
             <xs:element name="UserInformationRecoveryServiceIdentityMgtServiceException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="IdentityMgtServiceException" nillable="true" type="ax2284:IdentityMgtServiceException"></xs:element>
+                        <xs:element minOccurs="0" name="IdentityMgtServiceException" nillable="true" type="ax2280:IdentityMgtServiceException"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -35,7 +35,7 @@
             <xs:element name="verifyUserChallengeAnswerResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2286:VerificationBean"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2282:VerificationBean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -43,14 +43,14 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"></xs:element>
-                        <xs:element minOccurs="0" name="captcha" nillable="true" type="ax2289:CaptchaInfoBean"></xs:element>
+                        <xs:element minOccurs="0" name="captcha" nillable="true" type="ax2284:CaptchaInfoBean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="verifyUserResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2286:VerificationBean"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2282:VerificationBean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -59,14 +59,14 @@
                     <xs:sequence>
                         <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"></xs:element>
                         <xs:element minOccurs="0" name="code" nillable="true" type="xs:string"></xs:element>
-                        <xs:element minOccurs="0" name="captcha" nillable="true" type="ax2289:CaptchaInfoBean"></xs:element>
+                        <xs:element minOccurs="0" name="captcha" nillable="true" type="ax2284:CaptchaInfoBean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="verifyConfirmationCodeResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2286:VerificationBean"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2282:VerificationBean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -82,7 +82,7 @@
             <xs:element name="updatePasswordResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2286:VerificationBean"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2282:VerificationBean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -102,7 +102,7 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getUserChanllegneQuestionIds">
+            <xs:element name="getUserChallengeQuestionIds">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"></xs:element>
@@ -110,10 +110,10 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getUserChanllegneQuestionIdsResponse">
+            <xs:element name="getUserChallengeQuestionIdsResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2290:ChallengeQuestionIdsDTO"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2286:ChallengeQuestionIdsDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -129,7 +129,7 @@
             <xs:element name="getUserChallengeQuestionResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2290:UserChallengesDTO"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2286:UserChallengesDTO"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -141,7 +141,7 @@
             <xs:element name="getCaptchaResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2289:CaptchaInfoBean"></xs:element>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2284:CaptchaInfoBean"></xs:element>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -205,6 +205,12 @@
     <wsdl:message name="verifyConfirmationCodeResponse">
         <wsdl:part name="parameters" element="ns:verifyConfirmationCodeResponse"></wsdl:part>
     </wsdl:message>
+    <wsdl:message name="getUserChallengeQuestionIdsRequest">
+        <wsdl:part name="parameters" element="ns:getUserChallengeQuestionIds"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getUserChallengeQuestionIdsResponse">
+        <wsdl:part name="parameters" element="ns:getUserChallengeQuestionIdsResponse"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="getUserChallengeQuestionRequest">
         <wsdl:part name="parameters" element="ns:getUserChallengeQuestion"></wsdl:part>
     </wsdl:message>
@@ -216,12 +222,6 @@
     </wsdl:message>
     <wsdl:message name="verifyUserChallengeAnswerResponse">
         <wsdl:part name="parameters" element="ns:verifyUserChallengeAnswerResponse"></wsdl:part>
-    </wsdl:message>
-    <wsdl:message name="getUserChanllegneQuestionIdsRequest">
-        <wsdl:part name="parameters" element="ns:getUserChanllegneQuestionIds"></wsdl:part>
-    </wsdl:message>
-    <wsdl:message name="getUserChanllegneQuestionIdsResponse">
-        <wsdl:part name="parameters" element="ns:getUserChanllegneQuestionIdsResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="updatePasswordRequest">
         <wsdl:part name="parameters" element="ns:updatePassword"></wsdl:part>
@@ -251,6 +251,11 @@
             <wsdl:output message="ns:verifyConfirmationCodeResponse" wsaw:Action="urn:verifyConfirmationCodeResponse"></wsdl:output>
             <wsdl:fault message="ns:UserInformationRecoveryServiceIdentityMgtServiceException" name="UserInformationRecoveryServiceIdentityMgtServiceException" wsaw:Action="urn:verifyConfirmationCodeUserInformationRecoveryServiceIdentityMgtServiceException"></wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getUserChallengeQuestionIds">
+            <wsdl:input message="ns:getUserChallengeQuestionIdsRequest" wsaw:Action="urn:getUserChallengeQuestionIds"></wsdl:input>
+            <wsdl:output message="ns:getUserChallengeQuestionIdsResponse" wsaw:Action="urn:getUserChallengeQuestionIdsResponse"></wsdl:output>
+            <wsdl:fault message="ns:UserInformationRecoveryServiceIdentityMgtServiceException" name="UserInformationRecoveryServiceIdentityMgtServiceException" wsaw:Action="urn:getUserChallengeQuestionIdsUserInformationRecoveryServiceIdentityMgtServiceException"></wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getUserChallengeQuestion">
             <wsdl:input message="ns:getUserChallengeQuestionRequest" wsaw:Action="urn:getUserChallengeQuestion"></wsdl:input>
             <wsdl:output message="ns:getUserChallengeQuestionResponse" wsaw:Action="urn:getUserChallengeQuestionResponse"></wsdl:output>
@@ -260,11 +265,6 @@
             <wsdl:input message="ns:verifyUserChallengeAnswerRequest" wsaw:Action="urn:verifyUserChallengeAnswer"></wsdl:input>
             <wsdl:output message="ns:verifyUserChallengeAnswerResponse" wsaw:Action="urn:verifyUserChallengeAnswerResponse"></wsdl:output>
             <wsdl:fault message="ns:UserInformationRecoveryServiceIdentityMgtServiceException" name="UserInformationRecoveryServiceIdentityMgtServiceException" wsaw:Action="urn:verifyUserChallengeAnswerUserInformationRecoveryServiceIdentityMgtServiceException"></wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getUserChanllegneQuestionIds">
-            <wsdl:input message="ns:getUserChanllegneQuestionIdsRequest" wsaw:Action="urn:getUserChanllegneQuestionIds"></wsdl:input>
-            <wsdl:output message="ns:getUserChanllegneQuestionIdsResponse" wsaw:Action="urn:getUserChanllegneQuestionIdsResponse"></wsdl:output>
-            <wsdl:fault message="ns:UserInformationRecoveryServiceIdentityMgtServiceException" name="UserInformationRecoveryServiceIdentityMgtServiceException" wsaw:Action="urn:getUserChanllegneQuestionIdsUserInformationRecoveryServiceIdentityMgtServiceException"></wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="updatePassword">
             <wsdl:input message="ns:updatePasswordRequest" wsaw:Action="urn:updatePassword"></wsdl:input>
@@ -315,6 +315,18 @@
                 <soap:fault use="literal" name="UserInformationRecoveryServiceIdentityMgtServiceException"></soap:fault>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getUserChallengeQuestionIds">
+            <soap:operation soapAction="urn:getUserChallengeQuestionIds" style="document"></soap:operation>
+            <wsdl:input>
+                <soap:body use="literal"></soap:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"></soap:body>
+            </wsdl:output>
+            <wsdl:fault name="UserInformationRecoveryServiceIdentityMgtServiceException">
+                <soap:fault use="literal" name="UserInformationRecoveryServiceIdentityMgtServiceException"></soap:fault>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getUserChallengeQuestion">
             <soap:operation soapAction="urn:getUserChallengeQuestion" style="document"></soap:operation>
             <wsdl:input>
@@ -329,18 +341,6 @@
         </wsdl:operation>
         <wsdl:operation name="verifyUserChallengeAnswer">
             <soap:operation soapAction="urn:verifyUserChallengeAnswer" style="document"></soap:operation>
-            <wsdl:input>
-                <soap:body use="literal"></soap:body>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"></soap:body>
-            </wsdl:output>
-            <wsdl:fault name="UserInformationRecoveryServiceIdentityMgtServiceException">
-                <soap:fault use="literal" name="UserInformationRecoveryServiceIdentityMgtServiceException"></soap:fault>
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getUserChanllegneQuestionIds">
-            <soap:operation soapAction="urn:getUserChanllegneQuestionIds" style="document"></soap:operation>
             <wsdl:input>
                 <soap:body use="literal"></soap:body>
             </wsdl:input>
@@ -414,6 +414,18 @@
                 <soap12:fault use="literal" name="UserInformationRecoveryServiceIdentityMgtServiceException"></soap12:fault>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getUserChallengeQuestionIds">
+            <soap12:operation soapAction="urn:getUserChallengeQuestionIds" style="document"></soap12:operation>
+            <wsdl:input>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"></soap12:body>
+            </wsdl:output>
+            <wsdl:fault name="UserInformationRecoveryServiceIdentityMgtServiceException">
+                <soap12:fault use="literal" name="UserInformationRecoveryServiceIdentityMgtServiceException"></soap12:fault>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getUserChallengeQuestion">
             <soap12:operation soapAction="urn:getUserChallengeQuestion" style="document"></soap12:operation>
             <wsdl:input>
@@ -428,18 +440,6 @@
         </wsdl:operation>
         <wsdl:operation name="verifyUserChallengeAnswer">
             <soap12:operation soapAction="urn:verifyUserChallengeAnswer" style="document"></soap12:operation>
-            <wsdl:input>
-                <soap12:body use="literal"></soap12:body>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"></soap12:body>
-            </wsdl:output>
-            <wsdl:fault name="UserInformationRecoveryServiceIdentityMgtServiceException">
-                <soap12:fault use="literal" name="UserInformationRecoveryServiceIdentityMgtServiceException"></soap12:fault>
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getUserChanllegneQuestionIds">
-            <soap12:operation soapAction="urn:getUserChanllegneQuestionIds" style="document"></soap12:operation>
             <wsdl:input>
                 <soap12:body use="literal"></soap12:body>
             </wsdl:input>
@@ -504,6 +504,15 @@
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="getUserChallengeQuestionIds">
+            <http:operation location="getUserChallengeQuestionIds"></http:operation>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"></mime:content>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="getUserChallengeQuestion">
             <http:operation location="getUserChallengeQuestion"></http:operation>
             <wsdl:input>
@@ -515,15 +524,6 @@
         </wsdl:operation>
         <wsdl:operation name="verifyUserChallengeAnswer">
             <http:operation location="verifyUserChallengeAnswer"></http:operation>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"></mime:content>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"></mime:content>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getUserChanllegneQuestionIds">
-            <http:operation location="getUserChanllegneQuestionIds"></http:operation>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"></mime:content>
             </wsdl:input>
