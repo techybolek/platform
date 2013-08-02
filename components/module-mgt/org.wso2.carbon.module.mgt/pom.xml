@@ -70,7 +70,7 @@
                     <argLine>-enableassertions</argLine>
                     <excludes>
                         <exclude>**/BaseTestCase.java</exclude>
-                        <!--exclude>**/TestModuleAdminService.java</exclude-->
+                        <exclude>**/TestModuleAdminService.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
