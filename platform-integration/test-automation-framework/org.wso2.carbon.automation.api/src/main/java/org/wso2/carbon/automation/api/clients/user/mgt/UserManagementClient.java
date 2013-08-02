@@ -33,9 +33,8 @@ import java.util.List;
 public class UserManagementClient {
     private static final int LIMIT = 100;
     private final Log log = LogFactory.getLog(UserManagementClient.class);
-
-    private UserAdminStub userAdminStub;
     private final String serviceName = "UserAdmin";
+    private UserAdminStub userAdminStub;
 
     public UserManagementClient(String backendURL, String sessionCookie) throws AxisFault {
 
@@ -50,6 +49,20 @@ public class UserManagementClient {
         String endPoint = backendURL + serviceName;
         userAdminStub = new UserAdminStub(endPoint);
         AuthenticateStub.authenticateStub(userName, password, userAdminStub);
+    }
+
+    public static ClaimValue[] toADBClaimValues(
+            org.wso2.carbon.user.mgt.common.ClaimValue[] claimValues) {
+        if (claimValues == null) {
+            return new ClaimValue[0];
+        }
+        ClaimValue[] values = new ClaimValue[claimValues.length];
+        for (org.wso2.carbon.user.mgt.common.ClaimValue cvalue : claimValues) {
+            ClaimValue value = new ClaimValue();
+            value.setClaimURI(cvalue.getClaimURI());
+            value.setValue(cvalue.getValue());
+        }
+        return values;
     }
 
     public void addRole(String roleName, String[] userList, String[] permissions)
@@ -77,20 +90,6 @@ public class UserManagementClient {
                         String profileName) throws Exception {
 
         userAdminStub.addUser(userName, password, roles, null, profileName);
-    }
-
-    public static ClaimValue[] toADBClaimValues(
-            org.wso2.carbon.user.mgt.common.ClaimValue[] claimValues) {
-        if (claimValues == null) {
-            return new ClaimValue[0];
-        }
-        ClaimValue[] values = new ClaimValue[claimValues.length];
-        for (org.wso2.carbon.user.mgt.common.ClaimValue cvalue : claimValues) {
-            ClaimValue value = new ClaimValue();
-            value.setClaimURI(cvalue.getClaimURI());
-            value.setValue(cvalue.getValue());
-        }
-        return values;
     }
 
     public void deleteRole(String roleName) throws Exception {
@@ -123,8 +122,22 @@ public class UserManagementClient {
 
     private void addRoleWithUser(String roleName, String userName, String[] permission)
             throws Exception {
-        userAdminStub.addRole(roleName, new String[]{userName}, permission, false);
-        FlaggedName[] roles = userAdminStub.getAllRolesNames(roleName, LIMIT);
+        userAdminStub.addRole(roleName, new String[]{userName}, null, false);
+        FlaggedName[] roles = userAdminStub.getAllRolesNames(roleName, 100);
+        for (FlaggedName role : roles) {
+            if (!role.getItemName().equals(roleName)) {
+                continue;
+            } else {
+                assert (role.getItemName().equals(roleName));
+            }
+            assert false : "Role: " + roleName + " was not added properly.";
+        }
+    }
+
+    private void addRoleWithUser(String roleName, String userName, boolean isSharedRole)
+            throws Exception {
+        userAdminStub.addRole(roleName, new String[]{userName}, null, isSharedRole);
+        FlaggedName[] roles = userAdminStub.getAllRolesNames(roleName, 100);
         for (FlaggedName role : roles) {
             if (!role.getItemName().equals(roleName)) {
                 continue;
@@ -205,6 +218,35 @@ public class UserManagementClient {
             }
         }
         return false;
+    }
+
+    /**
+     * Lists all roles caught by wither with in limit
+     *
+     * @param filter
+     * @param limit
+     * @return
+     * @throws Exception
+     */
+    public FlaggedName[] listRoles(String filter, int limit)
+            throws Exception {
+        FlaggedName[] roles = new FlaggedName[0];
+        roles = userAdminStub.getAllRolesNames(filter, limit);
+        return roles;
+    }
+
+    /**
+     * Lists all users with in filter and limit
+     * @param filter
+     * @param limit
+     * @return FlaggedName[]
+     * @throws Exception
+     */
+    public FlaggedName[] listUsers(String filter, int limit)
+            throws Exception {
+        FlaggedName[] users = new FlaggedName[0];
+        users = userAdminStub.listAllUsers(filter, limit);
+        return users;
     }
 
     public boolean userNameExists(String roleName, String userName)

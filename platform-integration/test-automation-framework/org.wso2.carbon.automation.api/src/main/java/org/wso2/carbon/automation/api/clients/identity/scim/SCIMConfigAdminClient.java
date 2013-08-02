@@ -27,6 +27,9 @@ import org.wso2.carbon.identity.scim.common.stub.config.SCIMProviderDTO;
 
 import java.rmi.RemoteException;
 
+/**
+ * API Class for implentation of the  scimConfigAdminServiceStub which will handle all the scim operations
+ */
 public class SCIMConfigAdminClient {
     private final String serviceName = "SCIMConfigAdminService";
     private SCIMConfigAdminServiceStub scimConfigAdminServiceStub;
@@ -46,6 +49,7 @@ public class SCIMConfigAdminClient {
 
     /**
      * Adds a User provider SCIM
+     *
      * @param consumerId
      * @param providerId
      * @param userName
@@ -53,10 +57,12 @@ public class SCIMConfigAdminClient {
      * @param userEPUrl
      * @param groupEPUrl
      * @throws SCIMConfigAdminServiceIdentitySCIMExceptionException
+     *
      * @throws RemoteException
      */
     public void addUserProvider(String consumerId, String providerId, String userName, String
-            password, String userEPUrl, String groupEPUrl) throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
+            password, String userEPUrl, String groupEPUrl)
+            throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
         SCIMProviderDTO scimProviderDTO = new SCIMProviderDTO();
         scimProviderDTO.setUserName(userName);
         scimProviderDTO.setPassword(password);
@@ -68,6 +74,7 @@ public class SCIMConfigAdminClient {
 
     /**
      * Add a Global provider SCIM
+     *
      * @param consumerId
      * @param providerId
      * @param userName
@@ -75,10 +82,12 @@ public class SCIMConfigAdminClient {
      * @param userEPUrl
      * @param groupEPUrl
      * @throws SCIMConfigAdminServiceIdentitySCIMExceptionException
+     *
      * @throws RemoteException
      */
     public void addGlobalProvider(String consumerId, String providerId, String userName, String
-            password, String userEPUrl, String groupEPUrl) throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
+            password, String userEPUrl, String groupEPUrl)
+            throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
         SCIMProviderDTO scimProviderDTO = new SCIMProviderDTO();
         scimProviderDTO.setUserName(userName);
         scimProviderDTO.setPassword(password);
@@ -90,47 +99,59 @@ public class SCIMConfigAdminClient {
 
     /**
      * Delete a User provider
+     *
      * @param consumerId
      * @param providerId
      * @throws SCIMConfigAdminServiceIdentitySCIMExceptionException
+     *
      * @throws RemoteException
      */
-    public void deleteUserProvider(String consumerId, String providerId) throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
+    public void deleteUserProvider(String consumerId, String providerId)
+            throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
         scimConfigAdminServiceStub.deleteUserProvider(consumerId, providerId);
     }
 
     /**
      * Deletes a global Provider
+     *
      * @param consumerId
      * @param providerId
      * @throws SCIMConfigAdminServiceIdentitySCIMExceptionException
+     *
      * @throws RemoteException
      */
-    public void deleteGlobalProvider(String consumerId, String providerId) throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
+    public void deleteGlobalProvider(String consumerId, String providerId)
+            throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
         scimConfigAdminServiceStub.deleteUserProvider(consumerId, providerId);
     }
 
     /**
      * Lista all user Providers
+     *
      * @param consumerId
      * @param providerId
      * @return
      * @throws SCIMConfigAdminServiceIdentitySCIMExceptionException
+     *
      * @throws RemoteException
      */
-    public SCIMProviderDTO[] listUserProviders(String consumerId, String providerId) throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
+    public SCIMProviderDTO[] listUserProviders(String consumerId, String providerId)
+            throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
         return scimConfigAdminServiceStub.getAllUserProviders(consumerId);
     }
 
     /**
      * Lists all Global Providers
+     *
      * @param consumerId
      * @param providerId
      * @return
      * @throws SCIMConfigAdminServiceIdentitySCIMExceptionException
+     *
      * @throws RemoteException
      */
-    public SCIMProviderDTO[] listGlobalProviders(String consumerId, String providerId) throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
+    public SCIMProviderDTO[] listGlobalProviders(String consumerId, String providerId)
+            throws SCIMConfigAdminServiceIdentitySCIMExceptionException, RemoteException {
         return scimConfigAdminServiceStub.getAllGlobalProviders(consumerId);
     }
 }
