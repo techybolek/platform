@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -1577,6 +1578,87 @@ public class ApiMgtDAO {
             apiKeys = getApplicationKeys(applicationId, getKeysSql(null));
         }
         return apiKeys;
+    }
+    
+    public void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+        int tierPermissionId = -1;
+        
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getTierPermissionQuery = "SELECT TIER_PERMISSIONS_ID FROM AM_TIER_PERMISSIONS WHERE TIER = ?";
+            ps = conn.prepareStatement(getTierPermissionQuery);
+            ps.setString(1, tierName);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+            	tierPermissionId = resultSet.getInt("TIER_PERMISSIONS_ID");
+            }
+            resultSet.close();
+            ps.close();
+            
+            if (tierPermissionId == -1) {
+            	String query = "INSERT INTO" +
+                        " AM_TIER_PERMISSIONS (TIER, PERMISSIONS_TYPE, ROLES)" +
+                        " VALUES(?, ?, ?)";
+            	ps = conn.prepareStatement(query);
+                ps.setString(1, tierName);
+                ps.setString(2, permissionType);
+                ps.setString(3, roles);
+                ps.execute();
+            } else {
+            	String query = "UPDATE" +
+                        " AM_TIER_PERMISSIONS SET TIER = ?, PERMISSIONS_TYPE = ?, ROLES = ?" +
+                        " WHERE TIER_PERMISSIONS_ID = ?";
+            	ps = conn.prepareStatement(query);
+                ps.setString(1, tierName);
+                ps.setString(2, permissionType);
+                ps.setString(3, roles);
+                ps.setInt(4, tierPermissionId);
+                ps.executeUpdate();
+            }
+           
+        } catch (SQLException e) {
+            handleException("Error in updating tier permissions: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
+    
+    public Set<TierPermissionDTO> getTierPermissions() throws APIManagementException {
+    	Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+        
+        Set<TierPermissionDTO> tierPermissions = new HashSet<TierPermissionDTO>();
+        
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getTierPermissionQuery = "SELECT TIER , PERMISSIONS_TYPE , ROLES  FROM AM_TIER_PERMISSIONS";
+            ps = conn.prepareStatement(getTierPermissionQuery);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+            	TierPermissionDTO tierPermission = new TierPermissionDTO();
+            	tierPermission.setTierName(resultSet.getString("TIER"));
+            	tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+            	String roles = resultSet.getString("ROLES");
+            	if (roles != null) {
+            		String roleList[] = roles.split(",");
+            		tierPermission.setRoles(roleList);
+            	}
+            	tierPermissions.add(tierPermission);
+            }
+            resultSet.close();
+            ps.close();
+        } catch (SQLException e) {
+            handleException("Failed to get Tier permission information " , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return tierPermissions;
     }
     
     private Set<String> getApplicationKeys(int applicationId, String getKeysSql)

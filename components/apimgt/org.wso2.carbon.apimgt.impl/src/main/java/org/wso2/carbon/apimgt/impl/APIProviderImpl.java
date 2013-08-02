@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -1399,7 +1400,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiSortedList;
     }
 
+    /**
+     * Update the Tier Permissions
+     *
+     * @param tierName Tier Name
+     * @param permissionType Permission Type
+     * @param roles Roles          
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException {
+        apiMgtDAO.updateTierPermissions(tierName, permissionType, roles);
+    }
 
+	@Override
+	public Set<TierPermissionDTO> getTierPermissions() throws APIManagementException {
+		Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getTierPermissions();
+		return tierPermissions;
+	}
 
 }
 
