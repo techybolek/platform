@@ -19,13 +19,32 @@
 
 package org.apache.synapse.config;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.*;
+import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
+import org.apache.synapse.Startup;
+import org.apache.synapse.SynapseArtifact;
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.commons.datasource.DataSourceRepositoryHolder;
 import org.apache.synapse.commons.executors.PriorityExecutor;
 import org.apache.synapse.config.xml.MediatorFactoryFinder;
@@ -53,11 +72,6 @@ import org.apache.synapse.rest.API;
 import org.apache.synapse.util.xpath.ext.SynapseXpathFunctionContextProvider;
 import org.apache.synapse.util.xpath.ext.SynapseXpathVariableResolver;
 import org.apache.synapse.util.xpath.ext.XpathExtensionUtil;
-
-import javax.xml.namespace.QName;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The SynapseConfiguration holds the global configuration for a Synapse
@@ -181,6 +195,14 @@ public class SynapseConfiguration implements ManagedLifecycle, SynapseArtifact {
      * Holds the library imports  currently being included into Synapse engine
      */
     Map<String, SynapseImport> synapseImports = new ConcurrentHashMap<String, SynapseImport>();
+    
+    
+    /**
+     * Cachable HasMap to hold the decrypted information in its synapse configuration space.
+     * 
+     */
+    private Map<String, Object> decryptedCacheMap = new ConcurrentHashMap<String, Object>();
+    
     private boolean allowHotUpdate = true;
 
     /**
@@ -1730,8 +1752,21 @@ public class SynapseConfiguration implements ManagedLifecycle, SynapseArtifact {
     public SynapseArtifactDeploymentStore getArtifactDeploymentStore() {
         return artifactDeploymentStore;
     }
+    
+    
+    
+	/**
+	 * Returns the map which contains the Decrypted values read via the secure
+	 * vault provider
+	 * 
+	 * @return
+	 */
+    public Map<String, Object> getDecryptedCacheMap() {
+		return decryptedCacheMap;
+	}
+    
 
-    private void assertAlreadyExists(String key, String type) {
+	private void assertAlreadyExists(String key, String type) {
 
         if (key == null || "".equals(key)) {
             handleException("Given entry key is empty or null.");

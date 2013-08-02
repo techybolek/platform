@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.SynapseConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -42,8 +43,7 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 
 	private RegistryService registryService;
 
-	private Map<String, SecureVaultCacheContext> decryptedCacheMap = new ConcurrentHashMap<String, SecureVaultCacheContext>();
-
+	
 	UserRegistry registry = null;
 
 	private SecureVaultLookupHandlerImpl(
@@ -134,8 +134,10 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 	@Override
 	public String evaluate(String aliasPasword, MessageContext synCtx)
 			throws RegistryException {
+		SynapseConfiguration synapseConfiguration = synCtx.getConfiguration();
+		Map<String, Object> decryptedCacheMap = synapseConfiguration.getDecryptedCacheMap();
 		if (decryptedCacheMap.containsKey(aliasPasword)) {
-			SecureVaultCacheContext cacheContext = decryptedCacheMap.get(aliasPasword);
+			SecureVaultCacheContext cacheContext = (SecureVaultCacheContext)decryptedCacheMap.get(aliasPasword);
 			String cacheDurable = synCtx.getConfiguration().getRegistry().getConfigurationProperties().getProperty("cachableDuration");
 			long cacheTime = (cacheDurable != null && !cacheDurable.isEmpty())? Long.parseLong(cacheDurable):10000;
 			if((cacheContext.getDateTime().getTime()+cacheTime)>=System.currentTimeMillis()){
@@ -143,16 +145,16 @@ public class SecureVaultLookupHandlerImpl implements SecureVaultLookupHandler {
 				return cacheContext.getDecryptedValue();
 			}else{
 				decryptedCacheMap.remove(aliasPasword);
-				return vaultLookup(aliasPasword, synCtx);
+				return vaultLookup(aliasPasword, synCtx,decryptedCacheMap);
 			}
 			
 		} else {
-			String decryptedValue = vaultLookup(aliasPasword, synCtx);
+			String decryptedValue = vaultLookup(aliasPasword, synCtx,decryptedCacheMap);
 			return decryptedValue;
 		}
 	}
 
-	private String vaultLookup(String aliasPasword, MessageContext synCtx) {
+	private String vaultLookup(String aliasPasword, MessageContext synCtx,Map<String, Object> decryptedCacheMap) {
 		SecretCipherHander secretManager = new SecretCipherHander(synCtx);
 		String decryptedValue = secretManager.getSecret(aliasPasword);
 		decryptedCacheMap.put(aliasPasword, new SecureVaultCacheContext(Calendar
