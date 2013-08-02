@@ -255,4 +255,12 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains) throws APIManagementException;
+    
+    /**
+     * Returns a list of Tiers denied for the current user
+     *
+     * @return Set<String>
+     * @throws APIManagementException if failed to get the tiers
+     */
+    public Set<String> getDeniedTiers()throws APIManagementException;
 }

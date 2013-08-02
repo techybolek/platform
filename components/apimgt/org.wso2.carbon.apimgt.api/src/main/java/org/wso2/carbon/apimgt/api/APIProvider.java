@@ -290,5 +290,25 @@ public interface APIProvider extends APIManager {
      *          If failed to update subscription status
      */
     public void updateSubscription(APIIdentifier apiId,String subStatus,int appId) throws APIManagementException;
+    
+    /**
+     * Update the Tier Permissions
+     *
+     * @param tierName Tier Name
+     * @param permissionType Permission Type
+     * @param roles Roles          
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException;
+    
+    /**
+     * Get the list of Tier Permissions
+     * 
+     * @return Tier Permission Set
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public Set getTierPermissions() throws APIManagementException;
 
 }
