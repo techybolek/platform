@@ -9,6 +9,12 @@ include("/jagg/jagg.jag");
     if (action === "login") {
         mod = jagg.module("user");
         username = request.getParameter("username");
+
+	if (username.indexOf("@") != -1) {
+            var s=username.split("@");
+            username=s[0] + "@" + s[1].toLowerCase();
+        }
+	
         var tenant = request.getParameter("tenant");
         result = mod.login(username, request.getParameter("password"),tenant);
         if (result.error) {
