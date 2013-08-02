@@ -550,6 +550,7 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
 					.equals(XMLConfigConstants.API_ELT.getLocalPart())) {
 
 				String apiName = apiElement.getAttributeValue(new QName("name"));
+                String apiTransports = apiElement.getAttributeValue(new QName("transports"));
 
 				if (getSynapseConfiguration().getAxisConfiguration().getService(
 						apiName) != null) {
@@ -564,7 +565,19 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
 
 						if(log.isDebugEnabled()) {
 							log.debug("Added API : " + apiName);
+                            log.debug("Authorized Transports : " + apiTransports);
 						}
+
+                        if(apiTransports != null){
+                            ArrayList<String> transports = new ArrayList<String>();
+                            if (apiTransports.indexOf(" ") >= 0) {
+                                String[] transportArr = apiTransports.split(" ");
+                                transports.addAll(Arrays.asList(transportArr).subList(0, apiTransports.split(" ").length));
+                            } else {
+                                transports.add(apiTransports);
+                            }
+                            api.setTransports(transports);
+                        }
 
 						if (updateMode) {
 							api.setFileName(fileName);
