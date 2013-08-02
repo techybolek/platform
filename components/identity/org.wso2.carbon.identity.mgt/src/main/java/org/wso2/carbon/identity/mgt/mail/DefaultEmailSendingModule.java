@@ -32,10 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
-import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
-import org.wso2.carbon.identity.mgt.NotificationSendingModule;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
-import org.wso2.carbon.identity.mgt.dto.NotificationDataDTO;
 
 /**
  * default email sending implementation
@@ -65,7 +62,7 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
         } else if (IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)) {
 
 			String resetLink = emailConfig.getTargetEpr() + "?" + CONF_STRING + "="
-					+ notificationData.getNotificationCode() + "\n";
+					+ notificationData.getNotificationCode();
 			userParameters.put("password-reset-link", resetLink);
 			userParameters.put("user-name", notificationData.getUserId());
         }

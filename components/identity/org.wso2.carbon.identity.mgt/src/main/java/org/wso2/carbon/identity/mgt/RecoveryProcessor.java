@@ -15,6 +15,11 @@
  */
 package org.wso2.carbon.identity.mgt;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
@@ -28,17 +33,10 @@ import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.identity.mgt.store.UserRecoveryDataStore;
 import org.wso2.carbon.identity.mgt.util.Utils;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import java.util.*;
 
 /**
  *
@@ -58,6 +56,12 @@ public class RecoveryProcessor {
     private  NotificationSender notificationSender;
 
     private ChallengeQuestionProcessor questionProcessor;
+    
+    /*
+     *  Delimiter that will be used to store the registry resource entries. Must be valid characters.
+     *  If this changed the split regex also need to changed in getUserExternalCodeStr method.
+     */
+    private final String REG_DELIMITER = "___";
 
     public RecoveryProcessor() {
 
@@ -99,6 +103,7 @@ public class RecoveryProcessor {
         String domainName = recoveryDTO.getTenantDomain();
         int tenantId = recoveryDTO.getTenantId();
         NotificationDataDTO notificationData = new NotificationDataDTO();
+        String internalCode = null;
         
         String type = recoveryDTO.getNotificationType();
         if(type != null){
@@ -115,13 +120,16 @@ public class RecoveryProcessor {
             log.warn("Notification sending failure. Notification address is not defined for user " + userId);
         }
 
-        //userMgtBean.setEmail(email);
-
         if(recoveryDTO.getNotification() != null){
             String notification = recoveryDTO.getNotification().trim();
             notificationData.setNotification(notification);
             if(IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)){
-                confirmationKey = UUIDGenerator.generateUUID();
+            	internalCode = generateUserCode(2, userId);
+                try {
+					confirmationKey = getUserExternalCodeStr(internalCode);
+				} catch (Exception e) {
+					throw new IdentityException(e.getMessage());
+				}
                 secretKey = UUIDGenerator.generateUUID();
                 notificationData.setNotificationCode(confirmationKey);
                 
@@ -152,7 +160,7 @@ public class RecoveryProcessor {
 
         if(persistData){
             UserRecoveryDataDO recoveryDataDO =
-                            new UserRecoveryDataDO(userId, tenantId,  confirmationKey, secretKey);
+                            new UserRecoveryDataDO(userId, tenantId,  internalCode, secretKey);
             dataStore.store(recoveryDataDO);
 
         }
@@ -170,8 +178,10 @@ public class RecoveryProcessor {
 
     /**
      * Confirm that confirmation key has been sent to the same user.
-     *
+     * @param sequence TODO
+     * @param username TODO
      * @param confirmationKey confirmation key from the user
+     *
      * @return verification result as a bean
      */
     public VerificationBean verifyConfirmationKey(String confirmationKey) {
@@ -201,18 +211,21 @@ public class RecoveryProcessor {
     /**
      * This method is used to verify the confirmation code supplied by user. This invalidates 
      * the current code and generates a new code and send to user.
-     * 
+     * @param sequence TODO
+     * @param username TODO
      * @param code
      * @param userDto
+     * 
      * @return
      * @throws IdentityException
      */
-    public VerificationBean verifyConfirmationCode(String code, UserDTO userDto) throws IdentityException{
+    public VerificationBean verifyConfirmationCode(int sequence, String username, String code) throws IdentityException{
 
         UserRecoveryDataDO dataDO = null;
-
+        String internalCode = getUserInternalCodeStr(sequence, username, code);
+        
         try {
-            dataDO = dataStore.load(code);
+            dataDO = dataStore.load(internalCode);
         } catch (IdentityException e) {
             return new VerificationBean(VerificationBean.ERROR_CODE_INVALID_USER);
         }
@@ -224,28 +237,40 @@ public class RecoveryProcessor {
         if(!dataDO.isValid()){
             return new VerificationBean(VerificationBean.ERROR_CODE_EXPIRED_CODE);
         } else {
-//        	Generate new code to be send to updatedPassword.
-            String confirmationKey = UUIDGenerator.generateUUID();
-            String secretKey = UUIDGenerator.generateUUID();
-            
-			UserRecoveryDataDO recoveryDataDO = new UserRecoveryDataDO(userDto.getUserId(),
-					userDto.getTenantId(), confirmationKey, secretKey);
 
-			dataStore.store(recoveryDataDO);
-
-            return new VerificationBean(dataDO.getUserName(), confirmationKey);
+        	return new VerificationBean(true);
         }
 
+    }
+    
+    public VerificationBean updateConfirmationCode(int sequence, String username, int tenantId) throws IdentityException {
+    	
+        String confirmationKey = generateUserCode(sequence, username);
+        String secretKey = UUIDGenerator.generateUUID();
+        
+		UserRecoveryDataDO recoveryDataDO = new UserRecoveryDataDO(username,
+				tenantId, confirmationKey, secretKey);
+
+		dataStore.store(recoveryDataDO);
+		String externalCode = null;
+		try {
+			externalCode = getUserExternalCodeStr(confirmationKey);
+		} catch (Exception e) {
+			throw new IdentityException(e.getMessage());
+		}
+		
+        return new VerificationBean(username, externalCode);
     }
 
     /**
      * Verifies user id with underline user store
-     *
+     * @param sequence TODO
      * @param userDTO  bean class that contains user and tenant Information
+     *
      * @return true/false whether user is verified or not. If user is a tenant
      *         user then always return false
      */
-    public VerificationBean verifyUserForRecovery(UserDTO userDTO) {
+    public VerificationBean verifyUserForRecovery(int sequence, UserDTO userDTO) {
 
         String userId = userDTO.getUserId();
         int tenantId = userDTO.getTenantId();
@@ -276,18 +301,20 @@ public class RecoveryProcessor {
                 }
             }
             if(success){
-                String code = UUID.randomUUID().toString();
+                String internalCode = generateUserCode(sequence, userId);
                 String key = UUID.randomUUID().toString();
                 UserRecoveryDataDO  dataDO =
-                        new UserRecoveryDataDO(userId, tenantId, code, key);
+                        new UserRecoveryDataDO(userId, tenantId, internalCode, key);
                 dataStore.store(dataDO);
-                log.info("User verification successful for user : " + userId +
-                        " from tenant domain " + userDTO.getTenantDomain());
+                log.info("User verification successful for user : "+ userId +
+                        " from tenant domain :"+ userDTO.getTenantDomain());
                 
-                return new VerificationBean(userId, code);
+                return new VerificationBean(userId, getUserExternalCodeStr(internalCode));
             }
         } catch (Exception e) {
-            log.debug(e.getMessage());
+        	if(log.isDebugEnabled()) {
+        		log.debug(e.getMessage());
+        	}
             return  new VerificationBean(VerificationBean.ERROR_CODE_UN_EXPECTED);
         }
         
@@ -309,5 +336,134 @@ public class RecoveryProcessor {
     
     public ChallengeQuestionProcessor getQuestionProcessor() {
         return questionProcessor;
+    }
+    
+    /**
+     * Generates the code specific to user and operations sequence value.
+     * @param sequence
+     * @param username
+     * @return
+     */
+    private String generateUserCode(int sequence, String username) {
+    	
+    	String genCode = null;
+    	
+    	if(username != null) {
+    		
+    		StringBuilder userCode = new StringBuilder();
+    		userCode.append(sequence);
+    		userCode.append(REG_DELIMITER);
+    		userCode.append(stripSpecialChars(username));
+    		userCode.append(REG_DELIMITER);
+    		userCode.append(UUID.randomUUID().toString());
+    		
+    		genCode = userCode.toString();
+    	}
+    	
+    	return genCode;
+    }
+    
+
+    /**
+     * Creates the user specific code  by the given sequence, username and code to be search in
+     * the datastore.
+     * 
+     * @param sequence
+     * @param username
+     * @param code - user provided code
+     * @return
+     */
+    private String getUserInternalCodeStr(int sequence, String username, String code) {
+    	
+    	String searchCode = null;
+    	
+    	if(username != null && code != null) {
+    		
+    		StringBuilder userCode = new StringBuilder();
+    		userCode.append(sequence);
+    		userCode.append(REG_DELIMITER);
+    		userCode.append(stripSpecialChars(username));
+    		userCode.append(REG_DELIMITER);
+    		userCode.append(code);
+    		
+    		searchCode = userCode.toString();
+    	}
+    	
+    	return searchCode;
+    }
+    
+    /**
+     * 
+     * @param internalCode - code with the format "sequence_username_usercode".
+     * @return
+     */
+    private String getUserExternalCodeStr(String internalCode) throws Exception{
+    	
+    	String userCode = null;
+    	
+    	if(internalCode != null) {
+    		String[] codeParts = internalCode.split("_{3}", 3);
+    		// Must have 3 elements and 3rd one must have code.
+    		if(codeParts.length == 3) {
+    			userCode = codeParts[2];
+    		} else {
+    			throw new Exception("Invalid code");
+    		}
+    	} else {
+    		throw new Exception("Code not found");
+    	}
+    	
+    	return userCode;
+    }
+    
+    /**
+     * This removes the special chars which the registry resource does not accepts.
+     * 
+     * @param input
+     * @return
+     */
+    private String stripSpecialChars(String input) {
+    	
+    	StringBuilder output = new StringBuilder();
+    	
+    	if(input != null) {
+    		
+    		char[] inputArr = input.toCharArray();
+    		
+    		for (char c : inputArr) {
+				
+    			switch(c){
+    			
+    			case '~':
+    			case '!':
+    			case '@':
+    			case '#':
+    			case ';':
+    			case '%':
+    			case '^':
+    			case '*':
+    			case '(':
+    			case ')':
+    			case '+':
+    			case '=':
+    			case '{':
+    			case '}':
+    			case '|':
+    			case '\\':
+    			case '<':
+    			case '>':
+    			case '"':
+    			case '\'':
+    			case ',':
+    			case '$':
+    				output.append('z');
+    				break;
+    			default:
+    				output.append(c);
+    			}
+			}
+    	}
+    	
+    	return output.toString();
     }
 }

@@ -319,7 +319,7 @@ public class UserAccountRecoveryService {
 
         RecoveryProcessor  processor = IdentityMgtServiceComponent.getRecoveryProcessor();
 
-        return processor.verifyUserForRecovery(userDTO);
+        return processor.verifyUserForRecovery(1, userDTO);
     }
 
     /**
