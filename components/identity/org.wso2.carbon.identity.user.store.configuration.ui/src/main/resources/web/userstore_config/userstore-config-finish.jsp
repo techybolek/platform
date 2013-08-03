@@ -74,17 +74,12 @@
                     value = "false";
                 } else if (value.equals("on")) {
                     value = "true";
-                } else {
-
                 }
             }
             propertyDTO.setName(CharacterEncoder.getSafeText(request.getParameter("propertyName_" + i)));
             propertyDTO.setValue(value);
             propertyList.add(propertyDTO);
-        } else {
-
         }
-
     }
             userStoreDTO.setDomainId(domain);
             userStoreDTO.setDescription(description);
@@ -96,6 +91,7 @@
             // Session need to be update according to new user store info 
             session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
             session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE, null);
+            session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE, null);
             
         String message = resourceBundle.getString("successful.update");
         CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);

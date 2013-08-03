@@ -46,6 +46,8 @@
             // Session need to be update according to new user store info 
             session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
             session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE, null);
+            session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE, null);
+            
         } catch (Exception e) {
             String message = resourceBundle.getString("error.delete");
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
