@@ -41,7 +41,7 @@ import java.net.URL;
 import java.util.*;
 
 /*
-* Reader module for the XML files which containing the node details
+* Reader module for the XML files which containing the nodes details
 * */
 public class NodeReader {
     private static final Log log = LogFactory.getLog(NodeReader.class);
@@ -88,7 +88,7 @@ public class NodeReader {
     }
 
     /*
-     * Lists all Platforms in the node.XML file
+     * Lists all Platforms in the nodes.XML file
      *
      *  */
     public List<OMNode> listPlatforms() {

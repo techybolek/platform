@@ -42,16 +42,16 @@ public class GroupContextProvider {
         for (Context instance : nodeMap.values()) {
             if (instance.getInstanceProperties().getGroupId().equals(groupId)) {
                 groupContext.setGroupName(groupId);
-                if (instance.getInstanceProperties().getNodeType().equals(NodeType.node.name())) {
+                if (instance.getInstanceProperties().getNodeType().equals(NodeType.nodes.name())) {
                     groupContext.setNode(instance);
-                } else if (instance.getInstanceProperties().getNodeType().equals(NodeType.worker.name())) {
+                } else if (instance.getInstanceProperties().getNodeType().equals(NodeType.workers.name())) {
                     workerList.add(instance);
-                } else if (instance.getInstanceProperties().getNodeType().equals(NodeType.manager.name())) {
+                } else if (instance.getInstanceProperties().getNodeType().equals(NodeType.managers.name())) {
                     managerList.add(instance);
                 } else if (instance.getInstanceProperties().getNodeType().equals(NodeType.lb.name())) {
-                    if (instance.getInstanceProperties().getNodeContent().equals(NodeType.worker.name())) {
+                    if (instance.getInstanceProperties().getNodeContent().equals(NodeType.workers.name())) {
                         groupContext.setLbWorker(instance);
-                    } else if (instance.getInstanceProperties().getNodeContent().equals(NodeType.manager.name())) {
+                    } else if (instance.getInstanceProperties().getNodeContent().equals(NodeType.managers.name())) {
                         groupContext.setLbManager(instance);
                     }
                 }

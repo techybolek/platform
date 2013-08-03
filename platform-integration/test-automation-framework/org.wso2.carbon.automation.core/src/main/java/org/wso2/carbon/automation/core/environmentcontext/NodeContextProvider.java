@@ -26,7 +26,7 @@ import org.wso2.carbon.automation.core.globalcontext.GlobalContextProvider;
 import java.util.HashMap;
 import java.util.Map;
 /**
- * Reads the node values form the input XML and set the Node object
+ * Reads the nodes values form the input XML and set the Node object
  * **/
 public class NodeContextProvider extends GlobalContextProvider {
     private static Map<String, Context> nodeMap = new HashMap();
@@ -44,10 +44,10 @@ public class NodeContextProvider extends GlobalContextProvider {
         String managerId = null;
         Context node = nodeMap.get(nodeId);
         String groupId = node.getInstanceProperties().getGroupId();
-        for (Context groupNode : nodeMap.values()) {        //Worker manager seperated environment
+        for (Context groupNode : nodeMap.values()) {        //Worker managers seperated environment
             if (groupNode.getInstanceProperties().getGroupId().equals(groupId)
                     && groupNode.getInstanceProperties().getNodeType().equals(NodeType.lb.name())) {
-                if (groupNode.getInstanceProperties().getNodeContent().equals(NodeType.manager.name())) {
+                if (groupNode.getInstanceProperties().getNodeContent().equals(NodeType.managers.name())) {
                     managerId = groupNode.getNodeId();
                     break;
                 }
@@ -60,10 +60,10 @@ public class NodeContextProvider extends GlobalContextProvider {
         String workerId = null;
         Context node = nodeMap.get(nodeId);
         String groupId = node.getInstanceProperties().getGroupId();
-        for (Context groupNode : nodeMap.values()) {        //Worker manager seperated environment
+        for (Context groupNode : nodeMap.values()) {        //Worker managers seperated environment
             if (groupNode.getInstanceProperties().getGroupId().equals(groupId)
                     && groupNode.getInstanceProperties().getNodeType().equals(NodeType.lb.name())) {
-                if (groupNode.getInstanceProperties().getNodeContent().equals(NodeType.worker.name())) {
+                if (groupNode.getInstanceProperties().getNodeContent().equals(NodeType.workers.name())) {
                     workerId = groupNode.getNodeId();
                     break;
                 }

@@ -61,7 +61,7 @@ public class ContextProvider {
         NodeContextProvider contextProvider = new NodeContextProvider();
         nodeInfoContext = contextProvider.getContext(nodeId);
         if (frameworkContext.getEnvironmentSettings().isClusterEnable()) {
-            if (nodeInfoContext.getInstanceProperties().getNodeType().equals(NodeType.node.name())) {
+            if (nodeInfoContext.getInstanceProperties().getNodeType().equals(NodeType.nodes.name())) {
                 managerContext = nodeContextProvider.getManager(nodeId);
                 workerContext = nodeContextProvider.getWorker(nodeId);
             }
@@ -96,7 +96,7 @@ public class ContextProvider {
         workerContext = nodeContextProvider.getWorker(groupContext.getNode().getNodeId());
         nodeInfoContext = contextProvider.getContext(groupContext.getNode().getNodeId());
         if (frameworkContext.getEnvironmentSettings().isClusterEnable()) {
-            if (nodeInfoContext.getInstanceProperties().getNodeType().equals(NodeType.node.name())) {
+            if (nodeInfoContext.getInstanceProperties().getNodeType().equals(NodeType.nodes.name())) {
                 managerContext = nodeContextProvider.getManager(groupContext.getNode().getNodeId());
                 workerContext = nodeContextProvider.getWorker(groupContext.getNode().getNodeId());
             }
@@ -113,7 +113,7 @@ public class ContextProvider {
     }
 
     /**
-     * The module for high level node implementation of the selection nodes as per the scenario.
+     * The module for high level nodes implementation of the selection nodes as per the scenario.
      */
 
     private EnvironmentContext setContext(int userID,

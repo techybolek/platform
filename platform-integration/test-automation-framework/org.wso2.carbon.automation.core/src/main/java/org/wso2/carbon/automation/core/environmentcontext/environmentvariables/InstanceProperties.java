@@ -19,7 +19,7 @@
 package org.wso2.carbon.automation.core.environmentcontext.environmentvariables;
 
 /*
-* The object which holds the details of the individual node object.*
+* The object which holds the details of the individual nodes object.*
 */
 public class InstanceProperties implements java.io.Serializable{
     private String nodeId;
