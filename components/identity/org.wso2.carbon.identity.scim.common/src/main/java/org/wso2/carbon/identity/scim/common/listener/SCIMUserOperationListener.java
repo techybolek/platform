@@ -32,7 +32,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
@@ -95,7 +94,17 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPreAddUser(String s, Object o, String[] strings,
                                 Map<String, String> stringStringMap, String s1,
                                 UserStoreManager userStoreManager) throws UserStoreException {
-        return true;
+        try {
+            if (userStoreManager.isSCIMEnabled()) {
+                return true;
+            } else {
+                throw new UserStoreException("Error While Adding the User: SCIM not enable");
+            }
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e.getMessage());
+        }
+
     }
 
     public boolean doPostAddUser(String userName, Object credential, String[] roleList,
@@ -348,7 +357,17 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPreAddRole(String s, String[] strings,
                                 org.wso2.carbon.user.api.Permission[] permissions,
                                 UserStoreManager userStoreManager) throws UserStoreException {
-        return true;
+        try {
+            if (userStoreManager.isSCIMEnabled()) {
+                return true;
+            } else {
+                throw new UserStoreException("Error while Adding the Group: SCIM not enable");
+            }
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e.getMessage());
+        }
+
     }
 
     public boolean doPostAddRole(String roleName, String[] userList,
