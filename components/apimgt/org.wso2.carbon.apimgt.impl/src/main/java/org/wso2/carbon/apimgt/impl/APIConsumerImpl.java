@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -40,17 +39,11 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.Tenant;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -70,8 +63,7 @@ import java.util.regex.Pattern;
 class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private static final Log log = LogFactory.getLog(APIConsumerImpl.class);
-    private boolean isTenantModeStoreView;
-    private String requestedTenant;
+
     /* Map to Store APIs against Tag */
     private Map<String, Set<API>> taggedAPIs;
 
@@ -114,7 +106,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return
      * @throws APIManagementException
      */
-    private Set<API> getAPIsWithTag(Registry registry, String tag, String requestedTenantDomain, boolean isTenantMode, String domainOfIteratedTenant) throws APIManagementException {
+    private Set<API> getAPIsWithTag(Registry registry, String tag, String requestedTenantDomain,
+                                    boolean isTenantMode, String domainOfIteratedTenant)
+            throws APIManagementException {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
         try {
             String resourceByTagQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
@@ -124,96 +118,33 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Collection collection = registry.executeQuery(resourceByTagQueryPath, params);
 
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+                                                                                APIConstants.API_KEY);
 
             for (String row : collection.getChildren()) {
                 String uuid = row.substring(row.indexOf(";") + 1, row.length());
                 GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
-                if (genericArtifact != null) {
-                    String visibility = genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
-                    String visibleTenantDomains = genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS);
-
-                    boolean isPublicVisibility = APIConstants.API_GLOBAL_VISIBILITY.equals(visibility);
-                    boolean isControlledVisibility = APIConstants.API_CONTROLLED_VISIBILITY.equals(visibility);
-                    boolean isRestrictedVisibility = APIConstants.API_RESTRICTED_VISIBILITY.equals(visibility);
-
-                    if (isPublicVisibility && !isTenantMode) {
-                        apiSet.add(APIUtil.getAPI(genericArtifact));
-                    }
-                    if (isControlledVisibility && isTenantMode) {
-                        if (isAllowedTenantDomain(visibleTenantDomains, requestedTenantDomain)) {
-                            apiSet.add(APIUtil.getAPI(genericArtifact));
-                        }
-                    }
-                    else if(isRestrictedVisibility &&
-                            isArtifactViewable(genericArtifact, requestedTenantDomain, domainOfIteratedTenant)){
-                        apiSet.add(APIUtil.getAPI(genericArtifact));
-                    }
-                    if (domainOfIteratedTenant.equals(requestedTenantDomain)) {
-                         if(isLoggedinTenantSearchingOwnAPIs(genericArtifact))  {
-                          apiSet.add(APIUtil.getAPI(genericArtifact));
-                         }
-                    }
-                }
+                apiSet.add(APIUtil.getAPI(genericArtifact));
             }
-        } catch (Exception e) {
+
+        } catch (RegistryException e) {
             handleException("Failed to get API for tag " + tag, e);
         }
         return apiSet;
     }
 
     /**
-     * The method to get APIs to Store view
-     *
-     * @param requestedTenantDomain tenantDomain
+     * The method to get APIs to Store view      *
+
      * @return Set<API>  Set of APIs
      * @throws APIManagementException
      */
-    public Set<API> getAllPublishedAPIs(String requestedTenantDomain) throws APIManagementException {
+    public Set<API> getAllPublishedAPIs() throws APIManagementException {
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        boolean isTenantModeStoreView = (requestedTenantDomain != null && !requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
         try {
-            Set<GenericArtifact> tenantArtifacts = new HashSet<GenericArtifact>();
-            //First check store is running in tenant unaware mode or not
-            //if(tenantDomain==null||!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) ) {
-            //Retrieve existing tenants array to start getting APIs from tenants registry spaces
-            Tenant[] tenants = APIUtil.getAllTenantsWithSuperTenant().toArray(
-                    new Tenant[APIUtil.getAllTenantsWithSuperTenant().size()]);
-
-            //If the instance is having tenants [running in tenant mode],then initiate each tenant registry space and get APIs from each tenant space
-            //according to API visibility
-            if (tenants != null && tenants.length != 0) {
-                Registry registry;
-                
-                for (Tenant tenant : tenants) {
-
-                    loadTenantRegistry(tenant.getId());
-
-                    //First,if the Store is in anonymous view,try to get anonymous user allowed APIs from tenant spaces
-                    if (tenantDomain == null) {
-                        registry = ServiceReferenceHolder.getInstance().
-                                getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenant.getId());
-                    } else if (tenantId == tenant.getId()) { //Then if going to retrieve same tenant registry equal to current registry instance
-                        registry = this.registry;
-                    } else {
-                        registry = ServiceReferenceHolder.getInstance().
-                                getRegistryService().getGovernanceSystemRegistry(tenant.getId());
-
-                    }
-                    Set<GenericArtifact> tenantAPIs = getTenantAPIs(registry, requestedTenantDomain, tenant.getDomain(), isTenantModeStoreView);
-                    if (tenantAPIs != null) {
-                        tenantArtifacts.addAll(tenantAPIs);
-                    }
-                }
-            }
-
-            Set<GenericArtifact> genericArtifacts = new HashSet<GenericArtifact>();
-
-            if (tenantArtifacts != null && tenantArtifacts.size() != 0) {
-                genericArtifacts.addAll(tenantArtifacts);
-            }
-            if (genericArtifacts == null || genericArtifacts.size() == 0) {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact[] genericArtifacts = artifactManager.getAllGenericArtifacts();
+            if (genericArtifacts == null || genericArtifacts.length == 0) {
                 return apiSortedSet;
             }
 
@@ -278,8 +209,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         } catch (RegistryException e) {
             handleException("Failed to get all published APIs", e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e1) {
-            handleException("Failed to get all published APIs", e1);
         }
         return apiSortedSet;
 
@@ -323,76 +252,31 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Get the recently added APIs set
      *
      * @param limit                 no limit. Return everything else, limit the return list to specified value.
-     * @param requestedTenantDomain This value is required when need to get tenant specific recently added APIs.In standalone mode,value is null
      * @return Set<API>
      * @throws APIManagementException
      */
-    public Set<API> getRecentlyAddedAPIs(int limit, String requestedTenantDomain) throws APIManagementException {
+    public Set<API> getRecentlyAddedAPIs(int limit)
+            throws APIManagementException {
         Set<API> recentlyAddedAPIs = new HashSet<API>();
 
         try {
-            String loggedInUserDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getDomain(((UserRegistry) this.registry).getTenantId());
-            org.wso2.carbon.user.api.UserRealm  realm = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(this.tenantId);
+
+
             String latestAPIQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/latest-apis";
             Map<String, String> params = new HashMap<String, String>();
             params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.RESOURCES_RESULT_TYPE);
-            int resultSetSize = 0;
-            Collection collection = registry.executeQuery(latestAPIQueryPath, params);
-            resultSetSize = Math.min(limit, collection.getChildCount());
-            String[] recentlyAddedAPIPaths = new String[resultSetSize];
-            for (int i = 0; i < resultSetSize; i++) {
-                recentlyAddedAPIPaths[i] = collection.getChildren()[i];
-            }
-            boolean isTenantModeStoreView = (requestedTenantDomain != null && !requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
-            this.isTenantModeStoreView = isTenantModeStoreView;
-            this.requestedTenant = requestedTenantDomain;
-            String currentTenantDomain;
-            if (tenantDomain != null) {
-                currentTenantDomain = tenantDomain;
-            } else {
-                int currentTenantId = ServiceReferenceHolder.getUserRealm().getRealmConfiguration().getTenantId();
-                currentTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getDomain(currentTenantId);
-            }
-
-            //Retrieve existing tenants array to start getting APIs from tenants registry spaces
-            //All tenants includes super tenant
-            Tenant[] tenants = APIUtil.getAllTenantsWithSuperTenant().toArray(new Tenant[0]);
-            //If the store is running in tenant mode,first check the recently added APIs limit is already fulfilled or not.If not
-            //iterating through each tenant's registry
-            Registry tenantConfRegistry = null;
-            if (limit > 0 && tenants != null && tenants.length != 0) {
-                for (Tenant tenant : tenants) {
-
-                    loadTenantRegistry(tenant.getId());
-
-                    Registry tenantRegistry = null;
-                    //First,if the Store is in anonymous view,try to get anonymous user allowed APIs from tenant spaces
-                    if (tenantDomain == null) {
-                        tenantConfRegistry = ServiceReferenceHolder.getInstance().
-                                getRegistryService().getConfigUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenant.getId());
-                        tenantRegistry = ServiceReferenceHolder.getInstance().
-                                getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenant.getId());
-                    } else {
-                        tenantRegistry = ServiceReferenceHolder.getInstance().
-                                getRegistryService().getGovernanceSystemRegistry(tenant.getId());
-                        tenantConfRegistry = ServiceReferenceHolder.getInstance().
-                                getRegistryService().getConfigUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenant.getId());
-                    }
-
-                    if (tenantRegistry != null && tenantConfRegistry.resourceExists(latestAPIQueryPath)) {
-                        Collection tenantCollection = tenantRegistry.executeQuery(latestAPIQueryPath, params);
-
-                        if (tenantCollection != null) {
-
-                            Set<API> apiSortedSet = getAPIs(tenantRegistry, limit, tenantCollection.getChildren(), isTenantModeStoreView, tenant.getDomain(), requestedTenantDomain);
-                            limit = limit - apiSortedSet.size();
-                            recentlyAddedAPIs.addAll(apiSortedSet);
-                        }
-                    }
+            if (registry != null) {
+                Collection collection = registry.executeQuery(latestAPIQueryPath, params);
+                int resultSetSize = Math.min(limit, collection.getChildCount());
+                String[] recentlyAddedAPIPaths = new String[resultSetSize];
+                for (int i = 0; i < resultSetSize; i++) {
+                    recentlyAddedAPIPaths[i] = collection.getChildren()[i];
                 }
-               limit = 0;
 
+                Set<API> apiSortedSet = getAPIs(registry, limit, recentlyAddedAPIPaths);
+                recentlyAddedAPIs.addAll(apiSortedSet);
             }
+
             return recentlyAddedAPIs;
 
 
@@ -414,72 +298,26 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        boolean isTenantModeStoreView = this.isTenantModeStoreView;
         taggedAPIs = new HashMap<String, Set<API>>();
         try {
-            String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
-            Map<String, String> params = new HashMap<String, String>();
-            params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
-            /* First check store is running in tenant unware mode or not */
-            //if (tenantDomain == null || !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-            /*Retrieve existing tenants array to start getting APIs from tenants registry spaces */
-            Tenant[] tenantsWithSuperTenant = APIUtil.getAllTenantsWithSuperTenant().toArray(new Tenant[0]);
-            /*If the instance is having tenants [running in tenant mode],then initiate each tenant registry space and
-            get APIs from each tenant space according to API visibility*/
-            if (tenantsWithSuperTenant != null && tenantsWithSuperTenant.length != 0) {
-                for (Tenant tenant : tenantsWithSuperTenant) {
-                    Registry govRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                            getGovernanceSystemRegistry( tenant.getId());
-                    Registry confRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                            getConfigUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenant.getId());
-                    Collection collection;
-                    if (confRegistry.resourceExists(tagsQueryPath)) {
-                        collection = govRegistry.executeQuery(tagsQueryPath, params);
-                        for (String fullTag : collection.getChildren()) {
-                            //remove hardcoded path value
-                            String tagName = fullTag.substring(fullTag.indexOf(";") + 1, fullTag.indexOf(":"));
-                            String tagOccurenceCountStr = fullTag.substring(fullTag.indexOf(":") + 1, fullTag.length());
-                            int tagOccurenceCount = Integer.valueOf(tagOccurenceCountStr).intValue();
-                            Set<API> apisWithTag = getAPIsWithTag(govRegistry, tagName, requestedTenant, isTenantModeStoreView, tenant.getDomain());
-                            if (apisWithTag.size() != 0) {
-                                //tagSet.add(new Tag(tagName, tagOccurenceCount));
-                                /* Add the APIs against the tag name */
-                                Iterator<API> it = apisWithTag.iterator();
-                                while (it.hasNext()) {
-                                    API api = it.next();
-                                    String visibleTenants = api.getVisibleTenants();
-                                    if (visibleTenants != null) {
-                                        List<String> visibleTenantArr = Arrays.asList(visibleTenants.split(","));
-                                        if (tenantDomain!=null && !visibleTenantArr.contains(tenantDomain)) {
-                                            //apisWithTag.remove(api);
-                                            it.remove();
-                                        }
-                                    }
-                                }
-                                if (apisWithTag.size() != 0) {
-                                    if (taggedAPIs.containsKey(tagName)) {
-                                        for (API api : apisWithTag) {
-                                            taggedAPIs.get(tagName).add(api);
-                                        }
-                                    } else {
-                                        taggedAPIs.put(tagName, apisWithTag);
-                                    }
-                                    tagSet.add(new Tag(tagName, tagOccurenceCount));
-                                }
-                            }
-                        }
-                    }
+                String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
+                Map<String, String> params = new HashMap<String, String>();
+                params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
+                Collection collection = registry.executeQuery(tagsQueryPath, params);
+                for (String fullTag : collection.getChildren()) {
+                    //remove hardcoded path value
+                    String tagName = fullTag.substring(fullTag.indexOf(";") + 1, fullTag.indexOf(":"));
+                    String tagOccurenceCountStr = fullTag.substring(fullTag.indexOf(":") + 1, fullTag.length());
+                    int tagOccurenceCount = Integer.valueOf(tagOccurenceCountStr);
+                    tagSet.add(new Tag(tagName, tagOccurenceCount));
                 }
+
+
+            } catch (RegistryException e) {
+                handleException("Failed to get all the tags", e);
             }
-
-
-        } catch (RegistryException e) {
-            handleException("Failed to get all the tags", e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Error in retrieving all the tags", e);
+            return tagSet;
         }
-        return tagSet;
-    }
 
     public void rateAPI(APIIdentifier apiId, APIRating rating,
                         String user) throws APIManagementException {
@@ -594,71 +432,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             List<API> multiVersionedAPIs = new ArrayList<API>();
             Comparator<API> versionComparator = new APIVersionComparator();
             Boolean allowMultipleVersions = isAllowDisplayMultipleVersions();
-            Boolean showAllAPIs = isAllowDisplayAPIsWithMultipleStatus();
-
-            String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-            int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(providerDomain);
-            Registry registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceSystemRegistry(id);
-
-            org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
-                    getRealmService().getTenantUserRealm(id).
-                    getAuthorizationManager();
-
+            Boolean showAllAPIs = isAllowDisplayAllAPIs();
             String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    providerId;
+                                  providerId;
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+                                                                                APIConstants.API_KEY);
             Association[] associations = registry.getAssociations(providerPath,
-                    APIConstants.PROVIDER_ASSOCIATION);
-//            if (associations.length < limit || limit == -1) {
-//                limit = associations.length;
-//            }
-            int publishedAPICount = 0;
-
-            for (int i = 0; i < associations.length; i++) {
-
-                if (publishedAPICount >= limit) {
-                    break;
-                }
-
+                                                                  APIConstants.PROVIDER_ASSOCIATION);
+            if (associations.length < limit || limit == -1) {
+                limit = associations.length;
+            }
+            for (int i = 0; i < limit; i++) {
                 Association association = associations[i];
                 String apiPath = association.getDestinationPath();
-
-                Resource resource;
-                String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + apiPath);
-                boolean checkAuthorized = false;
-                String userNameWithoutDomain = loggedUsername;
-
-                String loggedDomainName = "";
-                if (!"".equals(loggedUsername) &&
-                        !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(super.tenantDomain)) {
-                    String [] nameParts = loggedUsername.split("@");
-                    loggedDomainName = nameParts[1];
-                    userNameWithoutDomain = nameParts[0];
-                }
-
-               if(loggedUsername.equals("")){
-                // Anonymous user is viewing.
-                checkAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-                }else {
-                // Some user is logged in.
-                    checkAuthorized = manager.isUserAuthorized(userNameWithoutDomain, path, ActionConstants.GET);
-                }
-
-                String apiArtifactId = null;
-                if (checkAuthorized) {
-                    resource = registry.get(apiPath);
-                    apiArtifactId = resource.getUUID();
-                }
-
+                Resource resource = registry.get(apiPath);
+                String apiArtifactId = resource.getUUID();
                 if (apiArtifactId != null) {
                     GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-
-                    if(!this.isArtifactViewable(artifact,loggedDomainName,providerDomain)){
-                        continue;
-                    }
                     // check the API status
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
@@ -668,14 +458,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         // then we are only interested in published APIs here...
                         if (status.equals(APIConstants.PUBLISHED)) {
                             api = APIUtil.getAPI(artifact);
-                           // if (checkDomainVisibility(loggedDomainName, api)) break;
-                            publishedAPICount++;
                         }
                     } else {   // else we are interested in both deprecated/published APIs here...
                         if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
                             api = APIUtil.getAPI(artifact);
-                           // if (checkDomainVisibility(loggedDomainName, api)) break;
-                            publishedAPICount++;
 
                         }
 
@@ -702,6 +488,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             multiVersionedAPIs.add(api);
                         }
                     }
+                } else {
+                    throw new GovernanceException("artifact id is null of " + apiPath);
                 }
             }
             if (!allowMultipleVersions) {
@@ -719,71 +507,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (RegistryException e) {
             handleException("Failed to get Published APIs for provider : " + providerId, e);
             return null;
-        } catch (UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
-            return null;
         }
-
-
     }
 
-    /**
-     * When the logged in tenant domain and the API is passed
-     * The function checks if the said API should be made visible to the domain.
-     *
-     * @param loggedDomainName
-     * @param api
-     * @return
-     */
-    private boolean checkDomainVisibility(String loggedDomainName, API api) {
-        String visibleTenants = api.getVisibleTenants();
-        if (visibleTenants != null) {
-            List<String> visibleTenantArr = Arrays.asList(visibleTenants.split(","));
-            if (!visibleTenantArr.contains(loggedDomainName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Set<API> searchAPI(String searchTerm, String searchType, String requestedTenantDomain) throws APIManagementException {
+    public Set<API> searchAPI(String searchTerm, String searchType, String requestedTenantDomain)
+            throws APIManagementException {
         Set<API> apiSet = new HashSet<API>();
         try {
-            Tenant[] tenants = APIUtil.getAllTenantsWithSuperTenant().toArray(new Tenant[0]);
-            boolean isAnonymousUserLoggedin = ((UserRegistry)this.registry).getUserName().equals(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+            apiSet.addAll(searchAPI(this.registry, searchTerm, searchType));
 
-            if (tenants != null && tenants.length != 0) {
-                for (Tenant tenant : tenants) {
-                    Registry registry;
-
-                        //First,if the Store is in anonymous view,try to get anonymous user allowed APIs from tenant spaces
-                        if (isAnonymousUserLoggedin) {
-                            registry = ServiceReferenceHolder.getInstance().
-                                    getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenant.getId());
-                        //
-                        } else  if(tenantDomain != null && tenantDomain.equals(requestedTenantDomain) && tenantDomain.equals(tenant.getDomain())){                            // If logged in user is searching own APIS.
-
-                            registry = this.registry;
-
-                        } else {
-                            registry = ServiceReferenceHolder.getInstance().
-                                    getRegistryService().getGovernanceSystemRegistry(tenant.getId());
-                        }
-                        apiSet.addAll(searchAPI(registry, searchTerm, searchType, requestedTenantDomain, tenant.getDomain()));
-                    }
-                }
-        } catch (RegistryException e) {
-            handleException("Failed to Search APIs", e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (Exception e) {
             handleException("Failed to Search APIs", e);
         }
         return apiSet;
     }
 
-    public Set<API> searchAPI(Registry registry, String searchTerm, String searchType, String requestedTenantDomain, String iteratedTenantDomain) throws APIManagementException {
+    public Set<API> searchAPI(Registry registry, String searchTerm, String searchType) throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         String regex = "(?i)[a-zA-Z0-9_.-|]*" + searchTerm.trim() + "(?i)[a-zA-Z0-9_.-|]*";
         Pattern pattern;
@@ -799,10 +538,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 pattern = Pattern.compile(regex);
 
                 for (GenericArtifact artifact : genericArtifacts) {
-
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
-                    if(isArtifactViewable(artifact,requestedTenantDomain,iteratedTenantDomain)) {
                         if (searchType.equalsIgnoreCase("Provider")) {
                             String api = APIUtil.replaceEmailDomainBack(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
                             matcher = pattern.matcher(api);
@@ -825,12 +562,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                 apiSet.add(APIUtil.getAPI(artifact, registry));
                             }
                         }
-                    }
+
                 }
             }
         } catch (RegistryException e) {
-            handleException("Failed to search APIs with type", e);
-        } catch (UserStoreException e) {
             handleException("Failed to search APIs with type", e);
         }
         return apiSet;
@@ -1060,99 +795,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return Boolean.parseBoolean(displayMultiVersions);
     }
 
-    /**
-     * Get the APIs own by each tenants
-     *
-     * @param registry               Governance registry space for each tenant
-     * @param requestedTenantDomain  tenant domain come with the request
-     * @param domainOfIteratedTenant tenant domain of current iterating tenant
-     * @param isTenantMode           is the Store running in global/tenant mode
-     * @return Set<GenericArtifact> Set of APIs
-     * @throws APIManagementException
-     * @throws GovernanceException
-     */
-    public Set<GenericArtifact> getTenantAPIs(Registry registry, String requestedTenantDomain, String domainOfIteratedTenant,
-                                              boolean isTenantMode)
-            throws APIManagementException, GovernanceException {
-
-        try {
-
-            String loggedInUserDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getDomain(((UserRegistry) this.registry).getTenantId());
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager.getAllGenericArtifacts();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    return null;
-                }
-                Set<GenericArtifact> filteredArtifacts = new HashSet<GenericArtifact>();
-                for (GenericArtifact artifact : genericArtifacts) {
-                    String visibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
-                    String visibleTenantDomains = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS);
-
-                    boolean isPublicVisibility = visibility.equals(APIConstants.API_GLOBAL_VISIBILITY);
-                    boolean isControlledVisibility = visibility.equals(APIConstants.API_CONTROLLED_VISIBILITY);
-                    boolean isRestrictedVisibility = visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY);
-                    /*First check whether the Store running in global mode [/Store]*/
-
-                    if (!isTenantMode) {
-                        /*If yes,then filter the APIs with 'public visibility' and if the store running in a
-                              logged user mode, all APIs visible to/shared with said tenant will be displayed*/
-                        //if (isPublicVisibility || domainOfIteratedTenant.equals(requestedTenantDomain)) {
-                        if (isPublicVisibility) {
-                            filteredArtifacts.add(artifact);
-                        } else if(isRestrictedVisibility &&
-                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(loggedInUserDomain) &&
-                                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domainOfIteratedTenant)){
-                            // Adds a restricted API for when a user logs in with matching role.
-                            // This block verifies if the SuperTenant is logged in and APIs created by ST are iterated
-                            filteredArtifacts.add(artifact);
-                        }
-                    } else { /*If the Store running in tenant base mode [/store/?tenant=...],then filer APIs own by that tenant and additionally
-	                			the APIs with 'Controlled' visibility from other tenants,which can be accessible by current tenant.*/
-
-                        if (requestedTenantDomain != null && requestedTenantDomain.equals(domainOfIteratedTenant) ||
-                                (isControlledVisibility && isAllowedTenantDomain(visibleTenantDomains, requestedTenantDomain))) {
-                            filteredArtifacts.add(artifact);
-                        } else if(isRestrictedVisibility && requestedTenantDomain.equals(domainOfIteratedTenant) && domainOfIteratedTenant.equals(loggedInUserDomain)){
-                            // Adds a restricted APIs for a user in a tenant domain.
-                            filteredArtifacts.add(artifact);
-                        }
-
-                    }
-                }
-                return filteredArtifacts;
-
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get all publishers", e);
-            return null;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException(e.getMessage(), e);
-        }
-        return null;
-
-    }
-
-    private boolean isAllowedTenantDomain(String allowedTenants, String inputTenantDomain) {
-        if (allowedTenants != null) {
-            String[] tenants = allowedTenants.split(",");
-            if (allowedTenants.split(",").length > 1) {
-                for (int i = 0; i < tenants.length; i++) {
-                    if (tenants[i].equals(inputTenantDomain)) {
-                        return true;
-                    }
-                }
-                return false;
-            } else {
-                if (allowedTenants.equals(inputTenantDomain)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-        return false;
-    }
 
     public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains)
             throws APIManagementException {
@@ -1213,15 +855,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param registry Registry object from which the APIs retrieving,
      * @param limit Specifies the number of APIs to add.
      * @param apiPaths Array of API paths.
-     * @param isTenantMode Differentiates between Tenant mode and Public mode.
-     * @param domainOfIteratedTenant Domain for the tenant being Iterated.
-     * @param requestedTenantDomain Domain of the tenant being viewed.
      * @return Set<API> set of APIs
      * @throws RegistryException
      * @throws APIManagementException
      */
-    private Set<API> getAPIs(Registry registry, int limit,String[] apiPaths, boolean isTenantMode, String domainOfIteratedTenant, String requestedTenantDomain)
-            throws RegistryException, APIManagementException, org.wso2.carbon.user.api.UserStoreException {
+    private Set<API> getAPIs(Registry registry, int limit, String[] apiPaths)
+            throws RegistryException, APIManagementException,
+                   org.wso2.carbon.user.api.UserStoreException {
 
         SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
@@ -1234,33 +874,28 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Find UUID
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
-        for (int a = 0; a < apiPaths.length && limit > 0; a++) {
+                                                                            APIConstants.API_KEY);
+        for (int a = 0; a < apiPaths.length; a++) {
             Resource resource = registry.get(apiPaths[a]);
             if (resource != null) {
                 GenericArtifact genericArtifact = artifactManager.getGenericArtifact(resource.getUUID());
-                String visibility = genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
                 API api = null;
                 String status = genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-
                 //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-                if(isArtifactViewable(genericArtifact,requestedTenantDomain, domainOfIteratedTenant)){
-                    if (!showAllAPIs) {
-                        // then we are only interested in published APIs here...
-                        if (status.equals(APIConstants.PUBLISHED)) {
-                            api = APIUtil.getAPI(genericArtifact, registry);
-                        }
-                    } else {   // else we are interested in both deprecated/published APIs here...
-                        if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
-                            api = APIUtil.getAPI(genericArtifact, registry);
-
-                        }
+                if (!showAllAPIs) {
+                    // then we are only interested in published APIs here...
+                    if (status.equals(APIConstants.PUBLISHED)) {
+                        api = APIUtil.getAPI(genericArtifact, registry);
+                    }
+                } else {   // else we are interested in both deprecated/published APIs here...
+                    if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
+                        api = APIUtil.getAPI(genericArtifact, registry);
 
                     }
+
                 }
                 if (api != null) {
                     String key;
-                    limit--;
                     //Check the configuration to allow showing multiple versions of an API true/false
                     if (!allowMultipleVersions) { //If allow only showing the latest version of an API
                         key = api.getId().getProviderName() + ":" + api.getId().getApiName();
@@ -1294,69 +929,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 apiVersionsSortedSet.add(api);
             }
             return apiVersionsSortedSet;
-
         }
+
     }
 
-    private boolean isArtifactViewable(GenericArtifact artifact, String requestedTenantDomain, String iteratedTenantDomain) throws GovernanceException,UserStoreException{
-
-        String visibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
-        boolean isPublicVisibility = visibility.equals(APIConstants.API_GLOBAL_VISIBILITY);
-        boolean isControlledVisibility = visibility.equals(APIConstants.API_CONTROLLED_VISIBILITY);
-        boolean isRestrictedVisibility = visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY);
-        String visibleTenantDomains = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS);
-        boolean isLoggedinTenantRequestingOwnAPIs = ((requestedTenantDomain != null) && (requestedTenantDomain.equals(iteratedTenantDomain))) &&
-                requestedTenantDomain.equals(this.tenantDomain);
-        boolean isUserLoggedIn = !((UserRegistry)this.registry).getUserName().equals(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
-        boolean isAUserLoggedInSuperTenantMode = isUserLoggedIn && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain);
-
-        return ((this.isTenantModeStoreView &&
-                ( isUserLoggedIn && ((isLoggedinTenantRequestingOwnAPIs && (isControlledVisibility ||
-                        (isRestrictedVisibility && isLoggedinTenantSearchingOwnAPIs(artifact)))) ||
-                        (this.tenantDomain.equals(requestedTenantDomain) && isControlledVisibility && isAllowedTenantDomain(visibleTenantDomains,requestedTenantDomain))) ||
-                        !isUserLoggedIn && ((isControlledVisibility && isAllowedTenantDomain(visibleTenantDomains,requestedTenantDomain)))||
-                        (requestedTenantDomain.equals(iteratedTenantDomain)) && !isRestrictedVisibility)) ||
-                !this.isTenantModeStoreView && ((isPublicVisibility) ||
-                        ((isUserLoggedIn && ((isAUserLoggedInSuperTenantMode && (isRestrictedVisibility &&iteratedTenantDomain.equals(this.tenantDomain) && isLoggedinTenantSearchingOwnAPIs(artifact)  )  ) )))) );
-    }
-
-    private boolean isLoggedinTenantSearchingOwnAPIs(GenericArtifact genericArtifact) throws GovernanceException,UserStoreException{
-        String [] permittedRoles =  genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES) != null?
-                genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES).split(","):null;
-        String [] currentUserRoles = new String[0];
-        try {
-            //We need to user store manager of logged in tenant
-            if(tenantId!=0){
-            currentUserRoles = ((UserRegistry) ((UserAwareAPIConsumer) this).registry).
-                    getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry)this.registry).getUserName());
-            }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-           log.error("cannot retrieve user role list for tenant" + tenantDomain);
+    private boolean isAllowDisplayAllAPIs() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String displayAllAPIs = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS);
+        if (displayAllAPIs == null) {
+            log.warn("The configurations related to show deprecated APIs in APIStore " +
+                     "are missing in api-manager.xml.");
+            return false;
         }
-        if(permittedRoles != null && currentUserRoles != null){
-            for(String permittedRole : permittedRoles){
-                for(String currentUserRole : currentUserRoles){
-                    if(currentUserRole.equals(permittedRole)){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean loadTenantRegistry(int tenantId){
-        TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
-
-        if (!registryInitializedTenants.contains(tenantId)) {
-            try {
-                tenantRegistryLoader.loadTenantRegistry(tenantId);
-                registryInitializedTenants.add(tenantId);
-                return true;
-            } catch (Exception e) {
-                log.error("Error while loading registry of Tenant + " + tenantId + " " + e.getMessage());
-            }
-        }
-        return false;
+        return Boolean.parseBoolean(displayAllAPIs);
     }
 }
