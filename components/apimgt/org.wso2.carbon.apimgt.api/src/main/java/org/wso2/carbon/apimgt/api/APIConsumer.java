@@ -51,7 +51,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws APIManagementException if failed to API set
      */
-    public Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException;
+    public Set<API> getAllPublishedAPIs() throws APIManagementException;
 
     /**
      * Returns top rated APIs
@@ -66,11 +66,10 @@ public interface APIConsumer extends APIManager {
      * Get recently added APIs to the store
      *
      * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
-     * @param requestedTenantDomain This value is required when need to get tenant specific recently added APIs.In standalone mode,value is null
      * @return set of API
      * @throws APIManagementException if failed to get recently added APIs
      */
-    public Set<API> getRecentlyAddedAPIs(int limit,String requestedTenantDomain) throws APIManagementException;
+    public Set<API> getRecentlyAddedAPIs(int limit) throws APIManagementException;
 
     /**
      * Get all tags of published APIs
