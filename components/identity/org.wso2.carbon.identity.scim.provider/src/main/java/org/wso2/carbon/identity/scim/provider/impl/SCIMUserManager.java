@@ -32,7 +32,6 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.ClaimManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.charon.core.attributes.Attribute;
 import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.exceptions.DuplicateResourceException;
@@ -600,37 +599,38 @@ public class SCIMUserManager implements UserManager {
                 //find out added members and deleted members..
                 List<String> oldMembers = oldGroup.getMembersWithDisplayName();
                 List<String> newMembers = newGroup.getMembersWithDisplayName();
+                if (newMembers != null) {
 
-                List<String> addedMembers = new ArrayList<String>();
-                List<String> deletedMembers = new ArrayList<String>();
+                    List<String> addedMembers = new ArrayList<String>();
+                    List<String> deletedMembers = new ArrayList<String>();
 
-                //check for deleted members
-                if (oldMembers != null && oldMembers.size() != 0) {
-                    for (String oldMember : oldMembers) {
-                        if (newMembers != null && newMembers.contains(oldMember)) {
-                            continue;
+                    //check for deleted members
+                    if (oldMembers != null && oldMembers.size() != 0) {
+                        for (String oldMember : oldMembers) {
+                            if (newMembers != null && newMembers.contains(oldMember)) {
+                                continue;
+                            }
+                            deletedMembers.add(oldMember);
                         }
-                        deletedMembers.add(oldMember);
+                    }
+
+                    //check for added members
+                    if (newMembers != null && newMembers.size() != 0) {
+                        for (String newMember : newMembers) {
+                            if (oldMembers != null && oldMembers.contains(newMember)) {
+                                continue;
+                            }
+                            addedMembers.add(newMember);
+                        }
+                    }
+
+                    if (addedMembers.size() != 0 || deletedMembers.size() != 0) {
+                        carbonUM.updateUserListOfRole(newGroup.getDisplayName(),
+                                                      deletedMembers.toArray(new String[deletedMembers.size()]),
+                                                      addedMembers.toArray(new String[addedMembers.size()]));
+                        updated = true;
                     }
                 }
-
-                //check for added members
-                if (newMembers != null && newMembers.size() != 0) {
-                    for (String newMember : newMembers) {
-                        if (oldMembers != null && oldMembers.contains(newMember)) {
-                            continue;
-                        }
-                        addedMembers.add(newMember);
-                    }
-                }
-
-                if (addedMembers.size() != 0 || deletedMembers.size() != 0) {
-                    carbonUM.updateUserListOfRole(newGroup.getDisplayName(),
-                                                  deletedMembers.toArray(new String[deletedMembers.size()]),
-                                                  addedMembers.toArray(new String[addedMembers.size()]));
-                    updated = true;
-                }
-
                 if (updated) {
                     log.info("Group: " + newGroup.getDisplayName() + " is updated through SCIM.");
                 } else {
