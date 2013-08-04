@@ -32,6 +32,8 @@
 <jsp:include page="../dialog/display_messages.jsp"/>
 
     <%
+        String filter = request.getParameter(SecurityUIConstants.KEYSTORE_LIST_FILTER);
+    
         KeyStoreData[] datas = null;
         String paginationValue = "region=region1&item=keystores_menu";
 	    int numberOfPages = 0;
@@ -51,6 +53,15 @@
     
         KeyStoreData[] keyStores = (KeyStoreData[])session.getAttribute(SecurityUIConstants.SESSION_ATTR_KEYSTORES);
         
+        if (filter == null || filter.trim().length() == 0) {
+            filter = (String) session.getAttribute(SecurityUIConstants.KEYSTORE_LIST_FILTER);
+            if (filter == null || filter.trim().length() == 0) {
+                filter = "*";
+            }
+        }
+        filter = filter.trim();
+        session.setAttribute(SecurityUIConstants.KEYSTORE_LIST_FILTER, filter);
+    
         try {
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -64,9 +75,11 @@
                 session.setAttribute(SecurityUIConstants.RE_FETCH_KEYSTORES, Boolean.FALSE);
             }
             
+            KeyStoreData[] filteredKeyStores = Util.doFilter(filter, keyStores);
+            
             if (keyStores != null && keyStores.length > 0) {
-                numberOfPages = (int) Math.ceil((double) keyStores.length / SecurityUIConstants.KEYSTORE_DEFAULT_ITEMS_PER_PAGE);
-                datas = Util.doKeyStoresPaging(pageNumberInt, keyStores);
+                numberOfPages = (int) Math.ceil((double) filteredKeyStores.length / SecurityUIConstants.KEYSTORE_DEFAULT_ITEMS_PER_PAGE);
+                datas = Util.doPaging(pageNumberInt, filteredKeyStores);
             }
         } catch (Exception e) {
             CarbonError error = new CarbonError();
@@ -102,6 +115,29 @@
     <div id="middle">
         <h2><fmt:message key="keystore.management"/></h2>
         <div id="workArea">
+            <form name="filterForm" method="post" action="keystore-mgt.jsp">
+	            <table class="styledLeft noBorders">
+	                <thead>
+	                <tr>
+	                    <th colspan="2"><fmt:message key="filter.keystore.search"/></th>
+	                </tr>
+	                </thead>
+	                <tbody>
+	                <tr>
+	                    <td class="leftCol-big" style="padding-right: 0 !important;"><fmt:message
+	                            key="filter.keystore.label"/></td>
+	                    <td>
+	                        <input type="text" name="<%=SecurityUIConstants.KEYSTORE_LIST_FILTER%>"
+	                               value="<%=filter%>"/>
+	
+	                        <input class="button" type="submit"
+	                               value="<fmt:message key="filter.keystore.search"/>"/>
+	                    </td>
+	                </tr>
+	                </tbody>
+	            </table>
+            </form>
+            <p>&nbsp;</p>
             <table class="styledLeft" id="keymgtTable">
                 <thead>
                 <tr>

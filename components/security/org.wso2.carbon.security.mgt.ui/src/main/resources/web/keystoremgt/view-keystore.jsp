@@ -37,6 +37,7 @@
                    resourceBundle="org.wso2.carbon.security.ui.i18n.Resources"
                    topPage="false" request="<%=request%>"/>
 <%
+    String filter = request.getParameter(SecurityUIConstants.KEYSTORE_CERT_LIST_FILTER);
     PaginatedCertData paginatedCertData = null;
     CertData[] certData = new CertData[0];
     PaginatedKeyStoreData keyStoreData = (PaginatedKeyStoreData) session.getAttribute(SecurityUIConstants.PAGINATED_KEY_STORE_DATA);
@@ -57,6 +58,15 @@
         pageNumberInt = Integer.parseInt(pageNumber);
     } catch (NumberFormatException ignored) {
     }
+    
+    if (filter == null || filter.trim().length() == 0) {
+        filter = (String) session.getAttribute(SecurityUIConstants.KEYSTORE_CERT_LIST_FILTER);
+        if (filter == null || filter.trim().length() == 0) {
+            filter = "*";
+        }
+    }
+    filter = filter.trim();
+    session.setAttribute(SecurityUIConstants.KEYSTORE_CERT_LIST_FILTER, filter);
 
     try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -78,9 +88,9 @@
         paginatedCertData = keyStoreData.getPaginatedCertData();
 
         if (paginatedCertData != null) {
-            // certData = paginatedCertData.getCertDataSet();
-            certData = Util.doPaging(pageNumberInt - startingPage, paginatedCertData.getCertDataSet());
-            numberOfPages = paginatedCertData.getNumberOfPages();
+            CertData[] filteredCerts = Util.doFilter(filter, paginatedCertData.getCertDataSet());
+            certData = Util.doPaging(pageNumberInt - startingPage, filteredCerts);
+            numberOfPages = (int) Math.ceil((double) filteredCerts.length / SecurityUIConstants.DEFAULT_ITEMS_PER_PAGE);
         }
 
 
@@ -120,117 +130,132 @@
         <h3><fmt:message key="certificate.of.the.private.key"/></h3>
         <table class="styledLeft">
             <thead>
-            <tr>
-                <th><fmt:message key="alias"/></th>
-                <th><fmt:message key="issuerdn"/></th>
-                <th><fmt:message key="notafter"/></th>
-                <th><fmt:message key="notbefore"/></th>
-                <th><fmt:message key="serialnumber"/></th>
-                <th><fmt:message key="subjectdn"/></th>
-                <th colspan="2"><fmt:message key="version"/></th>
-
-
-            </tr>
+	            <tr>
+	                <th><fmt:message key="alias"/></th>
+	                <th><fmt:message key="issuerdn"/></th>
+	                <th><fmt:message key="notafter"/></th>
+	                <th><fmt:message key="notbefore"/></th>
+	                <th><fmt:message key="serialnumber"/></th>
+	                <th><fmt:message key="subjectdn"/></th>
+	                <th colspan="2"><fmt:message key="version"/></th>
+	            </tr>
             </thead>
             <tbody>
-
-            <%
-                if (keyStoreData != null && keyStoreData.getKey() != null) {
-                    CertData cdata = keyStoreData.getKey();
-            %>
-            <tr>
-                <td><%=cdata.getAlias()%>
-                </td>
-                <td><%=cdata.getIssuerDN()%>
-                </td>
-                <td><%=cdata.getNotAfter()%>
-                </td>
-                <td><%=cdata.getNotBefore()%>
-                </td>
-                <td><%=cdata.getSerialNumber()%>
-                </td>
-                <td><%=cdata.getSubjectDN()%>
-                </td>
-                <td colspan="2"><%=cdata.getVersion()%>
-                </td>
-            </tr>
-            <%
-                }
-            %>
-            <tr>
-                <td class="buttonRow" colspan="8">
-                    <form>
-                        <input value="<fmt:message key="import.cert"/>" type="button"
-                               class="button"
-                               onclick="location.href ='import-cert.jsp?keyStore=<%=keyStore%>'"/>
-                        <input value="<fmt:message key="finish"/>" type="button" class="button"
-                               onclick="location.href ='keystore-mgt.jsp?region=region1&item=keystores_menu'"/>
-                    </form>
-                </td>
-            </tr>
-
-            <tr>
-                <td style="border-left: 0px !important; border-right: 0px !important; padding-left: 0px !important;"
-                    colspan="7">
-                    <h3><fmt:message key="available.certificates"/></h3></td>
-            </tr>
-            <tr>
-
-                <td class="sub-header"><fmt:message key="alias"/></td>
-                <td class="sub-header"><fmt:message key="issuerdn"/></td>
-                <td class="sub-header"><fmt:message key="notafter"/></td>
-                <td class="sub-header"><fmt:message key="notbefore"/></td>
-                <td class="sub-header"><fmt:message key="serialnumber"/></td>
-                <td class="sub-header"><fmt:message key="subjectdn"/></td>
-                <td class="sub-header"><fmt:message key="version"/></td>
-                <td class="sub-header"><fmt:message key="actions"/></td>
-            </tr>
-            <%
-                if (certData != null && certData.length > 0) {
-                    for (CertData cert : certData) {
-                        if (cert != null) {
-            %>
-            <tr>
-                <td><%=cert.getAlias()%>
-                </td>
-                <td><%=cert.getIssuerDN()%>
-                </td>
-                <td><%=cert.getNotAfter()%>
-                </td>
-                <td><%=cert.getNotBefore()%>
-                </td>
-                <td><%=cert.getSerialNumber()%>
-                </td>
-                <td><%=cert.getSubjectDN()%>
-                </td>
-                <td><%=cert.getVersion()%>
-                </td>
-                <td><a href="#"
-                       onclick="deleteCert('<%=cert.getAlias()%>', '<%=keyStoreData.getKeyStoreName()%>')"
-                       class="icon-link"
-                       style="background-image:url(images/delete.gif);">Delete</a>
-                </td>
-            </tr>
-            <%
-                        }
-                    }
-                }
-            %>
-            <tr>
-                <td style="border-left: 0px !important; border-right: 0px !important; padding-left: 0px !important;"
-                    colspan="0">
-                        <carbon:paginator pageNumber="<%=pageNumberInt%>"
-                                          numberOfPages="<%=numberOfPages%>"
-                                          page="view-keystore.jsp"
-                                          pageNumberParameterName="pageNumber"
-                                          parameters="<%=paginationValue%>"
-                                          resourceBundle="org.wso2.carbon.security.ui.i18n.Resources"
-                                          prevKey="prev" nextKey="next"/>
-            </tr>
-
-
+	            <%
+	                if (keyStoreData != null && keyStoreData.getKey() != null) {
+	                    CertData cdata = keyStoreData.getKey();
+	            %>
+	            <tr>
+	                <td><%=cdata.getAlias()%>
+	                </td>
+	                <td><%=cdata.getIssuerDN()%>
+	                </td>
+	                <td><%=cdata.getNotAfter()%>
+	                </td>
+	                <td><%=cdata.getNotBefore()%>
+	                </td>
+	                <td><%=cdata.getSerialNumber()%>
+	                </td>
+	                <td><%=cdata.getSubjectDN()%>
+	                </td>
+	                <td colspan="2"><%=cdata.getVersion()%>
+	                </td>
+	            </tr>
+	            <%
+	                }
+	            %>
+	            <tr>
+	                <td class="buttonRow" colspan="8">
+	                    <form>
+	                        <input value="<fmt:message key="import.cert"/>" type="button"
+	                               class="button"
+	                               onclick="location.href ='import-cert.jsp?keyStore=<%=keyStore%>'"/>
+	                        <input value="<fmt:message key="finish"/>" type="button" class="button"
+	                               onclick="location.href ='keystore-mgt.jsp?region=region1&item=keystores_menu'"/>
+	                    </form>
+	                </td>
+	            </tr>
             </tbody>
         </table>
+        <p>&nbsp;</p>
+        <h3><fmt:message key="available.certificates"/></h3>
+        <form name="filterForm" method="post" action="view-keystore.jsp">
+            <table class="styledLeft noBorders">
+                <thead>
+                 <tr>
+                     <th colspan="2"><fmt:message key="filter.keystore.cert.search"/></th>
+                 </tr>
+                </thead>
+                <tbody>
+                 <tr>
+                     <td class="leftCol-big" style="padding-right: 0 !important;"><fmt:message
+                             key="filter.keystore.cert.label"/></td>
+                     <td>
+                         <input type="text" name="<%=SecurityUIConstants.KEYSTORE_CERT_LIST_FILTER%>"
+                                value="<%=filter%>"/>
+ 
+                         <input class="button" type="submit"
+                                value="<fmt:message key="filter.keystore.cert.search"/>"/>
+                     </td>
+                 </tr>
+                </tbody>
+            </table>
+        </form>
+        <p>&nbsp;</p>
+        <table class="styledLeft">
+	        <thead>
+		        <tr>
+		            <th><fmt:message key="alias"/></th>
+		            <th><fmt:message key="issuerdn"/></th>
+		            <th><fmt:message key="notafter"/></th>
+		            <th><fmt:message key="notbefore"/></th>
+		            <th><fmt:message key="serialnumber"/></th>
+		            <th><fmt:message key="subjectdn"/></th>
+		            <th><fmt:message key="version"/></th>
+		            <th><fmt:message key="actions"/></th>
+		        </tr>
+	        </thead>
+			<tbody>
+				<%
+				    if (certData != null && certData.length > 0) {
+				        for (CertData cert : certData) {
+				            if (cert != null) {
+				%>
+				<tr>
+				    <td><%=cert.getAlias()%>
+				    </td>
+				    <td><%=cert.getIssuerDN()%>
+				    </td>
+				    <td><%=cert.getNotAfter()%>
+				    </td>
+				    <td><%=cert.getNotBefore()%>
+				    </td>
+				    <td><%=cert.getSerialNumber()%>
+				    </td>
+				    <td><%=cert.getSubjectDN()%>
+				    </td>
+				    <td><%=cert.getVersion()%>
+				    </td>
+				    <td><a href="#"
+				           onclick="deleteCert('<%=cert.getAlias()%>', '<%=keyStoreData.getKeyStoreName()%>')"
+				           class="icon-link"
+				           style="background-image:url(images/delete.gif);">Delete</a>
+				    </td>
+				</tr>
+				<%
+				            }
+				        }
+				    }
+				%>
+			</tbody>
+        </table>
+        <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                          numberOfPages="<%=numberOfPages%>"
+                          page="view-keystore.jsp"
+                          pageNumberParameterName="pageNumber"
+                          parameters="<%=paginationValue%>"
+                          resourceBundle="org.wso2.carbon.security.ui.i18n.Resources"
+                          prevKey="prev" nextKey="next"/>
     </div>
 </div>
 </fmt:bundle>

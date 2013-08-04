@@ -18,6 +18,8 @@
 */
 package org.wso2.carbon.security.ui;
 
+import java.util.ArrayList;
+
 import org.wso2.carbon.security.mgt.stub.keystore.xsd.CertData;
 import org.wso2.carbon.security.mgt.stub.keystore.xsd.KeyStoreData;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
@@ -43,7 +45,7 @@ public class Util {
         return returnedCertDataSet;
     }
     
-    public static KeyStoreData[] doKeyStoresPaging(int pageNumber, KeyStoreData[] keyStoreDataSet) {
+    public static KeyStoreData[] doPaging(int pageNumber, KeyStoreData[] keyStoreDataSet) {
 
         int itemsPerPageInt = SecurityUIConstants.KEYSTORE_DEFAULT_ITEMS_PER_PAGE;
         int startIndex = pageNumber * itemsPerPageInt;
@@ -75,5 +77,30 @@ public class Util {
 
         return returnedFlaggedNameSet;
     }
+    
+    public static KeyStoreData[] doFilter(String filter, KeyStoreData[] keyStoreDataSet) {
+        String regPattern = filter.replace("*", ".*");
+        ArrayList<KeyStoreData> list = new ArrayList<KeyStoreData>();
+        
+        for (KeyStoreData keyStore : keyStoreDataSet) {
+            if (keyStore != null && keyStore.getKeyStoreName().toLowerCase().matches(regPattern.toLowerCase())) {
+                list.add(keyStore);
+            }
+        }
 
+        return list.toArray(new KeyStoreData[list.size()]);
+    }
+    
+    public static CertData[] doFilter(String filter, CertData[] certDataSet) {
+        String regPattern = filter.replace("*", ".*");
+        ArrayList<CertData> list = new ArrayList<CertData>();
+        
+        for (CertData cert : certDataSet) {
+            if (cert != null && cert.getAlias().toLowerCase().matches(regPattern.toLowerCase())) {
+                list.add(cert);
+            }
+        }
+
+        return list.toArray(new CertData[list.size()]);
+    }
 }
