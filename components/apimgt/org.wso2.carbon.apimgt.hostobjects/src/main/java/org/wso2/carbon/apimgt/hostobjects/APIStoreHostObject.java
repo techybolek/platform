@@ -389,11 +389,10 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args!=null && args.length!=0) {
             String limitArg = args[0].toString();
             int limit = Integer.parseInt(limitArg);
-            String requestedTenantDomain=(String)args[1];
             Set<API> apiSet;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
-                apiSet = apiConsumer.getRecentlyAddedAPIs(limit,requestedTenantDomain);
+                apiSet = apiConsumer.getRecentlyAddedAPIs(limit);
             } catch (APIManagementException e) {
                 log.error("Error from Registry API while getting Recently Added APIs Information", e);
                 return apiArray;
@@ -641,13 +640,7 @@ public class APIStoreHostObject extends ScriptableObject {
         NativeArray myn = new NativeArray(0);
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         try {
-            String tenantDomain;
-            if (args != null) {
-                tenantDomain = (String) args[0];
-            } else {
-                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-            }
-            apiSet = apiConsumer.getAllPublishedAPIs(tenantDomain);
+            apiSet = apiConsumer.getAllPublishedAPIs();
 
         } catch (APIManagementException e) {
             log.error("Error from Registry API while getting API Information", e);
