@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.registry.core.Resource;
 
 /**
- * Utility class for mapping GREG paths to CMIS paths
+ * Utility class for mapping Registry paths to CMIS paths
  * However this is not used much since the greg root path is used for the cmis root path.
  */
 public class PathManager {
@@ -41,16 +41,16 @@ public class PathManager {
     private String gregRootPath = "/";
 
     /**
-     * @return  the GREG root path
+     * @return  the Registry root path
      */
     public String getGregRootPath() {
         return gregRootPath;
     }
 
     /**
-     * Determines whether a GREG <code>Node</code> is the root node wrt. to this
+     * Determines whether a Registry <code>Node</code> is the root node wrt. to this
      * <code>PathManager</code> instance. That is, whether the path of the node is
-     * equal to this instance's GREG root path.
+     * equal to this instance's Registry root path.
      * 
      * @param node
      * @return  <code>true</code> iff <code>node</code> is the root node wrt. to
@@ -62,7 +62,7 @@ public class PathManager {
     }
 
     /**
-     * Determine the CMIS path given a GREG <code>Node</code>.
+     * Determine the CMIS path given a Registry <code>Node</code>.
      *
      * @param node
      * @return
@@ -124,7 +124,6 @@ public class PathManager {
 
     private static String normalize(String path) {
         if (path == null || path.length() == 0) {
-        	//Made a change-Sagara
             return CMIS_ROOT_PATH;
         }
 

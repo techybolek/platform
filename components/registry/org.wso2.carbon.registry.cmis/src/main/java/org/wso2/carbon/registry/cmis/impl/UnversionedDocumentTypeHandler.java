@@ -22,6 +22,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.DocumentTypeDefini
 import org.wso2.carbon.registry.cmis.RegistryDocument;
 import org.wso2.carbon.registry.cmis.RegistryTypeManager;
 import org.wso2.carbon.registry.cmis.RegistryUnversionedDocument;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.cmis.PathManager;
@@ -49,9 +50,9 @@ public class UnversionedDocumentTypeHandler extends DocumentTypeHandler {
         DocumentTypeDefinitionImpl unversionedDocument = new DocumentTypeDefinitionImpl();
         unversionedDocument.initialize(super.getTypeDefinition());
 
-        unversionedDocument.setDescription("Unversioned document");
-        unversionedDocument.setDisplayName("Unversioned document");
-        unversionedDocument.setLocalName("Unversioned document");
+        unversionedDocument.setDescription(CMISConstants.DESC_UNVERSIONED_DOCUMENT);
+        unversionedDocument.setDisplayName(CMISConstants.DESC_UNVERSIONED_DOCUMENT);
+        unversionedDocument.setLocalName(CMISConstants.DESC_UNVERSIONED_DOCUMENT);
         unversionedDocument.setIsQueryable(true);
         unversionedDocument.setQueryName(DOCUMENT_UNVERSIONED_TYPE_ID);
         unversionedDocument.setId(DOCUMENT_UNVERSIONED_TYPE_ID);

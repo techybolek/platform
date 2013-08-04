@@ -29,7 +29,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertiesImpl;
 import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -41,7 +41,7 @@ import java.math.BigInteger;
 import java.util.Set;
 
 /**
- * Instances of this class represent a cmis:document of an underlying GREG <code>Node</code>.
+ * Instances of this class represent a cmis:document of an underlying Registry <code>Node</code>.
  */
 public abstract class RegistryDocument extends RegistryObject{
 	
@@ -50,9 +50,9 @@ public abstract class RegistryDocument extends RegistryObject{
     public static final String MIME_UNKNOWN = "application/octet-stream";
 
 	/**
-     * Create a new instance wrapping a GREG <code>node</code>.
+     * Create a new instance wrapping a Registry <code>node</code>.
      *
-     * @param resource           the GREG <code>node</code> to represent
+     * @param resource           the Registry <code>node</code> to represent
      * @param typeManager
      * @param pathManager
      *
@@ -67,12 +67,9 @@ public abstract class RegistryDocument extends RegistryObject{
     public boolean isDocumentCheckedOut() {
 
         String property = getNode().getProperty(CMISConstants.GREG_IS_CHECKED_OUT);
-		
-		if(property == null || property.equals("false")){
-            return false;
-        }
 
-        return true;
+        return (property != null && !property.equals("false"));
+
     }
     
     public ContentStream getContentStream(){
@@ -165,19 +162,19 @@ public abstract class RegistryDocument extends RegistryObject{
             }
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisStorageException(e.getMessage(), e);
+            log.error("Error occurred while setting content stream ", e);
+            throw new CmisStorageException(e.getMessage());
         }
 
     }
-
-    private String convertStreamToString(java.io.InputStream is) {
+    // TODO Remove
+    /*private String convertStreamToString(java.io.InputStream is) {
         try {
             return new java.util.Scanner(is).useDelimiter("\\A").next();
         } catch (java.util.NoSuchElementException e) {
             return "";
         }
-    }
+    }                */
 
     @Override
     protected String getTypeIdInternal() {
@@ -314,20 +311,17 @@ public abstract class RegistryDocument extends RegistryObject{
     protected Set<Action> compileAllowableActions(Set<Action> aas) {
         Set<Action> result = super.compileAllowableActions(aas);
         try {
-                if( getNode().getContentStream() != null){
-                    setAction(result, Action.CAN_GET_CONTENT_STREAM, true);
-                } else{
-                    setAction(result, Action.CAN_GET_CONTENT_STREAM, false);
-                }
+            boolean status = getNode().getContentStream() != null ? true : false;
+            setAction(result, Action.CAN_GET_CONTENT_STREAM, status);
         } catch (RegistryException e) {
-            log.debug(e.getMessage());
+            log.error("Failed to get the content stream for the node " + getNode().getId() + " " , e);
             setAction(result, Action.CAN_GET_CONTENT_STREAM, false);
-        } finally {
-            setAction(result, Action.CAN_SET_CONTENT_STREAM, true);
-            setAction(result, Action.CAN_DELETE_CONTENT_STREAM, true);
-            setAction(result, Action.CAN_GET_RENDITIONS, false);
-            return result;
         }
+
+        setAction(result, Action.CAN_SET_CONTENT_STREAM, true);
+        setAction(result, Action.CAN_DELETE_CONTENT_STREAM, true);
+        setAction(result, Action.CAN_GET_RENDITIONS, false);
+        return result;
 
     }
 

@@ -29,7 +29,8 @@ import org.apache.chemistry.opencmis.commons.server.ObjectInfoHandler;
 import org.apache.chemistry.opencmis.commons.spi.Holder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CommonUtil;
 import org.wso2.carbon.registry.cmis.util.PropertyHelper;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
@@ -44,7 +45,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * This class represents the GREG back-end for CMIS server.
+ * This class represents the WSO2 Governance Registry back-end for the CMIS server.
  */
 public class CMISRepository {
     private static final Logger log = LoggerFactory.getLogger(CMISRepository.class);
@@ -52,12 +53,12 @@ public class CMISRepository {
     private final Registry repository;
     private final RegistryTypeManager typeManager;
     private final PathManager pathManager;
-    private final String REPOSITORY_ID = "Governance Registry";
+    private final String REPOSITORY_ID = "WSO2 CMIS Repository";
 
     /**
-     * Create a new <code>org.wso2.registry.chemistry.greg.GregRepository</code> instance backed by a GREG repository.
+     * Create a new <code>org.wso2.registry.chemistry.greg.CMISRepository</code> instance backed by a Governance Registry repository.
      *
-     * @param repository  the Greg repository
+     * @param repository  the CMIS repository
      * @param pathManager
      * @param typeManager
      *
@@ -80,8 +81,9 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.2.2 getRepositoryInfo
      */
     public RepositoryInfo getRepositoryInfo() {
-        log.debug("getRepositoryInfo");
-
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<<< getRepositoryInfo");
+        }
         return compileRepositoryInfo(getRepositoryId());
     }
 
@@ -99,8 +101,9 @@ public class CMISRepository {
      */
     public TypeDefinitionList getTypeChildren(String typeId, boolean includePropertyDefinitions,
                                               BigInteger maxItems, BigInteger skipCount) {
-
-        log.debug("getTypesChildren");
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<< getTypesChildren for type id " + typeId);
+        }
         return typeManager.getTypeChildren(typeId, includePropertyDefinitions, maxItems, skipCount);
     }
 
@@ -108,7 +111,10 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.2.5 getTypeDefinition
      */
     public TypeDefinition getTypeDefinition(String typeId) {
-        log.debug("getTypeDefinition");
+
+        if(log.isTraceEnabled()){
+            log.trace("<<<<<<< getTypeDefinition for type id " + typeId);
+        }
 
         TypeDefinition type = typeManager.getType(typeId);
         if (type == null) {
@@ -124,7 +130,6 @@ public class CMISRepository {
     public List<TypeDefinitionContainer> getTypesDescendants(String typeId, BigInteger depth,
                                                              Boolean includePropertyDefinitions) {
 
-        log.debug("getTypesDescendants");
         return typeManager.getTypesDescendants(typeId, depth, includePropertyDefinitions);
     }
 
@@ -134,10 +139,13 @@ public class CMISRepository {
     public String createDocument(Properties properties, String folderId, ContentStream contentStream,
                                  VersioningState versioningState) {
 
-        log.debug("createDocument");
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<< Creating the document for folder Id:" + folderId
+                + "versioning state:" + versioningState.toString() );
+        }
 
         // check properties
-        if (properties == null || properties.getProperties() == null) {
+        if (!CommonUtil.isNonEmptyProperties(properties)) {
             throw new CmisInvalidArgumentException("Properties must be set!");
         }
 
@@ -160,7 +168,7 @@ public class CMISRepository {
         if (isVersionable && versioningState == VersioningState.NONE) {
             throw new CmisConstraintException("Versioning required for " + typeId);
         }
-        //-----------------------------GREG DEPENDANT-------------------------------------------------------------
+
         if(versioningState == VersioningState.NONE){
             UnversionedDocumentTypeHandler handler = new UnversionedDocumentTypeHandler(getRegistry(), pathManager, typeManager);
             RegistryObject gregNode = handler.createDocument(parent, name, properties, contentStream, versioningState);
@@ -170,7 +178,6 @@ public class CMISRepository {
             RegistryObject gregNode = typeHandler.createDocument(parent, name, properties, contentStream, versioningState);
             return gregNode.getId();
         }
-        
     }
 
     /**
@@ -179,7 +186,10 @@ public class CMISRepository {
     public String createDocumentFromSource(String sourceId, Properties properties, String folderId,
                                            VersioningState versioningState) {
 
-    	log.debug("createDocumentFromSource");
+        if(log.isTraceEnabled()) {
+    	    log.trace("<<<<<<<< Creating document from source with source Id:" + sourceId +
+                ", folder Id:" + folderId + " and versioning state:" + versioningState.toString());
+        }
 
         // get parent folder Node
         RegistryFolder parent = getGregNode(folderId).asFolder();
@@ -188,6 +198,7 @@ public class CMISRepository {
         RegistryDocument source = getGregNode(sourceId).asDocument();
 
         boolean isVersionable = source.isVersionable();
+        // Below throws same exception with different message based on spec
         if (!isVersionable && versioningState != VersioningState.NONE) {
             throw new CmisConstraintException("Versioning not supported for " + sourceId);
         }
@@ -208,10 +219,13 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.4.3 createFolder
      */
     public String createFolder(Properties properties, String folderId) {
-    	log.debug("createFolder");
+
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<<<< Create folder with folder Id:" + folderId);
+        }
 
         // check properties
-        if (properties == null || properties.getProperties() == null) {
+        if (!CommonUtil.isNonEmptyProperties(properties)) {
             throw new CmisInvalidArgumentException("Properties must be set!");
         }
 
@@ -238,9 +252,12 @@ public class CMISRepository {
     public ObjectData moveObject(Holder<String> objectId, String targetFolderId,
                                  ObjectInfoHandler objectInfos, boolean requiresObjectInfo) {
 
-    	log.debug("moveObject");
+        if(log.isTraceEnabled()) {
+    	    log.trace("<<<<<<<< Moving object from " + objectId.getValue() + " to "
+                + targetFolderId);
+        }
 
-        if (objectId == null || objectId.getValue() == null) {
+        if (!CommonUtil.hasObjectId(objectId)) {
             throw new CmisInvalidArgumentException("Id is not valid!");
         }
 
@@ -258,9 +275,12 @@ public class CMISRepository {
     public void setContentStream(Holder<String> objectId, Boolean overwriteFlag,
                                  ContentStream contentStream) {
 
-    	log.debug("setContentStream or deleteContentStream");
-
-        if (objectId == null || objectId.getValue() == null) {
+        if(log.isTraceEnabled()) {
+    	    log.trace("<<<<<<< Set the content stream for object " + objectId.getValue() +
+                " with overwrite set to " + overwriteFlag);
+        }
+        
+        if (!CommonUtil.hasObjectId(objectId)) {
             throw new CmisInvalidArgumentException("Id is not valid!");
         }
 
@@ -300,7 +320,11 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.4.14 deleteObject
      */
     public void deleteObject(String objectId, Boolean allVersions) {
-    	log.debug("deleteObject");
+
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<< Delete Object with Id" + objectId
+            + " with all versions set to " + allVersions);
+        }
 
         // get the node
         RegistryObject gregNode = getGregNode(objectId);
@@ -308,7 +332,7 @@ public class CMISRepository {
         //If PWC cancelCheckOut
         //String property = gregNode.getNode().getProperty(GregProperty.GREG_IS_CHECKED_OUT);
         //boolean isCheckedOut = property !=null && property.equals("true");
-        if(objectId.endsWith("_pwc")){
+        if(objectId.endsWith(CMISConstants.PWC_SUFFIX)){
             cancelCheckout(objectId);
         } else{
             gregNode.delete(Boolean.TRUE.equals(allVersions), RegistryPrivateWorkingCopy.isPwc(repository, objectId));
@@ -319,7 +343,10 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.4.15 deleteTree
      */
     public FailedToDeleteData deleteTree(String folderId) {
-    	log.debug("deleteTree");
+
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<< deleteTree with folder id " + folderId);
+        }
 
         //check for root
         if(folderId.equals("/")){
@@ -337,7 +364,9 @@ public class CMISRepository {
     public ObjectData updateProperties(Holder<String> objectId, Properties properties,
                                        ObjectInfoHandler objectInfos, boolean objectInfoRequired) {
 
-    	log.debug("updateProperties");
+        if(log.isTraceEnabled()){
+    	    log.trace("<<<<<<< updateProperties for object id: " + objectId.getValue());
+        }
 
         if (objectId == null) {
             throw new CmisInvalidArgumentException("Id is not valid!");
@@ -356,7 +385,9 @@ public class CMISRepository {
     public ObjectData getObject(String objectId, String filter, Boolean includeAllowableActions,
                                 ObjectInfoHandler objectInfos, boolean requiresObjectInfo) {
 
-    	log.debug("getObject");
+        if(log.isTraceEnabled()){
+    	    log.trace("<<<<<<<< getObject for id: " + objectId);
+        }
 
         // check id
         if (objectId == null) {
@@ -384,7 +415,10 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.4.6 getAllowableActions
      */
     public AllowableActions getAllowableActions(String objectId) {
-    	log.debug("getAllowableActions");
+
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<< getAllowableActions for object id " + objectId);
+        }
 
         RegistryObject gregNode = getGregNode(objectId);
         return gregNode.getAllowableActions();
@@ -395,7 +429,10 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.4.10 getContentStream
      */
     public ContentStream getContentStream(String objectId, BigInteger offset, BigInteger length) {
-    	log.debug("getContentStream");
+
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<< getContentStream for object id " + objectId);
+        }
 
         if (offset != null || length != null) {
             throw new CmisInvalidArgumentException("Offset and Length are not supported!");
@@ -419,8 +456,9 @@ public class CMISRepository {
     public ObjectInFolderList getChildren(String folderId, String filter,
                                           Boolean includeAllowableActions, Boolean includePathSegment, BigInteger maxItems, BigInteger skipCount,
                                           ObjectInfoHandler objectInfos, boolean requiresObjectInfo) {
-
-    	log.debug("getChildren");
+        if(log.isTraceEnabled()){
+        	log.trace("<<<<<< getChildren for folder id " + folderId);
+        }
 
         // skip and max
         int skip = skipCount == null ? 0 : skipCount.intValue();
@@ -487,8 +525,9 @@ public class CMISRepository {
                                                         String filter, Boolean includeAllowableActions, Boolean includePathSegment, ObjectInfoHandler objectInfos,
                                                         boolean requiresObjectInfo, boolean foldersOnly) {
 
-    	log.debug("getDescendants or getFolderTree");
-
+        if(log.isTraceEnabled()) {
+    	    log.trace("<<<<<< getDescendants or getFolderTree for folder id " + folderId);
+        }
         // check depth
         int d = depth == null ? 2 : depth.intValue();
         if (d == 0) {
@@ -537,7 +576,9 @@ public class CMISRepository {
                                                    Boolean includeAllowableActions, Boolean includeRelativePathSegment, ObjectInfoHandler objectInfos,
                                                    boolean requiresObjectInfo) {
 
-    	log.debug("getObjectParents");
+        if(log.isTraceEnabled()) {
+    	    log.trace("<<<<<<< getObjectParents for object id " + objectId);
+        }
 
         // get the file or folder
         RegistryObject gregNode = getGregNode(objectId);
@@ -572,7 +613,9 @@ public class CMISRepository {
     public ObjectData getObjectByPath(String folderPath, String filter, boolean includeAllowableActions,
                                       boolean includeACL, ObjectInfoHandler objectInfos, boolean requiresObjectInfo) {
 
-        log.debug("getObjectByPath");
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<< getObjectByPath for folder path " + folderPath);
+        }
 
         // check path
         if (folderPath == null || !PathManager.isAbsolute(folderPath)) {
@@ -604,7 +647,9 @@ public class CMISRepository {
     public ObjectList getCheckedOutDocs(String folderId, String filter, String orderBy,
      Boolean includeAllowableActions, BigInteger maxItems, BigInteger skipCount){
 
-        log.debug("getCheckedOutDocs");
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<<< getCheckedOutDocs for folder id " + folderId);
+        }
 
         // skip and max
         int skip = skipCount == null ? 0 : skipCount.intValue();
@@ -688,12 +733,10 @@ public class CMISRepository {
 
         boolean checkedOut = checkedOutProperty != null && checkedOutProperty.equals("true");
         boolean createdAsPwc = createdAsPwcProperty != null && createdAsPwcProperty.equals("true");
-        boolean endsWithPwc = node.getNode().getPath().endsWith("_pwc");
+        boolean endsWithPwc = node.getNode().getPath().endsWith(CMISConstants.PWC_SUFFIX);
 
-        if(checkedOut || createdAsPwc || endsWithPwc)
-            return  true;
+        return (checkedOut || createdAsPwc || endsWithPwc);
 
-        return false;
     }
 
 
@@ -702,8 +745,10 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.7.1 checkOut
      */
     public void checkOut(Holder<String> objectId, Holder<Boolean> contentCopied) {
-        log.debug("checkout");
 
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<<<< checkout for object id " + objectId.getValue());
+        }
         // check id
         if (objectId == null || objectId.getValue() == null) {
             throw new CmisInvalidArgumentException("Object Id must be set.");
@@ -727,8 +772,10 @@ public class CMISRepository {
      * See CMIS 1.0 section 2.2.7.2 cancelCheckout
      */
     public void cancelCheckout(String objectId) {
-        log.debug("cancelCheckout");
 
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<<< cancelCheckout for object id " + objectId);
+        }
         //TODO check what is the object id. Whether it is the id of orig copy or pwc.
         // check id
         if (objectId == null) {
@@ -751,7 +798,9 @@ public class CMISRepository {
     public void checkIn(Holder<String> objectId, Boolean major, Properties properties,
                         ContentStream contentStream, String checkinComment) {
 
-        log.debug("checkin");
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<< checkin for object id " + objectId.getValue());
+        }
 
         // check id
         if (objectId == null || objectId.getValue() == null) {
@@ -782,8 +831,9 @@ public class CMISRepository {
     public List<ObjectData> getAllVersions(String objectId, String filter,
                                            Boolean includeAllowableActions, ObjectInfoHandler objectInfos, boolean requiresObjectInfo) {
 
-        log.debug("getAllVersions");
-
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<<<<< getAllVersions for object id " + objectId);
+        }
         // check id
         if (objectId == null) {
             throw new CmisInvalidArgumentException("Object Id must be set.");
@@ -843,7 +893,9 @@ public class CMISRepository {
     public ObjectList query(String statement, Boolean searchAllVersions,
                             Boolean includeAllowableActions, BigInteger maxItems, BigInteger skipCount){
         //TODO: Not supported
-        log.debug("query");
+        if(log.isTraceEnabled()) {
+            log.trace("<<<<<<<<<<< query for the statement " + statement);
+        }
 
         return new ObjectListImpl();
     }
@@ -856,11 +908,11 @@ public class CMISRepository {
         fRepositoryInfo.setName(getRepositoryName());
         fRepositoryInfo.setDescription(getRepositoryDescription());
 
-        fRepositoryInfo.setCmisVersionSupported("1.0");
+        fRepositoryInfo.setCmisVersionSupported(CMISConstants.CMIS_VERSION);
 
-        fRepositoryInfo.setProductName("OpenCMIS Greg");
+        fRepositoryInfo.setProductName(CMISConstants.PRODUCT_NAME);
         fRepositoryInfo.setProductVersion("0.1");
-        fRepositoryInfo.setVendorName("WSO2");
+        fRepositoryInfo.setVendorName(CMISConstants.VENDOR_NAME);
         fRepositoryInfo.setRootFolder("/");
         fRepositoryInfo.setThinClientUri("");
 
@@ -911,7 +963,7 @@ public class CMISRepository {
                 //resource is deleted, the versions exist. Hence for the following code.
 
                 String originalResourceName = id.substring(0, id.indexOf(";"));
-                if(repository.resourceExists(originalResourceName)==false){
+                if(!repository.resourceExists(originalResourceName)){
 
                     int beginIndex = id.indexOf(":")+1;
                     int endIndex = id.length();
@@ -920,21 +972,18 @@ public class CMISRepository {
                     long snapshotId = Long.parseLong(versionNumber);
                     repository.removeVersionHistory(originalResourceName, snapshotId);
                     throw new CmisObjectNotFoundException("Original resource of version does not exist");
-                }//end check code
-
-                String nodeId = id;
-                String versionName = id;
+                }
 
                 //Node node = session.getNodeByIdentifier(nodeId);
                 Resource node = null;
 
-                node = repository.get(nodeId);
+                node = repository.get(id);
 
                 RegistryObject gregNode = null;
-                if(node!=null){
+                if(node != null){
                 	if(node instanceof Collection){
                 		gregNode = new FolderTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(node);
-                	} else if( node instanceof Resource){
+                	} else {
                 		gregNode = new DocumentTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(node);
                 	}
                 }
@@ -942,7 +991,7 @@ public class CMISRepository {
                 //    return gregNode.asVersion().getPwc();
                 //}
                 //else {
-                    return gregNode.asVersion().getVersion(versionName);
+                    return gregNode.asVersion().getVersion(id);
                 //}
             } else {
             	Resource node = null;
@@ -951,8 +1000,7 @@ public class CMISRepository {
                 if(node!=null){
                 	if(node instanceof Collection){
                 		gregNode = new FolderTypeHandler(getRegistry(), pathManager, typeManager).getGregNode(repository.get(id));
-                	} else if( node instanceof Resource){
-
+                	} else {
                         //check if Unversioned type
                         String property = node.getProperty(CMISConstants.GREG_UNVERSIONED_TYPE);
                         if(property!=null && property.equals("true")){
@@ -968,11 +1016,10 @@ public class CMISRepository {
                 return gregNode;
             }
 
-        }
-        
-        catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisObjectNotFoundException(e.getMessage(), e);
+        } catch (RegistryException e) {
+            String msg = "Failed to retrieve the node with id " + id;
+            log.error(msg, e);
+            throw new CmisObjectNotFoundException(msg, e);
         }
     }
 
@@ -1020,13 +1067,9 @@ public class CMISRepository {
      * Splits a filter statement into a collection of properties.
      */
     private static Set<String> splitFilter(String filter) {
-        if (filter == null) {
-            return null;
-        }
 
-        if (filter.trim().length() == 0) {
+        if (filter == null || filter.trim().length() == 0)
             return null;
-        }
 
         Set<String> result = new HashSet<String>();
         for (String s : filter.split(",")) {

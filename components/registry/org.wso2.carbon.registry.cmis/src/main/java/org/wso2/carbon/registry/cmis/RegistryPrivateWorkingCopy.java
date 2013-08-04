@@ -16,19 +16,16 @@
 
 package org.wso2.carbon.registry.cmis;
 
-import org.apache.chemistry.opencmis.server.support.TypeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
-
 
 /**
  * Instances of this class represent a private working copy of a cmis:document backed by an underlying
- * GREG <code>Node</code>.
+ * Registry <code>Node</code>.
  */
 public class RegistryPrivateWorkingCopy extends RegistryVersionBase {
     private static final Logger log = LoggerFactory.getLogger(RegistryPrivateWorkingCopy.class);
@@ -53,7 +50,7 @@ public class RegistryPrivateWorkingCopy extends RegistryVersionBase {
             String property = resource.getProperty(CMISConstants.GREG_CREATED_AS_PWC);
             String checkedOut = resource.getProperty(CMISConstants.GREG_IS_CHECKED_OUT);
 
-            if(resource.getPath().endsWith("_pwc") || ( property != null && property.equals("true") )
+            if(resource.getPath().endsWith(CMISConstants.PWC_SUFFIX) || ( property != null && property.equals("true") )
                                                    || ( checkedOut != null && checkedOut.equals("true") )){
                 return true;
             }

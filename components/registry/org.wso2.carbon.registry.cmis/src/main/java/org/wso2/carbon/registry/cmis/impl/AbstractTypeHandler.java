@@ -22,20 +22,19 @@ import org.wso2.carbon.registry.cmis.RegistryTypeManager;
 import org.wso2.carbon.registry.cmis.PathManager;
 
 /**
- * This abstract class takes care of collecting references set when the handler is added to
+ * This act as a super type for type handlers
  *
  */
-public abstract class AbstractGregTypeHandler{
+public abstract class AbstractTypeHandler{
 
     protected RegistryTypeManager typeManager;
     protected PathManager pathManager;
     protected Registry repository;
     
-    public AbstractGregTypeHandler(Registry repository, PathManager pathManager, RegistryTypeManager typeManager) {
+    public AbstractTypeHandler(Registry repository, PathManager pathManager, RegistryTypeManager typeManager) {
         this.typeManager = typeManager;
         this.pathManager = pathManager;
         this.repository = repository;
-        
     }
 
 }

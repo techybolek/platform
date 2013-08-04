@@ -18,19 +18,18 @@ package org.wso2.carbon.registry.cmis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.cmis.impl.DocumentTypeHandler;
-
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Instances of this class represent a specific version of a cmis:document backed by an underlying
- * GREG <code>Node</code>.
+ * Registry <code>Node</code>.
  */
 public class RegistryVersion extends RegistryVersionBase {
 
@@ -71,15 +70,8 @@ public class RegistryVersion extends RegistryVersionBase {
     @Override
     protected boolean isMajorVersion() {
         String property = getNode().getProperty(CMISConstants.GREG_VERSION_STATE);
-        if(property != null) {
-            if(property.equals(CMISConstants.GREG_MAJOR_VERSION)){
-                return true;
-            } else{
-                return false;
-            }
-        } else {
-            return false;
-        }
+
+        return (property != null && property.equals(CMISConstants.GREG_MAJOR_VERSION));
     }
 
     @Override

@@ -33,7 +33,8 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertiesImpl;
 import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CommonUtil;
 import org.wso2.carbon.registry.cmis.util.PropertyHelper;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
@@ -48,7 +49,7 @@ import java.util.*;
 
 
 /**
- * Instances of this class represent a cmis:folder backed by an underlying GREG <code>Node</code>.
+ * Instances of this class represent a cmis:folder backed by an underlying Registry <code>Node</code>.
  */
 public class RegistryFolder extends RegistryObject {
     private static final Logger log = LoggerFactory.getLogger(RegistryFolder.class);
@@ -333,7 +334,7 @@ public class RegistryFolder extends RegistryObject {
                 }
 
                 // add it
-                GregStaticMethods.setProperty(repository, node, prop);
+                CommonUtil.setProperty(repository, node, prop);
                 addedProps.add(prop.getId());
             }
 
@@ -344,7 +345,7 @@ public class RegistryFolder extends RegistryObject {
                     if (prop == null && propDef.isRequired()) {
                         throw new CmisConstraintException("Property '" + propDef.getId() + "' is required!");
                     } else if (prop != null) {
-                        GregStaticMethods.setProperty(repository, node, prop);
+                        CommonUtil.setProperty(repository, node, prop);
                     }
                 }
             }
@@ -365,7 +366,7 @@ public class RegistryFolder extends RegistryObject {
             try {
                 return documentTypeHandler.getGregNode(resource);
             } catch (RegistryException e) {
-                e.printStackTrace();
+                log.error("Unable to create the resource ", e);
             }
         }
 

@@ -134,7 +134,7 @@ public class CMISServiceFactory extends AbstractServiceFactory {
      * @return
      * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
      */
-    protected Registry acquireGregRepository(Map<String, String> gregConfig, CallContext context) throws RegistryException, AxisFault {
+    private Registry acquireGregRepository(Map<String, String> gregConfig, CallContext context) throws RegistryException, AxisFault {
 
 
         String username = context.getUsername();

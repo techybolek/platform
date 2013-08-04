@@ -32,7 +32,9 @@ import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.apache.chemistry.opencmis.commons.server.ObjectInfoHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CommonUtil;
 import org.wso2.carbon.registry.cmis.util.PropertyHelper;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
@@ -46,6 +48,10 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.*;
 
+/**
+ *  This class wraps a registry object along with other related type/path manager instances
+ *  Act as the super class for Other Document/Folder classes.
+ */
 public abstract class RegistryObject {
 
     private static final Logger log = LoggerFactory.getLogger(RegistryObject.class);
@@ -54,12 +60,12 @@ public abstract class RegistryObject {
     private Resource resource;
     protected final RegistryTypeManager typeManager;
     protected final PathManager pathManager;
-    //protected final GregTypeHandlerManager typeHandlerManager;
+
 
     /**
-     * Create a new instance wrapping a GREG <code>node</code>.
+     * Create a new instance wrapping a Registry <code>node</code>.
      *
-     * @param resource  the GREG <code>node</code> to represent
+     * @param resource  the Registry <code>node</code> to represent
      * @param typeManager
      * @param pathManager
      * //@param typeHandlerManager
@@ -73,7 +79,7 @@ public abstract class RegistryObject {
     }
 
     /**
-     * @return  the GREG <code>node</code> represented by this instance
+     * @return  the Registry <code>node</code> represented by this instance
      */
     public Resource getNode() {
         return resource;
@@ -97,8 +103,9 @@ public abstract class RegistryObject {
             return getNodeName();
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+            String msg = "Unable to get the name of CMIS object";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
     
@@ -111,8 +118,9 @@ public abstract class RegistryObject {
             return getObjectId();
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+            String msg = "Failed to get the id of the CMIS object";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
     
@@ -152,7 +160,7 @@ public abstract class RegistryObject {
     }
     
     /**
-     * @return  this instance as a <code>GregDocument</code>
+     * @return  this instance as a <code>RegistryDocument</code>
      * @throws CmisConstraintException if <code>this.isDocument() == false</code>
      */
     public RegistryDocument asDocument() {
@@ -164,7 +172,7 @@ public abstract class RegistryObject {
     }
 
     /**
-     * @return  this instance as a <code>GregFolder</code>
+     * @return  this instance as a <code>RegistryFolder</code>
      * @throws CmisConstraintException if <code>this.isFolder() == false</code>
      */
     public RegistryFolder asFolder() {
@@ -176,23 +184,23 @@ public abstract class RegistryObject {
     }
 
     /**
-     * @return  this instance as a <code>GregVersionBase</code>
+     * @return  this instance as a <code>RegistryVersionBase</code>
      * @throws CmisConstraintException if <code>this.isVersionable() == false</code>
      */
     public RegistryVersionBase asVersion() {
-        if (isVersionable()) {
-            return (RegistryVersionBase) this;
-        } else {
-            throw new CmisObjectNotFoundException("Not a version: " + this);
-        }
+        // TODO Removed  isVersionable() check here as it always returns true now. Any changes are
+        // done to isVersionable() just make sure to change this method as necessary to reflect those..
+
+        return (RegistryVersionBase) this;
+
     }
 
     /**
-     * Factory method creating a new <code>GregNode</code> from a node at a given GREG path.
+     * Factory method creating a new <code>RegistryNode</code> from a node at a given Registry path.
      *
-     * @param path  GREG path of the node
-     * @return  A new instance representing the GREG node at <code>path</code>
-     * @throws CmisObjectNotFoundException  if <code>path</code> does not identify a GREG node
+     * @param path  Registry path of the node
+     * @return  A new instance representing the Registry node at <code>path</code>
+     * @throws CmisObjectNotFoundException  if <code>path</code> does not identify a Registry node
      * @throws CmisRuntimeException
      */
     public RegistryObject getNode(String path) throws RegistryException {
@@ -207,17 +215,17 @@ public abstract class RegistryObject {
 	}
 
 	/**
-     * Factory method for creating a new <code>GregNode</code> instance from a GREG <code>Node</code>
+     * Factory method for creating a new <code>RegistryNode</code> instance from a Registry <code>Node</code>
      *
-     * @param resource of greg <code>Resource</code>
-     * @return  a new <code>GregObject</code>
+     * @param resource of registry <code>Resource</code>
+     * @return  a new <code>RegistryObject</code>
      * Since my implementation is fixed for types Document & Folder, this method 
-     * is implemented in the respective GregDocument or GregFolder classes.
+     * is implemented in the respective RegistryDocument or RegistryFolder classes.
      */
     protected abstract RegistryObject create(Resource resource);
-    //GREG implementation calls getGregNode from DefaultDocumentHandler & DefaultFolderHandler.
-    //Doc returns a new GREG version
-    //Folder returns a new GREG Folder
+    //Registry implementation calls getGregNode from DefaultDocumentHandler & DefaultFolderHandler.
+    //Doc returns a new Registry version
+    //Folder returns a new Registry Folder
 
     
     /**
@@ -253,8 +261,9 @@ public abstract class RegistryObject {
 
             return result;
         } catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+            String msg = "";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
     
@@ -286,8 +295,9 @@ public abstract class RegistryObject {
             }
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+            String msg = "Error trying to retrieve the resource ";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
     
@@ -377,7 +387,7 @@ public abstract class RegistryObject {
     }
     
     /**
-     * Utility function to retrieve the length of a property of a GREG <code>Node</code>.
+     * Utility function to retrieve the length of a property of a Registry <code>Node</code>.
      *
      * @param node
      * @param propertyName
@@ -386,7 +396,7 @@ public abstract class RegistryObject {
      */	
     protected static long getPropertyLength(Resource node, String propertyName) throws RegistryException {
         String property = node.getProperty(propertyName);
-        //if property asks for GREG_DATA then this should return the length of the content stream //my assumption
+        //if property asks for REGISTRY_DATA then this should return the length of the content stream //my assumption
         if(propertyName.equals(CMISConstants.GREG_DATA)){
             if(property != null && !property.equals("true")){
                 return 0;
@@ -449,8 +459,8 @@ public abstract class RegistryObject {
 
         //TODO Think on this later
         String path = resource.getPath();
-        if(path.endsWith("_pwc")){
-            int endIndex = path.indexOf("_pwc");
+        if(path.endsWith(CMISConstants.PWC_SUFFIX)){
+            int endIndex = path.indexOf(CMISConstants.PWC_SUFFIX);
             return path.substring(0, endIndex);
         } else if(path.contains(";")){
             int endIndex = path.indexOf(';');
@@ -462,7 +472,7 @@ public abstract class RegistryObject {
     }
 
     /**
-     * @return  the name of the underlying GREG <code>node</code>.
+     * @return  the name of the underlying Registry <code>node</code>.
      * @throws RegistryException
      */
     protected String getNodeName() throws RegistryException {
@@ -479,13 +489,10 @@ public abstract class RegistryObject {
     	}
 
         //Stored as abc_pwc in the registry but presented as pwc to cmis client
-        if(actualName.endsWith("_pwc")){
-            return actualName.substring(0, actualName.indexOf("_pwc"));
-        }
-        else if(actualName.contains(";")){  //if name includes the ;version:xxx part
-            //TODO maybe remove the ;version:xxx
-            return actualName;
-        } else{
+        if(actualName.endsWith(CMISConstants.PWC_SUFFIX)){
+            return actualName.substring(0, actualName.indexOf(CMISConstants.PWC_SUFFIX));
+        } else {
+            //TODO if name includes the ;version:xxx part maybe remove the ;version:xxx
             return actualName;
         }
     }
@@ -639,7 +646,7 @@ public abstract class RegistryObject {
             Resource newNode;
 
             if (rename) {
-                String destPath = getDestPathOfNode(getNode().getParentPath(), newName);
+                String destPath = CommonUtil.getDestPathOfNode(getNode().getParentPath(), newName);
                 repository.rename(getNode().getPath(), destPath);
                 newNode = repository.get(destPath);
                 //newNode.setProperty(PropertyIds.NAME);
@@ -679,20 +686,14 @@ public abstract class RegistryObject {
             }
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisStorageException(e.getMessage(), e);
+            String msg = "Failed to update properties ";
+            log.error(msg, e);
+            throw new CmisStorageException(msg, e);
         }
 
     }
 
-    private String getDestPathOfNode(String parentPath, String name) {
 
-		if (parentPath.endsWith("/")){
-			return parentPath+name;
-		} else{
-			return parentPath + "/" + name;
-		}
-    }
 
     /**
      * See CMIS 1.0 section 2.2.4.14 deleteObject
@@ -705,8 +706,9 @@ public abstract class RegistryObject {
             repository.delete(path);
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisRuntimeException(e.getMessage(), e);
+            String msg = "Failed to delete the object ";
+            log.error(msg, e);
+            throw new CmisRuntimeException(msg, e);
         }
     }
 
@@ -719,7 +721,7 @@ public abstract class RegistryObject {
         try {
             // move it if target location is not same as source location
         	//TODO 
-            String destPath = getDestPathOfNode(parent.getNode().getPath(), getNodeName());
+            String destPath = CommonUtil.getDestPathOfNode(parent.getNode().getPath(), getNodeName());
             String srcPath  = resource.getPath();
             Resource newNode;
             if (srcPath.equals(destPath)) {
@@ -732,8 +734,9 @@ public abstract class RegistryObject {
             return create(newNode);
         }
         catch (RegistryException e) {
-            log.debug(e.getMessage(), e);
-            throw new CmisStorageException(e.getMessage(), e);
+            String msg = "Failed ot move the object ";
+            log.error(msg, e);
+            throw new CmisStorageException(msg, e);
         }
     }
     
@@ -813,15 +816,16 @@ public abstract class RegistryObject {
         public void apply(Registry repository,Resource resource) {
             try {
                 for (PropertyData<?> prop: removeProperties) {
-                    GregStaticMethods.removeProperty(repository, resource, prop);
+                    CommonUtil.removeProperty(repository, resource, prop);
                 }
                 for (PropertyData<?> prop: updateProperties) {
-                    GregStaticMethods.setProperty(repository, resource, prop);
+                    CommonUtil.setProperty(repository, resource, prop);
                 }
             }
             catch (RegistryException e) {
-                log.debug(e.getMessage(), e);
-                throw new CmisStorageException(e.getMessage(), e);
+                String msg = "Failed to apply properties to the resource";
+                log.error(msg, e);
+                throw new CmisStorageException(msg, e);
             }
         }
     }
@@ -868,10 +872,8 @@ public abstract class RegistryObject {
     protected static boolean hasProperty(Resource resource,String propertyName){
     	
     	String property = resource.getProperty(propertyName);
-    	if (property != null)
-    		return true;
 
-    	return false;
+    	return property != null;
     }
     
     protected void compileProperties(PropertiesImpl properties, Set<String> filter, ObjectInfoImpl objectInfo)

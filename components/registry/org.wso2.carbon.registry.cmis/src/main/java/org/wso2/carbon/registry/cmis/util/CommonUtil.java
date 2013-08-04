@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.registry.cmis;
+package org.wso2.carbon.registry.cmis.util;
 
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.*;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.apache.chemistry.opencmis.commons.spi.Holder;
+import org.wso2.carbon.registry.cmis.RegistryFolder;
+
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-
-import org.wso2.carbon.registry.cmis.util.Util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -34,9 +34,85 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
- *
+ * Miscellaneous utility functions
  */
-public class GregStaticMethods {
+public final class CommonUtil {
+
+    /**
+     * Convert from <code>Calendar</code> to a <code>GregorianCalendar</code>.
+     * 
+     * @param date
+     * @return  <code>date</code> if it is an instance of <code>GregorianCalendar</code>.
+     *   Otherwise a new <code>GregorianCalendar</code> instance for <code>date</code>.
+     */
+    public static GregorianCalendar toCalendar(Calendar date) {
+        if (date instanceof GregorianCalendar) {
+            return (GregorianCalendar) date;
+        } else {
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(date.getTimeZone());
+            calendar.setTimeInMillis(date.getTimeInMillis());
+            return calendar;
+        }
+    }
+
+    /**
+     * Replace every occurrence of <code>target</code> in <code>string</code> with
+     * <code>replacement</code>.
+     *
+     * @param string  string to do replacement on
+     * @param target  string to search for
+     * @param replacement  string to replace with
+     * @return  string with replacing done
+     */
+    public static String replace(String string, String target, String replacement) {
+        if ("".equals(target)) {
+            throw new IllegalArgumentException("target string must not be empty");
+        }
+        if ("".equals(replacement) || target.equals(replacement)) {
+            return string;
+        }
+
+        StringBuilder result = new StringBuilder();
+        int d = target.length();
+        int k = 0;
+        int j;
+        do {
+            j = string.indexOf(target, k);
+            if (j < 0) {
+                result.append(string.substring(k));
+            } else {
+                result.append(string.substring(k, j)).append(replacement);
+            }
+            k = j + d;
+        } while (j >= 0);
+
+        return result.toString();
+    }
+
+    /**
+     * Escapes a GREG path such that it can be used in a XPath query
+     * @param path
+     * @return  escaped path
+     */
+    public static String escape(String path) {
+        return replace(path, " ", "_x0020_"); // fixme do more thorough escaping of path
+    }
+
+
+    /*
+          Common method to use to get target path
+     */
+    public static String getTargetPathOfNode(RegistryFolder parentFolder, String name) {
+
+        String parentPath = parentFolder.getNode().getPath();
+        if (parentPath.endsWith("/")){
+            return parentPath+name;
+        } else {
+            return parentPath + "/" + name;
+        }
+    }
+
 
     public static Resource getResourceById(Registry repository, String resourceId){
 
@@ -135,7 +211,7 @@ public class GregStaticMethods {
     /**
      * Convert an array of <code>Value</code>s to a list of <code>String</code>s.
      */
-    private static List<String> toStrings(String[] values) throws RegistryException {
+    public static List<String> toStrings(String[] values) throws RegistryException {
         ArrayList<String> strings = new ArrayList<String>(values.length);
 
         for (String v : values) {
@@ -148,7 +224,7 @@ public class GregStaticMethods {
     /**
      * Convert an array of <code>Value</code>s to a list of <code>BigInteger</code>s.
      */
-    private static List<BigInteger> toInts(String[] values) throws RegistryException {
+    public static List<BigInteger> toInts(String[] values) throws RegistryException {
         ArrayList<BigInteger> ints = new ArrayList<BigInteger>(values.length);
 
         for (String v : values) {
@@ -161,7 +237,7 @@ public class GregStaticMethods {
     /**
      * Convert an array of <code>Value</code>s to a list of <code>BigDecimal</code>s.
      */
-    private static List<BigDecimal> toDecs(String[] values) throws RegistryException {
+    public static List<BigDecimal> toDecs(String[] values) throws RegistryException {
         ArrayList<BigDecimal> decs = new ArrayList<BigDecimal>(values.length);
 
         for (String v : values) {
@@ -174,7 +250,7 @@ public class GregStaticMethods {
     /**
      * Convert an array of double <code>Value</code>s to a list of <code>BigInteger</code>s.
      */
-    private static List<BigDecimal> doublesToDecs(String[] values) throws RegistryException {
+    public static List<BigDecimal> doublesToDecs(String[] values) throws RegistryException {
         ArrayList<BigDecimal> decs = new ArrayList<BigDecimal>(values.length);
 
         for (String v : values) {
@@ -187,7 +263,7 @@ public class GregStaticMethods {
     /**
      * Convert an array of <code>Value</code>s to a list of <code>Booleans</code>s.
      */
-    private static List<Boolean> toBools(String[] values) throws RegistryException {
+    public static List<Boolean> toBools(String[] values) throws RegistryException {
         ArrayList<Boolean> bools = new ArrayList<Boolean>(values.length);
 
         for (String v : values) {
@@ -200,13 +276,13 @@ public class GregStaticMethods {
     /**
      * Convert an array of <code>Value</code>s to a list of <code>GregorianCalendar</code>s.
      */
-    private static List<GregorianCalendar> toDates(String[] values) throws RegistryException {
+    public static List<GregorianCalendar> toDates(String[] values) throws RegistryException {
         ArrayList<GregorianCalendar> dates = new ArrayList<GregorianCalendar>(values.length);
 
         for (String v : values) {
-        	//TODO check
-        	//Parses ISO 8601 compliant date string
-            dates.add(Util.toCalendar(javax.xml.bind.DatatypeConverter.parseDateTime(v)));
+            //TODO check
+            //Parses ISO 8601 compliant date string
+            dates.add(CommonUtil.toCalendar(javax.xml.bind.DatatypeConverter.parseDateTime(v)));
         }
 
         return dates;
@@ -215,7 +291,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyBoolean</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyBoolean propertyData) {
+    public static List<String> toValue(PropertyBoolean propertyData) {
         List<Boolean> values = propertyData.getValues();
         List<String> result = null;
 
@@ -233,7 +309,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyDateTime</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyDateTime propertyData) {
+    public static List<String> toValue(PropertyDateTime propertyData) {
         List<GregorianCalendar> values = propertyData.getValues();
         List<String> result = null;
         if (values == null) {
@@ -260,7 +336,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyDecimal</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyDecimal propertyData) {
+    public static List<String> toValue(PropertyDecimal propertyData) {
         List<BigDecimal> values = propertyData.getValues();
         List<String> result = null;
         if (values == null) {
@@ -277,7 +353,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyHtml</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyHtml propertyData) {
+    public static List<String> toValue(PropertyHtml propertyData) {
         List<String> values = propertyData.getValues();
         List<String> result = null;
         if (values == null) {
@@ -294,7 +370,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyId</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyId propertyData) {
+    public static List<String> toValue(PropertyId propertyData) {
         List<String> values = propertyData.getValues();
         List<String> result = null;
         if (values == null) {
@@ -311,7 +387,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyInteger</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyInteger propertyData) {
+    public static List<String> toValue(PropertyInteger propertyData) {
         List<BigInteger> values = propertyData.getValues();
         List<String> result = null;
         if (values == null) {
@@ -328,7 +404,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyString</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyString propertyData) {
+    public static List<String> toValue(PropertyString propertyData) {
         List<String> values = propertyData.getValues();
         List<String> result = new ArrayList<String>();
         if (values == null) {
@@ -345,7 +421,7 @@ public class GregStaticMethods {
     /**
      * Convert a <code>PropertyUri</code> to an array of GREG <code>Values</code>.
      */
-    private static List<String> toValue(PropertyUri propertyData) {
+    public static List<String> toValue(PropertyUri propertyData) {
         List<String> values = propertyData.getValues();
         List<String> result = null;
         if (values == null) {
@@ -358,4 +434,24 @@ public class GregStaticMethods {
 
         return result;
     }
+
+    public static String getDestPathOfNode(String parentPath, String name) {
+
+        if (parentPath.endsWith("/")){
+            return parentPath+name;
+        } else{
+            return parentPath + "/" + name;
+        }
+    }
+
+    public static boolean isNonEmptyProperties(Properties props) {
+        return props != null && props.getProperties() != null;
+    }
+
+    public static boolean hasObjectId(Holder<String> objectId) {
+        return objectId != null && objectId.getValue() != null;
+    }
+
+
+
 }

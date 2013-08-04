@@ -29,7 +29,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertiesImpl;
 import org.apache.chemistry.opencmis.commons.impl.server.ObjectInfoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.impl.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -43,7 +43,7 @@ import java.util.Arrays;
 
 /**
  * Instances of this class represent a versionable cmis:document and its versions backed by an underlying
- * GREG <code>Node</code>.
+ * Registry <code>Node</code>.
  */
 public abstract class RegistryVersionBase extends RegistryDocument {
     private static final Logger log = LoggerFactory.getLogger(RegistryVersionBase.class);
@@ -120,17 +120,13 @@ public abstract class RegistryVersionBase extends RegistryDocument {
                 if(versions!=null){
                     for(String version: versions){
 
-                        String resourcePath = path;
-                        String permanentPath = version;
+                        int beginIndex = version.indexOf(":")+1;
+                        int endIndex = version.length();
 
-                        int beginIndex = permanentPath.indexOf(":")+1;
-                        int endIndex = permanentPath.length();
-
-                        String versionNumber = permanentPath.substring(beginIndex,endIndex);
+                        String versionNumber = version.substring(beginIndex,endIndex);
                         long snapshotId = Long.parseLong(versionNumber);
 
-
-                        getRepository().removeVersionHistory(resourcePath, snapshotId);
+                        getRepository().removeVersionHistory(path, snapshotId);
 
                     }
                 }
@@ -263,8 +259,8 @@ public abstract class RegistryVersionBase extends RegistryDocument {
         try {
             Resource node = getNode();
             String[] versions = getRepository().getVersions(node.getPath());
-            if(versions==null){
-                throw new CmisObjectNotFoundException("GregVersionBase.java: No versions exist!!");
+            if(versions == null){
+                throw new CmisObjectNotFoundException("No versions exist");
             }
             String gotVersion = null;
             for (String version: versions){
@@ -272,8 +268,8 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             		gotVersion = version;
             	}
             }
-            if(gotVersion==null){
-            	throw new CmisObjectNotFoundException("GregVersionBase.java: No version found!!");
+            if(gotVersion == null){
+            	throw new CmisObjectNotFoundException("No version found");
             }
             return new RegistryVersion(getRepository(), node, gotVersion, typeManager, pathManager);
         }
@@ -283,22 +279,14 @@ public abstract class RegistryVersionBase extends RegistryDocument {
         }
     }
 
-    //------------------------------------------< protected >---
 
     /**
      * @return  Id of the version representing the base of this versions series
      * @throws RegistryException
      */
     protected String getBaseNodeId() throws RegistryException {
-        if( getRepository().getVersions(getNode().getPath()) != null){
-            String[] versions = getRepository().getVersions(getNode().getPath());
-            String baseNodePath = versions[versions.length-1];
-    	    return baseNodePath;
-        } else{
-            String baseNodePath = getNode().getPath();
-    	    return baseNodePath;
-        }
-
+        String[] versions = getRepository().getVersions(getNode().getPath());
+        return (versions != null ? versions[versions.length-1] : getNode().getPath());
     }
 
     /**
@@ -355,13 +343,11 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             String property = getNode().getProperty(CMISConstants.GREG_CREATED_AS_PWC);
             if(property != null && property.equals("true")){
                 return getVersionSeriesId();
-            } else{
-                return getVersionSeriesId()+"_pwc";
+            } else {
+                return getVersionSeriesId() + CMISConstants.PWC_SUFFIX;
             }
-        } else{
-            return null;
         }
-
+        return null;
     }
 
     @Override
@@ -387,7 +373,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
         repository.put(node.getPath(), node);
 
         //Make a private working copy (/resourceName_pwc)
-        String destPath = node.getPath()+"_pwc";
+        String destPath = node.getPath() + CMISConstants.PWC_SUFFIX;
         repository.copy(node.getPath(), destPath);
 
         node.setProperty(CMISConstants.GREG_IS_CHECKED_OUT, "true");
@@ -400,7 +386,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
         } else{
             resource  = repository.newResource();
             //Have to set content, otherwise Greg will throw exception when browsing this file in Workbench
-            resource.setContent("tracker");
+            resource.setContent(CMISConstants.TEMP_CONTENT);
         }
 
         resource.setProperty(destPath, "true");
@@ -410,7 +396,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
     }
 
     //------------------------------------------< private >---
-
+    // TODO REPLACE +++++++++++++++++++++++++++++++++++++++++
     private static String getResourceName(String path) {
         if(path.equals("/")){
             return "/";
@@ -432,7 +418,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
         getRepository().put(getNode().getPath(), getNode());
 
         String nodePath = getNode().getPath();
-        if(nodePath.endsWith("_pwc")){
+        if(nodePath.endsWith(CMISConstants.PWC_SUFFIX)){
 
             //Remove checkedOut doc from tracker
             Resource resource = getRepository().resourceExists(CMISConstants.GREG_CHECKED_OUT_TRACKER)
@@ -450,7 +436,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             }
 
 
-            String destPath = nodePath.substring(0, nodePath.indexOf("_pwc"));
+            String destPath = nodePath.substring(0, nodePath.indexOf(CMISConstants.PWC_SUFFIX));
             getRepository().move(nodePath, destPath);
 
             //Create a version
@@ -496,7 +482,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
             throw new CmisRuntimeException("Tracker not found");
         }
 
-        if(node.getPath().endsWith("_pwc")){
+        if(node.getPath().endsWith(CMISConstants.PWC_SUFFIX)){
 
             /*
             * Path of original copy     : /abc/def/resourceName
@@ -507,7 +493,7 @@ public abstract class RegistryVersionBase extends RegistryDocument {
 
             //Get the original copy
             String pathOfPwc = node.getPath();
-            String pathOfOriginalCopy = pathOfPwc.substring(0, pathOfPwc.indexOf("_pwc"));
+            String pathOfOriginalCopy = pathOfPwc.substring(0, pathOfPwc.indexOf(CMISConstants.PWC_SUFFIX));
 
             Resource resource = repository.get(pathOfOriginalCopy);
             //Reset properties
@@ -532,25 +518,20 @@ public abstract class RegistryVersionBase extends RegistryDocument {
     
     private boolean isCheckedOut(Resource node){
 
-        if(node.getPath().endsWith("_pwc")){
+        if(node.getPath().endsWith(CMISConstants.PWC_SUFFIX)){
 
             String path = node.getPath();
             try {
-                node = getRepository().get( path.substring(0, path.indexOf("_pwc")));
+                node = getRepository().get( path.substring(0, path.indexOf(CMISConstants.PWC_SUFFIX)));
             } catch (RegistryException e) {
-                log.debug(e.getMessage());
-                throw new CmisObjectNotFoundException(e.getMessage(), e);
+                String msg = "Failed to retrieve the resource at " + path;
+                log.error(msg, e);
+                throw new CmisObjectNotFoundException(msg, e);
             }
         }
     	String property = node.getProperty(CMISConstants.GREG_IS_CHECKED_OUT);
-    	if (property == null){
-    		return false;
-    	}
-    	if(property.equals("true")){
-    		return true;
-    	} else{
-    		return false;
-    	}
+
+        return (property != null && property.equals("true"));
     }
 
 }

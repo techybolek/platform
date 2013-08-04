@@ -25,7 +25,7 @@ import org.wso2.carbon.registry.cmis.impl.UnversionedDocumentTypeHandler;
 import java.util.Set;
 
 /**
- * Instances of this class represent a non versionable cmis:document backed by an underlying GREG <code>Node</code>.
+ * Instances of this class represent a non versionable cmis:document backed by an underlying Registry <code>Node</code>.
  */
 public class RegistryUnversionedDocument extends RegistryDocument {
     

@@ -26,7 +26,9 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisStorageException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.DocumentTypeDefinitionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.registry.cmis.util.Util;
+import org.wso2.carbon.registry.cmis.util.CMISConstants;
+import org.wso2.carbon.registry.cmis.util.CommonUtil;
+
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -35,7 +37,7 @@ import org.wso2.carbon.registry.cmis.*;
 /**
  * Type handler that provides cmis:document.
  */
-public class DocumentTypeHandler extends AbstractGregTypeHandler {
+public class DocumentTypeHandler extends AbstractTypeHandler {
 
     public DocumentTypeHandler(Registry repository, PathManager pathManager,
                                RegistryTypeManager typeManager) {
@@ -98,7 +100,7 @@ public class DocumentTypeHandler extends AbstractGregTypeHandler {
             }
 
             //Put to registry AS A PWC (Look at getDestPathOfNode() )
-            String destinationPath = Util.getTargetPathOfNode(parentFolder, name);
+            String destinationPath = CommonUtil.getTargetPathOfNode(parentFolder, name);
             repository.put(destinationPath, fileNode);
             fileNode = repository.get(destinationPath);
             

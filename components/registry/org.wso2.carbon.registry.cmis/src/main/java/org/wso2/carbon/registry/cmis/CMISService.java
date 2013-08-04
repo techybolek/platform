@@ -31,7 +31,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- * Greg service implementation.
+ * Registry service implementation for CMIS.
  */
 public class CMISService extends AbstractCmisService {
     private final CMISRepository gregRepository;

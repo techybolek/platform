@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.registry.cmis.RegistryFolder;
 import org.wso2.carbon.registry.cmis.RegistryTypeManager;
-import org.wso2.carbon.registry.cmis.util.Util;
+
+import org.wso2.carbon.registry.cmis.util.CommonUtil;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -35,7 +36,7 @@ import org.wso2.carbon.registry.cmis.PathManager;
 /**
  * Type handler that provides cmis:folder.
  */
-public class FolderTypeHandler extends AbstractGregTypeHandler {
+public class FolderTypeHandler extends AbstractTypeHandler {
 
     public FolderTypeHandler(Registry repository, PathManager pathManager,
                              RegistryTypeManager typeManager) {
@@ -88,7 +89,7 @@ public class FolderTypeHandler extends AbstractGregTypeHandler {
         try {
         	
         	Collection node = repository.newCollection();
-            String destinationPath = Util.getTargetPathOfNode(parentFolder, name);
+            String destinationPath = CommonUtil.getTargetPathOfNode(parentFolder, name);
         	repository.put(destinationPath, node);
         	Resource resource = repository.get(destinationPath);
         	// compile the properties
