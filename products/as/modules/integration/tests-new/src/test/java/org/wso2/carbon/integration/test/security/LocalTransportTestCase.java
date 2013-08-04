@@ -153,8 +153,4 @@ public class LocalTransportTestCase extends ASIntegrationTest {
                 asServer.getBackEndUrl());
     }
 
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        deleteService(serviceName);
-    }
 }
