@@ -19,6 +19,7 @@ package org.wso2.carbon.identity.scim.common.listener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.scim.common.config.SCIMProvisioningConfigManager;
@@ -32,6 +33,7 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
@@ -376,7 +378,10 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
 
         String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
-        String roleNameWithDomain = UserCoreUtil.addDomainToName(roleName, domainName);
+        if(domainName == null){
+            domainName = UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
+        }
+        String roleNameWithDomain = domainName + CarbonConstants.DOMAIN_SEPARATOR + roleName;
 
         //query role name from identity table
         try {
@@ -419,7 +424,10 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
 
         String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
-        String roleNameWithDomain = UserCoreUtil.addDomainToName(roleName, domainName);
+        if(domainName == null){
+            domainName = UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
+        }
+        String roleNameWithDomain = domainName + CarbonConstants.DOMAIN_SEPARATOR + roleName;
         try {
             //delete group attributes - no need to check existence here,
             //since it is checked in below method.
@@ -461,8 +469,11 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
 
         String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
-        String roleNameWithDomain = UserCoreUtil.addDomainToName(roleName, domainName);
-        String newRoleNameWithDomain = UserCoreUtil.addDomainToName(newRoleName, domainName);
+        if(domainName == null){
+            domainName = UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
+        }
+        String roleNameWithDomain = domainName + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+        String newRoleNameWithDomain = domainName + CarbonConstants.DOMAIN_SEPARATOR + newRoleName;
         try {
             scimGroupHandler.updateRoleName(roleNameWithDomain, newRoleNameWithDomain);
             
