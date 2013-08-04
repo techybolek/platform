@@ -32,6 +32,7 @@
     </dependencies>
 
     <modules>
+	<module>tcks/cmis-tck</module>
         <module>registry</module>
        <!-- <module>governance-api-test</module>-->
     </modules>

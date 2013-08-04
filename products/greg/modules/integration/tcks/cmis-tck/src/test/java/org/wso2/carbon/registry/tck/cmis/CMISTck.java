@@ -35,8 +35,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+
 
 /**
  * A test class to run the CMIS TCK as a TestNG module
@@ -52,6 +54,9 @@ public class CMISTck {
     private EnvironmentBuilder builder;
     private UserInfo userInfo;
 
+    private String cmisJarPath = "";
+    private String loggingJarPath = "";
+
     @BeforeClass(groups = {"wso2.greg"})
     public void init()
             throws MalformedURLException, RegistryException, LoginAuthenticationExceptionException,
@@ -66,20 +71,25 @@ public class CMISTck {
     }
 
     @Test(groups = {"wso2.greg"})
-    public void runTckTest() throws RegistryException, InterruptedException, IOException {
+    public void runTckTest() throws RegistryException, InterruptedException, IOException, Exception {
 	
 	PrintStream ps = new PrintStream(new FileOutputStream("system.properties"));
-	ps.println(CMIS_PATH + "=" + System.getProperty(CMIS_PATH));
-	ps.println(LOG_PATH + "=" + System.getProperty(LOG_PATH));
+	String fs = File.separator;
+	String localRepo =  System.getProperty("local.repo");
+		
+	loggingJarPath = localRepo + fs + "commons-logging" + fs + "commons-logging" + fs + "1.1.1" + fs;
+	cmisJarPath =  localRepo + fs + "org" + fs + "apache" + fs + "chemistry" + fs + "opencmis" + fs;  
 
-	Process p = Runtime.getRuntime().exec("ant cmis");
-	int stat = p.waitFor();
+	ps.println(CMIS_PATH + "=" + cmisJarPath);
+	ps.println(LOG_PATH + "=" + loggingJarPath);
+	
+ 	Process p = Runtime.getRuntime().exec("ant cmis");
+        int stat = p.waitFor();
 	
 	if (stat == 0) {
-	   System.out.println("CMIS TCK ran successfully");	
+	   System.out.println("----------------- CMIS TCK ran successfully, see the tck-results (default) for the results -------------------");	
 	} else {
-	   System.out.println("Failed to run CMIS TCK");	
-
+	   throw new Exception ("------------------ Failed to run CMIS TCK --------------------");	
 	}
     }
 }

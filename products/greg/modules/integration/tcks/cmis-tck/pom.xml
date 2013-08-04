@@ -10,7 +10,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <name>Registry TestNG TCK Test Module</name>
+    <name>Registry TCK Test Module</name>
     <artifactId>org.wso2.carbon.registry.test.tck</artifactId>
     <packaging>jar</packaging>
 
@@ -64,16 +64,10 @@
                         <instr.file>${basedir}/src/test/resources/instrumentation.txt</instr.file>
                         <filters.file>${basedir}/src/test/resources/filters.txt</filters.file>
                         <emma.output>${basedir}/target/emma</emma.output-->
-			
 			<property>
-                            <name>cmis.jar.path</name>
-                            <value>${settings.localRepository}/org/apache/chemistry/opencmis/</value>
-                        </property>
-			  <property>
-                            <name>logging.jar.path</name>
-                            <value>${settings.localRepository}/commons-logging/commons-logging/1.1.1/</value>
-                        </property>
-
+                            <name>local.repo</name>
+                            <value>${settings.localRepository}</value>
+                        </property>	
                     </systemProperties>
                     <workingDirectory>${basedir}/target</workingDirectory>
                 </configuration>
