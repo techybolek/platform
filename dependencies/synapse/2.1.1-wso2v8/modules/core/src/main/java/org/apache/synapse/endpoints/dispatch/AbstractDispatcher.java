@@ -149,7 +149,7 @@ public abstract class AbstractDispatcher implements Dispatcher {
                         return;
                     }
                     // reset
-                    StringBuilder newCookie = new StringBuilder();
+                    StringBuilder newCookie = new StringBuilder("");
                     
                     for (int i = 0; i < sessionIds.length; i++) {
 						String sessionId = sessionIds[i];
@@ -165,13 +165,13 @@ public abstract class AbstractDispatcher implements Dispatcher {
                     	newCookie.append(sessionId+"; ");
 					}
 
-                    log.debug("Modified Cookie header: "+ ("".equals(newCookie.toString()) ? "" : newCookie.substring(0,
-							newCookie.lastIndexOf(";"))));
+                    String modifiedCookie = ("".equals(newCookie.toString()) ? "" : newCookie.substring(0,
+                                            newCookie.lastIndexOf(";")));
+                    
+                    log.debug("Modified Cookie header: " + modifiedCookie);
+
                     // add the modified Cookie header
-					headerMap.put(
-							key,
-							"".equals(newCookie.toString()) ? "" : newCookie.substring(0,
-									newCookie.lastIndexOf(";")));
+					headerMap.put(key, modifiedCookie);
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Couldn't find the " + key + " header to find the session");
