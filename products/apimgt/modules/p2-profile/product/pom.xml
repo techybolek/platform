@@ -210,6 +210,8 @@
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.as.runtimes.cxf.feature:${carbon.platform.version}</featureArtifactDef>
                                 <!-- end of as runtime features-->
                                 <!---->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.webapp.mgt.feature:${carbon.platform.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt.feature:${carbon.platform.version}</featureArtifactDef>
 
                             </featureArtifacts>
                         </configuration>
@@ -596,6 +598,14 @@
                                     <id>org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+                                <feature>
+                                  <id>org.wso2.carbon.webapp.mgt.feature.group</id>
+                                  <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                <id>org.wso2.carbon.jaxws.webapp.mgt.feature.group</id>
+                                <version>${carbon.platform.version}</version>
+                                </feature>
 				
                                 <!--End Stratos API Manager features-->
                             </features>
@@ -936,6 +946,14 @@
                                <!-- end of as-runtimes-->
 				
                                 <!--End Stratos API Manager features-->
+                                <feature>
+                                    <id>org.wso2.carbon.webapp.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.jaxws.webapp.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
                             </features>
                         </configuration>
                     </execution>
@@ -1219,6 +1237,7 @@
                                     <id>org.wso2.carbon.governance.lifecycle.management.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+
 				<feature>
 				<id>org.wso2.carbon.user.mgt.feature.group</id>
 				<version>4.2.0-SNAPSHOT</version>
@@ -1267,6 +1286,14 @@
                                 </feature>
 
                                 <!-- end of as-runtimes-->
+                                <feature>
+                                    <id>org.wso2.carbon.webapp.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.jaxws.webapp.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
                             </features>
                         </configuration>
                     </execution>
