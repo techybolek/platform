@@ -24,6 +24,11 @@ import static org.wso2.carbon.connector.jira.template.JiraTemplateUtil.lookupFun
 
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.connector.jira.JiraSearchMediator;
+import org.wso2.carbon.connector.jira.util.JiraMediatorUtil;
+
+import com.atlassian.jira.rest.client.api.JiraRestClient;
+import com.atlassian.jira.rest.client.api.domain.Issue;
+import com.atlassian.jira.rest.client.api.domain.SearchResult;
 
 /**
  *
@@ -34,5 +39,15 @@ public class JiraSearchTemplate extends JiraSearchMediator {
 		fillAuthParams(synCtx, this);
 		setJqlQuery(lookupFunctionParam(synCtx, FUNC_JQL_QUERY));
 	    return super.mediate(synCtx);
+	}
+	
+	public static void main(String [] ar){
+		JiraRestClient client = JiraMediatorUtil.getClient("https://wso2.org/jira","dushan@wso2.com", "Adminhanuma@123");
+        SearchResult searchResult = client.getSearchClient().searchJql("text ~ 'dushan'").claim();
+        for(Issue issue :searchResult.getIssues()){
+        	System.out.println("==============================");
+        	System.out.println(issue.getSummary()+"-| |-");
+        	System.out.println("==============================");
+        }
 	}
 }

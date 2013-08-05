@@ -62,6 +62,18 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.atlassian.util.concurrent</groupId>
+			<artifactId>atlassian-util-concurrent</artifactId>
+			<version>2.4.0-M9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.atlassian.jira</groupId>
+			<artifactId>jira-rest-java-client-core</artifactId>
+			<version>${jrjc.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
@@ -71,6 +83,78 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-jaxrs</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-xc</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.atlassian.sal</groupId>
+			<artifactId>sal-api</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.atlassian.event</groupId>
+			<artifactId>atlassian-event</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.atlassian.httpclient</groupId>
+			<artifactId>atlassian-httpclient-apache-httpcomponents</artifactId>
+			<version>0.13.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.atlassian.httpclient</groupId>
+			<artifactId>atlassian-httpclient-api</artifactId>
+			<version>0.13.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient</artifactId>
+			<version>4.0-beta3-atlassian-1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient-cache</artifactId>
+			<version>4.0-beta3-atlassian-1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-cache</artifactId>
+			<version>4.2.1-atlassian-2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.atlassian.httpclient</groupId>
+			<artifactId>atlassian-httpclient-spi</artifactId>
+			<version>0.13.2</version>
 		</dependency>
 
 	</dependencies>
@@ -149,6 +233,14 @@
 									<outputDirectory>target/connector/dependencies</outputDirectory>
 								</artifactItem>
 								<artifactItem>
+									<groupId>com.sun.jersey</groupId>
+									<artifactId>jersey-core</artifactId>
+									<version>${jersey.client.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+								<artifactItem>
 									<groupId>com.atlassian.jira</groupId>
 									<artifactId>jira-rest-java-client-api</artifactId>
 									<version>${jrjc.version}</version>
@@ -180,6 +272,154 @@
 									<overWrite>true</overWrite>
 									<outputDirectory>target/connector/dependencies</outputDirectory>
 								</artifactItem>
+								<!-- jackson bindings -->
+								<artifactItem>
+									<groupId>org.codehaus.jackson</groupId>
+									<artifactId>jackson-core-asl</artifactId>
+									<version>1.5.5</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.codehaus.jackson</groupId>
+									<artifactId>jackson-core-asl</artifactId>
+									<version>1.5.5</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.codehaus.jackson</groupId>
+									<artifactId>jackson-core-asl</artifactId>
+									<version>1.5.5</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.codehaus.jackson</groupId>
+									<artifactId>jackson-mapper-asl</artifactId>
+									<version>1.5.5</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.codehaus.jackson</groupId>
+									<artifactId>jackson-jaxrs</artifactId>
+									<version>1.5.5</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.codehaus.jackson</groupId>
+									<artifactId>jackson-xc</artifactId>
+									<version>1.5.5</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>com.atlassian.util.concurrent</groupId>
+									<artifactId>atlassian-util-concurrent</artifactId>
+									<version>2.4.0-M9</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>com.atlassian.sal</groupId>
+									<artifactId>sal-api</artifactId>
+									<version>2.7.0</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>com.atlassian.event</groupId>
+									<artifactId>atlassian-event</artifactId>
+									<version>2.2.0</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>com.atlassian.httpclient</groupId>
+									<artifactId>atlassian-httpclient-apache-httpcomponents</artifactId>
+									<version>0.13.2</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>com.atlassian.httpclient</groupId>
+									<artifactId>atlassian-httpclient-api</artifactId>
+									<version>0.13.2</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.apache.httpcomponents</groupId>
+									<artifactId>httpasyncclient</artifactId>
+									<version>4.0-beta3-atlassian-1</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.apache.httpcomponents</groupId>
+									<artifactId>httpasyncclient-cache</artifactId>
+									<version>4.0-beta3-atlassian-1</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.apache.httpcomponents</groupId>
+									<artifactId>httpclient-cache</artifactId>
+									<version>4.2.1-atlassian-2</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>com.atlassian.httpclient</groupId>
+									<artifactId>atlassian-httpclient-spi</artifactId>
+									<version>0.13.2</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.apache.httpcomponents</groupId>
+									<artifactId>httpmime</artifactId>
+									<version>4.1.2</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
+
+
+
+
 							</artifactItems>
 						</configuration>
 					</execution>
@@ -236,7 +476,7 @@
 	</build>
 
 	<properties>
-		<jrjc.version>2.0.0-m13</jrjc.version>
+		<jrjc.version>2.0.0-m19</jrjc.version>
 		<jersey.client.version>1.5</jersey.client.version>
 		<slf4j.version>1.6.1</slf4j.version>
 	</properties>
