@@ -101,28 +101,12 @@ mvn install:install-file -Dfile=$APPFACTORY_HOME/repository/resources/maven/dbs-
 mvn archetype:generate -DartifactId=dbsdefault -DarchetypeGroupId=org.wso2.carbon.appfactory.maven.dbsarchetype -DarchetypeArtifactId=dbs-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=SNAPSHOT -DinteractiveMode=false -DarchetypeCatalog=local  > /dev/null
 cd ../..
 
-#configure controller
-mkdir setup/s2
-echo "Setting up Controller........"
-/usr/bin/unzip  -q resources/packs/wso2sc-1.0.1.zip -d setup/s2
 
-cp resources/configs/cloud-manager-user-mgt.xml $S2_SC_HOME/repository/conf/user-mgt.xml
-cat resources/configs/cloud-manager-axis2.xml | sed -e "s@AF_HOST@$af_host_name@g" > $S2_SC_HOME/repository/conf/axis2/axis2.xml
-cp resources/configs/cloud-manager-registry.xml $S2_SC_HOME/repository/conf/registry.xml
-cat resources/configs/cloud-manager-carbon.xml | sed -e "s@AF_HOST@$af_host_name@g" > $S2_SC_HOME/repository/conf/carbon.xml
-#cp resources/configs/cartridge-config.properties $S2_SC_HOME/repository/conf/cartridge-config.properties
-cp resources/configs/tenant-mgt.xml $S2_SC_HOME/repository/conf/tenant-mgt.xml
-cp resources/configs/cloud-manager-stratos.xml $S2_HOME_HOME/repository/conf/multitenancy/stratos.xml
-
-mkdir $S2_SC_HOME/repository/conf/appfactory
-cp $APPFACTORY_HOME/repository/conf/appfactory/appfactory.xml $S2_SC_HOME/repository/conf/appfactory
-
-cp $APPFACTORY_HOME/repository/components/plugins/org.wso2.carbon.appfactory.common_1.0.2.jar $S2_SC_HOME/repository/components/dropins
-cp resources/lib/org.wso2.carbon.appfactory.tenant.roles-1.0.2.jar $S2_SC_HOME/repository/components/dropins
-cp resources/lib/org.wso2.carbon.appfactory.tenant.mgt.stub-1.0.0.jar $S2_SC_HOME/repository/components/dropins
-cp $APPFACTORY_HOME/repository/components/plugins/org.wso2.carbon.appfactory.userstore_1.0.2.jar $S2_SC_HOME/repository/components/lib
-cp resources/lib/mysql-connector-java-5.1.12-bin.jar $S2_SC_HOME/repository/components/lib
-
+. `pwd`/set-up-sc.sh
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $SC_VERSION -h $af_host_name -o 2 
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "test" -v $SC_VERSION -h $af_host_name -o 3
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $SC_VERSION -h $af_host_name -o 4
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $SC_VERSION -h $af_host_name -o 5
 
 . `pwd`/set-up-as.sh
 
