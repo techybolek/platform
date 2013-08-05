@@ -176,7 +176,7 @@
 				<featureArtifactDef>
 				    org.wso2.carbon:org.wso2.carbon.registry.community.features.feature:${carbon.platform.version}
 			       	</featureArtifactDef>
-			<featureArtifactDef>
+			        <featureArtifactDef>
 				    org.wso2.carbon:org.wso2.carbon.registry.community.features.feature:${carbon.platform.version}
 				</featureArtifactDef>-
 				<featureArtifactDef>
