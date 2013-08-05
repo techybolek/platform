@@ -79,6 +79,13 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostAuthenticate(String userName, boolean authenticated,
                                       UserStoreManager userStoreManager)
             throws UserStoreException {
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
+
         String activeAttributeValue = userStoreManager.getUserClaimValue(userName, SCIMConstants.ACTIVE_URI, null);
         boolean isUserActive = true;
         if (activeAttributeValue != null) {
@@ -91,28 +98,30 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             }
         }
         return authenticated;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
     }
 
     public boolean doPreAddUser(String s, Object o, String[] strings,
                                 Map<String, String> stringStringMap, String s1,
                                 UserStoreManager userStoreManager) throws UserStoreException {
-        try {
-            if (userStoreManager.isSCIMEnabled()) {
-                return true;
-            } else {
-                throw new UserStoreException("Error While Adding the User: SCIM not enable");
-            }
-
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new UserStoreException(e.getMessage());
-        }
-
+        return true;
     }
 
     public boolean doPostAddUser(String userName, Object credential, String[] roleList,
                                  Map<String, String> claims, String profile,
                                  UserStoreManager userStoreManager)
             throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
         /*add mandatory attributes in core schema like id, meta attributes etc
         if SCIM Enabled in User Store and if not already added.*/
         Map<String, String> attributes = null;
@@ -180,6 +189,13 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             throw new UserStoreException("Error in constructing SCIM object from attributes when provisioning.");
         }
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
+
+
     }
 
     public boolean doPreUpdateCredential(String s, Object o, Object o1,
@@ -203,6 +219,13 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostUpdateCredentialByAdmin(String userName, Object credential,
                                                  UserStoreManager userStoreManager)
             throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
         //update last-modified-date
         try {
             if (userStoreManager.isSCIMEnabled()) {
@@ -232,10 +255,23 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
                     "Error in provisioning 'update credential by admin' operation");
         }
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
     }
 
     public boolean doPreDeleteUser(String userName, UserStoreManager userStoreManager)
             throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
+
         //do provisioning
         try {
             //identify the scim consumer from the user name in carbon context and perform provisioning.
@@ -251,6 +287,12 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             throw new UserStoreException("Error in provisioning delete operation");
         }
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
+
     }
 
     public boolean doPostDeleteUser(String s, UserStoreManager userStoreManager)
@@ -279,6 +321,14 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostSetUserClaimValues(String userName, Map<String, String> claims,
                                             String profileName, UserStoreManager userStoreManager)
             throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
+
         //check if it is specified to skip this listner.
         if ((SCIMCommonUtils.getThreadLocalToSkipSetUserClaimsListeners() != null &&
              !SCIMCommonUtils.getThreadLocalToSkipSetUserClaimsListeners()) ||
@@ -332,6 +382,10 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             }
         }
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
     }
 
     public boolean doPreDeleteUserClaimValues(String s, String[] strings, String s1,
@@ -359,22 +413,21 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPreAddRole(String s, String[] strings,
                                 org.wso2.carbon.user.api.Permission[] permissions,
                                 UserStoreManager userStoreManager) throws UserStoreException {
-        try {
-            if (userStoreManager.isSCIMEnabled()) {
-                return true;
-            } else {
-                throw new UserStoreException("Error while Adding the Group: SCIM not enable");
-            }
 
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new UserStoreException(e.getMessage());
-        }
-
+        return true;
     }
 
     public boolean doPostAddRole(String roleName, String[] userList,
                                  org.wso2.carbon.user.api.Permission[] permissions,
                                  UserStoreManager userStoreManager) throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
+
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
 
         String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
@@ -417,10 +470,24 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
         }
 
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
+
     }
 
     public boolean doPreDeleteRole(String roleName, UserStoreManager userStoreManager)
             throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
+
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
 
         String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
@@ -450,6 +517,12 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             throw new UserStoreException("Error in provisioning delete operation");
         }
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
+
     }
 
     public boolean doPostDeleteRole(String roleName, UserStoreManager userStoreManager)
@@ -465,6 +538,14 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostUpdateRoleName(String roleName, String newRoleName,
                                         UserStoreManager userStoreManager)
             throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
+
         //TODO:set last update date
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
 
@@ -501,6 +582,12 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             throw new UserStoreException("Error in provisioning delete operation");
         }
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
+
     }
 
     public boolean doPreUpdateUserListOfRole(String s, String[] strings, String[] strings1,
@@ -512,6 +599,13 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostUpdateUserListOfRole(String roleName, String[] deletedUsers,
                                               String[] newUsers, UserStoreManager userStoreManager)
             throws UserStoreException {
+
+        try {
+            // If scim not enabled returns
+            if (!userStoreManager.isSCIMEnabled()) {
+                return true;
+            }
+            
         //TODO:set last update date
         //do provisioning
         try {
@@ -536,6 +630,13 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             throw new UserStoreException("Error in provisioning delete operation");
         }
         return true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new UserStoreException(e);
+        }
+
+
+
     }
 
     public boolean doPreUpdateRoleListOfUser(String s, String[] strings, String[] strings1,
