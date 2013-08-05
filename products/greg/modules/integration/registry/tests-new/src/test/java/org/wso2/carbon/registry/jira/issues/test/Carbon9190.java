@@ -74,6 +74,7 @@ public class Carbon9190 {
         resourceAdminServiceClient =
                 new ResourceAdminServiceClient(environment.getGreg().getProductVariables().getBackendUrl(),
                                                environment.getGreg().getSessionCookie());
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
 
     }

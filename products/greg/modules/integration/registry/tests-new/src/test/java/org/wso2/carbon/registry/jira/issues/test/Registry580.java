@@ -31,7 +31,9 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.lifecycle.test.utils.LifeCycleUtils;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
@@ -102,6 +104,7 @@ public class Registry580 {
                                                          ROLE_NAME, WRITE_ACTION, PERMISSION_ENABLED);
         resourceAdminServiceClient.addResourcePermission(SERVICES_DENIED_DIR_PATH,
                                                          ROLE_NAME, DELETE_ACTION, PERMISSION_DISABLED);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
 
     }

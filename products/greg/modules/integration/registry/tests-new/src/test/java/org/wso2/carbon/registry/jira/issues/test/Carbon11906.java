@@ -95,6 +95,7 @@ public class Carbon11906 {
         resourceAdminServiceClient =
                 new ResourceAdminServiceClient(environment.getGreg().getProductVariables().getBackendUrl(),
                                                environment.getGreg().getSessionCookie());
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
     }
 
@@ -128,7 +129,6 @@ public class Carbon11906 {
     @Test(groups = "wso2.greg", description = "Add Artifact", dependsOnMethods = "testAddRxt")
     public void testAddArtifact() throws RegistryException, InterruptedException, AxisFault {
 
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         artifactManager = new GenericArtifactManager(governance, "person");
         artifact = artifactManager.newGovernanceArtifact(new QName("newPerson_Carbon11906"));
 
