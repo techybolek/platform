@@ -3,10 +3,6 @@
 			<className>org.wso2.carbon.appfactory.hostobjects.configuration.AppFactoryConfigurationReader</className>
 			<name>AppFactoryConfigurationReader</name>
 		</hostObject>
-               <hostObject>
-			<className>org.wso2.carbon.hostobjects.sysprop.SystemPropertyReaderObject</className>
-			<name>SystemPropertyReaderObject</name>
-	      </hostObject>
 </module>
 
 

@@ -17,6 +17,7 @@
 <UserManager>
     <Realm>
         <Configuration>
+                <AddAdmin>true</AddAdmin>
                 <AdminRole>admin</AdminRole>
                 <AdminUser>
                      <UserName>admin@admin.com</UserName>
@@ -34,10 +35,12 @@
         </Configuration>
 
 <UserStoreManager class="org.wso2.carbon.user.core.ldap.ReadWriteLDAPUserStoreManager">
+            <Property name="TenantManager">org.wso2.carbon.user.core.tenant.CommonHybridLDAPTenantManager</Property>
             <Property name="ConnectionURL">ldap://localhost:10389</Property>
             <Property name="ConnectionName">uid=admin,ou=system</Property>
             <Property name="ConnectionPassword">admin</Property>
             <Property name="passwordHashMethod">SHA</Property>
+            <Property name="IsEmailUserName">true</Property>
             <Property name="UserNameListFilter">(objectClass=person)</Property>
 	    <Property name="UserEntryObjectClass">inetOrgPerson</Property>
             <Property name="UserSearchBase">ou=Users,dc=appfactory,dc=wso2,dc=com</Property>
