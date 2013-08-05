@@ -18,6 +18,8 @@ package org.wso2.carbon.analytics.hive.extension;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.analytics.hive.annotation.HiveAnnotation;
+import org.wso2.carbon.analytics.hive.annotation.util.AnnotationBuilder;
 
 public class ResolvePathAnalyzer extends AbstractHiveAnalyzer {
 
@@ -27,7 +29,10 @@ public class ResolvePathAnalyzer extends AbstractHiveAnalyzer {
     @Override
     public void execute() {
         String path = null;
-        String filePath = "file://${CARBON_HOME}/repository/components/lib/CustomUDF_Country.jar";
+
+        HiveAnnotation annotation= AnnotationBuilder.getAnnotation("resolvePath");
+
+        String filePath= annotation.getParameter("path");
 
         try {
             path = resolvePath(filePath);

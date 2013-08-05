@@ -55,5 +55,5 @@ public class HiveConstants {
     public static final String ANNOTATIONS__ELEMENT = "annotations";
     public static final String ANNOTATION_ELEMENT = "annotation";
     public static final String ANNOTATION_NAME__ELEMENT = "name";
-    public static final String ANNOTATION_CLASS_ELEMENT = "class";
+    public static final String ANNOTATION_PARAMS_ELEMENT = "parameters";
 }

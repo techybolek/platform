@@ -22,7 +22,7 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveContext;
 import org.wso2.carbon.analytics.hive.HiveConstants;
 import org.wso2.carbon.analytics.hive.Utils;
-import org.wso2.carbon.analytics.hive.annotation.AbstractHiveAnnotation;
+import org.wso2.carbon.analytics.hive.annotation.HiveAnnotation;
 import org.wso2.carbon.analytics.hive.annotation.util.AnnotationBuilder;
 import org.wso2.carbon.analytics.hive.dto.QueryResult;
 import org.wso2.carbon.analytics.hive.dto.QueryResultRow;
@@ -290,15 +290,13 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             }
 
             try {
-                String newScript = resolveGlobalAnnotations(script);
+                String newScript = script;
 
                 String formattedScript = formatScript(newScript);
 
                 String[] cmdLines = formattedScript.split(";\\r?\\n|;"); // Tokenize with ;[new-line]
 
                 ScriptResult result = new ScriptResult();
-
-                Set cleanAnnotations = new HashSet();
 
 
                 Date startDateTime = null;
@@ -314,6 +312,9 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     trimmedCmdLine = trimmedCmdLine.replaceAll(";", "");
                     trimmedCmdLine = trimmedCmdLine.replaceAll("%%", ";");
 
+                    newScript = newScript.replaceAll("\n", " ");
+                    newScript = newScript.replaceAll("\t", " ");
+
                     if ("".equals(trimmedCmdLine)) {
                         continue;
                     }
@@ -322,25 +323,16 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                             trimmedCmdLine.startsWith("CLASS")) { // Class analyzer for executing custom logic
                         executeClassAnalyzer(trimmedCmdLine);
 
-                        if (!cleanAnnotations.isEmpty()) {
-                            for (Object s : cleanAnnotations) {
-                                AbstractHiveAnnotation cAnn = (AbstractHiveAnnotation) s;
-                                cAnn.clear();
-                            }
-                        }
+                        AnnotationBuilder.clearAnnotations();
+
                     } else if (trimmedCmdLine.startsWith("@")) {
-                        AbstractHiveAnnotation cAnnotation = executeAnnotation(trimmedCmdLine);
-                        cleanAnnotations.add(cAnnotation);
+                        executeAnnotation(trimmedCmdLine);
+
 
                     } else { // Normal hive query
                         executeHiveQuery(result,trimmedCmdLine,stmt);
 
-                        if (!cleanAnnotations.isEmpty()) {
-                            for (Object s : cleanAnnotations) {
-                                AbstractHiveAnnotation cAnn = (AbstractHiveAnnotation) s;
-                                cAnn.clear();
-                            }
-                        }
+                        AnnotationBuilder.clearAnnotations();
                     }
                 }
 
@@ -404,57 +396,13 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
         }
 
-        private String resolveGlobalAnnotations(String script) {
-            String newScript = script;
-            String regex = "((Global)\\{.*?\\};)";
-            String globalConf = null;
-            newScript = newScript.replaceAll("\n", " ");
-            newScript = newScript.replaceAll("\t", " ");
 
-            Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-            Matcher m = p.matcher(newScript);
-            if (m.find()) {
-                globalConf = m.group(1);
-
-            }
-
-            if (globalConf != null) {
-                String a = globalConf.trim();
-                String[] contentSet = a.split("Global");
-                String txt = contentSet[1];
-
-                String s = txt.substring(1, txt.length() - 2);
-
-
-                String aa = formatScript(s).trim();
-                String[] cmdLines1 = aa.split(";\\r?\\n|;"); // Tokenize with ;[new-line]
-
-
-                for (String cmdLine : cmdLines1) {
-
-                    String trimmedCmdLine = cmdLine.trim();
-                    trimmedCmdLine = trimmedCmdLine.replaceAll(";", "");
-                    trimmedCmdLine = trimmedCmdLine.replaceAll("%%", ";");
-                    if ("".equals(trimmedCmdLine)) {
-                        continue;
-                    }
-
-                    executeAnnotation(trimmedCmdLine);
-                }
-                String[] newScript1 = newScript.split(regex);
-                return newScript1[1];
-            } else {
-                return newScript;
-            }
-
-        }
-
-        private AbstractHiveAnnotation executeAnnotation(String trimmedCmdLine) {
+        private void executeAnnotation(String trimmedCmdLine) {
 
             HashMap<String, String> annotations = new HashMap<String, String>(); // annotation execution
             String[] contentSet = trimmedCmdLine.split("@");
             String txt = contentSet[1];
-            AbstractHiveAnnotation hiveAnnotation = null;
+
 
             String re2 = "(\\(.*\\))";    // Round Braces 1
 
@@ -470,8 +418,9 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                 for (String g : variables) {
                     String[] values = g.split("=");
-                    String key = values[0];
-                    String value = values[1].substring(1, values[1].length() - 1);
+                    String key = values[0].trim();
+                    String aa = values[1].trim();
+                    String value = aa.substring(1, aa.length() - 1);
                     annotations.put(key, value);
                 }
             }
@@ -480,47 +429,14 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             String txt2 = txt1[0];
 
 
-            String className = AnnotationBuilder.getAnnotationClass(txt2);
+            HiveAnnotation hiveAnnotation = new HiveAnnotation();
 
-            if (className != null) {
+            hiveAnnotation.setAnnotationName(txt2);
+            hiveAnnotation.setParameters(annotations);
 
-                Class clazz = null;
-                try {
-                    clazz = Class.forName(className, true,
-                            this.getClass().getClassLoader());
-                } catch (ClassNotFoundException e) {
-                    log.error("Unable to find custom annotation class..", e);
-                }
-                if (clazz != null) {
-                    Object annotation = null;
-                    try {
-                        annotation = clazz.newInstance();
-                    } catch (InstantiationException e) {
-                        log.error("Unable to instantiate custom annotation class..", e);
-                    } catch (IllegalAccessException e) {
-                        log.error("Unable to instantiate custom annotation class..", e);
-                    }
 
-                    if (annotation instanceof AbstractHiveAnnotation) {
-                        hiveAnnotation =
-                                (AbstractHiveAnnotation) annotation;
-                        hiveAnnotation.init();
-                        boolean validated = hiveAnnotation.validate(annotations.keySet());
-                        if (validated) {
-                            hiveAnnotation.setParameters(annotations);
-                            hiveAnnotation.execute();
-                        } else {
-                            log.error("Couldn't validate the annotation...");
-                        }
+            AnnotationBuilder.addAnnotation(txt2, hiveAnnotation);
 
-                    } else {
-                        log.error("Custom annotations should extend AbstractHiveAnnotation..");
-                    }
-                }
-            } else {
-                log.error("Annotation class is not defined in the annotation-config.xml..");
-            }
-            return hiveAnnotation;
         }
 
         private String formatScript(String script) {

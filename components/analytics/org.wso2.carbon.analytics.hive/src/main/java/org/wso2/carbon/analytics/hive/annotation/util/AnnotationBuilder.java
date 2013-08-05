@@ -20,6 +20,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.analytics.hive.HiveConstants;
+import org.wso2.carbon.analytics.hive.annotation.HiveAnnotation;
 import org.wso2.carbon.analytics.hive.exception.AnnotationConfigException;
 import org.wso2.carbon.utils.ServerConstants;
 
@@ -28,9 +29,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  *Build annotations from annotation-config.xml
@@ -39,7 +38,35 @@ public class AnnotationBuilder {
     private static final Log log = LogFactory.getLog(AnnotationBuilder.class);
 
 
-    private static Map<String, String> annotations = new HashMap<String, String>();
+    private static Map<String, Set<String>> annotationConfigs = new HashMap<String, Set<String>>();
+
+
+
+    private static Map<String, HiveAnnotation> annotations = new HashMap<String, HiveAnnotation>();
+
+
+    public static HiveAnnotation getAnnotation(String name){
+              return annotations.get(name);
+    }
+    public static void clearAnnotations() {
+       if(!annotations.isEmpty()){
+           annotations.clear();
+       }
+    }
+
+    public static void setAnnotations(Map<String, HiveAnnotation> annotations) {
+        AnnotationBuilder.annotations = annotations;
+    }
+
+    public static void addAnnotation(String name, HiveAnnotation annotation){
+
+        if(validate(name,annotation.getParameters().keySet())){
+        annotations.put(name,annotation);
+        } else{
+            log.error("Couldn't validate the annotation...");
+        }
+
+    }
 
     public static OMElement loadConfigXML() throws AnnotationConfigException {
 
@@ -87,33 +114,47 @@ public class AnnotationBuilder {
                         HiveConstants.ANNOTATIONS__ELEMENT));
 
         if (annotationElems != null) {
+
+
             for (Iterator annotationIterator = annotationElems.getChildrenWithName(new QName(HiveConstants.ANNOTATION_ELEMENT));
                  annotationIterator.hasNext(); ) {
+                Set<String> parameterSet=new HashSet<String>();
                 OMElement annotation = (OMElement) annotationIterator.next();
                 OMElement nameElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANALYTICS_NAMESPACE,HiveConstants.ANNOTATION_NAME__ELEMENT));
-                OMElement classElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANALYTICS_NAMESPACE,HiveConstants.ANNOTATION_CLASS_ELEMENT));
+                OMElement paramElem = annotation.getFirstChildWithName(new QName(HiveConstants.ANALYTICS_NAMESPACE,HiveConstants.ANNOTATION_PARAMS_ELEMENT));
 
-                annotations.put(nameElem.getText(), classElem.getText());
+                if(paramElem !=null){
+                    String params=paramElem.getText();
+                    params=params.replaceAll("\\s+", "");
+                    String[] parameters = params.split(",");
+
+                    for (String p : parameters) {
+                        parameterSet.add(p);
+                    }
+
+
+                }
+                annotationConfigs.put(nameElem.getText(), parameterSet);
             }
         }
 
 
     }
 
+    private static boolean validate(String name,Set<String> params){
+        Set<String> paramValues = annotationConfigs.get(name);
 
-    public static String getAnnotationClass(String name) {
-
-        if(annotations != null){
-            return annotations.get(name);
-        }else{
-          return null;
+        if (paramValues != null && params != null && paramValues.size() == params.size()) {
+            return paramValues.containsAll(params);
+        } else {
+            return false;
         }
-
     }
 
-    public void setAnnotations(Map<String, String> annotations) {
-        this.annotations = annotations;
+    public static Map<String, HiveAnnotation> lookupAnnotations(){
+        return annotations;
     }
+
 
 
 }

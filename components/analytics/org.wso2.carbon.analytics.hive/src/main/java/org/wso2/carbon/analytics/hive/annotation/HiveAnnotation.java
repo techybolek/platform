@@ -16,37 +16,17 @@
 
 package org.wso2.carbon.analytics.hive.annotation;
 
-import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public abstract class AbstractHiveAnnotation extends AbstractHiveAnalyzer {
+public class HiveAnnotation {
 
 
     private String annotationName = "";
 
-    private String scope = "";
-
-    private Set<String> paramValues = new HashSet<String>();
-
-
 
     private Map<String, String> parameters = new HashMap<String, String>();
 
-    public abstract void init();
-
-    public abstract void clear();
-
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
 
     public String getAnnotationName() {
         return annotationName;
@@ -56,28 +36,11 @@ public abstract class AbstractHiveAnnotation extends AbstractHiveAnalyzer {
         this.annotationName = annotationName;
     }
 
-    public void addParameter(String key) {
-        paramValues.add(key);
-    }
-
-    public boolean isParameter(String key) {
-
-        return paramValues.contains(key);
-    }
 
     public String getParameter(String name) {
         return parameters.get(name);
     }
 
-    public boolean validate(Set<String> params){
-
-        if (paramValues != null && params != null && paramValues.size() == params.size()) {
-            return paramValues.containsAll(params);
-        } else {
-            return false;
-        }
-
-    }
 
     public Map<String, String> getParameters() {
         return parameters;
@@ -86,6 +49,5 @@ public abstract class AbstractHiveAnnotation extends AbstractHiveAnalyzer {
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
     }
-
 
 }
