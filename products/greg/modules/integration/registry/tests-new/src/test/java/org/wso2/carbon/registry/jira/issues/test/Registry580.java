@@ -54,6 +54,7 @@ public class Registry580 {
     private Registry governance;
     private RegistryProviderUtil registryProviderUtil;
     private final String serviceName = "DeletePermissionDeniedService";
+    int userId = 2;
 
 
     @BeforeClass(groups = "wso2.greg", description = "Create a role with Delete permission denied")
@@ -104,6 +105,7 @@ public class Registry580 {
                                                          ROLE_NAME, WRITE_ACTION, PERMISSION_ENABLED);
         resourceAdminServiceClient.addResourcePermission(SERVICES_DENIED_DIR_PATH,
                                                          ROLE_NAME, DELETE_ACTION, PERMISSION_DISABLED);
+        governance = registryProviderUtil.getGovernanceRegistry(registry, userId);
         GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
 
 
@@ -112,12 +114,10 @@ public class Registry580 {
     @Test(groups = "wso2.greg", description = "Add Service from new Role")
     public void testAddService() throws Exception {
 
-        int userId = 2;
         builder = new EnvironmentBuilder().greg(userId);
         environment = builder.build();
         registryProviderUtil = new RegistryProviderUtil();
         registry = registryProviderUtil.getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME);
-        governance = registryProviderUtil.getGovernanceRegistry(registry, userId);
 
         resourceAdminServiceClient = new ResourceAdminServiceClient(environment.getGreg().getBackEndUrl(),
                                                                     environment.getGreg().getSessionCookie());
