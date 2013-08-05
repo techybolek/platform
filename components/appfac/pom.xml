@@ -45,6 +45,7 @@
         <module>org.wso2.carbon.appfactory.apimanager.integration</module>
         <module>org.wso2.carbon.appfactory.bam.integration</module>
         <module>org.wso2.carbon.appfactory.repository</module>
-        <module> org.wso2.carbon.appfactory.utilities</module>
+        <module>org.wso2.carbon.appfactory.utilities</module>
+        <module>org.wso2.carbon.appfactory.tenant.build.integration</module>
     </modules>
 </project>
