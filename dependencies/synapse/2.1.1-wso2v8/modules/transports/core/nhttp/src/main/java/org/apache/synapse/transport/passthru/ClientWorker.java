@@ -230,6 +230,22 @@ public class ClientWorker implements Runnable {
     }
 
     private String inferContentType() {
+        //Check whether server sent Content-Type in different case
+        Map<String,String> headers = response.getHeaders();
+        for(String header : headers.keySet()){
+            if(HTTP.CONTENT_TYPE.equalsIgnoreCase(header)){
+                return headers.get(header);
+            }
+        }
+        String cType = response.getHeader("content-type");
+        if (cType != null) {
+            return cType;
+        }
+        cType = response.getHeader("Content-type");
+        if (cType != null) {
+            return cType;
+        }
+
         // Try to get the content type from the message context
         Object cTypeProperty = responseMsgCtx.getProperty(PassThroughConstants.CONTENT_TYPE);
         if (cTypeProperty != null) {
