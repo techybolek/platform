@@ -41,79 +41,27 @@ if [ ! -d "$SETUP_DIR" ];then
 echo "Setting up the deployment first time"
 mkdir setup
 #configure elb
-mkdir setup/elb
-echo "Setting up ELB........"
 
-/usr/bin/unzip  -q resources/packs/wso2elb-2.0.3.zip -d setup/elb
+. `pwd`/set-up-elb.sh
+ setup_elb -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $ELB_VERSION -h $af_host_name -o 10
 
-cp resources/configs/elb-carbon.xml $ELB_HOME/repository/conf/carbon.xml
-cp resources/configs/elb-axis2.xml $ELB_HOME/repository/conf/axis2/axis2.xml
-cat resources/configs/loadbalancer.conf | sed -e "s@AF_HOST@$af_host_name@g" >  $ELB_HOME/repository/conf/loadbalancer.conf
 
 #configure appfactory
-mkdir setup/appfactory
-echo "Setting up Appfactory........"
-/usr/bin/unzip  -q resources/packs/wso2appfactory-1.0.0.zip   -d setup/appfactory
-
-cp resources/configs/wso2server.sh $APPFACTORY_HOME/bin
-cat resources/configs/appfactory.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/appfactory/appfactory.xml
-cp resources/configs/appfactory-user-mgt.xml $APPFACTORY_HOME/repository/conf/user-mgt.xml
-cp resources/configs/appfactory-registry.xml $APPFACTORY_HOME/repository/conf/registry.xml
-cat resources/configs/appfactory-carbon.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/carbon.xml
-cat resources/configs/appfactory-axis2.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/axis2/axis2.xml
-cat resources/configs/appfactory-confirmation-email-config.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/email/confirmation-email-config.xml
-cat resources/configs/appfactory-invite-user-email-config.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/email/invite-user-email-config.xml
-cat resources/configs/appfactory-sso-idp-config.xml  | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/sso-idp-config.xml
-cp resources/configs/appfactory-humantask.xml $APPFACTORY_HOME/repository/conf/humantask.xml
-cp resources/configs/carbon-console-web.xml $APPFACTORY_HOME/repository/conf/tomcat/carbon/WEB-INF/web.xml
-cp -r resources/patches/af/*  $APPFACTORY_HOME/repository/components/patches
-cp -r resources/CreateTenant.zip  $APPFACTORY_HOME/repository/deployment/server/bpel/
-cp -r resources/appmgt  $APPFACTORY_HOME/repository/deployment/server/jaggeryapps/
-cp -r resources/configs/endpoints  $APPFACTORY_HOME/repository/conf/appfactory
-
-#cp resources/org.wso2.carbon.appfactory.apiManager.integration-1.0.2.jar $APPFACTORY_HOME/repository/components/plugins/org.wso2.carbon.appfactory.apiManager.integration_1.0.2.jar
-#this is required for fast app page load
-cp resources/configs/tenant-mgt.xml $APPFACTORY_HOME/repository/conf/tenant-mgt.xml
-
-
-cp resources/lib/mysql-connector-java-5.1.12-bin.jar $APPFACTORY_HOME/repository/components/lib
-mkdir  setup/tmp
-cd setup/tmp
-mvn install:install-file -Dfile=$APPFACTORY_HOME/repository/resources/maven/af-archetype-1.0.0.jar -DgroupId=org.wso2.carbon.appfactory.maven.archetype -DartifactId=af-archetype -Dversion=1.0.0 -Dpackaging=jar > /dev/null
-mvn archetype:generate -DartifactId=afdefault -DgroupId=org.wso2.af -DarchetypeArtifactId=maven-archetype-webapp -Dversion=SNAPSHOT -DinteractiveMode=false  > /dev/null
-
-mvn install:install-file -Dfile=$APPFACTORY_HOME/repository/resources/maven/jaxrs-archetype-1.0.0.jar -DgroupId=org.wso2.carbon.appfactory.maven.jaxrsarchetype -DartifactId=jaxrs-archetype -Dversion=1.0.0 -Dpackaging=jar  > /dev/null
-mvn archetype:generate -DartifactId=jaxrsdefault -DarchetypeGroupId=org.wso2.carbon.appfactory.maven.jaxrsarchetype -DarchetypeArtifactId=jaxrs-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=SNAPSHOT -DinteractiveMode=false -DarchetypeCatalog=local   > /dev/null
-
-mvn install:install-file -Dfile=$APPFACTORY_HOME/repository/resources/maven/jaxws-archetype-1.0.0.jar -DgroupId=org.wso2.carbon.appfactory.maven.jaxwsarchetype -DartifactId=jaxws-archetype -Dversion=1.0.0 -Dpackaging=jar  > /dev/null
-mvn archetype:generate -DartifactId=jaxwsdefault -DarchetypeGroupId=org.wso2.carbon.appfactory.maven.jaxwsarchetype -DarchetypeArtifactId=jaxws-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=SNAPSHOT -DinteractiveMode=false -DarchetypeCatalog=local  > /dev/null
-
-mvn install:install-file -Dfile=$APPFACTORY_HOME/repository/resources/maven/jaggery-archetype-1.0.0.jar -DgroupId=org.wso2.carbon.appfactory.maven.jaggeryarchetype -DartifactId=jaggery-archetype -Dversion=1.0.0 -Dpackaging=jar  > /dev/null
-
-mvn archetype:generate -DartifactId=jaggerydefault -DarchetypeGroupId=org.wso2.carbon.appfactory.maven.jaggeryarchetype -DarchetypeArtifactId=jaggery-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=SNAPSHOT -DinteractiveMode=false -DarchetypeCatalog=local  > /dev/null
-
-mvn install:install-file -Dfile=$APPFACTORY_HOME/repository/resources/maven/bpel-archetype-1.0.0.jar -DgroupId=org.wso2.carbon.appfactory.maven.bpelarchetype -DartifactId=bpel-archetype -Dversion=1.0.0 -Dpackaging=jar  > /dev/null
-
-mvn archetype:generate -DartifactId=bpeldefault -DarchetypeGroupId=org.wso2.carbon.appfactory.maven.bpelarchetype -DarchetypeArtifactId=bpel-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=SNAPSHOT -DinteractiveMode=false -DarchetypeCatalog=local  > /dev/null
-
-mvn install:install-file -Dfile=$APPFACTORY_HOME/repository/resources/maven/dbs-archetype-1.0.0.jar -DgroupId=org.wso2.carbon.appfactory.maven.dbsarchetype -DartifactId=dbs-archetype -Dversion=1.0.0 -Dpackaging=jar  > /dev/null
-
-mvn archetype:generate -DartifactId=dbsdefault -DarchetypeGroupId=org.wso2.carbon.appfactory.maven.dbsarchetype -DarchetypeArtifactId=dbs-archetype -DarchetypeVersion=1.0.0 -DgroupId=org.wso2.af -Dversion=SNAPSHOT -DinteractiveMode=false -DarchetypeCatalog=local  > /dev/null
-cd ../..
-
+ . `pwd`/set-up-af.sh
+ setup_af -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $AF_VERSION -h $af_host_name -o 0
 
 . `pwd`/set-up-sc.sh
- setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $SC_VERSION -h $af_host_name -o 2 
- setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "test" -v $SC_VERSION -h $af_host_name -o 3
- setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $SC_VERSION -h $af_host_name -o 4
- setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $SC_VERSION -h $af_host_name -o 5
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $SC_VERSION -h $af_host_name -o 20 
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "test" -v $SC_VERSION -h $af_host_name -o 21
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $SC_VERSION -h $af_host_name -o 22
+ setup_sc -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $SC_VERSION -h $af_host_name -o 23
 
 . `pwd`/set-up-as.sh
 
- setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $APPSERVER_VERSION -h $af_host_name
- setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "test" -v $APPSERVER_VERSION -h $af_host_name
- setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $APPSERVER_VERSION -h $af_host_name
- setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $APPSERVER_VERSION -h $af_host_name
+ setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $APPSERVER_VERSION -h $af_host_name -o 2
+ setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "test" -v $APPSERVER_VERSION -h $af_host_name -o 4
+ setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $APPSERVER_VERSION -h $af_host_name -o 7
+ setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $APPSERVER_VERSION -h $af_host_name -o 5
 
  echo "Creating Databases ........"
 
