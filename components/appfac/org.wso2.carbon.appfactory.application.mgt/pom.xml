@@ -150,6 +150,5 @@
     </build>
     <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <wso2carbon.version>4.1.0</wso2carbon.version>
     </properties>
 </project>
