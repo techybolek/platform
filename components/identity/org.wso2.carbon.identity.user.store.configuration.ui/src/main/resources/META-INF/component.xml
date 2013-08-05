@@ -22,7 +22,7 @@
             <parent-menu>configure_menu</parent-menu>
             <link>../userstore_config/index.jsp</link>
             <region>region1</region>
-            <order>7</order>
+            <order>6</order>
             <style-class>manage</style-class>
             <icon>../userstore_config/images/multiple-user-stores.png</icon>
             <require-permission>/permission/admin</require-permission>
