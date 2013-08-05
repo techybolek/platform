@@ -4,6 +4,9 @@ import org.apache.catalina.Container;
 import org.apache.catalina.core.StandardWrapper;
 import org.wso2.carbon.webapp.mgt.WebApplication;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class WebAppUtils {
 
     /**
@@ -23,5 +26,12 @@ public class WebAppUtils {
             }
         }
         return null;
+    }
+
+    public static boolean validateWebappFileName(String filename){
+        Pattern pattern = Pattern.compile(".*[\\]\\[!\"#$%&'()*+,/:;<=>?@~{|}^`].*");
+        Matcher matcher = pattern.matcher(filename);
+        boolean isMatch = matcher.matches();
+        return isMatch;
     }
 }
