@@ -18,6 +18,17 @@
 
 package org.wso2.carbon.ldap.server.configuration;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.log4j.Logger;
@@ -33,18 +44,7 @@ import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
-import org.wso2.carbon.user.core.ldap.LDAPConstants;
 import org.wso2.carbon.utils.CarbonUtils;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * This class is responsible for building LDAP and KDC configurations. Given a file
@@ -370,57 +370,51 @@ public class LDAPConfigurationBuilder {
         
         this.partitionConfigurations = new PartitionInfo();
 
-        OMElement defaultPartition = documentElement.getFirstChildWithName(new QName(
-                "DefaultPartition"));
-        Map<String, String> propertyMap = getChildPropertyElements(defaultPartition);
+		OMElement defaultPartition = documentElement.getFirstChildWithName(new QName("DefaultPartition"));
+		Map<String, String> propertyMap = getChildPropertyElements(defaultPartition);
 
-        this.partitionConfigurations.setPartitionId(propertyMap.get("id"));
-        this.partitionConfigurations.setRealm(propertyMap.get("realm"));
+		this.partitionConfigurations.setPartitionId(propertyMap.get("id"));
+		this.partitionConfigurations.setRealm(propertyMap.get("realm"));
 
-        this.partitionConfigurations.setPartitionKdcPassword(propertyMap.get("kdcPassword"));
-        this.partitionConfigurations.setLdapServerPrinciplePassword(propertyMap.get(
-                "ldapServerPrinciplePassword"));
-        this.partitionConfigurations.setRootDN(getDomainNameForRealm(propertyMap.get("realm")));
+		this.partitionConfigurations.setPartitionKdcPassword(propertyMap.get("kdcPassword"));
+		this.partitionConfigurations.setLdapServerPrinciplePassword(propertyMap.get("ldapServerPrinciplePassword"));
+		this.partitionConfigurations.setRootDN(getDomainNameForRealm(propertyMap.get("realm")));
 
-        OMElement partitionAdmin = documentElement.getFirstChildWithName(new QName(
-                "PartitionAdmin"));
+        // Admin user config
+		OMElement partitionAdmin = documentElement.getFirstChildWithName(new QName("PartitionAdmin"));
         propertyMap = getChildPropertyElements(partitionAdmin);
-
-        /*do not create admin user and admin group because it is anyway checked and created
-         *in user core.*/
-
-        //AdminInfo defaultPartitionAdmin = buildPartitionAdminConfigurations(realmConfig, propertyMap);
-
-        //AdminGroupInfo adminGroupInfo = buildPartitionAdminGroupConfigurations(realmConfig);
-
-        //defaultPartitionAdmin.setGroupInformation(adminGroupInfo);
-
-        //this.partitionConfigurations.setPartitionAdministrator(defaultPartitionAdmin);
+        AdminInfo defaultPartitionAdmin = buildPartitionAdminConfigurations(propertyMap);
+        
+        // Admin role config
+        OMElement partitionAdminRole = documentElement.getFirstChildWithName(new QName("PartitionAdminGroup"));
+        propertyMap = getChildPropertyElements(partitionAdminRole);
+        AdminGroupInfo adminGroupInfo = buildPartitionAdminGroupConfigurations(propertyMap);
+        
+        defaultPartitionAdmin.setGroupInformation(adminGroupInfo);
+        this.partitionConfigurations.setPartitionAdministrator(defaultPartitionAdmin);
 
     }
 
-    private AdminInfo buildPartitionAdminConfigurations(RealmConfiguration realmConfig, Map<String, String> propertyMap) {
+    private AdminInfo buildPartitionAdminConfigurations(Map<String, String> propertyMap) {
         AdminInfo adminInfo = new AdminInfo();
 
-        adminInfo.setAdminUserName(realmConfig.getAdminUserName());
+        adminInfo.setAdminUserName(propertyMap.get("uid"));
         adminInfo.setAdminCommonName(propertyMap.get("firstName"));
         adminInfo.setAdminLastName(propertyMap.get("lastName"));
         adminInfo.setAdminEmail(propertyMap.get("email"));
-        adminInfo.setAdminPassword(realmConfig.getAdminPassword());
-        adminInfo.setPasswordAlgorithm(PasswordAlgorithm.valueOf(realmConfig.getUserStoreProperty(LDAPConstants.PASSWORD_HASH_METHOD)));
+        adminInfo.setAdminPassword(propertyMap.get("password"));
+        adminInfo.setPasswordAlgorithm(PasswordAlgorithm.valueOf(propertyMap.get("passwordType")));
         adminInfo.addObjectClass(ldapConfiguration.getAdminEntryObjectClass());
-        adminInfo.setUsernameAttribute(realmConfig.getUserStoreProperty(LDAPConstants.USER_NAME_ATTRIBUTE));
+        adminInfo.setUsernameAttribute("uid");
 
         return adminInfo;
     }
 
-    private AdminGroupInfo buildPartitionAdminGroupConfigurations(RealmConfiguration realmConfig) {
+    private AdminGroupInfo buildPartitionAdminGroupConfigurations(Map<String, String> propertyMap) {
         AdminGroupInfo adminGroupInfo = new AdminGroupInfo();
-
-        adminGroupInfo.setAdminRoleName(realmConfig.getAdminRoleName());
-        adminGroupInfo.setGroupNameAttribute(realmConfig.getUserStoreProperty(LDAPConstants.GROUP_NAME_ATTRIBUTE));
-        adminGroupInfo.setMemberNameAttribute(realmConfig.getUserStoreProperty(LDAPConstants.MEMBERSHIP_ATTRIBUTE));
-
+        adminGroupInfo.setAdminRoleName(propertyMap.get("adminRoleName"));
+        adminGroupInfo.setGroupNameAttribute(propertyMap.get("groupNameAttribute"));
+        adminGroupInfo.setMemberNameAttribute(propertyMap.get("memberNameAttribute"));
         return adminGroupInfo;
     }
 

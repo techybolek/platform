@@ -79,11 +79,10 @@ public class DirectoryActivator implements BundleActivator {
                         configurationBuilder.getConnectionPassword());
 
                 // Add admin (default)partition if it is not already created.
-                PartitionManager partitionManager = this.ldapServer.getPartitionManager();
-                PartitionInfo defaultPartitionInfo=
-                        configurationBuilder.getPartitionConfigurations();
-                boolean defaultPartitionAlreadyExisted=partitionManager.partitionDirectoryExists(
-                        defaultPartitionInfo.getPartitionId());
+				PartitionManager partitionManager = this.ldapServer.getPartitionManager();
+				PartitionInfo defaultPartitionInfo = configurationBuilder.getPartitionConfigurations();
+				boolean defaultPartitionAlreadyExisted =
+				                                         partitionManager.partitionDirectoryExists(defaultPartitionInfo.getPartitionId());
 
                 if (!defaultPartitionAlreadyExisted) {
                     partitionManager.addPartition(defaultPartitionInfo);

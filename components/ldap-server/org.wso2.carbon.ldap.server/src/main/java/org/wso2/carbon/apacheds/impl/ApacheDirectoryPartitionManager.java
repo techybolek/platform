@@ -103,14 +103,12 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
                  *in user core.*/
                 
                 // create tenant administrator entry at the time of tenant-partition created.
-                /*addAdmin(partitionInformation.getPartitionAdministrator(), partition.
-                        getSuffix(), partitionInformation.getRealm(), partitionInformation.
-                        isKdcEnabled());
-                addAdminGroup(partitionInformation.getPartitionAdministrator(), partition.
-                        getSuffix());
+				addAdmin(partitionInformation.getPartitionAdministrator(), partition.getSuffix(),
+				         partitionInformation.getRealm(), partitionInformation.isKdcEnabled());
+				addAdminGroup(partitionInformation.getPartitionAdministrator(), partition.getSuffix());
 
-                addAdminACLEntry(partitionInformation.getPartitionAdministrator().getAdminUserName(),
-                                 partition.getSuffix());*/
+				addAdminACLEntry(partitionInformation.getPartitionAdministrator().getAdminUserName(),
+				                 partition.getSuffix());
 
                 this.directoryService.sync();
             }
