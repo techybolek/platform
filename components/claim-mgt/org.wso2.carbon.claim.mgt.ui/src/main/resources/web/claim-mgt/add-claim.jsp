@@ -125,6 +125,16 @@
             	CARBON.showWarningDialog('<fmt:message key="regex.is.too.long"/>');
             	return false;
         	}
+        	
+        	var unsafeCharPattern = /[<>`\"]/;
+            var elements = document.getElementsByTagName("input");
+            for(i = 0; i < elements.length; i++){
+                if((elements[i].type === 'text' || elements[i].type === 'password') && 
+                   elements[i].value != null && elements[i].value.match(unsafeCharPattern) != null){
+                    CARBON.showWarningDialog("<fmt:message key="unsafe.char.validation.msg"/>");
+                    return false;
+                }
+            }
 
         	document.addclaim.submit();
     	}  
