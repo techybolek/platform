@@ -41,10 +41,7 @@ import javax.activation.FileDataSource;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class ApplicationAdmin extends AbstractAdmin {
 
@@ -181,8 +178,17 @@ public class ApplicationAdmin extends AbstractAdmin {
             String currentApp=null;
             String filename =null;
 
-            // Iterate all applications for this tenant and find the application to delete
+            // remove faulty services added by CApp
+            Hashtable<String,String> faultyServices = getAxisConfig().getFaultyServices();
+            for (String faultService : faultyServices.keySet()) {
+                // check if the service is related to the current CApp
+                if (faultService.contains(faultyCarbonApplication)) {
+                    getAxisConfig().getFaultyServices().remove(faultService);
+                }
+            }
+            ;
 
+            // Iterate all applications for this tenant and find the application to delete
             for (String carbonApp : faultyCarbonAppList.keySet()) {
 
                 filename = carbonApp.substring(carbonApp.lastIndexOf('/') + 1);
