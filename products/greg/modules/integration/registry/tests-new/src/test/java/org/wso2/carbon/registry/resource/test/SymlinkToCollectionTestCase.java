@@ -49,6 +49,7 @@ import org.wso2.carbon.registry.search.stub.SearchAdminServiceRegistryExceptionE
 import org.wso2.carbon.registry.search.stub.beans.xsd.AdvancedSearchResultsBean;
 import org.wso2.carbon.registry.search.stub.beans.xsd.ArrayOfString;
 import org.wso2.carbon.registry.search.stub.beans.xsd.CustomSearchParameterBean;
+import org.wso2.carbon.registry.util.TestUtils;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import javax.activation.DataHandler;
@@ -586,10 +587,15 @@ public class SymlinkToCollectionTestCase {
     public void cleanup()
             throws Exception {
 
+        TestUtils utils = new TestUtils();
+        ManageEnvironment adminEnvironment = utils.createUserEnviornment(ProductConstant.SUPER_ADMIN_USER_ID);
+        UserManagementClient adminUserManagementClient =   new UserManagementClient(adminEnvironment.getGreg().getProductVariables().getBackendUrl(),
+                adminEnvironment.getGreg().getSessionCookie());
+
         resourceAdminClient.deleteResource(DEPENDENCY_PATH);
         resourceAdminClient.deleteResource(ASSOCIATION_PATH);
         resourceAdminClient.deleteResource(SYMLINK_LOC + "/" + COPY_OF_SYMLINK_NAME);
-        userManagementClient.deleteRole(ROLE_NAME);
+        adminUserManagementClient.deleteRole(ROLE_NAME);
         wsRegistryServiceClient.removeAspect(ASPECT_NAME);
         lifeCycleManagementClient.deleteLifeCycle("IntergalacticServiceLC");
 
