@@ -30,6 +30,7 @@ import org.wso2.carbon.bpel.core.ode.integration.BPELServerImpl;
 import org.wso2.carbon.datasource.DataSourceInformationRepositoryService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.attachment.mgt.server.AttachmentServerService;
 
@@ -44,6 +45,10 @@ import org.wso2.carbon.attachment.mgt.server.AttachmentServerService;
  * @scr.reference name="attachment.mgt.service" interface="org.wso2.carbon.attachment.mgt.server.AttachmentServerService"
  * cardinality="1..1" policy="dynamic"  bind="setAttachmentMgtService"
  * unbind="unsetAttachmentMgtService"
+ * @scr.reference name="user.realmservice.default"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService"
+ * unbind="unsetRealmService"
  */
 
 public class BPELServiceComponent {
@@ -174,6 +179,14 @@ public class BPELServiceComponent {
      */
     protected void unsetAttachmentMgtService(AttachmentServerService attMgtService) {
         BPELServerHolder.getInstance().setAttachmentService(null);
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        BPELServerHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        BPELServerHolder.getInstance().setRealmService(null);
     }
 
 }

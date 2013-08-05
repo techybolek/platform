@@ -22,6 +22,7 @@ import org.wso2.carbon.attachment.mgt.server.AttachmentServerService;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServerImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * Data holder for the BPELServiceComponent
@@ -30,11 +31,14 @@ public final class BPELServerHolder {
     private static BPELServerHolder instance;
 
     private RegistryService registryService;
+
     private BPELServerImpl bpelServer;
 
     private TenantRegistryLoader registryLoader;
 
     private AttachmentServerService attachmentService;
+
+    private static RealmService realmService;
 
     private BPELServerHolder() {
     }
@@ -86,5 +90,13 @@ public final class BPELServerHolder {
      */
     public void setAttachmentService(AttachmentServerService attachmentService) {
         this.attachmentService = attachmentService;
+    }
+
+    public void setRealmService(RealmService realm) {
+        this.realmService = realm;
+    }
+
+    public RealmService getRealmService(){
+        return this.realmService;
     }
 }

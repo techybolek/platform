@@ -37,14 +37,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
 import org.wso2.carbon.bpel.core.BPELConstants;
+import org.wso2.carbon.bpel.core.internal.BPELServerHolder;
 import org.wso2.carbon.bpel.core.ode.integration.axis2.WSDLAwareSOAPProcessor;
 import org.wso2.carbon.bpel.core.ode.integration.store.ProcessConfigurationImpl;
 import org.wso2.carbon.bpel.core.ode.integration.utils.AxisServiceUtils;
 import org.wso2.carbon.bpel.core.ode.integration.utils.BPELMessageContextFactory;
 import org.wso2.carbon.bpel.core.ode.integration.utils.Messages;
 import org.wso2.carbon.bpel.core.ode.integration.utils.SOAPUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.unifiedendpoint.core.UnifiedEndpoint;
 import org.wso2.carbon.unifiedendpoint.core.UnifiedEndpointConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
@@ -143,7 +146,18 @@ public class PartnerService implements PartnerRoleChannel {
                             MessageExchange.MessageExchangePattern.REQUEST_RESPONSE);
         try {
             // Override options are passed to the axis MessageContext so we can
-            // retrieve them in our session out changeHandler.
+            // retrieve them in our session out changeHandler
+            //
+            String deployer = processConfiguration.getDeployer();
+            // Assuming that deployer should not be null
+            String domain = BPELServerHolder.getInstance().getRealmService().getTenantManager().getDomain(Integer.parseInt(deployer));
+            if(domain != null) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(domain);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            }
+
+
             final MessageContext mctx = new MessageContext();
 
 
