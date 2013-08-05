@@ -280,41 +280,6 @@ public class TomcatGenericWebappsDeployer {
         }
     }
 
-    /**
-     * This method reads from webapp meta files to check weather bam statistics are enabled.
-     * @param artifactName
-     * @param propertyName
-     * @return  bam enable or disable
-     * @throws AxisFault
-     * @throws ArtifactMetadataException
-     */
-    protected String recievePersistedWebappMetaData(String artifactName, String propertyName) throws AxisFault, ArtifactMetadataException {
-        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
-        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
-        ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
-                getMetadataManager();
-        return manager.loadParameter(artifactName ,type,propertyName);
-    }
-
-    /**
-     * This method stores the value in the webapp metadata file.
-     * @param artifactName
-     * @param propertyName
-     * @param value
-     * @throws AxisFault
-     * @throws ArtifactMetadataException
-     */
-    protected void setPersistedWebappMetaData(String artifactName, String propertyName, String value) throws AxisFault, ArtifactMetadataException {
-        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
-        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
-        ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
-                getMetadataManager();
-
-        manager.setParameter(artifactName, type,
-                propertyName, value, true);
-
-    }
-
     private void registerApplicationEventListeners(List<Object> applicationEventListeners,
                                                    Context context) {
         Object[] originalEventListeners = context.getApplicationEventListeners();
@@ -378,6 +343,7 @@ public class TomcatGenericWebappsDeployer {
         }
 
         clearFaultyWebapp(fileName);
+        removeMetadata(fileName);
     }
 
     /**
@@ -413,6 +379,56 @@ public class TomcatGenericWebappsDeployer {
                     TomcatUtil.getApplicationNameFromContext(context.getBaseName()));
             faultyWebapps.remove(fileName);
             log.info("Removed faulty webapp " + faultyWebapp);
+        }
+    }
+
+    /**
+     * This method reads from webapp meta files to check weather bam statistics are enabled.
+     * @param artifactName
+     * @param propertyName
+     * @return  bam enable or disable
+     * @throws AxisFault
+     * @throws ArtifactMetadataException
+     */
+    protected String recievePersistedWebappMetaData(String artifactName, String propertyName) throws AxisFault, ArtifactMetadataException {
+        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
+        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
+        ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
+                getMetadataManager();
+        return manager.loadParameter(artifactName ,type,propertyName);
+    }
+
+    /**
+     * This method stores the value in the webapp metadata file.
+     * @param artifactName
+     * @param propertyName
+     * @param value
+     * @throws AxisFault
+     * @throws ArtifactMetadataException
+     */
+    protected void setPersistedWebappMetaData(String artifactName, String propertyName, String value) throws AxisFault, ArtifactMetadataException {
+        AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
+        ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
+        ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
+                getMetadataManager();
+
+        manager.setParameter(artifactName, type,
+                propertyName, value, true);
+
+    }
+
+    private void removeMetadata(String artifactFileName) throws CarbonException {
+        try {
+            AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
+            ArtifactType type = new ArtifactType(WebappsConstants.WEBAPP_FILTER_PROP, WebappsConstants.WEBAPP_METADATA_DIR);
+            ArtifactMetadataManager manager = DeploymentArtifactMetadataFactory.getInstance(axisConfig).
+                    getMetadataManager();
+
+            manager.deleteMetafile(artifactFileName, type);
+        } catch (AxisFault e) {
+            log.error(e.getMessage(), e);
+            throw new CarbonException(e);
+
         }
     }
 
