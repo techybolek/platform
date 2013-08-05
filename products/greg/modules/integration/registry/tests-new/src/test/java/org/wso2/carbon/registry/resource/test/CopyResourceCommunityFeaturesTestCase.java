@@ -407,7 +407,7 @@ public class CopyResourceCommunityFeaturesTestCase {
         deleteResource(DEPENDENCY_PATH);
         deleteResource(ASSOCIATION_PATH);
         deleteResource("/c1");
-        deleteResource(ROLE_NAME);
+        userManagementClient.deleteRole(ROLE_NAME);
         wsRegistryServiceClient.removeAspect(ASPECT_NAME);
         lifeCycleManagementClient.deleteLifeCycle("IntergalacticServiceLC");
 

@@ -233,7 +233,8 @@ public class RootCollectionManagementTestCase {
     }
 
     @AfterClass
-    public void removeResources() {
+    public void removeResources() throws RemoteException, ResourceAdminServiceExceptionException {
+        resourceAdminClient.deleteResource(ROOT+COLL_MOVED_LOCATION);
         resourceAdminClient = null;
         userInfo=null;
         environment=null;

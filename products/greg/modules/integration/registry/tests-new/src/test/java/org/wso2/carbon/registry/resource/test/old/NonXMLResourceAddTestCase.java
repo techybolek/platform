@@ -124,6 +124,7 @@ public class NonXMLResourceAddTestCase {
     @AfterClass
     public void cleanup()
             throws Exception {
+        resourceAdminServiceClient.deleteResource("/TestAutomation/"+RES_FILE_FOLDER);
         resourceAdminServiceClient=null;
         userInfo=null;
     }

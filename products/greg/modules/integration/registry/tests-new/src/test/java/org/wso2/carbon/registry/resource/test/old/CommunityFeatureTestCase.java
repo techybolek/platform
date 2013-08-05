@@ -152,6 +152,7 @@ public class CommunityFeatureTestCase {
     @AfterClass
     public void cleanup()
             throws Exception {
+        resourceAdminServiceClient.deleteResource("/TestAutomation") ;
         userInfo=null;
         resourceAdminServiceClient=null;
         infoServiceAdminClient=null;

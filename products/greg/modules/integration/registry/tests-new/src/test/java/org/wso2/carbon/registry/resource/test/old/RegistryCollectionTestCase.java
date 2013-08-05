@@ -359,6 +359,7 @@ public class RegistryCollectionTestCase {
     @AfterClass
     public void cleanup()
             throws Exception {
+        resourceAdminServiceClient.deleteResource("/TestAutomation");
         resourceAdminServiceClient=null;
         userInfo=null;
     }
