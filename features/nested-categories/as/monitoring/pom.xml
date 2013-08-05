@@ -60,7 +60,7 @@
 <importFeatureDef>org.wso2.carbon.soaptracer:${carbon.platform.version}</importFeatureDef>
 <importFeatureDef>org.wso2.carbon.databridge.datapublisher:${carbon.platform.version}</importFeatureDef>
 <importFeatureDef>org.wso2.carbon.message.flows:${carbon.platform.version}</importFeatureDef>
-<importFeatureDef>org.wso2.carbon.bam.webapp.agent</importFeatureDef>
+<importFeatureDef>org.wso2.carbon.bam.webapp.agent:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
