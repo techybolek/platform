@@ -174,9 +174,15 @@ public class SynapseXMLConfigurationFactory implements ConfigurationFactory {
 		Entry entry = null;
 		try {
 			entry = EntryFactory.createEntry(elem, properties);
-			if (entry != null) {
+			String key = library.getQName().getLocalPart()+"."+entry.getKey();
+			if(entry != null && config.getEntry(key) != null){
+				//already existing thus need to update entry
+				config.updateEntry(library.getQName().getLocalPart()+"."+entry.getKey(), entry);
+			}else{
 				config.addEntry(library.getQName().getLocalPart()+"."+entry.getKey(), entry);
 			}
+			
+			
 		} catch (Exception e) {
 			String msg = "Local entry configuration: "
 					+ elem.getAttributeValue((new QName(XMLConfigConstants.NULL_NAMESPACE, "key")))
