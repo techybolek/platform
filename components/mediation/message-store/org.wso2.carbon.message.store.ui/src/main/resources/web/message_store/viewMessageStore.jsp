@@ -350,7 +350,7 @@
                 %>
                 <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
                 <tr>
-                    <td>
+                    <td colspan="2">
                         <a onclick="<%=(messageInfos == null || messageInfos.length == 0)?"return false":"deleteAll();"%>"
                            href="#" id="delete_all_link" class="<%=(messageInfos == null || messageInfos.length == 0)?"icon-link-disabled":"icon-link"%>"
                            style="background-image:url(../admin/images/delete.gif);"><fmt:message
