@@ -31,6 +31,7 @@ import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceResourceServic
 
 import java.rmi.RemoteException;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class Carbon6012 {
@@ -82,9 +83,13 @@ public class Carbon6012 {
     @AfterClass(alwaysRun = true)
     public void restoreArtifacts() throws Exception {
 
-        userManagementClient.updateUserListOfRole("testRole", new String[]{"testuser2", "testuser3"},
-                                                  new String[]{});
-        userManagementClient.deleteRole(ROLE_NAME);
-        userManagementClient = null;
+        try {
+            userManagementClient.updateUserListOfRole("testRole", new String[]{"testuser2", "testuser3"},
+                    new String[]{});
+            userManagementClient.deleteRole(ROLE_NAME);
+            userManagementClient = null;
+        } catch (Exception e) {
+            assertFalse(true, "Failed clean up operation" + e.getMessage());
+        }
     }
 }

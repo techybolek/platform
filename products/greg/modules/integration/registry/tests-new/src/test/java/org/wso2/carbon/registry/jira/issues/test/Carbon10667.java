@@ -138,6 +138,7 @@ public class Carbon10667 {
 
     @AfterClass(groups = "wso2.greg", description = "Remove created service/role by admin", alwaysRun = true)
     public void removeService() throws Exception {
+        try{
 
         EnvironmentBuilder builder = new EnvironmentBuilder().greg(adminId);
         environment = builder.build();
@@ -152,14 +153,16 @@ public class Carbon10667 {
                 serviceManager.removeService(s.getId());
             }
         }
+        }finally {
 
-        userManagementClient.updateUserListOfRole("testRole", new String[]{userInfo.getUserNameWithoutDomain()},
-                                                  new String[]{});
-        userManagementClient.deleteRole("testRoleBrowse");
-        userManagementClient = null;
-        registry = null;
-        environment = null;
-        registryProviderUtil = null;
-        governance = null;
+            userManagementClient.updateUserListOfRole("testRole", new String[]{userInfo.getUserNameWithoutDomain()},
+                    new String[]{});
+            userManagementClient.deleteRole("testRoleBrowse");
+            userManagementClient = null;
+            registry = null;
+            environment = null;
+            registryProviderUtil = null;
+            governance = null;
+        }
     }
 }
