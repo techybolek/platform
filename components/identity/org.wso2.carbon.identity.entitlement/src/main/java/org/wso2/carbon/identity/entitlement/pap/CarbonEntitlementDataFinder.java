@@ -99,7 +99,7 @@ public class CarbonEntitlementDataFinder implements EntitlementDataFinderModule 
                     getTenantUserRealm(tenantId).getUserStoreManager();
 
             String[] roleNames = ((AbstractUserStoreManager) userStoreManager).
-                                                                getRoleNames(regex, limit, false);
+                                                    getRoleNames(regex, limit, false, true, true);
 
             for(String roleName : roleNames){
                 if(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleName)){

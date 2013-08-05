@@ -134,9 +134,9 @@ public class PolicyPublisher{
         if(subscriberIds == null){
             toPDP = true;
         }
-        
+
         PolicyPublishExecutor executor = new PolicyPublishExecutor(policyIds, version, action,
-                        subscriberIds, this, toPDP, verificationCode);
+                subscriberIds, this, toPDP, verificationCode);
         executor.setTenantDomain(CarbonContext.getCurrentContext().getTenantDomain());
         executor.setTenantId(CarbonContext.getCurrentContext().getTenantId());
         executor.setUserName(CarbonContext.getCurrentContext().getUsername());
