@@ -343,7 +343,8 @@ public class UserRealmProxy {
             //get all roles without hybrid roles
             String[] externalRoles ;
             if(userStoreMan instanceof AbstractUserStoreManager){
-                externalRoles = ((AbstractUserStoreManager) userStoreMan).getRoleNames(filter, maxLimit, true);
+                externalRoles = ((AbstractUserStoreManager) userStoreMan).getRoleNames(filter,
+                        maxLimit, true, true, true);
             } else {
                 externalRoles = userStoreMan.getRoleNames();
             }
@@ -1254,7 +1255,8 @@ public class UserRealmProxy {
                 if(domain != null && filter.toLowerCase().startsWith(domain.toLowerCase() +
                                                                 CarbonConstants.DOMAIN_SEPARATOR)){
                     if(admin instanceof AbstractUserStoreManager){
-                        externalRoles = ((AbstractUserStoreManager) admin).getRoleNames(filter, limit, true);
+                        externalRoles = ((AbstractUserStoreManager) admin).getRoleNames(filter, limit,
+                                true, true, true);
                     } else {
                         externalRoles = admin.getRoleNames();
                     }
@@ -1273,7 +1275,8 @@ public class UserRealmProxy {
                     }
 
                     if(admin instanceof AbstractUserStoreManager){
-                        externalRoles = ((AbstractUserStoreManager) admin).getRoleNames(filter, limit, true);
+                        externalRoles = ((AbstractUserStoreManager) admin).getRoleNames(filter, limit,
+                                true, true, true);
                     } else {
                         externalRoles = admin.getRoleNames();
                     }
@@ -2049,8 +2052,7 @@ public class UserRealmProxy {
 			// TODO remove abstract user store
 			fName.setShared(((AbstractUserStoreManager) userStoreManager).isOthersSharedRole(entityName));
 			if (fName.isShared()) {
-				fName.setItemDisplayName(UserCoreConstants.SHARED_DOMAIN_NAME +
-				                         UserCoreConstants.SHARED_ROLE_TENANT_SEPERATOR +
+				fName.setItemDisplayName(UserCoreConstants.SHARED_ROLE_TENANT_SEPERATOR +
 				                         fName.getItemName());
 			}
 
