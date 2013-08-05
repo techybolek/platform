@@ -274,10 +274,10 @@
     <!-- This static configuration is suppose to be modified before any data being loaded to the registry (i.e.: before the first startup) -->
     
     <staticConfiguration>
-        <versioningProperties>true</versioningProperties>
-        <versioningComments>true</versioningComments>
-        <versioningTags>true</versioningTags>
-        <versioningRatings>true</versioningRatings>
+        <versioningProperties>false</versioningProperties>
+        <versioningComments>false</versioningComments>
+        <versioningTags>false</versioningTags>
+        <versioningRatings>false</versioningRatings>
         <!-- Location you want to add service and default location will be /services/ -->
         <servicePath>/trunk/services/</servicePath>
     </staticConfiguration>
@@ -286,10 +286,6 @@
   
     <versionResourcesOnChange>false</versionResourcesOnChange>
 
-    <!-- This enables registry activity logging-->
-
-    <enableActivityLogs>true</enableActivityLogs>
-    
     <!-- This enables JMX management for G-Reg -->
     
     <jmx enabled="false">
