@@ -85,6 +85,8 @@ public class PermissionUtil {
             }
             filteredRoleNames.add(roleN);
         }
+        // adding anonymous role
+        filteredRoleNames.add(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME);
 
         roleNames = filteredRoleNames.toArray(new String[filteredRoleNames.size()]);
         permissionsBean.setRoleNames(roleNames);
