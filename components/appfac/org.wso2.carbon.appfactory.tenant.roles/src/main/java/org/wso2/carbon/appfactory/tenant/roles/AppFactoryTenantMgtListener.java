@@ -19,12 +19,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
-import org.wso2.carbon.appfactory.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.appfactory.tenant.roles.util.Util;
-
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
-
+import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.Calendar;

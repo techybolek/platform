@@ -18,10 +18,9 @@ package org.wso2.carbon.appfactory.tenant.roles;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.appfactory.tenant.mgt.stub.AppFactoryTenantMgtAdminServiceExceptionException;
-import org.wso2.carbon.appfactory.tenant.mgt.stub.AppFactoryTenantMgtAdminServiceStub;
-import org.wso2.carbon.appfactory.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.appfactory.tenant.roles.util.Util;
+import org.wso2.carbon.tenant.mgt.stub.TenantMgtAdminServiceStub;
+import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
@@ -32,7 +31,7 @@ import java.rmi.RemoteException;
 public class AppFactoryTenantMgtServiceClient {
     private static final Log log = LogFactory.getLog(AppFactoryTenantMgtServiceClient.class);
     //private ServiceClient client = null;;
-    AppFactoryTenantMgtAdminServiceStub stub;
+    TenantMgtAdminServiceStub stub;
 
     public AppFactoryTenantMgtServiceClient(String serverURL, String username, String password) throws Exception {
         String epr = serverURL + "/services/AppFactoryTenantMgtAdminService";
@@ -43,7 +42,7 @@ public class AppFactoryTenantMgtServiceClient {
 
 
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);*/
-            stub = new AppFactoryTenantMgtAdminServiceStub(Util.getConfigurationContextService().getClientConfigContext(), epr);
+            stub = new TenantMgtAdminServiceStub(Util.getConfigurationContextService().getClientConfigContext(), epr);
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, stub._getServiceClient());
 
         } catch (AxisFault axisFault) {
@@ -63,13 +62,9 @@ public class AppFactoryTenantMgtServiceClient {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }*/
         try {
-            stub.doPostTenantActivation(tenantInfoBean);
+            stub.addSkeletonTenant(tenantInfoBean);
         } catch (RemoteException e) {
             String msg = "Remote Error while creating invoking service method";
-            log.error(msg, e);
-            throw new Exception(msg, e);
-        } catch (AppFactoryTenantMgtAdminServiceExceptionException e) {
-            String msg = "Error while creating invoking service method";
             log.error(msg, e);
             throw new Exception(msg, e);
         }
