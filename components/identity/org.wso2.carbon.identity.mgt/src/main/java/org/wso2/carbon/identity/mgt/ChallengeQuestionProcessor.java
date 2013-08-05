@@ -280,23 +280,26 @@ public class ChallengeQuestionProcessor {
 
 		ChallengeQuestionIdsDTO dto = new ChallengeQuestionIdsDTO();
 
-		try {
-			if (log.isDebugEnabled()) {
-				log.debug("Retrieving Challenge question ids from the user profile.");
-			}
-			List<String> challengesUris = getChallengeQuestionUris(userName, tenantId);
-			String[] ids = new String[challengesUris.size()];
-
-			for (int i = 0; i < challengesUris.size(); i++) {
-				ids[i] = challengesUris.get(i).trim();
-			}
-
-			dto.setIds(ids);
-
-		} catch (Exception e) {
-			String msg = "No associated challenge question found for the user";
-			log.debug(msg, e);
+		if (log.isDebugEnabled()) {
+			log.debug("Retrieving Challenge question ids from the user profile.");
 		}
+		List<String> challengesUris = getChallengeQuestionUris(userName, tenantId);
+
+		if (challengesUris.isEmpty()) {
+			String msg = "No associated challenge question found for the user";
+			if (log.isDebugEnabled()) {
+				log.debug(msg);
+			}
+			throw new IdentityMgtServiceException(msg);
+		}
+
+		String[] ids = new String[challengesUris.size()];
+
+		for (int i = 0; i < challengesUris.size(); i++) {
+			ids[i] = challengesUris.get(i).trim();
+		}
+
+		dto.setIds(ids);
 
 		return dto;
 

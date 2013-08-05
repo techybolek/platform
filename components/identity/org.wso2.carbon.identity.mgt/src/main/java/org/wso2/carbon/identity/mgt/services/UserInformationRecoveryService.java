@@ -31,9 +31,15 @@ import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionIdsDTO;
 import org.wso2.carbon.identity.mgt.dto.NotificationDataDTO;
 import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
 import org.wso2.carbon.identity.mgt.dto.UserDTO;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDTO;
+import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
+import org.wso2.carbon.identity.mgt.util.UserIdentityManagementUtil;
 import org.wso2.carbon.identity.mgt.util.Utils;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * This service provides the services needed to recover user password and user
@@ -81,7 +87,7 @@ public class UserInformationRecoveryService {
 				if(log.isDebugEnabled()) {
 					log.debug(e.getMessage());					
 				}
-				bean.setError(VerificationBean.ERROR_CODE_INVALID_CAPTCHA);
+				bean.setError(VerificationBean.ERROR_CODE_INVALID_CAPTCHA + " " + e.getMessage());
 				bean.setVerified(false);
 				return bean;
 			}
@@ -310,14 +316,20 @@ public class UserInformationRecoveryService {
 			return idsDTO;
 		}
 		if (bean.isVerified()) {
-			idsDTO = processor.getQuestionProcessor().getUserChallengeQuestionIds(
-					userDTO.getUserId(), userDTO.getTenantId());
-			idsDTO.setKey(bean.getKey());
+			try {
+				idsDTO = processor.getQuestionProcessor().getUserChallengeQuestionIds(
+						userDTO.getUserId(), userDTO.getTenantId());
+				idsDTO.setKey(bean.getKey());
+			} catch (Exception e) {
+				idsDTO.setError(e.getMessage());
+				idsDTO.setKey("");
+			}
 		} else {
 			if(log.isDebugEnabled()) {
 				log.debug("Verfication failed for user. Error : " + bean.getError());
 			}
 			idsDTO.setError(bean.getError());
+			idsDTO.setKey("");
 		}
 
 		return idsDTO;
@@ -465,6 +477,7 @@ public class UserInformationRecoveryService {
 
 		} else {
 			bean.setError("Answer verification failed for user: " + userName);
+			bean.setVerified(false);
 			bean.setKey(""); // clear the key to avoid returning to caller.
 			if(log.isDebugEnabled()) {
 				log.debug(bean.getError());
