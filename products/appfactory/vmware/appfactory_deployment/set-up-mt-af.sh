@@ -63,6 +63,10 @@ mkdir setup
  setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "staging" -v $APPSERVER_VERSION -h $af_host_name -o 7
  setup_as -w $SETUP_DIR -r $RESOURCE_DIR -e "prod" -v $APPSERVER_VERSION -h $af_host_name -o 5
 
+#configure build server
+. `pwd`/set-up-build-server.sh
+ setup_build_server -w $SETUP_DIR -r $RESOURCE_DIR -v $APPSERVER_VERSION -h $af_host_name -o 30
+
  echo "Creating Databases ........"
 
  MYSQL=`which mysql`
