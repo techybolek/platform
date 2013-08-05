@@ -428,37 +428,8 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
         deploymentEngine.addDeployer(deployer, extensionsPath, "xar");
         deploymentEngine.addDeployer(deployer, mediatorsPath, "jar");
         deploymentEngine.addDeployer(deployer, extensionsPath, "jar");
-        this.registerMediationLibraryDeployer(axisConfig, contextInfo.getSynapseEnvironment());
      }
     
-    
-    private void registerMediationLibraryDeployer(AxisConfiguration axisConfig, SynapseEnvironment synapseEnvironment) {
-
-        SynapseConfiguration synCfg = synapseEnvironment.getSynapseConfiguration();
-        DeploymentEngine deploymentEngine = (DeploymentEngine) axisConfig.getConfigurator();
-        SynapseArtifactDeploymentStore deploymentStore = synCfg.getArtifactDeploymentStore();
-
-        String synapseConfigPath = ServiceBusUtils.getSynapseConfigAbsPath(
-                synapseEnvironment.getServerContextInformation());
-        String synapseImportDir = synapseConfigPath
-                + File.separator + MultiXMLConfigurationBuilder.SYNAPSE_IMPORTS_DIR;
-
-        for (SynapseImport synImport : synCfg.getSynapseImports().values()) {
-            if (synImport.getFileName() != null) {
-                deploymentStore.addRestoredArtifact(
-                        synapseImportDir + File.separator + synImport.getFileName());
-            }
-        }
-        //register imports
-        deploymentEngine.addDeployer(new ImportDeployer(),
-                synapseImportDir, ServiceBusConstants.ARTIFACT_EXTENSION);
-
-        //register library deployer
-        String carbonRepoPath = axisConfig.getRepository().getPath();
-        String libsPath = carbonRepoPath + File.separator + "synapse-libs";
-        deploymentEngine.addDeployer(new LibraryArtifactDeployer(), libsPath, "zip");
-
-    }
     
 
     public static boolean isRunningSamplesMode() {

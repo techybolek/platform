@@ -38,6 +38,7 @@ import org.apache.synapse.commons.beanstalk.enterprise.EnterpriseBeanstalkManage
 import org.apache.synapse.commons.datasource.DataSourceRepositoryHolder;
 import org.apache.synapse.commons.util.RMIRegistryController;
 import org.apache.synapse.config.*;
+import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.wso2.securevault.SecurityConstants;
 import org.wso2.securevault.secret.SecretCallbackHandler;
 import org.apache.synapse.commons.datasource.DataSourceInformationRepository;
@@ -46,13 +47,18 @@ import org.apache.synapse.commons.jmx.JmxInformation;
 import org.apache.synapse.commons.jmx.JmxInformationFactory;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.*;
+import org.apache.synapse.deployers.ImportDeployer;
+import org.apache.synapse.deployers.LibraryArtifactDeployer;
+import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.eventing.SynapseEventSource;
+import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.task.*;
 import org.wso2.securevault.secret.handler.SharedSecretCallbackHandlerCache;
 import org.apache.synapse.util.xpath.ext.SynapseXpathFunctionContextProvider;
 import org.apache.synapse.util.xpath.ext.SynapseXpathVariableResolver;
 import org.apache.synapse.util.xpath.ext.XpathExtensionUtil;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -376,6 +382,7 @@ public class Axis2SynapseController implements SynapseController {
     public SynapseEnvironment createSynapseEnvironment() {
 
         try {
+        	deployMediationLibraryArtifacts();
         	deployMediatorExtensions();
             deploySynapseService();
             deployProxyServices();
@@ -407,7 +414,41 @@ public class Axis2SynapseController implements SynapseController {
         return synapseEnvironment;
     }
 
-    /**
+	/**
+	 * The mediation library deployer will handling the process of deploying the
+	 * libararyArtifacts, this is required since the library specific artifacts
+	 * has to be initialized priorly for the cases like connectors
+	 * 
+	 */
+	private void deployMediationLibraryArtifacts() {
+		if (configurationContext == null || synapseConfiguration == null) {
+			return;
+		}
+		DeploymentEngine deploymentEngine = (DeploymentEngine) configurationContext
+				.getAxisConfiguration().getConfigurator();
+		String carbonRepoPath = configurationContext.getAxisConfiguration().getRepository()
+				.getPath();
+		SynapseArtifactDeploymentStore deploymentStore = synapseConfiguration
+				.getArtifactDeploymentStore();
+
+		String synapseImportDir = synapseConfiguration.getPathToConfigFile() + File.separator
+				+ MultiXMLConfigurationBuilder.SYNAPSE_IMPORTS_DIR;
+
+		for (SynapseImport synImport : synapseConfiguration.getSynapseImports().values()) {
+			if (synImport.getFileName() != null) {
+				deploymentStore.addRestoredArtifact(synapseImportDir + File.separator
+						+ synImport.getFileName());
+			}
+		}
+		// register imports
+		deploymentEngine.addDeployer(new ImportDeployer(), synapseImportDir, "xml");
+
+		String libsPath = carbonRepoPath + File.separator + "synapse-libs";
+		deploymentEngine.addDeployer(new LibraryArtifactDeployer(), libsPath, "zip");
+	}
+
+
+	/**
      * Destroys the Synapse Environment by undeploying all Axis2 services.
      */
     public void destroySynapseEnvironment() {

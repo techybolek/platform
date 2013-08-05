@@ -54,15 +54,15 @@ public class LibraryArtifactDeployer extends AbstractSynapseArtifactDeployer {
             log.debug("Deployment of the synapse library artifact from file : " + libFilePath + " : STARTED");
         }
 
-        if (getServerContextInformation().getServerState() != ServerState.STARTED) {
-            // synapse server has not yet being started
-            if (log.isDebugEnabled()) {
-                log.debug("Skipped the library artifact deployment (since the Synapse " +
-                          "server doesn't seem to be started yet), from file : "
-                          + deploymentFileData.getAbsolutePath());
-            }
-            return;
-        }
+//        if (getServerContextInformation().getServerState() != ServerState.STARTED) {
+//            // synapse server has not yet being started
+//            if (log.isDebugEnabled()) {
+//                log.debug("Skipped the library artifact deployment (since the Synapse " +
+//                          "server doesn't seem to be started yet), from file : "
+//                          + deploymentFileData.getAbsolutePath());
+//            }
+//            return;
+//        }
         try {
             SynapseArtifactDeploymentStore deploymentStore = getSynapseConfiguration().getArtifactDeploymentStore();
 
