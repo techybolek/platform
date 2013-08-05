@@ -1636,12 +1636,12 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-                                <!--feature>
-                                    <id>org.wso2.carbon.webapp.mgt.feature.group</id>
+                                <feature>
+                                    <id>org.wso2.carbon.webapp.mgt.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-                                <feature>
+                                <!--feature>
                                     <id>org.wso2.carbon.jaxws.webapp.mgt.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature-->
@@ -2000,12 +2000,12 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-                                <!--feature>
-                                    <id>org.wso2.carbon.webapp.mgt.feature.group</id>
+                                <feature>
+                                    <id>org.wso2.carbon.webapp.mgt.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-                                <feature>
+                                <!--feature>
                                     <id>org.wso2.carbon.jaxws.webapp.mgt.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature-->
@@ -2663,6 +2663,11 @@
                                 </feature>
 
                                 <feature>
+                                    <id>org.wso2.carbon.webapp.mgt.server.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+
+                                <feature>
                                     <id>org.wso2.carbon.discovery.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -2805,7 +2810,10 @@
                                     <id>org.wso2.carbon.bam.service.agent.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-
+                                <feature>
+                                    <id>org.wso2.carbon.bam.webapp.agent.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
                                 <feature>
                                     <id>org.wso2.carbon.event.ui.feature.group</id>
                                     <version>${carbon.platform.version}</version>
