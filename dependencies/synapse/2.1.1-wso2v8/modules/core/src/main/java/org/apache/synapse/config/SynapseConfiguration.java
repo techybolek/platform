@@ -65,7 +65,7 @@ import org.apache.synapse.libraries.model.Library;
 import org.apache.synapse.libraries.util.LibDeployerUtils;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.mediators.template.TemplateMediator;
-import org.apache.synapse.message.processors.MessageProcessor;
+import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.message.store.MessageStore;
 import org.apache.synapse.registry.Registry;
 import org.apache.synapse.rest.API;

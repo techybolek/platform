@@ -16,11 +16,12 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.message.processors.forward;
+package org.apache.synapse.message.processor.impl.forwarder;
 
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
-import org.apache.synapse.message.processors.ScheduledMessageProcessor;
+import org.apache.synapse.message.processor.impl.ScheduledMessageProcessor;
+import org.apache.synapse.message.processor.impl.sampler.SamplingProcessorView;
 import org.apache.synapse.message.store.MessageStores;
 import org.quartz.*;
 
@@ -39,21 +40,25 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
 
     private BlockingMessageSender sender = null;
 
-    private volatile AtomicBoolean active = new AtomicBoolean(true);
+//    private volatile AtomicBoolean active = new AtomicBoolean(true);
 
-    private volatile AtomicInteger sendAttempts = new AtomicInteger(0);
+//    private volatile AtomicInteger sendAttempts = new AtomicInteger(0);
 
     private MessageForwardingProcessorView view;
 
     @Override
     public void init(SynapseEnvironment se) {
+
         String thisServerName = se.getServerContextInformation().getServerConfigurationInformation()
                 .getServerName();
         Object pinnedServersObj = this.parameters.get("pinnedServers");
+
         if (pinnedServersObj != null && pinnedServersObj instanceof String) {
+
             boolean pinned = false;
             String pinnedServers = (String) pinnedServersObj;
             StringTokenizer st = new StringTokenizer(pinnedServers, " ,");
+
             while (st.hasMoreTokens()) {
                 String token = st.nextToken().trim();
                 if (thisServerName.equals(token)) {
@@ -63,10 +68,12 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
             if (!pinned) {
                 log.info("Message processor '" + name + "' pinned on '" + pinnedServers + "' not starting on" +
                         " this server '" + thisServerName + "'");
-                active = new AtomicBoolean(false);
             }
         }
+//        sender = initMessageSender(parameters);
+
         super.init(se);
+
         try {
             view = new MessageForwardingProcessorView(
                     se.getSynapseConfiguration().getMessageStore(messageStore), sender, this);
@@ -78,39 +85,18 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
     }
 
     @Override
-    protected JobBuilder getJobBuilder() {
-        JobBuilder jobBuilder = JobBuilder
-                .newJob(MessageStores.getForwardingHandler(MessageStores.INMEMORY_MS))
-                .withIdentity(name + "-forward job", SCHEDULED_MESSAGE_PROCESSOR_GROUP);
-        return jobBuilder;
-    }
-
-    @Override
-    protected JobBuilder getJobBuilder(int type) {
-         JobBuilder jobBuilder = JobBuilder
-                 .newJob(MessageStores.getForwardingHandler(type))
-                 .withIdentity(name + "-forward job", SCHEDULED_MESSAGE_PROCESSOR_GROUP);
-         return jobBuilder;
-    }
-
-    @Override
-    protected JobDetail getJobDetail() {
-        JobDetail jobDetail;
-        JobBuilder jobBuilder = getJobBuilder();
-        jobDetail = jobBuilder.build();
-        return jobDetail;
-    }
-
-    @Override
     protected JobDataMap getJobDataMap() {
         JobDataMap jdm = new JobDataMap();
         sender = initMessageSender(parameters);
-        jdm.put(BLOCKING_SENDER,sender);
-        jdm.put(PROCESSOR_INSTANCE,this);
+        jdm.put(BLOCKING_SENDER, sender);
+        jdm.put(PROCESSOR_INSTANCE, this);
+        jdm.put(ForwardingProcessorConstants.TARGET_ENDPOINT, getTargetEndpoint());
+
         return jdm;
     }
 
     private BlockingMessageSender initMessageSender(Map<String, Object> params) {
+
         String axis2repo = (String) params.get(ForwardingProcessorConstants.AXIS2_REPO);
         String axis2Config = (String) params.get(ForwardingProcessorConstants.AXIS2_CONFIG);
 
@@ -126,61 +112,17 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
         return sender;
     }
 
-    public BlockingMessageSender getSender() {
-        return sender;
-    }
-
-    public void setSender(BlockingMessageSender sender) {
-        this.sender = sender;
-    }
-
     public boolean isActive() {
-        return active.get();
+        return !isDeactivated();
     }
 
-    public void activate() {
-        active.set(true);
-    }
-
-    public void deactivate() {
-        active.set(false);
-    }
-
-    public int getSendAttemptCount() {
-        return sendAttempts.get();
-    }
-
-    public void incrementSendAttemptCount() {
-        sendAttempts.incrementAndGet();
-    }
-
-    public void resetSentAttemptCount(){
-        sendAttempts.set(0);
-    }
-
-    @Override
-    public void destroy() {
-         state = State.DESTROY;
-         try {
-            scheduler.deleteJob(new JobKey(name + "-forward job",
-                    ScheduledMessageProcessor.SCHEDULED_MESSAGE_PROCESSOR_GROUP));
-        } catch (SchedulerException e) {
-            log.error("Error while destroying the task " + e);
-        }
-            if (getMessageConsumer() != null) {
-                boolean success = getMessageConsumer().cleanup();
-                if (!success) {
-                    log.error("[" + getName() + "] Could not cleanup message consumer.");
-                }
-            } else {
-                log.warn("[" + getName() + "] Could not find the message consumer to cleanup.");
-            }
-
-    }
-
+    // TODO : Remove this safely
+//    public void resetSentAttemptCount(){
+//        sendAttempts.set(0);
+//    }
 
     /**
-     * Return the JMS view of Message Processor
+     * This method is used by back end of the message processor
      * @return
      */
     public MessageForwardingProcessorView getView() {

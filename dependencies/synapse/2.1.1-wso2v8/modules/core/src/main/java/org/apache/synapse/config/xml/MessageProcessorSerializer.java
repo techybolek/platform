@@ -26,7 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.message.processors.MessageProcessor;
+import org.apache.synapse.message.processor.MessageProcessor;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;
@@ -72,6 +72,12 @@ public class MessageProcessorSerializer {
             processorElem.addAttribute(fac.createOMAttribute("name", nullNS, processor.getName()));
         } else {
             handleException("Message store Name not specified");
+        }
+
+        if (processor.getName() != null) {
+            processorElem.addAttribute(fac.createOMAttribute("targetEndpoint", nullNS, processor.getTargetEndpoint()));
+        } else {
+            handleException("Message store Target Endpoint not specified");
         }
 
         if(processor.getMessageStoreName() != null) {

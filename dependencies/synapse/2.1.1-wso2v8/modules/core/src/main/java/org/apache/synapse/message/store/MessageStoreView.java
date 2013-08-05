@@ -26,7 +26,7 @@ import org.apache.synapse.MessageContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageStoreView implements MessageStoreViewMBean{
+public class MessageStoreView implements MessageStoreViewMBean {
 
     private String messageStoreName;
 
@@ -34,50 +34,51 @@ public class MessageStoreView implements MessageStoreViewMBean{
 
     private static final Log log = LogFactory.getLog(MessageStoreView.class);
 
-    public MessageStoreView(String name , MessageStore messageStore){
+    public MessageStoreView(String name, MessageStore messageStore){
         this.messageStoreName = name;
         this.messageStore = messageStore;
     }
 
 
     public void deleteAll() {
-        messageStore.clear();
+        //messageStore.clear();
         log.info("All messages in Message Store" + messageStoreName + " were deleted");
     }
 
     public List<String> getMessageIds() {
 
         List<String> returnList = new ArrayList<String>();
-        List<MessageContext> list = messageStore.getAll();
+        //List<MessageContext> list = messageStore.getAll();
 
-        for(MessageContext m : list) {
-            returnList.add(m.getMessageID());
-        }
+        //for(MessageContext m : list) {
+        //    returnList.add(m.getMessageID());
+        //}
         return returnList;
     }
 
     public void delete(String messageID) {
         if(messageID != null) {
-            MessageContext m =messageStore.remove(messageID);
-            if (m != null){
-                log.info("Message with ID :" + messageID + " removed from the MessageStore");
-            }
+           // MessageContext m =messageStore.remove(messageID);
+            //if (m != null){
+            //    log.info("Message with ID :" + messageID + " removed from the MessageStore");
+            //}
         }
     }
 
     public String getEnvelope(String messageID) {
         if (messageID != null) {
-            MessageContext m = messageStore.get(messageID);
+            //MessageContext m = messageStore.get(messageID);
 
-            if (m != null) {
-                return m.getEnvelope().toString();
-            }
+            //if (m != null) {
+            //    return m.getEnvelope().toString();
+            //}
         }
         return null;
     }
 
     public int getSize() {
-        return messageStore.size();
+        //return messageStore.size();
+        return 0;
     }
 
 }

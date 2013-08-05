@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.apache.synapse.message.processors.forward;
+package org.apache.synapse.message.processor.impl.forwarder;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -45,9 +45,8 @@ import org.apache.synapse.util.MessageHelper;
 import java.util.Iterator;
 import java.util.Map;
 
-
 public class BlockingMessageSender {
-    public final static String DEFAULT_CLIENT_REPO = "./samples/axis2Client/client_repo";
+    public final static String DEFAULT_CLIENT_REPO = "./samples/axis2Client/client_repo"; // TODO : why we take it from the samples ????
     public final static String DEFAULT_AXIS2_XML = "./samples/axis2Client/client_repo/conf/axis2.xml";
     public final static String TARGET_MESSAGE_TYPE = "target.messageType";
 

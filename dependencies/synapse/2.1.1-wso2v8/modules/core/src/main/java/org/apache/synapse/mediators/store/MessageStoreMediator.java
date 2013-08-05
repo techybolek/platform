@@ -80,7 +80,7 @@ public class MessageStoreMediator extends AbstractMediator{
 
                 // Ensure that the message is fully read
                 synCtx.getEnvelope().buildWithAttachments();
-                messageStore.offer(synCtx);
+                boolean result = messageStore.getProducer().storeMessage(synCtx);
 
                 // with the nio transport, this causes the listener not to write a 202
                 // Accepted response, as this implies that Synapse does not yet know if
@@ -90,7 +90,7 @@ public class MessageStoreMediator extends AbstractMediator{
 
                 return true;
             } else {
-                handleException("Message Stroe is not exists", synCtx);
+                handleException("Message Store does not exist.", synCtx);
             }
         }
         return false;

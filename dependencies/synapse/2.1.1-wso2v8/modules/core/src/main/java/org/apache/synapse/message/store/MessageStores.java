@@ -20,8 +20,10 @@ package org.apache.synapse.message.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.message.processors.forward.ForwardingJob;
-import org.apache.synapse.message.processors.sampler.SamplingJob;
+import org.apache.synapse.message.processor.impl.forwarder.ForwardingService;
+//import org.apache.synapse.message.processor.impl.forwarder.InMem.ForwardingService;
+import org.apache.synapse.message.processor.impl.sampler.SamplingService;
+//import org.apache.synapse.message.store.impl.InMemory.InMemoryMessageStore;
 
 public final class MessageStores {
     /** JMS Message Store */
@@ -31,12 +33,13 @@ public final class MessageStores {
     /** In Memory Message Store */
     public static final int INMEMORY_MS  = 2;
     /** Types of JMS message processing handlers */
-    private static final String FORWARDING_HANDLER = "org.wso2.carbon.message.store.persistence.jms.ForwardingHandler";
+//    private static final String FORWARDING_HANDLER = "org.wso2.carbon.message.store.persistence.jms.ForwardingHandler";
+    private static final String FORWARDING_SERVICE = "org.apache.synapse.message.processor.impl.forwarder.JMS.JMSForwardingService";
     private static final String SAMPLING_HANDLER = "org.wso2.carbon.message.store.persistence.jms.SamplingHandler";
     /** Types of message stores */
     private static final String JMS_MESSAGE_STORE = "org.wso2.carbon.message.store.persistence.jms.JMSMessageStore";
 
-    private static final Log log = LogFactory.getLog(MessageStores.class);
+    private static final Log log = LogFactory.getLog(MessageStores.class.getName());
 
     private MessageStores() { }
 
@@ -45,69 +48,71 @@ public final class MessageStores {
      * @param type Type of the message store
      * @return A new instance of the message store.
      */
-    public static MessageStore getNewInstance(final int type) {
-        if (INMEMORY_MS == type) {
-            return new InMemoryMessageStore();
-        }
-        if (JMS_MS == type) {
-            return getNewInstanceFromImpl(JMS_MESSAGE_STORE);
-        }
-        log.error("Could not create message store of type '" + type
-                  + "'. Returning an In-memory message store instance.");
-        return new InMemoryMessageStore();
-    }
+//    public static MessageStore getNewInstance(final int type) {
+//        if (INMEMORY_MS == type) {
+//            return new InMemoryMessageStore();
+//        }
+//        if (JMS_MS == type) {
+//            return getNewInstanceFromImpl(JMS_MESSAGE_STORE);
+//        }
+//        log.error("Could not create message store of type '" + type
+//                  + "'. Returning an In-memory message store instance.");
+//        return new InMemoryMessageStore();
+//    }
 
     /**
      * Returns a new instance of a MessageStore object of the given implementation.
      * @param impl Full qualified name of the message store implementation
      * @return New instance of a message store
      */
-    public static MessageStore getNewInstanceFromImpl(final String impl) {
-        Class clazz;
-        try {
-            clazz = Class.forName(impl);
-        } catch (ClassNotFoundException e) {
-            log.error("Could not create message store from '" + impl + "'. "
-                      + e.getLocalizedMessage());
-            log.error("Returning an In-Memory message store instance.");
-            return new InMemoryMessageStore();
-        }
-        try {
-            return (MessageStore) clazz.newInstance();
-        } catch (Exception e) {
-            log.error("Could not create message store from '" + impl + "'. "
-                      + e.getLocalizedMessage());
-            log.error("Returning an In-Memory message store instance.");
-            return new InMemoryMessageStore();
-        }
-    }
+//    public static MessageStore getNewInstanceFromImpl(final String impl) {
+//        Class clazz;
+//        try {
+//            clazz = Class.forName(impl);
+//        } catch (ClassNotFoundException e) {
+//            log.error("Could not create message store from '" + impl + "'. "
+//                      + e.getLocalizedMessage());
+//            log.error("Returning an In-Memory message store instance.");
+//            return new InMemoryMessageStore();
+//        }
+//        try {
+//            return (MessageStore) clazz.newInstance();
+//        } catch (Exception e) {
+//            log.error("Could not create message store from '" + impl + "'. "
+//                      + e.getLocalizedMessage());
+//            log.error("Returning an In-Memory message store instance.");
+//            return new InMemoryMessageStore();
+//        }
+//    }
 
     /**
-     * Returns the type of the ForwardingJob for the given type.
+     * Returns the type of the ForwardingService for the given type.
      * @param type message store type.
      * @return Forwarding job class
      */
-    public static Class getForwardingHandler(final int type) {
+    public static Class getForwardingService(final int type) {
         if (type == INMEMORY_MS) {
-            return ForwardingJob.class;
+            return ForwardingService.class;
         }
         if (type == JMS_MS) {
             Class clazz;
             try {
-                clazz = Class.forName(FORWARDING_HANDLER);
+//                clazz = Class.forName(FORWARDING_HANDLER);
+                clazz = Class.forName(FORWARDING_SERVICE);
                 return clazz;
             } catch (ClassNotFoundException e) {
-                log.error("Could not create a forwarding message handler from '" + FORWARDING_HANDLER  + "'. "
+//                log.error("Could not create a forwarding message handler from '" + FORWARDING_HANDLER  + "'. "
+                log.error("Could not create a forwarding message handler from '" + FORWARDING_SERVICE  + "'. "
                           + e.getLocalizedMessage());
-                //return ForwardingJob.class;
+                //return ForwardingService.class;
             }
         }
         if (type == JDBC_MS) {
             log.warn("Could not create a forwarding message handler from '" + "JDBCForwardingHandler"  + "'. "
                           + "Returning default forwarding job instead.");
-            //return ForwardingJob.class;
+            //return ForwardingService.class;
         }
-        return ForwardingJob.class;
+        return ForwardingService.class;
     }
 
     /**
@@ -115,9 +120,9 @@ public final class MessageStores {
      * @param type Type of the message store
      * @return Sampling job class
      */
-    public static Class getSamplingHandler(final int type) {
+    public static Class getSamplingService(final int type) {
         if (type == INMEMORY_MS) {
-            return SamplingJob.class;
+            return SamplingService.class;
         }
         if (type == JMS_MS) {
             Class clazz;
@@ -133,7 +138,7 @@ public final class MessageStores {
             log.warn("Could not create a sampling message handler from '" + "JDBCSamplingHandler" + "'. "
                           + "Returning default sampling job instead.");
         }
-        return SamplingJob.class;
+        return SamplingService.class;
     }
 
     /**

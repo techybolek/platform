@@ -29,7 +29,7 @@ import org.apache.synapse.config.xml.endpoints.EndpointSerializer;
 import org.apache.synapse.endpoints.Template;
 import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.mediators.template.TemplateMediator;
-import org.apache.synapse.message.processors.MessageProcessor;
+import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.registry.Registry;
 import org.apache.synapse.core.axis2.ProxyService;
 import org.apache.synapse.eventing.SynapseEventSource;

@@ -25,8 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.message.processors.MessageProcessor;
-import org.apache.synapse.message.store.InMemoryMessageStore;
+import org.apache.synapse.message.processor.MessageProcessor;
+import org.apache.synapse.message.store.impl.memory.InMemoryStore;
 import org.apache.synapse.message.store.MessageStore;
 import org.apache.axis2.util.JavaUtils;
 
@@ -77,7 +77,7 @@ public class MessageStoreFactory {
                 return null;
             }
         } else {
-            messageStore = new InMemoryMessageStore();
+            messageStore = new InMemoryStore();
         }
 
 

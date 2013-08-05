@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.message.processors.forward;
+package org.apache.synapse.message.processor.impl.forwarder;
 
 /**
  * class <code>ForwardingProcessorConstants</code> holds the constants that are
@@ -29,8 +29,6 @@ public final class ForwardingProcessorConstants {
      */
     public static final String TARGET_ENDPOINT = "target.endpoint";
 
-
-
     /**
      * The axis2 repository location to be used By the Message Sender
      */
@@ -40,8 +38,6 @@ public final class ForwardingProcessorConstants {
      * The axis2 configuration file path to be used by the Message Sender
      */
     public static final String AXIS2_CONFIG = "axis2.config";
-
-
 
     public static final String BLOCKING_SENDER_ERROR="blocking.sender.error";
 

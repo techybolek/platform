@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.message.processors.MessageProcessor;
+import org.apache.synapse.message.processor.MessageProcessor;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -46,6 +46,7 @@ import java.util.Map;
 public class MessageProcessorFactory {
     private static final Log log = LogFactory.getLog(MessageProcessorFactory.class);
     public static final QName CLASS_Q = new QName(XMLConfigConstants.NULL_NAMESPACE, "class");
+    public static final QName TARGET_ENDPOINT_Q = new QName(XMLConfigConstants.NULL_NAMESPACE, "targetEndpoint");
     public static final QName NAME_Q = new QName(XMLConfigConstants.NULL_NAMESPACE, "name");
     public static final QName PARAMETER_Q = new QName(XMLConfigConstants.SYNAPSE_NAMESPACE,
             "parameter");
@@ -80,6 +81,14 @@ public class MessageProcessorFactory {
         if (nameAtt != null) {
             assert processor != null;
             processor.setName(nameAtt.getAttributeValue());
+        } else {
+            handleException("Can't create Message processor without a name ");
+        }
+
+        OMAttribute targetSequenceAtt = elem.getAttribute(TARGET_ENDPOINT_Q);
+        if (nameAtt != null) {
+            assert targetSequenceAtt != null;
+            processor.setTargetEndpoint(targetSequenceAtt.getAttributeValue());
         } else {
             handleException("Can't create Message processor without a name ");
         }

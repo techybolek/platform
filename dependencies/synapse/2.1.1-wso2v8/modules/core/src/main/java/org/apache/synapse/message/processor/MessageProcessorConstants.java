@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.apache.synapse.message.processors;
+package org.apache.synapse.message.processor;
 
 public final class MessageProcessorConstants {
 
@@ -33,6 +33,10 @@ public final class MessageProcessorConstants {
     /**
      * Message processor parameters
      */
-    public static final String MAX_DELIVER_ATTEMPTS = "max.deliver.attempts";
+    public static final String MAX_DELIVER_ATTEMPTS = "max.delivery.attempts";
 
+    /**
+     * This is used to control the retry rate when the front end client is not reachable.
+     */
+    public static final String RETRY_INTERVAL = "client.retry.interval";
 }

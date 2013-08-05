@@ -1,4 +1,4 @@
-package org.apache.synapse.message.processors.forward;
+package org.apache.synapse.message.processor.impl.forwarder;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -9,7 +9,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
-import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
@@ -23,11 +22,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 
 import javax.xml.namespace.QName;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MessageStoreServiceClient extends ServiceClient {
     private static final String EMPTY_MEDIA_TYPE = "";
@@ -52,7 +47,7 @@ public class MessageStoreServiceClient extends ServiceClient {
      * @param mc              message context
      * @param endpoint        Endpoint definition
      * @param synapseInMsgCtx Synapse Message context
-     * @throws AxisFault
+     * @throws org.apache.axis2.AxisFault
      */
     public void sendRobust(OMElement payload, MessageContext mc, EndpointDefinition endpoint,
                            org.apache.synapse.MessageContext synapseInMsgCtx) throws AxisFault {
@@ -84,7 +79,7 @@ public class MessageStoreServiceClient extends ServiceClient {
             }
             messageContext.setProperty(Constants.Configuration.HTTP_METHOD, method);
             // TODO: this doesn't work. i.e. The outgoing message has the SOAPAction header.
-            getOptions().setProperty(org.apache.axis2.Constants.Configuration.DISABLE_SOAP_ACTION, true);
+            getOptions().setProperty(Constants.Configuration.DISABLE_SOAP_ACTION, true);
             messageContext.setDoingREST(true);
         }
         OperationClient mepClient = createClient(ANON_ROBUST_OUT_ONLY_OP);
@@ -100,7 +95,7 @@ public class MessageStoreServiceClient extends ServiceClient {
      *
      * @param messageContext the message context to be filled
      * @param payload        the payload content
-     * @throws AxisFault if something goes wrong
+     * @throws org.apache.axis2.AxisFault if something goes wrong
      */
     private void fillSOAPEnvelope(MessageContext messageContext, OMElement payload)
             throws AxisFault {
@@ -126,7 +121,7 @@ public class MessageStoreServiceClient extends ServiceClient {
      * can not be seen in the options, version 1.1 is the default.
      *
      * @return the SOAP factory
-     * @see Options#setSoapVersionURI(String)
+     * @see org.apache.axis2.client.Options#setSoapVersionURI(String)
      */
     private SOAPFactory getSOAPFactory() {
         String soapVersionURI = getOptions().getSoapVersionURI();
@@ -150,14 +145,14 @@ public class MessageStoreServiceClient extends ServiceClient {
      * XML and receives a response. For more control, you can instead create a client for the
      * operationQName and use that client to execute the exchange.
      * <p/>
-     * Unless the <code>callTransportCleanup</code> property on the {@link Options} object has been
+     * Unless the <code>callTransportCleanup</code> property on the {@link org.apache.axis2.client.Options} object has been
      * set to <code>true</code>, the caller must invoke {@link #cleanupTransport()} after
      * processing the response.
      *
      * @param operationQName name of operationQName to be invoked (non-<code>null</code>)
      * @param payload        the data to send (becomes the content of SOAP body)
      * @return response OMElement
-     * @throws AxisFault in case of error
+     * @throws org.apache.axis2.AxisFault in case of error
      * @see #cleanupTransport()
      */
     public MessageContext sendReceive(QName operationQName, OMElement payload, MessageContext mc,
@@ -265,7 +260,7 @@ public class MessageStoreServiceClient extends ServiceClient {
 
     private void handleRESTfulInvocation(EndpointDefinition endpoint,
                                          org.apache.synapse.MessageContext syapseMessageIn,
-                                         org.apache.axis2.context.MessageContext axis2Ctx,
+                                         MessageContext axis2Ctx,
                                          String restSuffix, boolean isDoingREST) {
         if (endpoint.getAddress() != null) {
             if (isDoingREST && restSuffix != null && !"".equals(restSuffix)) {

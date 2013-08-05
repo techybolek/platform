@@ -1,116 +1,46 @@
-/*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+/**
+ *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.synapse.message.store;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseArtifact;
 import org.apache.synapse.Nameable;
+import org.apache.synapse.SynapseArtifact;
+import org.apache.synapse.message.MessageConsumer;
+import org.apache.synapse.message.MessageProducer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-/**
- * This is the interface  for the Synapse Message Store
- * Message Store is used to store Messages.
- */
-public interface MessageStore extends SynapseArtifact, Nameable, ManagedLifecycle {
-
-
+public interface MessageStore extends ManagedLifecycle, Nameable, SynapseArtifact {
+    /**
+     * Returns a Message Producer for this message store. <br/>
+     * @return  A non-null message producer that can produce messages to this message store.
+     */
+    MessageProducer getProducer();
 
     /**
-     * Inserts the Message into this store if it is possible to do so immediately
-     * without violating capacity restrictions.
-     * @param messageContext  MessageContext to be saved
+     * Returns a Message Consumer for this message store. <br/>
+     * @return A non-null message consumer that can read messages from this message store.<br/>
      */
-    public boolean offer(MessageContext messageContext);
-
-    /**
-     * Retrieves and removes the first Message in this store.
-     * Message ordering will depend on the underlying implementation
-     * @return first message context in the store
-     */
-    public MessageContext poll();
-
-    /**
-     * Retrieves but not removes the first Message in this store.
-     * Message ordering will depend on the underlying implementation
-     *
-     * @return first message context in the store
-     */
-    public MessageContext peek();
-
-
-    /**
-     * Retrieves and removes the first Message in this store.
-     * Message ordering will depend on the underlying implementation
-     *
-     * @return first message context in the store
-     * @throws NoSuchElementException if store is empty
-     */
-    public MessageContext remove() throws NoSuchElementException;
-
-    /**
-     * Delete all the Messages in the Message Store
-     *
-     */
-    public void clear();
-
-
-    /**
-     * Delete and return the MessageContext with given Message id
-     * @param messageID  message id of the Message
-     * @return  MessageContext instance
-     */
-    public MessageContext remove(String messageID);
-
-
-    /**
-     *  Returns the number of Messages  in this store.
-     * @return the number of Messages in this Store
-     */
-    public int size();
-
-    /**
-     * Return the Message in given index position
-     * (this may depend on the implementation)
-     * @param index position of the message
-     * @return Message in given index position
-     */
-    public MessageContext get(int index);
-
-    /**
-     * Get the All messages in the Message store without removing them from the queue
-     * @return List of all Messages
-     */
-    public List<MessageContext> getAll();
-
-    /**
-     * Get the Message with the given ID from the Message store without removing it
-     * @param messageId A message ID string
-     * @return Message with given ID
-     */
-    public MessageContext get(String messageId);
-
+    MessageConsumer getConsumer();
 
     /**
      * set the implementation specific parameters
@@ -123,7 +53,6 @@ public interface MessageStore extends SynapseArtifact, Nameable, ManagedLifecycl
      * @return a properties map
      */
     public Map<String,Object> getParameters();
-
 
     /**
      * Set the name of the file that the Message store is configured
@@ -139,38 +68,66 @@ public interface MessageStore extends SynapseArtifact, Nameable, ManagedLifecycl
      */
     public String getFileName();
 
-
     /**
-     * Register a MessageStore observer instance with the MessageStore
-     * to receive events.
-     * @param observer instance to be registered
-     */
-    public void registerObserver(MessageStoreObserver observer);
-
-    /**
-     * Un register an Message store instance from the message store
-     * to stop receiving events
-     * @param observer  instance to be unregistered
-     */
-    public void unregisterObserver(MessageStoreObserver observer);
-
-    /**
-     * Serializes the message store into the OMElement representation of Synapse DSL.
-     * @return
-     */
-    public OMElement serialize();
-
-    /**
-     * Returns the type of this message store.
-     * @return
+     * Returns the type of this message store. <br/>
+     * The type of a message store can be one of following types, <br/>
+     * {@link MessageStores#JMS_MS}, {@link MessageStores#INMEMORY_MS},
+     * or {@link MessageStores#JDBC_MS}
+     * @return Type of the message store.
      */
     public int getType();
 
     /**
-     * Creates a new message consumer for this message store.
-     * @return
-     * @throws Exception
+     * Retrieves and removes the first Message in this store.
+     * Message ordering will depend on the underlying implementation
+     *
+     * @return first message context in the store
+     * @throws java.util.NoSuchElementException
+     *          if store is empty
      */
-    public org.apache.synapse.message.MessageConsumer newConsumer() throws Exception;
+    public MessageContext remove() throws NoSuchElementException;
 
+    /**
+     * Delete all the Messages in the Message Store
+     */
+    public void clear();
+
+    /**
+     * Delete and return the MessageContext with given Message id
+     *
+     * @param messageID message id of the Message
+     * @return MessageContext instance
+     */
+    public MessageContext remove(String messageID);
+
+    /**
+     * Returns the number of Messages  in this store.
+     *
+     * @return the number of Messages in this Store
+     */
+    public int size();
+
+    /**
+     * Return the Message in given index position
+     * (this may depend on the implementation)
+     *
+     * @param index position of the message
+     * @return Message in given index position
+     */
+    public MessageContext get(int index);
+
+    /**
+     * Get the All messages in the Message store without removing them from the queue
+     *
+     * @return List of all Messages
+     */
+    public List<MessageContext> getAll();
+
+    /**
+     * Get the Message with the given ID from the Message store without removing it
+     *
+     * @param messageId A message ID string
+     * @return Message with given ID
+     */
+    public MessageContext get(String messageId);
 }

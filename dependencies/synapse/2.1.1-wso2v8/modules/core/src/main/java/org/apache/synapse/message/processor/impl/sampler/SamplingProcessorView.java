@@ -15,29 +15,28 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.apache.synapse.message.processors.sampler;
+package org.apache.synapse.message.processor.impl.sampler;
 
-/**
- * JMS MBean interface of <code>SamplingMessageProcessor</code>
- * This will expose the JMX operations for SamplingProcessor
- */
-public interface SamplingProcessorViewMBean {
+public class SamplingProcessorView implements SamplingProcessorViewMBean {
 
-    /**
-     * Activate the Sampling processor instance
-     */
-    public void activate();
+    private SamplingProcessor processor;
 
-    /**
-     * De activate the sampling processor instance
-     */
-    public void deactivate();
+    public SamplingProcessorView(SamplingProcessor processor) {
+        this.processor = processor;
+    }
 
+    public void activate() {
+        assert processor != null;
+        processor.activate();
+    }
 
-    /**
-     * Get the active status of Sampling processor
-     * @return
-     */
-    public boolean isActive();
+    public void deactivate() {
+        assert processor != null;
+        processor.deactivate();
+    }
 
+    public boolean isActive() {
+        assert processor != null;
+        return processor.isActive();
+    }
 }

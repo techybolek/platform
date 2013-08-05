@@ -18,52 +18,36 @@
 
 package org.apache.synapse.message;
 
+import org.apache.synapse.MessageContext;
+
 public interface MessageConsumer {
     /**
-     * Cleans up this consumer
-     * @return
+     * Receives the next message from the store.
+     * @return Synapse message context of the last message received from the store.
      */
-    public boolean cleanup();
+    MessageContext receive();
 
     /**
-     * Returns the actual message consumer.
-     * @return
+     * Acknowledges the last message received so that it will be removed from the store.
+     * @return true if the acknowledgement is successful. false otherwise.
      */
-    public Object getConsumer();
+    boolean ack();
 
     /**
-     * Returns the type of the message consumer.
-     * @return
+     * Cleans up this message consumer
+     * @return true if cleanup is successful, false otherwise.
      */
-    public int getConsumerType();
+    boolean cleanup();
 
     /**
-     * Sets the name of the message processor to which this consumer belongs.
-     * @param processor
+     * Sets the ID of this message consumer.
+     * @param i ID
      */
-    public void setProcessorName(String processor);
+    public void setId(int i);
 
     /**
-     * Returns the name of the message processor.
-     * @return
+     * Returns the ID of this Message consumer.
+     * @return ID
      */
-    public String processorName();
-
-    /**
-     * Sets the name of the message store to which the message processor of this consumer belongs.
-     * @param store
-     */
-    public void setStoreName(String store);
-
-    /**
-     * Returns the name of the message store.
-     * @return
-     */
-    public String storeName();
-
-    /**
-     * Indicates if this message consumer has encountered a connection error to the message store.
-     * @return
-     */
-    public boolean isConnectionError();
+    public String getId();
 }

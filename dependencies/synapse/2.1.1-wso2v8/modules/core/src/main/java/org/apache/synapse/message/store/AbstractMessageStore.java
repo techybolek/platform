@@ -19,28 +19,24 @@
 
 package org.apache.synapse.message.store;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.synapse.SynapseConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.commons.jmx.MBeanRegistrar;
 import org.apache.synapse.config.SynapseConfiguration;
-import org.apache.synapse.config.xml.XMLConfigConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 
-import javax.xml.namespace.QName;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class AbstractMessageStore implements MessageStore {
-    protected static final OMFactory fac = OMAbstractFactory.getOMFactory();
-    protected static final OMNamespace synNS = SynapseConstants.SYNAPSE_OMNAMESPACE;
-    protected static final OMNamespace nullNS = fac.createOMNamespace(XMLConfigConstants.NULL_NAMESPACE, "");
+    private static final Log logger = LogFactory.getLog(AbstractMessageStore.class.getName());
 
     /**
      * message store name
@@ -90,10 +86,21 @@ public abstract class AbstractMessageStore implements MessageStore {
 
     protected Lock lock = new ReentrantLock();
 
+    /** */
+    private MessageStore store;
+    /** Message producer id */
+    private AtomicInteger producerId = new AtomicInteger(0);
+    /** Message consumer id */
+    private AtomicInteger consumerId = new AtomicInteger(0);
+
+    private int maxProducerId = Integer.MAX_VALUE;
 
     public void init(SynapseEnvironment se) {
         this.synapseEnvironment = se;
         this.synapseConfiguration = synapseEnvironment.getSynapseConfiguration();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialized store [" + getName() + "]...");
+        }
     }
 
     public String getName() {
@@ -101,6 +108,10 @@ public abstract class AbstractMessageStore implements MessageStore {
     }
 
     public void setName(String name) {
+        if (name == null || "".equals(name)) {
+            logger.warn("Invalid name.");
+            return;
+        }
         this.name = name;
         messageStoreMBean = new MessageStoreView(name, this);
         MBeanRegistrar.getInstance().registerMBean(messageStoreMBean,
@@ -144,14 +155,21 @@ public abstract class AbstractMessageStore implements MessageStore {
     }
 
     public Map<String, Object> getParameters() {
-        return parameters;
+        return Collections.unmodifiableMap(parameters);
     }
 
     public void setParameters(Map<String, Object> parameters) {
+        if (parameters == null) {
+            this.parameters = new HashMap<String, Object>();
+            return;
+        }
         this.parameters = parameters;
     }
 
     public void destroy() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Destroyed store [" + getName() + "]...");
+        }
     }
 
     public void setDescription(String description) {
@@ -170,38 +188,26 @@ public abstract class AbstractMessageStore implements MessageStore {
         return this.fileName;
     }
 
+    public int getType() {
+        return 4;
+    }
+
     public Lock getLock() {
         return lock;
     }
 
-    public OMElement serialize() {
-        OMElement store = fac.createOMElement("messageStore", synNS);
+    public int nextProducerId() {
+        int id = producerId.incrementAndGet();
+        if (id == maxProducerId) {
+            logger.info("Setting producer ID generator to 0...");
+            producerId.set(0);
+            id = producerId.incrementAndGet();
+        }
+        return id;
+    }
 
-        if (!getClass().getName().equals(InMemoryMessageStore.class.getName())) {
-            store.addAttribute(fac.createOMAttribute("class", nullNS,
-                                                     getClass().getName()));
-        }
-        if (getName() != null) {
-            store.addAttribute(fac.createOMAttribute("name", nullNS, getName()));
-        }
-        if (getParameters() != null) {
-            Iterator iter = getParameters().keySet().iterator();
-            while (iter.hasNext()) {
-                String name = (String) iter.next();
-                String value = (String) getParameters().get(name);
-                OMElement property = fac.createOMElement("parameter", synNS);
-                property.addAttribute(fac.createOMAttribute(
-                        "name", nullNS, name));
-                property.setText(value.trim());
-                store.addChild(property);
-            }
-        }
-        if (getDescription() != null) {
-            OMElement descriptionElem = fac.createOMElement(
-                    new QName(SynapseConstants.SYNAPSE_NAMESPACE, "description"));
-            descriptionElem.setText(getDescription());
-            return descriptionElem;
-        }
-        return store;
+    public int nextConsumerId() {
+        int id = consumerId.incrementAndGet();
+        return id;
     }
 }

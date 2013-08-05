@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.message.store.InMemoryMessageStore;
 import org.apache.synapse.message.store.MessageStore;
+import org.apache.synapse.message.store.impl.memory.InMemoryStore;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;
@@ -56,7 +56,7 @@ public class MessageStoreSerializer {
         OMElement store = fac.createOMElement("messageStore", synNS);
 
         if (messageStore != null) {
-            if (!messageStore.getClass().getName().equals(InMemoryMessageStore.class.getName())) {
+            if (!messageStore.getClass().getName().equals(InMemoryStore.class.getName())) {
                 store.addAttribute(fac.createOMAttribute("class", nullNS,
                         messageStore.getClass().getName()));
             }

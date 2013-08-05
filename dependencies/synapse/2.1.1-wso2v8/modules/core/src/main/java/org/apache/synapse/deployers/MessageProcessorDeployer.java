@@ -25,8 +25,7 @@ import org.apache.synapse.config.xml.MessageProcessorFactory;
 import org.apache.synapse.config.xml.MessageProcessorSerializer;
 import org.apache.synapse.config.xml.MessageStoreSerializer;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
-import org.apache.synapse.message.processors.MessageProcessor;
-import org.apache.synapse.message.store.MessageStore;
+import org.apache.synapse.message.processor.MessageProcessor;
 
 import java.io.File;
 import java.util.Properties;

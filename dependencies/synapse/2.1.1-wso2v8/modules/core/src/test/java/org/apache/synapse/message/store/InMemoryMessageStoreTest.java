@@ -19,6 +19,8 @@ package org.apache.synapse.message.store;
 import junit.framework.TestCase;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.TestUtils;
+import org.apache.synapse.message.MessageConsumer;
+import org.apache.synapse.message.store.impl.memory.InMemoryStore;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,36 +28,48 @@ import java.util.NoSuchElementException;
 public class InMemoryMessageStoreTest extends TestCase {
     
     public void testBasics() throws Exception {
-        MessageStore store = new InMemoryMessageStore();
+        System.out.println("Testing Basic InMemoryStore operations...");
+        MessageStore store = new InMemoryStore();
         populateStore(store, 10);
         
         // test size()
         assertEquals(10, store.size());
-        
+        System.out.println("----------------------------------------------- 0");
+
+
         // test get(index)
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, store.get(i).getMessageID());
         }
+        System.out.println("----------------------------------------------- 1");
+
 
         // test get(messageId)
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, store.get("ID" + i).getMessageID());
         }
-        
+        System.out.println("----------------------------------------------- 3");
+
+
         // test getAll()
         List<MessageContext> list = store.getAll();
         assertEquals(10, list.size());
+
+        System.out.println("----------------------------------------------- 4");
+
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, list.get(i).getMessageID());
         }
-        
-        // test peek()
-        assertEquals("ID0", store.peek().getMessageID());
-        
-        // test poll()
+        System.out.println("----------------------------------------------- 5");
+
+        // test receive()
+        MessageConsumer consumer = store.getConsumer();
         for (int i = 0; i < 10; i++) {
-            assertEquals("ID" + i, store.poll().getMessageID());
+            assertEquals("ID" + i, consumer.receive().getMessageID());
+            consumer.ack();
         }
+        System.out.println("----------------------------------------------- 6");
+
 
         populateStore(store, 10);
 
@@ -63,12 +77,12 @@ public class InMemoryMessageStoreTest extends TestCase {
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, store.remove().getMessageID());
         }
+        System.out.println("----------------------------------------------- 7");
+
         try {
             store.remove();
             fail();
-        } catch (NoSuchElementException expected) {
-
-        }
+        } catch (NoSuchElementException expected) {}
 
         populateStore(store, 10);
 
@@ -76,33 +90,43 @@ public class InMemoryMessageStoreTest extends TestCase {
         assertEquals(10, store.size());
         store.clear();
         assertEquals(0, store.size());
+        System.out.println("----------------------------------------------- 8");
+
     }
     
     public void testOrderedDelivery1() throws Exception {
-        MessageStore store = new InMemoryMessageStore();        
-
+        System.out.println("Testing InMemoryStore Ordered Delivery...");
+        MessageStore store = new InMemoryStore();
         for (int i = 0; i < 100; i++) {
-            store.offer(createMessageContext("ID" + i));
+            store.getProducer().storeMessage(createMessageContext("ID" + i));
         }
-        
+        MessageConsumer consumer = store.getConsumer();
         for (int i = 0; i < 100; i++) {
-            assertEquals("ID" + i, store.poll().getMessageID());
+            assertEquals("ID" + i, consumer.receive().getMessageID());
+            consumer.ack();
         }
+        System.out.println("----------------------------------------------- 2");
     }
     
     public void testOrderedDelivery2() throws  Exception {
-        MessageStore store = new InMemoryMessageStore();
-        store.offer(createMessageContext("FOO"));
-
-        MessageContext msg = store.peek();
+        System.out.println("Testing InMemoryStore Guaranteed Delivery...");
+        MessageStore store = new InMemoryStore();
+        store.getProducer().storeMessage(createMessageContext("FOO"));
+        MessageConsumer consumer = store.getConsumer();
+        MessageContext msg = consumer.receive();
         assertEquals("FOO", msg.getMessageID());
+        System.out.println("----------------------------------------------- 31");
 
-        store.offer(createMessageContext("BAR"));
-        msg = store.poll();
+        store.getProducer().storeMessage(createMessageContext("BAR"));
+        msg = consumer.receive();
         assertEquals("FOO", msg.getMessageID());
+        System.out.println("----------------------------------------------- 32");
 
-        msg = store.peek();
+        consumer.ack();
+        msg = consumer.receive();
         assertEquals("BAR", msg.getMessageID());
+        System.out.println("----------------------------------------------- 33");
+
     }
     
     private MessageContext createMessageContext(String identifier) throws Exception {
@@ -113,7 +137,7 @@ public class InMemoryMessageStoreTest extends TestCase {
     
     private void populateStore(MessageStore store, int count) throws Exception {
         for (int i = 0; i < count; i++) {
-            store.offer(createMessageContext("ID" + i));
+            store.getProducer().storeMessage(createMessageContext("ID" + i));
         }
     }
 }

@@ -33,7 +33,7 @@ import org.apache.synapse.config.xml.rest.APISerializer;
 import org.apache.synapse.endpoints.Template;
 import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.mediators.template.TemplateMediator;
-import org.apache.synapse.message.processors.MessageProcessor;
+import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.message.store.MessageStore;
 import org.apache.synapse.commons.executors.PriorityExecutor;
 import org.apache.synapse.commons.executors.config.PriorityExecutorSerializer;
