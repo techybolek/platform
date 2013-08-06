@@ -82,9 +82,11 @@
                     throw new Exception("Message Store can't be Empty");
             } else {
                 messageStoreXml.append("<ns1:messageProcessor name=\"");
-                messageStoreXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim()).
-                        append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim()).
-                        append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\""+" ").
+                messageStoreXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim());
+                        if (targetEndpoint != null) {
+                            messageStoreXml.append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim());
+                        }
+                        messageStoreXml.append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\""+" ").
                         append(" xmlns:ns1=\"").append(SYNAPSE_NS).append("\">");
             }
 

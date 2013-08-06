@@ -250,7 +250,7 @@
                         if ("org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor".
                                 equals(type.trim())) {
                             type = "Scheduled Message Forwarding Processor";
-                        } else if ("org.apache.synapse.message.processors.sampler.SamplingProcessor".
+                        } else if ("org.apache.synapse.message.processor.impl.sampler.SamplingProcessor".
                                 equals(type.trim())) {
                             type = "Message Sampling Processor";
                         }

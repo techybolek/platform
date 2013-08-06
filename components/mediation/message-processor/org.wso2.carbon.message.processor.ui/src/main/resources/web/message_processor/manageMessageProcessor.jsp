@@ -338,7 +338,7 @@
                             if("org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor".
                                     equals(providerClass.trim())) {
                                 providerLabel = "Scheduled Message Forwarding Processor";
-                            } else if ("org.apache.synapse.message.processors.sampler.SamplingProcessor".
+                            } else if ("org.apache.synapse.message.processor.impl.sampler.SamplingProcessor".
                                     equals(providerClass.trim())) {
                                 providerLabel = "Message Sampling Processor";
                             } else {
@@ -358,7 +358,7 @@
                         <select name="Provider" onChange="javascript:showHideCustomInput(this)">
                             <option selected="true" value="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor" onclick="showHideCustomInput(false)">
                                 Scheduled Message Forwarding Processor</option>
-                            <option value="org.apache.synapse.message.processors.sampler.SamplingProcessor" onclick="showHideCustomInput(false)">
+                            <option value="org.apache.synapse.message.processor.impl.sampler.SamplingProcessor" onclick="showHideCustomInput(false)">
                                 Message Sampling Processor</option>
                             <option value="custom.processor"  onclick="showHideCustomInput(true)">
                                 Custom</option>

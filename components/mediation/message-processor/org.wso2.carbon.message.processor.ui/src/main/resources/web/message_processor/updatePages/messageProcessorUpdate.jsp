@@ -23,9 +23,11 @@
             throw new Exception("Message Store can't be Empty");
         } else {
             messageProcessorXml.append("<messageProcessor name=\"");
-            messageProcessorXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim()).
-                    append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim()).
-                    append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\"" + " ").
+            messageProcessorXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim());
+                    if (targetEndpoint != null) {
+                        messageProcessorXml.append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim());
+                    }
+                    messageProcessorXml.append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\"" + " ").
                     append("xmlns=\"").append(SYNAPSE_NS).append("\">");
         }
 

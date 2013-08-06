@@ -293,7 +293,7 @@
                     <td><fmt:message key="provider"/><span class="required"> *</span></td>
                     <td>
                         <input name="Provider" id="Provider" type="hidden"
-                               value="org.apache.synapse.message.processors.sampler.SamplingProcessor"/>
+                               value="org.apache.synapse.message.processor.impl.sampler.SamplingProcessor"/>
                         <%
                             String providerLabel = "Message Sampling Processor";
                         %>
@@ -304,7 +304,7 @@
                 </tr>
                 <%} else {%>
                 <input id="Provider" name="Provider" type="hidden"
-                       value="org.apache.synapse.message.processors.sampler.SamplingProcessor"/>
+                       value="org.apache.synapse.message.processor.impl.sampler.SamplingProcessor"/>
 
                 <%}%>
                 <%if ((processorData != null)) { %>
