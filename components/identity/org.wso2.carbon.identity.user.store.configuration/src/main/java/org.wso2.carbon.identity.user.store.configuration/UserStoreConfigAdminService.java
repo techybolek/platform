@@ -95,7 +95,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
         }
         return domains.toArray(new UserStoreDTO[domains.size()]);
     }
-
+    
     /**
      * Get user store properties of a given active user store manager as an array
      *
@@ -150,13 +150,53 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
      */
     public void saveConfigurationToFile(UserStoreDTO userStoreDTO) throws ParserConfigurationException, TransformerException {
 
-        String tenantFilePath = CarbonUtils.getCarbonTenantsDirPath();
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
+        File userStoreConfigFile = null;
+        
         String domainName = userStoreDTO.getDomainId();
         String fileName = domainName.replace(".", "_");
 
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            File userStore = new File(deploymentDirectory);
+            if (!userStore.exists()) {
+                if(new File(deploymentDirectory).mkdir()){
+                    //folder 'userstores' created
+                } else {
+                	log.error("Error at creating 'userstores' directory to store configurations for super tenant");
+                }
+            }
+            userStoreConfigFile = new File(deploymentDirectory + File.separator + fileName + ".xml");
+        } else {
+            String tenantFilePath = CarbonUtils.getCarbonTenantsDirPath();
+            tenantFilePath = tenantFilePath + File.separator + tenantId + File.separator + USERSTORES;
+            File userStore = new File(tenantFilePath);
+            if (!userStore.exists()) {
+                if(new File(tenantFilePath).mkdir()){
+                    //folder 'userstores' created
+                } else{
+                    log.error("Error at creating 'userstores' directory to store configurations for tenant:"+tenantId);
+                }
+            }
+            userStoreConfigFile = new File(tenantFilePath + File.separator + fileName + ".xml");
+        }
+        
+        if(userStoreConfigFile.exists()) {
+        	userStoreConfigFile.delete();
+        	// try {
+        	// 	Thread.sleep(15000);
+        	// }catch (Exception e) {
+        	// 	
+        	// }
+        }
+        
+        StreamResult result = new StreamResult(userStoreConfigFile);
+
+        
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+        
         //create UserStoreManager element
         Element userStoreElement = doc.createElement(UserCoreConstants.RealmConfig.LOCAL_NAME_USER_STORE_MANAGER);
         doc.appendChild(userStoreElement);
@@ -168,46 +208,11 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
         addProperties(userStoreDTO.getProperties(), doc, userStoreElement);
         addProperty(DOMAIN_NAME, userStoreDTO.getDomainId(), doc, userStoreElement);
         addProperty(DESCRIPTION, userStoreDTO.getDescription(), doc, userStoreElement);
-
-        // write the content into xml file
+        DOMSource source = new DOMSource(doc);
+        
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
-        DOMSource source = new DOMSource(doc);
-
-
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        StreamResult result;
-
-        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-            File userStore = new File(deploymentDirectory);
-            if (!userStore.exists()) {
-                if (new File(deploymentDirectory).mkdir()) {
-                    //folder 'userstores' created
-                } else {
-                    log.error("Error at creating 'userstores' directory to store configurations for super tenant");
-                }
-            } else {
-
-            }
-            result = new StreamResult(new File(deploymentDirectory + File.separator + fileName + ".xml"));
-        } else {
-            tenantFilePath = tenantFilePath + File.separator + tenantId + File.separator + USERSTORES;
-            File userStore = new File(tenantFilePath);
-            if (!userStore.exists()) {
-                if(new File(tenantFilePath).mkdir()){
-                    //folder 'userstores' created
-                } else{
-                    log.error("Error at creating 'userstores' directory to store configurations for tenant:"+tenantId);
-                }
-            } else {
-
-            }
-            result = new StreamResult(new File(tenantFilePath + File.separator + fileName + ".xml"));
-        }
-
         transformer.transform(source, result);
-
-
     }
 
     /**
@@ -262,7 +267,6 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
         for (String userStore : userStores) {
             deleteFile(file, userStore.replace(".", "_").concat(".xml"));
         }
-
     }
 
     private void deleteFile(File file, final String userStoreName) {
@@ -287,33 +291,28 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
      * @param disable : Whether to disable/enable domain(true/false)
      */
     public void updateDomain(String domain, String disable) throws UserStoreException, IdentityUserStoreMgtException, TransformerException, ParserConfigurationException {
-        RealmConfiguration secondaryRealmConfiguration = CarbonContext.getCurrentContext().getUserRealm().
-                getRealmConfiguration().getSecondaryRealmConfig();
-
-        //not editing primary store
-        if (secondaryRealmConfiguration == null) {
-        } else {
-
-            do {
-
-                if (secondaryRealmConfiguration.getUserStoreProperty(DOMAIN_NAME).equalsIgnoreCase(domain)) {
-                    UserStoreDTO userStoreDTO = new UserStoreDTO();
-                    String className = secondaryRealmConfiguration.getUserStoreClass();
-                    userStoreDTO.setClassName(secondaryRealmConfiguration.getUserStoreClass());
-                    userStoreDTO.setDescription(secondaryRealmConfiguration.getUserStoreProperty(DESCRIPTION));
-                    userStoreDTO.setDomainId(secondaryRealmConfiguration.getUserStoreProperty(DOMAIN_NAME));
-                    userStoreDTO.setDisabled(Boolean.parseBoolean(disable));
-
-                    Map<String, String> userStoreProperties = secondaryRealmConfiguration.getUserStoreProperties();
-                    userStoreProperties.put("Class", className);
-                    userStoreDTO.setProperties(convertMapToArray(userStoreProperties));
-                    saveConfigurationToFile(userStoreDTO);
-                }
-
-                secondaryRealmConfiguration = secondaryRealmConfiguration.getSecondaryRealmConfig();
-
-            } while (secondaryRealmConfiguration != null);
+        if("true".equalsIgnoreCase(disable) || "false".equalsIgnoreCase(disable)) {
+	    	// Not editing primary store
+	        RealmConfiguration secondaryRealmConfiguration = CarbonContext.getCurrentContext().getUserRealm().
+	                getRealmConfiguration().getSecondaryRealmConfig();
+	
+	        while (secondaryRealmConfiguration != null) {
+	        	if (secondaryRealmConfiguration.getUserStoreProperty(DOMAIN_NAME).equalsIgnoreCase(domain)) {
+	        		UserStoreDTO userStoreDTO = new UserStoreDTO();
+	                String className = secondaryRealmConfiguration.getUserStoreClass();
+	                userStoreDTO.setClassName(secondaryRealmConfiguration.getUserStoreClass());
+	                userStoreDTO.setDescription(secondaryRealmConfiguration.getUserStoreProperty(DESCRIPTION));
+	                userStoreDTO.setDomainId(secondaryRealmConfiguration.getUserStoreProperty(DOMAIN_NAME));
+	
+	                Map<String, String> userStoreProperties = secondaryRealmConfiguration.getUserStoreProperties();
+	                userStoreProperties.put("Class", className);
+	                userStoreProperties.put("Disabled", disable);
+	                userStoreDTO.setProperties(convertMapToArray(userStoreProperties));
+	                saveConfigurationToFile(userStoreDTO);
+	                break;
+	        	}
+	            secondaryRealmConfiguration = secondaryRealmConfiguration.getSecondaryRealmConfig();
+	        }
         }
     }
-
 }
