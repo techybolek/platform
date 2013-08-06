@@ -32,6 +32,7 @@
 <%@ page import="org.wso2.carbon.user.mgt.ui.RoleBean" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UIPermissionNode" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
+<%@ page import="java.text.MessageFormat" %>
 <jsp:useBean id="roleBean" type="org.wso2.carbon.user.mgt.ui.RoleBean"
                     class="org.wso2.carbon.user.mgt.ui.RoleBean" scope="session"/>
 <jsp:setProperty name="roleBean" property="*" />
@@ -94,14 +95,15 @@
                     }
                 }
 	        } catch(IOException e){
-	            e.printStackTrace();
 	            throw e;
 	        }
 		}
     %>
 
     <%
-    	String urlData = request.getQueryString(); // to be used when comming back from step3
+        String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
+        ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+        String urlData = request.getQueryString(); // to be used when comming back from step3
     	UIPermissionNode rootNode = null;
         try {                                                         
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -112,11 +114,19 @@
             //Checking whether the user provided role name exists in the system.
             rootNode = client.getAllUIPermissions();
         } catch (Exception e) {
-            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-            session.setAttribute(CarbonUIMessage.ID, uiMsg);
-            return;
-        }
+            String message = MessageFormat.format(resourceBundle.getString("error.while.loading.ui.permission"),
+                    e.getMessage());
     %>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "add-step1.jsp";
+        });
+    });
+</script>
+<%
+    }
+%>
 
     <script type="text/javascript">
 	    function doValidation() {

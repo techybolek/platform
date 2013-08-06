@@ -33,6 +33,8 @@
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.text.MessageFormat" %>
+<%@ page import="java.util.ResourceBundle" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 <jsp:include page="../userstore/display-messages.jsp"/>
@@ -50,7 +52,8 @@ String roleType = null;
 UserStoreInfo[] allUserStoreInfo = null;
 Boolean sharedRoleEnabled = false;
 boolean internal = false;
-
+String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
+ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 try{
 
 	sharedRoleEnabled = (Boolean)session.getAttribute(UserAdminUIConstants.SHARED_ROLE_ENABLED);
@@ -99,9 +102,17 @@ try{
         selectedDomain = primaryDomainName;
     }
 }catch(Exception e){
-    CarbonUIMessage uiMsg = new CarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, e);
-    session.setAttribute(CarbonUIMessage.ID, uiMsg);
-    return;
+    String message = MessageFormat.format(resourceBundle.getString("error.while.loading.user.store.info"),
+            e.getMessage());
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "user-mgt.jsp";
+        });
+    });
+</script>
+<%
     }
 %>
 
@@ -138,7 +149,7 @@ try{
                 return errorMessage;
             }
 
-            if("<%=UserAdminUIConstants.INTERNAL_ROLE%>" == "<%=roleType%>" && stringValue.indexOf("/") > -1){
+            if(stringValue.indexOf("/") > -1){
                 errorMessage = "Domain";
                 return errorMessage;    
             }

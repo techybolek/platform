@@ -28,12 +28,16 @@
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserStoreInfo" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
+<%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.text.MessageFormat" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 <jsp:include page="../dialog/display_messages.jsp"/>
 
 <%
 	String isUserChange = CharacterEncoder.getSafeText(request.getParameter("isUserChange"));
+    String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     String returnPath = null;
     String username = null;
     String cancelPath = null;
@@ -69,13 +73,18 @@
         userStoreInfo = userRealmInfo.getPrimaryUserStoreInfo(); // TODO
 
     } catch(Exception e){
-        CarbonUIMessage uiMsg = new CarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, e);
-        session.setAttribute(CarbonUIMessage.ID, uiMsg);
+        String message = MessageFormat.format(resourceBundle.getString("error.while.loading.user.store.info"),
+                e.getMessage());
 %>
-        <jsp:include page="../admin/error.jsp"/>
-    <%
-        return;
-        }
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "user-mgt.jsp";
+        });
+    });
+</script>
+<%
+    }
     
 	String regEx = userStoreInfo.getRoleNameRegEx();
     

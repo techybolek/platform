@@ -25,6 +25,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.*" %>
+<%@ page import="java.text.MessageFormat" %>
 <script type="text/javascript" src="../userstore/extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 <jsp:useBean id="roleBean" type="org.wso2.carbon.user.mgt.ui.RoleBean" scope="session"/>
@@ -137,13 +138,17 @@
                 }
             }
         } catch (Exception e) {
-                    CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
-    %>
-             <script type="text/javascript">
-                    location.href = "add-step1.jsp";
-             </script>
-    <%
-            return;
+            String message = MessageFormat.format(resourceBundle.getString("error.while.loading.users"),
+                    e.getMessage());
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "add-step1.jsp";
+        });
+    });
+</script>
+<%
         }
     }
 
@@ -269,9 +274,11 @@
                                          %>
 
                                          <a href="#" onclick="doSelectAll('roleUsers');"/><fmt:message key="select.all.page"/> </a> |
-                                         <a href="#" onclick="doUnSelectAll('roleUsers');"/><fmt:message key="unselect.all.page"/> </a> |
-                                         <a href="#" onclick="doSelectAllRetrieved();"/><fmt:message key="select.all.page.from"/> <%=fromPage%> <%if(Integer.parseInt(fromPage) < Integer.parseInt(toPage)){%><fmt:message key="select.all.page.to"/> <%=toPage%><%}%></a> |
+                                         <a href="#" onclick="doUnSelectAll('roleUsers');"/><fmt:message key="unselect.all.page"/> </a>
+                                         <%if(Integer.parseInt(fromPage) < Integer.parseInt(toPage)){%>
+                                         | <a href="#" onclick="doSelectAllRetrieved();"/><fmt:message key="select.all.page.from"/> <%=fromPage%> <%if(Integer.parseInt(fromPage) < Integer.parseInt(toPage)){%><fmt:message key="select.all.page.to"/> <%=toPage%><%}%></a> |
                                          <a href="#" onclick="doUnSelectAllRetrieved();"/><fmt:message key="unselect.all.page.from"/> <%=fromPage%> <%if(Integer.parseInt(fromPage) < Integer.parseInt(toPage)){%><fmt:message key="unselect.all.page.to"/> <%=toPage%><%}%></a>
+                                         <% } %>
                                      </td>
                                  </tr>
                                  <% } %>

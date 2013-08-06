@@ -29,6 +29,8 @@
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.text.MessageFormat" %>
+<%@ page import="java.util.ResourceBundle" %>
 <jsp:useBean id="userBean"
              type="org.wso2.carbon.user.mgt.ui.UserBean"
              class="org.wso2.carbon.user.mgt.ui.UserBean" scope="session"/>
@@ -44,6 +46,9 @@ UserStoreInfo[] allUserStoreInfo = null;
 
 List<String> domainNames = null;
 String selectedDomain  = null;
+
+String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
+ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
 try{
     userRealmInfo = (UserRealmInfo)session.getAttribute(UserAdminUIConstants.USER_STORE_INFO);
@@ -87,9 +92,17 @@ try{
     }    
     
 } catch(Exception e){
-    CarbonUIMessage uiMsg = new CarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, e);
-    session.setAttribute(CarbonUIMessage.ID, uiMsg);
-    return;
+    String message = MessageFormat.format(resourceBundle.getString("error.while.loading.user.store.info"),
+            e.getMessage());
+%>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CARBON.showErrorDialog('<%=message%>',  function () {
+            location.href = "user-mgt.jsp";
+        });
+    });
+</script>
+<%
     }
 %>
 
@@ -114,6 +127,11 @@ try{
 
         if (stringValue == '') {
             errorMessage = "Empty string";
+            return errorMessage;
+        }
+
+        if(stringValue.indexOf("/") > -1){
+            errorMessage = "Domain";
             return errorMessage;
         }
 
@@ -163,6 +181,8 @@ try{
                 CARBON.showWarningDialog("<fmt:message key="enter.user.name.not.conforming"/>");
             } else if (reason == "Empty string") {
             	CARBON.showWarningDialog("<fmt:message key="enter.user.name.empty"/>");
+            } else if(reason == "Domain"){
+                CARBON.showWarningDialog("<fmt:message key="enter.user.name.domain"/>");
             }
             return false;
         }
