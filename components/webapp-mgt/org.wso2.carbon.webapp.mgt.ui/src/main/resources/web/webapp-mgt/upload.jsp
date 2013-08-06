@@ -89,7 +89,7 @@
                  }
              } else if (document.webappUploadForm.version[0].value != null){
                  for (var i=0; i<document.webappUploadForm.version.length; i++) {
-                     var appVersion =  document.webappUploadForm.version.value;
+                     var appVersion =  document.webappUploadForm.version[i].value;
                      if(appVersion.indexOf("#")!=-1) {
                          CARBON.showWarningDialog('<fmt:message key="hash.included.version"/>');
                          validFileNames = false; break;
