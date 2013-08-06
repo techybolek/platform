@@ -40,7 +40,6 @@
             <class name="org.wso2.carbon.registry.jira.issues.test.Registry931"/>
             <class name="org.wso2.carbon.registry.jira.issues.test.Registry954"/>
             <class name="org.wso2.carbon.registry.jira.issues.test.Registry1166"/>
-            <class name="org.wso2.carbon.registry.jira.issues.test.Registry1170"/>
             <class name="org.wso2.carbon.registry.jira.issues.test.Registry1245"/>
             <class name="org.wso2.carbon.registry.jira.issues.test.RemoteRegistryTestCase"/>
             <class name="org.wso2.carbon.registry.jira.issues.test.SaveSearchTestCase"/>
