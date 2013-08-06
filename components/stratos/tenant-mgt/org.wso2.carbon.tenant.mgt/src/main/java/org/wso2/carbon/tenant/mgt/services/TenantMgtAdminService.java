@@ -143,6 +143,7 @@ public class TenantMgtAdminService extends AbstractAdmin {
             throw new Exception(msg);
         }
         Tenant tenant = TenantMgtUtil.initializeTenant(tenantInfoBean);
+        tenant.setId(tenantId);
         TenantPersistor persistor = new TenantPersistor();
         // not validating the domain ownership, since created by super tenant
         persistor.persistTenant(tenant, false, tenantInfoBean.getSuccessKey(),
