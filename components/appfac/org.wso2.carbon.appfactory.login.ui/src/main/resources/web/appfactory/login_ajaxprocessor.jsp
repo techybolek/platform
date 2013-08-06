@@ -170,26 +170,13 @@
             </div>
             <article class="start">
                 <header class="start_header">
-		    <%  
+		        <a class="signUpLink" href="<%=regLink%>" target="_blank"><h2 class="account"><%=signUpText%>.</h2></a>
 			
-			String str2 = "oxygen";
-			if(signUpText.toLowerCase().contains(str2.toLowerCase())){
-				%>
-			<a href="<%=regLink%>" class="signUpLink" target="_blank"><h2 class="account">Use your <img src="../carbon/appfactory/assets/img/wso2-oxygen-tank.png" alt="wso2 oxygen tank" /> account.</h2></a>
-				<%
-			}else{ 
-				%>
-			 <a class="signUpLink" href="<%=regLink%>" target="_blank"><h2 class="account"><%=signUpText%>.</h2></a>
-				<%
-			}
-			%>
-                   
- 		
 	     	    <!-- TODO make the right logic to handle the condition above -->
                 </header>
                 <section class="start_content">
                     <div class="alert alert-error error" style="display: none" id="loginError"></div>
-                    <form action="../samlsso" method="post"   id="loginForm">
+                    <form action="../../appmgt/jagg/jaggery_acs.jag" method="post"   id="loginForm">
                         <div class="input_row">
                             <label for="email">Email</label>
                             <input type="text" id="username" name="username" class="required" />
