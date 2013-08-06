@@ -739,28 +739,34 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             //row.put("serverURL", row, config.getFirstProperty(APIConstants.API_GATEWAY_API_ENDPOINT));
             row.put("serverURL", row, envDetails);
-
-            //TODO : need to pass in the full available tier list to front end
-            StringBuffer tiersSet = new StringBuffer("");
-            StringBuffer tiersDescSet = new StringBuffer("");
+            NativeArray tierArr=new NativeArray(0);
             Set<Tier> tierSet = api.getAvailableTiers();
             if(tierSet!=null){
             Iterator it = tierSet.iterator();
             int j = 0;
+
             while (it.hasNext()) {
-                Object tierObject = it.next();
-                Tier tier = (Tier) tierObject;
-                tiersSet.append(tier.getName());
-                tiersDescSet.append(tier.getDescription());
-                if (j != tierSet.size() - 1) {
-                    tiersSet.append(",");
-                    tiersDescSet.append(",");
-                }
-                j++;
-            }
-            row.put("tierName", row, tiersSet.toString());
-            row.put("tierDescription", row, tiersDescSet.toString());
-            }
+                    NativeObject tierObj=new NativeObject();
+                    Object tierObject = it.next();
+                    Tier tier = (Tier) tierObject;
+                    tierObj.put("tierName", tierObj, tier.getName());
+                    tierObj.put("tierDescription", tierObj,
+                            tier.getDescription() != null ? tier.getDescription() : "");
+                    if(tier.getTierAttributes()!=null){
+                        Map<String,Object> attributes;
+                        attributes=tier.getTierAttributes();
+                        String attributesList="";
+                        for (Map.Entry<String, Object> attribute : attributes.entrySet()){
+                            attributesList+=attribute.getKey()+"::"+attribute.getValue()+",";
+
+                        }
+                        tierObj.put("tierAttributes",tierObj,attributesList);
+                    }
+                    tierArr.put(j, tierArr, tierObj);
+                    j++;
+
+                } }
+            row.put("tiers", row, tierArr);
             row.put("subscribed", row, isSubscribed);
             if (api.getThumbnailUrl() == null) {
                 row.put("thumbnailurl", row, "images/api-default.png");
