@@ -42,7 +42,7 @@
     }
 	String[] selectedRoles = request.getParameterValues("selectedRoles");
 	String[] shownRoles = request.getParameterValues("shownRoles");
-    String pageNumber = request.getParameter("pageNumber");
+    String pageNumber = CharacterEncoder.getSafeText(request.getParameter("pageNumber"));
 
     if(request.getParameter("logout") != null){
         logout = Boolean.parseBoolean(request.getParameter("logout"));

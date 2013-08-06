@@ -24,6 +24,7 @@
 <%@page import="org.wso2.carbon.CarbonConstants"%>
 <%@page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil"%>
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <%@page import="org.wso2.carbon.user.mgt.ui.UserAdminClient"%>
 <%@page import="org.wso2.carbon.utils.ServerConstants"%>
 <%@page import="javax.servlet.jsp.JspWriter"%>
@@ -88,12 +89,12 @@
         String BUNDLE = "org.wso2.carbon.userstore.ui.i18n.Resources";
         ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
-        String prevPage =  request.getParameter("prevPage");
-        String prevUser = request.getParameter("prevUser");
-        String prevPageNumber = request.getParameter("prevPageNumber");
+        String prevPage =  CharacterEncoder.getSafeText(request.getParameter("prevPage"));
+        String prevUser = CharacterEncoder.getSafeText(request.getParameter("prevUser"));
+        String prevPageNumber = CharacterEncoder.getSafeText(request.getParameter("prevPageNumber"));
 
         UIPermissionNode rootNode = null;
-        String roleName = request.getParameter("roleName");
+        String roleName = CharacterEncoder.getSafeText(request.getParameter("roleName"));
 
         try {
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);

@@ -33,7 +33,7 @@
 <jsp:include page="../dialog/display_messages.jsp"/>
 
 <%
-	String isUserChange = request.getParameter("isUserChange");
+	String isUserChange = CharacterEncoder.getSafeText(request.getParameter("isUserChange"));
     String returnPath = null;
     String username = null;
     String cancelPath = null;
