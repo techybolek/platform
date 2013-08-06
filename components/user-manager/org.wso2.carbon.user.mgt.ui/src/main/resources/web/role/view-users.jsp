@@ -469,7 +469,7 @@
                 <tr>
                     <td class="buttonRow">
                         <%
-                            if(showUpdate && !readOnlyRole){
+                            if(showUpdate && !readOnlyRole && !showFilterMessage){
                         %>
                                 <input class="button" type="button" value="<fmt:message key="update"/>" onclick="doUpdate()"/>
                                 <input class="button" type="button" value="<fmt:message key="finish"/>" onclick="doFinish()"/>

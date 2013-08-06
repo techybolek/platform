@@ -480,10 +480,12 @@
 
                 <tr>
                     <td class="buttonRow">
+                        <% if(!showFilterMessage){ %>
                         <input class="button" type="button" value="<fmt:message key="update"/>"
                                onclick="enableCheckBoxes();doUpdate()"/>
                         <input class="button" type="button" value="<fmt:message key="finish"/>"
                                onclick="enableCheckBoxes();doFinish()"/>
+                        <%} %>
                         <input class="button" type="button" value="<fmt:message key="cancel"/>"
                                onclick="doCancel()"/>
                     </td>
