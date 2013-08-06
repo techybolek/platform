@@ -246,7 +246,8 @@ public class LCPromoteDemotePermissionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Promote from Commencement to Creation",
           dependsOnMethods = "testAddLcToService")
-    public void testPromoteToCreation() throws Exception {
+    public void testPromoteToCreation() throws Exception, 
+						GovernanceException {
         addRole("managerrole", userInfo.getUserNameWithoutDomain());
         lifeCycle =
                 lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
@@ -262,10 +263,12 @@ public class LCPromoteDemotePermissionTestCase {
         lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
                                                  ACTION_PROMOTE, null);
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+//        service = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         lifeCycle =
@@ -287,7 +290,8 @@ public class LCPromoteDemotePermissionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Demote from Commencement to Creation",
           dependsOnMethods = "testPromoteToCreation" , expectedExceptions = org.apache.axis2.AxisFault.class)
-    public void testDemoteFromCreation() throws Exception {
+    public void testDemoteFromCreation() throws Exception,
+						GovernanceException {
         lifeCycle =
                 lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
                                                              serviceString);
@@ -302,10 +306,12 @@ public class LCPromoteDemotePermissionTestCase {
         lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
                                                  ACTION_DEMOTE, null);
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+ //       service = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         lifeCycle =
@@ -382,10 +388,12 @@ public class LCPromoteDemotePermissionTestCase {
         lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
                                                  ACTION_DEMOTE, null);
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+ //       service = listMetadataServiceClient.listServices(null);
+	  Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         lifeCycle =
@@ -408,7 +416,8 @@ public class LCPromoteDemotePermissionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Promote from Commencement to Creation without permission",
           dependsOnMethods = "testDemoteFromCreationAgain", expectedExceptions = org.apache.axis2.AxisFault.class)
-    public void testPromoteToCreationAgain() throws Exception {
+    public void testPromoteToCreationAgain() throws Exception, 
+							GovernanceException {
         lifeCycle =
                 lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
                                                              serviceString);
@@ -427,10 +436,12 @@ public class LCPromoteDemotePermissionTestCase {
         lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
                                                  ACTION_PROMOTE, null);
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+//        service = listMetadataServiceClient.listServices(null);
+	  Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         lifeCycle =

@@ -358,12 +358,16 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService2() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException {
+                                             ResourceAdminServiceExceptionException,
+					     GovernanceException {
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+    //    service = listMetadataServiceClient.listServices(null);
+   	Service[] services = serviceManager.getAllServices();
+
+        for (Service service : services) {
+   	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME2);
@@ -498,12 +502,15 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService3() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException {
+                                             ResourceAdminServiceExceptionException, 
+					     GovernanceException {
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+      //  service = listMetadataServiceClient.listServices(null);
+        Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+            String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME3);
@@ -538,17 +545,21 @@ public class LCTransitionExecutionTestCase {
                                         CustomLifecyclesChecklistAdminServiceExceptionException,
                                         LifeCycleManagementServiceExceptionException,
                                         RegistryExceptionException,
-                                        ResourceAdminServiceExceptionException {
+                                        ResourceAdminServiceExceptionException,
+				        GovernanceException {
+
         ArrayOfString[] parameters = new ArrayOfString[1];
         parameters[0] = new ArrayOfString();
         parameters[0].setArray(new String[]{"preserveOriginal", "false"});
         lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceString,
                                                            LC_NAME3, ACTION_PROMOTE, null,
                                                            parameters);
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+     //   service = listMetadataServiceClient.listServices(null);
+	Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         lifeCycle =
@@ -664,12 +675,15 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService4() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException {
+                                             ResourceAdminServiceExceptionException,
+					     GovernanceException {
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+//        service = listMetadataServiceClient.listServices(null);
+        Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+  	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME4);
@@ -804,12 +818,15 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService5() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException {
+                                             ResourceAdminServiceExceptionException, 
+					     GovernanceException {
 
-        service = listMetadataServiceClient.listServices(null);
-        for (String services : service.getPath()) {
-            if (services.contains("IntergalacticService")) {
-                serviceString = services;
+//        service = listMetadataServiceClient.listServices(null);
+        Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+ 	    String path = service.getPath();
+            if (path.contains("IntergalacticService")) {
+                serviceString = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME5);

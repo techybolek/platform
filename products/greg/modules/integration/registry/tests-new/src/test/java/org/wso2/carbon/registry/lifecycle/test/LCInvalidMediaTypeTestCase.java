@@ -249,15 +249,16 @@ public class LCInvalidMediaTypeTestCase {
                                        CustomLifecyclesChecklistAdminServiceExceptionException,
                                        LifeCycleManagementServiceExceptionException,
                                        RegistryExceptionException,
-                                       ResourceAdminServiceExceptionException {
+                                       ResourceAdminServiceExceptionException,
+				       GovernanceException {
 
         lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
                                                  ACTION_PROMOTE, null);
-        service = listMetadataServiceClient.listServices(null);
-        String servicePathDev[] = service.getPath();
-        for (String services : servicePathDev) {
-            if (services.contains("IntergalacticService") && services.contains("trunk")) {
-                serviceString = services;
+	Service[] services = serviceManager.getAllServices();
+        for (Service service : services) {
+    	    String path = service.getPath();
+            if (path.contains("IntergalacticService") && path.contains("trunk")) {
+                serviceString = path;
             }
         }
         lifeCycle =
