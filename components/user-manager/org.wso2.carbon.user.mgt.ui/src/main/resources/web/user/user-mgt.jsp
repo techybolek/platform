@@ -174,6 +174,7 @@
                 exceededDomains = dataList.remove(dataList.size() - 1);
                 session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE_EXCEEDED, exceededDomains);
                 if (dataList == null || dataList.size() == 0) {
+                    session.removeAttribute(UserAdminUIConstants.USER_LIST_FILTER);
                     showFilterMessage = true;
                 }
 

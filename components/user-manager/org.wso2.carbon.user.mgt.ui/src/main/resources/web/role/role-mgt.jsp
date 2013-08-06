@@ -157,6 +157,7 @@
                 session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE_EXCEEDED, exceededDomains);
                 datas = datasList.toArray(new FlaggedName[datasList.size()]);
                 if (datas == null || datas.length == 0) {
+                    session.removeAttribute(UserAdminUIConstants.ROLE_LIST_FILTER);
                     showFilterMessage = true;
                 }
             }
