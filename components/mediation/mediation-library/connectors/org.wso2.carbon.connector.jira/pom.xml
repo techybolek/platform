@@ -50,6 +50,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.3</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.atlassian.jira</groupId>
 			<artifactId>jira-rest-java-client-api</artifactId>
 			<version>${jrjc.version}</version>
@@ -417,6 +423,14 @@
 									<outputDirectory>target/connector/dependencies</outputDirectory>
 								</artifactItem>
 
+								<artifactItem>
+									<groupId>com.thoughtworks.xstream</groupId>
+									<artifactId>xstream</artifactId>
+									<version>1.4.3</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/connector/dependencies</outputDirectory>
+								</artifactItem>
 
 
 
