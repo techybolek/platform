@@ -15,7 +15,7 @@
 *specific language governing permissions and limitations
 *under the License.
 */
-package org.wso2.carbon.registry.jira.issues.test;
+package org.wso2.carbon.registry.jira2.issues.test2;
 
 
 import org.apache.axis2.AxisFault;

@@ -16,7 +16,7 @@
 *under the License.
 */
 
-package org.wso2.carbon.registry.jira.issues.test;
+package org.wso2.carbon.registry.jira2.issues.test2;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;

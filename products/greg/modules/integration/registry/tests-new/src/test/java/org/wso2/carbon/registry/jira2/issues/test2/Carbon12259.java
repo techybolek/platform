@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package org.wso2.carbon.registry.jira.issues.test;
+package org.wso2.carbon.registry.jira2.issues.test2;
 
 import junit.framework.Assert;
 import org.testng.annotations.AfterClass;
