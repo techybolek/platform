@@ -15,10 +15,11 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.identity.application.authentication.endpoint.OAuth2Servlet"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%
-	String loggedInUser = request.getParameter("loggedInUser");
-	String app =   request.getParameter("oidcApp");
+	String loggedInUser = OAuth2Servlet.getSafeText(request.getParameter("loggedInUser"));
+	String app = OAuth2Servlet.getSafeText(request.getParameter("oidcApp"));
 %>
 
 <!DOCTYPE html>
