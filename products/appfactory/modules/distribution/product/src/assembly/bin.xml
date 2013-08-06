@@ -141,6 +141,19 @@
                 <include>**/zoo.cfg</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>
+                ../../p2-profile-gen/product/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/multitenancy/
+            </directory>
+            <outputDirectory>wso2appfactory-${pom.version}/repository/conf/multitenancy</outputDirectory>
+            <includes>
+                <include>**/cloud-services-desc.xml</include>
+                <include>**/eula.xml</include>
+                <include>**/multitenancy-packages.xml</include>
+                <include>**/stratos.xml</include>
+                <include>**/usage-throttling-agent-config.xml</include>
+            </includes>
+        </fileSet>
 	<fileSet>
 	    <directory>resources/jaggery-modules</directory>
             <outputDirectory>wso2appfactory-${pom.version}/modules</outputDirectory>
@@ -336,6 +349,12 @@
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
+        <file>
+            <source>../../bpels/CreateTenant/target/CreateTenant.zip</source>
+            <outputDirectory>wso2appfactory-${pom.version}/repository/deployment/server/bpel</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
 
         <!-- Deploy humantasks -->
          <file>
@@ -482,10 +501,6 @@
         <file>
             <source>../../p2-profile-gen/product/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/etc/coordination-client-config.xml</source>
             <outputDirectory>wso2appfactory-${pom.version}/repository/conf/etc</outputDirectory>
-        </file>
-        <file>
-            <source>../../p2-profile-gen/product/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/multitenancy/multitenancy-packages.xml</source>
-            <outputDirectory>wso2appfactory-${pom.version}/repository/conf/multitenancy</outputDirectory>
         </file>
         <file>
             <source>target/wso2carbon-core-${carbon.kernel.version}/bin/README.txt</source>
