@@ -231,6 +231,51 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
         return true;
 	}
 
+    /**
+     * Delete Selected API
+     * @param apiNames
+     * @return
+     * @throws APIException
+     */
+    public void deleteSelectedApi(String[] apiNames) throws APIException{
+        final Lock lock = getLock();
+        try {
+            lock.lock();
+            for (String apiName :apiNames ) {
+                assertNameNotEmpty(apiName);
+                apiName = apiName.trim();
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting API : " + apiName + " from the configuration");
+                }
+
+                SynapseConfiguration synapseConfiguration = getSynapseConfiguration();
+                API api = synapseConfiguration.getAPI(apiName);
+                api.destroy();
+                synapseConfiguration.removeAPI(apiName);
+
+                MediationPersistenceManager pm = getMediationPersistenceManager();
+                String fileName = api.getFileName();
+                pm.deleteItem(apiName, fileName, ServiceBusConstants.ITEM_TYPE_REST_API);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Api : " + apiName + " removed from the configuration");
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+
+    }
+
+    /**
+     * Delete All API in the synapse configuration
+     * @throws APIException
+     */
+    public void deleteAllApi() throws APIException{
+        String[] allApiNames = this.getApiNames();
+        this.deleteSelectedApi(allApiNames);
+    }
+
 	/**
 	 * Set the tenant domain when a publisher deletes his API in MT mode. When
 	 * publisher deletes
@@ -238,7 +283,7 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
 	 * API,which is in the particular tenant domain.
 	 * 
 	 * @param apiName
-	 * @param apiData
+	 * @param tenantDomain
 	 * @return
 	 * @throws APIException
 	 */
@@ -384,7 +429,7 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
 	 * API,which is in the particular tenant domain.
 	 * 
 	 * @param apiName
-	 * @param apiData
+	 * @param tenantDomain
 	 * @return
 	 * @throws APIException
 	 */
