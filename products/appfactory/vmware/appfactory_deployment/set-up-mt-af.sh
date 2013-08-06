@@ -65,7 +65,7 @@ mkdir setup
 
 #configure build server
 . `pwd`/set-up-build-server.sh
-# setup_build_server -w $SETUP_DIR -r $RESOURCE_DIR -v $APPSERVER_VERSION -h $af_host_name -o 30
+ setup_build_server -w $SETUP_DIR -r $RESOURCE_DIR -v $APPSERVER_VERSION -h $af_host_name -o 30
 
  echo "Creating Databases ........"
 

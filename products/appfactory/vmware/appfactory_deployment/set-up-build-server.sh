@@ -24,9 +24,9 @@ echo "[Build Server] Copying AS..."
 /usr/bin/unzip -q $resorce_dir/packs/wso2as-${version}.zip -d $working_dir/buildserver
 
 echo "[Build Server] Copying config xmls..."
-cp $resorce_dir/configs/appfactory-user-mgt.xml $BUILD_SERVER_AS_HOME/repository/conf/user-mgt.xml
-cp $resorce_dir/configs/appfactory-registry.xml $BUILD_SERVER_AS_HOME/repository/conf/registry.xml
-cp $resorce_dir/configs/tenant-mgt.xml $BUILD_SERVER_AS_HOME/repository/conf/tenant-mgt.xml
+cp $resorce_dir/configs/cloud-manager-user-mgt.xml $BUILD_SERVER_AS_HOME/repository/conf/user-mgt.xml
+cp $resorce_dir/configs/cloud-manager-registry.xml $BUILD_SERVER_AS_HOME/repository/conf/registry.xml
+cp $resorce_dir/configs/buildserver-tenant-mgt.xml $BUILD_SERVER_AS_HOME/repository/conf/tenant-mgt.xml
 
 cat $resorce_dir/configs/buildserver-carbon.xml | sed -e "s@AF_HOST@$af_host_name@g"  | sed -e "s@OFFSET@$offset@g" > $BUILD_SERVER_AS_HOME/repository/conf/carbon.xml
 cat $resorce_dir/configs/buildserver-axis2.xml | sed -e "s@AF_HOST@$af_host_name@g" > $BUILD_SERVER_AS_HOME/repository/conf/axis2/axis2.xml

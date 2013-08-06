@@ -696,7 +696,7 @@
     </ApplicationType>
     <!-- API-Token should be set according to the running instance of Jenkins-->
     <ContinuousIntegrationProvider name="jenkins" enabled="true">
-	<Property name="BaseURL">https://jenkins.AF_HOST</Property>
+	<Property name="BaseURL">https://jenkins.AF_HOST:9674</Property>
         <Property name="Authenticate">true</Property>
         <Property name="Maven3ConfigName">m3</Property>
         <Property name="DefaultGlobalRoles">readonly</Property>
