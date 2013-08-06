@@ -34,33 +34,28 @@ public class InMemoryMessageStoreTest extends TestCase {
         
         // test size()
         assertEquals(10, store.size());
-        System.out.println("----------------------------------------------- 0");
 
 
         // test get(index)
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, store.get(i).getMessageID());
         }
-        System.out.println("----------------------------------------------- 1");
 
 
         // test get(messageId)
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, store.get("ID" + i).getMessageID());
         }
-        System.out.println("----------------------------------------------- 3");
 
 
         // test getAll()
         List<MessageContext> list = store.getAll();
         assertEquals(10, list.size());
 
-        System.out.println("----------------------------------------------- 4");
 
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, list.get(i).getMessageID());
         }
-        System.out.println("----------------------------------------------- 5");
 
         // test receive()
         MessageConsumer consumer = store.getConsumer();
@@ -68,7 +63,6 @@ public class InMemoryMessageStoreTest extends TestCase {
             assertEquals("ID" + i, consumer.receive().getMessageID());
             consumer.ack();
         }
-        System.out.println("----------------------------------------------- 6");
 
 
         populateStore(store, 10);
@@ -77,7 +71,6 @@ public class InMemoryMessageStoreTest extends TestCase {
         for (int i = 0; i < 10; i++) {
             assertEquals("ID" + i, store.remove().getMessageID());
         }
-        System.out.println("----------------------------------------------- 7");
 
         try {
             store.remove();
@@ -90,7 +83,6 @@ public class InMemoryMessageStoreTest extends TestCase {
         assertEquals(10, store.size());
         store.clear();
         assertEquals(0, store.size());
-        System.out.println("----------------------------------------------- 8");
 
     }
     
@@ -105,7 +97,6 @@ public class InMemoryMessageStoreTest extends TestCase {
             assertEquals("ID" + i, consumer.receive().getMessageID());
             consumer.ack();
         }
-        System.out.println("----------------------------------------------- 2");
     }
     
     public void testOrderedDelivery2() throws  Exception {
@@ -115,17 +106,14 @@ public class InMemoryMessageStoreTest extends TestCase {
         MessageConsumer consumer = store.getConsumer();
         MessageContext msg = consumer.receive();
         assertEquals("FOO", msg.getMessageID());
-        System.out.println("----------------------------------------------- 31");
 
         store.getProducer().storeMessage(createMessageContext("BAR"));
         msg = consumer.receive();
         assertEquals("FOO", msg.getMessageID());
-        System.out.println("----------------------------------------------- 32");
 
         consumer.ack();
         msg = consumer.receive();
         assertEquals("BAR", msg.getMessageID());
-        System.out.println("----------------------------------------------- 33");
 
     }
     

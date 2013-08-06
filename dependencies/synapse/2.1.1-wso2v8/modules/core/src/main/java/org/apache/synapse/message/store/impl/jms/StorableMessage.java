@@ -20,6 +20,9 @@ package org.apache.synapse.message.store.impl.jms;
 
 import java.io.Serializable;
 
+/**
+ * This represents the final JMS message that will be saved in the JMS queue.
+ */
 public class StorableMessage implements Serializable {
     private Axis2Message axis2message;
 

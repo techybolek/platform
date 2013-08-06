@@ -19,5 +19,12 @@
 package org.apache.synapse.message.store;
 
 public final class Constants {
+    /** Message ID of the Synapse Message Context that is passed in to the message store mediator */
     public static final String OriginalMessageID = "OrigMessageID";
+    /** JMS Message Store */
+    public static final int JMS_MS       = 0;
+    /** JDBC Message Store */
+    public static final int JDBC_MS      = 1;
+    /** In Memory Message Store */
+    public static final int INMEMORY_MS  = 2;
 }

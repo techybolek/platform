@@ -18,7 +18,6 @@
 package org.apache.synapse.message.processor.impl.sampler;
 
 public class SamplingProcessorView implements SamplingProcessorViewMBean {
-
     private SamplingProcessor processor;
 
     public SamplingProcessorView(SamplingProcessor processor) {

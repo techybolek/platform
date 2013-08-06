@@ -23,7 +23,6 @@ package org.apache.synapse.message.processor.impl.forwarder;
  * used in Forwarding processors
  */
 public final class ForwardingProcessorConstants {
-
     /**
      * Message context property that holds the name of the target endpoint to be replayed
      */
@@ -50,6 +49,4 @@ public final class ForwardingProcessorConstants {
      * used for forward in case of Error
      */
     public static final String FAULT_SEQUENCE = "message.processor.fault.sequence";
-
-
 }

@@ -22,7 +22,6 @@ package org.apache.synapse.message.processor.impl.sampler;
  * This will expose the JMX operations for SamplingProcessor
  */
 public interface SamplingProcessorViewMBean {
-
     /**
      * Activate the Sampling processor instance
      */
@@ -32,7 +31,6 @@ public interface SamplingProcessorViewMBean {
      * De activate the sampling processor instance
      */
     public void deactivate();
-
 
     /**
      * Get the active status of Sampling processor

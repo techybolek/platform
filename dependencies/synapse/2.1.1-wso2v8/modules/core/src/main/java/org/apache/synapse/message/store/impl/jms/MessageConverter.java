@@ -55,7 +55,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class MessageConverter {
+public final class MessageConverter {
     private static final String ABSTRACT_MC_PROPERTIES = "ABSTRACT_MC_PROPERTIES";
     /** Name of the JSON stream */
     private static final String JSON_STREAM = "JSON_STREAM";
@@ -63,6 +63,8 @@ public class MessageConverter {
     private static final String JMS_PRIORITY = "JMS_PRIORITY";
 
     private static final Log logger = LogFactory.getLog(MessageConverter.class.getName());
+
+    private MessageConverter() {}
 
     /**
      * Converts a message read from the message store to a Synapse Message Context object.

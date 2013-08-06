@@ -21,7 +21,6 @@ package org.apache.synapse.message.processor.impl.forwarder;
 import java.util.List;
 
 public interface MessageForwardingProcessorViewMBean {
-
     /**
      * try resending all messages stored in the message store via associated endpoints.
      */
@@ -31,7 +30,6 @@ public interface MessageForwardingProcessorViewMBean {
      * Delete all the Messages in Message store
      */
     public void deleteAll() throws Exception;
-
 
     /**
      * Get the Message IDs of all stored Messages in the Message store
@@ -88,5 +86,4 @@ public interface MessageForwardingProcessorViewMBean {
      * This will stop the processing of Messages.
      */
     public void deactivate();
-
 }

@@ -21,7 +21,6 @@ package org.apache.synapse.message.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
 
 import java.util.ArrayList;
 import java.util.List;

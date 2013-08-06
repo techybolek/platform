@@ -20,24 +20,18 @@ package org.apache.synapse.message.processor.impl.sampler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.message.processor.impl.ScheduledMessageProcessor;
-import org.apache.synapse.message.store.MessageStores;
-import org.quartz.*;
+import org.quartz.JobDataMap;
 
-import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SamplingProcessor extends ScheduledMessageProcessor {
     private static final Log log = LogFactory.getLog(SamplingProcessor.class);
 
     public static final String CONCURRENCY = "concurrency";
-    public static final String SEQUENCE = "sequence";
 
-//    private AtomicBoolean active = new AtomicBoolean(true);
+    public static final String SEQUENCE = "sequence";
 
     private SamplingProcessorView view;
 

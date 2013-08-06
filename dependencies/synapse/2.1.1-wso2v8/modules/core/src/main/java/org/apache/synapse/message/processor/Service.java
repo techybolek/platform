@@ -22,10 +22,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.message.MessageConsumer;
 import org.quartz.JobExecutionContext;
 
-import java.util.Map;
-
 public interface Service {
-
     /**
      * This method is used to initialize a service. Each time it fires this method get called. This ensures
      * all the configurations of the service is up to date.

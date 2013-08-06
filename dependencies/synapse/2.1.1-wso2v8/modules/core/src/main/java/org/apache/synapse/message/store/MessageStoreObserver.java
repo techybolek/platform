@@ -25,7 +25,6 @@ package org.apache.synapse.message.store;
  * interface will be fired
  */
 public interface MessageStoreObserver {
-
     /**
      * Method invoked when a message is added to the store
      * @param messageId of the message that was added to the Message store
@@ -37,6 +36,4 @@ public interface MessageStoreObserver {
      * @param messageId of the Message that was removed
      */
     public void messageRemoved(String messageId);
-
-
 }

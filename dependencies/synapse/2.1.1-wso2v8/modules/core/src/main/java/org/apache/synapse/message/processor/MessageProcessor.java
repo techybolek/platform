@@ -26,7 +26,6 @@ import org.apache.synapse.message.MessageConsumer;
 import java.util.Map;
 
 public interface MessageProcessor extends ManagedLifecycle, Nameable, SynapseArtifact {
-
     /**
      * This method is used to start the message processor. Once the message processor is started
      * it will start receiving messages

@@ -25,7 +25,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.message.MessageConsumer;
 import org.apache.synapse.message.MessageProducer;
 import org.apache.synapse.message.store.AbstractMessageStore;
-import org.apache.synapse.message.store.MessageStores;
+import org.apache.synapse.message.store.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +61,7 @@ public class InMemoryStore extends AbstractMessageStore {
     }
 
     public int getType() {
-        return MessageStores.INMEMORY_MS;
+        return Constants.INMEMORY_MS;
     }
 
     public int size() {

@@ -18,46 +18,39 @@
  */
 package org.apache.synapse.message.processor.impl.forwarder;
 
-import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.endpoints.AddressEndpoint;
-import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.message.store.MessageStore;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class MessageForwardingProcessorView implements MessageForwardingProcessorViewMBean {
+    private static final Log log = LogFactory.getLog(MessageForwardingProcessorView.class);
 
-//    private MessageStore messageStore;
+    private MessageStore messageStore;
 
-//    private BlockingMessageSender sender;
-
+    private BlockingMessageSender sender;
     private ScheduledMessageForwardingProcessor processor;
-    private static Log log = LogFactory.getLog(MessageForwardingProcessorView.class);
 
 
     public MessageForwardingProcessorView(MessageStore messageStore, BlockingMessageSender sender,
                                           ScheduledMessageForwardingProcessor processor)
             throws Exception {
-//        if (messageStore != null) {
-//            this.messageStore = messageStore;
-//        } else {
-//            throw new Exception("Error , Can not create Message Forwarding Processor " +
-//                    "view with null " + "message store");
-//        }
+        if (messageStore != null) {
+            this.messageStore = messageStore;
+        } else {
+            throw new Exception("Error , Can not create Message Forwarding Processor " +
+                    "view with null " + "message store");
+        }
 
-//        if (sender != null) {
-//            this.sender = sender;
-//        } else {
-//            throw new Exception("Error , Can not create Message Forwarding Processor " +
-//                    "view with null " + "Message Sender");
-//        }
+        if (sender != null) {
+            this.sender = sender;
+        } else {
+            throw new Exception("Error , Can not create Message Forwarding Processor " +
+                    "view with null " + "Message Sender");
+        }
 
 
         if (processor != null) {

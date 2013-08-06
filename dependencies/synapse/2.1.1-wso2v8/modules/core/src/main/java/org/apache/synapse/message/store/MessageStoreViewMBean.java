@@ -22,12 +22,10 @@ package org.apache.synapse.message.store;
 import java.util.List;
 
 public interface MessageStoreViewMBean {
-
     /**
      * Delete all the Messages in Message store
      */
     public void deleteAll();
-
 
     /**
      * Get the Message IDs of all stored Messages in the Message store
@@ -35,7 +33,6 @@ public interface MessageStoreViewMBean {
      * @return a list of message ID values
      */
     public List<String> getMessageIds();
-
 
     /**
      * Delete the Message with Given id

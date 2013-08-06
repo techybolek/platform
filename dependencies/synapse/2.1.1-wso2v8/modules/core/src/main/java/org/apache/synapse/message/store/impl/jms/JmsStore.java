@@ -29,7 +29,7 @@ import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
 import org.apache.synapse.message.MessageConsumer;
 import org.apache.synapse.message.MessageProducer;
 import org.apache.synapse.message.store.AbstractMessageStore;
-import org.apache.synapse.message.store.MessageStores;
+import org.apache.synapse.message.store.Constants;
 
 import javax.jms.Connection;
 import javax.jms.Destination;
@@ -49,15 +49,15 @@ import java.util.Properties;
 import java.util.Set;
 
 public class JmsStore extends AbstractMessageStore {
-    /** */
+    /** JMS Broker username */
     public static final String USERNAME = "store.jms.username";
-    /** */
+    /** JMS Broker password */
     public static final String PASSWORD = "store.jms.password";
-    /** */
+    /** Whether to cache the connection or not */
     public static final String CACHE = "store.jms.cache.connection";
-    /** */
+    /** JMS destination (ie. Queue) name that this message store must store the messages to. */
     public static final String DESTINATION = "store.jms.destination";
-    /** */
+    /** JMS Specification version */
     public static final String JMS_VERSION = "store.jms.JMSSpecVersion";
     /** */
     public static final String CONSUMER_TIMEOUT = "store.jms.ConsumerReceiveTimeOut";
@@ -202,7 +202,7 @@ public class JmsStore extends AbstractMessageStore {
     }
 
     public int getType() {
-        return MessageStores.JMS_MS;
+        return Constants.JMS_MS;
     }
 
     /** JMS Message store does not support following operations. */
@@ -479,7 +479,6 @@ public class JmsStore extends AbstractMessageStore {
         super.setParameters(parameters);
     }
 
-    ////////
     private void initme() {
         Set<Map.Entry<String, Object>> mapSet = parameters.entrySet();
         for (Map.Entry<String, Object> e : mapSet) {
@@ -552,7 +551,6 @@ public class JmsStore extends AbstractMessageStore {
         }
     }
 
-    // TODO: debug this method to see what happens in reality.
     private Destination getDestination(Session session) {
         Destination dest = queue;
         if (dest != null) {

@@ -36,14 +36,10 @@ import java.util.Map;
  * directly use <code>MessageProcessor</code> interface for that implementations
  */
 public abstract class AbstractMessageProcessor implements MessageProcessor {
-
     protected Log log = LogFactory.getLog(this.getClass());
 
     /** Message Store associated with Message processor */
     protected String  messageStore;
-
-    // TODO: Remove this safely
-//    protected int messageStoreType = MessageStores.INMEMORY_MS;
 
     protected String description;
 
@@ -62,14 +58,12 @@ public abstract class AbstractMessageProcessor implements MessageProcessor {
 
     public void init(SynapseEnvironment se) {
         configuration = se.getSynapseConfiguration();
-//        setMessageStoreType();
         setMessageConsumer(configuration.getMessageStore(messageStore).getConsumer());
     }
 
     public void setMessageStoreName(String  messageStore) {
         if (messageStore != null) {
             this.messageStore = messageStore;
-//            setMessageStoreType();
         } else {
             throw new SynapseException("Error Can't set Message store to null");
         }
@@ -110,24 +104,6 @@ public abstract class AbstractMessageProcessor implements MessageProcessor {
     public String getFileName() {
         return fileName;
     }
-
-    // TODO: Safely remove this
-//    private void setMessageStoreType() {
-//        if (configuration != null && messageStore != null) {
-//            MessageStore ms = configuration.getMessageStore(messageStore);
-//            if (ms != null) {
-//                messageStoreType = ms.getType();
-//                if (log.isDebugEnabled()) {
-//                    log.debug("Set Message Store Type : "
-//                            + MessageStores.getTypeAsString(messageStoreType));
-//                }
-//            }
-//        } else {
-//            if (log.isDebugEnabled()) {
-//                log.debug("Set Message Store Type : Unsuccessful");
-//            }
-//        }
-//    }
 
     public MessageConsumer getMessageConsumer() {
         return messageConsumer;

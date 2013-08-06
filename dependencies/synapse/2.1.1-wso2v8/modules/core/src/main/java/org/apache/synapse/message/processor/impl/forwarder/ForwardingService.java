@@ -32,13 +32,16 @@ import org.apache.synapse.message.MessageConsumer;
 import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.message.processor.MessageProcessorConstants;
 import org.apache.synapse.message.processor.Service;
-import org.quartz.*;
+import org.quartz.InterruptableJob;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.UnableToInterruptJobException;
 
 import java.util.Map;
 import java.util.Set;
 
 public class ForwardingService implements InterruptableJob, Service {
-
     private static final Log log = LogFactory.getLog(ForwardingService.class);
 
     /** The consumer that is associated with the particular message store */

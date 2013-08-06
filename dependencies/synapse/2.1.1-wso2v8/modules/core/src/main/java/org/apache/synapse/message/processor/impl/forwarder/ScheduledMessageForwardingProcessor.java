@@ -21,28 +21,19 @@ package org.apache.synapse.message.processor.impl.forwarder;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.message.processor.impl.ScheduledMessageProcessor;
-import org.apache.synapse.message.processor.impl.sampler.SamplingProcessorView;
-import org.apache.synapse.message.store.MessageStores;
-import org.quartz.*;
+import org.quartz.JobDataMap;
 
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Redelivery processor is the Message processor which implements the Dead letter channel EIP
  * It will Time to time Redeliver the Messages to a given target.
  */
 public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcessor {
-
     public static final String BLOCKING_SENDER = "blocking.sender";
 
     private BlockingMessageSender sender = null;
-
-//    private volatile AtomicBoolean active = new AtomicBoolean(true);
-
-//    private volatile AtomicInteger sendAttempts = new AtomicInteger(0);
 
     private MessageForwardingProcessorView view;
 
@@ -70,7 +61,6 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
                         " this server '" + thisServerName + "'");
             }
         }
-//        sender = initMessageSender(parameters);
 
         super.init(se);
 
@@ -115,11 +105,6 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
     public boolean isActive() {
         return !isDeactivated();
     }
-
-    // TODO : Remove this safely
-//    public void resetSentAttemptCount(){
-//        sendAttempts.set(0);
-//    }
 
     /**
      * This method is used by back end of the message processor

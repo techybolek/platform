@@ -71,8 +71,8 @@ public interface MessageStore extends ManagedLifecycle, Nameable, SynapseArtifac
     /**
      * Returns the type of this message store. <br/>
      * The type of a message store can be one of following types, <br/>
-     * {@link MessageStores#JMS_MS}, {@link MessageStores#INMEMORY_MS},
-     * or {@link MessageStores#JDBC_MS}
+     * {@link Constants#JMS_MS}, {@link Constants#INMEMORY_MS},
+     * or {@link Constants#JDBC_MS}
      * @return Type of the message store.
      */
     public int getType();

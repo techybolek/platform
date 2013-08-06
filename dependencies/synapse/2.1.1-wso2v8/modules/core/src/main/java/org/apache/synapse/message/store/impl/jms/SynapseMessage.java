@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class serves as a container for the Synapse Message Context parameters/properties
+ * , and it will be saved as a JMS message in the JMS Store.
+ */
 public class SynapseMessage implements Serializable {
     private ArrayList<String> localEntries = new ArrayList<String>();
 
