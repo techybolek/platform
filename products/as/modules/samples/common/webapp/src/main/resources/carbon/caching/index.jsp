@@ -15,7 +15,9 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@ page import="org.wso2.carbon.context.CarbonContext" %>
+<%@ page import="javax.cache.CacheManager" %>
+<%@ page import="javax.cache.Caching" %>
+<%@ page import="javax.cache.Cache" %>
 
 <h2>WSO2 Carbon Caching Demo</h2>
 
@@ -62,12 +64,14 @@
 <hr/>
 
 <%
-    // The CarbonContext instance used to obtain the cache
-    CarbonContext cCtx = CarbonContext.getCurrentContext();
+    // The javax.cache.CacheManager instance used to obtain the cache
+    CacheManager cacheManager =   Caching.getCacheManagerFactory().getCacheManager("tsampleCacheManager");
+    Cache<String, String> cache = cacheManager.getCache("sampleCache");
 
     if (request.getParameter("add") != null) {
         String key = request.getParameter("key");
-        cCtx.getCache().put(key, request.getParameter("value"));
+        String value = request.getParameter("value");
+        cache.put(key, value);
 %>
 <p>
     Added entry: <%= key %>
@@ -75,8 +79,8 @@
 <%
     } else if (request.getParameter("view") != null) {
         String key = request.getParameter("key");
-        if (cCtx.getCache().get(key) != null) {
-            String content = (String)cCtx.getCache().get(key);
+        if (cache.get(key) != null) {
+            String content = (String) cache.get(key);
             response.addHeader("cache-value", content);
 %>
             <p>

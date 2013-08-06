@@ -15,7 +15,9 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;%@ page import="org.wso2.carbon.context.CarbonContext" %&gt;
+<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;%@ page import="javax.cache.CacheManager" %&gt;
+<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;%@ page import="javax.cache.Caching" %&gt;
+<pre style="line-height: 100%;font-family:monospace;background-color:#ffffff; border-width:0.01mm; border-color:#000000; border-style:solid;padding:4px;font-size:10pt;"><span style="background-color:#edffed;">&lt;%@ page import="javax.cache.Cache" %&gt;
 
 &lt;h2&gt;WSO2 Carbon Caching Demo&lt;/h2&gt;
 
@@ -62,12 +64,14 @@
 &lt;hr/&gt;
 
 </span><span style="color:#000080;background-color:#fffce4;">&lt;%
-</span><span style="background-color:#edffed;">    // The CarbonContext instance used to obtain the cache
-    CarbonContext cCtx = CarbonContext.getCurrentContext();
+</span><span style="background-color:#edffed;">    // The javax.cache.CacheManager instance used to obtain the cache
+    CacheManager cacheManager =   Caching.getCacheManagerFactory().getCacheManager("tsampleCacheManager");
+    Cache<String, String> cache = cacheManager.getCache("sampleCache");
 
     if (request.getParameter("add") != null) {
         String key = request.getParameter("key");
-        cCtx.getCache().put(key, request.getParameter("value"));
+        String value = request.getParameter("value");
+        cache.put(key, value);
 </span><span style="color:#000080;background-color:#fffce4;">%&gt;
 </span><span style="background-color:#edffed;">&lt;p&gt;
     Added entry: </span><span style="color:#000080;background-color:#fffce4;">&lt;%=</span><span style="background-color:#edffed;"> key </span><span style="color:#000080;background-color:#fffce4;">%&gt;
@@ -75,8 +79,8 @@
 </span><span style="color:#000080;background-color:#fffce4;">&lt;%
 </span><span style="background-color:#edffed;">    } else if (request.getParameter("view") != null) {
         String key = request.getParameter("key");
-        if (cCtx.getCache().get(key) != null) {
-            String content = (String)cCtx.getCache().get(key);
+        if (cache.get(key) != null) {
+            String content = (String) cache.get(key);
 </span><span style="color:#000080;background-color:#fffce4;">%&gt;
 </span><span style="background-color:#edffed;">            &lt;p&gt;
                 Value of entry </span><span style="color:#000080;background-color:#fffce4;">&lt;%=</span><span style="background-color:#edffed;"> key</span><span style="color:#000080;background-color:#fffce4;">%&gt;</span><span style="background-color:#edffed;"> : </span><span style="color:#000080;background-color:#fffce4;">&lt;%=</span><span style="background-color:#edffed;"> content </span><span style="color:#000080;background-color:#fffce4;">%&gt;
