@@ -275,47 +275,65 @@ public class LoadBalancerConfiguration implements Serializable {
                 ServiceConfiguration serviceConfig;
 
                 // iterates through all the service domain specified in this service element. 
-                for (Node domain : domainsNode.getChildNodes()) {
+                for (Node domainNode : domainsNode.getChildNodes()) {
+                    List<Node> subDomainList = domainNode.getChildNodes();
+                    if (subDomainList != null && subDomainList.size() > 0) {
+                        for (Node subDomainNode : domainNode.getChildNodes()) {
+                            currentServiceConfigs.add(createDomainConfiguration(serviceNode, domainNode, subDomainNode));
+                        }
+                    } else {
+                        currentServiceConfigs.add(createDomainConfiguration(serviceNode, domainNode, null));
 
-                    // create a new service configuration
-                    serviceConfig = new ServiceConfiguration();
-
-                    // set service name
-                    serviceConfig.setServiceName(serviceName);
-                    
-                    // set domain name
-                    serviceConfig.setDomain(domain.getName());
-
-                    // let's set properties common to all domains specified in this service element.
-                    createConfiguration(serviceConfig, serviceNode);
-
-                    // load properties specified under this service domain element.
-                    createConfiguration(serviceConfig, domain);
-
-                    // check host name duplication 
-                    if(isDuplicatedHost(serviceNode.getName(), serviceConfig)){
-                        // this is probably a mistake, so we don't proceed
-                        String msg = "Duplicated host names detected for different service domains.\n" +
-                                "Element: \n"+serviceNode.toString();
-                        log.error(msg);
-                        throw new RuntimeException(msg);
                     }
-                    
-                    currentServiceConfigs.add(serviceConfig);
-
                 }
             }
         }
 
         for (ServiceConfiguration serviceConfiguration : currentServiceConfigs) {
-            
             // add the built ServiceConfiguration, to the map
             addServiceConfiguration(serviceConfiguration);
-            
         }
         
         return currentServiceConfigs;
 
+    }
+
+
+    private ServiceConfiguration createDomainConfiguration(Node serviceNode, Node domainNode, Node subDomainNode){
+
+        // create a new service configuration
+        ServiceConfiguration serviceConfig = new ServiceConfiguration();
+
+        // set service name
+        serviceConfig.setServiceName(serviceNode.getName());
+
+        // set domain name
+        serviceConfig.setDomain(domainNode.getName());
+
+        // let's set properties common to all domains specified in this service element.
+        createConfiguration(serviceConfig, serviceNode);
+
+        // load properties specified under this service domain element.
+        createConfiguration(serviceConfig, domainNode);
+
+        if(subDomainNode != null) {
+            // Set sub domain name
+            serviceConfig.setSub_domain(subDomainNode.getName());
+
+            // load properties specified under this service sub domain element.
+            createConfiguration(serviceConfig, subDomainNode);
+        }
+
+        // check host name duplication
+        if (isDuplicatedHost(serviceNode.getName(), serviceConfig)) {
+            // this is probably a mistake, so we don't proceed
+            String msg = "Duplicated host names detected for different service domains.\n" +
+                    "Element: \n" + serviceNode.toString();
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
+
+        return serviceConfig;
     }
 
 
