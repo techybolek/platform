@@ -99,89 +99,91 @@
 //checked - private method 
     var getAllApps = function(userName)
     {
-        jagg.module("permission").checkUserAuthenticated();
-        // this security check is needed in case of user trying to retrieve all apps of other users.
-        if (userName != jagg.getUser()) {
-            var message = jagg.getUser() + ' is trying to list applications of user:' + userName;
-            log.error(message);
-            throw message;
-        }
-        var ws = require("ws");
-        var applicationMgtService = new ws.WSRequest();
-        var options = new Array();
-        options.useSOAP = 1.2;
-        options.action = "urn:getAllApplications";
-        options["HTTPHeaders"] =[
-                                 {
-                                	 name:
-                                		 "Cookie", value:modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))
-                                 }
-                                 ];
-        var payload = '<p:getAllApplications xmlns:p="http://service.mgt.application.appfactory.carbon.wso2.org"><p:userName>' + userName + '</p:userName></p:getAllApplications>';
-        var result;
+//         jagg.module("permission").checkUserAuthenticated();
+//         // this security check is needed in case of user trying to retrieve all apps of other users.
+//         if (userName != jagg.getUser()) {
+//             var message = jagg.getUser() + ' is trying to list applications of user:' + userName;
+//             log.error(message);
+//             throw message;
+//         }
+//         var ws = require("ws");
+//         var applicationMgtService = new ws.WSRequest();
+//         var options = new Array();
+//         options.useSOAP = 1.2;
+//         options.action = "urn:getAllApplications";
+//         options["HTTPHeaders"] =[
+//                                  {
+//                                 	 name:
+//                                 		 "Cookie", value:modManager.getAdminCookie(getProperty(APPFACTORY_SERVER_URL))
+//                                  }
+//                                  ];
+//         var payload = '<p:getAllApplications xmlns:p="http://service.mgt.application.appfactory.carbon.wso2.org"><p:userName>' + userName + '</p:userName></p:getAllApplications>';
+//         var result;
 
-        try {
-        	var endPoint = getProperty(APPFACTORY_SERVER_URL) + "ApplicationManagementService";
-        	applicationMgtService.open(options,endPoint, false);
-        	applicationMgtService.send(payload);
-        	result = applicationMgtService.responseE4X;
-        	var log = new Log();
-        	return result;
-        } catch (e) {
-        	log.error("Error while getting application of user \n" + e.message);
-        	throw "Error while getting application of user";
-        }
+//         try {
+//         	var endPoint = getProperty(APPFACTORY_SERVER_URL) + "ApplicationManagementService";
+//         	applicationMgtService.open(options,endPoint, false);
+//         	applicationMgtService.send(payload);
+//         	result = applicationMgtService.responseE4X;
+//         	var log = new Log();
+//         	return result;
+//         } catch (e) {
+//         	log.error("Error while getting application of user \n" + e.message);
+//         	throw "Error while getting application of user";
+//         }
     }
     ;
     
     var getAllAppsCountOfUser = function(userName)
     {
-        jagg.module("permission").checkUserAuthenticated();
+//         jagg.module("permission").checkUserAuthenticated();
         
-        // this security check is needed in case of user trying to retrieve all apps of other users.
-        if (userName != jagg.getUser()) {
-            var message = jagg.getUser() + ' is trying to list applications of user:' + userName;
-            log.error(message);
-            throw message;
-        }
-        try {
-            var result = getAllApps(userName);
-            var ns = new Namespace("http://service.mgt.application.appfactory.carbon.wso2.org");
-            var elements = result.ns::["return"].text();
-            return elements.length();
-        } catch (e) {
-            throw "Error while getting all application count of user: "+ userName;
-        }
+//         // this security check is needed in case of user trying to retrieve all apps of other users.
+//         if (userName != jagg.getUser()) {
+//             var message = jagg.getUser() + ' is trying to list applications of user:' + userName;
+//             log.error(message);
+//             throw message;
+//         }
+//         try {
+//             var result = getAllApps(userName);
+//             var ns = new Namespace("http://service.mgt.application.appfactory.carbon.wso2.org");
+//             var elements = result.ns::["return"].text();
+//             return elements.length();
+//         } catch (e) {
+//             throw "Error while getting all application count of user: "+ userName;
+//         }
     }
     ;
 
 //checked
     var getAllAppsOfUser = function(userName)
     {
-        jagg.module("permission").checkUserAuthenticated();
-        // this security check is needed in case of user trying to retrieve all apps of other users.
-        if (userName != jagg.getUser()) {
-            var message = jagg.getUser() + ' is trying to list applications of user:' + userName;
-            log.error(message);
-            throw message;
-        }
-        try {
-            var result = getAllApps(userName);
-            var ns = new Namespace("http://service.mgt.application.appfactory.carbon.wso2.org");
-            var elements = result.ns::["return"].text();
-            var elementsArray = new Array();
+    	   var apps = new Array();
+    	   return apps;
+//         jagg.module("permission").checkUserAuthenticated();
+//         // this security check is needed in case of user trying to retrieve all apps of other users.
+//         if (userName != jagg.getUser()) {
+//             var message = jagg.getUser() + ' is trying to list applications of user:' + userName;
+//             log.error(message);
+//             throw message;
+//         }
+//         try {
+//             var result = getAllApps(userName);
+//             var ns = new Namespace("http://service.mgt.application.appfactory.carbon.wso2.org");
+//             var elements = result.ns::["return"].text();
+//             var elementsArray = new Array();
 
-            for (var applicationKey in
-            elements){
-                var appInfo = getAppInfo(elements[applicationKey],userName);
-                if (appInfo != null) {
-                    elementsArray.push(appInfo);
-                }
-            }
-            return stringify(elementsArray);
-        } catch (e) {
-            throw "Error while getting application of user" + e;
-        }
+//             for (var applicationKey in
+//             elements){
+//                 var appInfo = getAppInfo(elements[applicationKey],userName);
+//                 if (appInfo != null) {
+//                     elementsArray.push(appInfo);
+//                 }
+//             }
+//             return stringify(elementsArray);
+//         } catch (e) {
+//             throw "Error while getting application of user" + e;
+//         }
     }
     ;
 
