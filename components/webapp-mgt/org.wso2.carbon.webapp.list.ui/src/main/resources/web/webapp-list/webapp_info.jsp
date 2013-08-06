@@ -610,7 +610,7 @@
                         <tr>
                     </table>
                     <br>
-                    <%   if(CarbonUIUtil.isContextRegistered(config, "/bampubsvcstat/")) { %>
+                    <%   if(CarbonUIUtil.isContextRegistered(config, "/bampubsvcstat/") && webapp.getStarted()) { %>
                     <table class="styledLeft" id="serviceTable"
                            style="margin-left: 0px;" width="100%">
                         <thead>
