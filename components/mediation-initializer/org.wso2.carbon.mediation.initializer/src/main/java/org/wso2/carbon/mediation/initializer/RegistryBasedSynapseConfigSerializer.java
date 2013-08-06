@@ -29,7 +29,7 @@ import org.apache.synapse.core.axis2.ProxyService;
 import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.eventing.SynapseEventSource;
 import org.apache.synapse.mediators.base.SequenceMediator;
-import org.apache.synapse.message.processors.MessageProcessor;
+import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.message.store.MessageStore;
 import org.apache.synapse.registry.Registry;
 import org.wso2.carbon.mediation.initializer.persistence.registry.*;

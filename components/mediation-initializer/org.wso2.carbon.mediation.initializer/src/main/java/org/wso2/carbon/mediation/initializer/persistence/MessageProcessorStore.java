@@ -21,7 +21,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.config.xml.MessageProcessorSerializer;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
-import org.apache.synapse.message.processors.MessageProcessor;
+import org.apache.synapse.message.processor.MessageProcessor;
 import org.wso2.carbon.mediation.initializer.persistence.registry.MessageProcessorRegistryStore;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
