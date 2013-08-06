@@ -117,17 +117,17 @@
             <artifactId>org.wso2.carbon.appfactory.events.notification</artifactId>
             <version>${appfactory.version}</version>
         </dependency>
-       <dependency>
-           <groupId>org.wso2.carbon</groupId>
-           <artifactId>org.wso2.carbon.appfactory.events.notification.stub</artifactId>
-           <version>${appfactory.version}</version>
-       </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.appfactory.events.notification.stub</artifactId>
             <version>${appfactory.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.appfactory.buildserver.teanant.mgt.stub</artifactId>
+            <version>${appfactory.version}</version>
+        </dependency>
+	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.appfactory.build</artifactId>
             <version>${appfactory.version}</version>
@@ -258,6 +258,7 @@
                                 <bundleDef> org.apache.maven.scm.wso2:maven-scm</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.utilities</bundleDef>
                                 <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.events.notification.stub</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.buildserver.teanant.mgt.stub</bundleDef>
                                 <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.apiManager.integration</bundleDef>
                                 <bundleDef>org.apache.maven.wso2:maven-model</bundleDef>
                                 <bundleDef>org.apache.maven.wso2:maven-core</bundleDef>
