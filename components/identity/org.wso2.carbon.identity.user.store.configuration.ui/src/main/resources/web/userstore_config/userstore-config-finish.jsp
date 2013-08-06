@@ -84,7 +84,6 @@
             userStoreDTO.setDomainId(domain);
             userStoreDTO.setDescription(description);
             userStoreDTO.setClassName(className);
-            userStoreDTO.setDisabled(true);
             userStoreDTO.setProperties(propertyList.toArray(new PropertyDTO[propertyList.size()]));
             userStoreConfigAdminServiceClient.saveConfigurationToFile(userStoreDTO);
 

@@ -51,6 +51,11 @@
             if (action.equals("disable")) {
                 userStoreConfigAdminServiceClient.updateUserStore(domain, "true");
             }
+
+            // Session need to be update according to new user store info 
+            session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
+            session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE, null);
+            session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE, null);
             forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
         } catch (Exception e) {
             String message = resourceBundle.getString("invalid.user.store.not.updated");
