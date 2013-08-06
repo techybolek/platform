@@ -20,6 +20,10 @@ package org.wso2.carbon.connector.jira;
 
 import static org.wso2.carbon.connector.jira.JiraConstants.CONTEXT_SEARCH_RESULT;
 
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.connector.jira.util.JiraMediatorUtil;
 
@@ -42,6 +46,18 @@ public class JiraSearchMediator extends JiraMediator {
     public boolean mediate(MessageContext synCtx) {
         JiraRestClient client = JiraMediatorUtil.getClient(getUri(), getUsername(), getPassword());
         SearchResult searchResult = client.getSearchClient().searchJql(getJqlQuery()).claim();
+        String xml = JiraMediatorUtil.getXmlFromPojo(searchResult);
+        try {
+        	StringBuilder searchResultString = new StringBuilder();
+        	searchResultString.append("<searchResult>");
+        	searchResultString.append(xml);
+        	searchResultString.append("</searchResult>");
+			OMElement element = AXIOMUtil.stringToOM(searchResultString.toString());
+			 JiraMediatorUtil.preparePayload(synCtx, element);
+		} catch (XMLStreamException e) {
+			// TODO Auto-generated catch block
+			handleException("Error whle building OM element for jira ", synCtx);
+		}
         synCtx.setProperty(CONTEXT_SEARCH_RESULT, searchResult);
         return true;
     }

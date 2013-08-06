@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<artifact name="jira_core" type="synapse/template">
+<artifact name="jira" type="synapse/template">
 	<subArtifacts>
 		<artifact name="configure">
 			<file>configure.xml</file>

@@ -21,7 +21,11 @@ package org.wso2.carbon.connector.jira.util;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.synapse.MessageContext;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -29,11 +33,15 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
 public class JiraMediatorUtil {
 
-	private static final AsynchronousJiraRestClientFactory factory =
-	                                                                 new AsynchronousJiraRestClientFactory();
+	private static final DomDriver domDriver = new DomDriver("UTF-8");
+	private static final XStream xstream = new XStream(domDriver);
+
+	private static final AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
 
 	/**
 	 * Returns a client instance to access the JIRA REST API. The client is
@@ -72,7 +80,7 @@ public class JiraMediatorUtil {
 	 * 
 	 */
 	public static Transition getTransitionByName(Iterable<Transition> transitions,
-	                                             String transitionName) {
+			String transitionName) {
 		for (Transition transition : transitions) {
 			if (transition.getName().equals(transitionName)) {
 				return transition;
@@ -80,20 +88,39 @@ public class JiraMediatorUtil {
 		}
 		return null;
 	}
-	
+
 	public static void getPojoFromJson(String json, Object pojo) {
 		ObjectMapper mapper = new ObjectMapper();
-		
+
 		try {
-	        pojo = mapper.readValue(json, pojo.getClass());
-        } catch (JsonParseException e) {
-	        e.printStackTrace();
-        } catch (JsonMappingException e) {
-	        e.printStackTrace();
-        } catch (IOException e) {
-	        e.printStackTrace();
-        }
-		
+			pojo = mapper.readValue(json, pojo.getClass());
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static String getXmlFromPojo(Object obj) {
+		Class<?> objClassType = obj.getClass();
+		xstream.alias(objClassType.getSimpleName().toLowerCase(), objClassType);
+
+		return xstream.toXML(obj);
+	}
+	
+	public static void preparePayload(MessageContext messageContext, OMElement element) {
+		SOAPBody soapBody = messageContext.getEnvelope().getBody();
+		for (Iterator itr = soapBody.getChildElements(); itr.hasNext();) {
+			OMElement child = (OMElement) itr.next();
+			child.detach();
+		}
+		for (Iterator itr = element.getChildElements(); itr.hasNext();) {
+			OMElement child = (OMElement) itr.next();
+			soapBody.addChild(child);
+		}
 	}
 
 }
