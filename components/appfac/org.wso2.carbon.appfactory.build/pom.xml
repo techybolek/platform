@@ -74,6 +74,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.1.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.appfactory.buildserver.teanant.mgt.stub</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
