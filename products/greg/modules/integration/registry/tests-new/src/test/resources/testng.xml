@@ -6,6 +6,7 @@
         <packages>
             <package name="org.wso2.carbon.registry.permission.test"/>
             <package name="org.wso2.carbon.registry.jira.issues.test"/>
+            <package name="org.wso2.carbon.registry.jira2.issues.test2"/>
             <package name="org.wso2.carbon.registry.resource.test"/>
             <package name="org.wso2.carbon.registry.xpath.query.test"/>
             <package name="org.wso2.carbon.registry.utfsupport.test"/>
