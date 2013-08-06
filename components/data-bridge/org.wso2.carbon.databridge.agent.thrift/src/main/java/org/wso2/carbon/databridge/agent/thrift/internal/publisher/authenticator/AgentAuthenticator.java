@@ -78,7 +78,10 @@ public abstract class AgentAuthenticator {
             client = secureTransportPool.borrowObject(dataPublisherConfiguration.getPublisherKey());
             disconnect(client,dataPublisherConfiguration.getSessionId());
         } catch (Exception e) {
-            log.error("Cannot connect to the server at " + dataPublisherConfiguration.getPublisherKey() + "Authenticator", e);
+            if(log.isDebugEnabled()){
+                log.error("Cannot connect to the server at " + dataPublisherConfiguration.getPublisherKey() + " Authenticator", e);
+            }
+            log.warn("Cannot connect to the server at " + dataPublisherConfiguration.getPublisherKey() + " Authenticator");
         } finally {
             try {
                 secureTransportPool.returnObject(dataPublisherConfiguration.getPublisherKey(), client);
