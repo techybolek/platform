@@ -299,7 +299,7 @@
         <td>
             <select name="Provider" onChange="javascript:showHideCustomInput(this)">
                 <option selected="true"
-                        value="org.apache.synapse.message.store.InMemoryMessageStore"
+                        value="org.apache.synapse.message.store.impl.memory.InMemoryStore"
                         onclick="showHideCustomInput(false)">
                     In Memory Message Store
                 </option>

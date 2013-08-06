@@ -100,7 +100,7 @@
         var content = cell.firstChild.innerHTML;
         if (storeType == "org.apache.synapse.message.store.impl.jms.JmsStore") {
             document.location.href = "jmsMessageStore.jsp?" + "messageStoreName=" + content;
-        } else if (storeType == "org.apache.synapse.message.store.InMemoryMessageStore") {
+        } else if (storeType == "org.apache.synapse.message.store.impl.memory.InMemoryStore") {
             document.location.href = "inMemoryMessageStore.jsp?" + "messageStoreName=" + content;
         } else {
             document.location.href = "customMessageStore.jsp?" + "messageStoreName=" + content;
@@ -234,8 +234,8 @@
                         <%}%>
 
                         <td>
-                            <a onclick="<%=("org.apache.synapse.message.store.InMemoryMessageStore".equals(type.trim()))?"return false":"editRow(this.parentNode.parentNode.rowIndex,"+"'" + type + "');"%>"
-                               class="<%=("org.apache.synapse.message.store.InMemoryMessageStore".equals(type.trim()))?"icon-link-disabled":"icon-link"%>"
+                            <a onclick="<%=("org.apache.synapse.message.store.impl.memory.InMemoryStore".equals(type.trim()))?"return false":"editRow(this.parentNode.parentNode.rowIndex,"+"'" + type + "');"%>"
+                               class="<%=("org.apache.synapse.message.store.impl.memory.InMemoryStore".equals(type.trim()))?"icon-link-disabled":"icon-link"%>"
                                style="background-image:url(../admin/images/edit.gif);" href="#"><fmt:message
                                     key="edit"/></a>
                             <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex)"

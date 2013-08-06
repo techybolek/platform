@@ -182,16 +182,16 @@
                                 <td><fmt:message key="provider"/><span class="required"> *</span></td>
                                 <td>
                                     <input name="Provider" id="Provider" type="hidden"
-                                           value="org.apache.synapse.message.store.InMemoryMessageStore"/>
+                                           value="org.apache.synapse.message.store.impl.memory.InMemoryStore"/>
                                     <label id="Provider_label"
-                                           for="Provider">org.apache.synapse.message.store.InMemoryMessageStore
+                                           for="Provider">org.apache.synapse.message.store.impl.memory.InMemoryStore
                                     </label>
                                     <br/>
                                 </td>
                             </tr>
                             <%} else {%>
                             <input id="Provider" name="Provider" type="hidden"
-                                   value="org.apache.synapse.message.store.InMemoryMessageStore"/>
+                                   value="org.apache.synapse.message.store.impl.memory.InMemoryStore"/>
                             </tr>
                             <%}%>
                             </tbody>
