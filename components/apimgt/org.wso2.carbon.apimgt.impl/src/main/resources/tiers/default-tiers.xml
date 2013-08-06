@@ -8,6 +8,12 @@
                     <wsp:Policy>
                         <throttle:MaximumCount>20</throttle:MaximumCount>
                         <throttle:UnitTime>60000</throttle:UnitTime>
+                        <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
+                        <throttle:Attributes>
+                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
+                            <throttle:Attribute2>xxxx</throttle:QoS>
+                        </throttle:Attributes>
+                        -->
                     </wsp:Policy>
                 </throttle:Control>
             </wsp:Policy>
@@ -19,6 +25,12 @@
                     <wsp:Policy>
                         <throttle:MaximumCount>5</throttle:MaximumCount>
                         <throttle:UnitTime>60000</throttle:UnitTime>
+                        <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
+                        <throttle:Attributes>
+                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
+                            <throttle:Attribute2>xxxx</throttle:QoS>
+                        </throttle:Attributes>
+                        -->
                     </wsp:Policy>
                 </throttle:Control>
             </wsp:Policy>
@@ -30,6 +42,12 @@
                     <wsp:Policy>
                         <throttle:MaximumCount>1</throttle:MaximumCount>
                         <throttle:UnitTime>60000</throttle:UnitTime>
+                        <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
+                        <throttle:Attributes>
+                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
+                            <throttle:Attribute2>xxxx</throttle:QoS>
+                        </throttle:Attributes>
+                        -->
                     </wsp:Policy>
                 </throttle:Control>
             </wsp:Policy>
@@ -41,6 +59,12 @@
                     <wsp:Policy>
                         <throttle:MaximumCount>60</throttle:MaximumCount>
                         <throttle:UnitTime>60000</throttle:UnitTime>
+                        <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
+                        <throttle:Attributes>
+                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
+                            <throttle:Attribute2>xxxx</throttle:QoS>
+                        </throttle:Attributes>
+                        -->
                     </wsp:Policy>
                 </throttle:Control>
             </wsp:Policy>
