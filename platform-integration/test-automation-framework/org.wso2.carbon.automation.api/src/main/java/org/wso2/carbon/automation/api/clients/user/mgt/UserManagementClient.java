@@ -269,4 +269,14 @@ public class UserManagementClient {
         }
         return false;
     }
+
+    public void getRolesOfUser(String userName, String filter, int limit){
+        try {
+            userAdminStub.getRolesOfUser(userName,filter,limit);
+        } catch (RemoteException e) {
+            log.error("Unable to get  role  list of user : "+ userName ,e);
+        } catch (UserAdminUserAdminException e) {
+            log.error("Unable to get role list of  user : "+userName ,e);
+        }
+    }
 }
