@@ -27,7 +27,10 @@
         
         <bpel:partnerLink name="TenantMgtAdminServicePL" partnerLinkType="tns:TenantMgtAdminServicePLT" partnerRole="TenantMgtAdminServiceProvider"></bpel:partnerLink>
         <bpel:partnerLink name="AppFactoryTenantToolInitializerServicePL" partnerLinkType="tns:AppFactoryTenantToolInitializerServicePLT" partnerRole="AppFactoryTenantToolInitializerServicePLProvider"></bpel:partnerLink>
-        <bpel:partnerLink name="AppFactoryTenantMgtAdminServicePL" partnerLinkType="tns:AppFactoryTenantMgtAdminServicePLT" partnerRole="AppFactoryTenantMgtAdminServiceProvider"></bpel:partnerLink>
+        <bpel:partnerLink name="dev-cloud-create-tenant" partnerLinkType="tns:TenantMgtAdminServicePLT" partnerRole="TenantMgtAdminServiceProvider"></bpel:partnerLink>
+        <bpel:partnerLink name="test-cloud-create-tenant" partnerLinkType="tns:TenantMgtAdminServicePLT" partnerRole="TenantMgtAdminServiceProvider"></bpel:partnerLink>
+        <bpel:partnerLink name="staging-cloud-create-tenant" partnerLinkType="tns:TenantMgtAdminServicePLT" partnerRole="TenantMgtAdminServiceProvider"></bpel:partnerLink>
+        <bpel:partnerLink name="prod-cloud-create-tenant" partnerLinkType="tns:TenantMgtAdminServicePLT" partnerRole="TenantMgtAdminServiceProvider"></bpel:partnerLink>
     </bpel:partnerLinks>
   
     <!-- ================================================================= -->         
@@ -54,6 +57,14 @@
         <bpel:variable name="AppFactoryTenantMgtAdminServicePLRequest" messageType="ns1:doPostTenantActivationRequest"></bpel:variable>
         <bpel:variable name="TenantMgtAdminServicePLResponse1" messageType="ns:activateTenantResponse"></bpel:variable>
         <bpel:variable name="TenantMgtAdminServicePLRequest1" messageType="ns:activateTenantRequest"></bpel:variable>
+        <bpel:variable name="dev-cloud-create-tenantResponse" messageType="ns:addSkeletonTenantResponse"></bpel:variable>
+        <bpel:variable name="dev-cloud-create-tenantRequest" messageType="ns:addSkeletonTenantRequest"></bpel:variable>
+        <bpel:variable name="test-cloud-create-tenantResponse" messageType="ns:addSkeletonTenantResponse"></bpel:variable>
+        <bpel:variable name="test-cloud-create-tenantRequest" messageType="ns:addSkeletonTenantRequest"></bpel:variable>
+        <bpel:variable name="staging-cloud-create-tenantResponse" messageType="ns:addSkeletonTenantResponse"></bpel:variable>
+        <bpel:variable name="staging-cloud-create-tenantRequest" messageType="ns:addSkeletonTenantRequest"></bpel:variable>
+        <bpel:variable name="prod-cloud-create-tenantResponse" messageType="ns:addSkeletonTenantResponse"></bpel:variable>
+        <bpel:variable name="prod-cloud-create-tenantRequest" messageType="ns:addSkeletonTenantRequest"></bpel:variable>
     </bpel:variables>
 
     <!-- ================================================================= -->         
@@ -66,30 +77,28 @@
         <!-- Receive input from requester. 
              Note: This maps to operation defined in CreateTenant.wsdl 
              -->
-        <bpel:receive name="receiveInput" partnerLink="client"
-                 portType="tns:CreateTenant"
-                 operation="process" variable="input"
-                 createInstance="yes"/>
-        <bpel:assign validate="no" name="Assign-CreateTenantRequest">
-            <bpel:copy>
+        <bpel:sequence name="Sequence">
+            <bpel:receive name="receiveInput" partnerLink="client" portType="tns:CreateTenant" operation="process" variable="input" createInstance="yes" />
+            <bpel:assign validate="no" name="Assign-CreateTenantRequest"><bpel:copy>
                 <bpel:from>
                     <bpel:literal>
-                        <ns:addTenant xmlns:ns="http://services.mgt.tenant.carbon.wso2.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ns:tenantInfoBean>
-    <active>true</active>
-    <admin>admin</admin>
-    <adminPassword>adminPassword</adminPassword>
-    <createdDate>2001-12-31T12:00:00</createdDate>
-    <email>email</email>
-    <firstname>firstname</firstname>
-    <lastname>lastname</lastname>
-    <originatedService>originatedService</originatedService>
-    <successKey>successKey</successKey>
-    <tenantDomain>tenantDomain</tenantDomain>
-    <tenantId>0</tenantId>
-    <usagePlan>usagePlan</usagePlan>
-  </ns:tenantInfoBean>
-
-                        </ns:addTenant>
+                    <ns:addTenant
+							xmlns:ns="http://services.mgt.tenant.carbon.wso2.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+							<ns:tenantInfoBean>
+								<xsd:active>true</xsd:active>
+								<xsd:admin>admin</xsd:admin>
+								<xsd:adminPassword>adminPassword</xsd:adminPassword>
+								<xsd:createdDate>2001-12-31T12:00:00</xsd:createdDate>
+								<xsd:email>email</xsd:email>
+								<xsd:firstname>firstname</xsd:firstname>
+								<xsd:lastname>lastname</xsd:lastname>
+								<xsd:originatedService>originatedService</xsd:originatedService>
+								<xsd:successKey>successKey</xsd:successKey>
+								<xsd:tenantDomain>tenantDomain</xsd:tenantDomain>
+								<xsd:tenantId>0</xsd:tenantId>
+								<xsd:usagePlan>usagePlan</xsd:usagePlan>
+							</ns:tenantInfoBean>
+						</ns:addTenant>
                     </bpel:literal>
                 </bpel:from>
                 <bpel:to variable="TenantMgtAdminServicePLRequest" part="parameters"></bpel:to>
@@ -182,13 +191,10 @@
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns:tenantInfoBean/xsd:usagePlan]]></bpel:query>
                 </bpel:to>
             </bpel:copy>
-        </bpel:assign>
         
-        
-        <!-- Generate reply to synchronous request -->
-        <bpel:invoke name="Invoke-CreateTenantInAppFactory" partnerLink="TenantMgtAdminServicePL" operation="addTenant" portType="ns:TenantMgtAdminServicePortType" inputVariable="TenantMgtAdminServicePLRequest" outputVariable="TenantMgtAdminServicePLResponse"></bpel:invoke>
-        <bpel:assign validate="no" name="Assign-ActivateTenantRequest">
-            <bpel:copy>
+            </bpel:assign>
+            <bpel:invoke name="Invoke-CreateTenantInAppFactory" partnerLink="TenantMgtAdminServicePL" operation="addTenant" portType="ns:TenantMgtAdminServicePortType" inputVariable="TenantMgtAdminServicePLRequest" outputVariable="TenantMgtAdminServicePLResponse"></bpel:invoke>
+            <bpel:assign validate="no" name="Assign-ActivateTenantRequest"><bpel:copy>
                 <bpel:from>
                     <bpel:literal>
                         <ns:activateTenant xmlns:ns="http://services.mgt.tenant.carbon.wso2.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ns:tenantDomain>ns:tenantDomain</ns:tenantDomain>
@@ -206,10 +212,10 @@
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns:tenantDomain]]></bpel:query>
                 </bpel:to>
             </bpel:copy>
-        </bpel:assign>
-        <bpel:invoke name="Invoke-ActivateTenantInAppFactory" partnerLink="TenantMgtAdminServicePL" operation="activateTenant" portType="ns:TenantMgtAdminServicePortType" inputVariable="TenantMgtAdminServicePLRequest1" outputVariable="TenantMgtAdminServicePLResponse1"></bpel:invoke>
-        <bpel:assign validate="no" name="Assign-initializeRepositoryManagerRequest">
-            <bpel:copy>
+        
+            </bpel:assign>
+            <bpel:invoke name="Invoke-ActivateTenantInAppFactory" partnerLink="TenantMgtAdminServicePL" operation="activateTenant" portType="ns:TenantMgtAdminServicePortType" inputVariable="TenantMgtAdminServicePLRequest1" outputVariable="TenantMgtAdminServicePLResponse1"></bpel:invoke>
+            <bpel:assign validate="no" name="Assign-initializeRepositoryManagerRequest"><bpel:copy>
                 <bpel:from>
                     <bpel:literal xml:space="preserve"><ns:initializeRepositoryManager xmlns:ns="http://services.core.appfactory.carbon.wso2.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <ns:tenantDomain>ns:tenantDomain</ns:tenantDomain>
@@ -234,10 +240,10 @@
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:usagePlan]]></bpel:query>
                 </bpel:to>
             </bpel:copy>
-        </bpel:assign>
-        <bpel:invoke name="Invoke-initializeRepositoryManagerService" partnerLink="AppFactoryTenantToolInitializerServicePL" operation="initializeRepositoryManager" portType="ns0:AppFactoryTenantToolInitializerServicePortType" inputVariable="AppFactoryTenantToolInitializerServicePLRequest" outputVariable="AppFactoryTenantToolInitializerServicePLResponse"></bpel:invoke>
-        <bpel:assign validate="no" name="Assign-initializeBuildManagerServiceRequest">
-            <bpel:copy>
+        
+            </bpel:assign>
+            <bpel:invoke name="Invoke-initializeRepositoryManagerService" partnerLink="AppFactoryTenantToolInitializerServicePL" operation="initializeRepositoryManager" portType="ns0:AppFactoryTenantToolInitializerServicePortType" inputVariable="AppFactoryTenantToolInitializerServicePLRequest" outputVariable="AppFactoryTenantToolInitializerServicePLResponse"></bpel:invoke>
+            <bpel:assign validate="no" name="Assign-initializeBuildManagerServiceRequest"><bpel:copy>
                 <bpel:from>
                     <bpel:literal>
                         <ns:initializeBuildManager xmlns:ns="http://services.core.appfactory.carbon.wso2.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ns:tenantDomain>ns:tenantDomain</ns:tenantDomain>
@@ -264,126 +270,13 @@
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns0:usagePlan]]></bpel:query>
                 </bpel:to>
             </bpel:copy>
-        </bpel:assign>
-        <bpel:invoke name="Invoke-initializeBuildManagerService" partnerLink="AppFactoryTenantToolInitializerServicePL" operation="initializeBuildManager" portType="ns0:AppFactoryTenantToolInitializerServicePortType" inputVariable="AppFactoryTenantToolInitializerServicePLRequest1" outputVariable="AppFactoryTenantToolInitializerServicePLResponse1"></bpel:invoke>
-        <bpel:assign validate="no" name="Assign-CreateTenantInCloud">
-            <bpel:copy>
-                <bpel:from>
-                    <bpel:literal>
-                        <ns:doPostTenantActivation xmlns:ns="http://services.mgt.tenant.appfactory.carbon.wso2.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ns:tenantInfoBean>
-    <active>true</active>
-    <admin>admin</admin>
-    <adminPassword>adminPassword</adminPassword>
-    <createdDate>2001-12-31T12:00:00</createdDate>
-    <email>email</email>
-    <firstname>firstname</firstname>
-    <lastname>lastname</lastname>
-    <originatedService>originatedService</originatedService>
-    <successKey>successKey</successKey>
-    <tenantDomain>tenantDomain</tenantDomain>
-    <tenantId>0</tenantId>
-    <usagePlan>usagePlan</usagePlan>
-  </ns:tenantInfoBean>
-
-                        </ns:doPostTenantActivation>
-                    </bpel:literal>
-                </bpel:from>
-                <bpel:to variable="AppFactoryTenantMgtAdminServicePLRequest" part="parameters"></bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:admin]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:admin]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:firstName]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:firstname]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:lastName]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:lastname]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:adminPassword]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:adminPassword]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:tenantDomain]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:tenantDomain]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:email]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:email]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:active]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:active]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:successKey]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:successKey]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
-                        <![CDATA[tns:createdDate]]>
-                    </bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:createdDate]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:originatedService]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:originatedService]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-            <bpel:copy>
-                <bpel:from part="payload" variable="input">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:usagePlan]]></bpel:query>
-                </bpel:from>
-                <bpel:to part="parameters" variable="AppFactoryTenantMgtAdminServicePLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:tenantInfoBean/xsd:usagePlan]]></bpel:query>
-                </bpel:to>
-            </bpel:copy>
-        </bpel:assign>
-        <bpel:invoke name="Invoke-CreateTenantInCloud" partnerLink="AppFactoryTenantMgtAdminServicePL" operation="doPostTenantActivation" portType="ns1:AppFactoryTenantMgtAdminServicePortType" inputVariable="AppFactoryTenantMgtAdminServicePLRequest" outputVariable="AppFactoryTenantMgtAdminServicePLResponse"></bpel:invoke>
-        <bpel:assign validate="no" name="Assign-result">
-            <bpel:copy>
+        
+            </bpel:assign>
+            <bpel:invoke name="Invoke-initializeBuildManagerService" partnerLink="AppFactoryTenantToolInitializerServicePL" operation="initializeBuildManager" portType="ns0:AppFactoryTenantToolInitializerServicePortType" inputVariable="AppFactoryTenantToolInitializerServicePLRequest1" outputVariable="AppFactoryTenantToolInitializerServicePLResponse1"></bpel:invoke>
+            
+            
+            
+            <bpel:assign validate="no" name="Assign-result"><bpel:copy>
                 <bpel:from>
                     <bpel:literal>
                         <tns:CreateTenantResponse xmlns:tns="http://wso2.org/bps/sample" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><tns:result>tns:result</tns:result>
@@ -401,13 +294,26 @@
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:result]]></bpel:query>
                 </bpel:to>
             </bpel:copy>
-        </bpel:assign>
-        <bpel:reply name="replyOutput" 
-               partnerLink="client"
-               portType="tns:CreateTenant"
-               operation="process" 
-               variable="output"
-               />
+        
+            </bpel:assign>
+            <bpel:reply name="replyOutput" partnerLink="client" portType="tns:CreateTenant" operation="process" variable="output" />
+        </bpel:sequence>
+        
+        
+        
+        
+        <!-- Generate reply to synchronous request -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     </bpel:sequence>
 </bpel:process>
 

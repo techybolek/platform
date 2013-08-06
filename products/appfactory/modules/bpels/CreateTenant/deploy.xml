@@ -17,10 +17,25 @@
         <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/AppFactoryTenantToolInitializerService.epr" />
       </service>
     </invoke>
-    <invoke partnerLink="AppFactoryTenantMgtAdminServicePL">
-      <service name="services.mgt.tenant.appfactory.carbon.wso2.org:AppFactoryTenantMgtAdminService" port="AppFactoryTenantMgtAdminServiceHttpsSoap12Endpoint">
-         <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/AppFactoryTenantMgtAdminService.epr" />
+      <!--   <invoke partnerLink="dev-cloud-create-tenant">
+      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
+        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/DevTenantMgtService.epr" />
       </service>
     </invoke>
+      <invoke partnerLink="test-cloud-create-tenant">
+      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
+        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/TestTenantMgtService.epr" />
+      </service>
+    </invoke>
+      <invoke partnerLink="staging-cloud-create-tenant">
+      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
+        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/StagingTenantMgtService.epr" />
+      </service>
+    </invoke>
+      <invoke partnerLink="prod-cloud-create-tenant">
+      <service name="services.mgt.tenant.carbon.wso2.org:TenantMgtAdminService" port="TenantMgtAdminServiceHttpsSoap12Endpoint">
+        <endpoint xmlns="http://wso2.org/bps/bpel/endpoint/config" endpointReference="./../../../../repository/conf/appfactory/endpoints/ProdTenantMgtService.epr" />
+      </service>
+    </invoke> -->
   </process>
 </deploy>
