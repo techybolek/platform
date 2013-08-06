@@ -32,7 +32,7 @@
     <artifactId>hadoop-core</artifactId>
     <packaging>bundle</packaging>
     <name>hadoop-core.wso2</name>
-    <version>0.20.203.1.wso2v4</version>
+    <version>1.1.2.wso2v1</version>
     <description>
         This bundle will represent hadoop-core
     </description>
@@ -79,12 +79,12 @@
                            org.wso2.carbon.hdfs.*,!org.apache.hadoop.*
                         </Import-Package>
 			<Include-Resource>
-			    @hadoop-core-0.20.203.1-wso2v4.jar!/core-default.xml,
-                            @hadoop-core-0.20.203.1-wso2v4.jar!/log4j.properties,
-                            @hadoop-core-0.20.203.1-wso2v4.jar!/hadoop-metrics.propertie,
-                            @hadoop-core-0.20.203.1-wso2v4.jar!/log4j.properties,
-                            @hadoop-core-0.20.203.1-wso2v4.jar!/hadoop-metrics.propertie,
-                            @hadoop-core-0.20.203.1-wso2v4.jar!/bin.tgz,                 
+			    @hadoop-core-1.1.2-wso2v1.jar!/core-default.xml,
+                            @hadoop-core-1.1.2-wso2v1.jar!/log4j.properties,
+                            @hadoop-core-1.1.2-wso2v1.jar!/hadoop-metrics.propertie,
+                            @hadoop-core-1.1.2-wso2v1.jar!/log4j.properties,
+                            @hadoop-core-1.1.2-wso2v1.jar!/hadoop-metrics.propertie,
+                            @hadoop-core-1.1.2-wso2v1.jar!/bin.tgz,                 
                         </Include-Resource>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
@@ -95,6 +95,6 @@
 
 
     <properties>
-        <hadoop-core.version>0.20.203.1-wso2v4</hadoop-core.version>
+        <hadoop-core.version>1.1.2-wso2v1</hadoop-core.version>
     </properties>
 </project>
