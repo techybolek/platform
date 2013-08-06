@@ -18,6 +18,8 @@
  */
 package org.apache.synapse.message.processor.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.message.processor.MessageProcessorConstants;
@@ -42,6 +44,8 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor {
+    private static final Log logger = LogFactory.getLog(ScheduledMessageProcessor.class.getName());
+
     public static final String SCHEDULED_MESSAGE_PROCESSOR_GROUP =
             "synapse.message.processor.quartz";
     public static final String PROCESSOR_INSTANCE = "processor.instance";
@@ -73,8 +77,8 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         try {
             sf = new StdSchedulerFactory(getSchedulerProperties(this.name));
             if (quartzConfig != null && !"".equals(quartzConfig)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Initiating a Scheduler with configuration : " + quartzConfig);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Initiating a Scheduler with configuration : " + quartzConfig);
                 }
                 sf.initialize(quartzConfig);
             }
@@ -102,7 +106,7 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         }
 
         if (interval <= 0) {
-            log.warn("Interval has been assigned an invalid value of ["
+            logger.warn("Interval has been assigned an invalid value of ["
                     + interval + "ms]. Setting the default value [1000ms].");
             interval = 1000;
         }
@@ -135,8 +139,8 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
             throw new SynapseException("Error scheduling job : " + jobDetail
                     + " with trigger " + trigger, e);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Started message processor. [" + getName() + "].");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Started message processor. [" + getName() + "].");
         }
 
         return true;
@@ -205,14 +209,14 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                 // This is to immediately stop the scheduler to avoid firing new services
                 scheduler.standby();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("ShuttingDown Message Processor Scheduler : " + scheduler.getMetaData());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("ShuttingDown Message Processor Scheduler : " + scheduler.getMetaData());
                 }
 
                 try {
                     scheduler.interrupt(new JobKey(name + "-job", SCHEDULED_MESSAGE_PROCESSOR_GROUP));
                 } catch (UnableToInterruptJobException e) {
-                    log.info("Unable to interrupt job [" + name + "-job]");
+                    logger.info("Unable to interrupt job [" + name + "-job]");
                 }
 
                 // gracefully shutdown
@@ -223,8 +227,8 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
             throw new SynapseException("Error ShuttingDown Message processor scheduler ", e);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Stopped message processor [" + getName() + "].");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Stopped message processor [" + getName() + "].");
         }
 
         return true;
@@ -239,22 +243,22 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         if (getMessageConsumer() != null) {
             boolean success = getMessageConsumer().cleanup();
             if (!success) {
-                log.error("[" + getName() + "] Could not cleanup message consumer.");
+                logger.error("[" + getName() + "] Could not cleanup message consumer.");
             }
         } else {
-            log.warn("[" + getName() + "] Could not find the message consumer to cleanup.");
+            logger.warn("[" + getName() + "] Could not find the message consumer to cleanup.");
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully destroyed message processor [" + getName() + "].");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Successfully destroyed message processor [" + getName() + "].");
         }
     }
 
     public boolean deactivate() {
         try {
             if (scheduler != null && scheduler.isStarted()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Deactivating message processor [" + getName() + "]");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Deactivating message processor [" + getName() + "]");
                 }
 
 //                try {
@@ -265,8 +269,8 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
 
                 scheduler.standby();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully deactivated the message processor [" + getName() + "]");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Successfully deactivated the message processor [" + getName() + "]");
                 }
 
                 return true;
@@ -282,14 +286,14 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
     public boolean activate() {
         try {
             if (scheduler != null && scheduler.isInStandbyMode()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Starting Message Processor Scheduler : " + scheduler.getMetaData());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Starting Message Processor Scheduler : " + scheduler.getMetaData());
                 }
 
                 scheduler.start();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully re-activated the message processor [" + getName() + "]");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Successfully re-activated the message processor [" + getName() + "]");
                 }
 
                 return true;

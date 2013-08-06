@@ -36,7 +36,7 @@ import java.util.Map;
  * directly use <code>MessageProcessor</code> interface for that implementations
  */
 public abstract class AbstractMessageProcessor implements MessageProcessor {
-    protected Log log = LogFactory.getLog(this.getClass());
+    private static final Log logger = LogFactory.getLog(AbstractMessageProcessor.class.getName());
 
     /** Message Store associated with Message processor */
     protected String  messageStore;
@@ -111,7 +111,7 @@ public abstract class AbstractMessageProcessor implements MessageProcessor {
 
     public boolean setMessageConsumer(MessageConsumer consumer) {
         if (consumer == null) {
-            log.error("[" + getName() + "] Faulty message consumer.");
+            logger.error("[" + getName() + "] Faulty message consumer.");
             return false;
         }
 

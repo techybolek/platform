@@ -18,6 +18,8 @@
  */
 package org.apache.synapse.message.processor.impl.forwarder;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.message.processor.impl.ScheduledMessageProcessor;
@@ -31,6 +33,8 @@ import java.util.StringTokenizer;
  * It will Time to time Redeliver the Messages to a given target.
  */
 public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcessor {
+    private static final Log logger = LogFactory.getLog(ScheduledMessageForwardingProcessor.class.getName());
+
     public static final String BLOCKING_SENDER = "blocking.sender";
 
     private BlockingMessageSender sender = null;
@@ -57,7 +61,7 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
                 }
             }
             if (!pinned) {
-                log.info("Message processor '" + name + "' pinned on '" + pinnedServers + "' not starting on" +
+                logger.info("Message processor '" + name + "' pinned on '" + pinnedServers + "' not starting on" +
                         " this server '" + thisServerName + "'");
             }
         }

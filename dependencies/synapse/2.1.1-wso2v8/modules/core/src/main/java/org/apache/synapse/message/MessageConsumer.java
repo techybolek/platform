@@ -29,13 +29,13 @@ public interface MessageConsumer {
 
     /**
      * Acknowledges the last message received so that it will be removed from the store.
-     * @return true if the acknowledgement is successful. false otherwise.
+     * @return {@code true} if the acknowledgement is successful. {@code false} otherwise.
      */
     boolean ack();
 
     /**
      * Cleans up this message consumer
-     * @return true if cleanup is successful, false otherwise.
+     * @return {@code true} if cleanup is successful, {@code false} otherwise.
      */
     boolean cleanup();
 

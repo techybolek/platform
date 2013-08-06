@@ -29,7 +29,7 @@ public interface MessageProcessor extends ManagedLifecycle, Nameable, SynapseArt
     /**
      * This method is used to start the message processor. Once the message processor is started
      * it will start receiving messages
-     * @return
+     * @return {@code true} if successful, {@code false} otherwise
      */
     boolean start();
 
@@ -37,46 +37,46 @@ public interface MessageProcessor extends ManagedLifecycle, Nameable, SynapseArt
      * This method is used to stop the message processor. Once the the message processor is stopped
      * it will no longer receive messages. A stopped message processor cannot re restarted without
      * re-instantiating.
-     * @return
+     * @return {@code true} if successful, {@code false} otherwise
      */
     boolean stop();
 
     /**
      * This method is used to deactivate the message processor. This will temporarily halt executing services.
-     * @return
+     * @return {@code true} if successful, {@code false} otherwise
      */
     boolean deactivate();
 
     /**
      * This method is used to activate a deactivated message processor. Activating message processor
      * will cause the services to start
-     * @return
+     * @return {@code true} if successful, {@code false} otherwise
      */
     boolean activate();
 
     /**
      * This method is used to see if the message processor is deactivated.
-     * @return
+     * @return {@code true} if successful, {@code false} otherwise
      */
     boolean isDeactivated();
 
     /**
      * This method is used to set the associated message store of the message processor. Every message processor
      * has to be bound to a message store
-     * @param messageStoreName
+     * @param messageStoreName Name of this message store.
      */
     void setMessageStoreName(String messageStoreName);
 
     /**
      * This method returns the associated message store name of the message processor.
-     * @return
+     * @return Name of this message store.
      */
     String getMessageStoreName();
 
     /**
      * This method is used to set configuration parameters of the message processor. For example, triggering interval
      * retrying interval, and etc.
-     * @param parameters
+     * @param parameters Message processor parameters.
      */
     void setParameters(Map<String,Object> parameters);
 

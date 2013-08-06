@@ -24,13 +24,13 @@ public interface MessageProducer {
     /**
      * Stores the given message to the store associated with this message consumer.
      * @param synCtx Message to be saved.
-     * @return true if storing of the message is successful, false otherwise.
+     * @return {@code true} if storing of the message is successful, {@code false} otherwise.
      */
     boolean storeMessage(MessageContext synCtx);
 
     /**
      * Cleans up this message consumer
-     * @return true if clean up is successful, false otherwise.
+     * @return {@code true} if clean up is successful, {@code false} otherwise.
      */
     boolean cleanup();
 
