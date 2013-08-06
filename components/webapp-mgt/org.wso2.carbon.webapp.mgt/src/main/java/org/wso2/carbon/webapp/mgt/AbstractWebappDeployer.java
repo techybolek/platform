@@ -158,7 +158,11 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
 
     public void undeploy(String fileName) throws DeploymentException {
         File webappToUndeploy = new File(fileName);        
-        handleUndeployment(fileName, webappToUndeploy);         
+        handleUndeployment(fileName, webappToUndeploy);
+        File file = new File(fileName.concat(".war"));
+        if(file.exists() && file.isFile()){
+            handleRedeployment(file);
+        }
         
     }
 
@@ -217,7 +221,7 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
         // Here we are checking WebappDeployer with .war extension or null extension
         // If foo.war and foo dir is found, then we will allow  .war based WebappDeployer to deploy that webapp.
         // If only foo dir found then directory based WebappDeployer will deploy that webapp.
-        if ("war".equals(extension)) {
+        if ("war".equals(extension) || webappFilePath.endsWith(".war")) {
              // We should not deploy .WAR files inside a another application. e.g- webapps/mvcapp/newapp.war
         	 return isInsideAnotherApp(webappFilePath);
         } else {
@@ -311,6 +315,12 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
         }
 
         return false;
+    }
+
+
+    protected void handleRedeployment(File file) throws DeploymentException {
+        DeploymentFileData data = new DeploymentFileData(file, this);
+        deploy(data);
     }
 
 }

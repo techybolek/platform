@@ -337,6 +337,13 @@ public class TomcatGenericWebappsDeployer {
         if (deployedWebapps.containsKey(fileName)) {
             undeploy(deployedWebapps.get(fileName));
         }
+        // app = app.war and make sure check using both patterns.
+        if(!fileName.endsWith(".war")){
+            String warFileName =  fileName.concat(".war");
+            if(deployedWebapps.containsKey(warFileName)){
+                undeploy(deployedWebapps.get(warFileName));
+            }
+        }
         //also checking the stopped webapps.
         else if (stoppedWebapps.containsKey(fileName)) {
             undeploy(stoppedWebapps.get(fileName));
@@ -473,5 +480,13 @@ public class TomcatGenericWebappsDeployer {
         }
 
         return path;
+    }
+
+    private boolean isUnpackedDirExists(String warPath){
+        File dir = new File(warPath.replace(".war",""));
+        if(dir.exists() && dir.isDirectory()){
+            return true;
+        }
+        return false;
     }
 }
