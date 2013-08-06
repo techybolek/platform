@@ -93,9 +93,9 @@ public class DemoteLCTestTransition {
                                               environment.getGreg().getSessionCookie());
         RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
 
-         String url = "https://" + FrameworkSettings.HOST_NAME + ":" + FrameworkSettings.HTTPS_PORT
-                    + "/services/";
-          WSRegistrySearchClient wsRegistrySearchClient =
+    //     String url = "https://" + FrameworkSettings.HOST_NAME + ":" + FrameworkSettings.HTTPS_PORT
+      //              + "/services/";
+        /*  WSRegistrySearchClient wsRegistrySearchClient =
                     new WSRegistrySearchClient(url, FrameworkSettings.USER_NAME,
                             FrameworkSettings.PASSWORD, ConfigurationContextFactory.createConfigurationContextFromFileSystem(
                             FrameworkSettings.CARBON_HOME +
@@ -106,7 +106,7 @@ public class DemoteLCTestTransition {
                                     .getFirstProperty(
                                             "Axis2Config.clientAxis2XmlLocation")));
 
-            wsRegistrySearchClient.init();
+            wsRegistrySearchClient.init(); */
         registry = registryProviderUtil.getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME);
         governance = registryProviderUtil.getGovernanceRegistry(registry, userId);
 
