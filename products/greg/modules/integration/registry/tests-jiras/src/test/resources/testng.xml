@@ -46,6 +46,7 @@
             <class name="org.wso2.carbon.registry.jira.issues.test.SearchServiceOfStatusChange"/>
             <class name="org.wso2.carbon.registry.jira.issues.test.SymlinkTestCase"/>
             <class name="org.wso2.carbon.registry.jira.issues.test.WSRegistryExecuteQueryTestCase"/>
+            <class name="org.wso2.carbon.registry.jira.issues.test.Carbon8980"/>
         </classes>
     </test>
 </suite>
