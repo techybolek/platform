@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Map;
+
 /**
  * This class represent the Tier
  */
@@ -26,6 +28,7 @@ public class Tier {
     private String name;
     private String description;
     private byte[] policyContent;
+    private Map<String,Object> tierAttributes;
 
     public Tier(String name) {
         this.name = name;
@@ -49,6 +52,13 @@ public class Tier {
 
     public void setPolicyContent(byte[] policyContent) {
         this.policyContent = policyContent;
+    }
+    public Map<String,Object> getTierAttributes() {
+        return tierAttributes;
+    }
+
+    public void setTierAttributes(Map<String,Object> tierAttributes) {
+        this.tierAttributes = tierAttributes;
     }
 
     @Override
