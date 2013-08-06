@@ -241,6 +241,7 @@
 				<module>org.wso2.carbon.appfactory.events.notification.stub</module>
 				<module>org.wso2.carbon.appfactory.jenkins.build.stub</module>
 				<module>org.wso2.carbon.appfactory.tenant.mgt.stub</module>
+				<module>org.wso2.carbon.appfactory.buildserver.teanant.mgt.stub</module>
 				<module>org.wso2.carbon.bam.jmx.agent.stub</module>
 				<module>org.wso2.carbon.bam.webapp.stat.publisher.stub</module>
 				<module>org.wso2.carbon.cassandra.cluster.mgt.stub</module>
@@ -249,7 +250,7 @@
 				<module>org.wso2.carbon.identity.authenticator.krb5.stub</module>
 				<module>org.wso2.carbon.hdfs.mgt.stub</module>
 				<module>org.wso2.carbon.mapred.mgt.stub</module>
-			</modules>
+  </modules>
 
     <build>
         <plugins>
@@ -311,5 +312,3 @@
 		</dependencies>
 
 </project>
-
-
