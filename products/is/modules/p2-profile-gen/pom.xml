@@ -139,7 +139,8 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 
 								<!-- DataSource feature -->
-								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.datasource.feature:4.2.0-SNAPSHOT</featureArtifactDef>
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ndatasource.feature:4.2.0-SNAPSHOT</featureArtifactDef>
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ndatasource.ui.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 							</featureArtifacts>
 						</configuration>
 					</execution>
@@ -373,8 +374,12 @@
 									<version>4.2.0-SNAPSHOT</version>
 								 </feature>
 								 <feature>
-									<id>org.wso2.carbon.datasource.feature.group</id>
-									<version>4.2.0-SNAPSHOT</version>
+								     <id>org.wso2.carbon.ndatasource.feature.group</id>
+								     <version>4.2.0-SNAPSHOT</version>
+								 </feature>
+								 <feature>
+								     <id>org.wso2.carbon.ndatasource.ui.feature.group</id>
+								     <version>4.2.0-SNAPSHOT</version>
 								 </feature>
 							</features>
 						</configuration>
