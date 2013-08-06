@@ -270,13 +270,15 @@ public class UserManagementClient {
         return false;
     }
 
-    public void getRolesOfUser(String userName, String filter, int limit){
+    public FlaggedName[] getRolesOfUser(String userName, String filter, int limit){
+        FlaggedName[] flaggedNames =  new FlaggedName[0];
         try {
-            userAdminStub.getRolesOfUser(userName,filter,limit);
+          flaggedNames =   userAdminStub.getRolesOfUser(userName,filter,limit);
         } catch (RemoteException e) {
             log.error("Unable to get  role  list of user : "+ userName ,e);
         } catch (UserAdminUserAdminException e) {
             log.error("Unable to get role list of  user : "+userName ,e);
         }
+        return flaggedNames;
     }
 }
