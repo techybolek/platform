@@ -11,13 +11,6 @@
             <package name="org.wso2.carbon.registry.xpath.query.test"/>
             <package name="org.wso2.carbon.registry.utfsupport.test"/>
             <package name="org.wso2.carbon.registry.lifecycle.test"/>
-            <package name="org.wso2.carbon.registry.metadata.test.service"/>
-            <package name="org.wso2.carbon.registry.metadata.test.api"/>
-            <package name="org.wso2.carbon.registry.metadata.test.custom"/>
-            <package name="org.wso2.carbon.registry.metadata.test.policy"/>
-            <package name="org.wso2.carbon.registry.metadata.test.schema"/>
-            <package name="org.wso2.carbon.registry.metadata.test.uri"/>
-            <package name="org.wso2.carbon.registry.metadata.test.wsdl"/>
             <package name="org.wso2.carbon.registry.mediatype.test"/>
             <package name="org.wso2.carbon.registry.governance.api.test"/>
             <package name="org.wso2.carbon.registry.activity.search"/>
