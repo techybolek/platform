@@ -10,8 +10,8 @@
                         <throttle:UnitTime>60000</throttle:UnitTime>
                         <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
                         <throttle:Attributes>
-                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
-                            <throttle:Attribute2>xxxx</throttle:QoS>
+                            <throttle:Attribute1>xxxx</throttle:Attribute1>
+                            <throttle:Attribute2>xxxx</throttle:Attribute2>
                         </throttle:Attributes>
                         -->
                     </wsp:Policy>
@@ -27,8 +27,8 @@
                         <throttle:UnitTime>60000</throttle:UnitTime>
                         <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
                         <throttle:Attributes>
-                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
-                            <throttle:Attribute2>xxxx</throttle:QoS>
+                            <throttle:Attribute1>xxxx</throttle:Attribute1>
+                            <throttle:Attribute2>xxxx</throttle:Attribute2>
                         </throttle:Attributes>
                         -->
                     </wsp:Policy>
@@ -44,8 +44,8 @@
                         <throttle:UnitTime>60000</throttle:UnitTime>
                         <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
                         <throttle:Attributes>
-                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
-                            <throttle:Attribute2>xxxx</throttle:QoS>
+                            <throttle:Attribute1>xxxx</throttle:Attribute1>
+                            <throttle:Attribute2>xxxx</throttle:Attribute2>
                         </throttle:Attributes>
                         -->
                     </wsp:Policy>
@@ -61,8 +61,8 @@
                         <throttle:UnitTime>60000</throttle:UnitTime>
                         <!--It's possible to define tier level attributes as below for each tier level.For eg:Payment Plan for a tier
                         <throttle:Attributes>
-                            <throttle:Attribute1>xxxx</throttle:PaymentPlan>
-                            <throttle:Attribute2>xxxx</throttle:QoS>
+                            <throttle:Attribute1>xxxx</throttle:Attribute1>
+                            <throttle:Attribute2>xxxx</throttle:Attribute2>
                         </throttle:Attributes>
                         -->
                     </wsp:Policy>
