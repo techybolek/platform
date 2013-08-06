@@ -96,7 +96,7 @@
             }
 
         }
-        if ("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore".
+        if ("org.apache.synapse.message.store.impl.jms.JmsStore".
                 equals(provider.trim())) {
             if (!paramList.containsKey("java.naming.factory.initial") ||
                     !paramList.containsKey("java.naming.provider.url")) {

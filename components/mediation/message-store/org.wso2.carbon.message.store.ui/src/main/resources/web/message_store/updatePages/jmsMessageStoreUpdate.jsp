@@ -7,7 +7,7 @@
 
     String name = request.getParameter("Name").trim();
     String params = request.getParameter("tableParams").trim();
-    String provider = "org.wso2.carbon.message.store.persistence.jms.JMSMessageStore";
+    String provider = "org.apache.synapse.message.store.impl.jms.JmsStore";
 
     if (params != null) {
         params = params.trim();

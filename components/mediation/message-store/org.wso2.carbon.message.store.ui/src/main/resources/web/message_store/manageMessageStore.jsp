@@ -303,7 +303,7 @@
                         onclick="showHideCustomInput(false)">
                     In Memory Message Store
                 </option>
-                <option value="org.wso2.carbon.message.store.persistence.jms.JMSMessageStore"
+                <option value="org.apache.synapse.message.store.impl.jms.JmsStore"
                         onclick="showHideCustomInput(false)">
                     JMS Message Store
                 </option>

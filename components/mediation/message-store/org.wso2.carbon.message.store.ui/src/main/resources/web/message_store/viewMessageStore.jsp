@@ -260,7 +260,7 @@
                 <tr>
                     <th><fmt:message key="messageStore.name"/></th>
                     <th><fmt:message key="type"/></th>
-                    <%if (!client.getClassName(messageStoreName).trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                    <%if (!client.getClassName(messageStoreName).trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")) { %>
                         <th><fmt:message key="size"/></th>
                     <%}%>
                 </tr>
@@ -283,7 +283,7 @@
                     </td>
                     <td><%= type%>
                     </td>
-                    <%if (!client.getClassName(messageStoreName).trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                    <%if (!client.getClassName(messageStoreName).trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")) { %>
                     <td><%= size%>
                     </td>
                     <%}%>
@@ -333,7 +333,7 @@
                            class="icon-link"
                            style="background-image:url(../message_store/images/envelop.gif);"><fmt:message
                             key="view.envelope"/></a>
-                        <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                        <%if (!type.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")) { %>
                         <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex)"
                            id="delete_link" class="icon-link"
                            style="background-image:url(../admin/images/delete.gif);"><fmt:message
@@ -348,7 +348,7 @@
                     }
 
                 %>
-                <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                <%if (!type.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")) { %>
                 <tr>
                     <td colspan="2">
                         <a onclick="<%=(messageInfos == null || messageInfos.length == 0)?"return false":"deleteAll();"%>"

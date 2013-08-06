@@ -231,15 +231,15 @@
                     <td><fmt:message key="provider"/><span class="required"> *</span></td>
                     <td>
                         <input name="Provider" id="Provider" type="hidden"
-                               value="org.wso2.carbon.message.store.persistence.jms.JMSMessageStore"/>
-                        <label id="Provider_label" for="Provider">org.wso2.carbon.message.store.persistence.jms.JMSMessageStore
+                               value="org.apache.synapse.message.store.impl.jms.JmsStore"/>
+                        <label id="Provider_label" for="Provider">org.apache.synapse.message.store.impl.jms.JmsStore
                         </label>
                         <br/>
                     </td>
                 </tr>
                 <%} else {%>
                 <input name="Provider" id="Provider" type="hidden"
-                       value="org.wso2.carbon.message.store.persistence.jms.JMSMessageStore"/>
+                       value="org.apache.synapse.message.store.impl.jms.JmsStore"/>
                 <%}%>
                 <tr>
                     <td><fmt:message key="factory.initial"/><span class="required"> *</span></td>

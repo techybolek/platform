@@ -98,7 +98,7 @@
         var cell = row.cells[0];
         var type = row.cells[1];
         var content = cell.firstChild.innerHTML;
-        if (storeType == "org.wso2.carbon.message.store.persistence.jms.JMSMessageStore") {
+        if (storeType == "org.apache.synapse.message.store.impl.jms.JmsStore") {
             document.location.href = "jmsMessageStore.jsp?" + "messageStoreName=" + content;
         } else if (storeType == "org.apache.synapse.message.store.InMemoryMessageStore") {
             document.location.href = "inMemoryMessageStore.jsp?" + "messageStoreName=" + content;
@@ -226,7 +226,7 @@
                         </td>
                         <td><%= type%>
                         </td>
-                        <%if (!type.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                        <%if (!type.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")) { %>
                         <td><%= size%>
                         </td>
                         <%} else {%>

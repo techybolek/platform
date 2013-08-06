@@ -140,7 +140,7 @@
         prettyPrintPayload = xmlPrettyPrinter.xmlFormat();
         String designViewUrl = "";
 
-        if (provider.equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) {
+        if (provider.equals("org.apache.synapse.message.store.impl.jms.JmsStore")) {
             designViewUrl = "jmsMessageStore.jsp?origin=source";
         } else if (provider.equals("org.apache.synapse.message.store.InMemoryMessageStore")) {
             designViewUrl = "inMemoryMessageStore.jsp?origin=source";
