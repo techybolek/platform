@@ -15,6 +15,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.identity.application.authentication.endpoint.OAuth2Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -23,9 +24,9 @@
 <%@ page import="java.net.URLEncoder" %>
 <%
 
-    String scopeString = request.getParameter("scope");
+    String scopeString = OAuth2Servlet.getSafeText(request.getParameter("scope"));
 
-    String authStatus = getSafeText(request.getParameter("auth_status"));
+    String authStatus = OAuth2Servlet.getSafeText(request.getParameter("auth_status"));
 %>
 <html lang="en">
 <head>
@@ -106,7 +107,7 @@
  	%>
             <form class="well form-horizontal" id="loginForm"
                   <% if(!("failed".equals(authStatus))) { %>style="display:none"<% } %>
-                  action="../oauth2endpoints/authorize">
+                  action="../oauth2endpoints/authorize" method="post">
 
                 <div class="alert alert-error"
                      id="errorMsg" <% if (!("failed".equals(authStatus))) { %>
@@ -147,19 +148,3 @@
 
 </body>
 </html>
-
-<%!
-public static String getSafeText(String text) {
-    if (text == null) {
-        return text;
-    }
-    text = text.trim();
-    if (text.indexOf('<') > -1) {
-        text = text.replace("<", "&lt;");
-    }
-    if (text.indexOf('>') > -1) {
-        text = text.replace(">", "&gt;");
-    }
-    return text;
-}
-%>

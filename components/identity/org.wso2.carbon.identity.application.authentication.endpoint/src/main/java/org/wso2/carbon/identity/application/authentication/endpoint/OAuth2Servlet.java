@@ -78,30 +78,33 @@ public class OAuth2Servlet extends HttpServlet {
 
 		// setting the login page
 		if (request.getRequestURI().contains("/oauth2_login.do")) {
+			String queryString = getSafeText(request.getQueryString());
 			if (loginPage != null) {
-				response.sendRedirect(loginPage + "?" + request.getQueryString());
+				response.sendRedirect(loginPage + "?" + queryString);
 			} else if (pages.get("Global-LoginPage") != null) {
-				response.sendRedirect(pages.get("Global-LoginPage") + "?" + request.getQueryString());
+				response.sendRedirect(pages.get("Global-LoginPage") + "?" + queryString);
 			} else {
 				request.getRequestDispatcher("oauth2/oauth2_login.jsp").forward(request, response);
 			}
 
 		// setting the error page	
 		} else if (request.getRequestURI().contains("/oauth2_error.do")) {
+			String queryString = getSafeText(request.getQueryString());
 			if (errorPage != null) {
-				response.sendRedirect(errorPage + "?" + request.getQueryString());
+				response.sendRedirect(errorPage + "?" + queryString);
 			} else if (pages.get("Global-ErrorPage") != null) {
-				response.sendRedirect(pages.get("Global-ErrorPage") + "?" + request.getQueryString());
+				response.sendRedirect(pages.get("Global-ErrorPage") + "?" + queryString);
 			} else {
 				request.getRequestDispatcher("oauth2/oauth2_error.jsp").forward(request, response);
 			}
 
 		// setting the consent page	
 		} else if (request.getRequestURI().contains("/oauth2_consent.do")) {
+			String queryString = getSafeText(request.getQueryString());
 			if (consentPage != null) {
-				response.sendRedirect(consentPage + "?" + request.getQueryString());
+				response.sendRedirect(consentPage + "?" + queryString);
 			} else if (pages.get("Global-ConsentPage") != null) {
-				response.sendRedirect(pages.get("Global-ConsentPage") + "?" + request.getQueryString());
+				response.sendRedirect(pages.get("Global-ConsentPage") + "?" + queryString);
 			} else {
 				request.getRequestDispatcher("oauth2/oauth2_consent.jsp").forward(request, response);
 			}
@@ -111,6 +114,20 @@ public class OAuth2Servlet extends HttpServlet {
 
 		}
 
+	}
+	
+	public static String getSafeText(String text) {
+		if (text == null) {
+			return text;
+		}
+		text = text.trim();
+		if (text.indexOf('<') > -1) {
+			text = text.replace("<", "&lt;");
+		}
+		if (text.indexOf('>') > -1) {
+			text = text.replace(">", "&gt;");
+		}
+		return text;
 	}
 
 }

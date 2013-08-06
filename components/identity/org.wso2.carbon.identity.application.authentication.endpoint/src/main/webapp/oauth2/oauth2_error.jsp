@@ -15,6 +15,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.identity.application.authentication.endpoint.OAuth2Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -23,8 +24,8 @@
 <%@ page import="java.net.URLEncoder"%>
 
 <%
-	String errorCode = (String) request.getParameter("oauthErrorCode");
-	String errorMsg = (String) request.getParameter("oauthErrorMsg");
+	String errorCode = OAuth2Servlet.getSafeText(request.getParameter("oauthErrorCode"));
+	String errorMsg = OAuth2Servlet.getSafeText(request.getParameter("oauthErrorMsg"));
 %>
 <!DOCTYPE html>
 <html lang="en">
