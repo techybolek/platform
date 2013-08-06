@@ -4,8 +4,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.wso2.carbon.connector</groupId>
-	<artifactId>org.wso2.carbon.connector.salesforce</artifactId>
+	<groupId>org.wso2.carbon.mediation.library.connectors.salesforce</groupId>
+	<artifactId>org.wso2.carbon.mediation.library.connectors.salesforce</artifactId>
 	<packaging>bundle</packaging>
 	<version>4.2.0-SNAPSHOT</version>
 	<name>WSO2 Carbon - Cloud Connector For Salesforce</name>
@@ -52,7 +52,7 @@
 							<goal>attached</goal>
 						</goals>
 						<configuration>
-							<finalName>SALESFORCE-CONNECTOR</finalName>
+							<finalName>salesforce-connector</finalName>
 							<appendAssemblyId>true</appendAssemblyId>
 
 							<filters>
@@ -82,7 +82,7 @@
 						<Export-Package>
 							!javax.servlet,
 							!javax.servlet.http,
-							org.wso2.carbon.connector.salesforce.*
+							org.wso2.carbon.mediation.library.connectors.salesforce.*
                         </Export-Package>
 						<Import-Package>
 							!javax.xml.soap,

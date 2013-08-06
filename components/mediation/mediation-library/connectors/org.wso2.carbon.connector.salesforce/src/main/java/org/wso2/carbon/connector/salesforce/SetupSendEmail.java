@@ -16,14 +16,18 @@
  * under the License.
  */
 
-package org.wso2.carbon.connector.salesforce;
+package org.wso2.carbon.mediation.library.connectors.salesforce;
 
 import java.util.Iterator;
 
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.impl.llom.OMAttributeImpl;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -59,10 +63,19 @@ public class SetupSendEmail extends AbstractConnector {
 				OMElement sObjects = AXIOMUtil.stringToOM(strSobject);
 				Iterator<OMElement> sObject = sObjects.getChildElements();
 				OMNamespace omNsurn = fac.createOMNamespace("urn:partner.soap.sforce.com", "urn");
+		        OMNamespace omNsXsi = fac.createOMNamespace("http://www.w3.org/2001/XMLSchema-instance", "xsi");
+		        String strType = null;
 				// Loops sObject
 				while (sObject.hasNext()) {
 					OMElement currentElement = sObject.next();
 					OMElement newElement = fac.createOMElement("messages", omNsurn);
+					//Add Attributes
+					OMAttribute omAttribute = currentElement.getAttribute(new QName(SalesforceUtil.SALESFORCE_CREATE_SOBJECTTYPE));
+					strType = "urn:SingleEmailMessage";
+					if(omAttribute != null && omAttribute.getAttributeValue() != null){
+						strType = omAttribute.getAttributeValue();
+					}
+					newElement.addAttribute(new OMAttributeImpl("type", omNsXsi, strType, fac));
 					// Add the fields
 					Iterator<OMElement> sObjectFields = currentElement.getChildElements();
 					while (sObjectFields.hasNext()) {
