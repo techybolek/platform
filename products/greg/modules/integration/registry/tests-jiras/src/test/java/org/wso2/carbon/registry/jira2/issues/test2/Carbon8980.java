@@ -29,6 +29,7 @@ import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.environmentutils.ManageEnvironment;
 import org.wso2.carbon.registry.permission.test.utils.PermissionTestConstants;
+import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 
 public class Carbon8980 {
     private static final String[] SECURITY_PERMISSION_LIST = {
@@ -72,8 +73,15 @@ public class Carbon8980 {
 
     @Test
     public void testCreateUser() throws Exception {
+        boolean found = false;
         user1UserManagementClient.addUser(NEW_USER, NEW_USER_PW, new String[]{PermissionTestConstants.EVERYONE_ROLE}, "testUserAProfile");
-        Assert.assertTrue(adminUserManagementClient.userNameExists(PermissionTestConstants.EVERYONE_ROLE, NEW_USER));
+        FlaggedName[] flaggedNames = adminUserManagementClient.getRolesOfUser(NEW_USER, "*", 100);
+        for (FlaggedName name : flaggedNames) {
+            if (name.getItemName().equals(PermissionTestConstants.EVERYONE_ROLE)) {
+                found = true;
+            }
+        }
+        Assert.assertTrue(found, NEW_USER + " is not in internal/everyone");
     }
 
     @Test(dependsOnMethods = "testCreateUser")
@@ -95,8 +103,11 @@ public class Carbon8980 {
         if (adminUserManagementClient.roleNameExists(NEW_ROLE)) {
             adminUserManagementClient.deleteRole(NEW_ROLE);
         }
-        if (adminUserManagementClient.userNameExists(PermissionTestConstants.EVERYONE_ROLE, NEW_USER)) {
-            adminUserManagementClient.deleteUser(NEW_USER);
+        FlaggedName[] flaggedNames = adminUserManagementClient.getRolesOfUser(NEW_USER, "*", 100);
+        for (FlaggedName name : flaggedNames) {
+            if (name.getItemName().equals(PermissionTestConstants.EVERYONE_ROLE)) {
+                adminUserManagementClient.deleteUser(NEW_USER);
+            }
         }
         adminUserManagementClient = null;
         user1UserManagementClient = null;
