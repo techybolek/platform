@@ -215,17 +215,17 @@
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-core</artifactId>
-	    <version>1.6.1.wso2v6</version>	
+	    <version>1.6.1.wso2v9</version>	
         </dependency>
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-policy</artifactId>
-	    <version>1.6.1.wso2v6</version>
+	    <version>1.6.1.wso2v9</version>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-trust</artifactId>
-	    <version>1.6.1.wso2v6</version>
+	    <version>1.6.1.wso2v9</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.security.wso2</groupId>
