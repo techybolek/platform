@@ -29,11 +29,12 @@ cat $resorce_dir/configs/appfactory-axis2.xml | sed -e "s@AF_HOST@$af_host_name@
 cat $resorce_dir/configs/appfactory-confirmation-email-config.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/email/confirmation-email-config.xml
 cat $resorce_dir/configs/appfactory-invite-user-email-config.xml | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/email/invite-user-email-config.xml
 cat $resorce_dir/configs/appfactory-sso-idp-config.xml  | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/sso-idp-config.xml
+cp $resorce_dir/configs/saml2.federation.properties  $APPFACTORY_HOME/repository/conf/security
 cp $resorce_dir/configs/appfactory-humantask.xml $APPFACTORY_HOME/repository/conf/humantask.xml
 cp $resorce_dir/configs/carbon-console-web.xml $APPFACTORY_HOME/repository/conf/tomcat/carbon/WEB-INF/web.xml
-cp -r $resorce_dir/patches/af/*  $APPFACTORY_HOME/repository/components/patches
-cp -r $resorce_dir/CreateTenant.zip  $APPFACTORY_HOME/repository/deployment/server/bpel/
-cp -r $resorce_dir/appmgt  $APPFACTORY_HOME/repository/deployment/server/jaggeryapps/
+#cp -r $resorce_dir/patches/af/*  $APPFACTORY_HOME/repository/components/patches
+#cp -r $resorce_dir/CreateTenant.zip  $APPFACTORY_HOME/repository/deployment/server/bpel/
+#cp -r $resorce_dir/appmgt  $APPFACTORY_HOME/repository/deployment/server/jaggeryapps/
 cp -r $resorce_dir/configs/endpoints  $APPFACTORY_HOME/repository/conf/appfactory
 
 #cp resources/org.wso2.carbon.appfactory.apiManager.integration-1.0.2.jar $APPFACTORY_HOME/repository/components/plugins/org.wso2.carbon.appfactory.apiManager.integration_1.0.2.jar

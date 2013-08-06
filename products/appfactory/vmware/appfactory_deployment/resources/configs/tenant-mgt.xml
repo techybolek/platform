@@ -27,11 +27,14 @@
 </TenantManager-->
 <!--Following tenant manager is used by Identity Server (IS) as its default tenant manager.
     IS will do token replacement when building the product. Therefore do not change the syntax.-->        
+<TenantManagers>
 <TenantManager class="org.wso2.carbon.user.core.tenant.CommonHybridLDAPTenantManager">
+    <Property name="MultiTenantRealmConfigBuilder">org.wso2.carbon.user.core.config.multitenancy.CommonLDAPRealmConfigBuilder</Property>
     <Property name="RootPartition">dc=appfactory,dc=wso2,dc=com</Property>
     <Property name="OrganizationalObjectClass">organizationalUnit</Property>
     <Property name="OrganizationalAttribute">ou</Property>
     <Property name="OrganizationalSubContextObjectClass">organizationalUnit</Property>
     <Property name="OrganizationalSubContextAttribute">ou</Property>
 </TenantManager>
+</TenantManagers>
 

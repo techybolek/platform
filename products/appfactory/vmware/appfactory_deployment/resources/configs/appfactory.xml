@@ -313,7 +313,7 @@
             <DeploymentServerURL>https://appserver.dev.AF_HOST:8343/services/</DeploymentServerURL>
             <MountPoint>dev</MountPoint>
 	    <BaseAccessUrl>https://appserver.dev.AF_HOST:8343</BaseAccessUrl>
-            <TenantMgtUrl>https://appserver.dev.AF_HOST</TenantMgtUrl>
+            <TenantMgtUrl>https://localhost:9463</TenantMgtUrl>
            <Buildable>true</Buildable>
  	<StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>
         <RssName>Development</RssName>
@@ -396,7 +396,7 @@
             <DeploymentServerURL>https://appserver.test.AF_HOST:8343/services/</DeploymentServerURL>
             <MountPoint>test</MountPoint>
 	    <BaseAccessUrl>https://appserver.test.AF_HOST:8343</BaseAccessUrl>
- <TenantMgtUrl>https://appserver.test.AF_HOST</TenantMgtUrl>
+ <TenantMgtUrl>https://localhost:9464</TenantMgtUrl>
 		<Buildable>false</Buildable>       
  		<StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>
                 <RssName>Testing</RssName>
@@ -479,7 +479,7 @@
             <DeploymentServerURL>https://appserver.staging.AF_HOST:8343/services/</DeploymentServerURL>
             <MountPoint>staging</MountPoint>
             <BaseAccessUrl>https://appserver.staging.AF_HOST:8343</BaseAccessUrl>
-            <TenantMgtUrl>https://appserver.staging.AF_HOST</TenantMgtUrl>
+            <TenantMgtUrl>https://localhost:9465</TenantMgtUrl>
 	<Buildable>false</Buildable>
 	<StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>
                         <RssName>Staging</RssName>
@@ -556,7 +556,7 @@
             <DeploymentServerURL>https://appserver.AF_HOST:8343/services/</DeploymentServerURL>
             <MountPoint>prod</MountPoint>
             <BaseAccessUrl>https://appserver.AF_HOST:8343</BaseAccessUrl>
- <TenantMgtUrl>https://appserver.prod.AF_HOST</TenantMgtUrl>
+ <TenantMgtUrl>https://localhost:9466</TenantMgtUrl>
 <Semantic>Production</Semantic>        
 <Buildable>false</Buildable>
                         <StorageServerUrl>https://storage.AF_HOST:9443/services/</StorageServerUrl>

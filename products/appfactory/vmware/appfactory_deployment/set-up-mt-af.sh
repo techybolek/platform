@@ -65,7 +65,7 @@ mkdir setup
 
 #configure build server
 . `pwd`/set-up-build-server.sh
- setup_build_server -w $SETUP_DIR -r $RESOURCE_DIR -v $APPSERVER_VERSION -h $af_host_name -o 30
+# setup_build_server -w $SETUP_DIR -r $RESOURCE_DIR -v $APPSERVER_VERSION -h $af_host_name -o 30
 
  echo "Creating Databases ........"
 
@@ -81,7 +81,7 @@ mkdir setup
 
  Q3="CREATE DATABASE userstore;"
  Q4="USE userstore;"
- Q5="SOURCE $APPFACTORY_HOME/dbscripts/mysql.sql;"
+ Q5="SOURCE `pwd`/mysql.sql;"
 
  Q6="CREATE DATABASE registry;"
  Q7d="CREATE DATABASE devregistry;"
