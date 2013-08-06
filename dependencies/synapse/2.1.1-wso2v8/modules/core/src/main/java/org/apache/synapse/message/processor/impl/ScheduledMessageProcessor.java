@@ -26,19 +26,11 @@ import org.apache.synapse.message.processor.MessageProcessorConstants;
 import org.apache.synapse.message.processor.impl.forwarder.ForwardingService;
 import org.apache.synapse.message.processor.impl.sampler.SamplingProcessor;
 import org.apache.synapse.message.processor.impl.sampler.SamplingService;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.UnableToInterruptJobException;
+import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -118,12 +110,14 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
             trigger = triggerBuilder
                     .withSchedule(simpleSchedule()
                         .withIntervalInMilliseconds(interval)
-                        .repeatForever())
+                        .repeatForever()
+                        .withMisfireHandlingInstructionNextWithRemainingCount())
                     .build();
         } else {
             trigger = triggerBuilder
                     .startNow()
-                    .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
+                    .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)
+                        .withMisfireHandlingInstructionDoNothing())
                     .build();
         }
 
@@ -261,11 +255,11 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                     logger.debug("Deactivating message processor [" + getName() + "]");
                 }
 
-//                try {
-//                    scheduler.interrupt(new JobKey(name + "-job", SCHEDULED_MESSAGE_PROCESSOR_GROUP));
-//                } catch (UnableToInterruptJobException e) {
-//                    log.info("Unable to interrupt job [" + name + "-job]");
-//                }
+                try {
+                    scheduler.interrupt(new JobKey(name + "-job", SCHEDULED_MESSAGE_PROCESSOR_GROUP));
+                } catch (UnableToInterruptJobException e) {
+                    logger.info("Unable to interrupt job [" + name + "-job]");
+                }
 
                 scheduler.standby();
 
@@ -306,6 +300,22 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         }
     }
 
+    public void pauseService() {
+        try {
+            this.scheduler.pauseTrigger(new TriggerKey(name + "-trigger"));
+        } catch (SchedulerException se) {
+            throw new SynapseException("Error while pausing the service", se);
+        }
+    }
+
+    public void resumeService() {
+        try {
+            this.scheduler.resumeTrigger(new TriggerKey(name + "-trigger"));
+        } catch (SchedulerException se) {
+            throw new SynapseException("Error while pausing the service", se);
+        }
+    }
+
     private Properties getSchedulerProperties(String name) {
         Properties config = new Properties();
 
@@ -314,7 +324,7 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         config.put("org.quartz.scheduler.rmi.proxy", "false");
         config.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", "false");
         config.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-        config.put("org.quartz.threadPool.threadCount", "10");
+        config.put("org.quartz.threadPool.threadCount", "1");
         config.put("org.quartz.threadPool.threadPriority", "5");
         config.put("org.quartz.jobStore.misfireThreshold", "60000");
         config.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "60000");

@@ -71,6 +71,7 @@ public class ForwardingService implements InterruptableJob, Service {
 
     private boolean isSuccessful = false;
     private volatile boolean isTerminated = false;
+    private volatile boolean isPaused = false;
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
@@ -277,11 +278,10 @@ public class ForwardingService implements InterruptableJob, Service {
                             prepareToRetry();
                         }
                         else {
-                            if (messageProcessor.isDeactivated()) {
-
-                                this.messageProcessor.activate();
+                            if (isPaused) {
+                                this.messageProcessor.resumeService();
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Activating message processor [" + messageProcessor.getName() + "]");
+                                    log.debug("Resuming message processor [" + messageProcessor.getName() + "]");
                                 }
                             }
                         }
@@ -373,11 +373,12 @@ public class ForwardingService implements InterruptableJob, Service {
         if (!isTerminated) {
             // First stop the processor since no point in re-triggering jobs if the we can't send
             // it to the client
-            if (!messageProcessor.isDeactivated()) {
-                this.messageProcessor.deactivate();
+            if (!isPaused) {
+                this.messageProcessor.pauseService();
+                isPaused = true;
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Deactivating message processor [" + messageProcessor.getName() + "]");
+                    log.debug("Pausing message processor [" + messageProcessor.getName() + "]");
                 }
             }
 

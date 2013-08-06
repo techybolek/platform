@@ -118,11 +118,15 @@ public interface MessageProcessor extends ManagedLifecycle, Nameable, SynapseArt
      * a message processor could not operated successfully.
      * @param targetEndpoint is the name of the associated endpoint
      */
-    public void setTargetEndpoint(String targetEndpoint);
+    void setTargetEndpoint(String targetEndpoint);
 
     /**
      * This method is used to retrieve the associated target endpoint name of the message processor.
      * @return The name of the endpoint
      */
-    public String getTargetEndpoint();
+    String getTargetEndpoint();
+
+    void pauseService();
+
+    void resumeService();
 }
