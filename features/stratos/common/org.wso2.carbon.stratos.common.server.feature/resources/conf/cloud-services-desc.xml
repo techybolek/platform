@@ -147,4 +147,15 @@
    	<description>WSO2 Storage Server.</description>
    	<productPageURL>http://wso2.com/products/storage-server/</productPageURL>
     </cloudService>
+   <cloudService name="WSO2 App Factory" default="true">
+        <key>AF</key>
+        <label>WSO2 App Factory</label>
+        <link>https://milestones.appfactory.wso2.com</link>
+        <icon>
+                https://localhost:9443/cloud-services-icons/af.gif
+        </icon>
+        <description>WSO2 App Factory.</description>
+        <productPageURL>http://wso2.com/cloud/app-factory</productPageURL>
+    </cloudService>
+
 </cloudServices>
