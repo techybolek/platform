@@ -2,64 +2,82 @@
     <body>
     Waiting for responses from identity server and validate response and forward to requested URI.
         <%
+        include("/jagg/constants.jag");
 (function () {
-    var log = new Log();
-    var samlResponse = request.getParameter("SAMLResponse");
-    var sessionId = session.getId();
-    var samlRequest = request.getParameter("SAMLRequest");
+	
+	var log = new Log();
+	var username = request.getParameter("username");
+	var password = request.getParameter("password");
+	  
+    var xhr = new XMLHttpRequest();
+    var endPoint = "https://localhost:9443/services" + "AuthenticationAdmin";
+    xhr.open("POST", endPoint);
+    var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:aut="http://authentication.services.core.carbon.wso2.org"><soap:Header/><soap:Body><aut:login><aut:username>' + username + '</aut:username><aut:password>' + password + '</aut:password><aut:remoteAddress>localhost</aut:remoteAddress></aut:login></soap:Body></soap:Envelope>';
+    xhr.send(payload);
+    var cookieString = xhr.getResponseHeader("Set-Cookie");
+    var cookie = cookieString.split(";")[0];
+    session.put(APPFAC_BACKEND_COOKIE, cookie.toString());
+	session.put("LOGGED_IN_USER", username);
+	session.put("logged.user", username);
+	response.sendRedirect("/appmgt/site/pages/index.jag");	
+	
+//     var log = new Log();
+//     var samlResponse = request.getParameter("SAMLResponse");
+//     var sessionId = session.getId();
+//     var samlRequest = request.getParameter("SAMLRequest");
 
-    // create a sso relying party js object
-    include('config_reader.jag');
-    include("/jagg/jagg.jag");
-    var security = require("sso");
-    var ssoRelyingParty = new security.SSORelyingParty(getProperty(SSO_NAME));
-    var isLogoutResponse = false;
-    var isLogoutRequest = false;
+//     // create a sso relying party js object
+//     include('config_reader.jag');
+//     include("/jagg/jagg.jag");
+//     var security = require("sso");
+//     var ssoRelyingParty = new security.SSORelyingParty(getProperty(SSO_NAME));
+//     var isLogoutResponse = false;
+//     var isLogoutRequest = false;
 
-    // if saml response is not a log out response
-    if (samlResponse != null) {
-        isLogoutResponse = ssoRelyingParty.isLogoutResponse(samlResponse);
-        if (!Boolean(isLogoutResponse)) {
-            // relay state value should be a valid value, this value is mapped with request uri.
-            var relayState = request.getParameter("RelayState");
-            var requestedURI = ssoRelyingParty.getRelayStateProperty(relayState);
-            if (requestedURI == null) {
-                log.error("Relaystate value is invalid.");
-                response.sendRedirect("../error.jag");
-                return;
-            }
+//     // if saml response is not a log out response
+//     if (samlResponse != null) {
+//         isLogoutResponse = ssoRelyingParty.isLogoutResponse(samlResponse);
+//         if (!Boolean(isLogoutResponse)) {
+//             // relay state value should be a valid value, this value is mapped with request uri.
+//             var relayState = request.getParameter("RelayState");
+//             var requestedURI = ssoRelyingParty.getRelayStateProperty(relayState);
+//             if (requestedURI == null) {
+//                 log.error("Relaystate value is invalid.");
+//                 response.sendRedirect("../error.jag");
+//                 return;
+//             }
 
-            // validating the signature
-            var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
-            if (!Boolean(isSignatureValid)) {
-                log.error("SAML response signature is verification failed.");
-                response.sendRedirect("../error.jag");
-                return;
-            }
-            samlResponse = samlResponse.replace('<?xml version="1.0" encoding="UTF-8"?>', "");
-            session.put("SAML_TOKEN", samlResponse);
-            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse);
-            jagg.setUser(ssoRelyingParty.getLoggedInUser(sessionId));
-            session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
-            response.sendRedirect("/appmgt/site/pages/index.jag");
-        } else {
-            // if the saml response is log out request from IDP, we log out from web app.
-            ssoRelyingParty.invalidateSessionBySessionId(sessionId);
-            session.invalidate();
-            response.sendRedirect("../");
-            return;
-        }
+//             // validating the signature
+//             var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
+//             if (!Boolean(isSignatureValid)) {
+//                 log.error("SAML response signature is verification failed.");
+//                 response.sendRedirect("../error.jag");
+//                 return;
+//             }
+//             samlResponse = samlResponse.replace('<?xml version="1.0" encoding="UTF-8"?>', "");
+//             session.put("SAML_TOKEN", samlResponse);
+//             ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse);
+//             jagg.setUser(ssoRelyingParty.getLoggedInUser(sessionId));
+//             session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
+//             response.sendRedirect("/appmgt/site/pages/index.jag");
+//         } else {
+//             // if the saml response is log out request from IDP, we log out from web app.
+//             ssoRelyingParty.invalidateSessionBySessionId(sessionId);
+//             session.invalidate();
+//             response.sendRedirect("../");
+//             return;
+//         }
 
-    }
+//     }
 
-    // if saml request is a log out request, then invalidate session.
-    if (samlRequest != null) {
-        isLogoutRequest = ssoRelyingParty.isLogoutRequest(samlRequest);
-        if (Boolean(isLogoutRequest)) {
-            ssoRelyingParty.invalidateSessionBySAMLResponse(samlRequest);
-            session.invalidate();
-        }
-    }
+//     // if saml request is a log out request, then invalidate session.
+//     if (samlRequest != null) {
+//         isLogoutRequest = ssoRelyingParty.isLogoutRequest(samlRequest);
+//         if (Boolean(isLogoutRequest)) {
+//             ssoRelyingParty.invalidateSessionBySAMLResponse(samlRequest);
+//             session.invalidate();
+//         }
+//     }
 
 
 }());

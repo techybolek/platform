@@ -13,8 +13,8 @@ jagg.template("header", function(inputs, outputs, jagg) {
 	
 	var ssoRelyingParty = new security.SSORelyingParty(getProperty(SSO_NAME));
 	var sessionId = session.getId();
-	var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
-	session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
+	//var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
+	//session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
 	
 	var requestURI = request.getRequestURI();
 	var checkSSO = true;
@@ -26,7 +26,8 @@ jagg.template("header", function(inputs, outputs, jagg) {
 	}
 
 	
-	if (checkSSO && !Boolean(isAuthenticated)) {
+	//if (checkSSO && !Boolean(isAuthenticated)) {
+	if (!session.get("LOGGED_IN_USER")) {
 	    log.info("User is not authenticated, redirecting to identity server for authentication.");
 	
 	    ssoRelyingParty.setProperty("identityProviderURL", getProperty(SSO_PROVIDER));
