@@ -794,6 +794,10 @@ public final class APIUtil {
                     } catch (APIManagementException ex) {
                         desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
                     }
+                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
+                    if(tierAttributes!=null && tierAttributes.size()!=0){
+                    tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
+                    }
                     tier.setDescription(desc);
                     if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
                         tiers.put(tier.getName(), tier);

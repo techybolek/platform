@@ -270,7 +270,9 @@ public final class APIConstants {
     public static final QName THROTTLE_MAXIMUM_COUNT_ELEMENT = new QName("http://www.wso2"
             +".org/products/wso2commons/throttle", "MaximumCount");
     public static final QName THROTTLE_UNIT_TIME_ELEMENT = new QName("http://www.wso2"
-            +".org/products/wso2commons/throttle", "UnitTime");
+                                                                     + ".org/products/wso2commons/throttle", "UnitTime");
+    public static final QName THROTTLE_ATTRIBUTES_ELEMENT = new QName("http://www.wso2"
+                                                                      + ".org/products/wso2commons/throttle", "Attributes");
 
     public static final String TIER_DESC_NOT_AVAILABLE = "Tire Description is not available";
     

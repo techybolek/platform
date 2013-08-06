@@ -22,6 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import javax.xml.namespace.QName;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 public class APIDescriptionGenUtil {
     /**
      * Class Logger
@@ -65,5 +70,45 @@ public class APIDescriptionGenUtil {
             log.warn(msg);
             throw new APIManagementException(msg);
         }
+    }
+
+    /**
+     * The method to extract the tier attributes from each tier level policy definitions
+     * @param policy  Tier level policy
+     * @return Attributes map
+     * @throws APIManagementException
+     */
+    public static Map<String, Object> getTierAttributes(OMElement policy)
+            throws APIManagementException {
+        Map<String, Object> attributesMap = new HashMap<String, Object>();
+        OMElement attributes;
+
+        try {
+            attributes = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName
+                    (APIConstants
+                             .THROTTLE_CONTROL_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                    getFirstChildWithName(APIConstants.THROTTLE_ATTRIBUTES_ELEMENT);
+
+            if (attributes == null) {
+                return attributesMap;
+            } else {
+                for (Iterator childElements = attributes.getChildElements(); childElements
+                        .hasNext(); ) {
+                    OMElement element = (OMElement) childElements.next();
+                    String localName = element.getLocalName();
+                    String value = element.getText();
+                    attributesMap.put(localName, value);
+                }
+
+
+            }
+
+        } catch (NullPointerException npe) {
+            String msg = "Policy could not be parsed correctly based on http://schemas.xmlsoap.org/ws/2004/09/policy " +
+                         "specification";
+            log.warn(msg);
+            throw new APIManagementException(msg);
+        }
+        return attributesMap;
     }
 }
