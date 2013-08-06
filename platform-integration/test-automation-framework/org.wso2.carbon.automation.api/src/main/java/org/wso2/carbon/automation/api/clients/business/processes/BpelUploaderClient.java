@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.automation.api.clients.business.processes;
 
+import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
@@ -33,47 +34,23 @@ import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 
 public class BpelUploaderClient {
-    String ServiceEndPoint = null;
-    String resourcePath = null;
-    String sessionCookie = null;
     private static final Log log = LogFactory.getLog(BpelUploaderClient.class);
-    BPELPackageManagementServiceStub bpelPackageManagementServiceStub;
+    private final String serviceName = "BPELUploader";
+    private   BPELUploaderStub bpelUploaderStub;
 
-    public BpelUploaderClient(String serviceEndPoint, String resourceLocation, String sessionCookie) {
-        this.ServiceEndPoint = serviceEndPoint;
-        this.resourcePath = resourceLocation;
-        this.sessionCookie = sessionCookie;
-    }
+    public BpelUploaderClient(String serviceEndPoint, String sessionCookie) throws AxisFault {
+        String uploaderServiceURL = serviceEndPoint + serviceName;
+        AuthenticateStub authenticateStub = new AuthenticateStub();
+        bpelUploaderStub = new BPELUploaderStub(uploaderServiceURL);
+        authenticateStub.authenticateStub(sessionCookie, bpelUploaderStub);
 
-
-    public boolean deployBPEL(String packageName)
-            throws RemoteException, MalformedURLException, InterruptedException,
-                   PackageManagementException {
-
-        final String uploaderServiceURL = ServiceEndPoint + "BPELUploader";
-        BpelPackageManagementClient manager = new BpelPackageManagementClient(ServiceEndPoint, sessionCookie);
-
-        boolean success = false;
-        BPELUploaderStub bpelUploaderStub = new BPELUploaderStub(uploaderServiceURL);
-        AuthenticateStub.authenticateStub(sessionCookie, bpelUploaderStub);
-        deployPackage(packageName, bpelUploaderStub);
-        Thread.sleep(10000);
-        success = manager.checkProcessDeployment(packageName);
-        return success;
     }
 
     public boolean deployBPEL(String packageName, String dirPath)
             throws RemoteException, InterruptedException, PackageManagementException {
-
-        final String uploaderServiceURL = ServiceEndPoint + "BPELUploader";
-        BpelPackageManagementClient manager = new BpelPackageManagementClient(ServiceEndPoint, sessionCookie);
         boolean success = false;
-        AuthenticateStub authenticateStub = new AuthenticateStub();
-        BPELUploaderStub bpelUploaderStub = new BPELUploaderStub(uploaderServiceURL);
-        authenticateStub.authenticateStub(sessionCookie, bpelUploaderStub);
         deployPackage(packageName, dirPath, bpelUploaderStub);
         Thread.sleep(10000);
-        success = manager.checkProcessDeployment(packageName);
         return success;
     }
 
@@ -87,23 +64,7 @@ public class BpelUploaderClient {
         return uploadedFileItem;
     }
 
-    public void deployPackage(String packageName,
-                              BPELUploaderStub bpelUploaderStub)
-            throws MalformedURLException, RemoteException, InterruptedException {
-        String sampleArchiveName = packageName + ".zip";
-        File bpelZipArchive =
-                new File(resourcePath + File.separator + "artifacts" + File.separator
-                         + "BPS" + File.separator + "bpel" + File.separator + sampleArchiveName);
-        UploadedFileItem[] uploadedFileItems = new UploadedFileItem[1];
-        uploadedFileItems[0] = getUploadedFileItem(new DataHandler(bpelZipArchive.toURI().toURL()),
-                                                   sampleArchiveName,
-                                                   "zip");
-        log.info("Deploying " + sampleArchiveName);
-        bpelUploaderStub.uploadService(uploadedFileItems);
-        Thread.sleep(10000);
-    }
-
-    public void deployPackage(String packageName, String resourceDir,
+    private void deployPackage(String packageName, String resourceDir,
                               BPELUploaderStub bpelUploaderStub)
             throws RemoteException, InterruptedException {
 
@@ -116,6 +77,5 @@ public class BpelUploaderClient {
                                                    "zip");
         log.info("Deploying " + sampleArchiveName);
         bpelUploaderStub.uploadService(uploadedFileItems);
-        Thread.sleep(10000);
     }
 }

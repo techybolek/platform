@@ -56,7 +56,6 @@ public class BpelPackageManagementClient {
         uploadedFileItem.setDataHandler(dataHandler);
         uploadedFileItem.setFileName(fileName);
         uploadedFileItem.setFileType(fileType);
-
         return uploadedFileItem;
     }
 

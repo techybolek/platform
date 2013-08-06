@@ -35,10 +35,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class BpelInstanceManagerClient {
+public class BpelInstanceManagementClient {
     String ServiceEndPoint = null;
     String SessionCookie = null;
-    private static final Log log = LogFactory.getLog(BpelInstanceManagerClient.class);
+    private static final Log log = LogFactory.getLog(BpelInstanceManagementClient.class);
 
     InstanceManagementServiceStub instanceManagementServiceStub = null;
 
@@ -49,7 +49,7 @@ public class BpelInstanceManagerClient {
      * @param serviceEndPoint the string to display.  If the text is null,
      *                        the tool tip is turned off for this component.
      */
-    public BpelInstanceManagerClient(String serviceEndPoint, String sessionCookie) {
+    public BpelInstanceManagementClient(String serviceEndPoint, String sessionCookie) {
         this.ServiceEndPoint = serviceEndPoint;
         this.SessionCookie = sessionCookie;
     }
