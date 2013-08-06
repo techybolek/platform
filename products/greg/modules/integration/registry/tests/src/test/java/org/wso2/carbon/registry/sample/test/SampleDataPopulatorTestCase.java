@@ -85,7 +85,7 @@ public class SampleDataPopulatorTestCase {
             if (osName.startsWith("Windows")) {
                 p = runTime.exec("cmd.exe /C ant -f " + location + (command != null ? " " + command : ""), null);
             } else {
-                p = runTime.exec("mkdir ant -f " + location + (command != null ? " " + command : ""), null);
+                p = runTime.exec("ant -f " + location + (command != null ? " " + command : ""), null);
             }
             // Print ant output.
             System.out.println(printOutput(p));
