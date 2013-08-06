@@ -34,7 +34,7 @@ public class AppFactoryTenantMgtServiceClient {
     TenantMgtAdminServiceStub stub;
 
     public AppFactoryTenantMgtServiceClient(String serverURL, String username, String password) throws Exception {
-        String epr = serverURL + "/services/AppFactoryTenantMgtAdminService";
+        String epr = serverURL + "/services/TenantMgtAdminService";
         try {
            /* client=new ServiceClient(Util.getConfigurationContextService().getClientConfigContext(),null);
             client.getOptions().setTo(new EndpointReference(epr));
