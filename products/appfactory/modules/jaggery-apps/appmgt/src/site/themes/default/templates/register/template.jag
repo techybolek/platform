@@ -4,26 +4,24 @@
 
 
     function doSubmit() {
-    
-    	
-    	
-    	
-            jagg.post("../blocks/application/users/add/ajax/add.jag", { 
-            		action:"createUserAccount",
+            jagg.post("../blocks/register/ajax/register.jag", {
+            		action:"registerOrganization",
             		firstName:$("#firstName").attr('value'),
             		lastName:$("#lastName").attr('value'),
             		email:$("#email").attr('value'),
-            		userName:$("#email").attr('value'),
-            		password:$("#password").attr('value')
+    adminUsername:$("#adminUsername").attr('value'),
+    adminPassword:$("#password").attr('value') ,
+    organizationDomain:$("#domainName").attr('value'),
+    usagePlan:'Demo'
               },
               function (result) {
-		jagg.message({content:'You have successfully registered to WSO2 AppFactory.Please check your mail to continue.',type:'info',cbk:function(){
+		jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
             		window.location.href = "index.jag";
      			}
 		});        
               },
               function (jqXHR, textStatus, errorThrown) {
-                  jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted. Please check your mail to continue.',type:'info', cbk:function(){
+                  jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted.',type:'info', cbk:function(){
             		window.location.href = "index.jag";
                   	}
                   });
@@ -57,7 +55,7 @@
             });
 		$('#registerForm').validate({
 			submitHandler: function(form) {
-				validateEmail();
+				doSubmit();
 		   	}
 		});
     });
@@ -85,6 +83,10 @@
                                 <form method='post' name="inputData" class='right_label hold' id='registerForm'>
                                   <fieldset>
                                         <div class="input_row">
+                                            <label for="domainName" ><strong>Domain Name</strong> <em>*</em></label>
+                                            <input type="text" id="domainName" name="domainName" class="required" />
+                                        </div>
+                                        <div class="input_row">
                                          	<label for="firstName" ><strong>First Name</strong> <em>*</em></label>
                                             <input type="text" id="firstName" name="firstName" class="required" />
                                         </div>
@@ -95,10 +97,15 @@
                                         </div>
 
                                         <div class="input_row">
-                                         	<label for="email"><strong>Email</strong> <em>*</em></label>
-                                            <input type="text" id="email" name="email" class="required email" />
-                                            <p class="note">Please make sure that you provide a valid Email address. This address will be use to validate your account</p>
+                                         	<label for="adminUsername"><strong>Admin Username</strong> <em>*</em></label>
+                                            <input type="text" id="adminUsername" name="adminUsername" class="required" />
+                                            <p class="note">Please make sure that you provide a valid username</p>
                                         </div>
+                                      <div class="input_row">
+                                          <label for="email"><strong>Email</strong> <em>*</em></label>
+                                          <input type="text" id="email" name="email" class="required email" />
+                                          <p class="note">Please make sure that you provide a valid Email address. This address will be use to validate your account</p>
+                                      </div>
 
                                         <div class="input_row">
                                          	<label for="password"><strong>Password</strong> <em>*</em></label>
@@ -120,7 +127,7 @@
                                   </fieldset>
 
                                  <div class="buttonrow">
-                                    <input id="submitbtn" type='submit' value='Create My Account' class='btn btn-primary' />
+                                    <input id="submitbtn" type='submit' value='Create My Organization' class='btn btn-primary' />
                                      <a href="javascript:location.href='index.jag'">Cancel</a>
                                 </div>
 

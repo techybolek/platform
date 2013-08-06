@@ -1,0 +1,8 @@
+<%
+jagg.module("register", {
+
+registerOrganization:function () {
+return jagg.require(jagg.getModulesDir() + "register/register.jag").registerOrganization.apply(this, arguments);
+}
+});
+%>

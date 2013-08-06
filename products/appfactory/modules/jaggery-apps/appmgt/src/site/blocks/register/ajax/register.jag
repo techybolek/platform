@@ -1,0 +1,36 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+(function () {
+var mod, obj, result,
+action = request.getParameter("action"),
+site = require("/site/conf/site.json");
+
+if (action == "registerOrganization") {
+mod = jagg.module("register");
+var organizationDomain = request.getParameter("organizationDomain");
+var adminUsername = request.getParameter("adminUsername");
+var firstName = request.getParameter("firstName");
+var lastName = request.getParameter("lastName");
+var email = request.getParameter("email");
+var adminPassword = request.getParameter("adminPassword");
+var usagePlan = request.getParameter("usagePlan");
+try {
+var result = mod.registerOrganization(organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan);
+
+if (result != null) {
+print(result);
+} else {
+throw "Error while registering an organization "+organizationDomain;
+}
+} catch(e) {
+throw "Error while registering an organization "+organizationDomain;
+}
+
+}else {
+throw new Error("No action specified");
+}
+
+}());
+%>

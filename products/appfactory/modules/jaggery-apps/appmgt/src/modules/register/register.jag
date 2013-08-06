@@ -1,0 +1,48 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+include("/jagg/config_reader.jag");
+
+var log = new Log();
+
+
+var registerOrganization = function (organizationDomain,adminUsername,adminPassword, firstName,lastName,email,usagePlan) {
+
+
+var ws = require("ws");
+var creatTenant = new ws.WSRequest();
+var options = new Array();
+options.useSOAP = 1.1;
+options.action = "http://wso2.org/process";
+
+var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
+    '<admin xmlns="http://wso2.org/bps/sample">'+adminUsername+'</admin>'+
+    '<firstName xmlns="http://wso2.org/bps/sample">'+firstName+'</firstName>'+
+    '<lastName xmlns="http://wso2.org/bps/sample">'+lastName+'</lastName>'+
+    '<adminPassword xmlns="http://wso2.org/bps/sample">'+adminPassword+'</adminPassword>'+
+    '<tenantDomain xmlns="http://wso2.org/bps/sample">'+organizationDomain+'</tenantDomain>'+
+    '<email xmlns="http://wso2.org/bps/sample">'+email+'</email>'+
+    '<active xmlns="http://wso2.org/bps/sample">true</active>'+
+    '<successKey xmlns="http://wso2.org/bps/sample">key</successKey>'+
+    '<createdDate xmlns="http://wso2.org/bps/sample">2001-12-31T12:00:00</createdDate>'+
+    '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 Stratos Manager</originatedService>'+
+    '<usagePlan xmlns="http://wso2.org/bps/sample">'+usagePlan+'</usagePlan>'+
+    '</p:CreateTenantRequest>';
+
+
+log.info("[Test log] paylod deployTaggedArtifact----------------" + payload);
+
+var result;
+try {
+var endPoint = getProperty(APPFACTORY_SERVER_URL) + "CreateTenant";
+creatTenant.open(options,endPoint, false);
+creatTenant.send(payload);
+result = creatTenant.responseE4X;
+
+return result;
+} catch (e) {
+log.error("Error while registering organization " + organizationDomain + " : " + e.message);
+throw "Error while registering organization " + organizationDomain;
+}
+};
+%>
