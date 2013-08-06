@@ -119,7 +119,8 @@
 				<DisplayName>Role</DisplayName>
 				<AttributeID>role</AttributeID>
 				<Description>Role</Description>
-	            <SupportedByDefault />
+	            		<SupportedByDefault />
+				<ReadOnly />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/postalcode</ClaimURI>
