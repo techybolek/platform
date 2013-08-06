@@ -28,6 +28,8 @@
     String undeployAll = request.getParameter("redeployAll");
     String hostName = request.getParameter("hostName");
     String httpPort = request.getParameter("httpPort");
+    String webappType = request.getParameter("webappType");
+
     int pageNumberInt = 0;
     if (pageNumber != null) {
         pageNumberInt = Integer.parseInt(pageNumber);
@@ -76,7 +78,7 @@
 <script>
     location.href = '<%= redirectPage %>?pageNumber=<%=pageNumberInt%>&webappFileName=<%= webappFileNames[0]%>'
                      <% if (hostName != null && httpPort != null) { %>
-            + '&hostName=<%= hostName %>&httpPort=<%= httpPort %>'
+            + '&hostName=<%= hostName %>&httpPort=<%= httpPort %>&webappType=<%= webappType %>&webappState=all'
             <% } %> ;
 </script>
 

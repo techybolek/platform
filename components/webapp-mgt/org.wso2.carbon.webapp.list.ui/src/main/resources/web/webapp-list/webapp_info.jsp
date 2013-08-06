@@ -154,7 +154,7 @@
         CARBON.showConfirmationDialog("<fmt:message key="start.selected.webapps.prompt"/>",
                                       function() {
                                           location.href = 'start_webapps.jsp?webappFileName=<%= webappFileName %>&redirectPage=webapp_info.jsp'
-                                                  +'&hostName=<%= hostName %>&httpPort=<%= httpPort %>';
+                                                  +'&hostName=<%= hostName %>&httpPort=<%= httpPort %>&webappType=<%= webappType %>';
                                       }
                 );
     }
@@ -271,7 +271,7 @@
                                 %>
                                 <a href="<%= urlPrefix + webapp.getContext() + servletContext + serviceListPath%>"
                                    target="_blank">
-                                    <%=webapp.getContext() + servletContext + serviceListPath%>
+                                    <%=webapp.getContext() + servletContext +serviceListPath%>
                                 </a>
                                 <%
                                     }
@@ -309,25 +309,261 @@
                             </td>
                         </tr>
                     </table>
+                    <br>
+                    <table class="styledLeft" id="operationsTable"
+                                               style="margin-left: 0px;" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th><fmt:message key="operations"/></th>
+                                            </tr>
+                                            </thead>
+                                            <% if (webapp.getStarted()) { %>
+                                            <tr>
+                                                <td>
+
+                                                    <a href="#" onclick="expireSessions()" class="icon-link"
+                                                       style='background-image:url(images/expire_timestamp.gif)'>
+                                                        <fmt:message key="expire.sessions"/>
+                                                    </a>
+                                                    <nobr>
+                                                        <form name="sessionExpiryForm" onsubmit="expireSessions();return false;" >
+                                                            <input type="hidden" name="webappFileName"
+                                                                   value="<%= webappFileName%>"/>
+                                                            <input type="hidden" name="redirectPage"
+                                                                   value="webapp_info.jsp"/>
+                                                            <input type="hidden" name="hostName"
+                                                                   value="<%= hostName %>"/>
+                                                            <input type="hidden" name="httpPort"
+                                                                   value="<%= httpPort %>"/>
+                                                            <label>
+                                                                &nbsp;<fmt:message key="with.idle"/> &ge;
+                                                                <input type="text" size="10" name="sessionExpiryTime"
+                                                                       id="idleTime"/>
+                                                                &nbsp;<fmt:message key="minutes"/>
+                                                            </label>
+                                                        </form>
+                                                    </nobr>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <a href="#" onclick="expireAllSessions()" class="icon-link"
+                                                       style='background-image:url(images/expire_session.gif)'>
+                                                        <fmt:message key="expire.all.session"/>s
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <a href="#" onclick="reloadWebapp()" class="icon-link"
+                                                       style='background-image:url(images/reload.gif)'>
+                                                        <fmt:message key="webapps.reload"/>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                                            <tr>
+                                                <td>
+                                                    <% if (webapp.getStarted()) {%>
+                                                    <a href="#" onclick="stopWebapp()" class="icon-link"
+                                                       style='background-image:url(images/stop.gif)'>
+                                                        <fmt:message key="webapps.stop"/>
+                                                    </a>
+                                                    <% } else { %>
+                                                    <a href="#" onclick="startWebapp()" class="icon-link"
+                                                       style='background-image:url(images/start.gif)'>
+                                                        <fmt:message key="webapps.start"/>
+                                                    </a>
+                                                    <% } %>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <script type="text/javascript">
+
+                                                </script>
+                                                <%--<td>--%>
+                                                            <% /* String cek = "";
+                                                                boolean checked = false;
+                                                                String webAppName = webappFileName;
+                                                                if(webappFileName.contains(".war")){
+                                                                    webAppName = webappFileName.trim().substring(0, webappFileName.length()-4);
+                                                                }
+                                                                WebappStatPublisherAdminClient adminClient = new WebappStatPublisherAdminClient(
+                                                                        cookie, backendServerURL, configContext, request.getLocale());
+
+
+                                                                try{
+
+                                                                    checked = adminClient.getWebappConfigData(webAppName);
+
+                                                                }catch (Exception e) {
+                                                                    CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+                                                                    session.setAttribute(CarbonUIMessage.ID, uiMsg);
+                                                                    e.printStackTrace();
+                                                                 }
+
+                                                                if(checked){
+                                                                    cek = "checked=\"checked\"";
+                                                                }
+                    */
+
+                                                    %>
+                                             <%--       <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" >  Enable BAM Statistics--%>
+                                               <%-- </td>--%>
+                                            </tr>
+                                             <%
+                                        if(CarbonUIUtil.isContextRegistered(config, "/urlmapper/")){ %>
+                                             <tr>
+                                               <td width="50%"><nobr>
+                                            <a class="icon-link" style="background-image: url(images/url-rewrite.png);"
+                        href="../urlmapper/index.jsp?carbonEndpoint=<%=webapp.getContext()%>&apptype=<%=webappType%>&servletContext=<%=servletContext%>">
+                                                URL Mappings
+                                            </a></nobr>
+                                        </td>
+                                            </tr>
+                                               <%
+
+                                       			 }
+                               				   %>
+                                            <tr>
+                                        </table>
+                                        <br>
+                                        <%   if(CarbonUIUtil.isContextRegistered(config, "/bampubsvcstat/") && webapp.getStarted()) { %>
+                                        <table class="styledLeft" id="serviceTable"
+                                               style="margin-left: 0px;" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th><fmt:message key="services"/></th>
+                                            </tr>
+                                            </thead>
+                                            <tr>
+                                                <script type="text/javascript">
+
+                                                </script>
+                                                <td>
+
+                                                    <%  String cek = "";
+                                                        boolean checked = false;
+                                                        String webAppName = webappFileName;
+                                                        WebappAdminClient adminClient = new WebappAdminClient(
+                                                                cookie, backendServerURL, configContext, request.getLocale());
+
+
+                                                        try{
+
+                                                            checked = adminClient.getBamConfig(webAppName);
+
+                                                        }catch (Exception e) {
+                                                            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+                                                            session.setAttribute(CarbonUIMessage.ID, uiMsg);
+                                                            e.printStackTrace();
+                                                        }
+
+                                                        if(checked){
+                                                            cek = "checked=\"checked\"";
+                                                        }
+
+
+                                                    %>
+                                                    <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" <%= cek %>>  Enable BAM Statistics
+
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <% } else { %>
+                                        &nbsp;
+                                        <% } %>
+
+                    <br>
+                    <%   if(CarbonUIUtil.isContextRegistered(config, "/statistics/")){ %>
+
+                                        <div id="result"></div>
+                                        <div id="statsDiv" >
+                                            <script type="text/javascript" src="../statistics/js/statistics.js"></script>
+                                            <script type="text/javascript" src="../statistics/js/graphs.js"></script>
+
+                                            <script type="text/javascript" src="../admin/js/jquery.flot.js"></script>
+                                            <script type="text/javascript" src="../admin/js/excanvas.js"></script>
+                                            <script type="text/javascript" src="global-params.js"></script>
+                                            <script type="text/javascript">
+                                                initResponseTimeGraph('50');
+                                            </script>
+                                            <script type="text/javascript">
+                                                jQuery.noConflict();
+                                                var refresh;
+                                                function refreshStats() {
+                                                    var url = "../statistics/webapplication_stats_ajaxprocessor.jsp?webAppNameName=<%=  webappFileName %>";
+                                                    try {
+                                                        jQuery("#result").load(url, null, function (responseText, status, XMLHttpRequest) {
+                                                            if (status != "success") {
+                                                                stopRefreshStats();
+                                                                document.getElementById('result').innerHTML = responseText;
+                                                            }
+                                                        });
+                                                    } catch (e){} // ignored
+                                                }
+                                                function stopRefreshStats() {
+                                                    if (refresh) {
+                                                        clearInterval(refresh);
+                                                    }
+                                                }
+                                                try {
+                                                    jQuery(document).ready(function() {
+                                                        refreshStats();
+                                                        if (document.getElementById('statsDiv').style.display == ''){
+                                                            refresh = setInterval("refreshStats()", 6000);
+                                                        }
+                                                    });
+                                                } catch (e){} // ignored
+                                            </script>
+                                        </div>
+
+
+                                        <%
+
+                                            }
+                                            else {
+                                        %>
+                                        &nbsp;
+
+                                        <%
+
+                                            }
+                                        %>
+
                 </td>
 
                 <td width="10px">&nbsp;</td>
 
 
                             <% if (webappType.equalsIgnoreCase("JaxWebapp") && wsdlURLS != null) { %>
+
                 <%--<td width="10px">&nbsp;</td>--%>
 
                 <td width="50%">
-                    <table class="styledLeft" id="wsClientTable"
+                        <table class="styledLeft" id="wsClientTable"
                            style="margin-left: 0px;" width="100%">
                         <thead>
                         <tr>
                             <th colspan="3"><fmt:message key="availableWS"/></th>
                         </tr>
                         </thead>
+
+                        <% for(int i=0;i<wsdlURLS.size();i++){%>
+                        <tr>
+                            <td colspan="2" align="left">
+
+                              <%
+                                String wsdlURL = wsdlURLS.get(i).toString();
+                                String serviceName = wsdlURL.substring( wsdlURL.indexOf(servletContext) , wsdlURL.indexOf("?wsdl") );
+                              %>
+                              <strong>Service:</strong><%= " "+serviceName%>
+                            </td>
+                        </tr>
                         <tr>
                             <td>
-                                <a href="#" onclick="validateAndSubmitTryit('<%=wsdlURLS.get(0)%>')" class="icon-link"
+                                <a href="#" onclick="validateAndSubmitTryit('<%=wsdlURLS.get(i)%>')" class="icon-link"
                                    style='background-image:url(images/tryit.gif)'>
                                     <fmt:message key="tryit"/>
                                 </a>
@@ -335,7 +571,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <a href="../wsdl2code/index.jsp?generateClient=<%=wsdlURLS.get(0)%>&toppage=false&resultType=cxf&api=jaxws" class="icon-link"
+                                <a href="../wsdl2code/index.jsp?generateClient=<%=wsdlURLS.get(i)%>&toppage=false&resultType=cxf&api=jaxws" class="icon-link"
                                    style='background-image:url(images/genclient.gif)'>
                                     <fmt:message key="generate.jaxws.client"/>
                                 </a>
@@ -343,14 +579,11 @@
                         </tr>
                         <tr>
                             <td width="50%">
-                                <a href="<%=wsdlURLS.get(0)%>" class="icon-link"
+                                <a href="<%=wsdlURLS.get(i)%>" class="icon-link"
                                    style="background-image:url(images/wsdl.gif);" target="_blank">
                                     WSDL1.1
                                 </a>
                             </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">&nbsp;</td>
                         </tr>
                         <tr>
                             <td colspan="2" align="left">
@@ -360,15 +593,23 @@
                         <tr>
                             <td>
                                 <%
-                                    String wsdlURL = wsdlURLS.get(0).toString();
+                                    //String wsdlURL = wsdlURLS.get(i).toString();
                                     String jaxWSEpr = wsdlURL.substring( 0, wsdlURL.indexOf("?wsdl") );
                                 %>
                                 <%=jaxWSEpr%>
                             </td>
                         </tr>
+                        <tr>
+                            <td colspan="1">&nbsp;</td>
+                        </tr>
+                        <% }%>
                     </table>
+
+
                 </td>
-                        <% } %>
+                 <% } %>
+
+
                         <% if (webappType.equalsIgnoreCase("JaxWebapp") && wadlURLS != null) { %>
                 <%--<td width="10px">&nbsp;</td>--%>
 
@@ -380,9 +621,21 @@
                             <th colspan="3"><fmt:message key="availableRS"/></th>
                         </tr>
                         </thead>
+
+                         <% for(int i=0;i<wadlURLS.size();i++){%>
+                         <tr>
+                                                     <td colspan="2" align="left">
+
+                                                       <%
+                                                         String wadlURL = wadlURLS.get(i).toString();
+                                                         String JAXRSServiceName = wadlURL.substring( wadlURL.indexOf(servletContext) , wadlURL.indexOf("?_wadl") );
+                                                       %>
+                                                       <strong>Service:</strong><%= " "+JAXRSServiceName%>
+                                                     </td>
+                         </tr>
                         <tr>
                             <td>
-                                <a href="../wsdl2code/index.jsp?generateClient=<%=wadlURLS.get(0)%>&toppage=false&resultType=cxf&api=jaxrs" class="icon-link"
+                                <a href="../wsdl2code/index.jsp?generateClient=<%=wadlURLS.get(i)%>&toppage=false&resultType=cxf&api=jaxrs" class="icon-link"
                                    style='background-image:url(images/genclient.gif)'>
                                     <fmt:message key="generate.jaxrs.client"/>
                                 </a>
@@ -390,7 +643,7 @@
                         </tr>
                         <tr>
                             <td width="50%">
-                                <a href="<%=wadlURLS.get(0)%>" class="icon-link"
+                                <a href="<%=wadlURLS.get(i)%>" class="icon-link"
                                    style="background-image:url(images/wsdl.gif);" target="_blank">
                                     WADL
                                 </a>
@@ -403,9 +656,6 @@
                                 <%--</td>--%>
                         </tr>
                         <tr>
-                            <td colspan="2">&nbsp;</td>
-                        </tr>
-                        <tr>
                             <td colspan="2" align="left">
                                 <strong><fmt:message key="endpoints"/></strong>
                             </td>
@@ -413,12 +663,16 @@
                         <tr>
                             <td>
                                 <%
-                                    String wadlURL = wadlURLS.get(0).toString();
+                                    //String wadlURL = wadlURLS.get(i).toString();
                                     String jaxRSEpr = wadlURL.substring( 0, wadlURL.indexOf("?_wadl") );
                                 %>
                                 <%=jaxRSEpr%>
                             </td>
                         </tr>
+                        <tr>
+                            <td colspan="1">&nbsp;</td>
+                        </tr>
+                        <%}%>
                     </table>
                 </td>
             <%}%>
@@ -483,240 +737,8 @@
                 </table>
                 </td>
                 <%}%>
-
-
             </tr>
-            <tr>
-                <td colspan="3">&nbsp;</td>
-            </tr>
-            <tr>
-                <td width="50%">
 
-                    <table class="styledLeft" id="operationsTable"
-                           style="margin-left: 0px;" width="100%">
-                        <thead>
-                        <tr>
-                            <th><fmt:message key="operations"/></th>
-                        </tr>
-                        </thead>
-                        <% if (webapp.getStarted()) { %>
-                        <tr>
-                            <td>
-
-                                <a href="#" onclick="expireSessions()" class="icon-link"
-                                   style='background-image:url(images/expire_timestamp.gif)'>
-                                    <fmt:message key="expire.sessions"/>
-                                </a>
-                                <nobr>
-                                    <form name="sessionExpiryForm" onsubmit="expireSessions();return false;" >
-                                        <input type="hidden" name="webappFileName"
-                                               value="<%= webappFileName%>"/>
-                                        <input type="hidden" name="redirectPage"
-                                               value="webapp_info.jsp"/>
-                                        <input type="hidden" name="hostName"
-                                               value="<%= hostName %>"/>
-                                        <input type="hidden" name="httpPort"
-                                               value="<%= httpPort %>"/>
-                                        <label>
-                                            &nbsp;<fmt:message key="with.idle"/> &ge;
-                                            <input type="text" size="10" name="sessionExpiryTime"
-                                                   id="idleTime"/>
-                                            &nbsp;<fmt:message key="minutes"/>
-                                        </label>
-                                    </form>
-                                </nobr>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#" onclick="expireAllSessions()" class="icon-link"
-                                   style='background-image:url(images/expire_session.gif)'>
-                                    <fmt:message key="expire.all.session"/>s
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#" onclick="reloadWebapp()" class="icon-link"
-                                   style='background-image:url(images/reload.gif)'>
-                                    <fmt:message key="webapps.reload"/>
-                                </a>
-                            </td>
-                        </tr>
-                        <% } %>
-                        <tr>
-                            <td>
-                                <% if (webapp.getStarted()) {%>
-                                <a href="#" onclick="stopWebapp()" class="icon-link"
-                                   style='background-image:url(images/stop.gif)'>
-                                    <fmt:message key="webapps.stop"/>
-                                </a>
-                                <% } else { %>
-                                <a href="#" onclick="startWebapp()" class="icon-link"
-                                   style='background-image:url(images/start.gif)'>
-                                    <fmt:message key="webapps.start"/>
-                                </a>
-                                <% } %>
-                            </td>
-                        </tr>
-                        <tr>
-                            <script type="text/javascript">
-
-                            </script>
-                            <%--<td>--%>
-                                        <% /* String cek = "";
-                                            boolean checked = false;
-                                            String webAppName = webappFileName;
-                                            if(webappFileName.contains(".war")){
-                                                webAppName = webappFileName.trim().substring(0, webappFileName.length()-4);
-                                            }
-                                            WebappStatPublisherAdminClient adminClient = new WebappStatPublisherAdminClient(
-                                                    cookie, backendServerURL, configContext, request.getLocale());
-
-
-                                            try{
-
-                                                checked = adminClient.getWebappConfigData(webAppName);
-
-                                            }catch (Exception e) {
-                                                CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-                                                session.setAttribute(CarbonUIMessage.ID, uiMsg);
-                                                e.printStackTrace();
-                                             }
-
-                                            if(checked){
-                                                cek = "checked=\"checked\"";
-                                            }
-*/
-
-                                %>
-                         <%--       <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" >  Enable BAM Statistics--%>
-                           <%-- </td>--%>
-                        </tr>
-                         <%
-                    if(CarbonUIUtil.isContextRegistered(config, "/urlmapper/")){ %>
-                         <tr>
-                           <td width="50%"><nobr>
-                        <a class="icon-link" style="background-image: url(images/url-rewrite.png);"
-    href="../urlmapper/index.jsp?carbonEndpoint=<%=webapp.getContext()%>&apptype=<%=webappType%>&servletContext=<%=servletContext%>">
-                            URL Mappings
-                        </a></nobr>
-                    </td>
-                        </tr>
-                           <%
-
-                   			 }
-           				   %>
-                        <tr>
-                    </table>
-                    <br>
-                    <%   if(CarbonUIUtil.isContextRegistered(config, "/bampubsvcstat/") && webapp.getStarted()) { %>
-                    <table class="styledLeft" id="serviceTable"
-                           style="margin-left: 0px;" width="100%">
-                        <thead>
-                        <tr>
-                            <th><fmt:message key="services"/></th>
-                        </tr>
-                        </thead>
-                        <tr>
-                            <script type="text/javascript">
-
-                            </script>
-                            <td>
-
-                                <%  String cek = "";
-                                    boolean checked = false;
-                                    String webAppName = webappFileName;
-                                    WebappAdminClient adminClient = new WebappAdminClient(
-                                            cookie, backendServerURL, configContext, request.getLocale());
-
-
-                                    try{
-
-                                        checked = adminClient.getBamConfig(webAppName);
-
-                                    }catch (Exception e) {
-                                        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-                                        session.setAttribute(CarbonUIMessage.ID, uiMsg);
-                                        e.printStackTrace();
-                                    }
-
-                                    if(checked){
-                                        cek = "checked=\"checked\"";
-                                    }
-
-
-                                %>
-                                <input type="checkbox" name="bam_stats" value="1" id="bam_statistics" class="bam_statistics" <%= cek %>>  Enable BAM Statistics
-
-
-                            </td>
-                        </tr>
-                    </table>
-                    <% } else { %>
-                    &nbsp;
-                    <% } %>
-
-                </td>
-                <td width="10px">&nbsp;</td>
-                <td>
-                    <%   if(CarbonUIUtil.isContextRegistered(config, "/statistics/")){ %>
-
-                    <div id="result"></div>
-                    <div id="statsDiv" >
-                        <script type="text/javascript" src="../statistics/js/statistics.js"></script>
-                        <script type="text/javascript" src="../statistics/js/graphs.js"></script>
-
-                        <script type="text/javascript" src="../admin/js/jquery.flot.js"></script>
-                        <script type="text/javascript" src="../admin/js/excanvas.js"></script>
-                        <script type="text/javascript" src="global-params.js"></script>
-                        <script type="text/javascript">
-                            initResponseTimeGraph('50');
-                        </script>
-                        <script type="text/javascript">
-                            jQuery.noConflict();
-                            var refresh;
-                            function refreshStats() {
-                                var url = "../statistics/webapplication_stats_ajaxprocessor.jsp?webAppNameName=<%=  webappFileName %>";
-                                try {
-                                    jQuery("#result").load(url, null, function (responseText, status, XMLHttpRequest) {
-                                        if (status != "success") {
-                                            stopRefreshStats();
-                                            document.getElementById('result').innerHTML = responseText;
-                                        }
-                                    });
-                                } catch (e){} // ignored
-                            }
-                            function stopRefreshStats() {
-                                if (refresh) {
-                                    clearInterval(refresh);
-                                }
-                            }
-                            try {
-                                jQuery(document).ready(function() {
-                                    refreshStats();
-                                    if (document.getElementById('statsDiv').style.display == ''){
-                                        refresh = setInterval("refreshStats()", 6000);
-                                    }
-                                });
-                            } catch (e){} // ignored
-                        </script>
-                    </div>
-
-
-                    <%
-
-                        }
-                        else {
-                    %>
-                    &nbsp;
-
-                    <%
-
-                        }
-                    %>
-                </td>
-            </tr>
         </table>
 
 
