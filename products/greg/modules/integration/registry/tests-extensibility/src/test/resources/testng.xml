@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="GregTestSuite">
+    <parameter name="useDefaultListeners" value="false"/>
+    <test name="Test - GREG" preserve-order="true" parallel="false">
+        <packages>
+            <package name="org.wso2.carbon.registry.xpath.query.test"/>
+            <package name="org.wso2.carbon.registry.utfsupport.test"/>
+            <package name="org.wso2.carbon.registry.discovery.test"/>
+            <package name="org.wso2.carbon.registry.reporting.test"/>
+        </packages>
+
+
+        <classes>
+        </classes>
+    </test>
+</suite>
