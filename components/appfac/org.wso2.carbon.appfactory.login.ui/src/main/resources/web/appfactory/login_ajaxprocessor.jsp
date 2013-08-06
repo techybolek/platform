@@ -23,7 +23,7 @@
 
 <%@ page import="org.wso2.carbon.appfactory.login.config.ServiceReferenceHolder" %>
 <%@ page import="org.wso2.carbon.appfactory.common.AppFactoryConstants" %>
-<%@ page import="org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProviderConstants" %>
+<%@ page import="org.wso2.carbon.identity.sso.saml.common.SAMLSSOProviderConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.stratos.identity.saml2.sso.mgt.ui.Util" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
