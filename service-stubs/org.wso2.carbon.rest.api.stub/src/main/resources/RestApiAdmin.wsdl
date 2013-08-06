@@ -176,6 +176,13 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+         <xs:element name="deleteSelectedApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="apiNames" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
             <xs:element name="deleteApiForTenant">
                 <xs:complexType>
                     <xs:sequence>
@@ -205,6 +212,11 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+         <xs:element name="deleteAllApi">
+            <xs:complexType>
+               <xs:sequence></xs:sequence>
+            </xs:complexType>
+         </xs:element>
             <xs:element name="addApiFromString">
                 <xs:complexType>
                     <xs:sequence>
@@ -308,6 +320,9 @@
     <wsdl:message name="getResourceSourceResponse">
         <wsdl:part name="parameters" element="ns1:getResourceSourceResponse"/>
     </wsdl:message>
+   <wsdl:message name="deleteSelectedApiRequest">
+      <wsdl:part name="parameters" element="ns1:deleteSelectedApi"></wsdl:part>
+   </wsdl:message>
     <wsdl:message name="addApiRequest">
         <wsdl:part name="parameters" element="ns1:addApi"/>
     </wsdl:message>
@@ -320,6 +335,9 @@
     <wsdl:message name="deleteApiResponse">
         <wsdl:part name="parameters" element="ns1:deleteApiResponse"/>
     </wsdl:message>
+   <wsdl:message name="deleteAllApiRequest">
+      <wsdl:part name="parameters" element="ns1:deleteAllApi"></wsdl:part>
+   </wsdl:message>
     <wsdl:message name="getAPICountRequest">
         <wsdl:part name="parameters" element="ns1:getAPICount"/>
     </wsdl:message>
@@ -405,6 +423,10 @@
             <wsdl:input message="tns:getResourceSourceRequest" wsaw:Action="urn:getResourceSource"/>
             <wsdl:output message="tns:getResourceSourceResponse" wsaw:Action="urn:getResourceSourceResponse"/>
         </wsdl:operation>
+      <wsdl:operation name="deleteSelectedApi">
+         <wsdl:input message="tns:deleteSelectedApiRequest" wsaw:Action="urn:deleteSelectedApi"/>
+         <wsdl:fault message="tns:RestApiAdminAPIException" name="RestApiAdminAPIException" wsaw:Action="urn:deleteSelectedApiRestApiAdminAPIException"/>
+      </wsdl:operation>
         <wsdl:operation name="addApi">
             <wsdl:input message="tns:addApiRequest" wsaw:Action="urn:addApi"/>
             <wsdl:output message="tns:addApiResponse" wsaw:Action="urn:addApiResponse"/>
@@ -415,6 +437,10 @@
             <wsdl:output message="tns:deleteApiResponse" wsaw:Action="urn:deleteApiResponse"/>
             <wsdl:fault message="tns:RestApiAdminAPIException" name="RestApiAdminAPIException" wsaw:Action="urn:deleteApiRestApiAdminAPIException"/>
         </wsdl:operation>
+      <wsdl:operation name="deleteAllApi">
+         <wsdl:input message="tns:deleteAllApiRequest" wsaw:Action="urn:deleteAllApi"/>
+         <wsdl:fault message="tns:RestApiAdminAPIException" name="RestApiAdminAPIException" wsaw:Action="urn:deleteAllApiRestApiAdminAPIException"/>
+      </wsdl:operation>
         <wsdl:operation name="getAPICount">
             <wsdl:input message="tns:getAPICountRequest" wsaw:Action="urn:getAPICount"/>
             <wsdl:output message="tns:getAPICountResponse" wsaw:Action="urn:getAPICountResponse"/>
@@ -510,6 +536,15 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+      <wsdl:operation name="deleteSelectedApi">
+         <soap:operation soapAction="urn:deleteSelectedApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:fault name="RestApiAdminAPIException">
+            <soap:fault use="literal" name="RestApiAdminAPIException"></soap:fault>
+         </wsdl:fault>
+      </wsdl:operation>
         <wsdl:operation name="addApi">
             <soap:operation soapAction="urn:addApi" style="document"/>
             <wsdl:input>
@@ -534,6 +569,15 @@
                 <soap:fault use="literal" name="RestApiAdminAPIException"/>
             </wsdl:fault>
         </wsdl:operation>
+      <wsdl:operation name="deleteAllApi">
+         <soap:operation soapAction="urn:deleteAllApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:fault name="RestApiAdminAPIException">
+            <soap:fault use="literal" name="RestApiAdminAPIException"></soap:fault>
+         </wsdl:fault>
+      </wsdl:operation>
         <wsdl:operation name="getApiSource">
             <soap:operation soapAction="urn:getApiSource" style="document"/>
             <wsdl:input>
@@ -696,6 +740,15 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+      <wsdl:operation name="deleteSelectedApi">
+         <soap12:operation soapAction="urn:deleteSelectedApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:fault name="RestApiAdminAPIException">
+            <soap12:fault use="literal" name="RestApiAdminAPIException"></soap12:fault>
+         </wsdl:fault>
+      </wsdl:operation>
         <wsdl:operation name="addApi">
             <soap12:operation soapAction="urn:addApi" style="document"/>
             <wsdl:input>
@@ -720,6 +773,15 @@
                 <soap12:fault use="literal" name="RestApiAdminAPIException"/>
             </wsdl:fault>
         </wsdl:operation>
+      <wsdl:operation name="deleteAllApi">
+         <soap12:operation soapAction="urn:deleteAllApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:fault name="RestApiAdminAPIException">
+            <soap12:fault use="literal" name="RestApiAdminAPIException"></soap12:fault>
+         </wsdl:fault>
+      </wsdl:operation>
         <wsdl:operation name="getApiSource">
             <soap12:operation soapAction="urn:getApiSource" style="document"/>
             <wsdl:input>
@@ -876,6 +938,12 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
+      <wsdl:operation name="deleteSelectedApi">
+         <http:operation location="deleteSelectedApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
         <wsdl:operation name="addApi">
             <http:operation location="addApi"/>
             <wsdl:input>
@@ -894,6 +962,12 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
+      <wsdl:operation name="deleteAllApi">
+         <http:operation location="deleteAllApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
         <wsdl:operation name="getApiSource">
             <http:operation location="getApiSource"/>
             <wsdl:input>
