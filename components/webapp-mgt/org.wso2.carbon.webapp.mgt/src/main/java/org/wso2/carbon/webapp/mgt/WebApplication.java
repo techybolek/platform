@@ -226,9 +226,7 @@ public class WebApplication {
         try {
             bamEnable = getBamEnableFromWebappMetaData();
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Unable to get bam enable from web app meta data.");
-    }
+            log.error("Unable to get bam enable from web app meta data.", e);
         }
         reloaded = reload(context);
 
@@ -269,9 +267,7 @@ public class WebApplication {
             tomcatGenericWebappsDeployer.setPersistedWebappMetaData(getWebappFile().getName(), WebappsConstants.ENABLE_BAM_STATISTICS, value);
             reload();
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Unable to persist data - bam enable");
-            }
+            log.error("Unable to persist data - bam enable",e);
         }
     }
 

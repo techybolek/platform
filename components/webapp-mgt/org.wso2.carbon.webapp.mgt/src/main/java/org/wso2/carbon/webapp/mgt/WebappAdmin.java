@@ -532,9 +532,7 @@ public class WebappAdmin extends AbstractAdmin {
         try {
             return getWebappsHolder().getStartedWebapps().get(webappFileName).getBamEnableFromWebappMetaData();
         } catch (Exception e) {
-            if(log.isDebugEnabled()) {
-                log.debug("Unable to read bam configurations");
-            }
+            log.error("Unable to read bam configurations",e);
             return null;
         }
     }
