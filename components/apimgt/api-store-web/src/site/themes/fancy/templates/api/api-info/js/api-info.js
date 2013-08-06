@@ -67,14 +67,26 @@ $(document).ready(function () {
     $("select[name='tiers-list']").change(function() {
         var selectedIndex = document.getElementById('tiers-list').selectedIndex;
         var api = jagg.api;
-        var tierDescription = api.tierDescription;
-        var tierDescList = tierDescription.split(",");
-        for (var i = 0; i < tierDescList.length; i++) {
-            var tierDesc = tierDescList[i];
+        var tiers = api.tiers;
+        for (var i = 0; i < tiers.length; i++) {
+            var tierDesc = tiers[i].tierDescription;
+            var tierAttrs=tiers[i].tierAttributes;
             if (selectedIndex == i) {
-                if (tierDesc != "null") {
+                if (tierDesc != null) {
                     $("#tierDesc").text(tierDesc);
+                }if(tierAttrs!=null){
+                    var tierAttr=tierAttrs.split(',')
+                    for(var k=0;k<tierAttr.length;k++){
+                        var tierAttrName=tierAttr[k].split("::")[0];
+                        var tierAttrValue=tierAttr[k].split("::")[1];
+                        if(tierAttrName!='' && tierAttrValue!=''){
+                        $('#tierDesc').append("<br/><span><b>"+tierAttrName+"<b>  :    "+tierAttrValue+"</span>");
+                        }
+                    }
+
                 }
+
+
             }
         }
 
