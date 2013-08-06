@@ -297,7 +297,9 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
     }
 
     private boolean isInsideAnotherApp(String path) {
-        if (path != null && path.endsWith(".war")) {
+        //Exclude CApps
+        boolean fromCApp = path.contains("carbonapps");
+        if (path != null && path.endsWith(".war") && !fromCApp) {
             String base = path.substring(0, path.lastIndexOf(File.separator));
             int index = base.lastIndexOf(File.separator) + 1;
             String baseName = base.substring(index);
