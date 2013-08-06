@@ -11,15 +11,15 @@
 
     <test name="Server Stratup" preserve-order="true" verbose="2">
         <classes>
-           <!-- <class name="org.wso2.carbon.esb.ServerStartupTestCase"/>-->
+            <!-- <class name="org.wso2.carbon.esb.ServerStartupTestCase"/>-->
         </classes>
     </test>
     <test name="Rest Test" preserve-order="true" verbose="2">
         <packages>
-           <!-- <package name="org.wso2.carbon.bps.bpelactivities"/>
+            <package name="org.wso2.carbon.bps.bpelactivities"/>
             <package name="org.wso2.carbon.bps.managescenarios"/>
-          <package name="org.wso2.carbon.bps.mgtstructuredactivities"/>-->
-           <package name="org.wso2.carbon.bps.uploadscenarios"/>
+            <package name="org.wso2.carbon.bps.mgtstructuredactivities"/>
+            <package name="org.wso2.carbon.bps.uploadscenarios"/>
         </packages>
     </test>
 
