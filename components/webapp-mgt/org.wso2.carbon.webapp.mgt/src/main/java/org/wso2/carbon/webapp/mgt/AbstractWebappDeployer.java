@@ -151,6 +151,13 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
 
         } catch (Exception e) {
             String msg = "Error occurred while deploying webapp : " + deploymentFileData.getFile().getAbsolutePath();
+            // removing faulty artifacts deployed by CApps
+            if (deploymentFileData.getAbsolutePath().contains("carbonapps")) {
+                String failedArtifact = deploymentFileData.getFile().getName();
+                WebApplicationsHolder webappsHolder = (WebApplicationsHolder) configContext.
+                        getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
+                webappsHolder.getFaultyWebapps().remove(failedArtifact);
+            }
             log.error(msg, e);
             throw new DeploymentException(msg, e);
         }
