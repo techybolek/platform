@@ -64,7 +64,9 @@ public class WebappAgentUtil {
         eventData = addStatisticEventData(webappStatEventData, eventData);
         metaData = addStatisticsMetaData(webappStatEventData, metaData);
 
-        metaData = addPropertiesAsMetaData(eventingConfigData, metaData);
+        if(eventingConfigData != null) {
+            metaData = addPropertiesAsMetaData(eventingConfigData, metaData);
+        }
 
         WebappStatEvent publishEvent = new WebappStatEvent();
         publishEvent.setCorrelationData(correlationData);

@@ -117,9 +117,10 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         * if any of those becomes false next valve is invoked and exit from executing further.
         */
         String serverRoot = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
-        boolean isMgtConsoleRequest = requestURI.startsWith(serverRoot) || requestURI.startsWith("/carbon");
+        boolean isMgtConsoleRequest = ((!serverRoot.equals("/") && requestURI.startsWith(serverRoot)) || requestURI.startsWith("/carbon"));
+        boolean isThemeRepoUrl = requestURI.contains("/_system/governance/repository/theme/");
         boolean isTenantPublishingEnabled = WebappAgentUtil.getPublishingEnabled() && webappStatsEnable;
-        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico")) || isMgtConsoleRequest) {
+        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico")) || isMgtConsoleRequest || isThemeRepoUrl) {
             return;
         }
 
