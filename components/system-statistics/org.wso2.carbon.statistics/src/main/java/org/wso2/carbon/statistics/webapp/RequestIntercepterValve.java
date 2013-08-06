@@ -24,6 +24,7 @@ import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.statistics.webapp.data.StatisticData;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -36,6 +37,10 @@ public class RequestIntercepterValve extends ValveBase {
 
     @Override
     public void invoke(Request request, Response response) throws IOException, ServletException {
+
+        if(CarbonUtils.isWorkerNode()){
+            return;
+        }
 
         Long startTime = System.currentTimeMillis();
 
