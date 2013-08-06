@@ -34,6 +34,11 @@
   </description>
 </property>
 <property>
+  <name>dfs.permissions.supergroup</name>
+  <value>admin</value>
+  <description>The name of the group of super-users.</description>
+</property>
+<property>
   <name>dfs.umaskmode</name>
   <value>026</value>
 </property>
