@@ -81,8 +81,29 @@ public class ClassloadingContextBuilder {
 
             //Webapp is not specified a custom custom classloading behaviour, hence defualts to the system values.
             webappClassloadingContext.setParentFirst(classloadingConfig.isParentFirst());
-            webappClassloadingContext.setDelegatedPackages(
-                    classloadingConfig.getDelegatedEnvironment(LoaderConstants.SYSTEM_ENV));
+            if(classloadingConfig.getEnvironments().length > 0){
+                List<String> delegatedPackageList = new ArrayList<String>();
+                for(String env : classloadingConfig.getEnvironments()){
+                    String[] packs = classloadingConfig.getDelegatedEnvironment(env);
+                    if(packs != null && packs.length > 0){
+                        for(String pkg : packs){
+                            delegatedPackageList.add(pkg);
+                        }
+                    }
+                }
+
+                webappClassloadingContext.setDelegatedPackages(delegatedPackageList.toArray(new String[delegatedPackageList.size()]));
+                if(delegatedPackageList.size() == 0){
+                    webappClassloadingContext.setDelegatedPackages(
+                            classloadingConfig.getDelegatedEnvironment(LoaderConstants.SYSTEM_ENV));
+                }
+
+
+            } else {
+                webappClassloadingContext.setDelegatedPackages(
+                        classloadingConfig.getDelegatedEnvironment(LoaderConstants.SYSTEM_ENV));
+            }
+
             webappClassloadingContext.setProvidedRepositories(new String[0]);
             return webappClassloadingContext;
         }
