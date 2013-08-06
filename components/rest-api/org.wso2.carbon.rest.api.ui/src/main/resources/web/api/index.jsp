@@ -224,6 +224,100 @@
     function searchSequence() {
         document.searchForm.submit();
     }
+
+    function loadApiAfterBulkDeletion(){
+        window.location.href = "index.jsp?pageNumber=<%=pageNumber%>";
+    }
+    function deleteServices() {
+        var selected = false;
+        if (document.servicesForm.apiGroups[0] != null) { // there is more than 1 APIs
+            for (var j = 0; j < document.servicesForm.apiGroups.length; j++) {
+                selected = document.servicesForm.apiGroups[j].checked;
+                if (selected) break;
+            }
+        }
+
+        else if (document.servicesForm.apiGroups != null) { // only 1 API
+            selected = document.servicesForm.apiGroups.checked;
+        }
+        if (!selected) {
+            CARBON.showInfoDialog('<fmt:message key="select.api.to.be.deleted"/>');
+            return;
+        }
+        if (allServicesSelected) {
+            CARBON.showConfirmationDialog("<fmt:message key="delete.api.on.all.prompt"/>", function() {
+                $.ajax({
+                    type: 'POST',
+                    url: 'delete_api_ajaxprocessor.jsp',
+                    data: 'deleteAllApiGroups=true',
+                    success: function(msg) {
+                        loadApiAfterBulkDeletion();
+                    }
+                });
+            });
+        } else {
+
+            var apiGroupsString = '';
+            jQuery('.chkBox').each(function(index) {
+                if(this.checked) {
+                    apiGroupsString += this.value + ':';
+                }
+            });
+
+            CARBON.showConfirmationDialog("<fmt:message key="delete.api.on.page.prompt"/>",function() {
+                $.ajax({
+                    type: 'POST',
+                    url: 'delete_api_ajaxprocessor.jsp',
+                    data: 'apiGroupsString='+ apiGroupsString,
+                    success: function(msg) {
+                        loadApiAfterBulkDeletion();
+                    }
+                });
+            });
+        }
+    }
+
+    function selectAllInThisPage(isSelected) {
+        allServicesSelected = false;
+        if (document.servicesForm.apiGroups != null &&
+                document.servicesForm.apiGroups[0] != null) { // there is more than 1 API
+            if (isSelected) {
+                for (var j = 0; j < document.servicesForm.apiGroups.length; j++) {
+                    document.servicesForm.apiGroups[j].checked = true;
+                }
+            } else {
+                for (j = 0; j < document.servicesForm.apiGroups.length; j++) {
+                    document.servicesForm.apiGroups[j].checked = false;
+                }
+            }
+        } else if (document.servicesForm.apiGroups != null) { // only 1 API
+            document.document.servicesForm.apiGroups.checked = isSelected;
+        }
+        return false;
+    }
+
+    function selectAllInAllPages() {
+        selectAllInThisPage(true);
+        allServicesSelected = true;
+        return false;
+    }
+
+    function resetVars() {
+        allServicesSelected = false;
+        var isSelected = false;
+        if (document.servicesForm.apiGroups[0] != null) { // there is more than 1 API
+            for (var j = 0; j < document.servicesForm.apiGroups.length; j++) {
+                if (document.servicesForm.apiGroups[j].checked) {
+                    isSelected = true;
+                }
+            }
+        } else if (document.servicesForm.apiGroups != null) { // only 1 API
+            if (document.servicesForm.apiGroups.checked) {
+                isSelected = true;
+            }
+        }
+        return false;
+    }
 </script>
 <%
     }
@@ -279,9 +373,23 @@
                       resourceBundle="org.wso2.carbon.rest.api.ui.i18n.Resources"
                       prevKey="prev" nextKey="next"
                       parameters="<%=""%>"/>
+    <br/>
+    <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
+                              selectAllFunction="selectAllInAllPages()"
+                              selectNoneFunction="selectAllInThisPage(false)"
+                              addRemoveFunction="deleteServices()"
+                              addRemoveButtonId="delete2"
+                              resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
+                              selectAllInPageKey="selectAllInPage"
+                              selectAllKey="selectAll"
+                              selectNoneKey="selectNone"
+                              addRemoveKey="delete"
+                              numberOfPages="<%=numberOfPages%>"/>
+    <br/>
     <table class="styledLeft" id="sgTable" width="100%">
         <thead>
         <tr>
+            <th><fmt:message key="api.select"/></th>
         	<th><fmt:message key="api.name"/></th>
         	<th><fmt:message key="api.invocation.url"/></th>
         	<th colspan="2"><fmt:message key="apis.table.action.header"/></th>
@@ -302,6 +410,12 @@
         <tr bgcolor="<%=bgColor%>">
                     <% if (loggedIn) {%>
                     <% } %>
+            <td width="10px" style="text-align:center; !important">
+                <input type="checkbox" name="apiGroups"
+                       value="<%=apiData.getName()%>"
+                       onclick="resetVars()" class="chkBox"/>
+                &nbsp;
+            </td>
             <td width="100px">
                 <nobr>
                     <%=apiData.getName()%>
@@ -329,6 +443,19 @@
         %>
         </tbody>
     </table>
+    <br/>
+    <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
+                              selectAllFunction="selectAllInAllPages()"
+                              selectNoneFunction="selectAllInThisPage(false)"
+                              addRemoveFunction="deleteServices()"
+                              addRemoveButtonId="delete2"
+                              resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
+                              selectAllInPageKey="selectAllInPage"
+                              selectAllKey="selectAll"
+                              selectNoneKey="selectNone"
+                              addRemoveKey="delete"
+                              numberOfPages="<%=numberOfPages%>"/>
+    <br/>
     <carbon:paginator pageNumber="<%=pageNumber%>"
                       numberOfPages="<%=numberOfPages%>"
                       page="index.jsp"

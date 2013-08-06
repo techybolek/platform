@@ -277,4 +277,21 @@ public class RestApiAdminClient {
         log.error(msg, e);
         throw new AxisFault(msg, e);
     }
+
+    public void deleteSelectedApi(String[] apiNames)throws  AxisFault{
+        try {
+            stub.deleteSelectedApi(apiNames);
+        } catch (Exception e){
+            handleException(bundle.getString("could.not.selected.delete.api"),e);
+        }
+    }
+
+    public void deleteAllApi()throws AxisFault{
+        try {
+            stub.deleteAllApi();
+        }
+        catch (Exception e){
+            handleException(bundle.getString("could.not.All.delete.api"),e);
+        }
+    }
 }
