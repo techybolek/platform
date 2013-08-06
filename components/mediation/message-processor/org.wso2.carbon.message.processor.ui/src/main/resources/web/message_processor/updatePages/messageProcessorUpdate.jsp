@@ -7,6 +7,7 @@
     String provider = request.getParameter("Provider");
     String store = request.getParameter("MessageStore");
     String params = request.getParameter("tableParams");
+    String targetEndpoint = request.getParameter("TargetEndpoint");
 
     if (params != null) {
         params = params.trim();
@@ -23,6 +24,7 @@
         } else {
             messageProcessorXml.append("<messageProcessor name=\"");
             messageProcessorXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim()).
+                    append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim()).
                     append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\"" + " ").
                     append("xmlns=\"").append(SYNAPSE_NS).append("\">");
         }
@@ -48,5 +50,6 @@
     session.setAttribute("name", name);
     session.setAttribute("provider", provider);
     session.setAttribute("store", store);
+    session.setAttribute("targetEndpoint", targetEndpoint);
 
 %>

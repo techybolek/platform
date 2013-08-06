@@ -333,7 +333,7 @@
                        class="icon-link"
                        style="background-image:url(../message_processor/images/envelop.gif);"><fmt:message
                         key="view.envelope"/></a>
-                    <%if (!messageStoreName.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                    <%if (!messageStoreName.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")) { %>
                     <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex)"
                        id="delete_link" class="icon-link"
                        style="background-image:url(../message_processor/images/delete_22.gif);"><fmt:message
@@ -354,7 +354,7 @@
             %>
             <tr>
                 <td>
-                    <%if (messageStoreName.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")) { %>
+                    <%if (messageStoreName.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")) { %>
                     <a onclick="<%=(messageIds == null || messageIds.length == 0)?"return false":"deleteFirst();"%>"
                        href="#" id="delete_first_link"
                        class="<%=(messageIds == null || messageIds.length == 0)?"icon-link-disabled":"icon-link"%>"

@@ -39,6 +39,8 @@ public class MessageProcessorData {
 
     private String clazz;
 
+    private String targetEndpoint;
+
     private String messageStore;
 
     private Map<String, String> params = new HashMap<String, String>();
@@ -91,6 +93,12 @@ public class MessageProcessorData {
             this.name = attElem.getAttributeValue();
         }
 
+        attElem = elem.getAttribute(MessageProcessorFactory.TARGET_ENDPOINT_Q);
+
+        if (attElem != null) {
+            this.targetEndpoint = attElem.getAttributeValue();
+        }
+
         attElem = elem.getAttribute(MessageProcessorFactory.MESSAGE_STORE_Q);
 
         if (attElem != null) {
@@ -112,4 +120,11 @@ public class MessageProcessorData {
 
     }
 
+    public String getTargetEndpoint() {
+        return targetEndpoint;
+    }
+
+    public void setTargetEndpoint(String targetSequence) {
+        this.targetEndpoint = targetSequence;
+    }
 }

@@ -45,6 +45,7 @@
     private String getMessageStoreXML() throws Exception {
 
         String name = req.getParameter("Name").trim();
+        String targetEndpoint = req.getParameter("TargetEndpoint");
         String provider = req.getParameter("Provider");
         String store = req.getParameter("MessageStore");
         String addedParams = req.getParameter("addedParams");
@@ -82,6 +83,7 @@
             } else {
                 messageStoreXml.append("<ns1:messageProcessor name=\"");
                 messageStoreXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim()).
+                        append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim()).
                         append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\""+" ").
                         append(" xmlns:ns1=\"").append(SYNAPSE_NS).append("\">");
             }

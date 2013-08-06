@@ -83,6 +83,12 @@
             return false;
         }
 
+        if (IsEmpty(form.TargetEndpoint)) {
+            CARBON.showWarningDialog('<fmt:message key="endpoint.field.cannot.be.empty"/>')
+            form.TargetEndpoint.focus();
+            return false;
+        }
+
         return true;
     }
 
@@ -104,6 +110,7 @@
 
     function addServiceParams() {
         addServiceParameter("interval", document.getElementById('retry_interval').value);
+        addServiceParameter("client.retry.interval", document.getElementById('client_retry_interval').value);
         addServiceParameter("max.delivery.attempts", document.getElementById('max_delivery_attempts').value);
         addServiceParameter("axis2.repo", document.getElementById('axis2_repo').value);
         addServiceParameter("axis2.config", document.getElementById('axis2_config').value);
@@ -149,7 +156,7 @@
             return false;
         }
         addServiceParams();
-        var messageStoreStr = {Name : document.getElementById("Name").value, Provider : document.getElementById("Provider").value, MessageStore : document.getElementById("MessageStore").value, tableParams : document.getElementById("tableParams").value};
+        var messageStoreStr = {Name : document.getElementById("Name").value, TargetEndpoint : document.getElementById("TargetEndpoint").value, Provider : document.getElementById("Provider").value, MessageStore : document.getElementById("MessageStore").value, tableParams : document.getElementById("tableParams").value};
         jQuery.ajax({
             type: 'POST',
             url: 'updatePages/messageProcessorUpdate.jsp',
@@ -216,6 +223,7 @@
             new MessageStoreAdminServiceClient(cookie, url, configContext);
 
     String[] messageStores = messageStoreClient.getMessageStoreNames();
+    String[] definedEndpoints = client.getDefinedEndpoints();
 
 
 %>
@@ -271,12 +279,41 @@
                     <td><input id="Name" type="text" size="60" name="Name" value=""/></td>
                 </tr>
                 <%}%>
+                <%if (processorData != null) {%>
+                <tr>
+
+                    <td width="276px"><fmt:message key="target.endpoint"/><span class="required"> *</span></td>
+                    <td>
+                        <input id="TargetEndpoint" name="TargetEndpoint" type="hidden"
+                               value="<%=processorData.getTargetEndpoint()%>"/>
+                        <label for="Name"><%=processorData.getTargetEndpoint()%>
+                        </label>
+                    </td>
+                </tr>
+                <%} else { %>
+                <tr>
+                    <td width="276px"><fmt:message key="target.endpoint"/><span class="required"> *</span></td>
+                    <td>
+                        <select id="TargetEndpoint" name="TargetEndpoint">
+                            <%if (definedEndpoints != null && definedEndpoints.length > 0) {
+                                for (String dep : definedEndpoints) {%>
+                                    <option selected="true" value="<%=dep%>"><%=dep%>
+                                    </option>
+                                <%}
+                            } else { %>
+                                    <option selected="true" value="">[No endpoint defined]
+                                    </option>
+                            <%}%>
+                        </select>
+                    </td>
+                </tr>
+                <%}%>
                 <%if ((processorData != null)) { %>
                 <tr>
                     <td><fmt:message key="provider"/><span class="required"> *</span></td>
                     <td>
                         <input name="Provider" id="Provider" type="hidden"
-                               value="org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor"/>
+                               value="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"/>
                         <%
                             String providerLabel = "Scheduled Message Forwarding Processor";
                         %>
@@ -287,7 +324,7 @@
                 </tr>
                 <%} else {%>
                 <input id="Provider" name="Provider" type="hidden"
-                       value="org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor"/>
+                       value="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"/>
                 <%}%>
                 <%if ((processorData != null)) { %>
                 <tr>
@@ -339,6 +376,15 @@
                         <td><input type="text" id="retry_interval" name="retry_interval"
                                    value="<%=((null!=processorData)&& processorData.getParams() != null
                                         && !processorData.getParams().isEmpty()&&(processorData.getParams().get("interval")!=null))?processorData.getParams().get("interval"):"1000"%>"
+                                />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="client.retry.interval"/></td>
+                        <td><input type="text" id="client_retry_interval" name="client_retry_interval"
+                                   value="<%=((null!=processorData)&& processorData.getParams() != null
+                                        && !processorData.getParams().isEmpty()&&(processorData.getParams().get("client.retry.interval")!=null))?processorData.getParams()
+                                        .get("client.retry.interval"):"1000"%>"
                                 />
                         </td>
                     </tr>

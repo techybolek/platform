@@ -304,7 +304,14 @@ public class MessageProcessorAdminServiceClient {
         return new String[0];
     }
 
-
+    public String[] getDefinedEndpoints() throws Exception {
+        try {
+            return stub.getDefinedEndpoints();
+        } catch (Exception e) {
+            handleException(e);
+            return null;
+        }
+    }
 
     public boolean isActive(String name) throws Exception {
 

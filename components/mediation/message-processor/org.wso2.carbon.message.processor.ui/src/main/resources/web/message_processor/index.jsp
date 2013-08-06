@@ -247,7 +247,7 @@
                     type = client.getClassName(name);
 
                     if (type != null) {
-                        if ("org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor".
+                        if ("org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor".
                                 equals(type.trim())) {
                             type = "Scheduled Message Forwarding Processor";
                         } else if ("org.apache.synapse.message.processors.sampler.SamplingProcessor".

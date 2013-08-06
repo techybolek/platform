@@ -335,7 +335,7 @@
                             String providerClass = client.getClassName(messageStoreName);
                             String providerLabel = "Not Available";
 
-                            if("org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor".
+                            if("org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor".
                                     equals(providerClass.trim())) {
                                 providerLabel = "Scheduled Message Forwarding Processor";
                             } else if ("org.apache.synapse.message.processors.sampler.SamplingProcessor".
@@ -356,7 +356,7 @@
                     <td><fmt:message key="provider"/><span class="required">*</span></td>
                     <td>
                         <select name="Provider" onChange="javascript:showHideCustomInput(this)">
-                            <option selected="true" value="org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor" onclick="showHideCustomInput(false)">
+                            <option selected="true" value="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor" onclick="showHideCustomInput(false)">
                                 Scheduled Message Forwarding Processor</option>
                             <option value="org.apache.synapse.message.processors.sampler.SamplingProcessor" onclick="showHideCustomInput(false)">
                                 Message Sampling Processor</option>

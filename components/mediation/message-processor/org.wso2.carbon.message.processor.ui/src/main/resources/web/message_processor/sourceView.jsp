@@ -114,7 +114,7 @@
         prettyPrintPayload = xmlPrettyPrinter.xmlFormat();
         String designViewUrl = "";
 
-        if (provider.equals("org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor")) {
+        if (provider.equals("org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor")) {
             designViewUrl = "manageMessageForwardingProcessor.jsp?origin=source";
         } else if (provider.equals("org.apache.synapse.message.processors.sampler.SamplingProcessor")) {
             designViewUrl = "manageMessageSamplingProcessor.jsp?origin=source";

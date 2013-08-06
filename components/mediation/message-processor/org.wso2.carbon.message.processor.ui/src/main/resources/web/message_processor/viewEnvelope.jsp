@@ -313,12 +313,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <%if (!(!messageIndex.trim().equals("1") && messageStoreName.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore"))) {%>
-                            <a onclick="<%=messageStoreName.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")?"deleteFirstMsg();":"deleteMsg();"%>"
+                            <%if (!(!messageIndex.trim().equals("1") && messageStoreName.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore"))) {%>
+                            <a onclick="<%=messageStoreName.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")?"deleteFirstMsg();":"deleteMsg();"%>"
                                href="#" id="delete_all_link" class="icon-link"
                                style="background-image:url(../admin/images/delete.gif);"><fmt:message
                                     key="delete"/></a>
-                            <a onclick="<%=messageStoreName.trim().equals("org.wso2.carbon.message.store.persistence.jms.JMSMessageStore")?"resendFirstMsg();":"resendMsg();"%>"
+                            <a onclick="<%=messageStoreName.trim().equals("org.apache.synapse.message.store.impl.jms.JmsStore")?"resendFirstMsg();":"resendMsg();"%>"
                                href="#" id="resend_all_link" class="icon-link"
                                style="background-image:url(../admin/images/resend.gif);"><fmt:message
                                     key="resend"/></a>
