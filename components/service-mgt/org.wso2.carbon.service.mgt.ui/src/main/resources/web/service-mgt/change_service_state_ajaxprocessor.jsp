@@ -22,11 +22,12 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 
 <fmt:bundle basename="org.wso2.carbon.service.mgt.ui.i18n.Resources">
     <%
-        String serviceName = request.getParameter("serviceName");
-        String isActive = request.getParameter("isActive");
+        String serviceName =  CharacterEncoder.getSafeText(request.getParameter("serviceName"));
+        String isActive =  CharacterEncoder.getSafeText(request.getParameter("isActive"));
         if (serviceName == null || serviceName.trim().length() == 0) {
     %>
     <p><fmt:message key="service.name.cannot.be.null"/></p>

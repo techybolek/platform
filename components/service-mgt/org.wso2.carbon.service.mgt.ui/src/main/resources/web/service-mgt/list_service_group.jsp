@@ -20,16 +20,18 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="org.wso2.carbon.service.mgt.ui.ServiceGroupAdminClient" %>
 <%@ page import="org.wso2.carbon.service.mgt.stub.types.carbon.ServiceGroupMetaData" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.service.mgt.stub.types.carbon.ServiceMetaData" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 
+
 <jsp:include page="javascript_include.jsp" />
 
 <%
-    String serviceGroupName = request.getParameter("serviceGroupName");
+    String serviceGroupName = CharacterEncoder.getSafeText(request.getParameter("serviceGroupName"));
 %>
 <script type="text/javascript">
     function createServiceArchive() {
