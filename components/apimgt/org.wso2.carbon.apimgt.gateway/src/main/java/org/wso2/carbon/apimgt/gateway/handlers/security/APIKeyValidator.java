@@ -62,22 +62,22 @@ public class APIKeyValidator {
         this.axisConfig = axisConfig;
         //check the client type from config
         String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
-        if(APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)){
+        if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
             this.dataStore = new WSAPIKeyDataStore();
-        } else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)){
+        } else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)) {
             this.dataStore = new ThriftAPIDataStore();
         }
         this.infoCache = initCache();
         this.resourceCache = initResourceCache();
-        this.isGatewayAPIKeyValidationEnabled=isAPIKeyValidationEnabled();
+        this.isGatewayAPIKeyValidationEnabled = isAPIKeyValidationEnabled();
     }
 
     protected Cache initCache() {
-       return Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache");
-       //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
+        return Caching.getCacheManager("API_MANAGER_CACHE").getCache("keyCache");
+        //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("keyCache");
     }
 
-    protected Cache initResourceCache(){
+    protected Cache initResourceCache() {
         return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RESOURCE_CACHE_NAME);
         //return PrivilegedCarbonContext.getCurrentContext(axisConfig).getCache("resourceCache");
     }
@@ -92,8 +92,8 @@ public class APIKeyValidator {
      * @throws APISecurityException If an error occurs while accessing backend services
      */
     public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey,
-                                                        String apiVersion,String authenticationScheme, String clientDomain) throws APISecurityException {
-        String cacheKey = apiKey + ":" + context + ":" + apiVersion+":"+authenticationScheme;
+                                                        String apiVersion, String authenticationScheme, String clientDomain) throws APISecurityException {
+        String cacheKey = apiKey + ":" + context + ":" + apiVersion + ":" + authenticationScheme;
         if (isGatewayAPIKeyValidationEnabled) {
             APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) infoCache.get(cacheKey);
             if (info != null) {
@@ -103,29 +103,29 @@ public class APIKeyValidator {
 
 
         //synchronized (apiKey.intern()) {
-            // We synchronize on the API key here to allow concurrent processing
-            // of different API keys - However when a burst of requests with the
-            // same key is encountered, only one will be allowed to execute the logic,
-            // and the rest will pick the value from the cache.
-            //   info = (APIKeyValidationInfoDTO) infoCache.get(cacheKey);
-            // if (info != null) {
-            //   return info;
-            //}
-            APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, apiVersion, apiKey,authenticationScheme, clientDomain);
-            if (info != null) {
-                if (isGatewayAPIKeyValidationEnabled && clientDomain == null) { //save into cache only if, validation is correct and api is allowed for all domains
-                    infoCache.put(cacheKey, info);
-                }
-                return info;
-            } else {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                        "API key validator returned null");
+        // We synchronize on the API key here to allow concurrent processing
+        // of different API keys - However when a burst of requests with the
+        // same key is encountered, only one will be allowed to execute the logic,
+        // and the rest will pick the value from the cache.
+        //   info = (APIKeyValidationInfoDTO) infoCache.get(cacheKey);
+        // if (info != null) {
+        //   return info;
+        //}
+        APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, apiVersion, apiKey, authenticationScheme, clientDomain);
+        if (info != null) {
+            if (isGatewayAPIKeyValidationEnabled && clientDomain == null) { //save into cache only if, validation is correct and api is allowed for all domains
+                infoCache.put(cacheKey, info);
             }
+            return info;
+        } else {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "API key validator returned null");
+        }
         //}
     }
 
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion,
-                                                             String apiKey,String authenticationScheme, String clientDomain) throws APISecurityException {
+                                                             String apiKey, String authenticationScheme, String clientDomain) throws APISecurityException {
 
         return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme, clientDomain);
     }
@@ -146,40 +146,39 @@ public class APIKeyValidator {
     }
 
     public String getResourceAuthenticationScheme(String context, String apiVersion,
-                                                  String requestPath, String httpMethod){
+                                                  String requestPath, String httpMethod) {
 
         String cacheKey = context + ":" + apiVersion;
         APIInfoDTO apiInfoDTO = null;
         if (isGatewayAPIKeyValidationEnabled) {
-            apiInfoDTO = (APIInfoDTO)resourceCache.get(cacheKey);
+            apiInfoDTO = (APIInfoDTO) resourceCache.get(cacheKey);
         }
 
-        if(apiInfoDTO == null){
+        if (apiInfoDTO == null) {
             apiInfoDTO = doGetAPIInfo(context, apiVersion);
             resourceCache.put(cacheKey, apiInfoDTO);
         }
 
         //Match the case where the direct api context is matched
-        if("/".equals(requestPath)){
+        if ("/".equals(requestPath)) {
             String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
 
             //Get decision from cache.
-            VerbInfoDTO matchingVerb=null;
+            VerbInfoDTO matchingVerb = null;
             if (isGatewayAPIKeyValidationEnabled) {
-            matchingVerb= (VerbInfoDTO)resourceCache.get(requestCacheKey);
+                matchingVerb = (VerbInfoDTO) resourceCache.get(requestCacheKey);
             }
             //On a cache hit
-            if(matchingVerb != null){
+            if (matchingVerb != null) {
                 return matchingVerb.getAuthType();
-            }
-            else{
-                for(ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()){
+            } else {
+                for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
                     String urlPattern = resourceInfoDTO.getUrlPattern();
 
                     //If the request patch is '/', it can only be matched with a resource whose url-context is '/*'
-                    if("/*".equals(urlPattern)){
-                        for(VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()){
-                            if(verbDTO.getHttpVerb().equals(httpMethod)){
+                    if ("/*".equals(urlPattern)) {
+                        for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
+                            if (verbDTO.getHttpVerb().equals(httpMethod)) {
                                 //Store verb in cache
                                 resourceCache.put(requestCacheKey, verbDTO);
                                 return verbDTO.getAuthType();
@@ -193,35 +192,35 @@ public class APIKeyValidator {
         //Remove the ending '/' from request
         requestPath = RESTUtils.trimTrailingSlashes(requestPath);
 
-            while(requestPath.length() > 1){
+        while (requestPath.length() > 1) {
 
             String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
 
             //Get decision from cache.
-            VerbInfoDTO matchingVerb=null;
+            VerbInfoDTO matchingVerb = null;
             if (isGatewayAPIKeyValidationEnabled) {
-            matchingVerb= (VerbInfoDTO)resourceCache.get(requestCacheKey);
+                matchingVerb = (VerbInfoDTO) resourceCache.get(requestCacheKey);
             }
 
             //On a cache hit
-            if(matchingVerb != null){
+            if (matchingVerb != null) {
                 return matchingVerb.getAuthType();
             }
             //On a cache miss
-            else{
-                for(ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()){
+            else {
+                for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
                     String urlPattern = resourceInfoDTO.getUrlPattern();
-                    if(urlPattern.endsWith("/*")){
+                    if (urlPattern.endsWith("/*")) {
                         //Remove the ending '/*'
                         urlPattern = urlPattern.substring(0, urlPattern.length() - 2);
                     }
                     //If the urlPattern ends with a '/', remove that as well.
                     urlPattern = RESTUtils.trimTrailingSlashes(urlPattern);
 
-                    if(requestPath.endsWith(urlPattern)){
+                    if (requestPath.endsWith(urlPattern)) {
 
-                        for(VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()){
-                            if(verbDTO.getHttpVerb().equals(httpMethod)){
+                        for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
+                            if (verbDTO.getHttpVerb().equals(httpMethod)) {
                                 //Store verb in cache
                                 resourceCache.put(requestCacheKey, verbDTO);
                                 return verbDTO.getAuthType();
@@ -259,6 +258,7 @@ public class APIKeyValidator {
                     verbInfoDTO = new VerbInfoDTO();
                     verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
                     verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+                    verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
                     verbs.add(verbInfoDTO);
                     resourceInfoDTO.setHttpVerbs(verbs);
                     apiInfoDTO.getResources().add(resourceInfoDTO);
@@ -268,6 +268,7 @@ public class APIKeyValidator {
                     verbInfoDTO = new VerbInfoDTO();
                     verbInfoDTO.setHttpVerb(uriTemplate.getHTTPVerb());
                     verbInfoDTO.setAuthType(uriTemplate.getAuthType());
+                    verbInfoDTO.setThrottling(uriTemplate.getThrottlingTier());
                     HashSet<VerbInfoDTO> httpVerbs2 = new HashSet();
                     httpVerbs2.add(verbInfoDTO);
                     resourceInfoDTO.setHttpVerbs(httpVerbs2);
@@ -281,6 +282,114 @@ public class APIKeyValidator {
         }
         return apiInfoDTO;
     }
+
+
+    /**
+     * @param context     API context of API
+     * @param apiVersion  Version of API
+     * @param requestPath Incoming request path
+     * @param httpMethod  http method of request
+     * @return verbInfoDTO which contains throttling tier for given resource and verb+resource key
+     */
+    public VerbInfoDTO getVerbInfoDTOFromAPIData(String context, String apiVersion, String requestPath, String httpMethod) {
+
+        String cacheKey = context + ":" + apiVersion;
+        APIInfoDTO apiInfoDTO = null;
+        if (isGatewayAPIKeyValidationEnabled) {
+            apiInfoDTO = (APIInfoDTO) resourceCache.get(cacheKey);
+        }
+
+        if (apiInfoDTO == null) {
+            apiInfoDTO = doGetAPIInfo(context, apiVersion);
+            resourceCache.put(cacheKey, apiInfoDTO);
+        }
+
+        //Match the case where the direct api context is matched
+        if ("/".equals(requestPath)) {
+            String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
+
+            //Get decision from cache.
+            +VerbInfoDTO matchingVerb = null;
+            if (isGatewayAPIKeyValidationEnabled) {
+                matchingVerb = (VerbInfoDTO) resourceCache.get(requestCacheKey);
+            }
+            //On a cache hit
+            if (matchingVerb != null) {
+                matchingVerb.setRequestKey(requestCacheKey);
+                return matchingVerb;
+            } else {
+                for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
+                    String urlPattern = resourceInfoDTO.getUrlPattern();
+
+                    //If the request patch is '/', it can only be matched with a resource whose url-context is '/*'
+                    if ("/*".equals(urlPattern)) {
+                        for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
+                            if (verbDTO.getHttpVerb().equals(httpMethod)) {
+                                //Store verb in cache
+                                resourceCache.put(requestCacheKey, verbDTO);
+                                verbDTO.setRequestKey(requestCacheKey);
+                                return verbDTO;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //Remove the ending '/' from request
+        requestPath = RESTUtils.trimTrailingSlashes(requestPath);
+
+        while (requestPath.length() > 1) {
+
+            String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
+
+            //Get decision from cache.
+            VerbInfoDTO matchingVerb = null;
+            if (isGatewayAPIKeyValidationEnabled) {
+                matchingVerb = (VerbInfoDTO) resourceCache.get(requestCacheKey);
+            }
+
+            //On a cache hit
+            if (matchingVerb != null) {
+                matchingVerb.setRequestKey(requestCacheKey);
+                return matchingVerb;
+            }
+            //On a cache miss
+            else {
+                for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
+                    String urlPattern = resourceInfoDTO.getUrlPattern();
+                    if (urlPattern.endsWith("/*")) {
+                        //Remove the ending '/*'
+                        urlPattern = urlPattern.substring(0, urlPattern.length() - 2);
+                    }
+                    //If the urlPattern ends with a '/', remove that as well.
+                    urlPattern = RESTUtils.trimTrailingSlashes(urlPattern);
+
+                    if (requestPath.endsWith(urlPattern)) {
+
+                        for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
+                            if (verbDTO.getHttpVerb().equals(httpMethod)) {
+                                //Store verb in cache
+                                resourceCache.put(requestCacheKey, verbDTO);
+                                verbDTO.setRequestKey(requestCacheKey);
+                                return verbDTO;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            //Remove the section after the last occurrence of the '/' character
+            int index = requestPath.lastIndexOf("/");
+            requestPath = requestPath.substring(0, index <= 0 ? 0 : index);
+        }
+        //nothing found. return the highest level of security
+        return null;
+    }
+
+
+
 
     private ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
             throws APIManagementException, APISecurityException {
