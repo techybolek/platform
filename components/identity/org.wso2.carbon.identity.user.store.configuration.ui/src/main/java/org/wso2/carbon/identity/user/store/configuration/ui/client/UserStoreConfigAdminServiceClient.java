@@ -103,7 +103,7 @@ public class UserStoreConfigAdminServiceClient {
          stub.deleteUserStores(userStores);
     }
 
-    public void updateUserStore(String domain,String disabled) throws Exception {
-         stub.updateDomain(domain,disabled);
+    public void updateUserStore(String domain,String isDisabled) throws Exception {
+         stub.updateDomain(domain,isDisabled);
     }
 }
