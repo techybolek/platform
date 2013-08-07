@@ -60,7 +60,7 @@ public final class ArchiveExtractor {
                     }
 
                     File dir = new File(destination, entry.getName());
-                    if (!dir.exists() && !dir.mkdir()) {
+                    if (!dir.exists() && !dir.mkdirs()) {
                         throw new IOException("Fail to create the directory: " + dir.getAbsolutePath());
                     }
 
