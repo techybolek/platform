@@ -18,9 +18,12 @@ jagg.block("api/api-info", {
         var applications, application, i, j, lenI, lenJ, subscriptions,isRatingActivated, subscription, username, result,deniedTiers,
                 list = [],
                 api = inputs.api,
+                uriTemplates = inputs.uriTemplates,
                 discoveryURL = inputs.discoveryURL,
                 selectedAPI=null,
                 user = jagg.getUser();
+                                            var log = new Log();
+                                            log.info(uriTemplates);
 
         if (user) {
             username = user.username;
@@ -59,6 +62,7 @@ jagg.block("api/api-info", {
             "discoveryURL":discoveryURL,
             "applications":list,
             "user":user,
+            "uriTemplates":uriTemplates,
             "isRatingActivated":isRatingActivated,
             "tabs":{
                 "tabs":[
@@ -93,6 +97,19 @@ jagg.block("api/api-info", {
                                 "name":"api/swagger",
                                 "inputs": {
                                     "api":api,
+                                    "discoveryURL":discoveryURL
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "title":i18n.localize("throttling.title"),
+                        "body":[
+                            {
+                                "name":"api/throttling",
+                                "inputs": {
+                                    "api":api,
+                                    "uriTemplates":uriTemplates,
                                     "discoveryURL":discoveryURL
                                 }
                             }
