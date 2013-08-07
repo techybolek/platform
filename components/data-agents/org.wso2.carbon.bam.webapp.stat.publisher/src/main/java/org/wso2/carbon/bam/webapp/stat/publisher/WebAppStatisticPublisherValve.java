@@ -120,7 +120,8 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         boolean isMgtConsoleRequest = ((!serverRoot.equals("/") && requestURI.startsWith(serverRoot)) || requestURI.startsWith("/carbon"));
         boolean isThemeRepoUrl = requestURI.contains("/_system/governance/repository/theme/");
         boolean isTenantPublishingEnabled = WebappAgentUtil.getPublishingEnabled() && webappStatsEnable;
-        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico")) || isMgtConsoleRequest || isThemeRepoUrl) {
+        boolean requestType = checkRequestType(request,response);
+        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico")) || isMgtConsoleRequest || isThemeRepoUrl || !requestType) {
             return;
         }
 
@@ -330,6 +331,36 @@ public class WebAppStatisticPublisherValve extends ValveBase {
             ip = request.getRemoteAddr();
         }
         return ip;
+    }
+
+    private boolean checkRequestType(Request request, Response response){
+
+        String type = request.getRequest().getHeader("Accept");
+        if(type.contains("text/css")) {
+            return false;
+        } else if(type.contains("image")) {
+            return false;
+        }  else {
+            String url = request.getRequestURI();
+            String last3Character = url.substring(url.length() - 3);
+
+            if(last3Character.equalsIgnoreCase(".js")){
+                return false;
+            }
+
+            String last4Characters= url.substring(url.length() - 4);
+            String last5Characters = url.substring(url.length() - 5);
+
+            if(last4Characters.equalsIgnoreCase(".jpg") || last4Characters.equalsIgnoreCase(".png") || last4Characters.equalsIgnoreCase(".gif") ||
+                    last5Characters.equalsIgnoreCase(".jpeg") || last4Characters.equalsIgnoreCase(".css") || last4Characters.equalsIgnoreCase(".bmp") ||
+                    last4Characters.equalsIgnoreCase(".raw") || last4Characters.equalsIgnoreCase(".pam") || last4Characters.equalsIgnoreCase(".pgm") ||
+                    last4Characters.equalsIgnoreCase(".ppm") || last5Characters.equalsIgnoreCase(".tiff") ){
+                return false;
+            }
+        }
+
+
+        return true;
     }
 
 }
