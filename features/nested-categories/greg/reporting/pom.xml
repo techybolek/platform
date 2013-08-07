@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.governance.reporting.nested.category.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Registry/Repository</name>
+    <name>Reporting</name>
     <url>http://wso2.org</url>
     <description>Includes Reporting features.</description>
 

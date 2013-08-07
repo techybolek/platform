@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.governance.asset-store.nested.category.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Registry/Repository</name>
+    <name>Asset Store</name>
     <url>http://wso2.org</url>
     <description>Includes Asset Store features.</description>
 

@@ -37,9 +37,14 @@
         <module>multi-tenancy</module>
         <module>user-mgt</module>
         <module>single-sign-on</module>
-        <module>registry-repository</module>
+        <module>registry</module>
+        <module>repository</module>
         <module>monitoring</module>
         <module>styling</module>
+        <module>reporting</module>
+        <module>asset-store</module>
+        <module>governance</module>
+        <module>gadget-dashboard</module>
     </modules>
 
 
