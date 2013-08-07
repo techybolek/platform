@@ -153,7 +153,7 @@ if (dataTable) {
 
 
 
-if(result.length!=0 && result.length!=undefined){
+if(result !=null && result.length!=undefined && result.length!=0){
    print("<h3>Page Visits</h3>");
 
     var str="<table cellpadding='0' cellspacing='0' border='0' id='example' class='display altrowstable' ><thead><tr><th>Context</th><th>Count</th></tr></thead><tbody>";
