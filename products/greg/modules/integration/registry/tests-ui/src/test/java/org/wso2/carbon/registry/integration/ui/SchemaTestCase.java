@@ -39,7 +39,9 @@ public class SchemaTestCase extends GregUiIntegrationTest{
         //adding .wsdl extension to the wsdl name
         String schemaUrlNameWithExtension = schemaUrlName + ".xsd";
         schemaPage.uploadSchemaFromUrl(schemaUrl, schemaUrlName);
+        Thread.sleep(6000);
         SchemaListPage schemaListPage = new SchemaListPage(driver);
+        driver.navigate().refresh();
         schemaListPage.checkOnUploadSchema(schemaUrlNameWithExtension);
         //uploading a wsdl from a file
         String SchemaFilePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator + "artifacts" + File.separator +
@@ -49,6 +51,8 @@ public class SchemaTestCase extends GregUiIntegrationTest{
         System.out.println(SchemaFilePath);
         System.out.println(SchemaNameWithExtension);
         schemaPage.uploadSchemaFromFile(SchemaFilePath, SchemaNameWithExtension);
+        Thread.sleep(6000);
+        driver.navigate().refresh();
         schemaListPage.checkOnUploadSchema(SchemaNameWithExtension);
         driver.close();
 
@@ -56,7 +60,7 @@ public class SchemaTestCase extends GregUiIntegrationTest{
 
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {
-       // driver.quit();
+        driver.quit();
     }
 
 
