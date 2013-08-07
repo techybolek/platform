@@ -333,33 +333,27 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         return ip;
     }
 
-    private boolean checkRequestType(Request request, Response response){
+    private boolean checkRequestType(Request request, Response response) {
 
-        String type = request.getRequest().getHeader("Accept");
-        if(type.contains("text/css")) {
-            return false;
-        } else if(type.contains("image")) {
-            return false;
-        }  else {
-            String url = request.getRequestURI();
-            String last3Character = url.substring(url.length() - 3);
-
-            if(last3Character.equalsIgnoreCase(".js")){
+        String type = response.getContentType();
+        if (type != null) {
+            if (type.startsWith("text/css") || type.startsWith("application/css")) {
+                return false;
+            } else if (type.startsWith("image")) {
+                return false;
+            } else if (type.startsWith("application/javascript") || type.startsWith("text/javascript")) {
                 return false;
             }
-
-            String last4Characters= url.substring(url.length() - 4);
-            String last5Characters = url.substring(url.length() - 5);
-
-            if(last4Characters.equalsIgnoreCase(".jpg") || last4Characters.equalsIgnoreCase(".png") || last4Characters.equalsIgnoreCase(".gif") ||
-                    last5Characters.equalsIgnoreCase(".jpeg") || last4Characters.equalsIgnoreCase(".css") || last4Characters.equalsIgnoreCase(".bmp") ||
-                    last4Characters.equalsIgnoreCase(".raw") || last4Characters.equalsIgnoreCase(".pam") || last4Characters.equalsIgnoreCase(".pgm") ||
-                    last4Characters.equalsIgnoreCase(".ppm") || last5Characters.equalsIgnoreCase(".tiff") ){
-                return false;
+        } else {
+            type = request.getRequest().getHeader("Accept");
+            if (type != null) {
+                if (type.contains("text/css") || type.contains("application/css")) {
+                    return false;
+                } else if (type.contains("image")) {
+                    return false;
+                }
             }
         }
-
-
         return true;
     }
 
