@@ -19,13 +19,6 @@
 
 package org.apache.synapse.endpoints;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisOperation;
@@ -50,6 +43,13 @@ import org.apache.synapse.mediators.MediatorFaultHandler;
 import org.apache.synapse.mediators.MediatorProperty;
 import org.apache.synapse.transport.passthru.util.RelayConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 /**
  * An abstract base class for all Endpoint implementations
@@ -339,6 +339,10 @@ public abstract class AbstractEndpoint extends FaultHandler implements Endpoint,
 
     public void onChildEndpointFail(Endpoint endpoint, MessageContext synMessageContext) {
         // do nothing, the LB/FO endpoints will override this
+    }
+
+    public void executeEpTypeSpecificFunctions(MessageContext synCtx) {
+        // do nothing, the Http endpoint will override this
     }
 
     /**

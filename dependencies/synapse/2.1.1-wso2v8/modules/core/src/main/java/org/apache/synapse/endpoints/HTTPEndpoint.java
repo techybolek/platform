@@ -65,8 +65,7 @@ public class HTTPEndpoint extends AbstractEndpoint {
     }
 
     public void send(MessageContext synCtx) {
-        processUrlTemplate(synCtx);
-        processHttpMethod(synCtx);
+        executeEpTypeSpecificFunctions(synCtx);
         if (getParentEndpoint() == null && !readyToSend()) {
             // if the this leaf endpoint is too a root endpoint and is in inactive
             informFailure(synCtx, SynapseConstants.ENDPOINT_ADDRESS_NONE_READY,
@@ -74,6 +73,11 @@ public class HTTPEndpoint extends AbstractEndpoint {
         } else {
             super.send(synCtx);
         }
+    }
+
+    public void executeEpTypeSpecificFunctions(MessageContext synCtx) {
+        processUrlTemplate(synCtx);
+        processHttpMethod(synCtx);
     }
 
     private void processHttpMethod(MessageContext synCtx) {
