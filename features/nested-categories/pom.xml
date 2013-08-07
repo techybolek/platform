@@ -32,5 +32,6 @@
 
     <modules>
         <module>as</module>
+        <module>greg</module>
     </modules>
 </project>
