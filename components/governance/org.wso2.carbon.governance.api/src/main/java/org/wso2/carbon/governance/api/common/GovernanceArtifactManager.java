@@ -525,6 +525,7 @@ public class GovernanceArtifactManager {
             }
             OMNamespace namespace = OMAbstractFactory.getOMFactory().createOMNamespace(artifactElementNamespace, "");
             Map<String, HashMap> mainElementMap = new HashMap<String, HashMap>();
+            final String defaultUUID = UUID.randomUUID().toString();
             String[] attributeKeys2 = artifact.getAttributeKeys();
             if (attributeKeys2 != null) {
             	for (String aggregatedKey : attributeKeys2) {
@@ -544,8 +545,11 @@ public class GovernanceArtifactManager {
             		}
             		String[] attributeValues = artifact.getAttributes(aggregatedKey);
                     String elementName = keys[keys.length - 1];
-                    mainElementMap.get(key).put(elementName,attributeValues);
-                    
+                    if (keys.length > 1) {
+                        mainElementMap.get(key).put(elementName, attributeValues);
+                    } else {
+                        mainElementMap.get(key).put(defaultUUID, attributeValues);
+                    }
             	}
             	
             }
@@ -577,12 +581,19 @@ public class GovernanceArtifactManager {
                 			value = subpairs.getValue()[i];
                 		} catch (Exception ex) {
                 			value = null;
-                		}	
-                		
-                		OMElement subkeyElement = OMAbstractFactory.getOMFactory().createOMElement(subpairs.getKey(), namespace);
-                        OMText textElement = OMAbstractFactory.getOMFactory().createOMText(value);
-                        subkeyElement.addChild(textElement);
-                        keyElement.addChild(subkeyElement);
+                		}
+
+                        //We have defaultUUID for non '_' scenario in this case remove defaultUUID and append it to the
+                        //parent element.
+                        if (subpairs.getKey().equals(defaultUUID)) {
+                            OMText textElement = OMAbstractFactory.getOMFactory().createOMText(value);
+                            keyElement.addChild(textElement);
+                        } else {
+                            OMElement subkeyElement = OMAbstractFactory.getOMFactory().createOMElement(subpairs.getKey(), namespace);
+                            OMText textElement = OMAbstractFactory.getOMFactory().createOMText(value);
+                            subkeyElement.addChild(textElement);
+                            keyElement.addChild(subkeyElement);
+                        }
                 		
                 		a++;
                 	}
