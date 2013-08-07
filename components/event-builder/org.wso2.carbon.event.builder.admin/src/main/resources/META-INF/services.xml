@@ -1,0 +1,99 @@
+<!--
+  ~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~  WSO2 Inc. licenses this file to you under the Apache License,
+  ~  Version 2.0 (the "License"); you may not use this file except
+  ~  in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<service name="EventBuilderAdminService">
+    <transports>
+        <transport>https</transport>
+    </transports>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/robust-in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <parameter name="ServiceClass">
+        org.wso2.carbon.event.builder.admin.internal.EventBuilderAdminService
+    </parameter>
+
+    <parameter name="AuthorizationAction" locked="false">
+        /permission/admin/manage/eventBuilder
+    </parameter>
+    <operation name="getInputTransportNames">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getAllEventBuilderNames">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getAllEventBuilderConfigurations">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getMessageConfigurationProperties">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getMessageConfigurationPropertiesWithValue">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getEventBuilderConfiguration">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="addEventBuilder">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="removeEventBuilder">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getSupportedInputMappingTypes">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getEventBuilderConfigurationsFor">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getEventBuilderConfigurationXml">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="updateEventBuilderWithXml">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="updateEventBuilderWithDto">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+    <operation name="getUndeployedFileNames">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/eventBuilder
+        </parameter>
+    </operation>
+
+    <parameter name="adminService" locked="true">false</parameter>
+    <parameter name="hiddenService" locked="true">false</parameter>
+</service>
+
+
