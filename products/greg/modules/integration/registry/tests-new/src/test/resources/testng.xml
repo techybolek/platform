@@ -6,8 +6,6 @@
         <packages>
             <package name="org.wso2.carbon.registry.permission.test"/>
             <package name="org.wso2.carbon.registry.resource.test"/>
-            <package name="org.wso2.carbon.registry.xpath.query.test"/>
-            <package name="org.wso2.carbon.registry.utfsupport.test"/>
             <package name="org.wso2.carbon.registry.lifecycle.test"/>
             <package name="org.wso2.carbon.registry.mediatype.test"/>
             <package name="org.wso2.carbon.registry.governance.api.test"/>
@@ -16,8 +14,6 @@
             <package name="org.wso2.carbon.registry.version.test"/>
             <package name="org.wso2.carbon.registry.search.metadata.test"/>
             <package name="org.wso2.carbon.registry.subscription.test"/>
-            <package name="org.wso2.carbon.registry.discovery.test"/>
-            <package name="org.wso2.carbon.registry.reporting.test"/>
         </packages>
 
 
