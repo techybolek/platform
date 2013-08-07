@@ -623,7 +623,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
     }
 
     public int getNumberOfServiceGroups() throws AxisFault {
-        List<String> sgList = new ArrayList<String>();        
+        List<String> sgList = new ArrayList<String>();
         for (Iterator<AxisServiceGroup> serviceGroups = getAxisConfig().getServiceGroups();
              serviceGroups.hasNext(); ) {
             AxisServiceGroup serviceGroup = serviceGroups.next();
@@ -793,7 +793,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         }
 
         if (archiveName.indexOf(repository) != 0) {
-            archiveName = repository +"/synapse-configs/default/proxy-services/"+archiveName+".xml";
+            originalName = repository + archiveName;
         }
 
         if (log.isDebugEnabled()) {
@@ -801,7 +801,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         }
         boolean isDeleted = false;
         if (archiveName.trim().length() != 0) {
-            File file = new File(archiveName);
+            File file = new File(originalName);
             if (file.exists()) {
                 if (!((file.isDirectory() && FileManipulator.deleteDir(file)) || file
                         .delete())) {

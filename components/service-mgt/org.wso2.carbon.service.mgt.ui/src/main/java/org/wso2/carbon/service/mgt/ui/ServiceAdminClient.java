@@ -196,7 +196,6 @@ public class ServiceAdminClient {
 
     public void deleteFaultyServiceGroups(String[] fileNames) throws RemoteException {
         try {
-            stub.deleteServiceGroups(fileNames);
             stub.deleteFaultyServiceGroups(fileNames);
         } catch (RemoteException e) {
             handleException(bundle.getString("cannot.delete.faulty.service.group"), e);
