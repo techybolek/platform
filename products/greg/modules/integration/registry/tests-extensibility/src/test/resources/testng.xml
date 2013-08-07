@@ -2,11 +2,35 @@
 
 <suite name="GregTestSuite">
     <parameter name="useDefaultListeners" value="false"/>
-    <test name="Test - GREG" preserve-order="true" parallel="false">
+    <test name="Test1" preserve-order="true" parallel="false">
+        <packages>
+            <package name="org.wso2.carbon.registry.utfsupport.test"/>
+        </packages>
+
+
+        <classes>
+        </classes>
+    </test>
+    <test name="Test2" preserve-order="true" parallel="false">
         <packages>
             <package name="org.wso2.carbon.registry.xpath.query.test"/>
-            <package name="org.wso2.carbon.registry.utfsupport.test"/>
+        </packages>
+
+
+        <classes>
+        </classes>
+    </test>
+    <test name="Test3" preserve-order="true" parallel="false">
+        <packages>
             <package name="org.wso2.carbon.registry.discovery.test"/>
+        </packages>
+
+
+        <classes>
+        </classes>
+    </test>
+    <test name="Test4" preserve-order="true" parallel="false">
+        <packages>
             <package name="org.wso2.carbon.registry.reporting.test"/>
         </packages>
 
