@@ -1,0 +1,104 @@
+<service name="InputTransportAdaptorManagerAdminService">
+    <transports>
+        <transport>https</transport>
+    </transports>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/robust-in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <parameter name="ServiceClass">
+        org.wso2.carbon.input.transport.adaptor.manager.admin.internal.InputTransportAdaptorManagerAdminService
+    </parameter>
+
+    <parameter name="AuthorizationAction" locked="false">
+        /permission/admin/manage/transportAdaptorManager
+    </parameter>
+    <operation name="getInputTransportAdaptorNames">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="getAllTransportAdaptorPropertiesDto">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="addInputTransportAdaptorConfiguration">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="removeInputTransportAdaptorConfiguration">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="removeInputTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="getNotDeployedInputTransportAdaptorConfigurationFiles">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="getInputTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="editInputTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="getInputTransportAdaptorConfigurationDetails">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="getAllInputTransportAdaptorConfigurationInfo">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="getNotDeployedInputTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="editNotDeployedInputTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="disableTracing">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="enableStatistics">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="enableTracing">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <operation name="disableStatistics">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/transportAdaptorManager
+        </parameter>
+    </operation>
+    <parameter name="adminService" locked="true">false</parameter>
+    <parameter name="hiddenService" locked="true">false</parameter>
+</service>
+
+
