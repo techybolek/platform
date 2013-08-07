@@ -79,89 +79,109 @@
                             <publishArtifacts>true</publishArtifacts>
                             <publishArtifactRepository>true</publishArtifactRepository>
                             <featureArtifacts>
-  				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.core.ui.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--Application Management Feature list -->
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.webapp.mgt.server.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.databridge.datapublisher.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.application.mgt.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.jaxwsservices.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.module.mgt.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.throttle.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.rm.server.feature:${carbon.version}</featureArtifactDef>
+
+
+                                <!--Registry Feature list -->
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.system.statistics.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.event.server.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.core.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.user.profile.ui.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.server.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.oauth.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.server.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.client.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.activities.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.webdav.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.jcr.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.jcr.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.handler.configuration.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.associations.dependencies.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.community.features.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.extensions.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.ws.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.uddi.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.social.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.gadget.editor.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.gadget.editor.ui.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.lifecycle.management.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.metadata.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.notifications.configuration.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu.governance.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.social.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.profiles.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.discovery.core.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.discovery.proxy.feature:${carbon.version}</featureArtifactDef>
-                                <!--removing to fix the stratos theam from standalone mode.-->
-                                <featureArtifactDef>org.wso2.governance:org.wso2.governance.styles.feature:${pom.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.governance:org.wso2.stratos.governance.ui.feature:${stratos.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.dashboard.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.dashboard.dashboardpopulator.server.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.event.common.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.application.mgt.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.jaxwsservices.server.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.datasource.server.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.reporting.server.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.reporting.ui.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.metadata.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.event.common.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.event.server.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.task.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.reporting.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.coordination.core.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.humantask.server.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.attachment.mgt.feature:${carbon.version}</featureArtifactDef>
-                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.platform.extensions.feature:${carbon.version}</featureArtifactDef>
 
-                                <!-- Features related to Cloud governance -->
+                                <!--Repository Feature list -->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu.governance.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--Governance Feature list -->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.lifecycle.management.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.notifications.configuration.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.governance.platform.extensions.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.humantask.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.attachment.mgt.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.governance:org.wso2.stratos.governance.ui.feature:${stratos.version}</featureArtifactDef>
+
+                                <!--Asset Store Feature list -->
+                                <featureArtifactDef>org.jaggeryjs:org.jaggeryjs.feature:0.9.0.ALPHA2-wso2v4</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.core.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.interceptor.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.publisher.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.store.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.startup.publisher.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--Single Sign on Feature list -->
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.server.feature:${carbon.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--Multi tenancy Feature list -->
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}</featureArtifactDef>
-                                <!--<featureArtifactDef>org.wso2.governance:org.wso2.stratos.governance.ui.feature:${stratos.version}</featureArtifactDef>-->
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature:${stratos.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:${stratos.version}</featureArtifactDef>
-   
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}</featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.captcha.mgt.server.feature:${carbon.version}</featureArtifactDef>
 
-                                <!-- Features related to Asset Store -->
-                                <featureArtifactDef>org.jaggeryjs:org.jaggeryjs.feature:0.9.0.ALPHA2-wso2v4</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.core.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.interceptor.feature:${carbon.version}</featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.publisher.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.store.feature:${carbon.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.startup.publisher.feature:${carbon.version}</featureArtifactDef>
-                                <!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.apimgt.ui.feature:1.0.6</featureArtifactDef-->
-				
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.module.mgt.server.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.throttle.server.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature:${carbon.version}</featureArtifactDef>
-				                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.rm.server.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--Monitoring feature list -->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.databridge.datapublisher.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.system.statistics.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--User management feature list -->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.core.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.user.profile.ui.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.oauth.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.client.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--Gadget Dashboard feature list -->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.gadget.editor.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.gadget.editor.ui.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.dashboard.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.dashboard.dashboardpopulator.server.feature:${carbon.version}</featureArtifactDef>
+
+                                <!--Reporting feature list -->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.reporting.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.reporting.ui.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.reporting.feature:${carbon.version}</featureArtifactDef>
+
+
+                                <!--Greg Styles feature list -->
+                                <featureArtifactDef>org.wso2.governance:org.wso2.governance.styles.feature:${pom.version}</featureArtifactDef>
+
+                                <!--Misc feature list -->
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.datasource.server.feature:${carbon.version}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.coordination.core.feature:${carbon.version}</featureArtifactDef>
+
                             </featureArtifacts>
                         </configuration>
                     </execution>
