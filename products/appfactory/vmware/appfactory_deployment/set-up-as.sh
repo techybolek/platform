@@ -26,7 +26,7 @@ cp $resorce_dir/configs/catalina-server.xml $carbon_home/repository/conf/tomcat/
 
 cp $resorce_dir/lib/mysql-connector-java-5.1.12-bin.jar $carbon_home/repository/components/lib
 cp $resorce_dir/configs/as-wso2server.sh $carbon_home/bin
-cp $resorce_dir/lib/org.wso2.carbon.appfactory.tenant.mgt-1.0.0.jar $carbon_home/repository/components/dropins
-cp $resorce_dir/lib/org.wso2.carbon.tenant.mgt.core-2.1.0.jar  $carbon_home/repository/components/plugins/org.wso2.carbon.tenant.mgt.core_2.1.0.jar 
+#cp $resorce_dir/lib/org.wso2.carbon.appfactory.tenant.mgt-1.0.0.jar $carbon_home/repository/components/dropins
+#cp $resorce_dir/lib/org.wso2.carbon.tenant.mgt.core-2.1.0.jar  $carbon_home/repository/components/plugins/org.wso2.carbon.tenant.mgt.core_2.1.0.jar 
 
 }

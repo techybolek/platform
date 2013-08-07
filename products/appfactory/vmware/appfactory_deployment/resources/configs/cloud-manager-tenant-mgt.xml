@@ -1,6 +1,6 @@
 <!--<TenantManager class="org.wso2.carbon.user.core.tenant.JDBCTenantManager">
 </TenantManager>-->
-<TenantManager class="org.wso2.carbon.appfactory.userstore.AppFactoryTenantManager">
+<TenantManager class="org.wso2.carbon.user.core.tenant.CommonHybridLDAPTenantManager">
     <Property name="RootPartition">dc=appfactory,dc=wso2,dc=com</Property>
     <Property name="OrganizationalObjectClass">organizationalUnit</Property>
     <Property name="OrganizationalAttribute">ou</Property>
