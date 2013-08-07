@@ -40,6 +40,7 @@
         <module>tests-metadata</module>
         <module>tests-extensibility</module>
         <module>tests-jiras</module>
+        <module>tests-search-version</module>
         <module>tests-new</module>
         <module>tests-ui</module>
     </modules>
