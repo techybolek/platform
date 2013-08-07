@@ -127,6 +127,7 @@
     
     function addServiceParams() {
         addServiceParameter("interval", document.getElementById('retry_interval').value);
+        addServiceParameter("concurrency", document.getElementById('sampling_concurrency').value);
         addServiceParameter("sequence", document.getElementById('Sequence').value);
         addServiceParameter("quartz.conf", document.getElementById('quartz_conf').value);
         addServiceParameter("cronExpression", document.getElementById('cron_expression').value);
@@ -364,10 +365,18 @@
                                 key="message.sampling.processor.parameters"/></td>
                     </tr>
                     <tr>
-                        <td><fmt:message key="interval"/></td>
+                        <td><fmt:message key="sampling.interval"/></td>
                         <td><input type="text" id="retry_interval" name="retry_interval"
                                    value="<%=((null!=processorData)&& processorData.getParams() != null
                                         && !processorData.getParams().isEmpty()&&(processorData.getParams().get("interval")!=null))?processorData.getParams().get("interval"):"1000"%>"
+                                />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="sampling.concurrency"/></td>
+                        <td><input type="text" id="sampling_concurrency" name="sampling_concurrency"
+                                   value="<%=((null!=processorData)&& processorData.getParams() != null
+                                        && !processorData.getParams().isEmpty()&&(processorData.getParams().get("concurrency")!=null))?processorData.getParams().get("concurrency"):"1000"%>"
                                 />
                         </td>
                     </tr>
