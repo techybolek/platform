@@ -18,6 +18,7 @@ mkdir -p $pack_dir
 echo "Setting up ${environment} Controller........"
 /usr/bin/unzip  -q $resorce_dir/packs/wso2sc-${version}.zip -d $pack_dir
 S2_SC_HOME=$pack_dir/wso2sc-${version}
+cp $resorce_dir/configs/sc-wso2server.sh $S2_SC_HOME/bin/wso2server.sh
 cp $resorce_dir/configs/cloud-manager-user-mgt.xml $S2_SC_HOME/repository/conf/user-mgt.xml
 cat $resorce_dir/configs/cloud-manager-axis2.xml | sed -e "s@AF_HOST@$af_host_name@g" > $S2_SC_HOME/repository/conf/axis2/axis2.xml
 cp $resorce_dir/configs/${environment}-cloud-registry.xml $S2_SC_HOME/repository/conf/registry.xml

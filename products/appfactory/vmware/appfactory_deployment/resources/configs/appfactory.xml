@@ -7,7 +7,7 @@
     <!--Application creation delay in queue   -->
     <ApplicationCreatorDelay>10000</ApplicationCreatorDelay>
     <EmailSend>true</EmailSend>
-    <RegistrationLink>../appmgt/site/pages/register.jag</RegistrationLink>
+    <RegistrationLink>../../appmgt/site/pages/register.jag</RegistrationLink>
     <!--To Register in WSO2 Oxygen Tank
     <RegistrationLink>http://wso2.org/user/register</RegistrationLink-->
     <SignUpText>Sign up and start developing</SignUpText>
@@ -168,7 +168,7 @@
     <SSORelyingParty>
         <Name>WSO2 AppFactory Application Management</Name>
                 <DashboardName>WSO2 AppFactory Dashboard</DashboardName>
-        <IdentityProviderURL>https://AF_HOST/samlsso</IdentityProviderURL>
+        <IdentityProviderURL>https://AF_HOST/carbon/appfactory/login_ajaxprocessor.jsp</IdentityProviderURL>
         <KeyStorePassword>wso2carbon</KeyStorePassword>
         <IdentityKeyAlias>wso2carbon</IdentityKeyAlias>
         <KeyStoreName>${carbon.home}/repository/resources/security/wso2carbon.jks</KeyStoreName>

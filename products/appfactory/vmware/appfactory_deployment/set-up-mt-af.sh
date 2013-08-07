@@ -100,6 +100,7 @@ mkdir setup
 
  $MYSQL -uroot -proot -A -e "$SQL";
 
+find $SETUP_DIR -name .svn | xargs rm -rf
 
 
 fi
