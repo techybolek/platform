@@ -607,6 +607,11 @@ public abstract class AbstractAPIManager implements APIManager {
         throw new APIManagementException(msg, e);
     }
 
+    protected void handleException(String msg) throws APIManagementException {
+        log.error(msg);
+        throw new APIManagementException(msg);
+    }
+
 
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
         return apiMgtDAO.isAccessTokenExists(accessToken);

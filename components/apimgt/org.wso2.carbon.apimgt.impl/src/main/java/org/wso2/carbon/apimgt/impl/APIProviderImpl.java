@@ -7,6 +7,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.synapse.SynapseConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -667,10 +668,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "--" + api.getId().getApiName());
             apiMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
             apiMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
-            if (api.getTransports()!=null) {
-                String transport = api.getTransports().replace(",", " ");
-                apiMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, transport);
-            }
+            validateTransports(api, apiMappings);
             builder = new BasicTemplateBuilder(apiMappings);
         } else {
             builder = getTemplateBuilder(api);
@@ -681,6 +679,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayManager.publishToGateway(api, builder, tenantDomain);
         } catch (Exception e) {
             handleException("Error while publishing to Gateway ", e);
+        }
+    }
+
+    private void validateTransports(API api, Map<String, String> apiMappings) throws APIManagementException {
+        if (api.getTransports().contains(",")) {
+            List<String> transports = new ArrayList<String>(Arrays.asList(api.getTransports().split(",")));
+            if(transports.contains(Constants.TRANSPORT_HTTP) && transports.contains(Constants.TRANSPORT_HTTPS)){
+                apiMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, "");
+            }else{
+                handleException("Unsupported Transport Exception");
+            }
+        }else{
+            apiMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, api.getTransports());
         }
     }
 
@@ -721,10 +732,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                  "--" + api.getId().getApiName());
         testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
         testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
-        if (api.getTransports() != null) {
-            String transport = api.getTransports().replace(",", " ");
-            testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, transport);
-        }
+
+        validateTransports(api, testAPIMappings);
 
         if (api.getUriTemplates() == null || api.getUriTemplates().size() == 0) {
             throw new APIManagementException("At least one resource is required");
