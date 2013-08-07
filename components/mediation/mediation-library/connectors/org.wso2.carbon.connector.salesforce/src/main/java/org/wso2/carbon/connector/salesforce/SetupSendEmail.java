@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.mediation.library.connectors.salesforce;
+package org.wso2.carbon.connector.salesforce;
 
 import java.util.Iterator;
 
