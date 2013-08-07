@@ -82,6 +82,7 @@ public class LifeCycleUtils {
         Service service;
         service = serviceManager.newService(new QName(nameSpace, serviceName));
         service.addAttribute("overview_version", version);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         serviceManager.addService(service);
         for (String serviceId : serviceManager.getAllServiceIds()) {
             service = serviceManager.getService(serviceId);

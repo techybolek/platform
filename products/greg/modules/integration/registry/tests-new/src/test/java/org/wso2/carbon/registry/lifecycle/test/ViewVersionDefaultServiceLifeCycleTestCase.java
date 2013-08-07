@@ -32,11 +32,13 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.services.ArrayOfString;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.lifecycle.test.utils.LifeCycleUtils;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -100,9 +102,10 @@ public class ViewVersionDefaultServiceLifeCycleTestCase {
 
     @Test(groups = "wso2.greg", description = "Test Service Version After Promoting",
           dependsOnMethods = "testDependencyVersions")
-    public void testServiceVersion() throws GovernanceException {
+    public void testServiceVersion() throws RegistryException {
         ServiceManager serviceManager = new ServiceManager(governance);
         Service[] service;
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         service = serviceManager.getAllServices();
 
         Boolean versionIsSet = false;
@@ -114,22 +117,21 @@ public class ViewVersionDefaultServiceLifeCycleTestCase {
 
         }
         assertTrue(versionIsSet, "versionIsSet is not set");
-
-
     }
 
 
     @Test(groups = "wso2.greg", description = "Test Service Changes",
           dependsOnMethods = "testServiceVersion")
-    public void testServiceChanged() throws GovernanceException {
+    public void testServiceChanged() throws RegistryException {
         ServiceManager serviceManager = new ServiceManager(governance);
         Service[] service;
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         service = serviceManager.getAllServices();
         for (Service s : service) {
             if (s.getAttribute("overview_version").equalsIgnoreCase("2.0.0")) {
                 s.setAttribute("overview_version", "3.0.0");
                 s.addAttribute("overview_description", "This is a Description");
-                serviceManager.addService(s);
+                serviceManager.updateService(s);
             }
 
         }
@@ -140,10 +142,11 @@ public class ViewVersionDefaultServiceLifeCycleTestCase {
 
     @Test(groups = "wso2.greg", description = "Test if service changes saved",
           dependsOnMethods = "testServiceChanged")
-    public void testServiceChangeTest() throws GovernanceException {
+    public void testServiceChangeTest() throws RegistryException {
 
         ServiceManager serviceManager = new ServiceManager(governance);
         Service[] service;
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         service = serviceManager.getAllServices();
         Boolean serviceChanged = false;
         for (Service s : service) {
