@@ -188,7 +188,7 @@
     </table>
     <table width="100%" style="text-align:center; padding-top: 10px; margin-bottom: -10px">
         <carbon:resourcePaginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
-                                  resourceBundle="org.wso2.carbon.governance.list.ui.i18n.Resources"
+                                  resourceBundle="org.wso2.carbon.registry.relations.ui.i18n.Resources"
                                   nextKey="next" prevKey="prev"
                                   paginationFunction="<%="loadAssociationDiv('" + request.getParameter("path").replaceAll("&","%26") + "', '" + request.getParameter("type") + "', {0})"%>" />
     </table>
@@ -325,7 +325,7 @@
     </table>
     <table width="100%" style="text-align:center; padding-top: 10px; margin-bottom: -10px">
         <carbon:resourcePaginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
-                                  resourceBundle="org.wso2.carbon.governance.list.ui.i18n.Resources"
+                                  resourceBundle="org.wso2.carbon.registry.relations.ui.i18n.Resources"
                                   nextKey="next" prevKey="prev"
                                   paginationFunction="<%="loadAssociationDiv('" + request.getParameter("path").replaceAll("&","%26") + "', '" + request.getParameter("type") + "', {0})"%>" />
     </table>
