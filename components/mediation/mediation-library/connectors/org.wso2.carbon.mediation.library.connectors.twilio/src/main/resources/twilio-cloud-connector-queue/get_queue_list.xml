@@ -1,8 +1,0 @@
-<template xmlns="http://ws.apache.org/ns/synapse" name="get_queue_list">
-
-    <sequence>
-
-        <class name="org.wso2.carbon.connectors.twilio.queue.GetQueueList" />
-
-    </sequence>
-</template>
