@@ -47,6 +47,16 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     public String resourceSandboxURI; // optional
     public String httpVerb; // optional
     public String authType; // optional
+    public String throttlingTier;
+
+    public String getThrottlingTier() {
+        return throttlingTier;
+    }
+
+    public void setThrottlingTier(String throttlingTier) {
+        this.throttlingTier = throttlingTier;
+    }
+
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
