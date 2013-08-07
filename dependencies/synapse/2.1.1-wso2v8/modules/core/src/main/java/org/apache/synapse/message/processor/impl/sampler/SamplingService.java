@@ -93,7 +93,7 @@ public class SamplingService implements InterruptableJob, Service {
         sequence = (String) parameters.get(SamplingProcessor.SEQUENCE);
         messageProcessor = (MessageProcessor)jdm.get(ScheduledMessageForwardingProcessor.PROCESSOR_INSTANCE);
 
-        String con = (String) jdm.get(SamplingProcessor.CONCURRENCY);
+        String con = (String) parameters.get(SamplingProcessor.CONCURRENCY);
         if (con != null) {
             try {
                 concurrency = Integer.parseInt(con);
