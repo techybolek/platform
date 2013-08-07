@@ -308,7 +308,7 @@
                    class="icon-link"
                    style="background-image:url(../admin/images/edit.gif);"><fmt:message
                     key="edit"/></a>
-                <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex,true)"
+                <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex)"
                    id="delete_link" class="icon-link"
                    style="background-image:url(../admin/images/delete.gif);"><fmt:message
                         key="delete"/></a>
@@ -329,7 +329,7 @@
                    class="icon-link"
                    style="background-image:url(../admin/images/edit.gif);"><fmt:message
                     key="edit"/></a>
-                <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex,true)"
+                <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex)"
                    id="delete_link" class="icon-link"
                    style="background-image:url(../admin/images/delete.gif);"><fmt:message
                         key="delete"/></a>

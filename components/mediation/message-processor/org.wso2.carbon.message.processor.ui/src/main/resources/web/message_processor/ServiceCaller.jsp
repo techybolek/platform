@@ -72,7 +72,7 @@
         
         String entry = null;
 
-        StringBuilder messageStoreXml = new StringBuilder();
+        StringBuilder messageProcessorXml = new StringBuilder();
 
         if (provider == null || provider.equals("")) {
             throw new Exception("Provider can't be Empty");
@@ -81,12 +81,12 @@
             if (store == null || "".equals(store.trim())) {
                     throw new Exception("Message Store can't be Empty");
             } else {
-                messageStoreXml.append("<ns1:messageProcessor name=\"");
-                messageStoreXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim());
+                messageProcessorXml.append("<ns1:messageProcessor name=\"");
+                messageProcessorXml.append(name.trim()).append("\"" + " ").append("class=\"").append(provider.trim());
                         if (targetEndpoint != null) {
-                            messageStoreXml.append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim());
+                            messageProcessorXml.append("\"" + " ").append("targetEndpoint=\"").append(targetEndpoint.trim());
                         }
-                        messageStoreXml.append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\""+" ").
+                        messageProcessorXml.append("\"" + " ").append("messageStore=\"").append(store.trim()).append("\""+" ").
                         append(" xmlns:ns1=\"").append(SYNAPSE_NS).append("\">");
             }
 
@@ -99,14 +99,14 @@
                 String[] pair = part.split("#");
                 String pName = pair[0];
                 String value = pair[1];
-                messageStoreXml.append("<ns1:parameter name=\"").append(pName.trim()).append("\" >").
+                messageProcessorXml.append("<ns1:parameter name=\"").append(pName.trim()).append("\" >").
                         append(value.trim()).append("</ns1:parameter>");
 
             }
             
         }
-        messageStoreXml.append("</ns1:messageProcessor>");
-        return messageStoreXml.toString().trim();
+        messageProcessorXml.append("</ns1:messageProcessor>");
+        return messageProcessorXml.toString().trim();
     }
 
 %>
