@@ -258,6 +258,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                                 <th><%=i18n.localize("urlPattern")%></th>
                                 <th style="width:66px;"><%=i18n.localize("httpVerb")%></th>
                                 <th style="width:120px;"><%=i18n.localize("authType")%></th>
+                                <th style="width:120px;"><%=i18n.localize("throttlingTier")%></th>
                                 <th style="width:20px;"><%=i18n.localize("action")%></th>
                             </tr>
 
@@ -334,6 +335,15 @@ API Definition for Swagger will not be overriden with the changes you will do to
                                     </select>
 
                                 </td>
+                                <!--Throttling-fix-->
+                                <td id = "throttlingTierListNew">
+                                     <select style="width:100%" id="getThrottlingTier" class="selected getThrottlingTier" name="getThrottlingTier"></select>
+                                     <select style="width:100%" id="postThrottlingTier" class="selected postThrottlingTier" name="postThrottlingTier"></select>
+                                     <select style="width:100%" id="putThrottlingTier" class="selected putThrottlingTier" name="putThrottlingTier"></select>
+                                     <select style="width:100%" id="deleteThrottlingTier" class="selected deleteThrottlingTier" name="deleteThrottlingTier"></select>
+                                     <select style="width:100%" id="optionsThrottlingTier" class="selected optionsThrottlingTier" name="optionsThrottlingTier"></select>
+                                </td>
+                                <!--Throttling-fix-->
                                 <td>
                                     <button type="button" disabled="disabled" class='even-width-button btn downButton'
                                             onclick="moveMe(this)"><i class="icon-chevron-down"></i> <%=i18n.localize("moveDown")%>
@@ -362,7 +372,23 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
                                     var methods = api.templates[i][1].split(",");
                                     var authTypes = api.templates[i][2].split(",");
+                                    var throttlingTiers = api.templates[i][3].split(",");
                                     var getVal,putVal,postVal,deleteVal,optionVal,method;
+
+                                    var log = new Log();
+                                    var tiersList = mod.getTiers().tiers;
+                                    var temp;
+                                    for(var k = 0 ; k < tiersList.length ; k++){
+                                    //    log.info(tiersList[k].tierName);
+
+                                    }
+                                   // log.info(temp);
+                                    //var tiers =  mod.getTiers().tiers;
+                                    //var contact = JSON.parse(tiers.tiers);
+                                    //log.info(contact);
+
+                                    var getThrottlingTier,postThrottlingTier,deleteThrottlingTier,optionsThrottlingTier,putThrottlingTier;
+
                                     var getAuthVal,putAuthVal,postAuthVal,deleteAuthVal,optionAuthVal,method;
                                     for(var n=0;n
                                     <methods.length
@@ -441,6 +467,50 @@ API Definition for Swagger will not be overriden with the changes you will do to
                                     </select>
 
                                 </td>
+                                     <td id = "throttlingTierList">
+
+                                         <select style="width:100%" id="getThrottlingTier" class="selected getThrottlingTier" name="getThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         log.info(tiersList[k].tierName);
+                                         %>
+                                         <option <%if(tiersList[l].tierName==getThrottlingTier){%> selected="selected" <%}%>><%=tiersList[l].tierName%></option>
+                                         <% }
+                                         %></select>
+
+                                         <select style="width:100%" id="postThrottlingTier" class="selected postThrottlingTier" name="postThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                          %>
+                                         <option <%if(tiersList[l].tierName==postThrottlingTier){%> selected="selected" <%}%>><%=tiersList[l].tierName%></option>
+                                         <% }
+                                         %></select>
+
+                                         <select style="width:100%" id="putThrottlingTier" class="selected putThrottlingTier" name="putThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==putThrottlingTier){%> selected="selected" <%}%>><%=tiersList[l].tierName%></option>
+                                         <% }
+                                         %></select>
+
+                                         <select style="width:100%" id="deleteThrottlingTier" class="selected deleteThrottlingTier" name="deleteThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==deleteThrottlingTier){%> selected="selected" <%}%>><%=tiersList[l].tierName%></option>
+                                         <% }
+                                         %></select>
+
+                                         <select style="width:100%" id="optionsThrottlingTier" class="selected optionsThrottlingTier" name="optionsThrottlingTier"><%
+                                         for(var k = 0 ; k < tiersList.length ; k++){
+                                         var l =  tiersList.length - k -1;
+                                         %>
+                                         <option <%if(tiersList[l].tierName==optionsThrottlingTier){%> selected="selected" <%}%>><%=tiersList[l].tierName%></option>
+                                         <% }
+                                         %></select>
+                                        </td>
+
                                 <% getAuthVal=putAuthVal=postAuthVal=deleteAuthVal=optionAuthVal=""; %>
                                 <td>
                                     <button type="button" disabled="disabled" class='even-width-button btn downButton'
