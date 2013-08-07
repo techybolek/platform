@@ -128,7 +128,7 @@
 						<tr>
 							<td><fmt:message key="value" />
 							</td>
-							<td><input type="text" id="propValue" />
+							<td><input type="password" id="propValue" />
 							</td>
 						</tr>
 						<tr>

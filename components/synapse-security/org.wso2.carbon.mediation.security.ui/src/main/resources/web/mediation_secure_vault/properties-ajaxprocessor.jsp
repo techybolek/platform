@@ -128,7 +128,7 @@
 					id="oldPropName_<%=i%>" type="hidden" value="<%=name%>" /><input
 					value="<%=name%>" type="text" id="propName_<%=i%>"
 					class="propEditNameSelector" /></td>
-				<td style="border-left:none !important">Enter New Password:<input value="<%=value%>" id="propValue_<%=i%>" type="text" />
+				<td style="border-left:none !important">Enter New Password:<input value="<%=value%>" id="propValue_<%=i%>" type="password" />
 				</td>
 				<td><a class="icon-link"
 					style="background-image: url(../properties/images/save-button.gif);"
