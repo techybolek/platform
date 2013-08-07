@@ -29,6 +29,7 @@ import org.wso2.carbon.appfactory.utilities.dataservice.DSApplicationListener;
 import org.wso2.carbon.appfactory.utilities.storage.FileArtifactStorage;
 import org.wso2.carbon.appfactory.utilities.version.AppVersionStrategyExecutor;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 
 /**
@@ -41,6 +42,11 @@ import org.wso2.carbon.registry.core.service.RegistryService;
  * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="user.realmservice.default"
+ * 				  interface="org.wso2.carbon.user.core.service.RealmService"
+ * 				  cardinality="1..1" policy="dynamic"
+ * 				  bind="setRealmService"
+ * 				  unbind="unsetRealmService"
  */
 public class UtilitiesServiceComponent {
     Log log = LogFactory.getLog(org.wso2.carbon.appfactory.utilities.internal.UtilitiesServiceComponent.class);
@@ -98,5 +104,15 @@ public class UtilitiesServiceComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+        log.debug("set up RealmService for org.wso2.carbon.appfactoutilities.internalion");
+    }
+
+    protected void unsetRealmService(RealmService realmService){
+        ServiceReferenceHolder.getInstance().setRealmService(null);
+        log.debug("un set RealmService for org.wso2.carbon.appfactoutilities.internalion");
     }
 }

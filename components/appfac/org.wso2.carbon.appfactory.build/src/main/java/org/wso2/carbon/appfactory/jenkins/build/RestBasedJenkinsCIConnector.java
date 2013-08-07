@@ -129,7 +129,7 @@ public class RestBasedJenkinsCIConnector {
         }
 
         PostMethod addRoleMethod = createPost(createRoleUrl,
-                                              parameters.toArray(new NameValuePair[0]), null);
+                                              parameters.toArray(new NameValuePair[0]), null, null);
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(addRoleMethod);
@@ -190,7 +190,7 @@ public class RestBasedJenkinsCIConnector {
         PostMethod assignRolesMethod =
                 createPost(assignURL,
                         params.toArray(new NameValuePair[params.size()]),
-                        null);
+                        null, null);
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(assignRolesMethod);
@@ -238,7 +238,7 @@ public class RestBasedJenkinsCIConnector {
 		PostMethod assignRolesMethod =
 		                               createPost(JenkinsCIConstants.RoleStrategy.UNASSIGN_ROLE_SERVICE,
 		                                          params.toArray(new NameValuePair[params.size()]),
-		                                          null);
+		                                          null, null);
 		try {
 			int httpStatusCode = getHttpClient().executeMethod(assignRolesMethod);
 			if (200 != httpStatusCode) {
@@ -380,7 +380,7 @@ public class RestBasedJenkinsCIConnector {
      * @param jobParams Job configuration parameters
      * @throws AppFactoryException if an error occures.
      */
-    public void createJob(String jobName, Map<String, String> jobParams) throws AppFactoryException {
+    public void createJob(String jobName, Map<String, String> jobParams, String tenantDomain) throws AppFactoryException {
 
         OMElement jobConfiguration = new JobConfigurator(jobParams).configure(jobParams.get(JenkinsCIConstants.APPLICATION_EXTENSION));
         NameValuePair[] queryParams = {new NameValuePair("name", jobName)};
@@ -391,7 +391,7 @@ public class RestBasedJenkinsCIConnector {
             createJob =
                     createPost("/createItem", queryParams,
                             new StringRequestEntity(jobConfiguration.toStringWithConsume(),
-                                    "text/xml", "utf-8"));
+                                    "text/xml", "utf-8"), tenantDomain);
             int httpStatusCode = getHttpClient().executeMethod(createJob);
 
             if (HttpStatus.SC_OK != httpStatusCode) {
@@ -497,7 +497,7 @@ public class RestBasedJenkinsCIConnector {
     public boolean deleteJob(String jobName) throws AppFactoryException {
         PostMethod deleteJobMethod =
                 createPost(String.format("/job/%s/doDelete", jobName), null,
-                        null);
+                        null, null);
         int httpStatusCode = -1;
         try {
             httpStatusCode = getHttpClient().executeMethod(deleteJobMethod);
@@ -542,7 +542,7 @@ public class RestBasedJenkinsCIConnector {
         }
 
         PostMethod startBuildMethod = createPost(String.format("/job/%s/buildWithParameters", jobName),
-                                                  parameters.toArray(new NameValuePair[parameters.size()]), null);
+                                                  parameters.toArray(new NameValuePair[parameters.size()]), null, null);
 
         int httpStatusCode = -1;
         try {
@@ -790,7 +790,7 @@ public class RestBasedJenkinsCIConnector {
         final String setCredentialsURL = String.format("/job/%s/descriptorByName/hudson.scm" +
                                                        ".SubversionSCM/postCredential", jobName);
 
-        PostMethod setCredentialsMethod = createPost(setCredentialsURL, null, null);
+        PostMethod setCredentialsMethod = createPost(setCredentialsURL, null, null, null);
 
         Part[] parts =
                 {new StringPart("url", svnRepo), new StringPart("kind", "password"),
@@ -859,7 +859,7 @@ public class RestBasedJenkinsCIConnector {
         PostMethod deployLatestSuccessArtifactMethod = createPost(deployLatestSuccessArtifactUrl,
                                                                   null, null, parameters.toArray(
                                                                                                  new NameValuePair[
-                                                                                                                   parameters.size()]));
+                                                                                                                   parameters.size()]), null);
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(deployLatestSuccessArtifactMethod);
@@ -955,7 +955,7 @@ public class RestBasedJenkinsCIConnector {
         PostMethod deployTaggedArtifactMethod = createPost(deployTaggedArtifactUrl,
                                                            null, null, parameters.toArray(
                                                                                           new NameValuePair[
-                                                                                                            parameters.size()]));
+                                                                                                            parameters.size()]), null);
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(deployTaggedArtifactMethod);
@@ -992,7 +992,7 @@ public class RestBasedJenkinsCIConnector {
         PostMethod deployPromotedArtifactMethod = createPost(deployPromotedArtifactUrl,
                 null, null, parameters.toArray(
                                                new NameValuePair[
-                                                                 parameters.size()]));
+                                                                 parameters.size()]), null);
 
         try {
             int httpStatusCode = getHttpClient().executeMethod(deployPromotedArtifactMethod);
@@ -1044,7 +1044,7 @@ public class RestBasedJenkinsCIConnector {
         PostMethod getIdsOfPersistArtifactMethod = createPost(getIdentifiersOfArtifactsUrl,
                                                               parameters.toArray(
                                                                       new NameValuePair[
-                                                                      parameters.size()]), null);
+                                                                      parameters.size()]), null, null);
         try {
             int httpStatusCode = getHttpClient().executeMethod(getIdsOfPersistArtifactMethod);
             log.info("status code for getting tag names of persisted artifacts : " + httpStatusCode);
@@ -1235,7 +1235,7 @@ public class RestBasedJenkinsCIConnector {
             createJob =
                     createPost(String.format("/job/%s/config.xml", jobName), queryParams,
                             new StringRequestEntity(jobConfiguration.toStringWithConsume(),
-                                    "text/xml", "utf-8"));
+                                    "text/xml", "utf-8"), null);
             int httpStatusCode = getHttpClient().executeMethod(createJob);
 
             if (HttpStatus.SC_OK != httpStatusCode) {
@@ -1310,11 +1310,18 @@ public class RestBasedJenkinsCIConnector {
      * @return a {@link PostMethod}
      */
     private PostMethod createPost(String urlFragment, NameValuePair[] queryParameters,
-                                  RequestEntity requestEntity) {
-        return createPost(urlFragment, queryParameters, requestEntity, null);
+                                  RequestEntity requestEntity, String tenantDomain) {
+        return createPost(urlFragment, queryParameters, requestEntity, null, tenantDomain);
     }
-    
-    
+
+
+    private String getJenkinsUrlByTenantDomain(String urlFragment, String tenantDomain){
+        if(tenantDomain!=null && !tenantDomain.equals(""))
+            return getJenkinsUrl() + File.separator + "t" + File.separator + tenantDomain + urlFragment;
+        else
+            return getJenkinsUrl() + urlFragment;
+    }
+
     /**
      * Util method to create a POST method
      *
@@ -1325,8 +1332,10 @@ public class RestBasedJenkinsCIConnector {
      * @return a {@link PostMethod}
      */
     private PostMethod createPost(String urlFragment, NameValuePair[] queryParameters,
-                                  RequestEntity requestEntity, NameValuePair[] postParameters) {
-        PostMethod post = new PostMethod(getJenkinsUrl() + urlFragment);
+                                  RequestEntity requestEntity, NameValuePair[] postParameters, String tenantDomain) {
+        String url = getJenkinsUrlByTenantDomain(urlFragment, tenantDomain);
+        // getJenkinsUrl() + urlFragment
+        PostMethod post = new PostMethod(url);
         if (authenticate) {
             post.setDoAuthentication(true);
         }

@@ -69,7 +69,7 @@ public class GithubRepositoryProvider extends AbstractRepositoryProvider {
      * @throws RepositoryMgtException if repository creation fails
      */
     @Override
-    public String createRepository(String applicationKey) throws RepositoryMgtException {
+    public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
 
         Repository repository = new Repository();
         repository.setName(applicationKey);

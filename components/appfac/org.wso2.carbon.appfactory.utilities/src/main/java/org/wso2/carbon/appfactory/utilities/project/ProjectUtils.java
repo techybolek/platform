@@ -41,6 +41,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.*;
@@ -541,6 +542,48 @@ public class ProjectUtils {
                             applicationId);
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
+        }
+
+        return (GenericArtifactImpl) artifact;
+    }
+
+    /**
+     * A Util method to load an Application artifact from the registry.
+     *
+     * @param applicationId the application Id
+     * @return a {@link GenericArtifactImpl} representing the application or
+     *         null if application (by the id is not in registry)
+     * @throws AppFactoryException if an error occurs.
+     */
+    private static GenericArtifactImpl getApplicationArtifact(String applicationId, String tenantDomain)
+            throws AppFactoryException {
+        GenericArtifact artifact = null;
+        try {
+
+            RegistryService registryService =
+                    ServiceReferenceHolder.getInstance()
+                            .getRegistryService();
+            UserRegistry userRegistry = registryService.getGovernanceSystemRegistry(ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain));
+            Resource resource =
+                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
+                            "/" + applicationId + "/" +
+                            "appinfo");
+            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
+            GenericArtifactManager artifactManager =
+                    new GenericArtifactManager(userRegistry,
+                            "application");
+            // GenericArtifact artifact =
+            // artifactManager.getGenericArtifact(resource.getUUID());
+            artifact = artifactManager.getGenericArtifact(resource.getUUID());
+
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to load the application information for applicaiton id: %s",
+                            applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        } catch (UserStoreException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
         return (GenericArtifactImpl) artifact;

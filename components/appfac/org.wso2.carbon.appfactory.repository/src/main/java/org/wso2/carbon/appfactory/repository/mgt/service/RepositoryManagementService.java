@@ -48,13 +48,13 @@ public class RepositoryManagementService extends AbstractAdmin {
      * @return
      * @throws RepositoryMgtException
      */
-    public String createRepository(String applicationKey, String type)
+    /*public String createRepository(String applicationKey, String type)
             throws RepositoryMgtException {
         long s = new Date().getTime();
         String ss = repositoryManager.createRepository(applicationKey, type);
         log.info("Repo Time : " + ((new Date().getTime()) - s));
         return ss;
-    }
+    }*/
 
     /**
      * @param applicationKey

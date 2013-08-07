@@ -76,7 +76,7 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
      * {@inheritDoc}
      */
 
-    public void createJob(String applicationId, String version, String revision)
+    public void createJob(String applicationId, String version, String revision, String tenantDomain)
             throws AppFactoryException {
 
         AppFactoryConfiguration configuration = ServiceContainer.getAppFactoryConfiguration();
@@ -130,7 +130,7 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
         parameters.put(JenkinsCIConstants.APPLICATION_EXTENSION, type);
         //parameters.put("PollingPeriod", pollingPeriod);
 
-        this.connector.createJob(getJobName(applicationId, version, revision), parameters);
+        this.connector.createJob(getJobName(applicationId, version, revision), parameters, tenantDomain);
 
     }
 

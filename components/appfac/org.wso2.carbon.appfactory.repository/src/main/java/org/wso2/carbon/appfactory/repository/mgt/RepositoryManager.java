@@ -28,12 +28,12 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 public class RepositoryManager {
     private static final Log log = LogFactory.getLog(RepositoryManager.class);
 
-    public String createRepository(String applicationKey, String type)
+    public String createRepository(String applicationKey, String type, String tenantDomain)
             throws RepositoryMgtException {        
         String url = null;
         RepositoryProvider provider = Util.getRepositoryProvider(type);
         if (provider != null) {
-            url = provider.createRepository(applicationKey);
+            url = provider.createRepository(applicationKey, tenantDomain);
             provider.getBranchingStrategy().prepareRepository(applicationKey, url);
         } else {
             handleException((new StringBuilder()).

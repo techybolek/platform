@@ -31,7 +31,7 @@ public interface RepositoryProvider {
      * @return url for created repository
      * @throws RepositoryMgtException when repository creation fails
      */
-    public String createRepository(String applicationKey) throws RepositoryMgtException;
+    public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException;
 
     /**
      * Return the repository url if exists or return null

@@ -48,9 +48,9 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
      * {@inheritDoc}
      */
     @Override
-    public String createRepository(String applicationKey) throws RepositoryMgtException {
+    public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         CarbonContext ct=CarbonContext.getCurrentContext();
-        String tenantDomain= ct.getTenantDomain();
+        //String tenantDomain= ct.getTenantDomain();
         String repoName=tenantDomain+"/"+applicationKey;
         String repoCreateUrl = config.getFirstProperty(BASE_URL);
         String adminUsername = config.getFirstProperty(GITBLIT_ADMIN_USERNAME);

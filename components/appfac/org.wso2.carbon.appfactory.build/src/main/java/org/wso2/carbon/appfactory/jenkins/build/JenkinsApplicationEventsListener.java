@@ -73,7 +73,7 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
         String stage=rxtManager.getStage(application.getId(),versions[0].getId());
         if (ArrayUtils.isNotEmpty(versions)) {
             jenkinsCISystemDriver.createJob(application.getId(),
-                    versions[0].getId(), "");
+                    versions[0].getId(), "", null);
             jenkinsCISystemDriver.startBuild(jenkinsCISystemDriver.getJobName(application.getId(),
                    versions[0].getId(),""),true,stage,"");
         }
@@ -115,7 +115,7 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
                 application.getName() + " Version : " + target.getId());
 
         ServiceContainer.getJenkinsCISystemDriver().createJob(application.getId(), target.getId(),
-                "");
+                "", null);
         String jobName = ServiceContainer.getJenkinsCISystemDriver().getJobName(application.getId(), target.getId(), "");
         log.info("Job created successfully in jenkins. Job name - " + jobName);
         ServiceContainer.getJenkinsCISystemDriver().startBuild(jobName, true, rxtManager.getStage(application.getId(),target.getId()), "");

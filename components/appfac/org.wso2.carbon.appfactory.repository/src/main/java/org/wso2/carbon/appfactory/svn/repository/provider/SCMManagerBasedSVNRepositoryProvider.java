@@ -45,7 +45,7 @@ public class SCMManagerBasedSVNRepositoryProvider extends AbstractRepositoryProv
     public static final String TYPE = "svn";
 
     @Override
-    public String createRepository(String applicationKey) throws RepositoryMgtException {
+    public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
 
         HttpClient client = getClient();
         PostMethod post = new PostMethod(getServerURL() + REST_BASE_URI +

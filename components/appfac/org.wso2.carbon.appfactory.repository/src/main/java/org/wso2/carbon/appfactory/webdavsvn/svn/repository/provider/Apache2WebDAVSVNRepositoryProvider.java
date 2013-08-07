@@ -51,7 +51,7 @@ public static final String REMOTE_HOST_SUPER_USER_PASSWORD="RemoteHostSuperUserP
     }
 
     @Override
-    public String createRepository(String applicationKey) throws RepositoryMgtException {
+    public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         /*String fullRepositoryPath=configuration.getFirstProperty(getPropertyKey(REMOTE_PARENT_REPO_LOCATION))+"/"+applicationKey;
         String username=configuration.getFirstProperty(getPropertyKey(REMOTE_USER_NAME));
         String password=configuration.getFirstProperty(getPropertyKey(REMOTE_USER_PASSWORD));
