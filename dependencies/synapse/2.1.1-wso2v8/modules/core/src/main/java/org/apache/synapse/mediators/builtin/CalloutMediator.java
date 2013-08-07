@@ -101,7 +101,6 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                 blockingMsgSender.setInitClientOptions(false);
             }
 
-            String endpointReferenceValue = null;
             boolean isWrappingEndpointCreated = false;
             if (serviceURL != null) {
                 endpoint = new AddressEndpoint();
@@ -157,8 +156,7 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
             }
 
             if (synLog.isTraceOrDebugEnabled()) {
-                synLog.traceOrDebug("About to invoke service : " + endpointReferenceValue + (action != null ?
-                                                                                             " with action : " + action : ""));
+                synLog.traceOrDebug("About to invoke the service");
                 if (synLog.isTraceTraceEnabled()) {
                     synLog.traceTrace("Request message payload : " + synapseOutMsgCtx.getEnvelope());
                 }
