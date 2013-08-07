@@ -27,7 +27,7 @@ jagg.template("header", function(inputs, outputs, jagg) {
 
 	
 	//if (checkSSO && !Boolean(isAuthenticated)) {
-	if (!session.get("LOGGED_IN_USER")) {
+	if (checkSSO && !session.get("LOGGED_IN_USER")) {
 	    log.info("User is not authenticated, redirecting to identity server for authentication.");
 	
 	    ssoRelyingParty.setProperty("identityProviderURL", getProperty(SSO_PROVIDER));
