@@ -368,6 +368,8 @@
                                     org.wso2.appserver:org.wso2.appserver.runtime.nested.category.feature:${as.version}
                                 </featureArtifactDef>
 
+
+
                                 <featureArtifactDef>
                                     org.wso2.governance:org.wso2.governance.application-mgt.nested.category.feature:${greg.version}
                                 </featureArtifactDef>
@@ -390,7 +392,10 @@
                                     org.wso2.governance:org.wso2.governance.multi-tenancy.nested.category.feature:${greg.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.governance:org.wso2.governance.registry-repository.nested.category.feature:${greg.version}
+                                    org.wso2.governance:org.wso2.governance.registry.nested.category.feature:${greg.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.governance:org.wso2.governance.repository.nested.category.feature:${greg.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.governance:org.wso2.governance.reporting.nested.category.feature:${greg.version}
@@ -501,7 +506,11 @@
                                             <version>${greg.version}</version>
                                         </catFeature>
                                         <catFeature>
-                                            <id>org.wso2.governance.registry-repository.nested.category</id>
+                                            <id>org.wso2.governance.registry.nested.category</id>
+                                            <version>${greg.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.governance.repository.nested.category</id>
                                             <version>${greg.version}</version>
                                         </catFeature>
                                         <catFeature>
