@@ -14,6 +14,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.Parameter;
@@ -27,6 +28,7 @@ import org.apache.synapse.config.xml.XMLConfigConstants;
 import org.apache.synapse.config.xml.rest.APIFactory;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.rest.API;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.DispatcherHelper;
 import org.apache.synapse.rest.dispatch.URITemplateHelper;
@@ -614,14 +616,12 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
 						}
 
                         if(apiTransports != null){
-                            ArrayList<String> transports = new ArrayList<String>();
-                            if (apiTransports.indexOf(" ") >= 0) {
-                                String[] transportArr = apiTransports.split(" ");
-                                transports.addAll(Arrays.asList(transportArr).subList(0, apiTransports.split(" ").length));
-                            } else {
-                                transports.add(apiTransports);
+                            if(apiTransports.equalsIgnoreCase(Constants.TRANSPORT_HTTP)){
+                                api.setProtocol(RESTConstants.PROTOCOL_HTTP_ONLY);
                             }
-                            api.setTransports(transports);
+                            if(apiTransports.equalsIgnoreCase(Constants.TRANSPORT_HTTPS)){
+                                api.setProtocol(RESTConstants.PROTOCOL_HTTPS_ONLY);
+                            }
                         }
 
 						if (updateMode) {
