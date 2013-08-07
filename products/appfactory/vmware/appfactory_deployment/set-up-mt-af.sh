@@ -100,6 +100,10 @@ mkdir setup
 
  $MYSQL -uroot -proot -A -e "$SQL";
 
+#configure bam
+. `pwd`/set-up-bam.sh
+setup_bam -w $SETUP_DIR -r $RESOURCE_DIR -e "dev" -v $BAM_VERSION -h $bam_host_name -o 3
+
 find $SETUP_DIR -name .svn | xargs rm -rf
 
 
