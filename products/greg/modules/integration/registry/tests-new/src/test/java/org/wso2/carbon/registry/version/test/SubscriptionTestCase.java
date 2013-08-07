@@ -31,7 +31,6 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.info.stub.beans.utils.xsd.SubscriptionInstance;
 import org.wso2.carbon.registry.info.stub.beans.xsd.SubscriptionBean;
-import org.wso2.carbon.registry.jira.issues.test.WSRegistryExecuteQueryTestCase;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.resource.stub.beans.xsd.VersionPath;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
