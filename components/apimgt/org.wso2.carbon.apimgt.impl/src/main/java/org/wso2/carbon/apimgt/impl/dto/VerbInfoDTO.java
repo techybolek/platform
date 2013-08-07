@@ -8,6 +8,27 @@ public class VerbInfoDTO {
 
     private String authType;
 
+    private String throttling;
+
+
+    private String requestKey;
+
+    public String getThrottling() {
+        return throttling;
+    }
+
+    public void setThrottling(String throttling) {
+        this.throttling = throttling;
+    }
+
+    public String getRequestKey() {
+        return requestKey;
+    }
+
+    public void setRequestKey(String requestKey) {
+        this.requestKey = requestKey;
+    }
+
     public String getHttpVerb() {
         return httpVerb;
     }
@@ -24,7 +45,7 @@ public class VerbInfoDTO {
         this.authType = authType;
     }
 
-    public boolean requiresAuthentication(){
+    public boolean requiresAuthentication() {
         return !APIConstants.AUTH_TYPE_NONE.equalsIgnoreCase(authType);
     }
 
