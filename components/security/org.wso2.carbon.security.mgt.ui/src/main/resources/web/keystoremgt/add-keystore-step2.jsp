@@ -104,7 +104,7 @@
             }
         } catch (Exception e) {
             forwardTo = "add-keystore-step1.jsp?ordinal=1";
-            CarbonUIMessage.sendCarbonUIMessage("Error when uploading the Key Store : " + e.getMessage(),
+            CarbonUIMessage.sendCarbonUIMessage("Error when uploading the KeyStore : " + e.getMessage(),
                     CarbonUIMessage.ERROR, request);
             session.setAttribute("add-keystore-error", "true");
         }
