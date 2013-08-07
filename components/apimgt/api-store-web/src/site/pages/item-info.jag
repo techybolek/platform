@@ -8,7 +8,7 @@ i18n.init(request,localeResourcesBasePath);
 
 (function () {
 
-    var result, api, title, mod, links,error,message,discoveryURL,
+    var result, api, title, mod, links,error,message,discoveryURL,uriTemplates
             name = request.getParameter("name"),
             version = request.getParameter("version"),
             provider = request.getParameter("provider"),
@@ -24,6 +24,7 @@ i18n.init(request,localeResourcesBasePath);
     error = result.error;
     message = result.message;
     discoveryURL = result.discoveryURL;
+    uriTemplates = result.uriTemplates;
     var apiName="";
     var apiVersion=null;
     var apiProvider="Provider";
@@ -55,6 +56,7 @@ i18n.init(request,localeResourcesBasePath);
                                      "providerId":apiProvider,
                                      "currentApi":apiName,
                                      "currentApiVersion":apiVersion,
+                                     "uriTemplates":uriTemplates,
                                      "error":error,
                                      "message":message
                                      }
@@ -64,6 +66,7 @@ i18n.init(request,localeResourcesBasePath);
                             "inputs":{
                                      "api":api,
                                      "discoveryURL":discoveryURL,
+                                     "uriTemplates":uriTemplates,
                                      "error":error,
                                      "message":message
                                      }
