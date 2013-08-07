@@ -75,7 +75,7 @@ public class SamplingProcessor extends ScheduledMessageProcessor {
     }
 
     public boolean isActive() {
-        return isStarted();
+        return !isDeactivated();
     }
 
     public SamplingProcessorView getView() {
