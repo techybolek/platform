@@ -279,35 +279,18 @@
                     <td><input id="Name" type="text" size="60" name="Name" value=""/></td>
                 </tr>
                 <%}%>
-                <%if (processorData != null) {%>
-                <tr>
-
-                    <td width="276px"><fmt:message key="target.endpoint"/><span class="required"> *</span></td>
-                    <td>
-                        <input id="TargetEndpoint" name="TargetEndpoint" type="hidden"
-                               value="<%=processorData.getTargetEndpoint()%>"/>
-                        <label for="Name"><%=processorData.getTargetEndpoint()%>
-                        </label>
-                    </td>
-                </tr>
-                <%} else { %>
                 <tr>
                     <td width="276px"><fmt:message key="target.endpoint"/><span class="required"> *</span></td>
                     <td>
-                        <select id="TargetEndpoint" name="TargetEndpoint">
-                            <%if (definedEndpoints != null && definedEndpoints.length > 0) {
-                                for (String dep : definedEndpoints) {%>
-                                    <option selected="true" value="<%=dep%>"><%=dep%>
-                                    </option>
-                                <%}
-                            } else { %>
-                                    <option selected="true" value="">[No endpoint defined]
-                                    </option>
-                            <%}%>
-                        </select>
+                        <input type="text" size="60" id="TargetEndpoint" name="TargetEndpoint"
+                               value="<%=((null!=processorData)&& processorData.getTargetEndpoint() != null
+                                        && !processorData.getTargetEndpoint().isEmpty())? processorData.getTargetEndpoint():""%>"/>
+                    <td>
+                        <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('TargetEndpoint','/_system/config')"><fmt:message key="processor.conf.registry.browser"/></a>
+                        <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('TargetEndpoint','/_system/governance')"><fmt:message key="processor.gov.registry.browser"/></a>
+                    </td>
                     </td>
                 </tr>
-                <%}%>
                 <%if ((processorData != null)) { %>
                 <tr>
                     <td><fmt:message key="provider"/><span class="required"> *</span></td>

@@ -264,17 +264,18 @@
         %>
 
         <tr>
-            <%
-                if ("Scheduled Message Forwarding Processor".
-                        equalsIgnoreCase(type) && !client.isActive(name)) {
-            %>
-            <td><a href="ScheduledForwardingProcessorView.jsp?processorName=<%=name%>"><%=name%>
-            </a>
-            </td>
-            <%} else { %>
-            <td><%=name%>
-            </td>
-            <%} %>
+            <%--<%--%>
+                <%--if ("Scheduled Message Forwarding Processor".--%>
+                        <%--equalsIgnoreCase(type) && !client.isActive(name)) {--%>
+            <%--%>--%>
+            <%--<td><a href="ScheduledForwardingProcessorView.jsp?processorName=<%=name%>"><%=name%>--%>
+            <%--</a>--%>
+            <%--</td>--%>
+            <%--<%} else { %>--%>
+            <%--<td><%=name%>--%>
+            <%--</td>--%>
+            <%--<%} %>--%>
+            <td><%=name%></td>
             <td><%=type%>
             </td>
             <%
@@ -315,7 +316,7 @@
                     <fmt:message key="inactive"/>&nbsp;[</span>
                 <a href="#" class="icon-link" id="activate_link"
                    style="background-image:none !important; margin-left: 0px !important; padding-left: 0px !important;"
-                   onclick="activateRow(this.parentNode.parentNode.rowIndex,true)"><fmt:message key="activate"/></a>
+                   onclick="activateRow(this.parentNode.parentNode.rowIndex)"><fmt:message key="activate"/></a>
                 <span class="icon-text"
                       style="background-image:none !important; margin-left: 0px !important; padding-left: 0px !important;">]</span>
 
