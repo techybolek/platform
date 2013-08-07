@@ -111,8 +111,11 @@ public class VFSOutTransportInfo implements OutTransportInfo {
     private String cleanURI(String vfsURI, String queryParams, String originalFileURI) {
         // Using Apache Commons StringUtils and Java StringBuilder for improved performance.
         vfsURI = StringUtils.replace(vfsURI, "?" + queryParams, "");
-        queryParams = StringUtils.replace(queryParams, VFSConstants.APPEND+"=true", "");
-        queryParams = StringUtils.replace(queryParams, VFSConstants.APPEND+"=false", "");
+
+        String[] uriParamsToDelete = {VFSConstants.APPEND+"=true", VFSConstants.APPEND+"=false"};
+        for(String deleteParam: uriParamsToDelete) {
+            queryParams = StringUtils.replace(queryParams, deleteParam, "");
+        }
         queryParams = StringUtils.replace(queryParams, "&&", "&");
 
         // We can sometimes be left with && in the URI
