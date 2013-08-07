@@ -20,22 +20,20 @@ package org.apache.synapse.config.xml.rest;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.Constants;
 import org.apache.axiom.om.OMNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.commons.util.PropertyHelper;
 import org.apache.synapse.config.xml.XMLConfigConstants;
-import org.apache.synapse.core.axis2.ProxyService;
 import org.apache.synapse.rest.API;
 import org.apache.synapse.rest.Handler;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.version.VersionStrategy;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 public class APIFactory {
 
@@ -101,27 +99,18 @@ public class APIFactory {
 
         OMAttribute trans = apiElt.getAttribute(
                 new QName(XMLConfigConstants.NULL_NAMESPACE, "transports"));
-        ArrayList<String> transportList = new ArrayList<String>();
         if (trans != null) {
             String transports = trans.getAttributeValue();
-            if (transports == null || ProxyService.ALL_TRANSPORTS.equals(transports)) {
-                // default to all transports using service name as destination
-            } else {
-                StringTokenizer st = new StringTokenizer(transports, " ,");
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    if (token.length() != 0) {
-                        transportList.add(token);
-                    }
+            if (!"".equals(transports)) {
+                if (Constants.TRANSPORT_HTTP.equals(transports)) {
+                    api.setProtocol(RESTConstants.PROTOCOL_HTTP_ONLY);
+                } else if (Constants.TRANSPORT_HTTPS.equals(transports)) {
+                    api.setProtocol(RESTConstants.PROTOCOL_HTTPS_ONLY);
+                } else {
+                    handleException("Invalid protocol name: " + transports);
                 }
             }
-        }else{
-            //By default if the transport tag is not present
-            //access will be allowed both via HTTP and HTTPs
-            String[] transports = {"http","https"};
-            transportList.addAll(Arrays.asList(transports));
         }
-        api.setTransports(transportList);
         return api;
     }
 

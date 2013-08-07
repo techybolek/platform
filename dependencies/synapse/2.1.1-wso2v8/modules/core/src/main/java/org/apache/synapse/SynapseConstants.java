@@ -160,6 +160,10 @@ public final class SynapseConstants {
         public static final String PROXY_SERVICE = "proxy.name";
         /** The Synapse MC property that marks it as a RESPONSE */
         public static final String RESPONSE = "RESPONSE";
+        /** The Synapse MC property that indicates the in-transport */
+        public static final String IN_TRANSPORT = "IN_TRANSPORT";
+        /** The Synapse MC property that marks if the message was denied on the accessed transport */
+        public static final String TRANSPORT_DENIED = "TRANSPORT_DENIED";
         /** The Synapse MC property that marks the message as a OUT_ONLY message */
         public static final String OUT_ONLY = "OUT_ONLY";
         /** The Synapse MC property that states that existing WS-A headers in the envelope should
@@ -167,12 +171,6 @@ public final class SynapseConstants {
         public static final String PRESERVE_WS_ADDRESSING = "PRESERVE_WS_ADDRESSING";
         /** The Synapse MC property that marks to Exception to be thrown on SOAPFault(Retry on SOAPFault)*/
         public static final String RETRY_ON_SOAPFAULT = "RETRY_ON_SOAPFAULT";
-
-        //Properties for Rest API transport level validation
-        /** The Synapse MC property that indicates the in-transport */
-        public static final String IN_TRANSPORT = "IN_TRANSPORT";
-        /** The Synapse MC property that marks if the message was denied on the accessed transport */
-        public static final String TRANSPORT_DENIED = "TRANSPORT_DENIED";
 
         /**
          * The name of the property which specifies the operation name that is

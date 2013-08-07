@@ -44,14 +44,11 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
     private Map<String,Resource> resources = new LinkedHashMap<String,Resource>();
     private List<Handler> handlers = new ArrayList<Handler>();
 
+    private int protocol = RESTConstants.PROTOCOL_HTTP_AND_HTTPS;
+
     private VersionStrategy versionStrategy = new DefaultStrategy(this);
 
     private String fileName;
-
-    /**
-     * The transport/s over which this API should be exposed, or defaults to all available
-     */
-    private ArrayList<String> transports = new ArrayList<String>();
 
     public API(String name, String context) {
         super(name);
@@ -74,16 +71,16 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
         return name;
     }
 
+    public int getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(int protocol) {
+        this.protocol = protocol;
+    }
+
     public String getAPIName() {
         return name;
-    }
-
-    public ArrayList getTransports() {
-        return transports;
-    }
-
-    public void setTransports(ArrayList transports) {
-        this.transports = transports;
     }
 
     public String getVersion(){
@@ -217,7 +214,22 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle {
                     return false;
                 }
             }
-            if(!transports.isEmpty() && !transports.contains(msgCtx.getTransportIn().getName())){
+            if (protocol == RESTConstants.PROTOCOL_HTTP_ONLY &&
+                    !Constants.TRANSPORT_HTTP.equals(msgCtx.getIncomingTransportName())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Protocol information does not match - Expected HTTP");
+                }
+                synCtx.setProperty(SynapseConstants.TRANSPORT_DENIED,new Boolean(true));
+                synCtx.setProperty(SynapseConstants.IN_TRANSPORT,msgCtx.getTransportIn().getName());
+                log.warn("Trying to access API : "+name+" on restricted transport chanel ["+msgCtx.getTransportIn().getName()+"]");
+                return false;
+            }
+
+            if (protocol == RESTConstants.PROTOCOL_HTTPS_ONLY &&
+                    !Constants.TRANSPORT_HTTPS.equals(msgCtx.getIncomingTransportName())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Protocol information does not match - Expected HTTPS");
+                }
                 synCtx.setProperty(SynapseConstants.TRANSPORT_DENIED,new Boolean(true));
                 synCtx.setProperty(SynapseConstants.IN_TRANSPORT,msgCtx.getTransportIn().getName());
                 log.warn("Trying to access API : "+name+" on restricted transport chanel ["+msgCtx.getTransportIn().getName()+"]");
