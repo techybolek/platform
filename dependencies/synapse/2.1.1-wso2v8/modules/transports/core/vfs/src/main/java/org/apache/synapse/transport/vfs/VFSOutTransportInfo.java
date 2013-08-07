@@ -46,6 +46,8 @@ public class VFSOutTransportInfo implements OutTransportInfo {
     private boolean append;
     private boolean fileLocking;
 
+    private static String[] uriParamsToDelete = {VFSConstants.APPEND+"=true", VFSConstants.APPEND+"=false"};
+
     /**
      * Constructs the VFSOutTransportInfo containing the information about the file to which the
      * response has to be submitted to.
@@ -112,7 +114,6 @@ public class VFSOutTransportInfo implements OutTransportInfo {
         // Using Apache Commons StringUtils and Java StringBuilder for improved performance.
         vfsURI = StringUtils.replace(vfsURI, "?" + queryParams, "");
 
-        String[] uriParamsToDelete = {VFSConstants.APPEND+"=true", VFSConstants.APPEND+"=false"};
         for(String deleteParam: uriParamsToDelete) {
             queryParams = StringUtils.replace(queryParams, deleteParam, "");
         }
