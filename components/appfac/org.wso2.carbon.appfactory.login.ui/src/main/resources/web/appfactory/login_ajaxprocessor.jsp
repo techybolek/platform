@@ -37,16 +37,16 @@
       <meta name="description" content="">
       <meta name="viewport" content="width=device-width">
 
-      <link rel="stylesheet" href="../carbon/appfactory/assets/css/font-awesome.min.css">
+      <link rel="stylesheet" href="../appfactory/assets/css/font-awesome.min.css">
       <!--[if IE 7]>
-      <link rel="stylesheet" href="../carbon/appfactory/assets/css/font-awesome-ie7.min.css">
+      <link rel="stylesheet" href="../appfactory/assets/css/font-awesome-ie7.min.css">
       <![endif]-->
-      <link rel="stylesheet" href="../carbon/appfactory/assets/css/normalize.min.css">
-      <link type="text/css" rel="stylesheet" href="../carbon/appfactory/assets/css/jquery.qtip.min.css" />
-      <link rel="stylesheet" href="../carbon/appfactory/assets/css/start.css">
-      <link rel="stylesheet" href="../carbon/appfactory/assets/css/development.css">
+      <link rel="stylesheet" href="../appfactory/assets/css/normalize.min.css">
+      <link type="text/css" rel="stylesheet" href="../appfactory/assets/css/jquery.qtip.min.css" />
+      <link rel="stylesheet" href="../appfactory/assets/css/start.css">
+      <link rel="stylesheet" href="../appfactory/assets/css/development.css">
 
-      <script src="../carbon/appfactory/assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+      <script src="../appfactory/assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 
 
 
@@ -55,9 +55,9 @@
       <title>WSO2 App Factory</title>
       <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
       <!--[if lt IE 9]>
-      <script src="../carbon/appfactory/assets/js/vendor/html5/html5.js"></script>
+      <script src="../appfactory/assets/js/vendor/html5/html5.js"></script>
       <![endif]-->
-      <script type="text/javascript"  src="../carbon/appfactory/assets/js/vendor/jquery-1.7.1.min.js"></script>
+      <script type="text/javascript"  src="../appfactory/assets/js/vendor/jquery-1.7.1.min.js"></script>
 
       
       <script type="text/javascript">
@@ -78,7 +78,7 @@
       </script>
 
       <!-- Le fav and touch icons -->
-      <link rel="shortcut icon" href="../carbon/appfactory/images/favicon.png">
+      <link rel="shortcut icon" href="../appfactory/images/favicon.png">
       <style>
 	.signUpLink{
 	    color:black;
@@ -165,7 +165,7 @@
 
         <div class="wrapper">
             <div class="branding">
-                <h1><img src="../carbon/appfactory/assets/img/appfactory.png" alt="App Factory" /></h1>
+                <h1><img src="../appfactory/assets/img/appfactory.png" alt="App Factory" /></h1>
                 <p>Revolutionizing App Delivery</p>
             </div>
             <article class="start">
@@ -212,7 +212,7 @@
         </div><!-- /wrapper -->
         <footer></footer>
         
-        <script type="text/javascript"  src="../carbon/appfactory/assets/js/start.js"></script>
+        <script type="text/javascript"  src="../appfactory/assets/js/start.js"></script>
 
 
 
@@ -220,7 +220,7 @@
 
 
 
-    <script src="../carbon/appfactory/assets/js/vendor/jquery-validation/jquery.validate.min.js"></script>
+    <script src="../appfactory/assets/js/vendor/jquery-validation/jquery.validate.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
            $("#loginForm").validate({
