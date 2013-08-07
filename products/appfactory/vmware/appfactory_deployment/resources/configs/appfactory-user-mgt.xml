@@ -43,8 +43,8 @@
                <Property name="UserNameListFilter">(objectClass=person)</Property>
            <Property name="UserEntryObjectClass">wso2Person</Property>
                <Property name="UserSearchBase">ou=Users,dc=appfactory,dc=wso2,dc=com</Property>
-               <Property name="UserNameSearchFilter">(&amp;(objectClass=person)(mail=?))</Property>
-               <Property name="UserNameAttribute">mail</Property>
+               <Property name="UserNameSearchFilter">(&amp;(objectClass=person)(uid=?))</Property>
+               <Property name="UserNameAttribute">uid</Property>
                <Property name="PasswordJavaScriptRegEx">^[\S]{5,30}$</Property>
                <Property name="UsernameJavaScriptRegEx">^[\S]{3,30}$</Property>
            <Property name="UsernameJavaRegEx">[a-zA-Z0-9._-|//]{3,30}$</Property>
@@ -68,7 +68,7 @@
                <Property name="SharedTenantObjectClass">organizationalUnit</Property>
            <Property name="MembershipAttribute">member</Property>
            <Property name="UserRolesCacheEnabled">true</Property>
-           <Property name="UserDNPattern">mail={0},ou=Users,dc=appfactory,dc=wso2,dc=com</Property>
+           <Property name="UserDNPattern">uid={0},ou=Users,dc=appfactory,dc=wso2,dc=com</Property>
                <Property name="MaxRoleNameListLength">100</Property>
                <Property name="MaxUserNameListLength">100</Property>
            </UserStoreManager>
