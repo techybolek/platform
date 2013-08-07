@@ -20,7 +20,7 @@ var log = new Log();
        var appFactoryCarbonUtilModule = require("carbonUtil");
        var appFactoryCarbonUtil = new appFactoryCarbonUtilModule.CarbonUserRealm();
 
-       var isUserAuthorized = appFactoryCarbonUtil.isUserAuthorized(username + '@' + applicationKey, permission , PERMISSION_EXECUTE);
+       var isUserAuthorized = appFactoryCarbonUtil.isUserAuthorized(username, permission , PERMISSION_EXECUTE);
        if(! isUserAuthorized){
             var errorMessage = "Un-authorized!!!. User:"+username +" does not have permission:"+permission + " on application:"+applicationKey ;
             log.error(errorMessage);

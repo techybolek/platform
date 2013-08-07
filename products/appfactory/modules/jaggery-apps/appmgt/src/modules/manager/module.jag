@@ -24,7 +24,10 @@ jagg.module("manager", {
     },
    addDataSource:function () {
        	return jagg.require(jagg.getModulesDir() + "manager/manager.jag").addDataSource.apply(this, arguments);
-        } 
+   },
+    getBackendCookie:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getBackendCookie.apply(this, arguments);
+        }
 
 });
 %>

@@ -42,7 +42,7 @@ var createApplication = function (applicationName, applicationKey, applicationDe
                     '<key>'+applicationKey+'</key>'+
                     '<version>trunk</version>'+
 		    '<isAutoBuild>true</isAutoBuild>'+
-		    '<isAutoDeploy>true</isAutoDeploy>'+	
+		    '<isAutoDeploy>true</isAutoDeploy>'+
                     '</appversion>'+
                     '<serviceLifecycle><lifecycleName>'+LIFE_CYCLE_NAME+'</lifecycleName></serviceLifecycle>'+
                     '</metadata>]]>';
@@ -92,8 +92,8 @@ var createApplicationBPEL = function (applicationName, applicationKey, applicati
 applicationType,repositoryType, userName) {
 
 var adminUserName=getProperty(ADMIN_USERNAME);
-    jagg.module("permission").checkUserActionPermission(PERMISSION_APPLICATION_CREATE);
-    
+    jagg.module("permission").checkUserActionPermission(applicationKey, PERMISSION_APPLICATION_CREATE);
+
     try {
 
         try {
@@ -131,8 +131,8 @@ var adminUserName=getProperty(ADMIN_USERNAME);
             log.error("Error while storing resource \n"+e.message);
             throw new Error("Error while storing registry resource");
         }
-        
-        
+
+
         var ws = require('ws');
         var request = new ws.WSRequest();
         var options = new Array();
@@ -187,15 +187,15 @@ var adminUserName=getProperty(ADMIN_USERNAME);
 			</wsp:ExactlyOne>
 		</wsp:Policy>;
         var payload = '<p:CreateApplicationRequest xmlns:p="http://wso2.org"><applicationId xmlns="http://wso2.org">' + applicationKey + '</applicationId><userName xmlns="http://wso2.org">' + userName + '</userName><repositoryType xmlns="http://wso2.org">' + repositoryType + '</repositoryType><adminUserName xmlns="http://wso2.org">' + adminUserName + '</adminUserName></p:CreateApplicationRequest>';
-        
+
         var result;
         var endPoint = getProperty(BPS_SERVER_URL) + "CreateApplication";
         //var endPoint =  "http://localhost:8181/services/CreateApplication";
         request.open(options, endPoint, false);
         request.send(payload);
         result = request.responseE4X;
-        var resultNS = new Namespace("http://wso2.org");
-        var repositoryPath = result.resultNS::["result"].text();
+        //var resultNS = new Namespace("http://wso2.org");
+        //var repositoryPath = result.resultNS::["result"].text();
 
         log.debug("Invoking service endpoint:" + endPoint + " returned result:" + result);
 
@@ -206,7 +206,7 @@ var adminUserName=getProperty(ADMIN_USERNAME);
         log.error("Error while creating application \n" + e.message);
         throw "Error while creating application";
     }
-    return repositoryPath;
+    //return repositoryPath;
 };
 
 // creates an svn repository for the created application
@@ -237,7 +237,7 @@ var createRepository = function (applicationKey) {
 };
 //
 var isApplicationKeyAvailable = function (applicationKey, auth) {
-	
+
 	if(auth){
 		jagg.module("permission").isUserAccessGrantedForPlatform(PERMISSION_APPLICATION_CREATE);
 	}
