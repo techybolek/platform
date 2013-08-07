@@ -35,6 +35,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     private static final org.apache.thrift.protocol.TField RESOURCE_SANDBOX_URI_FIELD_DESC = new org.apache.thrift.protocol.TField("resourceSandboxURI", org.apache.thrift.protocol.TType.STRING, (short)3);
     private static final org.apache.thrift.protocol.TField HTTP_VERB_FIELD_DESC = new org.apache.thrift.protocol.TField("httpVerb", org.apache.thrift.protocol.TType.STRING, (short)4);
     private static final org.apache.thrift.protocol.TField AUTH_TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("authType", org.apache.thrift.protocol.TType.STRING, (short)5);
+    private static final org.apache.thrift.protocol.TField THROTTLING_TIER_FIELD_DESC = new org.apache.thrift.protocol.TField("throttlingTier", org.apache.thrift.protocol.TType.STRING, (short)6);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -47,7 +48,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     public String resourceSandboxURI; // optional
     public String httpVerb; // optional
     public String authType; // optional
-    public String throttlingTier;
+    public String throttlingTier; // optional
 
     public String getThrottlingTier() {
         return throttlingTier;
@@ -64,7 +65,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
         RESOURCE_URI((short)2, "resourceURI"),
         RESOURCE_SANDBOX_URI((short)3, "resourceSandboxURI"),
         HTTP_VERB((short)4, "httpVerb"),
-        AUTH_TYPE((short)5, "authType");
+        AUTH_TYPE((short)5, "authType"),
+        THROTTLING_TIER((short)6, "throttlingTier");
 
         private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -89,6 +91,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                     return HTTP_VERB;
                 case 5: // AUTH_TYPE
                     return AUTH_TYPE;
+                case 6: // THROTTLING_TIER
+                    return THROTTLING_TIER;
                 default:
                     return null;
             }
@@ -129,7 +133,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
     }
 
     // isset id assignments
-    private _Fields optionals[] = {_Fields.URI_TEMPLATE,_Fields.RESOURCE_URI,_Fields.RESOURCE_SANDBOX_URI,_Fields.HTTP_VERB,_Fields.AUTH_TYPE};
+    private _Fields optionals[] = {_Fields.URI_TEMPLATE,_Fields.RESOURCE_URI,_Fields.RESOURCE_SANDBOX_URI,_Fields.HTTP_VERB,_Fields.AUTH_TYPE,_Fields.THROTTLING_TIER};
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
         Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -143,6 +147,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                                                                                     new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
         tmpMap.put(_Fields.AUTH_TYPE, new org.apache.thrift.meta_data.FieldMetaData("authType", org.apache.thrift.TFieldRequirementType.OPTIONAL,
                                                                                     new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+        tmpMap.put(_Fields.THROTTLING_TIER, new org.apache.thrift.meta_data.FieldMetaData("throttlingTier", org.apache.thrift.TFieldRequirementType.OPTIONAL,
+                                new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
         metaDataMap = Collections.unmodifiableMap(tmpMap);
         org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(URITemplate.class, metaDataMap);
     }
@@ -169,6 +175,9 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
         if (other.isSetAuthType()) {
             this.authType = other.authType;
         }
+        if (other.isSetThrottlingTier()) {
+            this.throttlingTier = other.throttlingTier;
+        }
     }
 
     public URITemplate deepCopy() {
@@ -182,6 +191,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
         this.resourceSandboxURI = null;
         this.httpVerb = null;
         this.authType = null;
+        this.throttlingTier = null;
     }
 
     public String getUriTemplate() {
@@ -304,6 +314,22 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
         }
     }
 
+    public void unsetThrottlingTier() {
+        this.throttlingTier = null;
+    }
+
+    /**
+     * Returns true if field throttlingTier is set (has been assigned a value) and false otherwise
+     */
+    public boolean isSetThrottlingTier() {
+        return this.throttlingTier != null;
+    }
+
+    public void setThrottlingTierIsSet(boolean value) {
+        if (!value) {
+            this.throttlingTier = null;
+        }
+    }
     public void setFieldValue(_Fields field, Object value) {
         switch (field) {
             case URI_TEMPLATE:
@@ -345,6 +371,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                     setAuthType((String)value);
                 }
                 break;
+            case THROTTLING_TIER:
+                                if (value == null) {
+                                    unsetThrottlingTier();
+                                } else {
+                                    setThrottlingTier((String)value);
+                                }
+                                break;
 
         }
     }
@@ -365,6 +398,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
 
             case AUTH_TYPE:
                 return getAuthType();
+            case THROTTLING_TIER:
+                              return getThrottlingTier();
 
         }
         throw new IllegalStateException();
@@ -387,6 +422,8 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                 return isSetHttpVerb();
             case AUTH_TYPE:
                 return isSetAuthType();
+            case THROTTLING_TIER:
+                               return isSetThrottlingTier();
         }
         throw new IllegalStateException();
     }
@@ -448,7 +485,14 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
             if (!this.authType.equals(that.authType))
                 return false;
         }
-
+        boolean this_present_throttlingTier = true && this.isSetThrottlingTier();
+        boolean that_present_throttlingTier = true && that.isSetThrottlingTier();
+        if (this_present_throttlingTier || that_present_throttlingTier) {
+            if (!(this_present_throttlingTier && that_present_throttlingTier))
+                return false;
+            if (!this.throttlingTier.equals(that.throttlingTier))
+                return false;
+        }
         return true;
     }
 
@@ -515,6 +559,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                 return lastComparison;
             }
         }
+        if (isSetThrottlingTier()) {
+            lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.throttlingTier, typedOther.throttlingTier);
+            if (lastComparison != 0) {
+                return lastComparison;
+            }
+        }
+
         return 0;
     }
 
@@ -581,6 +632,16 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                 sb.append("null");
             } else {
                 sb.append(this.authType);
+            }
+            first = false;
+        }
+        if (isSetThrottlingTier()) {
+            if (!first) sb.append(", ");
+            sb.append("throttlingTier:");
+            if (this.throttlingTier == null) {
+                sb.append("null");
+            } else {
+                sb.append(this.throttlingTier);
             }
             first = false;
         }
@@ -666,6 +727,14 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
                         }
                         break;
+                    case 6: // THROTTLING_TIER
+                        if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                            struct.throttlingTier = iprot.readString();
+                            struct.setThrottlingTierIsSet(true);
+                        } else {
+                            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+                        }
+                        break;
                     default:
                         org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
                 }
@@ -716,6 +785,13 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
                     oprot.writeFieldEnd();
                 }
             }
+            if (struct.throttlingTier != null) {
+                if (struct.isSetThrottlingTier()) {
+                    oprot.writeFieldBegin(THROTTLING_TIER_FIELD_DESC);
+                    oprot.writeString(struct.throttlingTier);
+                    oprot.writeFieldEnd();
+                }
+            }
             oprot.writeFieldStop();
             oprot.writeStructEnd();
         }
@@ -749,7 +825,10 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
             if (struct.isSetAuthType()) {
                 optionals.set(4);
             }
-            oprot.writeBitSet(optionals, 5);
+            if (struct.isSetThrottlingTier()) {
+                optionals.set(5);
+            }
+            oprot.writeBitSet(optionals, 6);
             if (struct.isSetUriTemplate()) {
                 oprot.writeString(struct.uriTemplate);
             }
@@ -770,7 +849,7 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
         @Override
         public void read(org.apache.thrift.protocol.TProtocol prot, URITemplate struct) throws org.apache.thrift.TException {
             TTupleProtocol iprot = (TTupleProtocol) prot;
-            BitSet incoming = iprot.readBitSet(5);
+            BitSet incoming = iprot.readBitSet(6);
             if (incoming.get(0)) {
                 struct.uriTemplate = iprot.readString();
                 struct.setUriTemplateIsSet(true);
@@ -790,6 +869,10 @@ public class URITemplate implements org.apache.thrift.TBase<URITemplate, URITemp
             if (incoming.get(4)) {
                 struct.authType = iprot.readString();
                 struct.setAuthTypeIsSet(true);
+            }
+            if (incoming.get(5)) {
+                struct.throttlingTier = iprot.readString();
+                struct.setThrottlingTierIsSet(true);
             }
         }
     }
