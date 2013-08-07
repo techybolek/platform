@@ -92,7 +92,7 @@ public class TargetRequestFactory {
             }
 
             String cType = getContentType(msgContext);
-            if (cType != null && (!httpMethod.equals("GET") || !httpMethod.equals("DELETE"))) {
+            if (cType != null && (!httpMethod.equals("GET") && !httpMethod.equals("DELETE"))) {
                 request.addHeader(HTTP.CONTENT_TYPE, cType);
             }
 

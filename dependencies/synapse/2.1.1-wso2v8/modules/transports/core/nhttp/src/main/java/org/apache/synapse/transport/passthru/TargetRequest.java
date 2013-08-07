@@ -143,25 +143,28 @@ public class TargetRequest {
         
         
         //fix GET request empty body
-        if((("GET").equals(requestMsgCtx.getProperty(Constants.Configuration.HTTP_METHOD))) || (("DELETE").equals(requestMsgCtx.getProperty(Constants.Configuration.HTTP_METHOD)))) {
-            hasEntityBody = false;
-            MessageFormatter formatter = MessageProcessorSelector.getMessageFormatter(requestMsgCtx);
-            OMOutputFormat format = PassThroughTransportUtils.getOMOutputFormat(requestMsgCtx);
+		if ((("GET").equals(requestMsgCtx.getProperty(Constants.Configuration.HTTP_METHOD)))
+				|| (("DELETE").equals(requestMsgCtx.getProperty(Constants.Configuration.HTTP_METHOD)))) {
+			hasEntityBody = false;
+			MessageFormatter formatter = MessageProcessorSelector.getMessageFormatter(requestMsgCtx);
+			OMOutputFormat format = PassThroughTransportUtils.getOMOutputFormat(requestMsgCtx);
 			if (formatter != null && format != null) {
 				URL _url = formatter.getTargetAddress(requestMsgCtx, format, url);
 				if (_url != null && !_url.toString().isEmpty()) {
-					if (requestMsgCtx.getProperty(NhttpConstants.POST_TO_URI) != null &&
-					    Boolean.TRUE.toString().equals(requestMsgCtx.getProperty(NhttpConstants.POST_TO_URI))) {
+					if (requestMsgCtx.getProperty(NhttpConstants.POST_TO_URI) != null
+							&& Boolean.TRUE.toString().equals(requestMsgCtx.getProperty(NhttpConstants.POST_TO_URI))) {
 						path = _url.toString();
 					} else {
-						path = _url.getPath()+((_url.getQuery()!= null && !_url.getQuery().isEmpty())?("?"+_url.getQuery()):"");
+						path = _url.getPath()
+								+ ((_url.getQuery() != null && !_url.getQuery().isEmpty())
+										? ("?" + _url.getQuery())
+										: "");
 					}
-					
+
 				}
 				headers.remove(HTTP.CONTENT_TYPE);
 			}
-		}
-        
+		}        
         
         
         Object o = requestMsgCtx.getProperty(MessageContext.TRANSPORT_HEADERS);
