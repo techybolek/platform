@@ -140,6 +140,9 @@ public class TwilioUtil {
 	public static final String PARAM_USAGE_CATEGORY = "usageCategory";
 	public static final String PARAM_TRIGGERBY = "triggerBy";
 	public static final String PARAM_USAGE_TRIGGER_SID = "usageTriggerSid";
+	public static final String PARAM_CALLBACK_URL = "callbackUrl";
+	public static final String PARAM_CALLBACK_METHOD = "callbackMethod";
+	public static final String PARAM_TRIGGER_VALUE = "triggerValue";
 	
 	public static final String TWILIO_FRIENDLY_NAME = "FriendlyName";
 	public static final String TWILIO_MAX_SIZE = "MaxSize";
@@ -205,6 +208,9 @@ public class TwilioUtil {
 	public static final String TWILIO_RECURRING = "Recurring";
 	public static final String TWILIO_USAGE_CATEGORY = "UsageCategory";
 	public static final String TWILIO_TRIGGERBY = "TriggerBy";
+	public static final String TWILIO_CALLBACK_URL = "CallbackUrl";
+	public static final String TWILIO_CALLBACK_METHOD = "CallbackMethod";
+	public static final String TWILIO_TRIGGER_VALUE = "TriggerValue";
 	
 	private static final OMFactory fac = OMAbstractFactory.getOMFactory();
 	private static final OMNamespace omNs = fac.createOMNamespace("http://wso2.org/twilio/adaptor",

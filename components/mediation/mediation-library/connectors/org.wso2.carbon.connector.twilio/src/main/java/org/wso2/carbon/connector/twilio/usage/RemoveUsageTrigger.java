@@ -17,9 +17,6 @@
  */
 package org.wso2.carbon.connector.twilio.usage;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
@@ -37,47 +34,33 @@ import com.twilio.sdk.resource.instance.UsageTrigger;
  * Class mediator for getting a an USAGE triggers
  * For more information, see http://www.twilio.com/docs/api/rest/usage-triggers
  */
-public class UpdateUsageTrigger extends AbstractConnector {
+public class RemoveUsageTrigger extends AbstractConnector {
 
 	public void connect(MessageContext messageContext) throws ConnectException {
 
 		SynapseLog log = getLog(messageContext);
-		log.auditLog("Start: update usage trigger");
+		log.auditLog("Start: remove usage trigger");
 		String triggerSid =
 		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
 		                                                                TwilioUtil.PARAM_USAGE_TRIGGER_SID);
-		String friendlyName =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
-		                                                                 TwilioUtil.PARAM_FRIENDLY_NAME);
-		String callbackUrl =
-            (String) ConnectorUtils.lookupFunctionParam(messageContext,
-                                                        TwilioUtil.PARAM_CALLBACK_URL);
-		String callbackMethod =
-            (String) ConnectorUtils.lookupFunctionParam(messageContext,
-                                                        TwilioUtil.PARAM_CALLBACK_METHOD);		
-		Map<String, String> params = new HashMap<String, String>();
-		if (friendlyName != null) {
-			params.put(TwilioUtil.TWILIO_FRIENDLY_NAME, friendlyName);
-		}
-		if (callbackUrl != null) {
-			params.put(TwilioUtil.TWILIO_CALLBACK_URL, callbackUrl);
-		}
-		if (callbackMethod != null) {
-			params.put(TwilioUtil.TWILIO_CALLBACK_METHOD, callbackMethod);
-		}		
+	
 		try {
 
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);
 			Account account = twilioRestClient.getAccount();
 			UsageTrigger usageTrigger = account.getUsageTrigger(triggerSid);
-			usageTrigger.update(params);
-			OMElement omResponse = TwilioUtil.parseResponse("usagetrigger.update.success");
+			OMElement omResponse = null;
+			if(usageTrigger.delete()){
+				omResponse = TwilioUtil.parseResponse("usagetrigger.delete.success");
+			}else{
+				omResponse = TwilioUtil.parseResponse("usagetrigger.delete.fail");
+			}
 			TwilioUtil.addElement(omResponse, TwilioUtil.PARAM_USAGE_TRIGGER_SID, usageTrigger.getSid());
 			TwilioUtil.preparePayload(messageContext, omResponse);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new SynapseException(e);
 		}
-		log.auditLog("End: update usage trigger");
+		log.auditLog("End: remove usage trigger");
 	}
 }

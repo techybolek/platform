@@ -22,6 +22,16 @@
             <file>updateUsageTrigger.xml</file>
             <description>Update usage trigger</description>
         </artifact>
+
+        <artifact name="removeUsageTrigger">
+            <file>removeUsageTrigger.xml</file>
+            <description>Remove usage trigger</description>
+        </artifact>
+
+        <artifact name="addUsageTrigger">
+            <file>addUsageTrigger.xml</file>
+            <description>Add usage trigger</description>
+        </artifact>
         
     </subArtifacts>
 
