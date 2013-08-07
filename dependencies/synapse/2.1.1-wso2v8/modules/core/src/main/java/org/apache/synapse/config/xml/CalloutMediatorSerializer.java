@@ -77,21 +77,24 @@ public class CalloutMediatorSerializer extends AbstractMediatorSerializer {
             callout.addChild(config);
         }
 
-        OMElement source = fac.createOMElement("source", synNS, callout);
         if (mediator.isUseEnvelopeAsSource()) {
+            OMElement source = fac.createOMElement("source", synNS, callout);
             source.addAttribute(fac.createOMAttribute(
                     "type", nullNS, "envelope"));
         } else if (mediator.getRequestXPath() != null) {
+            OMElement source = fac.createOMElement("source", synNS, callout);
             SynapseXPathSerializer.serializeXPath(mediator.getRequestXPath(), source, "xpath");
         } else if (mediator.getRequestKey() != null) {
+            OMElement source = fac.createOMElement("source", synNS, callout);
             source.addAttribute(fac.createOMAttribute(
                     "key", nullNS, mediator.getRequestKey()));
         }
 
-        OMElement target = fac.createOMElement("target", synNS, callout);
         if (mediator.getTargetXPath() != null) {
+            OMElement target = fac.createOMElement("target", synNS, callout);
             SynapseXPathSerializer.serializeXPath(mediator.getTargetXPath(), target, "xpath");
         } else if (mediator.getTargetKey() != null) {
+            OMElement target = fac.createOMElement("target", synNS, callout);
             target.addAttribute(fac.createOMAttribute(
                     "key", nullNS, mediator.getTargetKey()));
         }

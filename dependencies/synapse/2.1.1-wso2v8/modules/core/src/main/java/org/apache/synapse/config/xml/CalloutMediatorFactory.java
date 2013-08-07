@@ -151,7 +151,7 @@ public class CalloutMediatorFactory extends AbstractMediatorFactory {
                                 "is required for the Callout 'source'");
             }
         } else {
-            handleException("The message 'source' must be specified for a Callout mediator");
+            callout.setUseEnvelopeAsSource(true);
         }
 
         if (targetElt != null) {
@@ -169,8 +169,6 @@ public class CalloutMediatorFactory extends AbstractMediatorFactory {
                 handleException("A 'xpath' or 'key' attribute " +
                     "is required for the Callout 'target'");
             }
-        } else {
-            handleException("The message 'target' must be specified for a Callout mediator");
         }
 
         if (wsSec != null) {

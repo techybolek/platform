@@ -107,7 +107,7 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                 endpoint = new AddressEndpoint();
                 isWrappingEndpointCreated = true;
                 endpointDefinition = new EndpointDefinition();
-                endpointDefinition.setAddress(endpointReferenceValue.trim());
+                endpointDefinition.setAddress(serviceURL);
                 ((AddressEndpoint) endpoint).setDefinition(endpointDefinition);
             } else if (endpointKey != null) {
                 endpoint = synCtx.getEndpoint(endpointKey);
@@ -164,25 +164,25 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                 }
             }
 
-            OMElement result = null;
+            MessageContext resultMsgCtx = null;
             try {
                 if ("true".equals(synCtx.getProperty(SynapseConstants.OUT_ONLY))) {
                     blockingMsgSender.send(endpoint, synapseOutMsgCtx);
                 } else {
-                    result = blockingMsgSender.send(endpoint, synapseOutMsgCtx).getEnvelope().getBody().getFirstElement();
+                    resultMsgCtx = blockingMsgSender.send(endpoint, synapseOutMsgCtx);
                 }
             } catch (Exception ex) {
                 handleFault(synCtx, ex);
             }
 
             if (synLog.isTraceTraceEnabled()) {
-                synLog.traceTrace("Response payload received : " + result);
+                synLog.traceTrace("Response payload received : " + resultMsgCtx.getEnvelope());
             }
 
-            if (result != null) {
+            if (resultMsgCtx != null) {
                 if (targetXPath != null) {
                     Object o = targetXPath.evaluate(synCtx);
-
+                    OMElement result = resultMsgCtx.getEnvelope().getBody().getFirstElement();
                     if (o != null && o instanceof OMElement) {
                         OMNode tgtNode = (OMElement) o;
                         tgtNode.insertSiblingAfter(result);
@@ -198,7 +198,10 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                     }
                 }
                 if (targetKey != null) {
+                    OMElement result = resultMsgCtx.getEnvelope().getBody().getFirstElement();
                     synCtx.setProperty(targetKey, result);
+                } else {
+                    synCtx.setEnvelope(resultMsgCtx.getEnvelope());
                 }
             } else {
                 synLog.traceOrDebug("Service returned a null response");
