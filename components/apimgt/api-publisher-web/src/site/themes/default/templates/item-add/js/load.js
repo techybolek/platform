@@ -30,13 +30,21 @@ function loadTiers() {
 
 $(document).ready(function() {
 
-    $('.transports_check').change(function(){
+    $('.transports_check_http').change(function(){
         if($(this).is(":checked")){
-            $(this).next().val($(this).val());
+            $(http_checked).val($(this).val());
         }else{
-            $(this).next().val("");
+            $(http_checked).val("");
         }
     });
+
+    $('.transports_check_https').change(function(){
+            if($(this).is(":checked")){
+                $(https_checked).val($(this).val());
+            }else{
+                $(https_checked).val("");
+            }
+        });
 
     $("select[name='tier']").change(function() {
         // multipleValues will be an array

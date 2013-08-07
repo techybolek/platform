@@ -152,13 +152,13 @@ API Definition for Swagger will not be overriden with the changes you will do to
                <div class="controls">
                    <div class="checkbox">
                        <label>
-                           <input type="checkbox" class="required transports_check" id="transport_http" name="transports" value="http" <%=api.transport_http%>/>
-                           <input type="hidden" name="http_checked" value="http"/>
+                           <input type="checkbox" class="required transports_check_http" id="transport_http" name="transports" value="http" <%=api.transport_http%>/>
+                           <input type="hidden" id="http_checked" name="http_checked" <%if(api.transport_http == "checked"){%>value="http"<%}else{%>value=""<%}%>/>
                            <%=i18n.localize("httpTransport")%>
                        </label>
                        <label>
-                           <input type="checkbox" class="required transports_check" id="transport_https" name="transports" value="https" <%=api.transport_https%>/>
-                           <input type="hidden" name="https_checked" value="https"/>
+                           <input type="checkbox" class="required transports_check_https" id="transport_https" name="transports" value="https" <%=api.transport_https%>/>
+                           <input type="hidden" id="https_checked" name="https_checked" <%if(api.transport_https == "checked"){%>value="https"<%}else{%>value=""<%}%>/>
                            <%=i18n.localize("httpsTransport")%>
                        </label>
                    </div>
