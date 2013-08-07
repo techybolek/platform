@@ -1,30 +1,39 @@
-function loadTiers() {
+function loadTiers(row) {
+
     var target = document.getElementById("tier");
+
     jagg.post("/site/blocks/item-add/ajax/add.jag", { action:"getTiers" },
-              function (result) {
-                  if (!result.error) {
-                      var arr = [];
-                      for (var i = 0; i < result.tiers.length; i++) {
-                          arr.push(result.tiers[i].tierName);
-                      }
-                      for (var j = 0; j < arr.length; j++) {
-                          option = new Option(arr[j], arr[j]);
-                          target.options[j] = option;
-                          target.options[j].title = result.tiers[j].tierDescription;
-                          if (j == 0) {
-                              target.options[j].selected = 'selected';
-                              $("#tiersHelp").html(result.tiers[0].tierDescription);
-                              var tierArr = [];
-                              tierArr.push(target.options[j].value);
-                              $('<input>').attr('type', 'hidden')
-                                      .attr('name', 'tiersCollection')
-                                      .attr('id', 'tiersCollection')
-                                      .attr('value', tierArr)
-                                      .appendTo('#addAPIForm');
-                          }
-                      }
-                  }
-              }, "json");
+        function (result) {
+            if (!result.error) {
+                var arr = [];
+                for (var i = 0; i < result.tiers.length; i++) {
+                    arr.push(result.tiers[i].tierName);
+                    var k = result.tiers.length - i -1;
+                    $('.getThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.postThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.putThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.deleteThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.optionsThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                }
+                for (var j = 0; j < arr.length; j++) {
+                    option = new Option(arr[j], arr[j]);
+                    target.options[j] = option;
+                    target.options[j].title = result.tiers[j].tierDescription;
+
+                    if (j == 0) {
+                        target.options[j].selected = 'selected';
+                        $("#tiersHelp").html(result.tiers[0].tierDescription);
+                        var tierArr = [];
+                        tierArr.push(target.options[j].value);
+                        $('<input>').attr('type', 'hidden')
+                            .attr('name', 'tiersCollection')
+                            .attr('id', 'tiersCollection')
+                            .attr('value', tierArr)
+                            .appendTo('#addAPIForm');
+                    }
+                }
+            }
+        }, "json");
 }
 
 
