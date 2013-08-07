@@ -4,21 +4,11 @@
     <parameter name="useDefaultListeners" value="false"/>
     <test name="Test - GREG" preserve-order="true" parallel="false">
         <packages>
-            <package name="org.wso2.carbon.registry.permission.test"/>
             <package name="org.wso2.carbon.registry.resource.test"/>
-            <package name="org.wso2.carbon.registry.lifecycle.test"/>
-            <package name="org.wso2.carbon.registry.mediatype.test"/>
-            <package name="org.wso2.carbon.registry.governance.api.test"/>
-            <package name="org.wso2.carbon.registry.activity.search"/>
-            <package name="org.wso2.carbon.registry.capp.deployment.test"/>
-            <package name="org.wso2.carbon.registry.version.test"/>
-            <package name="org.wso2.carbon.registry.search.metadata.test"/>
-            <package name="org.wso2.carbon.registry.subscription.test"/>
         </packages>
 
 
         <classes>
-            <!--<class name="org.wso2.carbon.registry.jira.issues.test.SaveSearchTestCase"/>-->
         </classes>
     </test>
 </suite>
