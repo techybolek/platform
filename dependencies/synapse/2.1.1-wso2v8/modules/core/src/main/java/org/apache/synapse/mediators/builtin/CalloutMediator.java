@@ -77,7 +77,6 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
     private String outboundWsSecPolicyKey = null;
     public final static String DEFAULT_CLIENT_REPO = "./samples/axis2Client/client_repo";
     public final static String DEFAULT_AXIS2_XML = "./samples/axis2Client/client_repo/conf/axis2.xml";
-    String endpointReferenceValue = null;
 
     BlockingMsgSender blockingMsgSender = null;
 
@@ -102,6 +101,7 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                 blockingMsgSender.setInitClientOptions(false);
             }
 
+            String endpointReferenceValue = null;
             boolean isWrappingEndpointCreated = false;
             if (serviceURL != null) {
                 endpoint = new AddressEndpoint();
@@ -291,7 +291,7 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                     clientRepository != null ? clientRepository : DEFAULT_CLIENT_REPO,
                     axis2xml != null ? axis2xml : DEFAULT_AXIS2_XML);
             if (serviceURL != null) {
-                endpointReferenceValue = changeEndPointReference(serviceURL);
+                serviceURL = changeEndPointReference(serviceURL);
             }
 
             blockingMsgSender = new BlockingMsgSender();
