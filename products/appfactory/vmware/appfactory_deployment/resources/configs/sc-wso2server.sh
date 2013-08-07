@@ -292,6 +292,7 @@ do
     -Dorg.terracotta.quartz.skipUpdateCheck=true \
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF8 \
+    -DapplyPatches \
     -Dloadbalancer.conf=file:repository/conf/loadbalancer.conf \
     org.wso2.carbon.bootstrap.Bootstrap $*
     status=$?
