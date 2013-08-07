@@ -47,7 +47,7 @@ public interface ContinuousIntegrationSystemDriver {
      * @throws AppFactoryException
      *             if a error occurs
      */
-    public void createJob(String applicationId, String version, String revision)
+    public void createJob(String applicationId, String version, String revision, String tenantDomain)
                                                                                 throws AppFactoryException;
 
     /**
