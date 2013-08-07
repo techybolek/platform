@@ -65,6 +65,25 @@ public class AnonymousServiceFactory {
     public static AxisService getAnonymousService(SynapseConfiguration synCfg,
                                                   AxisConfiguration axisCfg, boolean wsAddrOn,
                                                   boolean wsRMOn, boolean wsSecOn) {
+        return getAnonymousService(synCfg, axisCfg, wsAddrOn, wsRMOn, wsSecOn, true);
+    }
+
+    /**
+     * Creates an AxisService for the requested QoS for sending out messages
+     * Callers must guarantee that if wsRMon or wsSecOn is required, that wsAddrOn is also set
+     *
+     * @param synCfg   Synapse configuration
+     * @param axisCfg  Axis2 configuration
+     * @param wsAddrOn whether addressing is on or not
+     * @param wsRMOn   whether RM is on ot not
+     * @param wsSecOn  whether security is on or not
+     * @param setCallback whether to register a synapse callback receiver or not
+     * @return An Axis service for the requested QoS
+     */
+    public static AxisService getAnonymousService(SynapseConfiguration synCfg,
+                                                  AxisConfiguration axisCfg, boolean wsAddrOn,
+                                                  boolean wsRMOn, boolean wsSecOn,
+                                                  boolean setCallback) {
 
         // if non of addressing, security and rm is engaged then checkbit is 0
         int checkbit = 0;
@@ -117,7 +136,7 @@ public class AnonymousServiceFactory {
                         return service;
                     }
 
-                    service = createAnonymousService(synCfg, axisCfg, servicekey);
+                    service = createAnonymousService(synCfg, axisCfg, servicekey, setCallback);
 
                     if (wsAddrOn) {
                         service.engageModule(axisCfg.getModule(
@@ -156,47 +175,90 @@ public class AnonymousServiceFactory {
      * @return an anonymous service named with the given QoS key
      */
     private static AxisService createAnonymousService(SynapseConfiguration synCfg,
-        AxisConfiguration axisCfg, String serviceKey) {
-
+                                                      AxisConfiguration axisCfg, String serviceKey,
+                                                      boolean setCallback) {
         try {
-            DynamicAxisOperation dynamicOperation =
-                new DynamicAxisOperation(new QName(OUT_IN_OPERATION));
-            dynamicOperation.setMessageReceiver(getCallbackReceiver(synCfg, axisCfg));
-            AxisMessage inMsg = new AxisMessage();
-            inMsg.setName("in-message");
-            inMsg.setParent(dynamicOperation);
-            AxisMessage outMsg = new AxisMessage();
-            outMsg.setName("out-message");
-            outMsg.setParent(dynamicOperation);
-            dynamicOperation.addMessage(inMsg, WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-            dynamicOperation.addMessage(outMsg, WSDLConstants.MESSAGE_LABEL_IN_VALUE);
-
-            OutOnlyAxisOperation asyncOperation =
-                new OutOnlyAxisOperation(new QName(OUT_ONLY_OPERATION));
-            asyncOperation.setMessageReceiver(getCallbackReceiver(synCfg, axisCfg));
-            AxisMessage outOnlyMsg = new AxisMessage();
-            outOnlyMsg.setName("out-message");
-            outOnlyMsg.setParent(asyncOperation);
-            asyncOperation.addMessage(outMsg, WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-
-            AxisService axisAnonymousService  = new AxisService(serviceKey);
-            axisAnonymousService.addOperation(dynamicOperation);
-            axisAnonymousService.addOperation(asyncOperation);
-            AxisServiceGroup axisAnonSvcGroup = new AxisServiceGroup(axisCfg);
-            axisAnonSvcGroup.setServiceGroupName(serviceKey);
-            axisAnonSvcGroup.addParameter(SynapseConstants.HIDDEN_SERVICE_PARAM, "true");
-            axisAnonymousService.setClientSide(true);
-            axisAnonSvcGroup.addService(axisAnonymousService);
-            axisCfg.addServiceGroup(axisAnonSvcGroup);
-            axisCfg.getPhasesInfo().setOperationPhases(dynamicOperation);
-            return axisAnonymousService;
-
+            if (setCallback) {
+                return getAxisServiceWithCallback(synCfg, axisCfg, serviceKey);
+            } else {
+                return getAxisServiceWithoutCallback(synCfg, axisCfg, serviceKey);
+            }
         } catch (AxisFault e) {
             handleException(
-                "Error occured while creating an anonymous service for QoS : " +
-                 serviceKey, e);
+                    "Error occured while creating an anonymous service for QoS : " +
+                    serviceKey, e);
         }
         return null;
+    }
+
+    private static AxisService getAxisServiceWithCallback(SynapseConfiguration synCfg,
+                                                          AxisConfiguration axisCfg,
+                                                          String serviceKey) throws AxisFault {
+        DynamicAxisOperation dynamicOperation =
+                new DynamicAxisOperation(new QName(OUT_IN_OPERATION));
+        dynamicOperation.setMessageReceiver(getCallbackReceiver(synCfg, axisCfg));
+        AxisMessage inMsg = new AxisMessage();
+        inMsg.setName("in-message");
+        inMsg.setParent(dynamicOperation);
+        AxisMessage outMsg = new AxisMessage();
+        outMsg.setName("out-message");
+        outMsg.setParent(dynamicOperation);
+        dynamicOperation.addMessage(inMsg, WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+        dynamicOperation.addMessage(outMsg, WSDLConstants.MESSAGE_LABEL_IN_VALUE);
+
+        OutOnlyAxisOperation asyncOperation =
+                new OutOnlyAxisOperation(new QName(OUT_ONLY_OPERATION));
+        asyncOperation.setMessageReceiver(getCallbackReceiver(synCfg, axisCfg));
+        AxisMessage outOnlyMsg = new AxisMessage();
+        outOnlyMsg.setName("out-message");
+        outOnlyMsg.setParent(asyncOperation);
+        asyncOperation.addMessage(outMsg, WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+
+        AxisService axisAnonymousService = new AxisService(serviceKey);
+        axisAnonymousService.addOperation(dynamicOperation);
+        axisAnonymousService.addOperation(asyncOperation);
+        AxisServiceGroup axisAnonSvcGroup = new AxisServiceGroup(axisCfg);
+        axisAnonSvcGroup.setServiceGroupName(serviceKey);
+        axisAnonSvcGroup.addParameter(SynapseConstants.HIDDEN_SERVICE_PARAM, "true");
+        axisAnonymousService.setClientSide(true);
+        axisAnonSvcGroup.addService(axisAnonymousService);
+        axisCfg.addServiceGroup(axisAnonSvcGroup);
+        axisCfg.getPhasesInfo().setOperationPhases(dynamicOperation);
+        return axisAnonymousService;
+    }
+
+    private static AxisService getAxisServiceWithoutCallback(SynapseConfiguration synCfg,
+                                                             AxisConfiguration axisCfg,
+                                                             String serviceKey) throws AxisFault {
+        OutInAxisOperation outInAxisOperation =
+                new OutInAxisOperation(new QName(OUT_IN_OPERATION));
+        AxisMessage inMsg = new AxisMessage();
+        inMsg.setName("in-message");
+        inMsg.setParent(outInAxisOperation);
+        AxisMessage outMsg = new AxisMessage();
+        outMsg.setName("out-message");
+        outMsg.setParent(outInAxisOperation);
+        outInAxisOperation.addMessage(inMsg, WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+        outInAxisOperation.addMessage(outMsg, WSDLConstants.MESSAGE_LABEL_IN_VALUE);
+
+        OutOnlyAxisOperation outOnlyAxisOperation =
+                new OutOnlyAxisOperation(new QName(OUT_ONLY_OPERATION));
+        AxisMessage outOnlyMsg = new AxisMessage();
+        outOnlyMsg.setName("out-message");
+        outOnlyMsg.setParent(outOnlyAxisOperation);
+        outOnlyAxisOperation.addMessage(outMsg, WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
+
+        AxisService axisAnonymousService = new AxisService(serviceKey);
+        axisAnonymousService.addOperation(outInAxisOperation);
+        axisAnonymousService.addOperation(outOnlyAxisOperation);
+        AxisServiceGroup axisAnonSvcGroup = new AxisServiceGroup(axisCfg);
+        axisAnonSvcGroup.setServiceGroupName(serviceKey);
+        axisAnonSvcGroup.addParameter(SynapseConstants.HIDDEN_SERVICE_PARAM, "true");
+        axisAnonymousService.setClientSide(true);
+        axisAnonSvcGroup.addService(axisAnonymousService);
+        axisCfg.addServiceGroup(axisAnonSvcGroup);
+        axisCfg.getPhasesInfo().setOperationPhases(outInAxisOperation);
+        return axisAnonymousService;
     }
 
     /**
