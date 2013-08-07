@@ -203,6 +203,23 @@
         </Keys>
     </ApiManager>
 
+    <!-- BAM integration related configurations -->
+    <BAM>
+        <Server>
+                <Url>https://localhost:9446</Url>
+        </Server>
+        <Dashboards>
+                <AdminDashboard>
+                        <Path>/AdminDashboard</Path>
+                </AdminDashboard>
+                <CEODashboard>
+                        <Path>/CEODashboard</Path>
+                </CEODashboard>
+                <AppFactoryUsersDashboard>
+                        <Path>/DevelperDashboard</Path>
+                </AppFactoryUsersDashboard>
+        </Dashboards>
+    </BAM>
 
     <!--Application repository related configurations-->
 
