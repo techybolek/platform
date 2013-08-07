@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="twilio-cloud-connector-usage" type="synapse/template">
+
+    <subArtifacts>
+    
+        <artifact name="getUsageRecordList">
+            <file>getUsageRecordList.xml</file>
+            <description>Get usage record list</description>
+        </artifact>
+        
+        <artifact name="getUsageTriggerList">
+            <file>getUsageTriggerList.xml</file>
+            <description>Get usage trigger list</description>
+        </artifact>
+
+        <artifact name="getUsageTrigger">
+            <file>getUsageTrigger.xml</file>
+            <description>Get usage trigger</description>
+        </artifact>
+
+        <artifact name="updateUsageTrigger">
+            <file>updateUsageTrigger.xml</file>
+            <description>Update usage trigger</description>
+        </artifact>
+        
+    </subArtifacts>
+
+</artifact>

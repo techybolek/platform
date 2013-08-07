@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="twilio-cloud-connector-call" type="synapse/template">
+
+    <subArtifacts>
+        <!--Calls-->
+        <artifact name="makeCall">
+            <file>makeCall.xml</file>
+            <description>Make A Call</description>
+        </artifact>
+        <artifact name="getCall">
+            <file>getCall.xml</file>
+            <description>Get details of a single Incoming or Outgoing Call</description>
+        </artifact>
+        <artifact name="getCallList">
+            <file>getCallList.xml</file>
+            <description>Get a list of incoming and outgoing calls</description>
+        </artifact>
+        <artifact name="modifyLiveCall">
+            <file>modifyLiveCall.xml</file>
+            <description>Modify a live call</description>
+        </artifact>
+        <artifact name="getTranscription">
+            <file>getTranscription.xml</file>
+            <description>Get recorded transcriptions by Transcription SID</description>
+        </artifact>
+        <artifact name="getTranscriptionList">
+            <file>getTranscriptionList.xml</file>
+            <description>Get a list of recorded transcriptions</description>
+        </artifact>
+        <artifact name="getRecording">
+            <file>getRecording.xml</file>
+            <description>Get a recording</description>
+        </artifact>
+        <artifact name="getRecordingList">
+            <file>getRecordingList.xml</file>
+            <description>Get a list of recordings</description>
+        </artifact>
+        <artifact name="deleteRecording">
+            <file>deleteRecording.xml</file>
+            <description>Delete a recording</description>
+        </artifact>
+    </subArtifacts>
+
+</artifact>

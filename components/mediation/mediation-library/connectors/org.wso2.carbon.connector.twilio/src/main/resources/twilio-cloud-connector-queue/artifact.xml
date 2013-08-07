@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="twilio-cloud-connector-queue" type="synapse/template">
+
+    <subArtifacts>
+        <!-- Queues -->
+        <artifact name="getQueue">
+            <file>getQueue.xml</file>
+            <description>Retrieve a call queue as represented by an SID</description>
+        </artifact>
+        <artifact name="updateQueue">
+            <file>updateQueue.xml</file>
+            <description>Retrieve a call queue as represented by an SID and update its parameters</description>
+        </artifact>
+        <artifact name="getQueueList">
+            <file>getQueueList.xml</file>
+            <description>Retrieve the list of queues from the specified account</description>
+        </artifact>
+        <artifact name="createQueue">
+            <file>createQueue.xml</file>
+            <description>Create a new queue instance and add it to the current account's list of queues</description>
+        </artifact>
+        <artifact name="getMember">
+            <file>getMember.xml</file>
+            <description>Retrieve a member instance from a queue</description>
+        </artifact>
+        <artifact name="dequeueMember">
+            <file>dequeueMember.xml</file>
+            <description>Dequeue a member instance from a queue</description>
+        </artifact>
+        <artifact name="getMemberList">
+            <file>getMemberList.xml</file>
+            <description>Retrieve a list of member instance from a queue</description>
+        </artifact>
+    </subArtifacts>
+    
+</artifact>
