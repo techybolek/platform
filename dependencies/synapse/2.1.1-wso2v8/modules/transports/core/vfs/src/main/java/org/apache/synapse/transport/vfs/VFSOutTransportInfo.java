@@ -46,7 +46,7 @@ public class VFSOutTransportInfo implements OutTransportInfo {
     private boolean append;
     private boolean fileLocking;
 
-    private static String[] uriParamsToDelete = {VFSConstants.APPEND+"=true", VFSConstants.APPEND+"=false"};
+    private static final String[] uriParamsToDelete = {VFSConstants.APPEND+"=true", VFSConstants.APPEND+"=false"};
 
     /**
      * Constructs the VFSOutTransportInfo containing the information about the file to which the
