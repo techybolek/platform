@@ -309,7 +309,7 @@ public class APIKeyValidator {
             String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
 
             //Get decision from cache.
-            +VerbInfoDTO matchingVerb = null;
+            VerbInfoDTO matchingVerb = null;
             if (isGatewayAPIKeyValidationEnabled) {
                 matchingVerb = (VerbInfoDTO) resourceCache.get(requestCacheKey);
             }
