@@ -1,0 +1,52 @@
+{
+    "server": {
+        "https": "https://localhost:9446",
+        "http": "http://localhost:9766"
+    },
+    "roles": {
+        "portal": {
+            "/permission/admin/login": ["ui.execute"]
+        }
+    },
+    "adminRole": "admin",
+    "user": {
+        "username": "admin",
+        "password": "admin"
+    },
+    "userRoles": ["portal"],
+    "permissions": {
+        "login": {
+            "/permission/admin/login": ["ui.execute"]
+        }
+    },
+    "userSpace": {
+        "space": "AdminDashboard",
+        "options": {
+            "type": "registry",
+            "serverUrl": "https://localhost:9446/admin",
+            "path": "/_system/governance/users",
+            "username": "admin",
+            "password": "admin"
+        }
+    },
+    "storeSpace": {
+        "space": "store",
+        "options": {
+            "type": "registry",
+            "serverUrl": "https://localhost:9446/admin",
+            "path": "/_system/governance/users",
+            "username": "admin",
+            "password": "admin"
+        }
+    },
+    "ssoConfiguration": {
+        "enabled": true,
+        "issuer": "AdminDashboard",
+        "identityProviderURL": "https://localhost:9446/sso/samlsso.jag",
+        "keyStorePassword": "wso2carbon",
+        "identityAlias": "wso2carbon",
+        "responseSigningEnabled": "true",
+        "keyStoreName": "/repository/resources/security/wso2carbon.jks",
+        "appAcs" : "https://localhost:9446/AdminDashboard/sso.jag",
+    }
+}
