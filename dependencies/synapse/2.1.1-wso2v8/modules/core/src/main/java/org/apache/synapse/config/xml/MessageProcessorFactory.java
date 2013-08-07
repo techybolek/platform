@@ -87,8 +87,10 @@ public class MessageProcessorFactory {
 
         OMAttribute targetSequenceAtt = elem.getAttribute(TARGET_ENDPOINT_Q);
         if (nameAtt != null) {
-            assert targetSequenceAtt != null;
-            processor.setTargetEndpoint(targetSequenceAtt.getAttributeValue());
+            if (targetSequenceAtt != null) {
+                assert processor != null;
+                processor.setTargetEndpoint(targetSequenceAtt.getAttributeValue());
+            }
         } else {
             handleException("Can't create Message processor without a name ");
         }

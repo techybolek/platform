@@ -64,6 +64,12 @@ public class SamplingService implements InterruptableJob, Service {
                 if (messageContext != null) {
                     dispatch(messageContext);
                 }
+                else {
+                    // either the connection is broken or there are no new massages.
+                    if (log.isDebugEnabled()) {
+                        log.debug("No messages were received for message processor ["+ messageProcessor.getName() + "]");
+                    }
+                }
             }
         } catch (Throwable t) {
             // All the possible recoverable exceptions are handles case by case and yet if it comes this
@@ -114,8 +120,6 @@ public class SamplingService implements InterruptableJob, Service {
         executor.submit(new Runnable() {
             public void run() {
                 try {
-                    // TODO : REMOVE THIS
-                    sequence = "send_seq";
                     Mediator processingSequence = messageContext.getSequence(sequence);
                     if (processingSequence != null) {
                         processingSequence.mediate(messageContext);
