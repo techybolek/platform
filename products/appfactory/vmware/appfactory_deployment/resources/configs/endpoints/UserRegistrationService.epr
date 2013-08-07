@@ -7,7 +7,7 @@
    <wsa:Metadata>
            <id>SInvokeEPR</id>
            <transport type="http">
-		<authorization-username>admin</authorization-username> 
+		<authorization-username>admin</authorization-username>  
     		<authorization-password>admin</authorization-password>
            </transport>
        </wsa:Metadata>
