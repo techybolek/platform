@@ -160,24 +160,21 @@ public class DiscoveryServiceUtils {
         }
     }
 
-    public static void removeService(TargetService service, Map<String,
-            String> headerMap) throws Exception {
+    public static void deactivateService(TargetService targetService) throws Exception {
         ServiceManager serviceManager = new ServiceManager(getRegistry());
-        String serviceId = service.getEpr().getAddress();
-
-        Service oldService = serviceManager.getService(serviceId);
-        oldService.deactivate();
-    }
-
-    public static void deactivateService(TargetService service) throws Exception {
-        TargetService targetService = getService(service.getEpr());
-
-        if (targetService == null) {
-            throw new DiscoveryException("Error while updating discovery metadata. No service " +
-                    "exists with the ID: " + service.getEpr().getAddress());
+        String serviceId = targetService.getEpr().getAddress();
+        //This part is use to remove the prefix of Service ID
+        if(serviceId.startsWith(DiscoveryConstants.EPR_ADDRESS_PREFIX)){
+            serviceId = serviceId.replace(DiscoveryConstants.EPR_ADDRESS_PREFIX, "");
         }
 
-        removeService(service, Collections.<String, String>emptyMap());
+        Service service = serviceManager.getService(serviceId);
+        if (service == null) {
+            throw new DiscoveryException("Error while updating discovery metadata. No service " +
+                                "exists with the ID: " + serviceId);
+        }
+
+        service.deactivate();
     }
 
     public static void removeServiceEndpoints(TargetService service) throws Exception {
@@ -240,7 +237,14 @@ public class DiscoveryServiceUtils {
      */
     public static TargetService getService(EndpointReference epr) throws Exception {
         ServiceManager serviceManager = new ServiceManager(getRegistry());
-        Service service = serviceManager.getService(epr.getAddress());
+
+        String serviceId = epr.getAddress();
+        //This part is use to remove the prefix of Service ID
+        if(serviceId.startsWith(DiscoveryConstants.EPR_ADDRESS_PREFIX)){
+            serviceId = serviceId.replace(DiscoveryConstants.EPR_ADDRESS_PREFIX, "");
+        }
+
+        Service service = serviceManager.getService(serviceId);
         if (service == null) {
             return null;
         }
