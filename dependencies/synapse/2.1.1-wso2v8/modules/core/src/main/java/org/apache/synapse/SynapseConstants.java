@@ -320,7 +320,13 @@ public final class SynapseConstants {
     public static final String FORMAT_GET = "get";
     public static final String FORMAT_SOAP11 = "soap11";
     public static final String FORMAT_SOAP12 = "soap12";    
-    public static final String FORMAT_REST = "rest";    
+    public static final String FORMAT_REST = "rest";
+
+    // - Blocking Message Sender Constants
+    /** The Synapse MC property that marks to Exception to be thrown on SOAPFault(Retry on SOAPFault)*/
+    public static final String THROW_EXCEPTION_ON_SOAPFAULT = "THROW_EXCEPTION_ON_SOAPFAULT";
+
+    public static final String BLOCKING_SENDER_ERROR = "blocking.sender.error";
 
     /** Synapse server instance name */
     public static final String SERVER_NAME = "serverName";
