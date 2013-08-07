@@ -2,20 +2,39 @@
 
 <suite name="APPServer-features-test-suite">
     <parameter name="useDefaultListeners" value="false"/>
-    <test name="Test - APPServer" preserve-order="true" parallel="false">
-        <packages>
-            <package name="org.wso2.carbon.integration.test.*"/>
-            <package name="jaggery.integration.tests.*"/>
-            <package name="ms.integration.tests.*"/>
-        </packages>
 
+    <test name="InitializedAndSetupServer" preserve-order="true" parallel="false">
         <classes>
-            <!--<class name="org.wso2.carbon.integration.test.sampleservices.axis2module.Axis2ModuleTestCase"/>-->
-            <!--<class name="org.wso2.carbon.integration.test.qualityofservice.throtllingservice.ThrottlingTestCase"/>-->
-            <!--<class name="org.wso2.carbon.integration.test.webapp.mgt.WebApplicationFaultyDeploymentTestCase"/>-->
-            <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityByAdminTestCase"/>-->
-            <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityVerifyPostMethod"/>-->
-            <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityWithInvalidGroupTestCase"/>-->
+            <class name="org.wso2.carbon.integration.test.ServerStartupTestCase"/>
         </classes>
     </test>
+
+    <test name="jaggery-integration-tests" preserve-order="true" parallel="false">
+        <packages>
+            <package name="jaggery.integration.tests.*"/>
+        </packages>
+    </test>
+
+    <test name="ms-integration-tests" preserve-order="true" parallel="false">
+        <packages>
+            <package name="ms.integration.tests.emailhostobject.*"/>
+        </packages>
+    </test>
+
+    <test name="integration-tests" preserve-order="true" parallel="false">
+        <packages>
+            <package name="org.wso2.carbon.integration.test.*"/>
+        </packages>
+    </test>
+
+    <!--<test name="debugging-tests" preserve-order="true" parallel="false">-->
+        <!--<packages>-->
+            <!--<package name="org.wso2.carbon.integration.test.*"/>-->
+        <!--</packages>-->
+        <!---->
+        <!--<classes>-->
+            <!--<class name="org.wso2.carbon.integration.test.aarservice.AARUploaderTest"/>-->
+        <!--</classes>-->
+    <!--</test>-->
+
 </suite>
