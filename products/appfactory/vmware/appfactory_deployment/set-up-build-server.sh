@@ -13,7 +13,7 @@ do
         esac
 done
 
-BUILD_SERVER_AS_HOME=`pwd`/setup/buildserver/wso2as-${version}
+BUILD_SERVER_AS_HOME=$working_dir/buildserver/wso2as-${version}
 JENKINS_TENANT_HOME=$BUILD_SERVER_AS_HOME/repository/jenkins
 
 #Configure Build Server
