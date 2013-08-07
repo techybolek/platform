@@ -32,6 +32,8 @@ cat $resorce_dir/configs/buildserver-carbon.xml | sed -e "s@AF_HOST@$af_host_nam
 cat $resorce_dir/configs/buildserver-axis2.xml | sed -e "s@AF_HOST@$af_host_name@g" > $BUILD_SERVER_AS_HOME/repository/conf/axis2/axis2.xml
 cp $resorce_dir/configs/buildserver-webapp-classloading-environments.xml $BUILD_SERVER_AS_HOME/repository/conf/tomcat/webapp-classloading-environments.xml
 
+cp $resorce_dir/configs/buildserver-wso2server.sh $BUILD_SERVER_AS_HOME/bin/wso2server.sh
+
 cp $resorce_dir/lib/mysql-connector-java-5.1.12-bin.jar $BUILD_SERVER_AS_HOME/repository/components/lib
 
 echo "[Build Server] Copying jenkins war..."
