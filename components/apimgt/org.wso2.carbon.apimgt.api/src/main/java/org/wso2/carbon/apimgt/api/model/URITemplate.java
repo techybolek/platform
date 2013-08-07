@@ -28,6 +28,25 @@ public class URITemplate {
     private String authType;
     private LinkedHashSet<String> httpVerbs = new LinkedHashSet<String>();
     private List<String> authTypes = new ArrayList<String>();
+    private String throttlingTier;
+    private List<String> throttlingTiers = new ArrayList<String>();
+
+    public String getThrottlingTier() {
+        return throttlingTier;
+    }
+
+    public void setThrottlingTier(String throttlingTier) {
+        this.throttlingTier = throttlingTier;
+    }
+
+    public List<String> getThrottlingTiers() {
+        return throttlingTiers;
+    }
+
+    public void setThrottlingTiers(List<String> throttlingTiers) {
+        this.throttlingTiers = throttlingTiers;
+    }
+
 
     public String getHTTPVerb() {
         return httpVerb;
@@ -107,5 +126,16 @@ public class URITemplate {
         return str.trim();
     }
 
+    public void setThrottlingTiers(String tier) {
+        throttlingTiers.add(tier);
+    }
+
+    public String getThrottlingTiersAsString() {
+        String str = "";
+        for (String tier : throttlingTiers) {
+            str += tier + " ";
+        }
+        return str.trim();
+    }
 
 }
