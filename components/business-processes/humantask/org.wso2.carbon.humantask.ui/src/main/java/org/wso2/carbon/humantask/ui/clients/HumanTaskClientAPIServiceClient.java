@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.humantask.stub.ui.task.client.api.*;
 import org.wso2.carbon.humantask.stub.ui.task.client.api.types.*;
 import org.wso2.carbon.humantask.ui.constants.HumanTaskUIConstants;
+import org.wso2.carbon.humantask.ui.util.HumanTaskUIUtil;
 
 import javax.xml.stream.XMLStreamException;
 import java.math.BigInteger;
@@ -190,7 +191,8 @@ public class HumanTaskClientAPIServiceClient {
                    IllegalOperationFault, XMLStreamException {
         String errMsg = "Error occurred while performing complete operation";
         try {
-            stub.complete(taskId, payLoad);
+            String decodedPayload = HumanTaskUIUtil.decodeHTML(payLoad);
+            stub.complete(taskId, decodedPayload);
         } catch (RemoteException e) {
             log.error(errMsg, e);
             throw e;

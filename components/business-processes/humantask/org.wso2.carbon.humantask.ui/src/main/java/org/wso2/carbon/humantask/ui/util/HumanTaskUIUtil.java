@@ -340,4 +340,11 @@ public final class HumanTaskUIUtil {
         }
         return isErroneous;
     }
+
+    public static String decodeHTML(String encodedString) {
+        //Replace "&lt;" &gt; and &amp; with <,>,& in input String.
+        return encodedString.replace("&lt;","<").replace("&gt;",">").replace("&amp;", "&");
+
+    }
+
 }
