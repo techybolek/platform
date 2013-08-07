@@ -1,0 +1,840 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://internal.admin.manager.adaptor.transport.output.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax2215="http://internal.admin.manager.adaptor.transport.output.carbon.wso2.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://internal.admin.manager.adaptor.transport.output.carbon.wso2.org">
+    <wsdl:documentation>OutputTransportAdaptorManagerAdminService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema xmlns:ax2216="http://internal.admin.manager.adaptor.transport.output.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://internal.admin.manager.adaptor.transport.output.carbon.wso2.org">
+            <xs:import namespace="http://internal.admin.manager.adaptor.transport.output.carbon.wso2.org/xsd"/>
+            <xs:element name="testConnection">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="outputAdaptorPropertyDtoOutputs" nillable="true" type="ax2216:OutputTransportAdaptorPropertyDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="removeOutputTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="removeOutputTransportAdaptorConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getOutputTransportAdaptorNames">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getOutputTransportAdaptorNamesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getOutputTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getOutputTransportAdaptorConfigurationFileResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getOutputTransportAdaptorConfigurationDetails">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getOutputTransportAdaptorConfigurationDetailsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2216:OutputTransportAdaptorPropertiesDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedOutputTransportAdaptorConfigurationFiles">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedOutputTransportAdaptorConfigurationFilesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2216:OutputTransportAdaptorFileDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedOutputTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedOutputTransportAdaptorConfigurationFileResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllTransportAdaptorPropertiesDto">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllTransportAdaptorPropertiesDtoResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2216:OutputTransportAdaptorPropertiesDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllOutputTransportAdaptorConfigurationInfo">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllOutputTransportAdaptorConfigurationInfoResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2216:OutputTransportAdaptorConfigurationInfoDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="enableTracing">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="enableStatistics">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="editOutputTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorConfiguration" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="editNotDeployedOutputTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorConfiguration" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="disableTracing">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="disableStatistics">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addOutputTransportAdaptorConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="outputAdaptorPropertyDtoOutputs" nillable="true" type="ax2216:OutputTransportAdaptorPropertyDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://internal.admin.manager.adaptor.transport.output.carbon.wso2.org/xsd">
+            <xs:complexType name="OutputTransportAdaptorPropertyDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="defaultValue" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="displayName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="hint" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="options" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="required" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="secured" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OutputTransportAdaptorPropertiesDto">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="outputTransportAdaptorPropertyDtos" nillable="true" type="ax2215:OutputTransportAdaptorPropertyDto"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OutputTransportAdaptorFileDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OutputTransportAdaptorConfigurationInfoDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="enableStats" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="enableTracing" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="addOutputTransportAdaptorConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:addOutputTransportAdaptorConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="addOutputTransportAdaptorConfigurationResponse"/>
+    <wsdl:message name="getNotDeployedOutputTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:getNotDeployedOutputTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="getNotDeployedOutputTransportAdaptorConfigurationFileResponse">
+        <wsdl:part name="parameters" element="ns:getNotDeployedOutputTransportAdaptorConfigurationFileResponse"/>
+    </wsdl:message>
+    <wsdl:message name="testConnectionRequest">
+        <wsdl:part name="parameters" element="ns:testConnection"/>
+    </wsdl:message>
+    <wsdl:message name="testConnectionResponse"/>
+    <wsdl:message name="getOutputTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:getOutputTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="getOutputTransportAdaptorConfigurationFileResponse">
+        <wsdl:part name="parameters" element="ns:getOutputTransportAdaptorConfigurationFileResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getAllOutputTransportAdaptorConfigurationInfoRequest">
+        <wsdl:part name="parameters" element="ns:getAllOutputTransportAdaptorConfigurationInfo"/>
+    </wsdl:message>
+    <wsdl:message name="getAllOutputTransportAdaptorConfigurationInfoResponse">
+        <wsdl:part name="parameters" element="ns:getAllOutputTransportAdaptorConfigurationInfoResponse"/>
+    </wsdl:message>
+    <wsdl:message name="enableStatisticsRequest">
+        <wsdl:part name="parameters" element="ns:enableStatistics"/>
+    </wsdl:message>
+    <wsdl:message name="enableStatisticsResponse"/>
+    <wsdl:message name="removeOutputTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:removeOutputTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="removeOutputTransportAdaptorConfigurationFileResponse"/>
+    <wsdl:message name="getOutputTransportAdaptorConfigurationDetailsRequest">
+        <wsdl:part name="parameters" element="ns:getOutputTransportAdaptorConfigurationDetails"/>
+    </wsdl:message>
+    <wsdl:message name="getOutputTransportAdaptorConfigurationDetailsResponse">
+        <wsdl:part name="parameters" element="ns:getOutputTransportAdaptorConfigurationDetailsResponse"/>
+    </wsdl:message>
+    <wsdl:message name="editNotDeployedOutputTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:editNotDeployedOutputTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="editNotDeployedOutputTransportAdaptorConfigurationFileResponse"/>
+    <wsdl:message name="getAllTransportAdaptorPropertiesDtoRequest">
+        <wsdl:part name="parameters" element="ns:getAllTransportAdaptorPropertiesDto"/>
+    </wsdl:message>
+    <wsdl:message name="getAllTransportAdaptorPropertiesDtoResponse">
+        <wsdl:part name="parameters" element="ns:getAllTransportAdaptorPropertiesDtoResponse"/>
+    </wsdl:message>
+    <wsdl:message name="enableTracingRequest">
+        <wsdl:part name="parameters" element="ns:enableTracing"/>
+    </wsdl:message>
+    <wsdl:message name="enableTracingResponse"/>
+    <wsdl:message name="getOutputTransportAdaptorNamesRequest">
+        <wsdl:part name="parameters" element="ns:getOutputTransportAdaptorNames"/>
+    </wsdl:message>
+    <wsdl:message name="getOutputTransportAdaptorNamesResponse">
+        <wsdl:part name="parameters" element="ns:getOutputTransportAdaptorNamesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="disableStatisticsRequest">
+        <wsdl:part name="parameters" element="ns:disableStatistics"/>
+    </wsdl:message>
+    <wsdl:message name="disableStatisticsResponse"/>
+    <wsdl:message name="editOutputTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:editOutputTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="editOutputTransportAdaptorConfigurationFileResponse"/>
+    <wsdl:message name="removeOutputTransportAdaptorConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:removeOutputTransportAdaptorConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="removeOutputTransportAdaptorConfigurationResponse"/>
+    <wsdl:message name="disableTracingRequest">
+        <wsdl:part name="parameters" element="ns:disableTracing"/>
+    </wsdl:message>
+    <wsdl:message name="disableTracingResponse"/>
+    <wsdl:message name="getNotDeployedOutputTransportAdaptorConfigurationFilesRequest">
+        <wsdl:part name="parameters" element="ns:getNotDeployedOutputTransportAdaptorConfigurationFiles"/>
+    </wsdl:message>
+    <wsdl:message name="getNotDeployedOutputTransportAdaptorConfigurationFilesResponse">
+        <wsdl:part name="parameters" element="ns:getNotDeployedOutputTransportAdaptorConfigurationFilesResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="OutputTransportAdaptorManagerAdminServicePortType">
+        <wsdl:operation name="addOutputTransportAdaptorConfiguration">
+            <wsdl:input message="ns:addOutputTransportAdaptorConfigurationRequest" wsaw:Action="urn:addOutputTransportAdaptorConfiguration"/>
+            <wsdl:output message="ns:addOutputTransportAdaptorConfigurationResponse" wsaw:Action="urn:addOutputTransportAdaptorConfigurationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:getNotDeployedOutputTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:getNotDeployedOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:getNotDeployedOutputTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:getNotDeployedOutputTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="testConnection">
+            <wsdl:input message="ns:testConnectionRequest" wsaw:Action="urn:testConnection"/>
+            <wsdl:output message="ns:testConnectionResponse" wsaw:Action="urn:testConnectionResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:getOutputTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:getOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:getOutputTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:getOutputTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAllOutputTransportAdaptorConfigurationInfo">
+            <wsdl:input message="ns:getAllOutputTransportAdaptorConfigurationInfoRequest" wsaw:Action="urn:getAllOutputTransportAdaptorConfigurationInfo"/>
+            <wsdl:output message="ns:getAllOutputTransportAdaptorConfigurationInfoResponse" wsaw:Action="urn:getAllOutputTransportAdaptorConfigurationInfoResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="enableStatistics">
+            <wsdl:input message="ns:enableStatisticsRequest" wsaw:Action="urn:enableStatistics"/>
+            <wsdl:output message="ns:enableStatisticsResponse" wsaw:Action="urn:enableStatisticsResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:removeOutputTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:removeOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:removeOutputTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:removeOutputTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationDetails">
+            <wsdl:input message="ns:getOutputTransportAdaptorConfigurationDetailsRequest" wsaw:Action="urn:getOutputTransportAdaptorConfigurationDetails"/>
+            <wsdl:output message="ns:getOutputTransportAdaptorConfigurationDetailsResponse" wsaw:Action="urn:getOutputTransportAdaptorConfigurationDetailsResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedOutputTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:editNotDeployedOutputTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:editNotDeployedOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:editNotDeployedOutputTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:editNotDeployedOutputTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <wsdl:input message="ns:getAllTransportAdaptorPropertiesDtoRequest" wsaw:Action="urn:getAllTransportAdaptorPropertiesDto"/>
+            <wsdl:output message="ns:getAllTransportAdaptorPropertiesDtoResponse" wsaw:Action="urn:getAllTransportAdaptorPropertiesDtoResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="enableTracing">
+            <wsdl:input message="ns:enableTracingRequest" wsaw:Action="urn:enableTracing"/>
+            <wsdl:output message="ns:enableTracingResponse" wsaw:Action="urn:enableTracingResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorNames">
+            <wsdl:input message="ns:getOutputTransportAdaptorNamesRequest" wsaw:Action="urn:getOutputTransportAdaptorNames"/>
+            <wsdl:output message="ns:getOutputTransportAdaptorNamesResponse" wsaw:Action="urn:getOutputTransportAdaptorNamesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="disableStatistics">
+            <wsdl:input message="ns:disableStatisticsRequest" wsaw:Action="urn:disableStatistics"/>
+            <wsdl:output message="ns:disableStatisticsResponse" wsaw:Action="urn:disableStatisticsResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="editOutputTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:editOutputTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:editOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:editOutputTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:editOutputTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfiguration">
+            <wsdl:input message="ns:removeOutputTransportAdaptorConfigurationRequest" wsaw:Action="urn:removeOutputTransportAdaptorConfiguration"/>
+            <wsdl:output message="ns:removeOutputTransportAdaptorConfigurationResponse" wsaw:Action="urn:removeOutputTransportAdaptorConfigurationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="disableTracing">
+            <wsdl:input message="ns:disableTracingRequest" wsaw:Action="urn:disableTracing"/>
+            <wsdl:output message="ns:disableTracingResponse" wsaw:Action="urn:disableTracingResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFiles">
+            <wsdl:input message="ns:getNotDeployedOutputTransportAdaptorConfigurationFilesRequest" wsaw:Action="urn:getNotDeployedOutputTransportAdaptorConfigurationFiles"/>
+            <wsdl:output message="ns:getNotDeployedOutputTransportAdaptorConfigurationFilesResponse" wsaw:Action="urn:getNotDeployedOutputTransportAdaptorConfigurationFilesResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="OutputTransportAdaptorManagerAdminServiceSoap11Binding" type="ns:OutputTransportAdaptorManagerAdminServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:getNotDeployedOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addOutputTransportAdaptorConfiguration">
+            <soap:operation soapAction="urn:addOutputTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="testConnection">
+            <soap:operation soapAction="urn:testConnection" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:getOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllOutputTransportAdaptorConfigurationInfo">
+            <soap:operation soapAction="urn:getAllOutputTransportAdaptorConfigurationInfo" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="enableStatistics">
+            <soap:operation soapAction="urn:enableStatistics" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:removeOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationDetails">
+            <soap:operation soapAction="urn:getOutputTransportAdaptorConfigurationDetails" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <soap:operation soapAction="urn:getAllTransportAdaptorPropertiesDto" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedOutputTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:editNotDeployedOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="enableTracing">
+            <soap:operation soapAction="urn:enableTracing" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorNames">
+            <soap:operation soapAction="urn:getOutputTransportAdaptorNames" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="disableStatistics">
+            <soap:operation soapAction="urn:disableStatistics" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfiguration">
+            <soap:operation soapAction="urn:removeOutputTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editOutputTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:editOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="disableTracing">
+            <soap:operation soapAction="urn:disableTracing" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFiles">
+            <soap:operation soapAction="urn:getNotDeployedOutputTransportAdaptorConfigurationFiles" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="OutputTransportAdaptorManagerAdminServiceSoap12Binding" type="ns:OutputTransportAdaptorManagerAdminServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:getNotDeployedOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addOutputTransportAdaptorConfiguration">
+            <soap12:operation soapAction="urn:addOutputTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="testConnection">
+            <soap12:operation soapAction="urn:testConnection" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:getOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllOutputTransportAdaptorConfigurationInfo">
+            <soap12:operation soapAction="urn:getAllOutputTransportAdaptorConfigurationInfo" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="enableStatistics">
+            <soap12:operation soapAction="urn:enableStatistics" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:removeOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationDetails">
+            <soap12:operation soapAction="urn:getOutputTransportAdaptorConfigurationDetails" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <soap12:operation soapAction="urn:getAllTransportAdaptorPropertiesDto" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedOutputTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:editNotDeployedOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="enableTracing">
+            <soap12:operation soapAction="urn:enableTracing" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorNames">
+            <soap12:operation soapAction="urn:getOutputTransportAdaptorNames" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="disableStatistics">
+            <soap12:operation soapAction="urn:disableStatistics" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfiguration">
+            <soap12:operation soapAction="urn:removeOutputTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editOutputTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:editOutputTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="disableTracing">
+            <soap12:operation soapAction="urn:disableTracing" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFiles">
+            <soap12:operation soapAction="urn:getNotDeployedOutputTransportAdaptorConfigurationFiles" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="OutputTransportAdaptorManagerAdminServiceHttpBinding" type="ns:OutputTransportAdaptorManagerAdminServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFile">
+            <http:operation location="getNotDeployedOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addOutputTransportAdaptorConfiguration">
+            <http:operation location="addOutputTransportAdaptorConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="testConnection">
+            <http:operation location="testConnection"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationFile">
+            <http:operation location="getOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllOutputTransportAdaptorConfigurationInfo">
+            <http:operation location="getAllOutputTransportAdaptorConfigurationInfo"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="enableStatistics">
+            <http:operation location="enableStatistics"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfigurationFile">
+            <http:operation location="removeOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorConfigurationDetails">
+            <http:operation location="getOutputTransportAdaptorConfigurationDetails"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <http:operation location="getAllTransportAdaptorPropertiesDto"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedOutputTransportAdaptorConfigurationFile">
+            <http:operation location="editNotDeployedOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="enableTracing">
+            <http:operation location="enableTracing"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOutputTransportAdaptorNames">
+            <http:operation location="getOutputTransportAdaptorNames"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="disableStatistics">
+            <http:operation location="disableStatistics"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeOutputTransportAdaptorConfiguration">
+            <http:operation location="removeOutputTransportAdaptorConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editOutputTransportAdaptorConfigurationFile">
+            <http:operation location="editOutputTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="disableTracing">
+            <http:operation location="disableTracing"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedOutputTransportAdaptorConfigurationFiles">
+            <http:operation location="getNotDeployedOutputTransportAdaptorConfigurationFiles"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="OutputTransportAdaptorManagerAdminService">
+        <wsdl:port name="OutputTransportAdaptorManagerAdminServiceHttpsSoap11Endpoint" binding="ns:OutputTransportAdaptorManagerAdminServiceSoap11Binding">
+            <soap:address location="https://101.2.191.138:9443/services/OutputTransportAdaptorManagerAdminService.OutputTransportAdaptorManagerAdminServiceHttpsSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="OutputTransportAdaptorManagerAdminServiceHttpsSoap12Endpoint" binding="ns:OutputTransportAdaptorManagerAdminServiceSoap12Binding">
+            <soap12:address location="https://101.2.191.138:9443/services/OutputTransportAdaptorManagerAdminService.OutputTransportAdaptorManagerAdminServiceHttpsSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="OutputTransportAdaptorManagerAdminServiceHttpsEndpoint" binding="ns:OutputTransportAdaptorManagerAdminServiceHttpBinding">
+            <http:address location="https://101.2.191.138:9443/services/OutputTransportAdaptorManagerAdminService.OutputTransportAdaptorManagerAdminServiceHttpsEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
