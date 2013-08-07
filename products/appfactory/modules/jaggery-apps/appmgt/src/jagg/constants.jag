@@ -56,6 +56,11 @@ var API_MANAGER_STORE_URL = "ApiManager.Store.Url";
 var API_MANAGER_SERVICE_NAME = "ApiManager.Service.Name";
 var API_MANAGER_SERVICE_NAMESPACE = "ApiManager.Service.Namespace";
 
+var BAM_SERVER_URL = "BAM.Server.Url";
+var ADMIN_DASHBOARD_PATH = "BAM.Dashboards.AdminDashboard.Path";
+var CEO_DASHBOARD_PATH = "BAM.Dashboards.CEODashboard.Path";
+var AF_USERS_DASHBOARD_PATH = "BAM.Dashboards.AppFactoryUsersDashboard.Path";
+
 var PREFERRED_REPOSITORY_TYPE = "RepositoryType";
 var SHOW_OTHER_SERVICES_TAB = "OtherServices.ShowOtherServicesTab"
 var SHOW_SONAR_BTN = "EnableSonar";

@@ -33,6 +33,10 @@ jagg.module("user", {
     	return jagg.require(jagg.getModulesDir() + "user/get/list.jag").getAllUsersHavingName.apply(this, arguments);
      },
 
+     getAllRolesOfUser:function (){
+    	return jagg.require(jagg.getModulesDir() + "user/get/list.jag").getAllRolesOfUser.apply(this, arguments);
+     },
+
      getUserInfoBean:function (){
     	return jagg.require(jagg.getModulesDir() + "user/get/list.jag").getUserInfoBean.apply(this, arguments);
      }
