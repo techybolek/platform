@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="GregTestSuite">
+    <parameter name="useDefaultListeners" value="false"/>
+    <test name="Test - GREG" preserve-order="true" parallel="false">
+        <packages>
+            <package name="org.wso2.carbon.registry.lifecycle.test"/>
+            <package name="org.wso2.carbon.registry.subscription.test"/>
+        </packages>
+
+
+        <classes>
+            <!--<class name="org.wso2.carbon.registry.jira.issues.test.SaveSearchTestCase"/>-->
+        </classes>
+    </test>
+</suite>
