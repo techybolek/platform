@@ -330,12 +330,6 @@
                                 </featureArtifactDef>
                                 <!-- End of the Mashup server features -->
 
-                                <!-- reporting features -->
-                                <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.reporting.feature:${carbon.platform.version}
-                                </featureArtifactDef>
-                                <!-- end reporting features -->
-
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.platform.version}
                                 </featureArtifactDef>
@@ -794,10 +788,6 @@
                                 <!-- mashup feature groups end -->
 
                                 <feature>
-                                    <id>org.wso2.carbon.reporting.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -1170,10 +1160,6 @@
                                     <version>${synapse.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.carbon.reporting.server.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -1524,10 +1510,6 @@
                                 </feature-->
                                 <!-- mashup feature groups end -->
 
-                                <feature>
-                                    <id>org.wso2.carbon.reporting.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
                                 <feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
@@ -1889,10 +1871,6 @@
                                 <!-- mashup feature groups end -->
 
                                 <feature>
-                                    <id>org.wso2.carbon.reporting.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -2253,10 +2231,6 @@
                                 <!-- mashup feature groups end -->
 
                                 <feature>
-                                    <id>org.wso2.carbon.reporting.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -2575,10 +2549,6 @@
                                 <!-- feature groups end-->
 
                                 <feature>
-                                    <id>org.wso2.carbon.reporting.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
-                                <feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -2893,10 +2863,6 @@
                                 </feature>
                                 <!-- mashup feature groups end -->
 
-                                <feature>
-                                    <id>org.wso2.carbon.reporting.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature>
                                 <feature>
                                     <id>org.wso2.carbon.coordination.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
