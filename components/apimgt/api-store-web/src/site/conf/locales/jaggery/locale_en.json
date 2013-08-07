@@ -153,6 +153,17 @@
     "IM":"IM",
     "URL":"URL",
     "Role":"Role",
-	"validityTime":"Token valid period"
+    "throttling.title":"Throttling Info",
+    "urlPrefix" : "URL Prefix" ,
+    "urlPattern" : "URL Pattern" ,
+    "httpVerb" : "HTTP Verb" ,
+    "authType" : "Auth Type" ,
+    "action" : "Action" ,
+    "get" : "GET" ,
+    "post" : "POST" ,
+    "delete" : "DELETE" ,
+    "put" : "PUT" ,
+    "validityTime":"Token valid period"
+    "options" : "OPTIONS"
 
 }
