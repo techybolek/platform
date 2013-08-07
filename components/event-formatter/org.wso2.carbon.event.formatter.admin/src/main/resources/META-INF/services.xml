@@ -1,0 +1,140 @@
+<service name="EventFormatterAdminService">
+    <transports>
+        <transport>https</transport>
+    </transports>
+    <messageReceivers>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/robust-in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
+                         class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+        <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
+                         class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+    </messageReceivers>
+    <parameter name="ServiceClass">
+        org.wso2.carbon.event.formatter.admin.internal.EventFormatterAdminService
+    </parameter>
+
+    <parameter name="AuthorizationAction" locked="false">
+        /permission/admin/manage/eventFormatterManager
+    </parameter>
+    <operation name="getAllEventFormatterConfigurationInfo">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="removeEventFormatterConfiguration">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getNotDeployedEventFormatterConfigurationFiles">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="removeEventFormatterConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getNotDeployedEventFormatterConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="editNotDeployedEventFormatterConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getEventFormatterConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="editEventFormatterConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getAllEventStreamNames">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getStreamDefinition">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getOutputTransportAdaptorNames">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getSupportedMappingTypes">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getEventFormatterProperties">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="addWSO2EventFormatter">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="addTextEventFormatter">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="addXmlEventFormatter">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="addMapEventFormatter">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="addJsonEventFormatter">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="getEventFormatterConfigurationDto">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="disableTracing">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="enableStatistics">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="enableTracing">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+    <operation name="disableStatistics">
+        <parameter name="AuthorizationAction" locked="true">
+            /permission/admin/manage/eventFormatterManager
+        </parameter>
+    </operation>
+
+    <parameter name="adminService" locked="true">false</parameter>
+    <parameter name="hiddenService" locked="true">false</parameter>
+</service>
+
+
