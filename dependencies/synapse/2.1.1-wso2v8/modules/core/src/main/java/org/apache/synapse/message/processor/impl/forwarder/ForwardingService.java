@@ -211,6 +211,11 @@ public class ForwardingService implements InterruptableJob, Service {
             log.debug("Sending the message to client with message processor [" + messageProcessor.getName() + "]");
         }
 
+        // The below code is just for keeping the backward compatibility with the old code.
+        if (targetEndpoint == null) {
+            targetEndpoint = (String) messageContext.getProperty(ForwardingProcessorConstants.TARGET_ENDPOINT);
+        }
+
         MessageContext outCtx = null;
 
         if (targetEndpoint != null) {

@@ -47,6 +47,9 @@ public class MessageProcessorSerializer {
 
     private static final Log log = LogFactory.getLog(MessageProcessorSerializer.class);
 
+    public static final String FORWARDING_PROCESSOR =
+            "org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor";
+
     protected static final OMFactory fac = OMAbstractFactory.getOMFactory();
     protected static final OMNamespace synNS = SynapseConstants.SYNAPSE_OMNAMESPACE;
     protected static final OMNamespace nullNS = fac.createOMNamespace(
@@ -74,11 +77,13 @@ public class MessageProcessorSerializer {
             handleException("Message store Name not specified");
         }
 
-        if (processor.getTargetEndpoint() != null) {
-            processorElem.addAttribute(fac.createOMAttribute("targetEndpoint", nullNS, processor.getTargetEndpoint()));
-        } else {
-            // This could be null when it comes to message samplers
-//            handleException("Message store Target Endpoint not specified");
+        if (FORWARDING_PROCESSOR.equals(processor.getClass().getName())) {
+            if (processor.getTargetEndpoint() != null) {
+                processorElem.addAttribute(fac.createOMAttribute("targetEndpoint", nullNS, processor.getTargetEndpoint()));
+            } else {
+                // This validation is removed to support backward compatibility
+                // handleException("Target Endpoint not specified");
+            }
         }
 
         if(processor.getMessageStoreName() != null) {

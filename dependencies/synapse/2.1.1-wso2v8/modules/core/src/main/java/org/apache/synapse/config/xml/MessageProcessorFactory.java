@@ -45,8 +45,13 @@ import java.util.Map;
  */
 public class MessageProcessorFactory {
     private static final Log log = LogFactory.getLog(MessageProcessorFactory.class);
+
+    public static final String FORWARDING_PROCESSOR =
+            "org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor";
+
     public static final QName CLASS_Q = new QName(XMLConfigConstants.NULL_NAMESPACE, "class");
     public static final QName TARGET_ENDPOINT_Q = new QName(XMLConfigConstants.NULL_NAMESPACE, "targetEndpoint");
+    public static final QName SEQUENCE_Q = new QName(XMLConfigConstants.NULL_NAMESPACE, "sequence");
     public static final QName NAME_Q = new QName(XMLConfigConstants.NULL_NAMESPACE, "name");
     public static final QName PARAMETER_Q = new QName(XMLConfigConstants.SYNAPSE_NAMESPACE,
             "parameter");
@@ -85,14 +90,16 @@ public class MessageProcessorFactory {
             handleException("Can't create Message processor without a name ");
         }
 
-        OMAttribute targetSequenceAtt = elem.getAttribute(TARGET_ENDPOINT_Q);
-        if (nameAtt != null) {
+        if (FORWARDING_PROCESSOR.equals(clssAtt.getAttributeValue())) {
+            OMAttribute targetSequenceAtt = elem.getAttribute(TARGET_ENDPOINT_Q);
+
             if (targetSequenceAtt != null) {
                 assert processor != null;
                 processor.setTargetEndpoint(targetSequenceAtt.getAttributeValue());
+            } else {
+                // This validation is commented due to backward compatibility
+                // handleException("Can't create Message processor without a target endpoint ");
             }
-        } else {
-            handleException("Can't create Message processor without a name ");
         }
 
         OMAttribute storeAtt = elem.getAttribute(MESSAGE_STORE_Q);
