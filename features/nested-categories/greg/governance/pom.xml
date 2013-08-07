@@ -60,22 +60,16 @@
                                 </importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.governance.gadgets:${carbon.platform.version}
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.governance.metadata:${carbon.platform.version}
-                                </importFeatureDef>
                                 <importFeatureDef>
                                     org.wso2.carbon.governance.notifications.configuration:${carbon.platform.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
                                     org.wso2.carbon.governance.platform.extensions:${carbon.platform.version}
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.event.server:${carbon.platform.version}
-                                </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.event.common:${carbon.platform.version}
-                                </importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.ntask:${carbon.platform.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.attachment.mgt:${carbon.platform.version}
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.humantask:${carbon.platform.version}
+                                <importFeatureDef>org.wso2.carbon.humantask.server:${carbon.platform.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
