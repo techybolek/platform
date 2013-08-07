@@ -21,6 +21,8 @@ public class UriListPage {
         this.driver = driver;
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
+        driver.findElement(By.id(uiElementMapper.getElement("carbon.Main.tab"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("uri.list.link"))).click();
         if (!(driver.getCurrentUrl().contains("generic"))) {
             // Alternatively, we could navigate to the login page, perhaps logging out first
             throw new IllegalStateException("This is not the URI List page");

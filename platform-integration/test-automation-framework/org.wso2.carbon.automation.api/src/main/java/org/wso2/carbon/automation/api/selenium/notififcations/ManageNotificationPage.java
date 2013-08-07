@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.wso2.carbon.automation.api.selenium.login.LoginPage;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
@@ -73,5 +74,14 @@ public class ManageNotificationPage {
 
         return false;
     }
+
+    public boolean testHierarchicalSubscriptionMethodStatePersistance(String expectedValue){
+
+        driver.findElement(By.xpath("//*[@id=\"subscriptionsTable\"]/tbody/tr[1]/td[6]/a[1]")).click();
+        String value = new Select(driver.findElement(By.id(uiElementMapper.getElement("registry.subscription.hsmethod" +
+                ".id")))).getFirstSelectedOption().getText();
+        return  expectedValue.equals(value);
+
+    };
 
 }
