@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.wso2.carbon.mediation.library.connectors</groupId>
-	<artifactId>org.wso2.carbon.mediation.library.connectors.twilio</artifactId>
+	<groupId>org.wso2.carbon.connector.twilio</groupId>
+	<artifactId>org.wso2.carbon.connector.twilio</artifactId>
 	<version>4.2.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>twilio-cloud-connector</name>

@@ -4,8 +4,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.wso2.carbon.mediation.library.connectors.salesforce</groupId>
-	<artifactId>org.wso2.carbon.mediation.library.connectors.salesforce</artifactId>
+	<groupId>org.wso2.carbon.connector.salesforce</groupId>
+	<artifactId>org.wso2.carbon.connector.salesforce</artifactId>
 	<packaging>bundle</packaging>
 	<version>4.2.0-SNAPSHOT</version>
 	<name>WSO2 Carbon - Cloud Connector For Salesforce</name>
