@@ -6,6 +6,7 @@ include("/jagg/config_reader.jag");
 //used for logging
 var log = new Log();
 var modManager = jagg.module("manager");
+var wso2_rss_instanceName = 'WSO2_RSS';
 
 var getStageFromRssInstanceName=function(rssInstanceName){
 	var deploymentStages = getProperties(DEPLOYMENT_STAGES);
@@ -28,7 +29,12 @@ var dropTemplate = function (applicationKey,databaseServerInstanceName,name){
 	options.useSOAP = 1.2;
 	options.action = "urn:dropDatabasePrivilegesTemplate";
 	options.mep = "in-only";
-	var payload ='<ser:dropDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"><ser:templateName>'+name+'</ser:templateName></ser:dropDatabasePrivilegesTemplate>';
+	var payload ='<ser:dropDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">' +
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
+	'<ser:templateName>'+name+'</ser:templateName></ser:dropDatabasePrivilegesTemplate>';
 
 	var result;
 
@@ -58,7 +64,12 @@ var editTemplate = function (applicationKey, name,databaseServerInstanceName){
 	var options = new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:getDatabasePrivilegesTemplate";
-	var payload ='<ser:getDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"><ser:templateName>'+name+'</ser:templateName></ser:getDatabasePrivilegesTemplate>';
+	var payload ='<ser:getDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">' +
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
+	'<ser:templateName>'+name+'</ser:templateName></ser:getDatabasePrivilegesTemplate>';
 
 	var result;
 	var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
@@ -91,8 +102,12 @@ var createTemplate = function (applicationKey,databaseServerInstanceName,name,al
 	//   var tenantId= getProperty(ADMIN_USERNAME)+'@'+applicationKey;    TODO: changed for app factory
 	var tenantId="-1234";
 	options.robust = true;
-	
-	var payload ='<ser:createDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://entity.core.rssmanager.carbon.wso2.org/xsd">'+
+
+	var payload ='<ser:createDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"  xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:template>'+
 	'<xsd:name>'+name+'</xsd:name>'+
 	'<xsd:privileges>'+
@@ -147,7 +162,11 @@ var editDbTemplate = function (applicationKey,databaseServerInstanceName,name,al
 
 	var tenantId="-1234";
 
-	var payload ='<ser:editDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://entity.core.rssmanager.carbon.wso2.org/xsd">'+
+	var payload ='<ser:editDatabasePrivilegesTemplate  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:template>'+
 	'<xsd:name>'+name+'</xsd:name>'+
 	'<xsd:privileges>'+
@@ -197,7 +216,6 @@ var getTemplates = function (applicationKey){
 	var options = new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:getDatabasePrivilegesTemplates";
-	var payload ='<ser:getDatabasePrivilegesTemplates  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"/>';
 
 	var result;
 
@@ -209,6 +227,12 @@ var getTemplates = function (applicationKey){
 		var hasDBConfigurePermissionToStage = permissionModule.isUserAccessGranted(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +deploymentStages[i]);
 		if(hasDBConfigurePermissionToStage){
 			var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+deploymentStages[i]+'.'+STORAGE_SERVER_URL);
+			var payload ='<ser:getDatabasePrivilegesTemplates  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">' +
+			'<ser:ctx>' +
+			'<xsd:environmentName>' + deploymentStages[i] + '</xsd:environmentName>' +
+			'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+			'</ser:ctx>' +
+			'</ser:getDatabasePrivilegesTemplates>';
 			getDatabaseTemplate.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
 			getDatabaseTemplate.send(payload);
 			result = getDatabaseTemplate.responseE4X;
@@ -223,16 +247,16 @@ var getTemplates = function (applicationKey){
 	return templatesArray;
 
 	/*   var stage = getStageFromRssInstanceName(databaseServerInstanceName);
-                     var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
-    try {
-        getDatabaseTemplate.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
-        getDatabaseTemplate.send(payload);
-        result = getDatabaseTemplate.responseE4X;
+	 var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
+	try {
+	getDatabaseTemplate.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
+	getDatabaseTemplate.send(payload);
+	result = getDatabaseTemplate.responseE4X;
 
-       } catch (e) {
-        log.error(e.toString());
-        }
- return buildResponse(result);   */
+	} catch (e) {
+	log.error(e.toString());
+	}
+	return buildResponse(result);   */
 };
 
 var getAvailableTemplatesToAttachToDatabase = function (applicationKey, rssInstance){
@@ -243,7 +267,11 @@ var getAvailableTemplatesToAttachToDatabase = function (applicationKey, rssInsta
 	var options = new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:getDatabasePrivilegesTemplates";
-	var payload ='<ser:getDatabasePrivilegesTemplates  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"/>';
+	var payload ='<ser:getDatabasePrivilegesTemplates  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">' +
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + rssInstance + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx></ser:getDatabasePrivilegesTemplates>';
 	var result;
 	var permissionModule = jagg.module("permission");
 	var templatesArray=[];
@@ -263,21 +291,13 @@ var getAvailableTemplatesToAttachToDatabase = function (applicationKey, rssInsta
 
 function buildResponse(result){
 	var databaseObject=[];
-
 	if(result != undefined){
 		var response=result.*::["return"]
-
 		for(var index=0; index < response.length();index++){
-
 			var task={};
 			var entry=response[index];
-
-
 			var name=entry.*::name.text();
-
 			task.name=name;
-
-
 			databaseObject.push(task);
 		}
 	}
@@ -290,13 +310,9 @@ function buildTemplate(result){
 
 	if(result != undefined){
 		var response=result.*::["return"]
-
 		for(var index=0; index < response.length();index++){
-
 			var task={};
 			var entry=response[index];
-
-
 			var name=entry.*::name.text();
 			var privilages=entry.*::privileges
 
@@ -339,14 +355,13 @@ function buildTemplate(result){
 			task.selectPriv=selectPriv;
 			task.showViewPriv=showViewPriv;
 			task.triggerPriv=triggerPriv;
-			task.updatePriv=updatePriv; 
+			task.updatePriv=updatePriv;
 
 			databaseObject.push(task);
 		}
 	}
 	return databaseObject;
 }
-
 
 %>
 

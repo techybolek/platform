@@ -21,12 +21,15 @@ var createDatabase = function (applicationKey,databaseName,databaseServerInstanc
 	var options =new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:createDatabase";
-	options.mep = "in-only";
 	options.robust = true;
 	var result="";
 
 	var payload ='<ser:createDatabase xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" ' +
-	'xmlns:xsd="http://entity.core.rssmanager.carbon.wso2.org/xsd">'+
+	'xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:database>'+
 	'<xsd:name>'+ databaseName +'</xsd:name>'+
 	'<xsd:rssInstanceName>'+ wso2_rss_instanceName +'</xsd:rssInstanceName>'+
@@ -36,9 +39,14 @@ var createDatabase = function (applicationKey,databaseName,databaseServerInstanc
 	try {
 		var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
 		createDatabaseService.open(options, storageServerURL+"RSSAdmin", false,
-				getProperty(ADMIN_USERNAME)+'@'+applicationKey, getProperty(ADMIN_PASSWORD) );
+		getProperty(ADMIN_USERNAME)+'@'+applicationKey, getProperty(ADMIN_PASSWORD) );
 		createDatabaseService.send(payload);
-		result = "success";
+		result = createDatabaseService.responseE4X;
+		var ns = new Namespace("http://service.core.rssmanager.carbon.wso2.org");
+		var response=result.ns::["return"];
+		var entry = response[0];
+		var ax = new Namespace("http://entity.core.rssmanager.carbon.wso2.org/xsd");
+		result=entry.ax::["name"].text();
 	} catch (e) {
 		log.error("Error while creating database "+ "\n" + e.message);
 		//throw "Error while creating database  ";
@@ -63,8 +71,11 @@ var createDatabaseWithAttachedUsers = function (applicationKey,databaseName,data
 	var tenantId="-1234";
 
 	var payload ='<ser:createDatabase xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" ' +
-	'xmlns:xsd="http://entity.core.rssmanager.carbon.wso2.org/xsd">'+
-	'<ser:rssInstanceName>'+wso2_rss_instanceName+'</ser:rssInstanceName>'+
+	' xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:user><xsd:password>'+userPassword+'</xsd:password>'+
 	'<xsd:rssInstanceName>'+wso2_rss_instanceName+'</xsd:rssInstanceName>'+
 	'<xsd:tenantId>'+tenantId+'</xsd:tenantId>'+
@@ -106,7 +117,7 @@ var createDatabaseWithAttachedUsers = function (applicationKey,databaseName,data
 		createDatabaseService.open(options, storageServerURL+"RSSAdmin", false, getProperty(ADMIN_USERNAME)+'@'+applicationKey, getProperty(ADMIN_PASSWORD) );
 		createDatabaseService.send(payload);
 		result = createDatabaseService.responseE4X;
-        result = result.*::["return"].text();
+		result = result.*::["return"].text();
 	} catch (e) {
 		log.error("Error while creating database "+ "\n" + e.message);
 		throw e;
@@ -116,66 +127,69 @@ var createDatabaseWithAttachedUsers = function (applicationKey,databaseName,data
 
 var createDbWithUserAndTemplate = function (applicationKey,databaseName,userName,templateName,databaseServerInstanceName, userPassword, alterPriv,alterRoutinePriv, createPriv,createRoutinePriv, createTmpTablePriv, createViewPriv,deletePriv,dropPriv,eventPriv,executePriv,grantPriv,indexPriv,insertPriv,lockTablesPriv,referencesPriv,selectPriv,showViewPriv,triggerPriv,updatePriv) {
 
-    var stage = getStageFromRssInstanceName(databaseServerInstanceName);
-    var permissionModule = jagg.module("permission");
-    permissionModule.checkUserActionPermission(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +stage);
-    var ws = require('ws');
-    var createDatabaseService = new ws.WSRequest();
-    var options =new Array();
-    options.useSOAP = 1.2;
-    options.action = "urn:createDatabaseWithAttachedUsers";
-    var tenantId="-1234";
+	var stage = getStageFromRssInstanceName(databaseServerInstanceName);
+	var permissionModule = jagg.module("permission");
+	permissionModule.checkUserActionPermission(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +stage);
+	var ws = require('ws');
+	var createDatabaseService = new ws.WSRequest();
+	var options =new Array();
+	options.useSOAP = 1.2;
+	options.action = "urn:createDatabaseWithAttachedUsers";
+	var tenantId="-1234";
 
-    var payload ='<ser:createDatabase xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" ' +
-                 'xmlns:xsd="http://entity.core.rssmanager.carbon.wso2.org/xsd">'+
-                 '<ser:rssInstanceName>'+wso2_rss_instanceName+'</ser:rssInstanceName>'+
-                 '<ser:user><xsd:password>'+userPassword+'</xsd:password>'+
-                 '<xsd:rssInstanceName>'+wso2_rss_instanceName+'</xsd:rssInstanceName>'+
-                 '<xsd:tenantId>'+tenantId+'</xsd:tenantId>'+
-                 '<xsd:type></xsd:type>'+
-                 '<xsd:username>'+userName+'</xsd:username></ser:user>' +
-                 '<ser:template>'+
-                 '<xsd:name>'+templateName+'@'+databaseServerInstanceName+'</xsd:name>'+
-                 '<xsd:privileges>'+
-                 '<xsd:alterPriv>'+alterPriv+'</xsd:alterPriv>'+
-                 '<xsd:alterRoutinePriv>'+alterRoutinePriv+'</xsd:alterRoutinePriv>'+
-                 '<xsd:createPriv>'+createPriv+'</xsd:createPriv>'+
-                 '<xsd:createRoutinePriv>'+createRoutinePriv+'</xsd:createRoutinePriv>'+
-                 '<xsd:createTmpTablePriv>'+createTmpTablePriv+'</xsd:createTmpTablePriv>'+
-                 '<xsd:createViewPriv>'+createViewPriv+'</xsd:createViewPriv>'+
-                 '<xsd:deletePriv>'+deletePriv+'</xsd:deletePriv>'+
-                 '<xsd:dropPriv>'+dropPriv+'</xsd:dropPriv>'+
-                 '<xsd:eventPriv>'+eventPriv+'</xsd:eventPriv>'+
-                 '<xsd:executePriv>'+executePriv+'</xsd:executePriv>'+
-                 '<xsd:grantPriv>'+grantPriv+'</xsd:grantPriv>'+
-                 '<xsd:indexPriv>'+indexPriv+'</xsd:indexPriv>'+
-                 '<xsd:insertPriv>'+insertPriv+'</xsd:insertPriv>'+
-                 '<xsd:lockTablesPriv>'+lockTablesPriv+'</xsd:lockTablesPriv>'+
-                 '<xsd:referencesPriv>'+referencesPriv+'</xsd:referencesPriv>'+
-                 '<xsd:selectPriv>'+selectPriv+'</xsd:selectPriv>'+
-                 '<xsd:showViewPriv>'+showViewPriv+'</xsd:showViewPriv>'+
-                 '<xsd:triggerPriv>'+triggerPriv+'</xsd:triggerPriv>'+
-                 '<xsd:updatePriv>'+updatePriv+'</xsd:updatePriv>'+
-                 '</xsd:privileges>'+
-                 ' <xsd:tenantId>'+tenantId+'</xsd:tenantId>'+
-                 '</ser:template>' +
-                 '<ser:database>'+
-                 '<xsd:name>'+ databaseName +'</xsd:name>'+
-                 '<xsd:rssInstanceName>'+ wso2_rss_instanceName +'</xsd:rssInstanceName>'+
-                 '</ser:database>'+
-                 '</ser:createDatabase>';
-    var result;
-    try {
-        var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
-        createDatabaseService.open(options, storageServerURL+"RSSAdmin", false, getProperty(ADMIN_USERNAME)+'@'+applicationKey, getProperty(ADMIN_PASSWORD) );
-        createDatabaseService.send(payload);
-        result = createDatabaseService.responseE4X;
-        result = result.*::["return"].text();
-    } catch (e) {
-        log.error("Error while creating database "+ "\n" + e.message);
-        throw e;
-    }
-    return result;
+	var payload ='<ser:createDatabase xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" ' +
+	'xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
+	'<ser:user><xsd:password>'+userPassword+'</xsd:password>'+
+	'<xsd:rssInstanceName>'+wso2_rss_instanceName+'</xsd:rssInstanceName>'+
+	'<xsd:tenantId>'+tenantId+'</xsd:tenantId>'+
+	'<xsd:type></xsd:type>'+
+	'<xsd:username>'+userName+'</xsd:username></ser:user>' +
+	'<ser:template>'+
+	'<xsd:name>'+templateName+'@'+databaseServerInstanceName+'</xsd:name>'+
+	'<xsd:privileges>'+
+	'<xsd:alterPriv>'+alterPriv+'</xsd:alterPriv>'+
+	'<xsd:alterRoutinePriv>'+alterRoutinePriv+'</xsd:alterRoutinePriv>'+
+	'<xsd:createPriv>'+createPriv+'</xsd:createPriv>'+
+	'<xsd:createRoutinePriv>'+createRoutinePriv+'</xsd:createRoutinePriv>'+
+	'<xsd:createTmpTablePriv>'+createTmpTablePriv+'</xsd:createTmpTablePriv>'+
+	'<xsd:createViewPriv>'+createViewPriv+'</xsd:createViewPriv>'+
+	'<xsd:deletePriv>'+deletePriv+'</xsd:deletePriv>'+
+	'<xsd:dropPriv>'+dropPriv+'</xsd:dropPriv>'+
+	'<xsd:eventPriv>'+eventPriv+'</xsd:eventPriv>'+
+	'<xsd:executePriv>'+executePriv+'</xsd:executePriv>'+
+	'<xsd:grantPriv>'+grantPriv+'</xsd:grantPriv>'+
+	'<xsd:indexPriv>'+indexPriv+'</xsd:indexPriv>'+
+	'<xsd:insertPriv>'+insertPriv+'</xsd:insertPriv>'+
+	'<xsd:lockTablesPriv>'+lockTablesPriv+'</xsd:lockTablesPriv>'+
+	'<xsd:referencesPriv>'+referencesPriv+'</xsd:referencesPriv>'+
+	'<xsd:selectPriv>'+selectPriv+'</xsd:selectPriv>'+
+	'<xsd:showViewPriv>'+showViewPriv+'</xsd:showViewPriv>'+
+	'<xsd:triggerPriv>'+triggerPriv+'</xsd:triggerPriv>'+
+	'<xsd:updatePriv>'+updatePriv+'</xsd:updatePriv>'+
+	'</xsd:privileges>'+
+	' <xsd:tenantId>'+tenantId+'</xsd:tenantId>'+
+	'</ser:template>' +
+	'<ser:database>'+
+	'<xsd:name>'+ databaseName +'</xsd:name>'+
+	'<xsd:rssInstanceName>'+ wso2_rss_instanceName +'</xsd:rssInstanceName>'+
+	'</ser:database>'+
+	'</ser:createDatabase>';
+	var result;
+	try {
+		var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
+		createDatabaseService.open(options, storageServerURL+"RSSAdmin", false, getProperty(ADMIN_USERNAME)+'@'+applicationKey, getProperty(ADMIN_PASSWORD) );
+		createDatabaseService.send(payload);
+		result = createDatabaseService.responseE4X;
+		result = result.*::["return"].text();
+	} catch (e) {
+		log.error("Error while creating database "+ "\n" + e.message);
+		throw e;
+	}
+	return result;
 };
 
 var getRSSinstances = function (applicationKey){
@@ -187,7 +201,8 @@ var getRSSinstances = function (applicationKey){
 		//if user has access to stage
 		var hasDBConfigurePermissionToStage = permissionModule.isUserAccessGranted(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +deploymentStages[i]);
 		if(hasDBConfigurePermissionToStage){
-			var task={};
+			var task={
+			};
 			task.name=getProperty(DEPLOYMENT_STAGES+'.'+deploymentStages[i]+'.'+RSS_NAME);
 			rssInstancesArray.push(task);
 		}
@@ -218,8 +233,11 @@ var getAttachedUsers = function (applicationKey, dbname, rssInstance){
 	var options = new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:getUsersAttachedToDatabase";
-	var payload ='<ser:getUsersAttachedToDatabase  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org">'+
-	'<ser:rssInstanceName>'+wso2_rss_instanceName+'</ser:rssInstanceName>'+
+	var payload ='<ser:getUsersAttachedToDatabase  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + rssInstance + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:databaseName>'+dbname+'</ser:databaseName>'+
 	'</ser:getUsersAttachedToDatabase>';
 
@@ -252,8 +270,11 @@ var attachNewUser = function (applicationKey,rssInstance, dbname, users, templat
 	options.mep = "in-only";
 	options.robust = true;
 
-	var payload ='<ser:attachUserToDatabase  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org">'+
-	'<ser:rssInstanceName>'+wso2_rss_instanceName+'</ser:rssInstanceName>'+
+	var payload ='<ser:attachUserToDatabase  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + rssInstance + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:databaseName>'+dbname+'</ser:databaseName>'+
 	'<ser:username>'+users+'</ser:username>'+
 	'<ser:templateName>'+templates+'</ser:templateName></ser:attachUserToDatabase>';
@@ -289,8 +310,11 @@ var detachUser = function (applicationKey,rssInstance, dbname, username){
 	options.useSOAP = 1.2;
 	options.action = "urn:detachUserFromDatabase";
 	options.mep = "in-only";
-	var payload ='<ser:detachUserFromDatabase xmlns:ser="http://service.core.rssmanager.carbon.wso2.org">'+
-	'<ser:rssInstanceName>'+wso2_rss_instanceName+'</ser:rssInstanceName>'+
+	var payload ='<ser:detachUserFromDatabase xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + rssInstance + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:databaseName>'+dbname+'</ser:databaseName>'+
 	'<ser:username>'+username+'</ser:username>'+
 	'</ser:detachUserFromDatabase>';
@@ -302,12 +326,12 @@ var detachUser = function (applicationKey,rssInstance, dbname, username){
 
 		detachUserService.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
 		detachUserService.send(payload);
-        result = true;//since detachUserService.responseE4X is null;
+		result = true;//since detachUserService.responseE4X is null;
 	} catch (e) {
 		log.error("Error while detaching a user \n" + e.message);
 		throw "Error while detaching a user";
 	}
-    return result;
+	return result;
 };
 
 var getUserPrivileges = function (applicationKey,rssInstance, dbname, username){
@@ -321,8 +345,11 @@ var getUserPrivileges = function (applicationKey,rssInstance, dbname, username){
 	var options = new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:getUserDatabasePermissions";
-	var payload ='<ser:getUserDatabasePermissions xmlns:ser="http://service.core.rssmanager.carbon.wso2.org">'+
-	'<ser:rssInstanceName>'+wso2_rss_instanceName+'</ser:rssInstanceName>'+
+	var payload ='<ser:getUserDatabasePermissions xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + rssInstance + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<ser:databaseName>'+dbname+'</ser:databaseName>'+
 	'<ser:username>'+username+'</ser:username>'+
 	'</ser:getUserDatabasePermissions>';
@@ -344,7 +371,7 @@ var getUserPrivileges = function (applicationKey,rssInstance, dbname, username){
 };
 
 
-var editUserPermissions = function (applicationKey,dbname,rssInstance,username,password,alterPriv,alterRoutinePriv, createPriv,createRoutinePriv, createTmpTablePriv, createViewPriv,deletePriv,dropPriv,eventPriv,executePriv,grantPriv,indexPriv,insertPriv,lockTablesPriv,referencesPriv,selectPriv,showViewPriv,triggerPriv,updatePriv){
+var editUserPermissions = function (applicationKey,dbname,rssInstance,username,alterPriv,alterRoutinePriv, createPriv,createRoutinePriv, createTmpTablePriv, createViewPriv,deletePriv,dropPriv,eventPriv,executePriv,grantPriv,indexPriv,insertPriv,lockTablesPriv,referencesPriv,selectPriv,showViewPriv,triggerPriv,updatePriv){
 	var stage = getStageFromRssInstanceName(rssInstance);
 	var permissionModule = jagg.module("permission");
 	permissionModule.checkUserActionPermission(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +stage);
@@ -359,7 +386,11 @@ var editUserPermissions = function (applicationKey,dbname,rssInstance,username,p
 
 	//   var tenantId= getProperty(ADMIN_USERNAME)+'@'+applicationKey;    TODO: changed for app factory
 	var tenantId="-1234";
-	var payload ='<ser:editDatabaseUserPrivileges  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://entity.core.rssmanager.carbon.wso2.org/xsd">'+
+	var payload ='<ser:editDatabaseUserPrivileges  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + rssInstance + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
 	'<xsd:privileges>'+
 	'<xsd:alterPriv>'+alterPriv+'</xsd:alterPriv>'+
 	'<xsd:alterRoutinePriv>'+alterRoutinePriv+'</xsd:alterRoutinePriv>'+
@@ -382,7 +413,6 @@ var editUserPermissions = function (applicationKey,dbname,rssInstance,username,p
 	'<xsd:updatePriv>'+updatePriv+'</xsd:updatePriv>'+
 	'</xsd:privileges>'+
 	'<ser:user>'+
-	'<xsd:password>'+password+'</xsd:password>'+
 	'<xsd:rssInstanceName>'+wso2_rss_instanceName+'</xsd:rssInstanceName>'+
 	'<xsd:tenantId>'+tenantId+'</xsd:tenantId>'+
 	'<xsd:type></xsd:type>'+
@@ -415,7 +445,6 @@ var getDatabases = function (applicationKey){
 	var options = new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:getDatabases";
-	var payload ='<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"/>';
 
 	var result;
 	var databasesObjectArray=[];
@@ -427,6 +456,12 @@ var getDatabases = function (applicationKey){
 		var hasDBConfigurePermissionToStage = permissionModule.isUserAccessGranted(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +deploymentStages[i]);
 		if(hasDBConfigurePermissionToStage){
 			var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+deploymentStages[i]+'.'+STORAGE_SERVER_URL);
+			var payload ='<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">' +
+			'<ser:ctx>' +
+			'<xsd:environmentName>' + deploymentStages[i] + '</xsd:environmentName>' +
+			'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+			'</ser:ctx>' +
+			'</ser:getDatabases>';
 			getDatabaseService.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
 			getDatabaseService.send(payload);
 			result = getDatabaseService.responseE4X;
@@ -446,110 +481,117 @@ var getDatabases = function (applicationKey){
 var getDatabasesForStage = function (applicationKey, stage){
 	var ws = require('ws');
 
-log.info("Inside Module getDatabasesForStage !!!!!!!!!!!!!!!");
 	var getDatabaseService = new ws.WSRequest();
 	var options = new Array();
 	options.useSOAP = 1.2;
 	options.action = "urn:getDatabases";
-	var payload ='<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"/>';
+	var payload ='<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">';
 
 	var result;
 	var databasesObjectArray=[];
 	var permissionModule = jagg.module("permission");
 	var deploymentStages = getProperties(DEPLOYMENT_STAGES);
 	var rssInstancesArray=[];
-		//if user has access to stage
-		var hasDBConfigurePermissionToStage = permissionModule.isUserAccessGranted(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +stage);
-		if(hasDBConfigurePermissionToStage){
-			var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
-			getDatabaseService.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
-			getDatabaseService.send(payload);
-			result = getDatabaseService.responseE4X;
-			var databaseObjects = buildResponse(result, stage, applicationKey);
-			for(var index in  databaseObjects){
-				var databaseObject = databaseObjects[index];
-				databasesObjectArray.push(databaseObject);
-			}
+	//if user has access to stage
+	var hasDBConfigurePermissionToStage = permissionModule.isUserAccessGranted(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +stage);
+	if(hasDBConfigurePermissionToStage){
+		var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);
+		var payload ='<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">' +
+		'<ser:ctx>' +
+		'<xsd:environmentName>' + stage + '</xsd:environmentName>' +
+		'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+		'</ser:ctx>' +
+		'</ser:getDatabases>';
+		getDatabaseService.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
+		getDatabaseService.send(payload);
+		result = getDatabaseService.responseE4X;
+		var databaseObjects = buildResponse(result, stage, applicationKey);
+		for(var index in  databaseObjects){
+			var databaseObject = databaseObjects[index];
+			databasesObjectArray.push(databaseObject);
 		}
+	}
 
 	return  databasesObjectArray;
 };
 
 
 var getDbUserTemplateInfoForStages = function(applicationKey) {
-    var ws = require('ws');
+	var ws = require('ws');
 
-    var getDatabaseService = new ws.WSRequest();
-    var options = new Array();
-    options.useSOAP = 1.2;
-    options.action = "urn:getDatabases";
-    var payload ='<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"/>';
+	var getDatabaseService = new ws.WSRequest();
+	var options = new Array();
+	options.useSOAP = 1.2;
+	options.action = "urn:getDatabases";
 
-    var result;
-    var infoArray=[];
-    var permissionModule = jagg.module("permission");
-    var deploymentStages = getProperties(DEPLOYMENT_STAGES);
+	var result;
+	var infoArray=[];
+	var permissionModule = jagg.module("permission");
+	var deploymentStages = getProperties(DEPLOYMENT_STAGES);
 
-    for(var i=0;i<deploymentStages.length;i++){
-        //if user has access to stage
-        var hasDBConfigurePermissionToStage = permissionModule.isUserAccessGranted(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +deploymentStages[i]);
-        if(hasDBConfigurePermissionToStage){
-            var infoObj = {};
-            infoObj.stage = deploymentStages[i];
-            rssInstanceName = getProperty(DEPLOYMENT_STAGES+'.'+deploymentStages[i]+'.'+RSS_NAME);
+	for(var i=0;i<deploymentStages.length;i++){
+		//if user has access to stage
+		var hasDBConfigurePermissionToStage = permissionModule.isUserAccessGranted(applicationKey,PERMISSION_CONFIGURATION_DB_FOR_STAGE +deploymentStages[i]);
+		if(hasDBConfigurePermissionToStage){
+			var infoObj = {
+			};
+			infoObj.stage = deploymentStages[i];
+			rssInstanceName = getProperty(DEPLOYMENT_STAGES+'.'+deploymentStages[i]+'.'+RSS_NAME);
 
-            var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+deploymentStages[i]+'.'+STORAGE_SERVER_URL);
-            getDatabaseService.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
-            getDatabaseService.send(payload);
-            result = getDatabaseService.responseE4X;
-            if(result != undefined) {
-                var response=result.*::["return"];
-                var dbs = [];
-                for(var index in response) {
-                    var db = {};
-                    db.dbName = response[index].*::name.text();
-                    db.url = response[index].*::url.text();
-                    dbs.push(db);
-                }
-                infoObj.dbs = dbs;
+			var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+deploymentStages[i]+'.'+STORAGE_SERVER_URL);
+			var payload = '<ser:getDatabases  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">' +
+			'<ser:ctx>' +
+			'<xsd:environmentName>' + deploymentStages[i] + '</xsd:environmentName>' +
+			'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+			'</ser:ctx>' +
+			'</ser:getDatabases>';
+			getDatabaseService.open(options, storageServerURL+'RSSAdmin', false,getProperty(ADMIN_USERNAME)+'@'+applicationKey , getProperty(ADMIN_PASSWORD) );
+			getDatabaseService.send(payload);
+			result = getDatabaseService.responseE4X;
+			if(result != undefined) {
+				var response=result.*::["return"];
+				var dbs = [];
+				for(var index in response) {
+					var db = {
+					};
+					db.dbName = response[index].*::name.text();
+					db.url = response[index].*::url.text();
+					dbs.push(db);
+				}
+				infoObj.dbs = dbs;
 
-            }
-            var rssMod = jagg.module("rssmanager");
-            var users = rssMod.getDatabaseUsersForRssInstance(applicationKey, rssInstanceName);
-            infoObj.users = users;
+			}
+			var rssMod = jagg.module("rssmanager");
+			var users = rssMod.getDatabaseUsersForRssInstance(applicationKey, rssInstanceName);
+			infoObj.users = users;
 
 
-            var templates = rssMod.getAvailableTemplatesToAttachToDatabase(applicationKey, rssInstanceName);
-            infoObj.templates = templates;
+			var templates = rssMod.getAvailableTemplatesToAttachToDatabase(applicationKey, rssInstanceName);
+			infoObj.templates = templates;
 
-            infoArray.push(infoObj);
+			infoArray.push(infoObj);
 
-        }
-    }
-    return  infoArray;
+		}
+	}
+	return  infoArray;
 };
 
 function buildResponse(result,stage,applicationKey){
 	var databaseObject=[];
 
-	if(result != undefined){    
+	if(result != undefined){
 		var response=result.*::["return"]
-
 		for(var index=0; index < response.length();index++){
-
-			var task={};
+			var task={
+			};
 			var entry=response[index];
-
-
 			var name=entry.*::name.text();
 			var rssInstanceName=entry.*::rssInstanceName.text();
 			var url=entry.*::url.text();
-
 			task.name=name;
 			task.rssInstanceName=getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+RSS_NAME);
-            task.url = url;
-            
-            databaseObject.push(task);
+			task.url = url;
+			databaseObject.push(task);
 		}
 	}
 	return databaseObject;
@@ -557,64 +599,44 @@ function buildResponse(result,stage,applicationKey){
 
 function buildRssInstances(result){
 	var databaseObject=[];
-
 	if(result != undefined){
 		var response=result.*::["return"]
-
 		for(var index=0; index < response.length();index++){
-
-			var task={};
+			var task={
+			};
 			var entry=response[index];
-
-
 			var name=entry.*::name.text();
-
 			task.name=name;
 			databaseObject.push(task);
 		}
 	}
 	return databaseObject;
-
 }
 
 
 function getUserList(result){
-
 	var databaseObject=[];
-
 	if(result != undefined){
-		var response=result.*::["return"]
-
+		var ns = new Namespace("http://service.core.rssmanager.carbon.wso2.org");
+		var response=result.ns::["return"];
 		for(var index=0; index < response.length();index++){
-
-			var task={};
-			var entry=response[index];
-
-
-			var name=entry.text();
-
-			task.name=name;
-			databaseObject.push(task);
+			var entry = response[index];
+			var ax = new Namespace("http://entity.core.rssmanager.carbon.wso2.org/xsd");
+			var username=entry.ax::["username"].text();
+			databaseObject.push(username);
 		}
 	}
 	return databaseObject;
-
-
 }
 
 function buildUserPrivilege(result){
-
 	var databaseObject=[];
-
 	if(result != undefined){
 		var response=result.*::["return"]
-
 		for(var index=0; index < response.length();index++){
-
-			var task={};
-
+			var task={
+			};
 			var privilages=response[index];
-
 			var alterPriv=privilages.*::alterPriv.text();
 			var alterRoutinePriv=privilages.*::alterRoutinePriv.text();
 			var createPriv=privilages.*::createPriv.text();
@@ -659,7 +681,6 @@ function buildUserPrivilege(result){
 		}
 	}
 	return databaseObject;
-
 
 }
 %>

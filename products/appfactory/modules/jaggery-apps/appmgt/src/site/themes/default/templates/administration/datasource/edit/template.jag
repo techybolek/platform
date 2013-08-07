@@ -301,7 +301,7 @@ var stages = getProperties('ApplicationDeployment.DeploymentStage');
                 $("#datasource_username_text").val("");
                 var i = 0;
                 for (i = 0; i < parsedArray.length; i++) {
-                    var name = parsedArray[i].name;
+                    var name = parsedArray[i];
 
                     var row = '<option value="' + name + '">' + name + '</option>';
                     $("#datasource_username_select").append(row);

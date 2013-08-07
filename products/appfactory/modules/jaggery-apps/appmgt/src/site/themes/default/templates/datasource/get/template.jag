@@ -80,7 +80,7 @@
             count++;
         }
         if(count == 0){
-        	$('#content').html("<div class='noData-message'>Data Sources have not been created yet.</div>");
+        	$('#contentHeader').html("<div class='noData-message'>Data Sources have not been created yet.</div>");
         }else{
         	$('#content').append($table);
         }	
@@ -212,11 +212,12 @@
                                 </div>
                             </div>
                             <div class="content clear well" >
-                                <ul class="list_table push_top_20" id="content">
+                                <ul class="list_table push_top_20" id="contentHeader">
                                     <li class="list_row_item first_list_row_item">
                                         <ul class="list_row first_list_row">
                                             <li class="list_col first_list_col datasources_name_col" style="width: 13%;">
-                                                <h2 class="list_col_heading">Name</h2>                                                
+                                                <h2 class="list_col_heading">Name</h2>  
+                                            </li>                                              
                                             <li class="list_col datasources_description_col" style="width: 16.3%;">
                                                 <h2 class="list_col_heading">Description</h2>                                               
                                             </li>
@@ -231,8 +232,8 @@
                                             </li>
                                         </ul>
                                    </li>
-                                    <div id="content">
-                                    </div>
+                                   <div id="content">
+                                   </div>
                                 </ul>
                             </div>
                         </section>

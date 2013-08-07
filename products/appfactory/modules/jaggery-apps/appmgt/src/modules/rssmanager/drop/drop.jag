@@ -19,9 +19,12 @@ var dropDatabase = function (applicationKey,databaseName,databaseServerInstanceN
 	options.useSOAP = 1.2;
 	options.action = "urn:dropDatabase";
 	options.mep = "in-only";
-	var payload ='<ser:dropDatabase  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org"><ser:rssInstanceName>'+
-	wso2_rss_instanceName+'</ser:rssInstanceName><ser:databaseName>'
-	+databaseName+'</ser:databaseName></ser:dropDatabase>';
+	var payload ='<ser:dropDatabase  xmlns:ser="http://service.core.rssmanager.carbon.wso2.org" xmlns:xsd="http://environment.config.core.rssmanager.carbon.wso2.org/xsd">'+
+	'<ser:ctx>' +
+	'<xsd:environmentName>' + databaseServerInstanceName + '</xsd:environmentName>' +
+	'<xsd:rssInstanceName>' + wso2_rss_instanceName + '</xsd:rssInstanceName>' +
+	'</ser:ctx>' +
+	'<ser:databaseName>'+databaseName+'</ser:databaseName></ser:dropDatabase>';
 	var result;
 
 	var storageServerURL = getProperty(DEPLOYMENT_STAGES+'.'+stage+'.'+STORAGE_SERVER_URL);

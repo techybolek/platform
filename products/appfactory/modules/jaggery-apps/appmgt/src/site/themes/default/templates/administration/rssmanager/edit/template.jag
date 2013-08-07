@@ -8,16 +8,15 @@ var applicationKey = request.getParameter("applicationKey");
 
 <script type="text/javascript">
 
-    var dbName,environment='',
-        applicationKey='',
+var applicationKey='',
         dbUser='',
         selectedUser='',
         selectedTemplate='',
-        selectedTemplateForAttachuser='',
-        applicationKey='<%=request.getParameter("applicationKey")%>',
-        dbName='<%=request.getParameter("dbName") %>',
-        environment='<%=request.getParameter("environment") %>';
-
+        selectedTemplateForAttachuser='';
+var applicationKey='<%=request.getParameter("applicationKey")%>';
+var dbName='<%=request.getParameter("dbName") %>';
+var environment='<%=request.getParameter("environment") %>';
+        
 $(document).ready(function(){
 
     $('#dbNameConatiner').html('<h2>'+dbName+'</hs2>') ;
@@ -42,7 +41,7 @@ $(document).ready(function(){
          }
     });
     $('#btn_save').click(function(){
-        detachUser(dbUser);
+    	attachNewUser($('select#dbUsersDD').val(),$('select#templateDD').val()+'@'+environment);
     });
 
     $('#btn_delete_db').click(function(event){
@@ -61,6 +60,123 @@ var removeElement = function(clickedElem){
     $(clickedElem).parent().parent().parent().parent().remove();
 }
 
+function setValue(value){
+    if(value == 'Y'){
+	    return true;
+	}else if (value == 'N'){
+	    return false;
+	}
+}
+
+function getValue(value){
+	if(value == 'checked'){
+	     return true;
+	}else{
+	     return false;
+	}
+}
+
+function showEditUser(username){
+    formEditPrivHide();
+    jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
+        action:"getUserPrivileges",
+        applicationKey:applicationKey,
+        dbname:dbName,
+        rssInstanceName:environment,
+        username:username
+    }, function (result) {
+        if(result != undefined){
+            var parsedArray = jQuery.parseJSON(result);
+            $("#editselectPriv").prop('checked', setValue(parsedArray[0].selectPriv));
+            $("#editinsertPriv").prop('checked', setValue(parsedArray[0].insertPriv));
+            $("#editupdatePriv").prop('checked', setValue(parsedArray[0].updatePriv));
+            $("#editdeletePriv").prop('checked', setValue(parsedArray[0].deletePriv));
+            $("#editcreatePriv").prop('checked', setValue(parsedArray[0].createPriv));
+            $("#editdropPriv").prop('checked', setValue(parsedArray[0].dropPriv));
+            $("#editgrantPriv").prop('checked', setValue(parsedArray[0].grantPriv));
+            $("#editreferencesPriv").prop('checked', setValue(parsedArray[0].referencesPriv));
+            $("#editindexPriv").prop('checked', setValue(parsedArray[0].indexPriv));
+            $("#editalterPriv").prop('checked', setValue(parsedArray[0].alterPriv));
+            $("#editcreateTmpTablePriv").prop('checked', setValue(parsedArray[0].createTmpTablePriv));
+            $("#editlockTablesPriv").prop('checked', setValue(parsedArray[0].lockTablesPriv));
+            $("#editcreateViewPriv").prop('checked', setValue(parsedArray[0].createViewPriv));
+            $("#editshowViewPriv").prop('checked', setValue(parsedArray[0].showViewPriv));
+            $("#editcreateRoutinePriv").prop('checked', setValue(parsedArray[0].createRoutinePriv));
+            $("#editalterRoutinePriv").prop('checked', setValue(parsedArray[0].alterRoutinePriv));
+            $("#editexecutePriv").prop('checked', setValue(parsedArray[0].executePriv));
+            $("#editeventPriv").prop('checked', setValue(parsedArray[0].eventPriv));
+            $("#edittriggerPriv").prop('checked', setValue(parsedArray[0].triggerPriv));
+            $('#btn_save_user_prev').click(function(){
+                   editUserPermission(username);
+           });
+            $("#formEditPriv").show();
+        }
+    },
+    function (jqXHR, textStatus, errorThrown) {
+           jagg.message({type:'error',content:'Error occurred while reading templates', id:'tempalte_edit'});
+    });
+ }
+
+ function formEditPrivHide(){
+    $("#formEditPriv").hide();
+ }
+
+ function editUserPermission(username){
+
+     var alterPriv=($("#editalterPriv"));
+     var alterRoutinePriv=($("#editalterRoutinePriv"));
+     var createPriv=($("#editcreatePriv"));
+     var createRoutinePriv=($("#editcreateRoutinePriv"));
+     var createTmpTablePriv=($("#editcreateTmpTablePriv"));
+     var createViewPriv=($("#editcreateViewPriv"));
+     var deletePriv=($("#editdeletePriv"));
+     var dropPriv=($("#editdropPriv"));
+     var eventPriv=($("#editeventPriv"));
+     var executePriv=($("#editexecutePriv"));
+     var grantPriv=($("#editgrantPriv"));
+     var indexPriv=($("#editindexPriv"));
+     var insertPriv=($("#editinsertPriv"));
+     var lockTablesPriv=($("#editlockTablesPriv"));
+     var referencesPriv=($("#editreferencesPriv"));
+     var selectPriv=($("#editselectPriv"));
+     var showViewPriv=($("#editshowViewPriv"));
+     var triggerPriv=($("#edittriggerPriv"));
+     var updatePriv=($("#editupdatePriv"));
+     jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
+         action:"editUserPermissions",
+         applicationKey:applicationKey,
+         databaseName:dbName,
+         rssInstanceName:environment,
+         username:username,
+         alterPriv:getValue(alterPriv.attr('checked')),
+         alterRoutinePriv:getValue(alterRoutinePriv.attr('checked')),
+         createPriv:getValue(createPriv.attr('checked')),
+         createRoutinePriv:getValue(createRoutinePriv.attr('checked')),
+         createTmpTablePriv:getValue(createTmpTablePriv.attr('checked')),
+         createViewPriv:getValue(createViewPriv.attr('checked')),
+         deletePriv:getValue(deletePriv.attr('checked')),
+         dropPriv:getValue(dropPriv.attr('checked')),
+         eventPriv:getValue(eventPriv.attr('checked')),
+         executePriv:getValue(executePriv.attr('checked')),
+         grantPriv:getValue(grantPriv.attr('checked')),
+         indexPriv:getValue(indexPriv.attr('checked')),
+         insertPriv:getValue(insertPriv.attr('checked')),
+         lockTablesPriv:getValue(lockTablesPriv.attr('checked')),
+         referencesPriv:getValue(referencesPriv.attr('checked')),
+         selectPriv:getValue(selectPriv.attr('checked')),
+         showViewPriv:getValue(showViewPriv.attr('checked')),
+         triggerPriv:getValue(triggerPriv.attr('checked')),
+         updatePriv:getValue(updatePriv.attr('checked'))
+     }                  ,
+     function (result) {
+            formEditPrivHide();
+            jagg.removeMessage();
+            jagg.message({content:'Privileges are applied to the user successfully',type:'success', id:'tempalte_edit' });
+            setTimeout(function(){jagg.removeMessage()},5000);
+     },
+     function (jqXHR, textStatus, errorThrown) {
+     });
+ }
 
 function getDatabaseUsers(){
     jagg.post("../blocks/rssmanager/users/ajax/list.jag", {
@@ -69,26 +185,19 @@ function getDatabaseUsers(){
                 databaseName:dbName,
                 dbServerInstanceName:environment
             },
-
             function (result) {
-
-                 var users=jQuery.parseJSON(result);
+                var users=jQuery.parseJSON(result);
                 if(result != undefined || result==true){
                     var options='';
                     for(var u in users){
                        options+='<option value="'+users[u]+'">'+users[u]+'</option>';
                     }
-
                   $('#dbUsersDD').append(options);
-
                 } else if(result==false){
-
-
                 }
             },
             function (jqXHR, textStatus, errorThrown) {
                 // showNotification('notifier','message','Your invitation has not been sent to '+newUserNames,'error');
-
             });
 
 }
@@ -99,33 +208,35 @@ function getDatabaseUsers(){
                     dbname:dbName,
                     rssInstance:environment
                 },
-
                 function (result) {
                     var users=jQuery.parseJSON(result);
-                    if(result != undefined || result==true){
-                 //       var options='';
-                   //     for(var u in users){
-                  //          options+='<option value="'+users[u].name+'">'+users[u].name+'</option>';
-                  //      }
-
-                        if(users.length>0){
-                            var username= users[0].name;
-                            dbUser=username;
-                            $('#dbUsersDD').append('<option value="'+username+'">'+username+'</option>');
-                            $('#dbUsersDD').select2('val',username);
-                        }
-                        getUserPrivileges(username);
-
-
-
-                    }else if(result==false){
-
-
-                    }
+                    if(result){
+                    	var $table='';
+                    	for(var u in users){
+	                    	$table +=	'<li class="list_row_item  ">' +
+	                    	          		'<ul class="list_row  ">' +
+	                    	             		'<li class="list_col" style="width:44.3%">' +
+	                    	          				'<div class="list_col_content">' +
+	                    	                  			users[u] +
+	                    	                    	'</div>' +
+	                    	           			'</li>' +
+	                    	   					'<li class="list_col">' +
+	                    	              			'<div class="list_col_content" >' +
+	                    								'<span onclick=\'showEditUser("' + users[u] + '")\'>Edit Priviledges     </span>'+
+	                    	   							'<span onclick=\'detachUser("' + users[u] + '")\'>Dettach</span>'+
+	                    	            			'</div>' +
+	              								'</li>' +
+	                    	  				'</ul>' +
+	                   					'</li>'; 
+                    	}
+	                    if(users.length == 0){
+	                    	$('#tblAttachedUsers').html("<div class='noData-message'>No Users Attached Yet.</div>");
+	                    }else{
+	                  		$('#tblAttachedUsers').append($table);
+						}
                 },
                 function (jqXHR, textStatus, errorThrown) {
                     // showNotification('notifier','message','Your invitation has not been sent to '+newUserNames,'error');
-
                 });
 
     }
@@ -145,47 +256,32 @@ function getDatabaseUsers(){
                        for(var p in privilages){
                            if(privilages[p]=="Y"){
                                $('#'+p).prop('checked', true);
-
-
                            } else{
                                $('#'+p).prop('checked', false);
                            }
                            $('#'+p).prop('disabled', 'disabled');
-
                        }
-
                     }else if(result==false){
-
-
                     }
                 },
                 function (jqXHR, textStatus, errorThrown) {
                     // showNotification('notifier','message','Your invitation has not been sent to '+newUserNames,'error');
-
                 });
-
     }
 
     function getDatabases(){
         jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
                     action:"getDatabases",
                     applicationKey:applicationKey
-
                 },
-
                 function (result) {
                     var users=jQuery.parseJSON(result);
                     if(result != undefined || result==true){
-
-
                     }else if(result==false){
-
-
                     }
                 },
                 function (jqXHR, textStatus, errorThrown) {
                     // showNotification('notifier','message','Your invitation has not been sent to '+newUserNames,'error');
-
                 });
 
     }
@@ -193,9 +289,7 @@ function getDatabaseUsers(){
         jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
                     action:"getDbUserTemplateInfoForStages",
                     applicationKey:applicationKey
-
                 },
-
                 function (result) {
                     var info=jQuery.parseJSON(result);
                     if(result != undefined || result==true){
@@ -209,15 +303,11 @@ function getDatabaseUsers(){
                         $('#templateDD').append(options);
                        // $('#templateDD').val('default');
                     }else if(result==false){
-
-
                     }
                 },
                 function (jqXHR, textStatus, errorThrown) {
                     // showNotification('notifier','message','Your invitation has not been sent to '+newUserNames,'error');
-
                 });
-
     }
 
     function getTemplatesForStage(result,stage){
@@ -279,43 +369,18 @@ function getDatabaseUsers(){
     	var isValid=true;
     	jagg.removeMessage();
 	
-        selectedTemplateForAttachuser = $('select#templateDD').val()+'@'+environment;
-        selectedUser = $('select#dbUsersDD').val();
-        if($('select#templateDD').val()==''){
-        	isValid=false;
-        	jagg.message({type:'error',content:'Select valid Permission Template!', id:'tempalte_edit'});
-        }
-
-		if($('select#dbUsersDD').val()==''){
-			isValid=false;
-			jagg.message({type:'error',content:'Select valid User!', id:'tempalte_edit'});
-		}
-	
 		if(isValid){
 			jagg.post("../blocks/rssmanager/add/ajax/add.jag", {
-			        action: "detachUser",
-			        applicationKey: applicationKey,
-			        databaseName: dbName,
-			        dbServerInstanceName: environment,
-			        username: userName
+			     action: "detachUser",
+			     applicationKey: applicationKey,
+			     databaseName: dbName,
+			     dbServerInstanceName: environment,
+			     username: userName
 			    },
 			    function (result) {
-			        // var users=jQuery.parseJSON(result);
-			        console.info('detachUser response handling...result => '+result);
-			        console.info('detachUser response handling...(result == "true") => '+(result == true));
-			        if (result !== undefined && result == "true") {
-			            if (selectedUser == undefined || selectedUser.length === 0) {
-			                attachNewUser(userName, selectedTemplateForAttachuser);
-			            } else {
-			                attachNewUser(selectedUser, selectedTemplateForAttachuser);
-			            }
-			            
-			        }
-			        
+			        document.location.reload(true);			        
 			    },
 			    function (jqXHR, textStatus, errorThrown) {
-			        // showNotification('notifier','message','Your invitation has not been sent to '+newUserNames,'error');
-			        //console.error('detachUser response handling failed');
 			    });
 		}
     }
@@ -330,11 +395,9 @@ function getDatabaseUsers(){
                     users:userName,
                     templates:template
                 },
-
                 function (result) {
-
                     //var users=jQuery.parseJSON(result);
-                    if(result !== undefined && result=='success'){
+                    if(result !== undefined && result.trim()=='success'){
                          callPreviousPage();
                     }else{
                         jagg.message({type:'error',content:'Database Configurations not modified!', id:'tempalte_edit'});
@@ -355,24 +418,14 @@ function getDatabaseUsers(){
                     databaseName:dbName,
                     rssInstanceName:environment
                 },
-
                 function (result) {
-
-
-                    if(result != undefined || result==true){
-                        window.location.replace("<%=jagg.getAbsoluteUrl("/site/pages/configureenvironment.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>");
-                    }else if(result==false){
-
-
+                    if(result){
+                    	window.location.replace("<%=jagg.getAbsoluteUrl("/site/pages/listdatabases.jag")%>?applicationName=<%=applicationName%>&applicationKey=<%=applicationKey%>");
                     }
                 },
                 function (jqXHR, textStatus, errorThrown) {
                     // showNotification('notifier','message','Your invitation has not been sent to '+newUserNames,'error');
-
                 });
-
-
-
     }
     
     // call previous page
@@ -416,7 +469,6 @@ function getDatabaseUsers(){
                             <div class="left pw_50">
                                 <ul class="list big push_bottom">
                                     <li>
-
                                         <label >DB User</label>
                                         <select class="half big"  name="permission_template">
                                             <option value="db_user_1">db_1</option>
@@ -438,6 +490,63 @@ function getDatabaseUsers(){
                             <div class="clearfix"></div>
                         </div>
 
+                         <section class="separator clear">
+                                <div class="content well">
+                                    <div>
+                                        <h2>Attached Users</h2>
+                                                <ul class="list_table push_top_20" id="tblAttachedUsers">
+                                                        <li class="list_row_item first_list_row_item">
+                                                                <ul class="list_row first_list_row">
+                                                                  <li class="list_col first_list_col" style="width:44.3%">
+                                                                    <h2 class="list_col_heading">Database User</h2>
+                                                                  </li>
+                                                                  <li class="list_col">
+                                                                    <h2 class="list_col_heading">Action</h2>
+                                                                  </li>
+                                                                </ul>
+                                                            </li>
+                                                </ul>
+                                    </div>
+                                    <div class="form-container" id="formEditPriv" style="display:none;margin-top:20px;">
+                                        <form class="hold right_label" method="post" action="#" >
+                                            <fieldset>
+                                                <div class="clearfix"></div>
+                                                <div class="controlset">
+                                                    <div class="input_row">
+                                                        <label><input type="checkbox" name="permission" id="editselectPriv" checked="checked"> SELECT</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editinsertPriv" checked="checked"> INSERT</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editupdatePriv" checked="checked"> UPDATE</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editdeletePriv" checked="checked"> DELETE</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editcreatePriv" checked="checked"> CREATE</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editdropPriv" checked="checked"> DROP</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editgrantPriv" checked="checked"> GRANT</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editreferencesPriv" checked="checked"> REFERENCES</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editindexPriv" checked="checked"> INDEX</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editalterPriv" checked="checked"> ALTER</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editcreateTmpTablePriv" checked="checked"> CREATE_TEMP_TABLE</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editlockTablesPriv" checked="checked"> LOCK_TABLES</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editcreateViewPriv" checked="checked"> CREATE_VIEW</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editshowViewPriv" checked="checked"> SHOW_VIEW</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editcreateRoutinePriv" checked="checked"> CREATE_ROUTINE</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editalterRoutinePriv" checked="checked"> ALTER_ROUTINE</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editexecutePriv" checked="checked"> EXECUTE</label><br>
+                                                        <label><input type="checkbox" name="permission" id="editeventPriv" checked="checked"> EVENT</label><br>
+                                                        <label><input type="checkbox" name="permission" id="edittriggerPriv" checked="checked"> TRIGGER</label><br>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <input type="hidden" value="app_105" id="applicationKey">
+ 
+                                            <div class="buttonrow">
+                                                <input type="button" class="btn main" id="btn_save_user_prev" value="Save" name="Submit">
+                                                <a id="btn_edit_cancel" onclick='formEditPrivHide();'>Cancel</a>
+                                                <span style="margin-left: 10px; display:none;" class="icon-spinner icon-spin icon-large" id="saveSpin"></span>
+                                            </div>
+                                        </form>
+ 
+                                    </div>
+                                </div>
+                        </section>                                                    
                         <section class="separator clear" id="permission_listing">
                             <div class="content well">
                                 <div class="left pw_50">
@@ -445,8 +554,8 @@ function getDatabaseUsers(){
                                     <ul class="list big push_bottom">
                                         <li>
                                             <label>User Name</label>
-
                                             <select id="dbUsersDD" class="select_list half big" name="permission_template">
+                                            	<option value="">Select your option</option>
                                             </select>
                                         </li>
                                     </ul>
@@ -457,7 +566,6 @@ function getDatabaseUsers(){
                                         <li><label>Permission Template</label>
                                             <select id="templateDD" class="select_list half big" name="permission_template" placeholder="Select Template...">
                                                 <option value="">Select your option</option>
-
                                             </select>
                                         </li>
                                     </ul>
@@ -498,8 +606,8 @@ function getDatabaseUsers(){
                                 <input type="hidden" value="app_105" id="applicationKey">
 
                                 <div class="buttonrow">
-                                    <input type="button" class="btn main" id="btn_save" value="Save Changes" name="Submit">
-                                    <a id="btn_cancel" href="#">Cancel</a>
+                                    <input type="button" class="btn main" id="btn_save" value="Attach User" name="Submit">
+                                    <a id="btn_cancel" onclick="callPreviousPage();">Cancel</a>
                                     <span style="margin-left: 10px; display:none;" class="icon-spinner icon-spin icon-large" id="saveSpin"></span>
                                 </div>
 
