@@ -220,6 +220,7 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
         template.setHttpVerb(dto.getHTTPVerb());
         template.setResourceSandboxURI(dto.getResourceSandboxURI());
         template.setUriTemplate(dto.getUriTemplate());
+        template.setThrottlingTier(dto.getThrottlingTier());
         return template;
     }
 

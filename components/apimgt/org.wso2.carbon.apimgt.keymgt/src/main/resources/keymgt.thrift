@@ -30,6 +30,7 @@ struct URITemplate {
     3: optional string resourceSandboxURI;
     4: optional string httpVerb;
     5: optional string authType;
+    6: optional string throttlingTier;
 }
 
 
