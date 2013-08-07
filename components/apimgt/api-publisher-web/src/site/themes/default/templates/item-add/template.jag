@@ -237,6 +237,9 @@
                                     <th><%=i18n.localize("urlPattern")%></th>
                                     <th style="width:50px;"><%=i18n.localize("httpVerb")%></th>
                                     <th  style="width:120px;"><%=i18n.localize("authType")%></th>
+                                    <!--Throttling fix-->
+                                    <th  style="width:120px;"><%=i18n.localize("throttlingTier")%></th>
+                                    <!--Throttling fix-->
                                     <th style="width:20px;"><%=i18n.localize("action")%></th>
                                 </tr>
 
@@ -286,6 +289,17 @@
                                         <select style="width:100%" class="optionsAuthType"><option selected="selected"><%=i18n.localize("none")%></option><option><%=i18n.localize("application")%></option><option><%=i18n.localize("applicationUser")%></option><option><%=i18n.localize("application&applicationUser")%></option></option></select>
 
                                     </td>
+
+            <!--Throttling-fix-->
+                                     <td id = "throttlingTierList">
+                                         <select style="width:100%" id="getThrottlingTier" class="selected getThrottlingTier" name="getThrottlingTier"></select>
+                                         <select style="width:100%" id="postThrottlingTier" class="selected postThrottlingTier" name="postThrottlingTier"></select>
+                                         <select style="width:100%" id="putThrottlingTier" class="selected putThrottlingTier" name="putThrottlingTier"></select>
+                                         <select style="width:100%" id="deleteThrottlingTier" class="selected deleteThrottlingTier" name="deleteThrottlingTier"></select>
+                                         <select style="width:100%" id="optionsThrottlingTier" class="selected optionsThrottlingTier" name="optionsThrottlingTier"></select>
+                                    </td>
+           <!--Throttling-fix-->
+
                                     <td>
                                          <button type="button" disabled="disabled" class='even-width-button btn downButton' onclick="moveMe(this)"><i class="icon-chevron-down"></i> <%=i18n.localize("moveDown")%></button><button onclick="moveMe(this)" type="button" disabled="disabled" class='even-width-button btn upButton'><i class="icon-chevron-up"></i>  <%=i18n.localize("moveUp")%></button>
                                         <button type="button" class="btn btn-danger even-width-button deleteButton" id="resourceDelBtn" onclick="deleteResource(this)">
@@ -328,6 +342,7 @@
                 <div id="hiddenFormElements" name="hiddenFormElements">
                     <input id="resourceMethod-0" type="hidden" name="resourceMethod-0" value="GET,POST,PUT,DELETE,OPTIONS">
                     <input id="resourceMethodAuthType-0" type="hidden" name="resourceMethodAuthType-0" value="Application & Application User,Application & Application User,Application & Application User,Application & Application User,None">
+                    <input id="resourceMethodThrottlingTier-0" type="hidden" name="resourceMethodThrottlingTier-0" value="Unlimited, Unlimited, Unlimited, Unlimited, Unlimited">
                     <input type="hidden" name="uriTemplate-0" id="uriTemplate-0" value="/*"/>
                 </div>
 
