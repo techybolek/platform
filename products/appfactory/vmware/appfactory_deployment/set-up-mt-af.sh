@@ -67,6 +67,11 @@ mkdir setup
 . `pwd`/set-up-build-server.sh
  setup_build_server -w $SETUP_DIR -r $RESOURCE_DIR -v $APPSERVER_VERSION -h $af_host_name -o 30
 
+#configure git server
+. `pwd`/set-up-gitblit.sh
+ setup_git_server -w $SETUP_DIR -r $RESOURCE_DIR -v $GITBLIT_VERSION -h $af_host_name -o 0
+
+
  echo "Creating Databases ........"
 
  MYSQL=`which mysql`
