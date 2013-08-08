@@ -48,30 +48,7 @@ public class ModifyLiveCall extends AbstractConnector {
 		String callSid =
 		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
 		                                                             TwilioUtil.PARAM_CALL_SID);
-		// Optional parameters. For specifications and formats, see
-		// http://www.twilio.com/docs/api/rest/change-call-state
-		// Available parameters to be modified (Optional)
-		String url =
-		             (String) ConnectorUtils.lookupFunctionParam(messageContext,
-		                                                         TwilioUtil.PARAM_URL);
-		String status =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
-		                                                            TwilioUtil.PARAM_STATUS);
-		String method =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
-		                                                            TwilioUtil.PARAM_METHOD);
-
-		// Map for optional parameters
-		Map<String, String> params = new HashMap<String, String>();
-		if (url != null) {
-			params.put(TwilioUtil.TWILIO_URL, url);
-		}
-		if (status != null) {
-			params.put(TwilioUtil.TWILIO_STATUS, status);
-		}
-		if (method != null) {
-			params.put(TwilioUtil.TWILIO_METHOD, method);
-		}
+		Map<String, String> params = getParameters(messageContext);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);
 			// Get the call to be modified
@@ -86,5 +63,58 @@ public class ModifyLiveCall extends AbstractConnector {
 			throw new SynapseException(e);
 		}
 		log.auditLog("End: Update Live Call");
+	}
+
+	private Map<String, String> getParameters(MessageContext messageContext) {
+		// Optional parameters. For specifications and formats, see
+		// http://www.twilio.com/docs/api/rest/change-call-state
+		// Available parameters to be modified (Optional)
+		String url =
+		             (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                                         TwilioUtil.PARAM_URL);
+		String status =
+		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                                            TwilioUtil.PARAM_STATUS);
+		String method =
+		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                                            TwilioUtil.PARAM_METHOD);
+
+		String fallbackUrl =
+		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                                                 TwilioUtil.PARAM_FALLBACKURL);
+		String fallbackMethod =
+		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                                                    TwilioUtil.PARAM_FALLBACK_METHOD);
+		String statusCallback =
+		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                                                    TwilioUtil.PARAM_STATUS_CALLBACK);
+		String statusCallbackMethod =
+		                              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                                                          TwilioUtil.PARAM_STATUS_CALLBACK_METHOD);
+
+		// Map for optional parameters
+		Map<String, String> params = new HashMap<String, String>();
+		if (url != null) {
+			params.put(TwilioUtil.TWILIO_URL, url);
+		}
+		if (status != null) {
+			params.put(TwilioUtil.TWILIO_STATUS, status);
+		}
+		if (method != null) {
+			params.put(TwilioUtil.TWILIO_METHOD, method);
+		}
+		if (fallbackUrl != null) {
+			params.put(TwilioUtil.TWILIO_FALLBACK_URL, fallbackUrl);
+		}
+		if (fallbackMethod != null) {
+			params.put(TwilioUtil.TWILIO_FALLBACK_METHOD, fallbackMethod);
+		}
+		if (statusCallback != null) {
+			params.put(TwilioUtil.TWILIO_STATUS_CALLBACK, statusCallback);
+		}
+		if (statusCallbackMethod != null) {
+			params.put(TwilioUtil.TWILIO_STATUS_CALLBACKMETHOD, statusCallbackMethod);
+		}
+		return params;
 	}
 }

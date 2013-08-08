@@ -8,6 +8,10 @@
     <parameter name="url"/>
     <parameter name="method"/>
     <parameter name="status"/>
+    <parameter name="fallbackUrl"/>
+    <parameter name="fallbackMethod"/>
+    <parameter name="statusCallback"/>
+    <parameter name="statusCallbackMethod"/>
     <sequence>
         <class name="org.wso2.carbon.connector.twilio.call.ModifyLiveCall"/>
     </sequence>

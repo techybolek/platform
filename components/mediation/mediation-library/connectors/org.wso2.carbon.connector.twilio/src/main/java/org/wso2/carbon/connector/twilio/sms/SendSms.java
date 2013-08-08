@@ -86,7 +86,6 @@ public class SendSms extends AbstractConnector {
 			TwilioUtil.addElement(omResponse, TwilioUtil.PARAM_MESSAGE_SID, message.getSid());
 			TwilioUtil.addElement(omResponse, TwilioUtil.PARAM_STATUS, message.getStatus());
 			TwilioUtil.preparePayload(messageContext, omResponse);			
-			TwilioUtil.preparePayload(messageContext, omResponse);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new SynapseException(e);
