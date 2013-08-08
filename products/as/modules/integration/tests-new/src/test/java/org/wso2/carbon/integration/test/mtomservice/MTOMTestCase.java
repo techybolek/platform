@@ -15,7 +15,7 @@
 *specific language governing permissions and limitations
 *under the License.
 */
-package org.wso2.carbon.integration.test.sampleservices.mtomservice;
+package org.wso2.carbon.integration.test.mtomservice;
 
 import org.apache.axiom.om.*;
 import org.apache.commons.logging.Log;
