@@ -202,27 +202,13 @@ public class WsdlRetentionVerificationTestCase {
     @AfterClass(groups = "wso2.greg", alwaysRun = true, description = "cleaning up the artifacts added")
     public void tearDown() throws AxisFault, RegistryException {
 
-        String pathPrefix = "/_system/governance";
-        Endpoint[] endpoints;
-        endpoints = wsdlAddedByFirstUser.getAttachedEndpoints();
-        String previousGovernanceArtifactPath = "to prevent re-deleting errors";
-        
-        GovernanceArtifact[] governanceArtifacts = wsdl.getDependents();
-        for (GovernanceArtifact tmpGovernanceArtifact : governanceArtifacts) {
-            if (!tmpGovernanceArtifact.getPath().contentEquals(previousGovernanceArtifactPath)) {
-                wsRegistry.delete(pathPrefix + tmpGovernanceArtifact.getPath());
-            }
-            previousGovernanceArtifactPath = tmpGovernanceArtifact.getPath();
+        if(wsRegistry.resourceExists("/_system/governance/trunk")){
+            wsRegistry.delete("/_system/governance/trunk");
         }
 
-        for (Endpoint tmpEndpoint : endpoints) {
-        	GovernanceArtifact[] dependentArtifacts =  tmpEndpoint.getDependents();
-        	for (GovernanceArtifact tmpGovernanceArtifact : dependentArtifacts) {
-                wsRegistry.delete(pathPrefix + tmpGovernanceArtifact.getPath());
-            }
-            wsRegistry.delete(pathPrefix + tmpEndpoint.getPath());
+        if(wsRegistry.resourceExists("/_system/governance/branches")){
+            wsRegistry.delete("/_system/governance/branches");
         }
-
         wsRegistry = null;
         wsdl = null;
         wsdlManager = null;
