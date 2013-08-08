@@ -140,7 +140,7 @@ public class ServiceVersioningTestCase {
         versionService.removeAttribute("interface_wsdlUrl");
         versionService.removeAttribute("interface_messageFormats");
         versionService.setAttribute("interface_messageExchangePatterns", "One Way");
-        versionService.setAttribute("security_authenticationPlatform ", "WSO2 Identity Server");
+        versionService.setAttribute("security_authenticationPlatform", "WSO2 Identity Server");
         versionService.removeAttribute("security_authenticationMechanism");
         versionService.removeAttribute("security_messageIntegrity");
         versionService.removeAttribute("security_messageEncryption");
