@@ -29,6 +29,9 @@
         <field type="text" required="true">
             <name>Version</name>
         </field>
+        <field type="text">
+            <name>Transports</name>
+        </field>
         <field type="text-area">
             <name>Description</name>
         </field>
@@ -65,6 +68,9 @@
         </field>
         <field type="text">
             <name>Visible Roles</name>
+        </field>
+	<field type="text">
+            <name>Visible Tenants</name>
         </field>
         <field type="options">
             <name label="IsLatest">Is Latest</name>
