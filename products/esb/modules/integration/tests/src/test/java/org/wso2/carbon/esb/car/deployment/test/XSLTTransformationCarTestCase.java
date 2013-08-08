@@ -57,7 +57,7 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
                 , new DataHandler(new URL("file:" + File.separator + File.separator + getESBResourceLocation()
                                           + File.separator + "car" + File.separator + "xslt-transformation-car_1.0.0.car")));
         applicationAdminClient = new ApplicationAdminClient(esbServer.getBackEndUrl(), esbServer.getSessionCookie());
-        Assert.assertTrue(isCarFileDeployed(carFileName));
+        Assert.assertTrue(isCarFileDeployed(carFileName), "Car file deployment failed");
         TimeUnit.SECONDS.sleep(5);
         resourceAdminServiceStub =
                 new ResourceAdminServiceClient(esbServer.getBackEndUrl(), esbServer.getSessionCookie());
