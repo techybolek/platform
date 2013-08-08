@@ -135,6 +135,12 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.sourcerequestprocessor.feature:${carbon.platform.version}
                                 </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.dataservices.task.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.cassandra-jdbc-1.1.1.server.feature:${carbon.platform.version}
+                                </featureArtifactDef>
 
 
                                 <featureArtifactDef>
@@ -174,6 +180,10 @@
                                 <featureArtifactDef>
                                     org.wso2.appserver:org.wso2.stratos.appserver.sample.installer.ui.feature:${stratos.version}
                                 </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.stratos.dss.dashboard.ui.feature:${stratos.version}
+                                </featureArtifactDef>
+
 
 
                                 <featureArtifactDef>
@@ -254,6 +264,9 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.tryit.feature:${carbon.platform.version}
                                 </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.dbconsole.ui.feature:${carbon.platform.version}
+                                </featureArtifactDef>
 
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.mediation.initializer.feature:${carbon.platform.version}
@@ -294,6 +307,8 @@
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>org.wso2.dss:org.wso2.stratos.dss.styles.feature:${stratos.version}
                                 </featureArtifactDef>
 
                                 <featureArtifactDef>
@@ -343,6 +358,18 @@
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.reporting.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.sts.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.subversion.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.core.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.core.runtime.feature:${carbon.platform.version}
                                 </featureArtifactDef>
 
                                 <featureArtifactDef>
@@ -575,6 +602,37 @@
                                 <featureArtifactDef>
                                     org.wso2.am:org.wso2.apimgt.jaggery-apps.nested.category.feature:${apimserver.version}
                                 </featureArtifactDef>
+
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.application-mgt.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.dataservices-hosting.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.miscellaneous.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.multi-tenancy.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.user-mgt.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.single-sign-on.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.registry-repository.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.monitoring.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.tooling.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.dss:org.wso2.dss.styling.nested.category.feature:${dss.version}
+                                </featureArtifactDef>
                             </featureArtifacts>
 
                             <categories>
@@ -716,6 +774,55 @@
                                         </catFeature>
                                     </features>
                                 </category>
+                                <!--Start of DSS feature categories-->
+                                <category>
+                                    <id>org.wso2.dss.category</id>
+                                    <label>Data Services Server</label>
+                                    <description>This category contains features required for WSO2 Data Services Server
+                                    </description>
+                                    <features>
+                                        <catFeature>
+                                            <id>org.wso2.dss.application-mgt.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.dataservices-hosting.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.miscellaneous.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dsss.multi-tenancy.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.user-mgt.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.single-sign-on.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.registry-repository.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.monitoring.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.tooling.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.dss.styling.nested.category</id>
+                                            <version>${dss.version}</version>
+                                        </catFeature>
+                                    </features>
+                                </category>
                             </categories>
 
                         </configuration>
@@ -731,6 +838,7 @@
         <is.version>4.5.0-SNAPSHOT</is.version>
         <greg.version>4.6.0-SNAPSHOT</greg.version>
         <apimserver.version>1.5.0-SNAPSHOT</apimserver.version>
+        <dss.version>3.1.0-SNAPSHOT</dss.version>
 
         <!-- Stratos Version -->
         <stratos.version>2.2.0-SNAPSHOT</stratos.version>
