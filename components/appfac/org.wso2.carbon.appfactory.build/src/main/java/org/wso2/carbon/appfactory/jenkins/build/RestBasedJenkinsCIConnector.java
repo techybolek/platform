@@ -1317,7 +1317,7 @@ public class RestBasedJenkinsCIConnector {
 
     private String getJenkinsUrlByTenantDomain(String urlFragment, String tenantDomain){
         if(tenantDomain!=null && !tenantDomain.equals(""))
-            return getJenkinsUrl() + File.separator + "t" + File.separator + tenantDomain + urlFragment;
+            return getJenkinsUrl() + File.separator + "t" + File.separator + tenantDomain + "/webapps/jenkins/"+urlFragment;
         else
             return getJenkinsUrl() + urlFragment;
     }

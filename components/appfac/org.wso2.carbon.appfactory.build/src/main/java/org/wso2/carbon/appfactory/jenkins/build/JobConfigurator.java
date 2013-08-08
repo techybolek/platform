@@ -53,6 +53,8 @@ public class JobConfigurator {
         	jobTemplate = getJenkinFreeStyleJobConfigurationTemplate(projectType);
         }
 
+
+
         // Configure
         return jobTemplate;
     }

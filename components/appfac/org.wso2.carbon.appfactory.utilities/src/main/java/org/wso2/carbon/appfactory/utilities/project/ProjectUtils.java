@@ -312,9 +312,59 @@ public class ProjectUtils {
         }
     }
 
+    public static String getApplicationType(String applicationId, String tenantDomain) throws AppFactoryException {
+
+        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
+
+        if (artifact == null) {
+            String errorMsg =
+                    String.format("Unable to find applcation information for id : %s",
+                            applicationId);
+            log.error(errorMsg);
+            throw new AppFactoryException(errorMsg);
+
+        }
+
+        try {
+            return artifact.getAttribute("application_type");
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to find the application type for application " +
+                            "id: %s",
+                            applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+    }
+
+
     public static String getRepositoryType(String applicationId) throws AppFactoryException {
 
         GenericArtifactImpl artifact = getApplicationArtifact(applicationId);
+
+        if (artifact == null) {
+            String errorMsg =
+                    String.format("Unable to find applcation information for id : %s",
+                            applicationId);
+            log.error(errorMsg);
+            throw new AppFactoryException(errorMsg);
+
+        }
+
+        try {
+            return artifact.getAttribute("application_repositorytype");
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to find the repository type for application id: %s",
+                            applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+    }
+
+    public static String getRepositoryType(String applicationId, String tenantDomain) throws AppFactoryException {
+
+        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
 
         if (artifact == null) {
             String errorMsg =
@@ -555,7 +605,7 @@ public class ProjectUtils {
      *         null if application (by the id is not in registry)
      * @throws AppFactoryException if an error occurs.
      */
-    private static GenericArtifactImpl getApplicationArtifact(String applicationId, String tenantDomain)
+    public static GenericArtifactImpl getApplicationArtifact(String applicationId, String tenantDomain)
             throws AppFactoryException {
         GenericArtifact artifact = null;
         try {

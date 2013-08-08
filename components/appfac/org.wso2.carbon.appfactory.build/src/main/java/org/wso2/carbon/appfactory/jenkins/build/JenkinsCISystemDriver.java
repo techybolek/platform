@@ -27,6 +27,8 @@ import org.wso2.carbon.appfactory.core.dto.Statistic;
 import org.wso2.carbon.appfactory.jenkins.build.internal.ServiceContainer;
 import org.wso2.carbon.appfactory.repository.mgt.RepositoryMgtException;
 import org.wso2.carbon.appfactory.utilities.project.ProjectUtils;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 
 import java.io.File;
 import java.util.Collections;
@@ -84,9 +86,26 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
                 "ApplicationDeployment.DeploymentStage.Development.AutomaticDeployment.PollingPeriod");
         pollingPeriod = "*//*" + pollingPeriod + " * * * *";*/
         Map<String, String> parameters = new HashMap<String, String>();
-        String repoType = ProjectUtils.getRepositoryType(applicationId);
+        //String repoType = ProjectUtils.getRepositoryType(applicationId);
+        //String repoType = "git";
+        GenericArtifactImpl genericArtifact = ProjectUtils.getApplicationArtifact(applicationId, tenantDomain);
+
+        String repoType = "";
+        String applicationType ="";
+
+        if (genericArtifact == null) {
+            String errorMsg =
+                    String.format("Unable to find applcation information for id : %s",
+                            applicationId);
+            log.error(errorMsg);
+            throw new AppFactoryException(errorMsg);
+
+        }
+
 
         try {
+
+            repoType = genericArtifact.getAttribute("application_repositorytype");
 
             String svnRepoUrl =
                     ServiceContainer.getRepositoryManager()
@@ -99,10 +118,18 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
             }
             parameters.put(JenkinsCIConstants.REPOSITORY_URL, svnRepoUrl);
             parameters.put(JenkinsCIConstants.REPOSITORY_TYPE, repoType);
-            String applicationType = ProjectUtils.getApplicationType(applicationId);
+            //String applicationType = ProjectUtils.getApplicationType(applicationId);
+            applicationType = ProjectUtils.getApplicationType(applicationId, tenantDomain);
             parameters.put(JenkinsCIConstants.APPLICATION_EXTENSION, applicationType);
-
+            applicationType = genericArtifact.getAttribute("application_type");
         } catch (RepositoryMgtException repoEx) {
+            String errorMsg =
+                    String.format("Unable to find the repository url for application " +
+                            "id: %s, version: %s, repository type: %s",
+                            applicationId, version, repoType);
+            log.error(errorMsg, repoEx);
+            throw new AppFactoryException(errorMsg, repoEx);
+        } catch (GovernanceException repoEx) {
             String errorMsg =
                     String.format("Unable to find the repository url for application " +
                             "id: %s, version: %s, repository type: %s",
@@ -126,8 +153,9 @@ public class JenkinsCISystemDriver implements ContinuousIntegrationSystemDriver 
         parameters.put(JenkinsCIConstants.APPLICATION_ID, applicationId);
         parameters.put(JenkinsCIConstants.APPLICATION_VERSION, version);
 
-        String type = ProjectUtils.getApplicationType(applicationId);
-        parameters.put(JenkinsCIConstants.APPLICATION_EXTENSION, type);
+        //String type = ProjectUtils.getApplicationType(applicationId);
+        //String type = "war";
+        parameters.put(JenkinsCIConstants.APPLICATION_EXTENSION, applicationType);
         //parameters.put("PollingPeriod", pollingPeriod);
 
         this.connector.createJob(getJobName(applicationId, version, revision), parameters, tenantDomain);
