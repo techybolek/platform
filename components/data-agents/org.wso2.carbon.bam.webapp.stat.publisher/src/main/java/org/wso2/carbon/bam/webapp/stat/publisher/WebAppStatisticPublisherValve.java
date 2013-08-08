@@ -350,23 +350,18 @@ public class WebAppStatisticPublisherValve extends ValveBase {
     private boolean checkRequestType(Request request, Response response) {
 
         String type = response.getContentType();
-        try {
             if (type != null) {
                 if (type.startsWith("text/html")) {
                     return true;
-                } else if (type.startsWith("text/css") || type.startsWith("application/css")) {
-                    return false;
-                } else if (type.startsWith("image")) {
-                    return false;
-                } else if (type.startsWith("application/javascript") || type.startsWith("text/javascript")) {
+                } else if (type.startsWith("text/css") || type.startsWith("application/css") ||
+                        type.startsWith("image") || type.startsWith("application/javascript") ||
+                        type.startsWith("text/javascript")) {
                     return false;
                 }
             } else {
                 type = request.getRequest().getHeader("Accept");
                 if (type != null) {
-                    if (type.contains("text/css") || type.contains("application/css")) {
-                        return false;
-                    } else if (type.contains("image")) {
+                    if (type.contains("text/css") || type.contains("application/css") || type.contains("image")) {
                         return false;
                     }
                 } else {
@@ -376,9 +371,7 @@ public class WebAppStatisticPublisherValve extends ValveBase {
                     }
                 }
             }
-        } catch (Exception e) {
 
-        }
         return true;
     }
 
