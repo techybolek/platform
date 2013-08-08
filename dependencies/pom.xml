@@ -39,7 +39,7 @@
 		<module>commons/siddhi/2.0.0-wso2v4</module>
 		<module>commons/caching/4.0.2</module>
                 <module>commons/throttle/3.3.0-wso2v2</module>
-		<module>httpcore/4.1.3-wso2v3</module>
+		<module>httpcore/4.3.0-wso2v1</module>
 		<module>orbit/httpcore</module>
 		<module>httpcore-nio/4.1.3-wso2v4</module>
 		<module>orbit/httpcore-nio</module>
