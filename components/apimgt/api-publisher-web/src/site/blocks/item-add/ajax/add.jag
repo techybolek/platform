@@ -56,7 +56,7 @@ var throttlingTierArr = new Array();
 
             var authType=request.getParameter("resourceMethodAuthType-0");
 var throttlingTier=request.getParameter("resourceMethodThrottlingTier-0");
-log.info(throttlingTier);
+
 
             uriAuthMethodArr.push(authType);
 throttlingTierArr.push(throttlingTier);
@@ -70,7 +70,7 @@ var tierName=request.getParameter("resourceMethodThrottlingTier-" +i);
 
             uriAuthMethodArr.push(authType);
 throttlingTierArr.push(tierName);
-log.info(throttlingTierArr);
+
 
 
             }

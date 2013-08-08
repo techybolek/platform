@@ -6,7 +6,8 @@ $(document).ready(function() {
     $('#resourceRow').clone().addClass('resourceRow').insertAfter($('#resourceRow')).show();
     $('.resourceTemplate',$('#resourceRow').next()).val('/*');
     $('input:checkbox',$('#resourceRow').next()).attr('checked','checked');
-
+    loadTiers($('#resourceRow').get(0));
+    loadTiers($('#resourceRow').next().get(0));
 
     $('#context').change(function() {
         getContextValue();
@@ -111,30 +112,54 @@ var createHiddenForm = function(){
 
         var tr = this;
         //read the checkbox values
-       if($('.resource-get',tr).is(':checked')){
-           if(resourceMethodValues == ""){resourceMethodValues += "GET"}else{resourceMethodValues += ",GET"}
-           var selectedValue = $('.getAuthType',tr).val();
-           if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
-       }
+        if($('.resource-get',tr).is(':checked')){
+            if(resourceMethodValues == ""){resourceMethodValues += "GET"}else{resourceMethodValues += ",GET"}
+            var selectedValue = $('.getAuthType',tr).val();
+            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
+            <!--Throttling-fix-->
+            var selectedValueThrottling = $('.getThrottlingTier',tr).val();
+            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
+            <!--Throttling-fix-->
+        }
         if($('.resource-put',tr).is(':checked')){
             if(resourceMethodValues == ""){resourceMethodValues += "PUT"}else{resourceMethodValues += ",PUT"}
             var selectedValue = $('.putAuthType',tr).val();
             if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
+            <!--Throttling-fix-->
+            var selectedValueThrottling = $('.postThrottlingTier',tr).val();
+            console.log(selectedValueThrottling);
+            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
+            <!--Throttling-fix-->
         }
         if($('.resource-post',tr).is(':checked')){
             if(resourceMethodValues == ""){resourceMethodValues += "POST"}else{resourceMethodValues += ",POST"}
             var selectedValue = $('.postAuthType',tr).val();
             if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue }
+            <!--Throttling-fix-->
+            var selectedValueThrottling = $('.putThrottlingTier',tr).val();
+            console.log(selectedValueThrottling);
+            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
+            <!--Throttling-fix-->
         }
         if($('.resource-delete',tr).is(':checked')){
             if(resourceMethodValues == ""){resourceMethodValues += "DELETE"}else{resourceMethodValues += ",DELETE"}
             var selectedValue = $('.deleteAuthType',tr).val();
             if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
+            <!--Throttling-fix-->
+            var selectedValueThrottling = $('.deleteThrottlingTier',tr).val();
+            console.log(selectedValueThrottling);
+            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
+            <!--Throttling-fix-->
         }
         if($('.resource-options',tr).is(':checked')){
             if(resourceMethodValues == ""){resourceMethodValues += "OPTIONS"}else{resourceMethodValues += ",OPTIONS"}
             var selectedValue = $('.optionsAuthType',tr).val();
             if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
+            <!--Throttling-fix-->
+            var selectedValueThrottling = $('.optionsThrottlingTier',tr).val();
+            console.log(selectedValueThrottling);
+            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
+            <!--Throttling-fix-->
         }
 
 
