@@ -43,6 +43,8 @@ public class SynapseLibrary implements Library {
     
     private final Map<String, Object> localEntryArtifacts = new ConcurrentHashMap<String, Object>();
     
+    private List<String> localEntries =new ArrayList<String>();
+    
     private String description;
 
     private boolean isLoaded = false;
@@ -207,6 +209,10 @@ public class SynapseLibrary implements Library {
 
 	public Map<String, Object> getLocalEntryArtifacts() {
 		return localEntryArtifacts;
+	}
+
+	public List<String> getLocalEntries() {
+		return localEntries;
 	}
 
 

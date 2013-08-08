@@ -21,6 +21,8 @@ package org.apache.synapse.libraries.model;
 import org.apache.synapse.SynapseArtifact;
 
 import javax.xml.namespace.QName;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -100,5 +102,8 @@ public interface Library extends SynapseArtifact {
 	 * @return
 	 */
 	public Map<String, Object> getLocalEntryArtifacts();
+	
+	
+	public List<String> getLocalEntries();
 
 }

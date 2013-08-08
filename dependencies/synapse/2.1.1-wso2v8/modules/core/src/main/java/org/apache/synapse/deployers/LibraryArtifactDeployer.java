@@ -39,6 +39,7 @@ import org.apache.synapse.libraries.util.LibDeployerUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -174,10 +175,30 @@ public class LibraryArtifactDeployer extends AbstractSynapseArtifactDeployer {
                 // if the file doesn't exists then it is an actual undeployment
                 String artifactName = deploymentStore.getArtifactNameForFile(fileName);
                 try {
-                    //do un-deployment
+                	
+                	  // CarbonApplication instance to delete
+                    Library currentMediationLib = null;
+                    
+                    //undeploying the local entries
+                    Collection<Library> appList = getSynapseConfiguration().getSynapseLibraries().values();
+        			for (Library mediationLib : appList) {
+        				if (artifactName.equals(mediationLib.getQName().toString())) {
+        					currentMediationLib = mediationLib;
+        				}
+        			}
+        			
+        			if(currentMediationLib != null){
+        				for(String localEntry : currentMediationLib.getLocalEntries()){
+        					  getSynapseConfiguration().removeEntry(localEntry);
+        				}
+        			}
+        			//do un-deployment
                     undeploySynapseArtifact(artifactName);
 
                     deploymentStore.removeArtifactWithFileName(fileName);
+                    
+                        				
+                    
                     log.info("Synapse Library named '" + artifactName + "' has been undeployed");
                 } catch (SynapseArtifactDeploymentException sade) {
                     log.error("Unable to undeploy the synapse library artifact from file : " + fileName, sade);

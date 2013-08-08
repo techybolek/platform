@@ -180,6 +180,7 @@ public class SynapseXMLConfigurationFactory implements ConfigurationFactory {
 				config.updateEntry(library.getQName().getLocalPart()+"."+entry.getKey(), entry);
 			}else{
 				config.addEntry(library.getQName().getLocalPart()+"."+entry.getKey(), entry);
+				library.getLocalEntries().add(key);
 			}
 			
 			
