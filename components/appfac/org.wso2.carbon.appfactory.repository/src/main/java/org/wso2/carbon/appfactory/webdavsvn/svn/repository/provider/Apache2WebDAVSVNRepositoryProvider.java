@@ -94,6 +94,11 @@ public static final String REMOTE_HOST_SUPER_USER_PASSWORD="RemoteHostSuperUserP
                "/" + applicationKey;
     }
 
+    @Override
+    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     protected String getPropertyKey(String name) {
         StringBuilder key = new StringBuilder(AppFactoryConstants.REPOSITORY_PROVIDER_CONFIG);
         key.append(".").append(REPO_TYPE).append(".").append("Property").append(".").append(name);

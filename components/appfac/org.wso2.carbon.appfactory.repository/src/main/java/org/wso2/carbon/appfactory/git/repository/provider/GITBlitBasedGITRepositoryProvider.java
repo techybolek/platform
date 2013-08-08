@@ -55,7 +55,7 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
         String repoCreateUrl = config.getFirstProperty(BASE_URL);
         String adminUsername = config.getFirstProperty(GITBLIT_ADMIN_USERNAME);
         String adminPassword = config.getFirstProperty(GITBLIT_ADMIN_PASS);
-        //Create the gitblit repository model
+        //Create the gfitblit repository model
         RepositoryModel model = new RepositoryModel();
         model.name = repoName;
         //authenticated users can clone, push and view the repository
@@ -64,7 +64,7 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
             isCreated = RpcUtils.createRepository(model, repoCreateUrl, adminUsername,
                                                   adminPassword.toCharArray());           
             if (isCreated) {
-                String url = getAppRepositoryURL(applicationKey);
+                String url = getAppRepositoryURL(applicationKey, tenantDomain);
                 return url;
             } else {
                 String msg = "Repository is not created for " + applicationKey + " due to remote server error";
@@ -85,6 +85,11 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
     @Override
     public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
         return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + applicationKey + ".git";
+    }
+
+    @Override
+    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
+        return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + tenantDomain + "/" +applicationKey + ".git";
     }
 
     /**

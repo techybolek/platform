@@ -34,7 +34,7 @@ public class RepositoryManager {
         RepositoryProvider provider = Util.getRepositoryProvider(type);
         if (provider != null) {
             url = provider.createRepository(applicationKey, tenantDomain);
-            provider.getBranchingStrategy().prepareRepository(applicationKey, url);
+            provider.getBranchingStrategy().prepareRepository(applicationKey, url, tenantDomain);
         } else {
             handleException((new StringBuilder()).
                     append("Repository provider for the type ").

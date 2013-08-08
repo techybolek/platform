@@ -28,7 +28,7 @@ public interface BranchingStrategy {
      * @param url   Repository URL
      * @throws RepositoryMgtException
      */
-    public void prepareRepository(String appId, String url)
+    public void prepareRepository(String appId, String url, String tenantDomain)
             throws RepositoryMgtException;
 
     /**
