@@ -139,6 +139,11 @@ public class DataPublisher {
                          String password, Agent agent)
             throws MalformedURLException, AgentException, AuthenticationException,
             TransportException {
+        /**
+         * Only if the agent is not null, then the agent will be set to agent holder.
+         * Ie, only for the first datapublisher which is setting the agent,
+         * will be actually used and the rest of the agents passed-in will be neglected.
+         */
         if (null == agent) {
             agent = AgentHolder.getOrCreateAgent();
         } else if (AgentHolder.getAgent() == null) {
@@ -151,13 +156,13 @@ public class DataPublisher {
                     (receiverURL.getHost()), receiverURL.getPort(),
                     receiverURL.getProtocol(),
                     (receiverURL.getHost()), receiverURL.getPort(), receiverURL.isSecured()),
-                    agent);
+                    AgentHolder.getAgent());
         } else if (receiverURL.getProtocol() == ReceiverConfiguration.Protocol.TCP) {
             this.start(new ReceiverConfiguration(userName, password, receiverURL.getProtocol(),
                     (receiverURL.getHost()), receiverURL.getPort(),
                     receiverURL.getProtocol(),
                     (receiverURL.getHost()), receiverURL.getPort() + CommonThriftConstants.SECURE_EVENT_RECEIVER_PORT_OFFSET, receiverURL.isSecured()),
-                    agent);
+                    AgentHolder.getAgent());
         } else {
             throw new AgentException("http not supported via this constructor use https, ssl or tcp ");
         }
@@ -186,6 +191,11 @@ public class DataPublisher {
                          String password, Agent agent)
             throws MalformedURLException, AgentException, AuthenticationException,
             TransportException {
+        /**
+         * Only if the agent is not null, then the agent will be set to agent holder.
+         * Ie, only for the first datapublisher which is setting the agent,
+         * will be actually used and the rest of the agents passed-in will be neglected.
+         */
         if (null == agent) {
             agent = AgentHolder.getOrCreateAgent();
         } else if (AgentHolder.getAgent() == null) {
@@ -202,7 +212,7 @@ public class DataPublisher {
                 receiverURL.getHost(), receiverURL.getPort(),
                 authenticationURL.getProtocol(),
                 authenticationURL.getHost(), authenticationURL.getPort(), receiverURL.isSecured()),
-                agent);
+                AgentHolder.getAgent());
 
     }
 
