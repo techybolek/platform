@@ -573,8 +573,9 @@ public class ApplicationManagementService extends AbstractAdmin {
     }
 
     public String[] getAllApplications(String userName) throws ApplicationManagementException {
+       //                    String []apps={"aj5", "aj6", "aj7", "aj8", "aj9"};
 
-        String apps[] = userApplicationCache.getValueFromCache(userName);
+      String apps[] = userApplicationCache.getValueFromCache(userName);
         if (apps != null) {
             return apps;
         } else {
