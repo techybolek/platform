@@ -70,6 +70,7 @@ public class OAuth2TokenClient {
             tokenReqDTO.setRefreshToken(oauthRequest.getRefreshToken());
         } else if (org.wso2.carbon.identity.oauth.common.GrantType.SAML20_BEARER.toString().equals(grantType)){
             tokenReqDTO.setAssertion(oauthRequest.getAssertion());
+            tokenReqDTO.setIdp(oauthRequest.getIdP());
         }
 
         try {
