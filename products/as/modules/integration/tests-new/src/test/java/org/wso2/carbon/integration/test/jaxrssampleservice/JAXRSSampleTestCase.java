@@ -97,6 +97,10 @@ public class JAXRSSampleTestCase extends ASIntegrationTest {
           dependsOnMethods = "webApplicationUpload")
     public void sendTextXMLPOSTRequestToJAXRSSample02() throws Exception {
 
+
+
+
+
         URL endpoint = new URL(asServer.getWebAppURL() + "/jaxrs_sample_02/services/Starbucks_Outlet_Service/orders");
         Reader data = new StringReader("<Order>\n" +
                                        "    <drinkName>Mocha Flavored Coffee</drinkName>\n" +
@@ -107,20 +111,6 @@ public class JAXRSSampleTestCase extends ASIntegrationTest {
         Assert.assertTrue(writer.toString().contains("{\"Order\":{\"additions\":\"Caramel\",\"drinkName\""
                                                      + ":\"Mocha Flavored Coffee\",\"locked\":false,\"orderId\":"));
 
-    }
-
-    //sends a Post request in plain text format
-
-    @Test(groups = "wso2.as", description = "invoke JAXRS service in text/plain POST request",
-          dependsOnMethods = "webApplicationUpload")
-    public void plainTextPOSTRequestToJAXRSSample02() throws Exception {
-
-        URL endpoint = new URL(asServer.getWebAppURL() + "/jaxrs_sample_02/services/Starbucks_Outlet_Service/data");
-        Reader data = new StringReader("123");
-        Writer writer = new StringWriter();
-        HttpURLConnectionClient.sendPostRequest(data, endpoint, writer, "text/plain");
-        log.info(writer.toString());
-        Assert.assertTrue(writer.toString().contains("\"orderId\":123}}"));
     }
 
     //sends a PUT request in application/json format
