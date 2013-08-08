@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractApplicationAuthenticator;
+import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticationSessionDTO;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticatorConstants;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
@@ -18,6 +19,10 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+/**
+ * Username Password based Authenticator
+ *
+ */
 public class BasicAuthenticator extends AbstractApplicationAuthenticator {
 
 	private static Log log = LogFactory.getLog(BasicAuthenticator.class);
@@ -39,8 +44,25 @@ public class BasicAuthenticator extends AbstractApplicationAuthenticator {
 			
 			if (canHandle(request)) {
 				try {
-    				status = authenticate(request) ? ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS 
-    				                               : ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_FAIL;
+    				if (authenticate(request)) {
+    					status = ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_PASS;
+    					cleanUpSession(request);
+    				} else {
+    					//send to re-authenticate
+    					String loginPage = getAuthenticatorConfig().getStatusMap().get(String.valueOf(BasicAuthenticatorConstants.CUSTOM_STATUS_SEND_TO_LOGIN));
+    					status = BasicAuthenticatorConstants.CUSTOM_STATUS_AUTHENTICATE;
+    					
+    					try {
+    						String sessionDataKey = request.getParameter(ApplicationAuthenticatorConstants.SESSION_DATA_KEY);
+    						ApplicationAuthenticationSessionDTO sessionDTO = (ApplicationAuthenticationSessionDTO)request.getSession().getAttribute(sessionDataKey);
+    			            response.sendRedirect(loginPage + sessionDTO.getQueryParams() + "&authFailure=true");
+    		            } catch (IOException e) {
+    			            e.printStackTrace();
+    		            }
+    					
+    					request.getSession().setAttribute(BasicAuthenticatorConstants.AUTHENTICATOR_STATUS, status);
+    				}
+    				
 				} catch (Exception e) {
 		            String msg = "Error on BasicAuthenticator authentication";
 		            log.error(msg, e);
@@ -49,6 +71,7 @@ public class BasicAuthenticator extends AbstractApplicationAuthenticator {
 			} else {
 				status = ApplicationAuthenticatorConstants.STATUS_AUTHENTICATION_CANNOT_HANDLE;
 			}
+			
 		} else if (status == BasicAuthenticatorConstants.CUSTOM_STATUS_SEND_TO_LOGIN) {
 			String loginPage = getAuthenticatorConfig().getStatusMap().get(String.valueOf(status));
 			status = BasicAuthenticatorConstants.CUSTOM_STATUS_AUTHENTICATE;
@@ -58,13 +81,14 @@ public class BasicAuthenticator extends AbstractApplicationAuthenticator {
 			}
 			
 			try {
-	            response.sendRedirect(loginPage + request.getSession().getAttribute("commonAuthQueryParams"));
+	            response.sendRedirect(loginPage + request.getAttribute("commonAuthQueryParams"));
             } catch (IOException e) {
 	            e.printStackTrace();
             }
+			
+			request.getSession().setAttribute(BasicAuthenticatorConstants.AUTHENTICATOR_STATUS, status);
 		} 
 		
-		request.getSession().setAttribute(BasicAuthenticatorConstants.AUTHENTICATOR_STATUS, status);
 		return status;
     }
 	
@@ -159,6 +183,12 @@ public class BasicAuthenticator extends AbstractApplicationAuthenticator {
             log.debug("User is successfully authenticated.");
         }
         
+        request.getSession().setAttribute("username", username);
+        
         return true;
+    }
+    
+    private void cleanUpSession(HttpServletRequest request){
+    	request.getSession().setAttribute(BasicAuthenticatorConstants.AUTHENTICATOR_STATUS, null);
     }
 }
