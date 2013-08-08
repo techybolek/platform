@@ -37,10 +37,13 @@ public class CarbonOAuthTokenRequest extends OAuthTokenRequest {
 
     private String credentialType;
 
+    private String idp;
+
     public CarbonOAuthTokenRequest(HttpServletRequest request) throws OAuthSystemException, OAuthProblemException {
         super(request);
         assertion = request.getParameter("assertion");
         credentialType = request.getParameter("credentialType");
+        idp = request.getParameter("idp");
     }
 
     @Override
@@ -75,6 +78,14 @@ public class CarbonOAuthTokenRequest extends OAuthTokenRequest {
 
     public void setCredentialType(String credentialType) {
         this.credentialType = credentialType;
+    }
+
+    public String getIdP() {
+        return idp;
+    }
+
+    public void setIdP(String idp) {
+        this.idp = idp;
     }
 
 }
