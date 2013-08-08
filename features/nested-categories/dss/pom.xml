@@ -19,21 +19,30 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon</groupId>
-        <artifactId>carbon-features</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <groupId>org.wso2.dss</groupId>
+        <artifactId>dataservices-parent</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.nested.category.parent</artifactId>
+    <artifactId>org.wso2.dss.nested.categories</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Nested Feature Category Parent</name>
+    <name>WSO2 DSS - Nested Feature Categories</name>
     <url>http://wso2.org</url>
 
+
     <modules>
-        <module>as</module>
-        <module>greg</module>
-        <module>apimgt</module>
-        <module>dss</module>
+        <module>application-mgt</module>
+        <module>dataservice-hosting</module>
+        <module>miscellaneous</module>
+        <module>multi-tenancy</module>
+        <module>user-mgt</module>
+        <module>single-sign-on</module>
+        <module>registry-repository</module>
+        <module>monitoring</module>
+        <module>tooling</module>
+        <module>styling</module>
     </modules>
+
+
 </project>
