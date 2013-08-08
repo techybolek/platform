@@ -939,7 +939,12 @@
 		       <xpath>/APIManager/GatewayType</xpath>
                        <token>(Synapse)</token>
                        <value>GReg</value>
-                   </replacement>  
+                   </replacement>
+		   <replacement>
+		       <xpath>/APIManager/StartupAPIPublisher/Enabled</xpath>
+                       <token>(false)</token>
+                       <value>true</value>
+                   </replacement>    
                 </replacements>
            </configuration>
 	</plugin>
