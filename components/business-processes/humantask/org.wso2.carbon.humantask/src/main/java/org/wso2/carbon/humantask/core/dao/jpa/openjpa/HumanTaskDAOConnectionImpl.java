@@ -184,7 +184,7 @@ public class HumanTaskDAOConnectionImpl implements HumanTaskDAOConnection {
      * @return list of unique node identfiers found in the databaseuniqu
      */
     public List<String> getNodeIds() {
-        Query q = entityManager.createQuery("SELECT DISTINCT t.nodeId FROM org.wso2.carbon.humantask.core.dao.jpa.openjpa.model.HumanTaskJob t");
+        Query q = entityManager.createQuery("SELECT DISTINCT t.nodeId FROM org.wso2.carbon.humantask.core.dao.jpa.openjpa.model.HumanTaskJob t WHERE t.nodeId IS NOT NULL");
         return (List<String>) q.getResultList();
     }
 
