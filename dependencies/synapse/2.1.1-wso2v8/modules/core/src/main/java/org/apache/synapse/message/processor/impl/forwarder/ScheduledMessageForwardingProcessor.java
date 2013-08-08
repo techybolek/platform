@@ -27,6 +27,7 @@ import org.quartz.JobDataMap;
 
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Redelivery processor is the Message processor which implements the Dead letter channel EIP

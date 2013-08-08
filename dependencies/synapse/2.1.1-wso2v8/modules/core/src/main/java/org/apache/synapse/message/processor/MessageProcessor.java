@@ -129,4 +129,6 @@ public interface MessageProcessor extends ManagedLifecycle, Nameable, SynapseArt
     void pauseService();
 
     void resumeService();
+
+    boolean isPaused();
 }

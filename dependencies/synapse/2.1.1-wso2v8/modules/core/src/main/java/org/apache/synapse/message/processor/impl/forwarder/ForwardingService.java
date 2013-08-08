@@ -283,7 +283,7 @@ public class ForwardingService implements InterruptableJob, Service {
                             prepareToRetry();
                         }
                         else {
-                            if (isPaused) {
+                            if (messageProcessor.isPaused()) {
                                 this.messageProcessor.resumeService();
                                 if (log.isDebugEnabled()) {
                                     log.debug("Resuming message processor [" + messageProcessor.getName() + "]");
@@ -378,9 +378,8 @@ public class ForwardingService implements InterruptableJob, Service {
         if (!isTerminated) {
             // First stop the processor since no point in re-triggering jobs if the we can't send
             // it to the client
-            if (!isPaused) {
+            if (!messageProcessor.isPaused()) {
                 this.messageProcessor.pauseService();
-                isPaused = true;
 
                 if (log.isDebugEnabled()) {
                     log.debug("Pausing message processor [" + messageProcessor.getName() + "]");

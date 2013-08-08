@@ -62,6 +62,8 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
      */
     protected String cronExpression = null;
 
+    protected AtomicBoolean isPaused = new AtomicBoolean(false);
+
     public void init(SynapseEnvironment se) {
         super.init(se);
         StdSchedulerFactory sf = null;
@@ -286,6 +288,11 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
 
                 scheduler.start();
 
+                if (this.isPaused()) {
+                    messageConsumer.cleanup();
+                    resumeService();
+                }
+
                 if (logger.isDebugEnabled()) {
                     logger.debug("Successfully re-activated the message processor [" + getName() + "]");
                 }
@@ -303,6 +310,7 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
     public void pauseService() {
         try {
             this.scheduler.pauseTrigger(new TriggerKey(name + "-trigger"));
+            this.isPaused.set(true);
         } catch (SchedulerException se) {
             throw new SynapseException("Error while pausing the service", se);
         }
@@ -311,9 +319,14 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
     public void resumeService() {
         try {
             this.scheduler.resumeTrigger(new TriggerKey(name + "-trigger"));
+            this.isPaused.set(false);
         } catch (SchedulerException se) {
             throw new SynapseException("Error while pausing the service", se);
         }
+    }
+
+    public boolean isPaused() {
+        return isPaused.get();
     }
 
     private Properties getSchedulerProperties(String name) {
