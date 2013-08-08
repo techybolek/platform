@@ -17,18 +17,6 @@
   -->
 
 <Authenticators>
-	<Authenticator name="SAMLSSOAuthenticator" disabled="true" factor="1">
-		<Status value="10" loginPage="https://localhost:8443/idp/profile/SAML2/Redirect/SSO" />
-		<Config>
-			<Parameter name="ServiceProviderID">oauthAuthorizer</Parameter>
-            <Parameter name="IdPCertAlias">idp.example.org</Parameter>
-            <Parameter name="EnableRequestSigning">false</Parameter>
-            <Parameter name="EnableResponseSignatureValidation">true</Parameter>
-            <Parameter name="EnableAssertionSignatureValidation">true</Parameter>
-            <Parameter name="EnableSLO">false</Parameter>
-            <Parameter name="CredentialImplClass">org.wso2.carbon.identity.application.authenticator.samlsso.manager.SSOAgentKeyStoreCredential</Parameter>
-		</Config>
-	</Authenticator>
 	<Authenticator name="BasicAuthenticator" disabled="false" factor="1">
 		<Status value="10" loginPage="https://localhost:9443/authenticationendpoint/login.jsp" />
 	</Authenticator>
