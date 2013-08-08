@@ -118,7 +118,7 @@ public final class Client {
             int result = httpclient.executeMethod(put);
             System.out.println("Response status code: " + result);
             System.out.println("Response body: ");
-            System.out.println(put.getResponseBodyAsString());
+            System.out.println(put.getResponseBodyAsStream());
         } finally {
             // Release current connection to the connection pool once you are
             // done
@@ -135,7 +135,7 @@ public final class Client {
             int result = httpclient.executeMethod(put);
             System.out.println("Response status code: " + result);
             System.out.println("Response body: ");
-            System.out.println(put.getResponseBodyAsString());
+            System.out.println(put.getResponseBodyAsStream());
         } finally {
             // Release current connection to the connection pool once you are
             // done
@@ -159,7 +159,7 @@ public final class Client {
             int result = httpclient.executeMethod(post);
             System.out.println("Response status code: " + result);
             System.out.println("Response body: ");
-            System.out.println(post.getResponseBodyAsString());
+            System.out.println(post.getResponseBodyAsStream());
         } finally {
             // Release current connection to the connection pool once you are
             // done
@@ -184,7 +184,7 @@ public final class Client {
             int result = httpclient.executeMethod(delete);
             System.out.println("Response status code: " + result);
             System.out.println("Response body: ");
-            System.out.println(delete.getResponseBodyAsString());
+            System.out.println(delete.getResponseBodyAsStream());
         } finally {
             // Release current connection to the connection pool once you are
             // done
