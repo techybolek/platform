@@ -16,7 +16,7 @@
 
     <!-- This handler provides the feature to add a simlink to a given resource -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.ExtensionsSymLinkHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.ExtensionsSymLinkHandler" profiles="default,uddi-registry">
         <filter class="org.wso2.carbon.registry.core.jdbc.handlers.filters.URLMatcher">
             <property name="pattern">.*</property>
         </filter>
@@ -33,7 +33,7 @@
 
     <!-- This handler process the uploaded  WSDL files -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.WSDLMediaTypeHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.WSDLMediaTypeHandler" profiles="default,uddi-registry">
         <!--property name="createService">false</property>
         <property name="disableWSDLValidation">true</property-->
         <property name="disableSymlinkCreation">true</property>
@@ -54,7 +54,7 @@
 
     <!-- This handler processes .zip & .gar files being added to the registry -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.ZipWSDLMediaTypeHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.ZipWSDLMediaTypeHandler" profiles="default,uddi-registry">
         <property name="wsdlMediaType">application/wsdl+xml</property>
         <property name="schemaMediaType">application/xsd+xml</property>
         <property name="threadPoolSize">50</property>
@@ -85,7 +85,7 @@
 
     <!-- This handler processes the services being added to the registry -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.ServiceMediaTypeHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.ServiceMediaTypeHandler" profiles="default,uddi-registry">
         <!--property name="disableWSDLValidation">true</property-->
         <property name="defaultServiceVersion">1.0.0-SNAPSHOT</property>
         <property name="disableSymlinkCreation">true</property>
@@ -101,7 +101,7 @@
 
     <!-- This handler provides the ability to remove the entire heirarchy for a given service while deleting the service -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.DeleteHierarchyHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.DeleteHierarchyHandler" profiles="default,uddi-registry">
         <filter class="org.wso2.carbon.registry.core.jdbc.handlers.filters.MediaTypeMatcher">
             <property name="mediaType">application/vnd.wso2-service+xml</property>
         </filter>
@@ -119,7 +119,7 @@
 
     <!-- This handler processes the links for the lifecycle -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.SmartLifecycleLinkHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.SmartLifecycleLinkHandler" profiles="default,uddi-registry">
         <property name="states" type="xml">
             <state key="dev">Created</state>
             <state key="qa">Tested</state>
@@ -132,7 +132,7 @@
 
     <!-- This handler processes the policy files of the given media type defined by the filter -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.PolicyMediaTypeHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.PolicyMediaTypeHandler" profiles="default,uddi-registry">
 	<property name="policyLocationConfiguration" type="xml">
             <location>/trunk/policies/</location>            
 	</property>
@@ -143,7 +143,7 @@
 
     <!-- This handler processes the schema types which are defined by the filter  -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.XSDMediaTypeHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.XSDMediaTypeHandler" profiles="default,uddi-registry">
         <!--property name="disableSchemaValidation">true</property-->
         <property name="disableSymlinkCreation">true</property>
         <property name="locationConfiguration" type="xml">
@@ -164,7 +164,7 @@
 
     <!-- This handler processes service end-points defined in the WSDL files being uploaded to the registry -->
 
-    <handler class="org.wso2.carbon.registry.extensions.handlers.EndpointMediaTypeHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.EndpointMediaTypeHandler" profiles="default,uddi-registry">
         <property name="endpointMediaType">application/vnd.wso2.endpoint</property>
         <property name="endpointLocationConfiguration" type="xml">
             <location>/trunk/endpoints/</location>
@@ -173,13 +173,13 @@
         </filter>
     </handler>
 
-    <handler class="org.wso2.carbon.governance.registry.extensions.handlers.UriMediaTypeHandler">
+    <handler class="org.wso2.carbon.governance.registry.extensions.handlers.UriMediaTypeHandler" profiles="default,uddi-registry">
 	<filter class="org.wso2.carbon.registry.core.jdbc.handlers.filters.MediaTypeMatcher">
 	    <property name="mediaType">application/vnd.wso2-uri+xml</property>
 	</filter>
     </handler>
     
-    <handler class="org.wso2.carbon.registry.extensions.handlers.WADLMediaTypeHandler">
+    <handler class="org.wso2.carbon.registry.extensions.handlers.WADLMediaTypeHandler" profiles="default,uddi-registry">
         <!--<property name="disableWADLValidation">true</property>-->
         <property name="wadlLocationConfiguration" type="xml">
             <location>/trunk/wadls/</location>
@@ -201,7 +201,7 @@
     </handler>
 
     <!--This handler manage the meta data resource caching-->
-    <handler class="org.wso2.carbon.governance.registry.extensions.handlers.MetaDataCacheHandler">
+    <handler class="org.wso2.carbon.governance.registry.extensions.handlers.MetaDataCacheHandler" profiles="default,uddi-registry">
         <filter class="org.wso2.carbon.registry.core.jdbc.handlers.filters.URLMatcher">
             <property name="pattern">.*</property>
         </filter>
