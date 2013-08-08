@@ -44,30 +44,29 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 
     private static final Log log = LogFactory.getLog(AbstractQuartzTaskManager.class);
 
-
     /* This holds the information  about the tasks which was trying to schedule
        before the server initialize properly
      */
-    private static ArrayList<StartupPendingTask> startupPendingTasks
-            = new ArrayList<StartupPendingTask>();
+    private static ArrayList<StartupPendingTask> startupPendingTasks = new ArrayList<StartupPendingTask>();
 
     /*
     This flag states whether taskManager is has scheduled all the tasks
     in the repository for the pariticular task type
      */
-
-    private boolean initilazedRegisteredTasks
-            = false;
+    private boolean initilazedRegisteredTasks = false;
 
     private TaskRepository taskRepository;
 
     private Scheduler scheduler;
 
+    private static final String TASK_TRIGGER_LISTENER_NAME = "TASK_TRIGGER_LISTENER";
+
+    @SuppressWarnings({"unchecked"})
     public AbstractQuartzTaskManager(TaskRepository taskRepository) throws TaskException {
         this.taskRepository = taskRepository;
         this.scheduler = TasksDSComponent.getScheduler();
         try {
-            this.getScheduler().getListenerManager().addTriggerListener(new TaskTriggerListener("TASK_TRIGGER_LISTENER")) ;
+            this.getScheduler().getListenerManager().addTriggerListener(new TaskTriggerListener(TASK_TRIGGER_LISTENER_NAME)) ;
         } catch (SchedulerException e) {
             throw new TaskException("Error in initiating task trigger listener", Code.UNKNOWN, e);
         }
@@ -190,18 +189,14 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
                 log.error("Error in scheduling task: " + e.getMessage(), e);
             }
         }
-
         initilazedRegisteredTasks = true;
-
         /*
         continue scheduling pending tasks which was tried to schdule
         before the taskManager get initialized.
          */
-
         for (StartupPendingTask aPendingTask : startupPendingTasks) {
             scheduleLocalTask(aPendingTask.taskName, aPendingTask.paused);
         }
-
     }
 
     protected synchronized void scheduleLocalTask(String taskName) throws TaskException {
@@ -240,7 +235,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
                         Code.UNKNOWN, e);
             }
         } else {
-            this.startupPendingTasks.add(new StartupPendingTask(taskName, paused));
+            startupPendingTasks.add(new StartupPendingTask(taskName, paused));
         }
     }
 

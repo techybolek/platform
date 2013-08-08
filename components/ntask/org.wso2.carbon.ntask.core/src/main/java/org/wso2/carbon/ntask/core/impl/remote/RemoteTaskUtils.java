@@ -57,60 +57,60 @@ public class RemoteTaskUtils {
 	
 	public static void removeRemoteTaskMapping(String remoteTaskId) throws TaskException {
 		try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().
-                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getCurrentContext().
+                            setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 			Registry registry = RegistryBasedTaskRepository.getRegistry();
 			registry.delete(resourcePathFromRemoteTaskId(remoteTaskId));
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
 		} finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 	
 	public static String createRemoteTaskMapping(String tenantDomain,
 			String taskType, String taskName) throws TaskException {
 		try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().
-                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-			Registry registry = RegistryBasedTaskRepository.getRegistry();
-		    Resource res = registry.newResource();
-		    res.setProperty(REMOTE_TASK_TENANT_DOMAIN, tenantDomain);
-		    res.setProperty(REMOTE_TASK_TASK_TYPE, taskType);
-		    res.setProperty(REMOTE_TASK_TASK_NAME, taskName);
-		    String remoteTaskId = generateRemoteTaskID();
-		    registry.put(resourcePathFromRemoteTaskId(remoteTaskId), res);
-		    return remoteTaskId;
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getCurrentContext().
+                            setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        Registry registry = RegistryBasedTaskRepository.getRegistry();
+                        Resource res = registry.newResource();
+                        res.setProperty(REMOTE_TASK_TENANT_DOMAIN, tenantDomain);
+                        res.setProperty(REMOTE_TASK_TASK_TYPE, taskType);
+                        res.setProperty(REMOTE_TASK_TASK_NAME, taskName);
+                        String remoteTaskId = generateRemoteTaskID();
+                        registry.put(resourcePathFromRemoteTaskId(remoteTaskId), res);
+		        return remoteTaskId;
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
 		} finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 	
 	public static Object[] lookupRemoteTask(String remoteTaskId) throws TaskException {
 		try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().
-                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-		    Registry registry = RegistryBasedTaskRepository.getRegistry();
-		    Resource res = registry.get(resourcePathFromRemoteTaskId(remoteTaskId));
-		    Object[] result = new Object[3];
-		    result[0] = res.getProperty(REMOTE_TASK_TENANT_DOMAIN);
-		    result[1] = res.getProperty(REMOTE_TASK_TASK_TYPE);
-		    result[2] = res.getProperty(REMOTE_TASK_TASK_NAME);
-		    return result;
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getCurrentContext().
+                        setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        Registry registry = RegistryBasedTaskRepository.getRegistry();
+                        Resource res = registry.get(resourcePathFromRemoteTaskId(remoteTaskId));
+                        Object[] result = new Object[3];
+                        result[0] = res.getProperty(REMOTE_TASK_TENANT_DOMAIN);
+                        result[1] = res.getProperty(REMOTE_TASK_TASK_TYPE);
+                        result[2] = res.getProperty(REMOTE_TASK_TASK_NAME);
+                        return result;
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
 		} finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 
 	private static String getTenantSectionInURL(String tenantDomain) {
-		if (tenantDomain == MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) {
+		if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
 			return "";
 		} else {
 			return "/t/" + tenantDomain;

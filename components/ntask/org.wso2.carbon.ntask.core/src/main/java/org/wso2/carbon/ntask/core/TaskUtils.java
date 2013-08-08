@@ -17,10 +17,13 @@ package org.wso2.carbon.ntask.core;
 
 import org.apache.axiom.om.OMElement;
 import org.w3c.dom.*;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
@@ -40,16 +43,29 @@ public class TaskUtils {
 	
 	private static SecretResolver secretResolver;
 
-    public static Document convertToDocument(File file) throws TaskException {
-        DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
-        fac.setNamespaceAware(true);
-        try {
-            return fac.newDocumentBuilder().parse(file);
-        } catch (Exception e) {
-            throw new TaskException("Error in creating an XML document from file: " +
-                    e.getMessage(), Code.CONFIG_ERROR, e);
+        public static Registry getGovRegistryForTenant(int tid) throws TaskException {
+                try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tid);
+                        return TasksDSComponent.getRegistryService().getGovernanceSystemRegistry(tid);
+                } catch (RegistryException e) {
+                        throw new TaskException("Error in retrieving registry instance", Code.UNKNOWN, e);
+                } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
         }
-    }
+
+
+        public static Document convertToDocument(File file) throws TaskException {
+                DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
+                fac.setNamespaceAware(true);
+                try {
+                        return fac.newDocumentBuilder().parse(file);
+                } catch (Exception e) {
+                        throw new TaskException("Error in creating an XML document from file: " +
+                            e.getMessage(), Code.CONFIG_ERROR, e);
+                }
+        }
     
 	private static void secureLoadElement(Element element)
 			throws CryptoException {
@@ -91,58 +107,58 @@ public class TaskUtils {
 		}
 	}
 
-    public static void setTaskState(TaskRepository taskRepo, String taskName,
+        public static void setTaskState(TaskRepository taskRepo, String taskName,
                                     TaskManager.TaskState taskState) throws TaskException {
-        taskRepo.setTaskMetadataProp(taskName, TASK_STATE_PROPERTY, taskState.toString());
-    }
-
-    public static TaskManager.TaskState getTaskState(TaskRepository taskRepo,
-                                                     String taskName) throws TaskException {
-        String currentTaskState = taskRepo.getTaskMetadataProp(taskName, TASK_STATE_PROPERTY);
-        if (currentTaskState != null) {
-            for (TaskManager.TaskState taskState : TaskManager.TaskState.values()) {
-                if (currentTaskState.equalsIgnoreCase(taskState.toString())) {
-                    return taskState;
-                }
-            }
+                taskRepo.setTaskMetadataProp(taskName, TASK_STATE_PROPERTY, taskState.toString());
         }
-        return null;
-    }
+
+        public static TaskManager.TaskState getTaskState(TaskRepository taskRepo,
+                                                     String taskName) throws TaskException {
+                String currentTaskState = taskRepo.getTaskMetadataProp(taskName, TASK_STATE_PROPERTY);
+                if (currentTaskState != null) {
+                        for (TaskManager.TaskState taskState : TaskManager.TaskState.values()) {
+                                if (currentTaskState.equalsIgnoreCase(taskState.toString())) {
+                                        return taskState;
+                                }
+                        }
+                }
+                return null;
+        }
 	
 	public static void setTaskPaused(TaskRepository taskRepo, String taskName, 
 			boolean paused) throws TaskException {
-        if (paused) {
-            setTaskState(taskRepo, taskName, TaskManager.TaskState.PAUSED);
-        }else {
-            setTaskState(taskRepo, taskName, TaskManager.TaskState.NORMAL);
-        }
+                if (paused) {
+                        setTaskState(taskRepo, taskName, TaskManager.TaskState.PAUSED);
+                }else {
+                        setTaskState(taskRepo, taskName, TaskManager.TaskState.NORMAL);
+                }
 	}
 	
 	public static boolean isTaskPaused(TaskRepository taskRepo, 
 			String taskName) throws TaskException {
-        TaskManager.TaskState currentState = getTaskState(taskRepo,taskName);
-        if (currentState == null || !currentState.equals(TaskManager.TaskState.PAUSED)) {
-            return false;
-        } else
-            return true;
+                TaskManager.TaskState currentState = getTaskState(taskRepo,taskName);
+                if (currentState == null || !currentState.equals(TaskManager.TaskState.PAUSED)) {
+                        return false;
+                } else
+                        return true;
 	}
 
-    public static void setTaskFinished(TaskRepository taskRepo, String taskName,
+        public static void setTaskFinished(TaskRepository taskRepo, String taskName,
                                        boolean finished) throws TaskException {
-        if (finished) {
-            setTaskState(taskRepo, taskName, TaskManager.TaskState.FINISHED);
-        }else {
-            setTaskState(taskRepo, taskName, TaskManager.TaskState.NORMAL);
+                if (finished) {
+                        setTaskState(taskRepo, taskName, TaskManager.TaskState.FINISHED);
+                }else {
+                        setTaskState(taskRepo, taskName, TaskManager.TaskState.NORMAL);
+                }
         }
-    }
 
-    public static boolean isTaskFinished(TaskRepository taskRepo,
-                                         String taskName) throws TaskException {
-        TaskManager.TaskState currentState = getTaskState(taskRepo, taskName);
-        if (currentState == null || !currentState.equals(TaskManager.TaskState.FINISHED)) {
-            return false;
-        } else
-            return true;
-    }
+        public static boolean isTaskFinished(TaskRepository taskRepo,
+                                 String taskName) throws TaskException {
+                TaskManager.TaskState currentState = getTaskState(taskRepo, taskName);
+                if (currentState == null || !currentState.equals(TaskManager.TaskState.FINISHED)) {
+                        return false;
+                } else
+                        return true;
+        }
 		
 }

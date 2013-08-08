@@ -69,8 +69,8 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		for (List<TaskInfo> entry : tasksInServers) {
 			scheduledTasks.addAll(entry);
 		}
-        /* add already finished tasks*/
-        scheduledTasks.addAll(this.getAllFinishedTasks());
+                /* add already finished tasks*/
+                scheduledTasks.addAll(this.getAllFinishedTasks());
 		List<TaskInfo> allTasks = this.getAllTasks();
 		List<TaskInfo> missingTasks = new ArrayList<TaskInfo>(allTasks);
 		missingTasks.removeAll(scheduledTasks);
@@ -117,11 +117,11 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 	public Map<String, TaskState> getAllTaskStates() throws TaskException {
 		try {
 			List<TaskInfo> tasks = this.getAllTasks();
-		    Map<String, TaskState> result = new HashMap<String, TaskState>();
-		    for (TaskInfo task : tasks) {
-		    	result.put(task.getName(), this.getTaskState(task.getName()));
-		    }
-		    return result;
+                        Map<String, TaskState> result = new HashMap<String, TaskState>();
+                        for (TaskInfo task : tasks) {
+                                result.put(task.getName(), this.getTaskState(task.getName()));
+                        }
+		        return result;
 		} catch (Exception e) {
 			throw new TaskException("Error in getting all task states: " + 
 		            e.getMessage(), Code.UNKNOWN, e);
@@ -131,7 +131,7 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 	public TaskState getTaskState(String taskName) throws TaskException {
 		try {
 			String memberId = this.getMemberIdFromTaskName(taskName, false);
-		    return this.getTaskState(memberId, taskName);
+		        return this.getTaskState(memberId, taskName);
 		} catch (TaskException e) {
 			if (e.getCode() == Code.NO_TASK_EXISTS) {
 				return TaskState.NONE;
@@ -214,7 +214,7 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		int location = getTaskLocation(taskName);
 		List<String> ids;
 		try {
-		    ids = this.getMemberIds();
+		        ids = this.getMemberIds();
 		} catch (Exception e) {
 			throw new TaskException("Error in getting member ids: " + 
 					e.getMessage(), Code.UNKNOWN, e);
@@ -413,9 +413,9 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		}
 	}
 
-    public void deleteLocalTasks() throws TaskException {
-        super.deleteLocalTasks();
-    }
+        public void deleteLocalTasks() throws TaskException {
+                super.deleteLocalTasks();
+        }
 
 	public static final class OperationNames {
 		

@@ -17,12 +17,12 @@ package org.wso2.carbon.ntask.core.impl;
 
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManagerId;
 import org.wso2.carbon.ntask.core.TaskRepository;
+import org.wso2.carbon.ntask.core.TaskUtils;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -89,7 +89,15 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	}
 
 	public static Registry getRegistry() throws TaskException {
-		return (Registry) PrivilegedCarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
+                if (registry == null) {
+                        synchronized (RegistryBasedTaskRepository.class) {
+                                if (registry == null) {
+                                        registry = TaskUtils.getGovRegistryForTenant(
+                                                MultitenantConstants.SUPER_TENANT_ID);
+                                }
+                        }
+                }
+                return registry;
 	}
 
 	public String getTaskType() {
@@ -101,8 +109,11 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		List<TaskInfo> result = new ArrayList<TaskInfo>();
 		String tasksPath = this.getMyTasksPath();
 		try {
-            PrivilegedCarbonContext.getCurrentContext().
-                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 			if (getRegistry().resourceExists(tasksPath)) {
 				Collection tasksCollection = (Collection) getRegistry().get(tasksPath);
 				String[] taskPaths = tasksCollection.getChildren();
@@ -116,7 +127,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		} catch (Exception e) {
 			throw new TaskException("Error in getting all tasks from repository", 
 					Code.CONFIG_ERROR, e);
-		}
+		} finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 
 	@Override
@@ -124,6 +137,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		String tasksPath = this.getMyTasksPath();
 		String currentTaskPath = tasksPath + "/" + taskName;
 		try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 			if (!getRegistry().resourceExists(currentTaskPath)) {
 				throw new TaskException("The task '" + taskName + "' does not exist",
 						Code.NO_TASK_EXISTS);
@@ -135,7 +151,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		} catch (Exception e) {
 			throw new TaskException("Error in loading task '" + taskName + "' from registry", 
 					Code.CONFIG_ERROR, e);
-		}
+		} finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 
 	@Override
@@ -143,6 +161,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		String tasksPath = this.getMyTasksPath();
 		String currentTaskPath = tasksPath + "/" + taskInfo.getName();
 		try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			getTaskMarshaller().marshal(taskInfo, out);
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
@@ -152,7 +173,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		} catch (Exception e) {
 			throw new TaskException("Error in adding task '" + taskInfo.getName()
 					+ "' to the repository: " + e.getMessage(), Code.CONFIG_ERROR, e);
-		}
+		} finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 
 	@Override
@@ -160,6 +183,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		String tasksPath = this.getMyTasksPath();
 		String currentTaskPath = tasksPath + "/" + taskName;
 		try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 			if (!getRegistry().resourceExists(currentTaskPath)) {
 				return false;
 			}
@@ -168,7 +194,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		} catch (RegistryException e) {
 			throw new TaskException("Error in deleting task '" + taskName
 					+ "' in the repository", Code.CONFIG_ERROR, e);
-		}
+		} finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 	
 	private String getMyTasksPath() {
@@ -176,17 +204,24 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	}
 	
 	private TaskInfo getTaskInfoRegistryPath(String path) throws Exception {
-		Resource resource = getRegistry().get(path);
-		InputStream in = resource.getContentStream();
-		TaskInfo taskInfo;
-		/* the following synchronized block is to avoid "org.xml.sax.SAXException: FWK005" error
-		 * where the XML parser is not thread safe */
-		synchronized (getTaskUnmarshaller()) {
-			taskInfo = (TaskInfo) getTaskUnmarshaller().unmarshal(in);
-		}
-		in.close();
-		taskInfo.getProperties().put(TaskInfo.TENANT_DOMAIN_PROP, String.valueOf(this.getTenantDomain()));
-		return taskInfo;
+                try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        Resource resource = getRegistry().get(path);
+                        InputStream in = resource.getContentStream();
+                        TaskInfo taskInfo;
+                        /* the following synchronized block is to avoid "org.xml.sax.SAXException: FWK005" error
+                         * where the XML parser is not thread safe */
+                        synchronized (getTaskUnmarshaller()) {
+                                taskInfo = (TaskInfo) getTaskUnmarshaller().unmarshal(in);
+                        }
+                        in.close();
+                        taskInfo.getProperties().put(TaskInfo.TENANT_DOMAIN_PROP, String.valueOf(this.getTenantDomain()));
+                        return taskInfo;
+                } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 	
 	@Override
@@ -197,9 +232,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	public static List<TaskManagerId> getAvailableTenantTasksInRepo() throws TaskException {
 		List<TaskManagerId> tmList = new ArrayList<TaskManagerId>();
 		try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getCurrentContext().
-                    setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getCurrentContext().
+                        setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 		    boolean result = getRegistry().resourceExists(
 				    RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
 		    Resource tmpRes;
@@ -238,8 +273,8 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		} catch (Exception e) {
 			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
 		} finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 		return tmList;
 	}
 	
@@ -257,25 +292,35 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	private Resource getTaskMetadataPropResource(String taskName) 
 	        throws TaskException, RegistryException {
 		try {
-		    return getRegistry().get(RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH + "/" + 
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+		        return getRegistry().get(RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH + "/" +
 				    this.getTenantDomain() + "/" + this.getTasksType() + "/" + taskName);
 		} catch (ResourceNotFoundException e) {
 			throw new TaskException("The task '" + taskName + "' does not exist", 
 					Code.NO_TASK_EXISTS, e);
-		}
+		} finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 	
 	@Override
 	public void setTaskMetadataProp(String taskName, String key, String value)
 			throws TaskException {
 		try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
 			Resource res = this.getTaskMetadataPropResource(taskName);
 			res.setProperty(key, value);
 			getRegistry().put(res.getPath(), res);
 		} catch (RegistryException e) {
 			throw new TaskException("Error in setting task metadata properties: " + 
 					e.getMessage(), Code.UNKNOWN, e);
-		}
+		} finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                }
 	}
 
 	@Override

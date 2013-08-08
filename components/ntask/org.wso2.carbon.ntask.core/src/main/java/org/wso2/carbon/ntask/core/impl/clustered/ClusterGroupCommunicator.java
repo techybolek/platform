@@ -119,7 +119,7 @@ public class ClusterGroupCommunicator {
 		
 		private Group group;
 		
-        private boolean leader;
+                private boolean leader;
 				
 		public ClusterGroup(String taskType) throws TaskException {
 			this.taskType = taskType;
@@ -133,14 +133,14 @@ public class ClusterGroupCommunicator {
 			}
 		}
 
-        private void initClusterGroup(String taskType) {
-            try {
-                this.group = TasksDSComponent.getCoordinationService().createGroup(
-                        CARBON_TASK_GROUP_BASE + this.getTaskType());
-            } catch (CoordinationException e) {
-                log.error("Error while creating the group : " + taskType);
-            }
-        }
+                private void initClusterGroup(String taskType) {
+                        try {
+                                this.group = TasksDSComponent.getCoordinationService().createGroup(
+                                        CARBON_TASK_GROUP_BASE + this.getTaskType());
+                        } catch (CoordinationException e) {
+                                log.error("Error while creating the group : " + taskType);
+                        }
+                }
 		
 		public List<String> getMemberIds() throws CoordinationException {
 			return this.getGroup().getMemberIds();
@@ -240,33 +240,33 @@ public class ClusterGroupCommunicator {
 			}
 		}
 
-        @Override
-        public void onExpired() {
-            try {
-                this.deleteLocalTasks();
-            } catch (TaskException e) {
-                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
-            }
-        }
-
-        @Override
-        public void onConnect() {
-            try {
-                initClusterGroup(this.getTaskType());
-            } catch (Exception e) {
-                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
-            }
-        }
-
-        private void deleteLocalTasks() throws TaskException {
-            for (TaskManager tm : getTaskService().getAllTenantTaskManagersForType(this.getTaskType())) {
-                if (tm instanceof ClusteredTaskManager) {
-                    ((ClusteredTaskManager) tm).deleteLocalTasks();
+                @Override
+                public void onExpired() {
+                        try {
+                                this.deleteLocalTasks();
+                        } catch (TaskException e) {
+                                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
+                        }
                 }
-            }
-        }
 
-    }
+                @Override
+                public void onConnect() {
+                        try {
+                                initClusterGroup(this.getTaskType());
+                        } catch (Exception e) {
+                                log.error("Error in deleting local tasks on session expire: " + e.getMessage(), e);
+                        }
+                }
+
+                private void deleteLocalTasks() throws TaskException {
+                        for (TaskManager tm : getTaskService().getAllTenantTaskManagersForType(this.getTaskType())) {
+                                if (tm instanceof ClusteredTaskManager) {
+                                        ((ClusteredTaskManager) tm).deleteLocalTasks();
+                                }
+                        }
+                }
+
+        }
 
 	public static byte[] objectToBytes(Object obj) throws Exception {
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
