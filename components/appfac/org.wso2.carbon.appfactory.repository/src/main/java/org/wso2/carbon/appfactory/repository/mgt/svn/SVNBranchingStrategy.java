@@ -44,7 +44,7 @@ public class SVNBranchingStrategy implements BranchingStrategy {
      * {@inheritDoc}
      */
     @Override
-    public void prepareRepository(String applicationKey, String url, String tenantDomain)
+    public void prepareRepository(String applicationKey, String url)
             throws RepositoryMgtException {
         File workDir = new File(CarbonUtils.getTmpDir() + File.separator + applicationKey);
         if (!workDir.mkdirs()) {

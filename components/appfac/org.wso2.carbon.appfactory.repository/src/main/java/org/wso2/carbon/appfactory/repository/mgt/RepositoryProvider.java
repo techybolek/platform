@@ -42,8 +42,6 @@ public interface RepositoryProvider {
      */
     public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException;
 
-    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException;
-
     /**
      * This is the method  used to set appfactory configuration by appfactory.
      * Repository provider should implement this method to use the appfactory configs meaning fully

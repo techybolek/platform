@@ -123,11 +123,6 @@ public class SCMManagerBasedSVNRepositoryProvider extends AbstractRepositoryProv
         return repository;
     }
 
-    @Override
-    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
 //    No need to override. The abstract class has the implementation
 /*    @Override
     public AppfactoryRepositoryClient getRepositoryClient() throws RepositoryMgtException {

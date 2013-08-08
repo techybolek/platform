@@ -60,6 +60,7 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
         model.name = repoName;
         //authenticated users can clone, push and view the repository
         model.accessRestriction = Constants.AccessRestrictionType.VIEW;
+        model.isBare=true;
         try {
             isCreated = RpcUtils.createRepository(model, repoCreateUrl, adminUsername,
                                                   adminPassword.toCharArray());           
@@ -85,6 +86,11 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
     @Override
     public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
         return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + applicationKey + ".git";
+    }
+
+    @Override
+    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
+        return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + tenantDomain + "/" +applicationKey + ".git";
     }
 
     @Override
