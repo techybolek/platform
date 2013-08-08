@@ -50,11 +50,14 @@ public class PasswordGrantHandler extends AbstractAuthorizationGrantHandler {
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
+
         OAuth2AccessTokenReqDTO oAuth2AccessTokenReqDTO = tokReqMsgCtx.getOauth2AccessTokenReqDTO();
         String username = oAuth2AccessTokenReqDTO.getResourceOwnerUsername();
         String credentialType = oAuth2AccessTokenReqDTO.getCredentialType();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        username = tenantAwareUserName + "@" + tenantDomain;
         int tenantId;
-        String authUsername = null;
         try {
             tenantId = IdentityUtil.getTenantIdOFUser(username);
         } catch (IdentityException e) {
@@ -74,11 +77,10 @@ public class PasswordGrantHandler extends AbstractAuthorizationGrantHandler {
         boolean authStatus;
         try {
             UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-            authUsername = MultitenantUtils.getTenantAwareUsername(username);
             if(credentialType != null && !credentialType.equals("")) { // TODO : a hack to get multiple cred working
-            	authUsername = credentialType + ":" + authUsername;
+            	username = credentialType + ":" + username;
             }
-            authStatus = userStoreManager.authenticate(authUsername, oAuth2AccessTokenReqDTO.getResourceOwnerPassword());
+            authStatus = userStoreManager.authenticate(tenantAwareUserName, oAuth2AccessTokenReqDTO.getResourceOwnerPassword());
 
             if(log.isDebugEnabled()){
                 log.debug("Token request with Password Grant Type received. " +
@@ -91,10 +93,14 @@ public class PasswordGrantHandler extends AbstractAuthorizationGrantHandler {
             throw new IdentityOAuth2Exception("Error when authenticating the user credentials.", e);
         }
         if(authStatus){
-            if(authUsername.indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0){
-                tokReqMsgCtx.setAuthorizedUser(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR + authUsername);
-            }else if(authUsername.indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0){
-                tokReqMsgCtx.setAuthorizedUser(authUsername);
+            if(username.indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0){
+                if(UserCoreUtil.getDomainFromThreadLocal() != null && !UserCoreUtil.getDomainFromThreadLocal().equals("")){
+                    tokReqMsgCtx.setAuthorizedUser(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR + username);
+                } else {
+                    tokReqMsgCtx.setAuthorizedUser(username);
+                }
+            }else if(username.indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0){
+                tokReqMsgCtx.setAuthorizedUser(username);
             }
         }
         tokReqMsgCtx.setScope(oAuth2AccessTokenReqDTO.getScope());

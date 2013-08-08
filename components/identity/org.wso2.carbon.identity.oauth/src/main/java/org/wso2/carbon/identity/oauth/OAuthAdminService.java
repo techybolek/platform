@@ -255,6 +255,9 @@ public class OAuthAdminService extends AbstractAdmin {
 
         TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
         OAuthAppDAO appDAO = new OAuthAppDAO();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        username = tenantAwareUserName + "@" + tenantDomain;
         OAuthAppDO[] appDOs = tokenMgtDAO.getAppsAuthorizedByUser(username);
         OAuthConsumerAppDTO[] appDTOs = new OAuthConsumerAppDTO[appDOs.length];
         for(int i = 0; i < appDTOs.length ; i++){
@@ -290,8 +293,10 @@ public class OAuthAdminService extends AbstractAdmin {
                     throw new IdentityOAuth2Exception(loggedInUser +
                             " not authorized to revoke tokens of " + revokeRequestDTO.getAuthzUser());
                 }
-                String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(revokeRequestDTO.getAuthzUser());
-                tokenMgtDAO.revokeTokensByResourceOwner(revokeRequestDTO.getApps(), tenantAwareUsername);
+                String tenantDomain = MultitenantUtils.getTenantDomain(revokeRequestDTO.getAuthzUser());
+                String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(revokeRequestDTO.getAuthzUser());
+                String userName = tenantAwareUserName + "@" + tenantDomain;
+                tokenMgtDAO.revokeTokensByResourceOwner(revokeRequestDTO.getApps(), userName);
             } else {
                 OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
                 revokeRespDTO.setError(true);

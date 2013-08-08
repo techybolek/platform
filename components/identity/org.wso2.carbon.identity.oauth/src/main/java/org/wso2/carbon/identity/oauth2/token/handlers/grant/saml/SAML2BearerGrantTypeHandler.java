@@ -62,6 +62,8 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.AbstractAuthorizationGrantHandler;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
+import org.wso2.carbon.idp.mgt.IdPMetadataService;
+import org.wso2.carbon.idp.mgt.dto.TrustedIdPDTO;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -133,60 +135,6 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
         }
 
         /**
-         * Validating SAML request according to criteria specified in "SAML 2.0 Bearer Assertion Profiles for
-         * OAuth 2.0 - http://tools.ietf.org/html/draft-ietf-oauth-saml2-bearer-14
-         */
-
-        /**
-         * The Assertion's <Issuer> element MUST contain a unique identifier for the entity that issued
-         * the Assertion.
-         */
-        if (assertion.getIssuer() == null || assertion.getIssuer().getValue().equals("")) {
-            log.debug("Issuer is empty in the SAML assertion");
-            throw new IdentityOAuth2Exception("Issuer is empty in the SAML assertion");
-        } else if (!OAuthServerConfiguration.getInstance().getSAML2Issuers().containsKey(assertion.getIssuer().getValue())){
-            log.debug("SAML2 Issuers not registered");
-            throw new IdentityOAuth2Exception("SAML2 Issuers not registered");
-        }
-
-        /**
-         * The Assertion MUST contain <Conditions> element with an <AudienceRestriction> element with an <Audience>
-         * element containing a URI reference that identifies the authorization server, or the service provider
-         * SAML entity of its controlling domain, as an intended audience.  The token endpoint URL of the
-         * authorization server MAY be used as an acceptable value for an <Audience> element.  The authorization
-         * server MUST verify that it is an intended audience for the Assertion.
-         */
-        boolean isAudienceValid = false;
-        Conditions conditions = assertion.getConditions();
-        if (conditions != null) {
-            List<AudienceRestriction> restrictions = conditions.getAudienceRestrictions();
-            if (restrictions != null && restrictions.size() > 0) {
-                for(AudienceRestriction audienceRestriction:restrictions){
-                    List<Audience> audiences = audienceRestriction.getAudiences();
-                    for (Audience audience : audiences) {
-                        String audienceURI = audience.getAudienceURI();
-                        if(OAuthServerConfiguration.getInstance().getSAML2Audience().contains(audienceURI) ||
-                                OAuthServerConfiguration.getInstance().getTokenEndPoint().equals(audienceURI) ||
-                                OAuthServerConfiguration.getInstance().getTokenEndPointAliases().contains(audienceURI)){
-                            isAudienceValid = true;
-                            break;
-                        }
-                    }
-                }
-                if(!isAudienceValid){
-                    log.debug("Valid Audience not found in SAML2 token");
-                    throw new IdentityOAuth2Exception("Valid Audience not found in SAML2 token");
-                }
-            } else {
-                log.debug("Cannot find any AudienceRestrictions in the Assertion");
-                throw new IdentityOAuth2Exception("Cannot find any AudienceRestrictions in the Assertion");
-            }
-        } else {
-            log.debug("Cannot find any Conditions in the Assertion");
-            throw new IdentityOAuth2Exception("Cannot find any Conditions in the Assertion");
-        }
-
-        /**
          * The Assertion MUST contain a <Subject> element.  The subject MAY identify the resource owner for whom
          * the access token is being requested.  For client authentication, the Subject MUST be the "client_id"
          * of the OAuth client.  When using an Assertion as an authorization grant, the Subject SHOULD identify
@@ -204,6 +152,99 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
         } else {
             log.debug("Cannot find a Subject in the Assertion");
             throw new IdentityOAuth2Exception("Cannot find a Subject in the Assertion");
+        }
+        String userName = tokReqMsgCtx.getAuthorizedUser();
+        int tenantID = getTenantId(userName);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        TrustedIdPDTO trustedIdPDTO = null;
+        if(tokReqMsgCtx.getOauth2AccessTokenReqDTO().getIdp() != null &&
+                !tokReqMsgCtx.getOauth2AccessTokenReqDTO().getIdp().equals("")){
+            trustedIdPDTO = IdPMetadataService.getInstance().getTenantIdPMetaData(
+                    tokReqMsgCtx.getOauth2AccessTokenReqDTO().getIdp(), tenantDomain);
+        } else {
+            String idPName = IdPMetadataService.getInstance().getPrimaryIdP(tenantDomain);
+            trustedIdPDTO = IdPMetadataService.getInstance().getTenantIdPMetaData(idPName, tenantDomain);
+        }
+        if(trustedIdPDTO == null){
+            log.debug("SAML2 Issuer not registered");
+            throw new IdentityOAuth2Exception("SAML2 Issuer not registered");
+        }
+
+        /**
+         * Validating SAML request according to criteria specified in "SAML 2.0 Bearer Assertion Profiles for
+         * OAuth 2.0 - http://tools.ietf.org/html/draft-ietf-oauth-saml2-bearer-14
+         */
+
+        /**
+         * The Assertion's <Issuer> element MUST contain a unique identifier for the entity that issued
+         * the Assertion.
+         */
+        if (assertion.getIssuer() == null || assertion.getIssuer().getValue().equals("")) {
+            log.debug("Issuer is empty in the SAML assertion");
+            throw new IdentityOAuth2Exception("Issuer is empty in the SAML assertion");
+        } else {
+            if(!assertion.getIssuer().getValue().equals(trustedIdPDTO.getIdPIssuerId())){
+                log.debug("SAML Token Issuer verification failed");
+                throw new IdentityOAuth2Exception("SAML Token Issuer verification failed");
+            }
+        }
+
+        /**
+         * The Assertion MUST contain <Conditions> element with an <AudienceRestriction> element with an <Audience>
+         * element containing a URI reference that identifies the authorization server, or the service provider
+         * SAML entity of its controlling domain, as an intended audience.  The token endpoint URL of the
+         * authorization server MAY be used as an acceptable value for an <Audience> element.  The authorization
+         * server MUST verify that it is an intended audience for the Assertion.
+         */
+
+        if(trustedIdPDTO.getAudience() != null && trustedIdPDTO.getAudience().length > 0){
+            for(String requestedAudience : trustedIdPDTO.getAudience()){
+                Conditions conditions = assertion.getConditions();
+                if (conditions != null) {
+                    List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
+                    if (audienceRestrictions != null && !audienceRestrictions.isEmpty()) {
+                        boolean audienceFound = false;
+                        for (AudienceRestriction audienceRestriction : audienceRestrictions) {
+                            if (audienceRestriction.getAudiences() != null && audienceRestriction.getAudiences().size() > 0) {
+                                for(Audience audience: audienceRestriction.getAudiences()){
+                                    if(audience.getAudienceURI().equals(requestedAudience)){
+                                        audienceFound = true;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                if(log.isDebugEnabled()){
+                                    String message = "SAML Response's AudienceRestriction doesn't contain Audiences";
+                                    log.debug(message);
+                                }
+                                return false;
+                            }
+                            if(audienceFound){
+                                break;
+                            }
+                        }
+                        if(!audienceFound){
+                            if(log.isDebugEnabled()){
+                                String message = "SAML Assertion Audience Restriction validation failed";
+                                log.debug(message);
+                            }
+                            return false;
+                        }
+                    } else {
+                        if(log.isDebugEnabled()){
+                            String message = "SAML Response doesn't contain AudienceRestrictions";
+                            log.debug(message);
+                        }
+                        return false;
+                    }
+                } else {
+                    if(log.isDebugEnabled()){
+                        String message = "SAML Response doesn't contain Conditions";
+                        log.debug(message);
+                    }
+                    return false;
+                }
+            }
         }
 
         /**
@@ -284,15 +325,9 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
         }
 
         if(recipientURLS.size() > 0){
-            if(!recipientURLS.contains(OAuthServerConfiguration.getInstance().getTokenEndPoint())){
-                boolean isAliasFound = false;
-                for(String alias : OAuthServerConfiguration.getInstance().getTokenEndPointAliases()){
-                    if(recipientURLS.contains(alias)){
-                        isAliasFound = true;
-                        break;
-                    }
-                }
-                if(!isAliasFound){
+            String[] requestedRecipients = trustedIdPDTO.getAudience();
+            for(String requestedRecipient:requestedRecipients){
+                if(!recipientURLS.contains(requestedRecipient)){
                     log.debug("None of the recipient URLs match the token endpoint or an acceptable alias");
                     throw new IdentityOAuth2Exception("None of the recipient URLs match the token endpoint or an acceptable alias");
                 }
@@ -342,9 +377,6 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
             throw new IdentityOAuth2Exception("Signature element does not conform to SAML Signature Profile");
         }
 
-        String userName = tokReqMsgCtx.getAuthorizedUser();
-        int tenantID = getTenantId(userName);
-        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantID);
         KeyStore keyStore;
 
@@ -352,14 +384,14 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
             // derive key store name
             String ksName = tenantDomain.trim().replace(".", "-");
             // derive JKS name
-            String jksName = ksName + ".jks";
+            String jksName = ksName + "-idp-mgt-truststore.jks";
             try {
                 keyStore = tenantKSM.getKeyStore(jksName);
             } catch (Exception e) {
                 log.error(e);
                 throw new IdentityOAuth2Exception("Error retrieving key store: " + jksName);
             }
-        }else{
+        } else {
             try {
                 keyStore = tenantKSM.getPrimaryKeyStore();
             } catch (Exception e) {
@@ -372,10 +404,7 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
         SignatureTrustEngine trustEngine = new ExplicitKeySignatureTrustEngine(resolver,
                 Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
         CriteriaSet criteriaSet = new CriteriaSet();
-        if(OAuthServerConfiguration.getInstance().getSAML2Issuers().get(assertion.getIssuer().getValue()) != null){
-            criteriaSet.add(new EntityIDCriteria(OAuthServerConfiguration.getInstance().getSAML2Issuers().
-                    get(assertion.getIssuer().getValue())));
-        }
+        criteriaSet.add(new EntityIDCriteria(trustedIdPDTO.getIdPName()));
         criteriaSet.add(new KeyInfoCriteria(assertion.getSignature().getKeyInfo()));
         try {
             if (!trustEngine.validate(assertion.getSignature(), criteriaSet)) {

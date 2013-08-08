@@ -32,6 +32,7 @@ public class OAuth2AccessTokenReqDTO {
     private String clientAssertionType;
     private String clientAssertion;
     private String credentialType;
+    private String idp;
 
     public String getClientId() {
         return clientId;
@@ -135,5 +136,13 @@ public class OAuth2AccessTokenReqDTO {
 
 	public void setCredentialType(String credentialType) {
 	    this.credentialType = credentialType;
+    }
+
+    public String getIdp() {
+        return idp;
+    }
+
+    public void setIdp(String idp) {
+        this.idp = idp;
     }
 }
