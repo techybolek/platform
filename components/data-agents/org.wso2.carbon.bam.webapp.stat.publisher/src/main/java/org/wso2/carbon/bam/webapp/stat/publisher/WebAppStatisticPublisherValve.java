@@ -124,9 +124,8 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         /**
          * Checks whether request content type is css or java script.
          */
-        boolean requestType = checkRequestType(request,response);
 
-        if(!requestType){
+        if(!checkRequestType(request,response)){
             return;
         }
 
