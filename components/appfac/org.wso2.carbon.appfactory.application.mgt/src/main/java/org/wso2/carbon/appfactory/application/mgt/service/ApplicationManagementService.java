@@ -573,9 +573,10 @@ public class ApplicationManagementService extends AbstractAdmin {
     }
 
     public String[] getAllApplications(String userName) throws ApplicationManagementException {
-       //                    String []apps={"aj5", "aj6", "aj7", "aj8", "aj9"};
+        String []apps={"foo1", "foo2", "foo3", "foo4", "foo5", "foo6", "foo7", "foo8", "foo9", "foo10","foo11", "foo12", "foo13", "foo14", "foo15", "foo16", "foo17", "foo18", "foo19", "foo20"};
 
-      String apps[] = userApplicationCache.getValueFromCache(userName);
+        return apps;
+     /* String apps[] = userApplicationCache.getValueFromCache(userName);
         if (apps != null) {
             return apps;
         } else {
@@ -595,7 +596,7 @@ public class ApplicationManagementService extends AbstractAdmin {
             apps = list.toArray(new String[list.size()]);
         }
         userApplicationCache.addToCache(userName, apps);
-        return apps;
+        return apps;     */
     }
 
     public String[] getAllCreatedApplications() throws ApplicationManagementException {
