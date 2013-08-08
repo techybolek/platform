@@ -31,7 +31,7 @@
     <artifactId>httpclient</artifactId>
     <packaging>bundle</packaging>
     <name>httpclient.wso2</name>
-    <version>4.2.3.wso2v1</version>
+    <version>4.2.5.wso2v1</version>
     <description>
         org.wso2.carbon.httpclient. This bundle will export packages from httpclient.jar
     </description>
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.2.3</version>
+            <version>4.2.5</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
@@ -81,8 +81,8 @@
     </build>
 
     <properties>
-        <orbit.patch.version.httpcore>4.2.3.wso2v1</orbit.patch.version.httpcore>
-        <httpcore.patch.version>4.2.3</httpcore.patch.version>
+        <orbit.patch.version.httpcore>4.2.5.wso2v1</orbit.patch.version.httpcore>
+        <httpcore.patch.version>4.2.5</httpcore.patch.version>
     </properties>
 
 </project>
