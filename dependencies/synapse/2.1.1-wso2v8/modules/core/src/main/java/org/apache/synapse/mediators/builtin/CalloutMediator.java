@@ -19,6 +19,7 @@
 
 package org.apache.synapse.mediators.builtin;
 
+import com.damnhandy.uri.template.UriTemplate;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPBody;
@@ -38,6 +39,7 @@ import org.apache.synapse.endpoints.AddressEndpoint;
 import org.apache.synapse.endpoints.DefaultEndpoint;
 import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.endpoints.EndpointDefinition;
+import org.apache.synapse.endpoints.HTTPEndpoint;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.message.senders.blocking.BlockingMsgSender;
 import org.apache.synapse.util.MessageHelper;
@@ -103,11 +105,21 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
 
             boolean isWrappingEndpointCreated = false;
             if (serviceURL != null) {
-                endpoint = new AddressEndpoint();
-                isWrappingEndpointCreated = true;
-                endpointDefinition = new EndpointDefinition();
-                endpointDefinition.setAddress(serviceURL);
-                ((AddressEndpoint) endpoint).setDefinition(endpointDefinition);
+
+                if (serviceURL.contains("{")) {
+                    endpoint = new HTTPEndpoint();
+                    ((HTTPEndpoint)endpoint).setUriTemplate(UriTemplate.fromTemplate(serviceURL));
+                    endpointDefinition = new EndpointDefinition();
+                    endpointDefinition.setAddress(serviceURL);
+                    ((HTTPEndpoint) endpoint).setDefinition(endpointDefinition);
+                } else {
+                    endpoint = new AddressEndpoint();
+                    isWrappingEndpointCreated = true;
+                    endpointDefinition = new EndpointDefinition();
+                    endpointDefinition.setAddress(serviceURL);
+                    ((AddressEndpoint) endpoint).setDefinition(endpointDefinition);
+                }
+
             } else if (endpointKey != null) {
                 endpoint = synCtx.getEndpoint(endpointKey);
             } else {
