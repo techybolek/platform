@@ -104,6 +104,9 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.unifiedendpoint.server.feature:${carbon.platform.version}
                                 </featureArtifactDef>
+                               <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.user.mgt.feature:${carbon.platform.version}
+                                </featureArtifactDef>
                                 <!--featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.security.mgt.feature:${carbon.platform.version}
                                 </featureArtifactDef-->
@@ -303,6 +306,11 @@
                                     <id>org.wso2.carbon.datasource.server.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.user.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+
                                 <feature>
                                     <id>org.wso2.carbon.stratos.common.feature.group</id>
                                     <version>${stratos.version}</version>
