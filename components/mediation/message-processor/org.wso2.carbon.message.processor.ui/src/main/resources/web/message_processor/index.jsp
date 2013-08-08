@@ -304,7 +304,7 @@
             } else if ("Scheduled Message Forwarding Processor".
                     equalsIgnoreCase(type)) {
             %>
-            <td><a onclick="editRow('<%= type%>', this.parentNode.parentNode.rowIndex,true)" href="#"
+            <td><a onclick="editRow('<%= type%>', this.parentNode.parentNode.rowIndex)" href="#"
                    class="icon-link"
                    style="background-image:url(../admin/images/edit.gif);"><fmt:message
                     key="edit"/></a>
@@ -325,7 +325,7 @@
             } else if ("Message Sampling Processor".
                     equalsIgnoreCase(type)) {
             %>
-            <td><a onclick="editRow('<%= type%>', this.parentNode.parentNode.rowIndex,true)" href="#"
+            <td><a onclick="editRow('<%= type%>', this.parentNode.parentNode.rowIndex)" href="#"
                    class="icon-link"
                    style="background-image:url(../admin/images/edit.gif);"><fmt:message
                     key="edit"/></a>

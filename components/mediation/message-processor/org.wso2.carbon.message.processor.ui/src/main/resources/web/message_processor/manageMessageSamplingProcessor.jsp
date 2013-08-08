@@ -107,7 +107,7 @@
     		return true;
     	}
         addServiceParams();
-        document.Submit.submit();
+        //document.Submit.submit();
         return true;
     }
 
@@ -376,7 +376,7 @@
                         <td><fmt:message key="sampling.concurrency"/></td>
                         <td><input type="text" id="sampling_concurrency" name="sampling_concurrency"
                                    value="<%=((null!=processorData)&& processorData.getParams() != null
-                                        && !processorData.getParams().isEmpty()&&(processorData.getParams().get("concurrency")!=null))?processorData.getParams().get("concurrency"):"1000"%>"
+                                        && !processorData.getParams().isEmpty()&&(processorData.getParams().get("concurrency")!=null))?processorData.getParams().get("concurrency"):"1"%>"
                                 />
                         </td>
                     </tr>
@@ -416,7 +416,7 @@
     <tbody>
     <tr>
         <td colspan="2" class="buttonRow">
-            <input type="button" value="<fmt:message key="save"/>" class="button"
+            <input type="submit" value="<fmt:message key="save"/>" class="button"
                    onclick="submitTextContent(document.Submit);"/>
             <input type="button" value="<fmt:message key="cancel"/>"
                    onclick="javascript:document.location.href='../message_processor/index.jsp?region=region1&item=messageProcessor_menu&ordinal=0'"
