@@ -50,7 +50,7 @@ var updateTierPermissions = function (tierPermission) {
 };
 
 var getTierPermissions = function () {
-	var mod, result, obj,
+	var mod, result, obj,log = new Log(),
    			provider = jagg.module("manager").getAPIProviderObj();
             try {
             	result = provider.getTierPermissions();
