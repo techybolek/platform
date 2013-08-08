@@ -40,7 +40,7 @@ public class CarbonApplicationDeploymentTestCase extends ESBIntegrationTest {
     private CarbonAppUploaderClient carbonAppUploaderClient;
     private ApplicationAdminClient applicationAdminClient;
     private final int MAX_TIME = 120000;
-    private final String carFileName = "esb-artifacts-car";
+    private final String carFileName = "esb-artifacts-car_1.0.0";
 
     @BeforeClass(alwaysRun = true)
     protected void uploadCarFileTest() throws Exception {

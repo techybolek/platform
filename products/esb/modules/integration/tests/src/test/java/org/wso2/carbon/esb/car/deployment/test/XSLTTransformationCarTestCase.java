@@ -46,7 +46,7 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
     private CarbonAppUploaderClient carbonAppUploaderClient;
     private ApplicationAdminClient applicationAdminClient;
     private final int MAX_TIME = 120000;
-    private final String carFileName = "xslt-transformation-car";
+    private final String carFileName = "xslt-transformation-car_1.0.0";
     private ResourceAdminServiceClient resourceAdminServiceStub;
 
     @BeforeClass(alwaysRun = true)
