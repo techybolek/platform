@@ -327,10 +327,6 @@ public class SecureAxisServiceClient implements CallbackHandler {
             //setting user credential
             opts.setUserName(userName);
             opts.setPassword(password);
-            int timeoutmillis = 6000;
-            opts.setTimeOutInMilliSeconds(timeoutmillis);
-            opts.setProperty(HTTPConstants.SO_TIMEOUT, timeoutmillis);
-            opts.setProperty(HTTPConstants.CONNECTION_TIMEOUT, timeoutmillis);
             sc.setOptions(opts);
 
         } catch (AxisFault axisFault) {
