@@ -93,10 +93,6 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
         return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + tenantDomain + "/" +applicationKey + ".git";
     }
 
-    @Override
-    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
-        return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + tenantDomain + "/" +applicationKey + ".git";
-    }
 
     /**
      * {@inheritDoc}

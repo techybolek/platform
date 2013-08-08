@@ -44,7 +44,7 @@ public class GITBranchingStrategy implements BranchingStrategy {
      * {@inheritDoc}
      */
     @Override
-    public void prepareRepository(String applicationKey, String url) throws RepositoryMgtException {
+    public void prepareRepository(String applicationKey, String url, String tenantDomain) throws RepositoryMgtException {
         File workDir = new File(CarbonUtils.getTmpDir() + File.separator + applicationKey);
         if (!workDir.mkdirs()) {
             log.error("Error creating work directory at location" + workDir.getAbsolutePath());
@@ -53,7 +53,7 @@ public class GITBranchingStrategy implements BranchingStrategy {
             AppfactoryRepositoryClient client = provider.getRepositoryClient();
             client.checkOut(url, workDir, "");
             try {
-                String applicationType = ProjectUtils.getApplicationType(applicationKey);
+                String applicationType = ProjectUtils.getApplicationType(applicationKey, tenantDomain);
                 Util.getApplicationTypeManager().getApplicationTypeProcessor(applicationType).generateApplicationSkeleton(applicationKey, workDir.getAbsolutePath());
             } catch (AppFactoryException e) {
                 //There is an exception when generating the maven archetype.

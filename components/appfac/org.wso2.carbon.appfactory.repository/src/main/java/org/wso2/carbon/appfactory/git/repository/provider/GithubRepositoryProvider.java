@@ -144,6 +144,11 @@ public class GithubRepositoryProvider extends AbstractRepositoryProvider {
         return "https://github.com/" + ORG_NAME + "/" + applicationKey + ".git";
     }
 
+    @Override
+    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     /**
      * @return client for accessing repo
      * @throws RepositoryMgtException if client initilaization fails

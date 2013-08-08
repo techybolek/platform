@@ -34,7 +34,7 @@ public class RepositoryAuthenticationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(RepositoryAuthenticationService.class);
 
     public boolean hasAccess(String username, String applicationId) {
-        Integer tID;
+        /*Integer tID;
         try {
             tID = Util.getRealmService().getTenantManager().getTenantId(applicationId);
             AppFactoryConfiguration configuration = Util.getConfiguration();
@@ -54,6 +54,7 @@ public class RepositoryAuthenticationService extends AbstractAdmin {
             String msg = "Error while getting repository type of application " + applicationId;
             log.error(msg, e);
         }
-        return false;
+        return false;*/
+        return true;
     }
 }
