@@ -856,7 +856,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         utArr.add(ut.getUriTemplate());
                         utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
                         utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
-
+                        utArr.add(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
                         NativeArray utNArr = new NativeArray(utArr.size());
                         for (int p = 0; p < utArr.size(); p++) {
                             utNArr.put(p, utNArr, utArr.get(p));
