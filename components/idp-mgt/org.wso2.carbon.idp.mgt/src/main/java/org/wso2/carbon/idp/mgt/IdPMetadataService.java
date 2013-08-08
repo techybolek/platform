@@ -36,7 +36,7 @@ public class IdPMetadataService {
     private static Log log = LogFactory.getLog(IdPMetadataService.class);
 
     private static IdPMgtDAO dao = new IdPMgtDAO();
-
+    private static IdPMetadataService idPMetadataService = new IdPMetadataService();
     /**
      * Retrieves registered IdPs for a given tenant
      *
@@ -211,5 +211,9 @@ public class IdPMetadataService {
             }
             return false;
         }
+    }
+
+    public static IdPMetadataService getInstance(){
+        return idPMetadataService;
     }
 }

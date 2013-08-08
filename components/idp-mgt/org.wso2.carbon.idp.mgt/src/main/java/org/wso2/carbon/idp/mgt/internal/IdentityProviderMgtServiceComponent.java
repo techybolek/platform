@@ -58,13 +58,6 @@ public class IdentityProviderMgtServiceComponent {
                 log.error("Identity Provider Management TenantMgtListener could not be registered");
             }
 
-            ServiceRegistration idpMetadataSR = bundleCtx.registerService(IdPMetadataService.class.getName(),new IdPMetadataService(),null);
-            if(idpMetadataSR != null){
-                log.debug("Identity Provider Management IdPMetadataService registered");
-            } else {
-                log.error("Identity Provider Management IdPMetadataService could not be registered");
-            }
-
             ServiceRegistration userOperationListenerSR = bundleCtx.registerService(UserOperationEventListener.class.getName(), new IdPMgtUserStoreListener(), null);
             if(userOperationListenerSR != null){
                 log.debug("Identity Provider Management UserStoreListener is enabled");

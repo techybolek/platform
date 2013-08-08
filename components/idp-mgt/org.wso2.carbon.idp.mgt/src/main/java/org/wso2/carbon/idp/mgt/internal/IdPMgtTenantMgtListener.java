@@ -37,7 +37,7 @@ public class IdPMgtTenantMgtListener implements TenantMgtListener {
     public void onTenantCreate(TenantInfoBean tenantInfo) throws StratosException {
         try {
             String tenantDomain = tenantInfo.getTenantDomain();
-            String trustStoreName = tenantDomain + "-idp-mgt-truststore.jks";
+            String trustStoreName = tenantDomain.trim().replace(".", "-") + "-idp-mgt-truststore.jks";
             KeyStoreGenerator ksGenerator = new KeyStoreGenerator(tenantInfo.getTenantId());
             ksGenerator.generateTrustStore(trustStoreName);
         } catch (KeyStoreMgtException e) {

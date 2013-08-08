@@ -92,7 +92,7 @@ public class IdPMgtDAO {
                 }
                 String audience = rs.getString(6);
                 if(audience != null){
-                    trustedIdPDO.setAudience(new ArrayList<String>(Arrays.asList(rs.getString(5).split("\\s"))));
+                    trustedIdPDO.setAudience(new ArrayList<String>(Arrays.asList(rs.getString(6).split("\\s"))));
                 } else {
                     trustedIdPDO.setAudience(new ArrayList<String>());
                 }
