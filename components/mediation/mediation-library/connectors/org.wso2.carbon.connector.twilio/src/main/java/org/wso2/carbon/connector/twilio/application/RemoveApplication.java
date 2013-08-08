@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.connector.twilio.application;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.SynapseLog;
@@ -43,7 +44,14 @@ public class RemoveApplication extends AbstractConnector {
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);
 			Application application = twilioRestClient.getAccount().getApplication(applicationSid);
-			application.delete();
+			OMElement omResponse = null;
+			if(application.delete()){
+				omResponse = TwilioUtil.parseResponse("application.delete.success");
+			}else{
+				omResponse = TwilioUtil.parseResponse("application.delete.fail");
+			}
+			TwilioUtil.addElement(omResponse, TwilioUtil.PARAM_APPLICATION_SID, application.getSid());
+			TwilioUtil.preparePayload(messageContext, omResponse);			
 		} catch (Exception e) {
 			log.error(e);
 			throw new SynapseException(e);
