@@ -33,7 +33,8 @@
         <module>gateway-manager</module>
         <module>gateway-worker</module>
         <module>keymanager</module>
-        <module>jaggery-apps</module>
+        <module>publisher</module>
+        <module>store</module>
     </modules>
     <!--<properties>
         <apimserver.version>1.5.0-SNAPSHOT</apimserver.version>

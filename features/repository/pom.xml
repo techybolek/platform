@@ -600,7 +600,10 @@
                                     org.wso2.am:org.wso2.apimgt.keymanager.nested.category.feature:${apimserver.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.am:org.wso2.apimgt.jaggery-apps.nested.category.feature:${apimserver.version}
+                                    org.wso2.am:org.wso2.apimgt.publisher.nested.category.feature:${apimserver.version}
+                                </featureArtifactDef>
+				<featureArtifactDef>
+                                    org.wso2.am:org.wso2.apimgt.store.nested.category.feature:${apimserver.version}
                                 </featureArtifactDef>
 
                                 <featureArtifactDef>
@@ -769,7 +772,11 @@
                                             <version>${apimserver.version}</version>
                                         </catFeature>
                                         <catFeature>
-                                            <id>org.wso2.apimgt.jaggery-apps.nested.category</id>
+                                            <id>org.wso2.apimgt.publisher.nested.category</id>
+                                            <version>${apimserver.version}</version>
+                                        </catFeature>
+                                        <catFeature>
+                                            <id>org.wso2.apimgt.store.nested.category</id>
                                             <version>${apimserver.version}</version>
                                         </catFeature>
                                     </features>

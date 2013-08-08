@@ -25,11 +25,11 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.apimgt.jaggery-apps.nested.category.feature</artifactId>
+    <artifactId>org.wso2.apimgt.store.nested.category.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Jaggery Applications</name>
+    <name>Store</name>
     <url>http://wso2.org</url>
-    <description>Includes features for Store and Publisher components.</description>
+    <description>Includes features for Store component.</description>
  
     <build>
         <plugins>
@@ -45,7 +45,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.apimgt.jaggery-apps.nested.category</id>
+                            <id>org.wso2.apimgt.store.nested.category</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -58,11 +58,8 @@
 				<importFeatureDef>org.jaggeryjs:0.9.0.ALPHA2-wso2v4</importFeatureDef>
 				<importFeatureDef>org.wso2.am.styles:${apimserver.version}</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.apimgt.core:${carbon.platform.version}</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.apimgt.publisher:${carbon.platform.version}</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.apimgt.store:${carbon.platform.version}</importFeatureDef>
-
 				<importFeatureDef>org.wso2.carbon.application.mgt.server:${carbon.platform.version}</importFeatureDef>
-
 				<importFeatureDef>org.wso2.carbon.datasource.server:${carbon.platform.version}</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.ec2-client:${carbon.platform.version}</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.endpoint.server:${carbon.platform.version}</importFeatureDef>
