@@ -8,6 +8,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
 
 import java.util.Date;
+import java.util.Map;
 
 
 public class CassandraRowDeletionAnalyzer extends AbstractHiveAnalyzer {
@@ -16,7 +17,8 @@ public class CassandraRowDeletionAnalyzer extends AbstractHiveAnalyzer {
     private static final Log log = LogFactory.getLog(CassandraRowDeletionAnalyzer.class);
 
     @Override
-    public void execute() {
+    public void execute(Map<String, String> stringStringMap) {
+
         CassandraMapReduceRowDeletion mapReduceRowDeletion = new CassandraMapReduceRowDeletion();
         HiveConf hiveConf = HiveContext.getCurrentContext().getConf();
         String[] array = new String[] {hiveConf.get("hadoop.tmp.dir") + "/archivalTempResults" + new Date().getTime()};
