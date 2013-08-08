@@ -116,12 +116,6 @@
 			<AuthorizationContextTTL>15</AuthorizationContextTTL>
 		</AuthorizationContextTokenGeneration>
 		<SAML2Grant>
-			<Issuers>
-				<Issuer trustEntityId="wso2carbon">https://localhost:9443/samlsso</Issuer>
-			</Issuers>
-			<TokenEndPoint>https://localhost:9443/oauth2endpoints/token</TokenEndPoint>
-			<TokenEndPointAliases>tokenEP</TokenEndPointAliases>
-			<Audience>https://localhost:9443/oauth2endpoints/token</Audience>
 			<!--SAML2TokenHandler></SAML2TokenHandler-->
 		</SAML2Grant>
                 <OpenIDConnect>
