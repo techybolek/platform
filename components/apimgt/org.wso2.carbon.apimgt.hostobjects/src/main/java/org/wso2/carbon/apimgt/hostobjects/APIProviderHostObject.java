@@ -326,6 +326,7 @@ public class APIProviderHostObject extends ScriptableObject {
         API api = new API(apiId);
         NativeArray uriMethodArr = (NativeArray) apiData.get("uriMethodArr", apiData);
         NativeArray authTypeArr = (NativeArray) apiData.get("uriAuthMethodArr", apiData);
+        NativeArray throttlingTierArr = (NativeArray) apiData.get("throttlingTierArr", apiData);
         if (uriTemplateArr != null && uriMethodArr != null && authTypeArr != null) {
             if (uriTemplateArr.getLength() == uriMethodArr.getLength()) {
                 Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -334,6 +335,8 @@ public class APIProviderHostObject extends ScriptableObject {
                     String uriMethodsAuthTypes = (String) authTypeArr.get(i, authTypeArr);
                     String[] uriMethodArray = uriMethods.split(",");
                     String[] authTypeArray = uriMethodsAuthTypes.split(",");
+                    String uriMethodsThrottlingTiers = (String) throttlingTierArr.get(i, throttlingTierArr);
+                    String[] throttlingTierArray = uriMethodsThrottlingTiers.split(",");
                     for (int k = 0; k < uriMethodArray.length; k++) {
                         for (int j = 0; j < authTypeArray.length; j++) {
                             if (j == k) {
@@ -341,7 +344,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                 String uriTemp = (String) uriTemplateArr.get(i, uriTemplateArr);
                                 String uriTempVal = uriTemp.startsWith("/") ? uriTemp : ("/" + uriTemp);
                                 template.setUriTemplate(uriTempVal);
-
+                                String throttlingTier = throttlingTierArray[j];
                                 template.setHTTPVerb(uriMethodArray[k]);
                                 String authType = authTypeArray[j];
                                 if (authType.equals("Application & Application User")) {
@@ -350,6 +353,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                 if (authType.equals("Application User")) {
                                     authType = "Application_User";
                                 }
+                                template.setThrottlingTier(throttlingTier);
                                 template.setAuthType(authType);
                                 template.setResourceURI(endpoint);
                                 template.setResourceSandboxURI(sandboxUrl);
@@ -529,7 +533,7 @@ public class APIProviderHostObject extends ScriptableObject {
         NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
         NativeArray uriMethodArr = (NativeArray) apiData.get("uriMethodArr", apiData);
         NativeArray authTypeArr = (NativeArray) apiData.get("uriAuthMethodArr", apiData);
-
+        NativeArray throttlingTierArr = (NativeArray) apiData.get("throttlingTierArr", apiData);
         if (uriTemplateArr != null && uriMethodArr != null && authTypeArr != null) {
             if (uriTemplateArr.getLength() == uriMethodArr.getLength()) {
                 Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -538,7 +542,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
                     String uriMethods = (String) uriMethodArr.get(i, uriMethodArr);
                     String[] uriMethodArray = uriMethods.split(",");
-
+                    String uriMethodsThrottlingTiers = (String) throttlingTierArr.get(i, throttlingTierArr);
+                    String[] throttlingTierArray = uriMethodsThrottlingTiers.split(",");
                     String uriAuthTypes = (String) authTypeArr.get(i, authTypeArr);
                     String[] uriAuthTypeArray = uriAuthTypes.split(",");
                     for (int k = 0; k < uriMethodArray.length; k++) {
@@ -548,7 +553,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                 String templateVal = (String) uriTemplateArr.get(i, uriTemplateArr);
                                 String template = templateVal.startsWith("/") ? templateVal : ("/" + templateVal);
                                 uriTemplate.setUriTemplate(template);
-
+                                String throttlingTier = throttlingTierArray[j];
                                 uriTemplate.setHTTPVerb(uriMethodArray[k]);
                                 String authType = uriAuthTypeArray[j];
                                 if (authType.equals("Application & Application User")) {
@@ -557,6 +562,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                 if (authType.equals("Application User")) {
                                     authType = "Application_User";
                                 }
+                                uriTemplate.setThrottlingTier(throttlingTier);
                                 uriTemplate.setAuthType(authType);
                                 uriTemplate.setResourceURI(endpoint);
                                 uriTemplate.setResourceSandboxURI(sandboxUrl);
