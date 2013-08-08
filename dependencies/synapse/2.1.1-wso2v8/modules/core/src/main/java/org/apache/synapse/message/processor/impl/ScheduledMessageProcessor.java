@@ -99,12 +99,6 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
             throw new SynapseException("Error starting the scheduler", e);
         }
 
-        if (interval <= 0) {
-            logger.warn("Interval has been assigned an invalid value of ["
-                    + interval + "ms]. Setting the default value [1000ms].");
-            interval = 1000;
-        }
-
         Trigger trigger;
         TriggerBuilder<Trigger> triggerBuilder = newTrigger().withIdentity(name + "-trigger");
 
@@ -142,13 +136,13 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         return true;
     }
 
-    public boolean isStarted() {
-        try {
-            return scheduler.isStarted();
-        } catch (SchedulerException e) {
-            throw new SynapseException("Error Standing-by Message processor scheduler ", e);
-        }
-    }
+//    public boolean isStarted() {
+//        try {
+//            return scheduler.isStarted();
+//        } catch (SchedulerException e) {
+//            throw new SynapseException("Error Standing-by Message processor scheduler ", e);
+//        }
+//    }
 
     public boolean isDeactivated() {
         try {
@@ -343,7 +337,7 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         config.put("org.quartz.threadPool.threadCount", "1");
         config.put("org.quartz.threadPool.threadPriority", "5");
         config.put("org.quartz.jobStore.misfireThreshold", "60000");
-        config.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "60000");
+        config.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "true");
         config.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
 
         return config;
