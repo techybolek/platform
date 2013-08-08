@@ -23,6 +23,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
@@ -326,8 +327,10 @@ public class SecureAxisServiceClient implements CallbackHandler {
             //setting user credential
             opts.setUserName(userName);
             opts.setPassword(password);
-
-
+            int timeoutmillis = 6000;
+            opts.setTimeOutInMilliSeconds(timeoutmillis);
+            opts.setProperty(HTTPConstants.SO_TIMEOUT, timeoutmillis);
+            opts.setProperty(HTTPConstants.CONNECTION_TIMEOUT, timeoutmillis);
             sc.setOptions(opts);
 
         } catch (AxisFault axisFault) {
