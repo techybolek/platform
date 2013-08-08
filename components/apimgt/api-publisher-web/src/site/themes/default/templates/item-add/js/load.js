@@ -6,6 +6,12 @@ function loadTiers(row) {
         function (result) {
             if (!result.error) {
                 var arr = [];
+                $('.getThrottlingTier',row).html('');
+                $('.postThrottlingTier',row).html('');
+                $('.putThrottlingTier',row).html('');
+                $('.deleteThrottlingTier',row).html('');
+                $('.optionsThrottlingTier',row).html('');
+
                 for (var i = 0; i < result.tiers.length; i++) {
                     arr.push(result.tiers[i].tierName);
                     var k = result.tiers.length - i -1;
