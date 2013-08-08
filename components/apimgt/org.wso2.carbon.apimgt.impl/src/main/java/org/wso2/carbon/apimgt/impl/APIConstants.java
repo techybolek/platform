@@ -282,6 +282,8 @@ public final class APIConstants {
     public static final String AUTH_TYPE_APP = "APP";
 
     public static final String REMOTE_ADDR = "REMOTE_ADDR";
+    
+    public static final String TIER_PERMISSION_ALLOW = "allow";
 
     //TODO: move this to a common place (& Enum) to be accessible by all components
     public static class KeyValidationStatus {
