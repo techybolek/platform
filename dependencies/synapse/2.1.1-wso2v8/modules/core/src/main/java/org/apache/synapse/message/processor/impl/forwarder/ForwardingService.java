@@ -338,6 +338,7 @@ public class ForwardingService implements InterruptableJob, Service {
     public boolean terminate() {
         try {
             isTerminated = true;
+            Thread.currentThread().interrupt();
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully terminated job of message processor [" + messageProcessor.getName() + "]");

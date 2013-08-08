@@ -257,13 +257,17 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                     logger.debug("Deactivating message processor [" + getName() + "]");
                 }
 
+                // This is to immediately stop the scheduler to avoid firing new services
+                scheduler.standby();
+
                 try {
                     scheduler.interrupt(new JobKey(name + "-job", SCHEDULED_MESSAGE_PROCESSOR_GROUP));
                 } catch (UnableToInterruptJobException e) {
                     logger.info("Unable to interrupt job [" + name + "-job]");
                 }
 
-                scheduler.standby();
+                // This is to remove the consumer from the queue.
+                messageConsumer.cleanup();
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("Successfully deactivated the message processor [" + getName() + "]");
@@ -289,7 +293,6 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                 scheduler.start();
 
                 if (this.isPaused()) {
-                    messageConsumer.cleanup();
                     resumeService();
                 }
 
