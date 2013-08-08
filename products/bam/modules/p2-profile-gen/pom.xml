@@ -311,6 +311,12 @@
                                 <featureArtifactDef>
                                     org.wso2.bam:org.wso2.stratos.bam.dashboard.ui.feature:${stratos.version}
                                 </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.application.deployer.bam.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.application.mgt.feature:${carbon.platform.version}
+                                </featureArtifactDef>
 
                             </featureArtifacts>
                         </configuration>
@@ -457,6 +463,15 @@
 
                                 <feature>
                                     <id>org.wso2.carbon.transport.mgt.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+
+                                <feature>
+                                    <id>org.wso2.carbon.application.deployer.bam.feature.group</id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.application.mgt.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
