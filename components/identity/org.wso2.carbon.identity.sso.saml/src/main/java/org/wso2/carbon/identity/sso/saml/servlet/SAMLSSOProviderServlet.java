@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.net.URLDecoder;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -94,10 +95,6 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		String username =
-		                  CharacterEncoder.getSafeText(req.getParameter(SAMLSSOProviderConstants.USERNAME));
-		String password = req.getParameter(SAMLSSOProviderConstants.PASSWORD);
-		
 		String federatedIdp = req.getParameter(SAMLSSOProviderConstants.FEDERATED_IDP);
 		if (federatedIdp == null) {
 			federatedIdp = req.getHeader(SAMLSSOProviderConstants.FEDERATED_IDP);
@@ -114,7 +111,10 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 		try {
 			if (federatedIdp != null) {
 				handleFederatedLogin(req, resp);
-			} else if (username == null && password == null) {// SAMLRequest received.
+			} else if (req.getAttribute("commonAuthAuthenticated") != null) { //Response from common authentication framework.
+				handleRequestFromLoginPage(req, resp, ssoTokenID, 
+				                           (String)req.getAttribute(SAMLSSOProviderConstants.SESSION_DATA_KEY));
+			} else {// SAMLRequest received.
 				// if an openid authentication or password authentication
 				String authMode = req.getParameter("authMode");
 				if (!SAMLSSOProviderConstants.AuthnModes.OPENID.equals(authMode)) {
@@ -144,10 +144,7 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 							resp);
 					return;
 				}
-			} else {
-				handleRequestFromLoginPage(req, resp, ssoTokenID, 
-				                           req.getParameter(SAMLSSOProviderConstants.SESSION_DATA_KEY));
-			}
+			} 
 		} catch (IdentityException e) {
 			log.error("Error when processing the authentication request!", e);
 			sendNotification(SAMLSSOProviderConstants.Notification.EXCEPTION_STATUS,
@@ -269,7 +266,7 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 	}
 
 	/**
-	 * Sends the user for authentication to the login page
+	 * Sends the user for authentication to the login page	
 	 * 
 	 * @param req
 	 * @param resp
@@ -297,11 +294,12 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 		HttpSession session = req.getSession();
 		session.setAttribute(sessionDataKey, sessionDTO);
 		
-		String redirectURL = CarbonUIUtil.getAdminConsoleURL(req);
-		redirectURL = redirectURL.replace("samlsso/carbon/",
-		                                  getLoginPage(signInRespDTO.getLoginPageURL()));
-		
-		resp.sendRedirect(redirectURL + "?" + SAMLSSOProviderConstants.SESSION_DATA_KEY + "=" + sessionDataKey);
+        req.setAttribute(SAMLSSOProviderConstants.SESSION_DATA_KEY, sessionDataKey);
+        req.setAttribute("commonAuthCallerPath", "../../samlsso");
+        req.setAttribute("commonAuthQueryParams", "?type=samlsso");
+        
+        RequestDispatcher dispatcher = req.getRequestDispatcher("../../commonauth");
+        dispatcher.forward(req, resp);
 	}
 
 	/**
@@ -356,7 +354,7 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 	 * @param resp
 	 * @param ssoTokenID
 	 * @throws IdentityException
-	 * @throws IOException
+	 * @throws IOException8
 	 * @throws ServletException
 	 */
 	private void handleRequestFromLoginPage(HttpServletRequest req, HttpServletResponse resp,
@@ -372,7 +370,7 @@ public class SAMLSSOProviderServlet extends HttpServlet {
                     (String)req.getSession().getAttribute("authenticatedOpenID")));
             authRespDTO = ssoServiceClient.authenticate(authnReqDTO, ssoTokenID, true, SAMLSSOConstants.AuthnModes.OPENID);
         } else {
-            authRespDTO = ssoServiceClient.authenticate(authnReqDTO, ssoTokenID, false, SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD);
+            authRespDTO = ssoServiceClient.authenticate(authnReqDTO, ssoTokenID, (Boolean)req.getAttribute("commonAuthAuthenticated"), SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD);
         }
 
 		if (authRespDTO.isSessionEstablished()) { // authenticated
@@ -387,7 +385,7 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 					authRespDTO.getAssertionConsumerURL(), authRespDTO.getSubject());
 		} else { // authentication FAILURE
 			// send back to the login.page for the next authentication attempt.
-			sendToReAuthenticate(req, resp, authRespDTO);
+			//sendToReAuthenticate(req, resp, authRespDTO);
 		}
 	}
 	
@@ -410,8 +408,9 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 		authnReqDTO.setQueryString(sessionDTO.getHttpQueryString());
 		authnReqDTO.setDestination(sessionDTO.getDestination());
 		
-		authnReqDTO.setUsername(getRequestParameter(req, SAMLSSOProviderConstants.USERNAME));
-		authnReqDTO.setPassword(getRequestParameter(req, SAMLSSOProviderConstants.PASSWORD));
+		//authnReqDTO.setUsername(getRequestParameter(req, SAMLSSOProviderConstants.USERNAME));
+		//authnReqDTO.setPassword(getRequestParameter(req, SAMLSSOProviderConstants.PASSWORD));
+		authnReqDTO.setUsername((String)req.getAttribute("authenticatedUser"));
 	}
 
 	/**
@@ -514,18 +513,18 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 		return acsUrlWithTenantDomain;
 	}
 	
-	private void sendToReAuthenticate(HttpServletRequest req, HttpServletResponse resp, 
-	                                    SAMLSSORespDTO authRespDTO) throws IOException {
-      
-      String redirectURL = CarbonUIUtil.getAdminConsoleURL(req);
-		redirectURL = redirectURL.replace("samlsso/carbon/",
-		                                  getLoginPage(authRespDTO.getLoginPageURL()));
-		
-		String queryParams = "?" + SAMLSSOProviderConstants.AUTH_FAILURE + "=" + "true" + "&" +
-      		SAMLSSOProviderConstants.AUTH_FAILURE_MSG + "=" + authRespDTO.getErrorMsg() + 
-      		"&" + SAMLSSOProviderConstants.SESSION_DATA_KEY + "=" + 
-      		req.getParameter(SAMLSSOProviderConstants.SESSION_DATA_KEY);
-		
-		resp.sendRedirect(redirectURL + queryParams);
-	}
+//	private void sendToReAuthenticate(HttpServletRequest req, HttpServletResponse resp, 
+//	                                    SAMLSSORespDTO authRespDTO) throws IOException {
+//      
+//      String redirectURL = CarbonUIUtil.getAdminConsoleURL(req);
+//		redirectURL = redirectURL.replace("samlsso/carbon/",
+//		                                  getLoginPage(authRespDTO.getLoginPageURL()));
+//		
+//		String queryParams = "?" + SAMLSSOProviderConstants.AUTH_FAILURE + "=" + "true" + "&" +
+//      		SAMLSSOProviderConstants.AUTH_FAILURE_MSG + "=" + authRespDTO.getErrorMsg() + 
+//      		"&" + SAMLSSOProviderConstants.SESSION_DATA_KEY + "=" + 
+//      		req.getParameter(SAMLSSOProviderConstants.SESSION_DATA_KEY);
+//		
+//		resp.sendRedirect(redirectURL + queryParams);
+//	}
 }

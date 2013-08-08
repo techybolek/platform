@@ -112,43 +112,53 @@ public class AuthnRequestProcessor {
 
 		
 			// authenticate the user, if required
-			if (!isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
-				RealmService realmService = SAMLSSOUtil.getRealmService();
-				TenantManager tenantManager = realmService.getTenantManager();
-				String tenantDomain = MultitenantUtils.getTenantDomain(authnReqDTO.getUsername());
-				int tenantId = tenantManager.getTenantId(tenantDomain);
-				if (tenantId > 0) {
-					boolean isTenantActive = tenantManager.isTenantActive(tenantId);
-					if (!isTenantActive) {
-						log.warn("Unsuccessful login attempt from the tenant : " + tenantDomain);
-						String errorMsg = "login.fail.inactive.tenant";
-						SAMLSSORespDTO errorResp =
-						                           buildErrorResponse(authnReqDTO.getId(),
-						                                              SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
-						                                              errorMsg);
-						errorResp.setErrorMsg(errorMsg);
-						errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
-						return errorResp;
-					}
-				}
+//			if (!isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
+//				RealmService realmService = SAMLSSOUtil.getRealmService();
+//				TenantManager tenantManager = realmService.getTenantManager();
+//				String tenantDomain = MultitenantUtils.getTenantDomain(authnReqDTO.getUsername());
+//				int tenantId = tenantManager.getTenantId(tenantDomain);
+//				if (tenantId > 0) {
+//					boolean isTenantActive = tenantManager.isTenantActive(tenantId);
+//					if (!isTenantActive) {
+//						log.warn("Unsuccessful login attempt from the tenant : " + tenantDomain);
+//						String errorMsg = "login.fail.inactive.tenant";
+//						SAMLSSORespDTO errorResp =
+//						                           buildErrorResponse(authnReqDTO.getId(),
+//						                                              SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
+//						                                              errorMsg);
+//						errorResp.setErrorMsg(errorMsg);
+//						errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
+//						return errorResp;
+//					}
+//				}
+//
+//				if (CarbonUtils.isRunningOnLocalTransportMode()
+//						&& authnReqDTO.getPassword().equals(
+//								"federated_idp_login")) {
+//					isAuthencated = true;
+//				} else if (!authenticate(authnReqDTO.getUsername(),
+//						authnReqDTO.getPassword())) {
+//					log.warn("Authentication Failure, invalid username or password.");
+//					String errorMsg = "login.fail.message";
+//					SAMLSSORespDTO errorResp = buildErrorResponse(
+//							authnReqDTO.getId(),
+//							SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
+//							errorMsg);
+//					errorResp.setErrorMsg(errorMsg);
+//					errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
+//					return errorResp;
+//				}
+//
+//				SAMLSSOServiceProviderDO spDO = new SAMLSSOServiceProviderDO();
+//				spDO.setIssuer(authnReqDTO.getIssuer());
+//				spDO.setAssertionConsumerUrl(authnReqDTO.getAssertionConsumerURL());
+//				spDO.setCertAlias(authnReqDTO.getCertAlias());
+//				spDO.setLogoutURL(authnReqDTO.getLogoutURL());
+//				sessionPersistenceManager.persistSession(sessionId, authnReqDTO.getUsername(),
+//				                                         spDO, authnReqDTO.getRpSessionId());
+//			}
 
-				if (CarbonUtils.isRunningOnLocalTransportMode()
-						&& authnReqDTO.getPassword().equals(
-								"federated_idp_login")) {
-					isAuthencated = true;
-				} else if (!authenticate(authnReqDTO.getUsername(),
-						authnReqDTO.getPassword())) {
-					log.warn("Authentication Failure, invalid username or password.");
-					String errorMsg = "login.fail.message";
-					SAMLSSORespDTO errorResp = buildErrorResponse(
-							authnReqDTO.getId(),
-							SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
-							errorMsg);
-					errorResp.setErrorMsg(errorMsg);
-					errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
-					return errorResp;
-				}
-
+			if (isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
 				SAMLSSOServiceProviderDO spDO = new SAMLSSOServiceProviderDO();
 				spDO.setIssuer(authnReqDTO.getIssuer());
 				spDO.setAssertionConsumerUrl(authnReqDTO.getAssertionConsumerURL());
@@ -156,9 +166,7 @@ public class AuthnRequestProcessor {
 				spDO.setLogoutURL(authnReqDTO.getLogoutURL());
 				sessionPersistenceManager.persistSession(sessionId, authnReqDTO.getUsername(),
 				                                         spDO, authnReqDTO.getRpSessionId());
-			}
-
-			if (isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
+				
 				SessionInfoData sessionInfo = sessionPersistenceManager.getSessionInfo(sessionId);
 				authnReqDTO.setUsername(sessionInfo.getSubject());
 				sessionPersistenceManager.persistSession(sessionId, authnReqDTO.getIssuer(),
