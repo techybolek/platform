@@ -66,7 +66,7 @@ goto end
 rem set the classes
 setlocal EnableDelayedExpansion
 rem loop through the libs and add them to the class path
-cd %WSO2AppServer_HOME%\samples\Jaxws-Jaxrs\jaxrs_sample_02
+cd %WSO2AppServer_HOME%\samples\Jaxws-Jaxrs\jaxrs_starbucks_service
 set CLIENT_CLASSPATH=.\conf;.\build\classes
 FOR %%C in (.\build\lib\*.jar) DO set CLIENT_CLASSPATH=!CLIENT_CLASSPATH!;.\build\lib\%%~nC%%~xC
 
@@ -75,7 +75,7 @@ echo Using WSO2AppServer_HOME:   %WSO2AppServer_HOME%
 echo Using JAVA_HOME:    %JAVA_HOME%
 set _RUNJAVA="%JAVA_HOME%\bin\java"
 
-%_RUNJAVA% %JAVA_OPTS% -Dwso2appserver.home="%WSO2AppServer_HOME%" -cp "%CLIENT_CLASSPATH%" -Djava.endorsed.dirs="%WSO2AppServer_HOME%\lib\endorsed";"%JAVA_HOME%\jre\lib\endorsed";"%JAVA_HOME%\lib\endorsed" demo.jaxrs.client.Client http://localhost:9763/jaxrs_sample_02/services/Starbucks_Outlet_Service %*
+%_RUNJAVA% %JAVA_OPTS% -Dwso2appserver.home="%WSO2AppServer_HOME%" -cp "%CLIENT_CLASSPATH%" -Djava.endorsed.dirs="%WSO2AppServer_HOME%\lib\endorsed";"%JAVA_HOME%\jre\lib\endorsed";"%JAVA_HOME%\lib\endorsed" demo.jaxrs.client.Client http://localhost:9763/jaxrs_starbucks_service/services/Starbucks_Outlet_Service %*
 cd %CURRENT_DIR%
 endlocal
 :end

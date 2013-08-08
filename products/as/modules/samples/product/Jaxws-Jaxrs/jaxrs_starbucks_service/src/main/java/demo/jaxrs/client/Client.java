@@ -50,8 +50,8 @@ public final class Client {
 
     public static void main(String args[]) throws Exception {
         // First set the URL of the service
-        // Default is : http://localhost:9763/jaxrs_sample_02/services/Starbucks_Outlet_Service
-        String serviceURL = "http://localhost:9763/jaxrs_sample_02/services/Starbucks_Outlet_Service";
+        // Default is : http://localhost:9763/jaxrs_starbucks_service/services/Starbucks_Outlet_Service
+        String serviceURL = "http://localhost:9763/jaxrs_starbucks_service/services/Starbucks_Outlet_Service";
         if (args[0] != null) {
             serviceURL = args[0];
         }

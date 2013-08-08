@@ -17,7 +17,7 @@
 
     <property name="wso2appserver.home" value="../../../"/>
     <property name="repo.location" value="${wso2appserver.home}/repository/deployment/server"/>
-    <property name="warName" value="jaxrs_sample_02.war"/>
+    <property name="warName" value="jaxrs_starbucks_service.war"/>
     <property name="build.dir" value="build"/>
     <property name="classes" value="${build.dir}/classes"/>
     <property name="lib" value="${build.dir}/lib"/>

@@ -3,7 +3,7 @@ JAX-RS Demo - Sample 02
 
 The demo shows some advanced functionalities of REST based Web Services using JAX-RS (JSR-311). The REST server provides the following services: 
 
-A RESTful Starbucks outlet service is provided on URL http://localhost:9763/jaxrs_sample_02/services/Starbucks_Outlet_Service (say serviceURL).
+A RESTful Starbucks outlet service is provided on URL http://localhost:9763/jaxrs_starbucks_service/services/Starbucks_Outlet_Service (say serviceURL).
 Users access this URI to perform operations of drink orders.
 
 --------------------------------------
@@ -92,14 +92,14 @@ To remove the target dir, run `mvn clean`.
 Building and running the demo using ant
 ---------------------------------------
 
-1. Run "ant" on AS_HOME/samples/Jaxws-Jaxrs/jaxrs_sample_02 directory. This will deploy the jaxrs_sample_02
+1. Run "ant" on AS_HOME/samples/Jaxws-Jaxrs/jaxrs_starbucks_service directory. This will deploy the jaxrs_starbucks_service
    service in WSO2 AS.
 2. Start the server and access the Management Console at https://localhost:9443/carbon. Go to
-   the service listing page. You will see the deployed jaxrs_sample_02 service.
+   the service listing page. You will see the deployed jaxrs_starbucks_service service.
 3. Execute "sh run-client.sh" to run the client.
 4. Try the sample with different QoS options. Run "sh run-client.sh -help" for different options.
 
-Please download the Documentation Distribution and refer to the jaxrs_sample_02 sample document
-for detailed instructions on how to run the jaxrs_sample_02 sample.
+Please download the Documentation Distribution and refer to the jaxrs_starbucks_service sample document
+for detailed instructions on how to run the jaxrs_starbucks_service sample.
 
 

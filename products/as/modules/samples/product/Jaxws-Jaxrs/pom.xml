@@ -28,7 +28,7 @@
     <modules>
         <module>java_first_jaxws</module>
         <module>jaxrs_basic</module>
-        <module>jaxrs_sample_02</module>
+        <module>jaxrs_starbucks_service</module>
         <module>jaxrs_content_negotiation</module>
         <module>wsdl_first_jaxws</module>
         <module>async_jaxws</module>

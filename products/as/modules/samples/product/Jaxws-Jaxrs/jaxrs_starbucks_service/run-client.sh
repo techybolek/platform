@@ -83,9 +83,9 @@ fi
 echo Using CARBON_HOME: $CARBON_HOME
 echo Using JAVA_HOME    : $JAVA_HOME
 
-CLIENT_CLASSPATH="$CARBON_HOME/samples/Jaxws-Jaxrs/jaxrs_sample_02/build/classes":$CLIENT_CLASSPATH
+CLIENT_CLASSPATH="$CARBON_HOME/samples/Jaxws-Jaxrs/jaxrs_starbucks_service/build/classes":$CLIENT_CLASSPATH
 
 $JAVA_HOME/bin/java -Dwso2appserver.home="$CARBON_HOME" -classpath "$CLIENT_CLASSPATH" \
 -Djava.endorsed.dirs="$CARBON_HOME/lib/endorsed":"$JAVA_HOME/jre/lib/endorsed":"$JAVA_HOME/lib/endorsed" \
-demo.jaxrs.client.Client http://localhost:9763/jaxrs_sample_02/services/Starbucks_Outlet_Service$*
+demo.jaxrs.client.Client http://localhost:9763/jaxrs_starbucks_service/services/Starbucks_Outlet_Service$*
 
