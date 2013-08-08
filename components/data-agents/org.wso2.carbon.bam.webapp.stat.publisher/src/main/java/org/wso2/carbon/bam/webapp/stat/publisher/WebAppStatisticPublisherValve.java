@@ -97,10 +97,6 @@ public class WebAppStatisticPublisherValve extends ValveBase {
     public void invoke(Request request, Response response) throws IOException, ServletException {
         // Get the requested url from the request to check what it consist of  and to check weather this web app has enable statistic monitoring
         Long startTime = System.currentTimeMillis();
-        String requestURI = request.getRequestURI();
-        // check weather web app has enabled for web app statistics
-        boolean webappStatsEnable = Boolean.parseBoolean(request.getContext().findParameter(WebappStatisticsPublisherConstants.ENABLE_STATISTICS));
-        
         /*
         * Invoke the next valve. For our valve being the last configured in catalina-server.xml this will trigger the web application context requested.
         * After the completion of serving the request, response will return to here.
@@ -116,14 +112,33 @@ public class WebAppStatisticPublisherValve extends ValveBase {
         * Checks weather requested url contains favicon.ico
         * if any of those becomes false next valve is invoked and exit from executing further.
         */
+
+        // check weather web app has enabled for web app statistics
+        boolean webappStatsEnable = Boolean.parseBoolean(request.getContext().findParameter(WebappStatisticsPublisherConstants.ENABLE_STATISTICS));
+        boolean isTenantPublishingEnabled = WebappAgentUtil.getPublishingEnabled() && webappStatsEnable;
+        String requestURI = request.getRequestURI();
+        if((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico"))) {
+            return;
+        }
+
+        /**
+         * Checks whether request content type is css or java script.
+         */
+        boolean requestType = checkRequestType(request,response);
+
+        if(!requestType){
+            return;
+        }
+
         String serverRoot = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
         boolean isMgtConsoleRequest = ((!serverRoot.equals("/") && requestURI.startsWith(serverRoot)) || requestURI.startsWith("/carbon"));
         boolean isThemeRepoUrl = requestURI.contains("/_system/governance/repository/theme/");
-        boolean isTenantPublishingEnabled = WebappAgentUtil.getPublishingEnabled() && webappStatsEnable;
-        boolean requestType = checkRequestType(request,response);
-        if ((!WebappAgentUtil.isGlobalPublishingEnabled() && !isTenantPublishingEnabled) || (requestURI.contains("favicon.ico")) || isMgtConsoleRequest || isThemeRepoUrl || !requestType) {
+
+        if (isMgtConsoleRequest || isThemeRepoUrl) {
             return;
         }
+
+
 
         try {
 
@@ -336,23 +351,34 @@ public class WebAppStatisticPublisherValve extends ValveBase {
     private boolean checkRequestType(Request request, Response response) {
 
         String type = response.getContentType();
-        if (type != null) {
-            if (type.startsWith("text/css") || type.startsWith("application/css")) {
-                return false;
-            } else if (type.startsWith("image")) {
-                return false;
-            } else if (type.startsWith("application/javascript") || type.startsWith("text/javascript")) {
-                return false;
-            }
-        } else {
-            type = request.getRequest().getHeader("Accept");
+        try {
             if (type != null) {
-                if (type.contains("text/css") || type.contains("application/css")) {
+                if (type.startsWith("text/html")) {
+                    return true;
+                } else if (type.startsWith("text/css") || type.startsWith("application/css")) {
                     return false;
-                } else if (type.contains("image")) {
+                } else if (type.startsWith("image")) {
+                    return false;
+                } else if (type.startsWith("application/javascript") || type.startsWith("text/javascript")) {
                     return false;
                 }
+            } else {
+                type = request.getRequest().getHeader("Accept");
+                if (type != null) {
+                    if (type.contains("text/css") || type.contains("application/css")) {
+                        return false;
+                    } else if (type.contains("image")) {
+                        return false;
+                    }
+                } else {
+                    String lastCh = request.getRequestURI().substring(request.getRequestURI().length() - 3);
+                    if (lastCh == ".js") {
+                        return false;
+                    }
+                }
             }
+        } catch (Exception e) {
+
         }
         return true;
     }
