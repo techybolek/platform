@@ -326,6 +326,8 @@ public final class SynapseConstants {
 
     public static final String BLOCKING_SENDER_ERROR = "blocking.sender.error";
 
+    public static final String HTTP_SENDER_STATUSCODE = "transport.http.statusCode";
+
     /** Synapse server instance name */
     public static final String SERVER_NAME = "serverName";
 

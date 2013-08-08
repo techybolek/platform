@@ -195,7 +195,7 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                                         targetXPath.toString() + " did not yeild an OMNode", synCtx);
                     }
                 }
-                if (targetKey != null) {
+                else if (targetKey != null) {
                     OMElement result = resultMsgCtx.getEnvelope().getBody().getFirstElement();
                     synCtx.setProperty(targetKey, result);
                 } else {
