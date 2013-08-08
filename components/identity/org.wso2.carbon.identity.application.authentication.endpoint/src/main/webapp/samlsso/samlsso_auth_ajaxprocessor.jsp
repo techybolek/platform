@@ -38,7 +38,7 @@
         }
     </script>
 
-    <link media="all" type="text/css" rel="stylesheet" href="css/main.css"/>
+    <link media="all" type="text/css" rel="stylesheet" href="samlsso/css/main.css"/>
 <table id="main-table" border="0" cellspacing="0">
     <tbody><tr>
         <td id="header" colspan="3">
