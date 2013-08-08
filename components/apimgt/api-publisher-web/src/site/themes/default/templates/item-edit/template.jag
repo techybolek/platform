@@ -555,6 +555,8 @@ API Definition for Swagger will not be overriden with the changes you will do to
                                    value="<%=api.templates[j][0]%>">
               <input type="hidden" name="resourceMethodAuthType-<%=String(j)%>" id="resourceMethodAuthType-<%=String(j)%>"
                                    value="<%=api.templates[j][2]%>">
+               <input type="hidden" name="resourceMethodThrottlingTier-<%=String(j)%>" id="resourceMethodThrottlingTier-<%=String(j)%>"
+                                    value="<%=api.templates[j][3]%>">
               <%}}%>
             </div>
 
