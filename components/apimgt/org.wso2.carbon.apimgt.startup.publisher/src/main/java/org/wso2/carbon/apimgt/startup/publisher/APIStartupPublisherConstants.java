@@ -23,14 +23,24 @@ public class APIStartupPublisherConstants {
 	/*API Management configuration in for startup publishing APIs */
     
 	public static final String API_STARTUP_PUBLISHER = "StartupAPIPublisher.";
+	
+	public static final String API_STARTUP_PUBLISHER_ENABLED = API_STARTUP_PUBLISHER + "Enabled";
         
+    public static final String API_STARTUP_PUBLISHER_LOCAL_API = API_STARTUP_PUBLISHER + "LocalAPI.";
+
+    public static final String API_STARTUP_PUBLISHER_API_LOCAL_PROVIDER = API_STARTUP_PUBLISHER_LOCAL_API + "Provider";
+    
+    public static final String API_STARTUP_PUBLISHER_API_LOCAL_VERSION = API_STARTUP_PUBLISHER_LOCAL_API + "Version";
+    
+    public static final String API_STARTUP_PUBLISHER_API_LOCAL_CONTEXT = API_STARTUP_PUBLISHER_LOCAL_API + "Context";
+    
     public static final String API_STARTUP_PUBLISHER_API = API_STARTUP_PUBLISHER + "API.";
 
     public static final String API_STARTUP_PUBLISHER_API_PROVIDER = API_STARTUP_PUBLISHER_API + "Provider";
     
     public static final String API_STARTUP_PUBLISHER_API_VERSION = API_STARTUP_PUBLISHER_API + "Version";
     
-    public static final String API_STARTUP_PUBLISHER_API_ENDPOINT = API_STARTUP_PUBLISHER_API + "Endpoint";
-    
     public static final String API_STARTUP_PUBLISHER_API_CONTEXT = API_STARTUP_PUBLISHER_API + "Context";
+    
+    public static final String API_STARTUP_PUBLISHER_API_ENDPOINT = API_STARTUP_PUBLISHER_API + "Endpoint";
 }

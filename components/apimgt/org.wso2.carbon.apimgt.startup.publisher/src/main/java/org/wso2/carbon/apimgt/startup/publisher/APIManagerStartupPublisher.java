@@ -50,93 +50,133 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.CarbonUtils;
 
-public class APIManagerStartupPublisher implements ServerStartupHandler{
-	private static final Log log = LogFactory.getLog(APIManagerStartupPublisher.class);
+public class APIManagerStartupPublisher implements ServerStartupHandler {
+	private static final Log log = LogFactory
+			.getLog(APIManagerStartupPublisher.class);
 	Cache contextCache = APIUtil.getAPIContextCache();
 	APIProvider provider;
 	protected Registry registry;
-	
+	private static final String httpPort = "mgt.transport.http.port";
+	private static final String hostName = "carbon.local.ip";
+
 	@Override
 	public void invoke() {
 		if (log.isDebugEnabled()) {
 			log.info("Startup Publisher Invoked");
 		}
 		
-		String apiManagementEnabled = CarbonUtils.getServerConfiguration().getFirstProperty(APIManagerConstants.API_MANGEMENT_ENABLED);
-        String externalAPIManagerGatewayURL = CarbonUtils.getServerConfiguration().getFirstProperty(APIManagerConstants.EXTERNAL_API_GATEWAY);
+		APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+												.getAPIManagerConfiguration();
 		
-        if (apiManagementEnabled.equalsIgnoreCase("true")) {
-	        APIManagerConfiguration configuration =
-		                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-	        	
-	        	List<String> apiContexts = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_CONTEXT);
-	        	List<String> apiProviders = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_PROVIDER);
-	        	List<String> apiVersions = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_VERSION);
-	        	List<String> apiEndpoints = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_ENDPOINT);
-				
-	        	if (apiProviders == null || apiVersions == null || apiEndpoints == null || apiContexts == null) {
-					if (log.isDebugEnabled()) {
-						log.info("StartupAPIPublisher is not configured or invalid StartupAPIPublisher configuration");
-					}
-					return;
-				}
-	        	
-				
-				
-				for (int i = 0; i <apiContexts.size(); i ++) {
+		if (Boolean.parseBoolean(configuration.getFirstProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_ENABLED))) {
+			List<String> apiContexts = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_CONTEXT);
+			List<String> apiProviders = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_PROVIDER);
+			List<String> apiVersions = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_VERSION);
+			List<String> apiEndpoints = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_ENDPOINT);
+			
+			List<String> localAPIContexts = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_CONTEXT);
+			List<String> localAPIProviders = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_PROVIDER);
+			List<String> localApiVersions = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_VERSION);
+			
+			
+			if ((localAPIProviders == null || localApiVersions == null || localAPIContexts == null)
+					&& (apiProviders == null || apiVersions == null || apiEndpoints == null || apiContexts == null)){
+				log.error("Invalid StartupAPIPublisher configuration");
+				return;
+			}
+			
+			if (apiContexts != null) {
+				/* Create APIs*/
+				for (int i = 0; i < apiContexts.size(); i++) {
 					try {
 						String apiContext = apiContexts.get(i);
 						String apiProvider = apiProviders.get(i);
 						String apiVersion = apiVersions.get(i);
 						String apiEndpoint = apiEndpoints.get(i);
-					
-					
-						String apiName = null;
 						
-						if (apiProvider == null || apiVersion == null || apiEndpoint == null || apiContext == null) {
-							if (log.isDebugEnabled()) {
-								log.info("StartupAPIPublisher is not configured or invalid StartupAPIPublisher configuration");
-							}
+						String apiName = null;
+
+						if (apiProvider == null || apiVersion == null || apiContext == null || apiEndpoint == null) {
+							log.error("Invalid StartupAPIPublisher configuration");
 							return;
 						}
-						
-						/* API Context validations and initialize apiName to context without slash*/
+
+						/*
+						 * API Context validations and initialize apiName to context
+						 * without slash
+						 */
 						if (!apiContext.startsWith("/")) {
 							apiName = apiContext;
 							apiContext = "/" + apiContext;
 						} else {
 							apiName = apiContext.substring(1);
 						}
-						
-						/* API Management Embedded mode */
-						if (apiManagementEnabled.equalsIgnoreCase("true") && externalAPIManagerGatewayURL == null) {
-							createAPIInEmbeddedMode(apiName, apiProvider, apiVersion, apiEndpoint, apiContext);
-						} else {
-							//publish api to external gateway
-						}
+
+						createAPIAtServerStartup(apiName, apiProvider, apiVersion,
+								apiEndpoint, apiContext);
 					} catch (IndexOutOfBoundsException e) {
 						log.error("Invalid StartupAPIPublisher configuration");
 					}
 				}
-        }
-			
-	}
-	
-	private void createAPIInEmbeddedMode(String apiName, String apiProvider, String apiVersion, 
-			String apiEndpoint, String apiContext) {
-		/* Check whether API already published */
-		if (contextCache.get(apiContext) != null || ApiMgtDAO.isContextExist(apiContext)) {
-			if (log.isDebugEnabled()) {
-				log.info("API Context " + apiContext+ " already exists");
 			}
-			log.info("API Context" + apiContext+ "already exists");
+			
+			if (localAPIContexts != null) {
+				/* Create LocalAPIs*/
+				for (int i = 0; i < localAPIContexts.size(); i++) {
+					try {
+						String apiContext = localAPIContexts.get(i);
+						String apiProvider = localAPIProviders.get(i);
+						String apiVersion = localApiVersions.get(i);
+										
+						String apiName = null;
+
+						if (apiProvider == null || apiVersion == null || apiContext == null) {
+							log.error("Invalid StartupAPIPublisher configuration");
+							return;
+						}
+
+						/*
+						 * API Context validations and initialize apiName to context
+						 * without slash
+						 */
+						if (!apiContext.startsWith("/")) {
+							apiName = apiContext;
+							apiContext = "/" + apiContext;
+						} else {
+							apiName = apiContext.substring(1);
+						}
+
+						/* This is an internal API. So we will compute the Endpoint. */
+						String apiEndpoint = "http://" + System.getProperty(hostName)
+									+ ":" + System.getProperty(httpPort) + apiContext;
+						
+						createAPIAtServerStartup(apiName, apiProvider, apiVersion,
+								apiEndpoint, apiContext);
+					} catch (IndexOutOfBoundsException e) {
+						log.error("Invalid StartupAPIPublisher configuration");
+					}
+				}
+			}
+		}
+	}
+
+	private void createAPIAtServerStartup(String apiName, String apiProvider,
+			String apiVersion, String apiEndpoint, String apiContext) {
+		/* Check whether API already published */
+		if (contextCache.get(apiContext) != null
+				|| ApiMgtDAO.isContextExist(apiContext)) {
+			if (log.isDebugEnabled()) {
+				log.info("API Context " + apiContext + " already exists");
+			}
 			return;
-		} 
-		
+		}
+
 		try {
-			API api = createAPIModel(apiName, apiProvider, apiVersion, apiEndpoint, apiContext);
+			API api = createAPIModel(apiName, apiProvider, apiVersion,
+					apiEndpoint, apiContext);
 			if (api != null) {
 				addAPI(api);
+				log.info("Successfully Created API " + apiName + "-" + apiVersion);
 			}
 		} catch (APIManagementException e) {
 			log.error(e);
@@ -144,13 +184,16 @@ public class APIManagerStartupPublisher implements ServerStartupHandler{
 			log.error(e);
 		}
 	}
-	
-	private API createAPIModel(String apiName, String apiProvider, String apiVersion, 
-			String apiEndpoint, String apiContext) throws APIManagementException {
+
+	private API createAPIModel(String apiName, String apiProvider,
+			String apiVersion, String apiEndpoint, String apiContext)
+			throws APIManagementException {
 		API api = null;
 		try {
-			provider = APIManagerFactory.getInstance().getAPIProvider(apiProvider);
-			APIIdentifier identifier = new APIIdentifier(apiProvider , apiName , apiVersion);
+			provider = APIManagerFactory.getInstance().getAPIProvider(
+					apiProvider);
+			APIIdentifier identifier = new APIIdentifier(apiProvider, apiName,
+					apiVersion);
 			api = new API(identifier);
 			api.setContext(apiContext);
 			api.setUrl(apiEndpoint);
@@ -162,150 +205,176 @@ public class APIManagerStartupPublisher implements ServerStartupHandler{
 		} catch (APIManagementException e) {
 			handleException("Error while initializing API Provider", e);
 		}
-			return api;
+		return api;
 	}
-	
-	private void addAPI(API api) throws RegistryException, APIManagementException{
+
+	private void addAPI(API api) throws RegistryException,
+			APIManagementException {
 		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-		try {  
-			this.registry = DataHolder.getRegistryService().getGovernanceSystemRegistry();
+		try {
+			this.registry = DataHolder.getRegistryService()
+					.getGovernanceSystemRegistry();
 			createAPIArtifact(api);
-            apiMgtDAO.addAPI(api);
-            if (APIUtil.isAPIManagementEnabled()) {
-            	Boolean apiContext = null;
-            	if (contextCache.get(api.getContext()) != null) {
-            		apiContext = Boolean.parseBoolean(contextCache.get(api.getContext()).toString());
-            	} 
-            	if (apiContext == null) {
-                    contextCache.put(api.getContext(), true);
-                }
-            }
-        } catch (APIManagementException e) {          
-          throw new APIManagementException("Error in adding API :"+api.getId().getApiName(),e);
-        } catch (RegistryException e) {
-        	throw e;
-        }
-	}
-	
-	/**
-     * Create an Api
-     *
-     * @param api API
-     * @throws APIManagementException if failed to create API
-     */
-    private void createAPIArtifact(API api) throws APIManagementException {
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                            APIConstants.API_KEY);
-        try {
-        	registry.beginTransaction();
-            GenericArtifact genericArtifact =
-                    artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
-            GenericArtifact artifact = APIUtil.createAPIArtifactContent(genericArtifact, api);
-            artifactManager.addGenericArtifact(artifact);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String providerPath = APIUtil.getAPIProviderPath(api.getId());
-            //provider ------provides----> API
-            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
-            Set<String> tagSet = api.getTags();
-            if (tagSet != null && tagSet.size() > 0) {
-                for (String tag : tagSet) {
-                    registry.applyTag(artifactPath, tag);
-                }
-            }
-           
-            if (api.getUrl() != null && !"".equals(api.getUrl())){
-                String path = APIUtil.createEndpoint(api.getUrl(), registry);
-                if (path != null) {
-                    registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                }
-            }
-            //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
-            //to gain performance
-            String apiStatus = api.getStatus().getStatus();
-            saveAPIStatus(artifactPath, apiStatus);
-            String visibleRolesList = api.getVisibleRoles();
-            String[] visibleRoles = new String[0];
-            if (visibleRolesList != null) {
-                visibleRoles = visibleRolesList.split(",");
-            }
-            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, artifactPath);
-            registry.commitTransaction();
-
-             //Generate API Definition for Swagger 
-            createUpdateAPIDefinition(api);
-
-        } catch (RegistryException e) {
-        	 try {
-                 registry.rollbackTransaction();
-             } catch (RegistryException re) {
-                 handleException("Error while rolling back the transaction for API: " +
-                                 api.getId().getApiName(), re);
-             }
-             handleException("Error while performing registry transaction operation", e);
-        }
-        
-    }
-    
-    /**
-     * Create API Definition in JSON and save in the registry
-     *
-     * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     *          if failed to generate the content and save
-     */
-    private void createUpdateAPIDefinition(API api) throws APIManagementException {
-    	APIIdentifier identifier = api.getId(); 
-    	
-    	try{
-    		String jsonText = APIUtil.createSwaggerJSONContent(api);
-    		
-    		String resourcePath = APIUtil.getAPIDefinitionFilePath(identifier.getApiName(), identifier.getVersion()); 
-    		
-    		Resource resource = registry.newResource();
-    		    		
-    		resource.setContent(jsonText);
-    		resource.setMediaType("application/json");
-    		registry.put(resourcePath, resource);
-    		
-    		/*Set permissions to anonymous role */
-    		APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, resourcePath);
-    			    
-    	} catch (RegistryException e) {
-    		handleException("Error while adding API Definition for " + identifier.getApiName() + "-" + identifier.getVersion(), e);
+			apiMgtDAO.addAPI(api);
+			if (APIUtil.isAPIManagementEnabled()) {
+				Boolean apiContext = null;
+				if (contextCache.get(api.getContext()) != null) {
+					apiContext = Boolean.parseBoolean(contextCache.get(
+							api.getContext()).toString());
+				}
+				if (apiContext == null) {
+					contextCache.put(api.getContext(), true);
+				}
+			}
 		} catch (APIManagementException e) {
-			handleException("Error while adding API Definition for " + identifier.getApiName() + "-" + identifier.getVersion(), e);
+			throw new APIManagementException("Error in adding API :"
+					+ api.getId().getApiName(), e);
+		} catch (RegistryException e) {
+			throw e;
 		}
-    }
-    
-        
-    /**
-     * Persist API Status into a property of API Registry resource
-     *
-     * @param artifactId API artifact ID
-     * @param apiStatus Current status of the API
-     * @throws APIManagementException on error
-     */
-    private void saveAPIStatus(String artifactId, String apiStatus) throws APIManagementException{
-        try{
-            Resource resource = registry.get(artifactId);
-            if (resource != null) {
-                String propValue = resource.getProperty(APIConstants.API_STATUS);
-                if (propValue == null) {
-                    resource.addProperty(APIConstants.API_STATUS, apiStatus);
-                } else {
-                    resource.setProperty(APIConstants.API_STATUS, apiStatus);
-                }
-                registry.put(artifactId,resource);
-            }
-        }catch (RegistryException e) {
-            handleException("Error while adding API", e);
-        }
-    }
-		
+	}
+
+	/**
+	 * Create an Api
+	 * 
+	 * @param api
+	 *            API
+	 * @throws APIManagementException
+	 *             if failed to create API
+	 */
+	private void createAPIArtifact(API api) throws APIManagementException {
+		GenericArtifactManager artifactManager = APIUtil.getArtifactManager(
+				registry, APIConstants.API_KEY);
+		try {
+			registry.beginTransaction();
+			GenericArtifact genericArtifact = artifactManager
+					.newGovernanceArtifact(new QName(api.getId().getApiName()));
+			GenericArtifact artifact = APIUtil.createAPIArtifactContent(
+					genericArtifact, api);
+			artifactManager.addGenericArtifact(artifact);
+			String artifactPath = GovernanceUtils.getArtifactPath(registry,
+					artifact.getId());
+			String providerPath = APIUtil.getAPIProviderPath(api.getId());
+			// provider ------provides----> API
+			registry.addAssociation(providerPath, artifactPath,
+					APIConstants.PROVIDER_ASSOCIATION);
+			Set<String> tagSet = api.getTags();
+			if (tagSet != null && tagSet.size() > 0) {
+				for (String tag : tagSet) {
+					registry.applyTag(artifactPath, tag);
+				}
+			}
+
+			if (api.getUrl() != null && !"".equals(api.getUrl())) {
+				String path = APIUtil.createEndpoint(api.getUrl(), registry);
+				if (path != null) {
+					registry.addAssociation(artifactPath, path,
+							CommonConstants.ASSOCIATION_TYPE01);
+				}
+			}
+			// write API Status to a separate property. This is done to support
+			// querying APIs using custom query (SQL)
+			// to gain performance
+			String apiStatus = api.getStatus().getStatus();
+			saveAPIStatus(artifactPath, apiStatus);
+			String visibleRolesList = api.getVisibleRoles();
+			String[] visibleRoles = new String[0];
+			if (visibleRolesList != null) {
+				visibleRoles = visibleRolesList.split(",");
+			}
+			APIUtil.setResourcePermissions(api.getId().getProviderName(),
+					api.getVisibility(), visibleRoles, artifactPath);
+			registry.commitTransaction();
+
+			// Generate API Definition for Swagger
+			createUpdateAPIDefinition(api);
+
+		} catch (RegistryException e) {
+			try {
+				registry.rollbackTransaction();
+			} catch (RegistryException re) {
+				handleException(
+						"Error while rolling back the transaction for API: "
+								+ api.getId().getApiName(), re);
+			}
+			handleException(
+					"Error while performing registry transaction operation", e);
+		}
+
+	}
+
+	/**
+	 * Create API Definition in JSON and save in the registry
+	 * 
+	 * @param api
+	 *            API
+	 * @throws org.wso2.carbon.apimgt.api.APIManagementException
+	 *             if failed to generate the content and save
+	 */
+	private void createUpdateAPIDefinition(API api)
+			throws APIManagementException {
+		APIIdentifier identifier = api.getId();
+
+		try {
+			String jsonText = APIUtil.createSwaggerJSONContent(api);
+
+			String resourcePath = APIUtil.getAPIDefinitionFilePath(
+					identifier.getApiName(), identifier.getVersion());
+
+			Resource resource = registry.newResource();
+
+			resource.setContent(jsonText);
+			resource.setMediaType("application/json");
+			registry.put(resourcePath, resource);
+
+			/* Set permissions to anonymous role */
+			APIUtil.setResourcePermissions(api.getId().getProviderName(), null,
+					null, resourcePath);
+
+		} catch (RegistryException e) {
+			handleException("Error while adding API Definition for "
+					+ identifier.getApiName() + "-" + identifier.getVersion(),
+					e);
+		} catch (APIManagementException e) {
+			handleException("Error while adding API Definition for "
+					+ identifier.getApiName() + "-" + identifier.getVersion(),
+					e);
+		}
+	}
+
+	/**
+	 * Persist API Status into a property of API Registry resource
+	 * 
+	 * @param artifactId
+	 *            API artifact ID
+	 * @param apiStatus
+	 *            Current status of the API
+	 * @throws APIManagementException
+	 *             on error
+	 */
+	private void saveAPIStatus(String artifactId, String apiStatus)
+			throws APIManagementException {
+		try {
+			Resource resource = registry.get(artifactId);
+			if (resource != null) {
+				String propValue = resource
+						.getProperty(APIConstants.API_STATUS);
+				if (propValue == null) {
+					resource.addProperty(APIConstants.API_STATUS, apiStatus);
+				} else {
+					resource.setProperty(APIConstants.API_STATUS, apiStatus);
+				}
+				registry.put(artifactId, resource);
+			}
+		} catch (RegistryException e) {
+			handleException("Error while adding API", e);
+		}
+	}
+
 	private Set<URITemplate> getURITemplates(String endpoint) {
 		Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-		String[] httpVerbs = {"GET", "POST", "PUT", "DELETE", "OPTIONS"};
-		for(int i=0 ; i < 5; i ++) {
+		String[] httpVerbs = { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
+		for (int i = 0; i < 5; i++) {
 			URITemplate template = new URITemplate();
 			if (i != 4) {
 				template.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
@@ -319,10 +388,11 @@ public class APIManagerStartupPublisher implements ServerStartupHandler{
 		}
 		return uriTemplates;
 	}
-	
-	private void handleException(String msg, Exception e) throws APIManagementException {
-        log.error(msg, e);
-        throw new APIManagementException(msg, e);
-    }
+
+	private void handleException(String msg, Exception e)
+			throws APIManagementException {
+		log.error(msg, e);
+		throw new APIManagementException(msg, e);
+	}
 
 }
