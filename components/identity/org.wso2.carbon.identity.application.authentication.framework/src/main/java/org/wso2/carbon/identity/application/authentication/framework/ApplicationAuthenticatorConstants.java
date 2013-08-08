@@ -8,6 +8,8 @@ public abstract class ApplicationAuthenticatorConstants {
 	
 	public static final String DO_AUTHENTICATION = "doAuthentication";
 	public static final String AUTHENTICATED = "commonAuthAuthenticated";
+	public static final String AUTHENTICATED_USER = "authenticatedUser";
+	public static final String SESSION_DATA_KEY = "sessionDataKey";
 	public static final String CALLER_PATH = "commonAuthCallerPath";
 	public static final String QUERY_PARAMS = "commonAuthQueryParams";
 }

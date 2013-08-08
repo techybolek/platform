@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.internal.ApplicationAuthenticationFrameworkServiceComponent;
+import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 
 @SuppressWarnings("serial")
 public class CommonApplicationAuthenticationServlet extends HttpServlet {
@@ -36,6 +37,27 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 														throws ServletException, IOException {
+		
+		if(request.getAttribute("sessionDataKey") != null){
+			ApplicationAuthenticationSessionDTO sessionDTO = new ApplicationAuthenticationSessionDTO();
+			sessionDTO.setCallerPath((String)request.getAttribute(ApplicationAuthenticatorConstants.CALLER_PATH));
+			sessionDTO.setCallerSessionKey((String)request.getAttribute("sessionDataKey"));
+			
+			//generate a new session key to hold data of this request
+			String sessionDataKey = UUIDGenerator.generateUUID();
+			
+			String queryParams = (String)request.getAttribute("commonAuthQueryParams");
+			if(queryParams != null){
+				queryParams = queryParams + "&sessionDataKey=" + sessionDataKey;
+			} else {
+				queryParams = queryParams + "?sessionDataKey=" + sessionDataKey;
+			}
+			
+			sessionDTO.setQueryParams(queryParams);
+			request.setAttribute("commonAuthQueryParams", queryParams);
+			
+			request.getSession().setAttribute(sessionDataKey, sessionDTO);
+		}
 		
 		for (ApplicationAuthenticator authenticator : authenticators) {
 			
@@ -121,11 +143,15 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 	                                        		  throws ServletException, IOException {
 		cleanUpSession(request);
 		
-		//Set in session whether authenticated or not. Caller will check this.
-		request.getSession().setAttribute(ApplicationAuthenticatorConstants.AUTHENTICATED, isAuthenticated);
+		String sessionDataKey = request.getParameter(ApplicationAuthenticatorConstants.SESSION_DATA_KEY);
+		ApplicationAuthenticationSessionDTO sessionDTO = (ApplicationAuthenticationSessionDTO)request.getSession().getAttribute(sessionDataKey);
 		
-		String caller = (String)request.getSession().getAttribute(ApplicationAuthenticatorConstants.CALLER_PATH);
+		request.setAttribute(ApplicationAuthenticatorConstants.AUTHENTICATED, isAuthenticated);
+		request.setAttribute(ApplicationAuthenticatorConstants.AUTHENTICATED_USER, (String)request.getSession().getAttribute("username"));
+		request.setAttribute(ApplicationAuthenticatorConstants.SESSION_DATA_KEY, sessionDTO.getCallerSessionKey());
 		
+		String caller = sessionDTO.getCallerPath();
+				
 		if (log.isDebugEnabled()) {
 			log.debug("Sending response back to: " + caller);
 		}

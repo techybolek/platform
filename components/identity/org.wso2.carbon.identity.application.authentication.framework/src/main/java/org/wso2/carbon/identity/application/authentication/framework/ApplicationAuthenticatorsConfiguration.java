@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -56,11 +57,11 @@ public class ApplicationAuthenticatorsConfiguration {
 
         private boolean disabled;
         
-        private Map<String, String> statusMap;
+        private LinkedHashMap<String, String> statusMap;
         private Map<String, String> parameterMap;
 
 		private AuthenticatorConfig(String name, int factor, boolean disabled,
-		                            Map<String, String> statusMap, Map<String, String> parameterMap) {
+		                            LinkedHashMap<String, String> statusMap, Map<String, String> parameterMap) {
 			this.name = name;
 			this.factor = factor;
 			this.disabled = disabled;
@@ -163,7 +164,7 @@ public class ApplicationAuthenticatorsConfiguration {
         }
         
         // read the Status
-        Map<String, String> statusMap = new Hashtable<String, String>();
+        LinkedHashMap<String, String> statusMap = new LinkedHashMap<String, String>();
         for(Iterator statusElemItr = authenticatorElem.getChildrenWithLocalName(ELEM_STATUS);
             statusElemItr.hasNext();){
             OMElement statusElement = (OMElement)statusElemItr.next();
