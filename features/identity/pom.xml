@@ -42,6 +42,8 @@
                 <module>sso-saml</module>
                 <module>openid-admin</module>
                 <module>passive-sts</module>
+                <module>application-authentication-framework</module>
+                <module>application-authenticators</module>
 		<module>scim</module>
             </modules>
     <dependencyManagement>
@@ -393,6 +395,16 @@
                 <artifactId>cxf-bundle</artifactId>
 
                 <version>${cxf.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
+                <version>${identity.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.identity.application.authenticator.basicauth</artifactId>
+                <version>${identity.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
