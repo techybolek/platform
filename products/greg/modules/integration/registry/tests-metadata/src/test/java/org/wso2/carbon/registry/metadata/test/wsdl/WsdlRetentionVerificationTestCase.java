@@ -93,9 +93,8 @@ public class WsdlRetentionVerificationTestCase {
 
 
         wsdl = wsdlManager
-                .newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/platform-integration/"
-                        + "platform-automated-test-suite/org.wso2.carbon.automation.test.repo/src/main/resources/artifacts/"
-                        + "GREG/wsdl/echo.wsdl");
+                .newWsdl("https://svn.wso2.org/repos/wso2/carbon/platform/trunk/products/greg/modules/integration/" +
+                        "registry/tests-metadata/src/test/resources/artifacts/GREG/wsdl/GeoIPService.svc.wsdl");
 
         wsdl.addAttribute("version", "1.0.0");
         wsdl.addAttribute("author", "Kanarupan");
@@ -168,13 +167,13 @@ public class WsdlRetentionVerificationTestCase {
         Wsdl[] wsdls = wsdlManager2.getAllWsdls();
 
         for (Wsdl tmpWsdl : wsdls) {
-            if (tmpWsdl.getQName().toString().contains("http://echo.services.core.carbon.wso2.org")) {
+            if (tmpWsdl.getQName().getLocalPart().contains("GeoIPService")) {
                 wsdlAddedByFirstUser = tmpWsdl;
             }
         }
 
-        assertTrue(wsdlAddedByFirstUser.getQName().toString()
-                .contains("http://echo.services.core.carbon.wso2.org"));
+        assertTrue(wsdlAddedByFirstUser.getQName().getLocalPart()
+                .contains("GeoIPService"));
         assertTrue(wsdlAddedByFirstUser.getAttribute("author").contains(
                 "Kanarupan"));
 
