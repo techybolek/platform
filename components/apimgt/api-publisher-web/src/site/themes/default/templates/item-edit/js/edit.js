@@ -66,37 +66,37 @@ $(document).ready(function() {
 
 });
 
-//var rowNums=new Array();
 function loadTiers() {
     var target = document.getElementById("editTier");
     jagg.post("/site/blocks/item-add/ajax/add.jag", { action:"getTiers" },
-              function (result) {
-                  if (!result.error) {
-                      var arr = [];
-                      var row = '#resourceRow';
-                      for (var i = 0; i < result.tiers.length; i++) {
-                          arr.push(result.tiers[i].tierName);
-                          var k = result.tiers.length - i -1;
-                          $('.getThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
-                          $('.postThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
-                          $('.putThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
-                          $('.deleteThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
-                          $('.optionsThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
-                      }
-                      for (var i = 0; i < result.tiers.length; i++) {
-                          arr.push(result.tiers[i].tierName);
-                      }
-                      for (var j = 0; j < arr.length; j++) {
-                          option = new Option(arr[j], arr[j]);
-                          target.options[j] = option;
-                          target.options[j].title = result.tiers[j].tierDescription;
-                      }
-                      addSelectedTiers(target);
+        function (result) {
+            if (!result.error) {
+                var arr = [];
+                var row = '#resourceRow';
+                for (var i = 0; i < result.tiers.length; i++) {
+                    // arr.push(result.tiers[i].tierName);
+                    var k = result.tiers.length - i -1;
+                    $('.getThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.postThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.putThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.deleteThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                    $('.optionsThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierName+'</option>'));
+                }
+                for (var i = 0; i < result.tiers.length; i++) {
+                    arr.push(result.tiers[i].tierName);
+                }
 
-                  }
-                  $('#saveMessage').hide(); $('#saveButtons').show();
+                for (var j = 0; j < arr.length; j++) {
+                    option = new Option(arr[j], arr[j]);
+                    target.options[j] = option;
+                    target.options[j].title = result.tiers[j].tierDescription;
+                }
+                addSelectedTiers(target);
 
-              }, "json");
+            }
+            $('#saveMessage').hide(); $('#saveButtons').show();
+
+        }, "json");
 }
 
 
@@ -170,18 +170,19 @@ var createHiddenForm = function(){
         var resourcesCount = index - 2;
         var resourceMethodValues = "";
         var resourceMethodAuthValues = "";
-
+        var resourceThrottlingTierValues = "";
         var tr = this;
         //read the checkbox values
-       if($('.resource-get',tr).is(':checked')){
-           if(resourceMethodValues == ""){resourceMethodValues += "GET"}else{resourceMethodValues += ",GET"}
-           var selectedValue = $('.getAuthType',tr).val();
-           if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
-           <!--Throttling-fix-->
-           var selectedValueThrottling = $('.getThrottlingTier',tr).val();
-           if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
-           <!--Throttling-fix-->
-       }
+
+        if($('.resource-get',tr).is(':checked')){
+            if(resourceMethodValues == ""){resourceMethodValues += "GET"}else{resourceMethodValues += ",GET"}
+            var selectedValue = $('.getAuthType',tr).val();
+            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
+            <!--Throttling-fix-->
+            var selectedValueThrottling = $('.getThrottlingTier',tr).val();
+            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
+            <!--Throttling-fix-->
+        }
         if($('.resource-put',tr).is(':checked')){
             if(resourceMethodValues == ""){resourceMethodValues += "PUT"}else{resourceMethodValues += ",PUT"}
             var selectedValue = $('.putAuthType',tr).val();
@@ -223,27 +224,26 @@ var createHiddenForm = function(){
             <!--Throttling-fix-->
         }
 
-       if(resourcesCount >= 0){
-           $('<input>').attr('type', 'hidden')
-                   .attr('name', 'uriTemplate-' + resourcesCount).attr('id', 'uriTemplate-' + resourcesCount).attr('value', $('.resourceTemplate',tr).val())
-                   .appendTo('#hiddenFormElements');
+        if(resourcesCount >= 0){
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'uriTemplate-' + resourcesCount).attr('id', 'uriTemplate-' + resourcesCount).attr('value', $('.resourceTemplate',tr).val())
+                .appendTo('#hiddenFormElements');
 
-           $('<input>').attr('type', 'hidden')
-                   .attr('name', 'resourceMethod-' + resourcesCount).attr('id', 'resourceMethod-' + resourcesCount).attr('value', resourceMethodValues)
-                   .appendTo('#hiddenFormElements');
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'resourceMethod-' + resourcesCount).attr('id', 'resourceMethod-' + resourcesCount).attr('value', resourceMethodValues)
+                .appendTo('#hiddenFormElements');
 
-           $('<input>').attr('type', 'hidden')
-                   .attr('name', 'resourceMethodAuthType-' + resourcesCount).attr('id', 'resourceMethodAuthType-' + resourcesCount).attr('value', resourceMethodAuthValues)
-                   .appendTo('#hiddenFormElements');
-           <!--Throttling-fix-->
-           $('<input>').attr('type', 'hidden')
-               .attr('name', 'resourceMethodThrottlingTier-' + resourcesCount).attr('id', 'resourceMethodThrottlingTier-' + resourcesCount).attr('value', resourceThrottlingTierValues)
-               .appendTo('#hiddenFormElements');
-           <!--Throttling-fix-->
-       }
-   });
-
-   $('#resourceCount').val($('#resourceTable tr').length-2);
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'resourceMethodAuthType-' + resourcesCount).attr('id', 'resourceMethodAuthType-' + resourcesCount).attr('value', resourceMethodAuthValues)
+                .appendTo('#hiddenFormElements');
+            <!--Throttling-fix-->
+            $('<input>').attr('type', 'hidden')
+                .attr('name', 'resourceMethodThrottlingTier-' + resourcesCount).attr('id', 'resourceMethodThrottlingTier-' + resourcesCount).attr('value', resourceThrottlingTierValues)
+                .appendTo('#hiddenFormElements');
+            <!--Throttling-fix-->
+        }
+    });
+    $('#resourceCount').val($('#resourceTable tr').length-2);
 };
 var deleteResource = function (deleteButton) {
     var count=$('#resourceTable tr').length;
