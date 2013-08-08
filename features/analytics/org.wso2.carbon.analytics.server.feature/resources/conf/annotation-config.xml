@@ -1,8 +1,0 @@
-<annotationsConfig xmlns="http://wso2.org/carbon/analytics">
-    <annotations>
-        <annotation>
-            <name>resolvePath</name>
-            <parameters>path</parameters>
-        </annotation>
-    </annotations>
-</annotationsConfig>
