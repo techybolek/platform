@@ -1,4 +1,4 @@
-package org.wso2.carbon.analytics.hive.extension;
+package org.wso2.carbon.analytics.hive.extension.builtin;
 
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -18,8 +18,10 @@ package org.wso2.carbon.analytics.hive.extension;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.analytics.hive.annotation.HiveAnnotation;
-import org.wso2.carbon.analytics.hive.annotation.util.AnnotationBuilder;
+
+import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
+
+import java.util.Map;
 
 public class ResolvePathAnalyzer extends AbstractHiveAnalyzer {
 
@@ -27,12 +29,10 @@ public class ResolvePathAnalyzer extends AbstractHiveAnalyzer {
     private static final Log log = LogFactory.getLog(ResolvePathAnalyzer.class);
 
     @Override
-    public void execute() {
+    public void execute(Map<String,String> parameters) {
         String path = null;
 
-        HiveAnnotation annotation= AnnotationBuilder.getAnnotation("resolvePath");
-
-        String filePath= annotation.getParameter("path");
+        String filePath= parameters.get("path");
 
         try {
             path = resolvePath(filePath);

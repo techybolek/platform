@@ -32,9 +32,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.analytics.hive.ServiceHolder;
 import org.wso2.carbon.analytics.hive.Utils;
-import org.wso2.carbon.analytics.hive.annotation.util.AnnotationBuilder;
-import org.wso2.carbon.analytics.hive.exception.AnnotationConfigException;
+import org.wso2.carbon.analytics.hive.exception.AnalyzerConfigException;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
+import org.wso2.carbon.analytics.hive.extension.util.AnalyzerBuilder;
 import org.wso2.carbon.analytics.hive.impl.HiveExecutorServiceImpl;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
@@ -114,10 +114,10 @@ public class HiveServiceComponent {
         hiveServerPool.submit(new HiveRunnable());
 
         try {
-             OMElement config= AnnotationBuilder.loadConfigXML();
-             AnnotationBuilder.populateAnnotations(config);
-        } catch (AnnotationConfigException e) {
-            String errorMessage = "Error loading annotation-config.xml";
+             OMElement config= AnalyzerBuilder.loadConfigXML();
+            AnalyzerBuilder.populateAnalyzers(config);
+        } catch (AnalyzerConfigException e) {
+            String errorMessage = "Error loading analyzer-config.xml";
             log.error(errorMessage, e);
         }
 

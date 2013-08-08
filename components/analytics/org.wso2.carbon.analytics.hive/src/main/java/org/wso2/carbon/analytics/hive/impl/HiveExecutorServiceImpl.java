@@ -22,14 +22,13 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveContext;
 import org.wso2.carbon.analytics.hive.HiveConstants;
 import org.wso2.carbon.analytics.hive.Utils;
-import org.wso2.carbon.analytics.hive.annotation.HiveAnnotation;
-import org.wso2.carbon.analytics.hive.annotation.util.AnnotationBuilder;
 import org.wso2.carbon.analytics.hive.dto.QueryResult;
 import org.wso2.carbon.analytics.hive.dto.QueryResultRow;
 import org.wso2.carbon.analytics.hive.dto.ScriptResult;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.exception.RegistryAccessException;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
+import org.wso2.carbon.analytics.hive.extension.util.AnalyzerBuilder;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveMultitenantUtil;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
@@ -323,16 +322,12 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                             trimmedCmdLine.startsWith("CLASS")) { // Class analyzer for executing custom logic
                         executeClassAnalyzer(trimmedCmdLine);
 
-                        AnnotationBuilder.clearAnnotations();
-
-                    } else if (trimmedCmdLine.startsWith("@")) {
-                        executeAnnotation(trimmedCmdLine);
-
+                    } else if (trimmedCmdLine.startsWith("analyzer") ||    // custom analyzer for executing custom logic with parameters
+                            trimmedCmdLine.startsWith("CLASS")) {
+                        executeAnalyzer(trimmedCmdLine);
 
                     } else { // Normal hive query
                         executeHiveQuery(result,trimmedCmdLine,stmt);
-
-                        AnnotationBuilder.clearAnnotations();
                     }
                 }
 
@@ -397,45 +392,90 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
         }
 
 
-        private void executeAnnotation(String trimmedCmdLine) {
+        private void executeAnalyzer(String trimmedCmdLine) {
+            String name = null;
+            String conf = null;
+            HashMap<String, String> parameters = new HashMap<String, String>(); // annotation execution
+            String[] tokens = trimmedCmdLine.split("analyzer");
+            if (tokens != null && tokens.length >= 2) {
+                conf = tokens[1];
+            }
 
-            HashMap<String, String> annotations = new HashMap<String, String>(); // annotation execution
-            String[] contentSet = trimmedCmdLine.split("@");
-            String txt = contentSet[1];
+            String regEx = "(\\(.*\\))";
 
+            String[] tokensName = conf.trim().split(regEx);
 
-            String re2 = "(\\(.*\\))";    // Round Braces 1
+            if (tokensName != null && tokensName.length >= 2) {
+                name = tokensName[0];
+            }
+            // Round Braces 1
 
-            Pattern p = Pattern.compile(re2, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-            Matcher m = p.matcher(txt);
+            Pattern p = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Matcher m = p.matcher(conf.trim());
             if (m.find()) {
-                String rbraces1 = m.group(1);
-                int temp = rbraces1.trim().length();
+                String rBraces = m.group(1);
+                int temp = rBraces.trim().length();
 
-                String s = rbraces1.substring(1, temp - 1);
+                String s = rBraces.substring(1, temp - 1);
 
                 String[] variables = s.split(",");
 
                 for (String g : variables) {
                     String[] values = g.split("=");
                     String key = values[0].trim();
-                    String aa = values[1].trim();
-                    String value = aa.substring(1, aa.length() - 1);
-                    annotations.put(key, value);
+                    String valueTemp = values[1].trim();
+                    String value = valueTemp.substring(1, valueTemp.length() - 1);
+                    parameters.put(key, value);
                 }
             }
 
-            String[] txt1 = txt.split(re2);
-            String txt2 = txt1[0];
+            Map<String, Set<String>> paramConf= AnalyzerBuilder.getAnalyzerParams();
+
+            if (paramConf.containsKey(name)) {
 
 
-            HiveAnnotation hiveAnnotation = new HiveAnnotation();
+            Set<String> paramValues = paramConf.get(name);
+            Set<String> params= parameters.keySet();
 
-            hiveAnnotation.setAnnotationName(txt2);
-            hiveAnnotation.setParameters(annotations);
+            if (paramValues != null && params != null && paramValues.size() == params.size() && paramValues.containsAll(params)) {
+
+                Map<String, String> analyzerConf= AnalyzerBuilder.getAnalyzerClasses();
+
+                String className = analyzerConf.get(name);
+                          Class clazz = null;
+                    try {
+                          clazz = Class.forName(className, true,
+                                            this.getClass().getClassLoader());
+                        } catch (ClassNotFoundException e) {
+                            log.error("Unable to find custom analyzer class..", e);
+                        }
+
+                            if (clazz != null) {
+                           Object analyzer = null;
+                            try {
+                                    analyzer = clazz.newInstance();
+                               } catch (InstantiationException e) {
+                                   log.error("Unable to instantiate custom analyzer class..", e);
+                               } catch (IllegalAccessException e) {
+                                   log.error("Unable to instantiate custom analyzer class..", e);
+                               }
+
+                                    if (analyzer instanceof AbstractHiveAnalyzer) {
+                                    AbstractHiveAnalyzer hiveAnnotation =
+                                                    (AbstractHiveAnalyzer) analyzer;
 
 
-            AnnotationBuilder.addAnnotation(txt2, hiveAnnotation);
+                                  hiveAnnotation.execute(parameters);
+                               } else {
+                                    log.error("Custom analyzers should extend AbstractHiveAnalayzer..");
+                                }
+
+                            }
+            }else {
+                log.error("Error while validating parameters");
+            }
+
+            }
 
         }
 
@@ -632,7 +672,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     if (analyzer instanceof AbstractHiveAnalyzer) {
                         AbstractHiveAnalyzer hiveAnalyzer =
                                 (AbstractHiveAnalyzer) analyzer;
-                        hiveAnalyzer.execute();
+                        hiveAnalyzer.execute(null);
                     } else {
                         log.error("Custom analyzers should extend AbstractHiveAnalyzer..");
                     }
