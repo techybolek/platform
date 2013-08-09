@@ -10,7 +10,7 @@
 	var password = request.getParameter("password");
 	  
     var xhr = new XMLHttpRequest();
-    var endPoint = "https://localhost:9443/services" + "AuthenticationAdmin";
+    var endPoint = "https://localhost:9443/services/" + "AuthenticationAdmin";
     xhr.open("POST", endPoint);
     var payload = '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:aut="http://authentication.services.core.carbon.wso2.org"><soap:Header/><soap:Body><aut:login><aut:username>' + username + '</aut:username><aut:password>' + password + '</aut:password><aut:remoteAddress>localhost</aut:remoteAddress></aut:login></soap:Body></soap:Envelope>';
     xhr.send(payload);
