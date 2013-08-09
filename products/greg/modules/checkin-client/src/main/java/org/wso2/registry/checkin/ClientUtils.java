@@ -27,7 +27,6 @@ import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.synchronization.SynchronizationConstants;
 import org.wso2.carbon.registry.synchronization.SynchronizationException;
-import org.wso2.carbon.registry.synchronization.Utils;
 import org.wso2.carbon.registry.synchronization.message.MessageCode;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.wso2.carbon.user.core.common.DefaultRealmService;
@@ -169,8 +168,7 @@ public class ClientUtils {
             String parentDirName = file.getParent();
             return parentDirName + File.separator + SynchronizationConstants.META_DIRECTORY +
                             File.separator + SynchronizationConstants.META_FILE_PREFIX +
-                            Utils.encodeResourceName(file.getName()) +
-                            SynchronizationConstants.META_FILE_EXTENSION;
+                            file.getName() + SynchronizationConstants.META_FILE_EXTENSION;
         }
     }
 

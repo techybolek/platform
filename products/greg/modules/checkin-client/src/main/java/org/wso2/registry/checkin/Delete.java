@@ -9,6 +9,7 @@ import org.wso2.carbon.registry.synchronization.SynchronizationException;
 import org.wso2.carbon.registry.synchronization.message.MessageCode;
 
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.*;
 
@@ -28,7 +29,7 @@ public class Delete {
     private void setDeleteRecursively(String path) throws SynchronizationException{
         File file = new File(path);
         setDelete(ClientUtils.getMetaFilePath(path));
-        log.info("D " + path);
+        System.out.println("D " + path);
         if(file.isDirectory()){
             for(String fileName : file.list(new FilenameFilter() {
                 public boolean accept(File file, String s) {
@@ -44,15 +45,15 @@ public class Delete {
     }
 
     private void setDelete(String metaFilePath) throws SynchronizationException {
+        System.out.println(metaFilePath);
         File metaFile = new File(metaFilePath);
-
-        OMElement resourceElement = null;
+        XMLStreamWriter xmlWriter = null;
         try {
-            resourceElement = new StAXOMBuilder(new FileInputStream(metaFile)).getDocumentElement();
+            OMElement resourceElement = new StAXOMBuilder(new FileInputStream(metaFile)).getDocumentElement();
             resourceElement.addAttribute("status", "deleted", null);
             FileWriter writer = new FileWriter(metaFile);
             XMLOutputFactory xof = XMLOutputFactory.newInstance();
-            XMLStreamWriter xmlWriter = xof.createXMLStreamWriter(writer);
+            xmlWriter = xof.createXMLStreamWriter(writer);
             resourceElement.serialize(xmlWriter);
             xmlWriter.flush();
 
@@ -60,6 +61,14 @@ public class Delete {
             throw new SynchronizationException(MessageCode.RESOURCE_NOT_UNDER_REGISTRY_CONTROL);
         } catch (Exception e) {
             throw new SynchronizationException(MessageCode.RESOURCE_METADATA_CORRUPTED);
+        } finally {
+            try {
+                if (xmlWriter != null) {
+                    xmlWriter.close();
+                }
+            } catch (XMLStreamException e) {
+                log.warn("XML writer not closed correctly" + e.getMessage());
+            }
         }
     }
 
