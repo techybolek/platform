@@ -19,6 +19,8 @@ package org.wso2.carbon.identity.mgt.store;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.cache.Cache;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -116,10 +118,10 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
 			int tenantId = CarbonContext.getCurrentContext().getTenantId();
 			userIdentityDTO.setTenantId(tenantId);
 
-			/*Cache<String, UserIdentityClaimsDO> cache = getCache();
+			Cache<String, UserIdentityClaimsDO> cache = getCache();
 			if(cache != null) {
 				cache.put(tenantId + userName, userIdentityDTO);
-			}*/
+			}
 			return userIdentityDTO;
 		}
 		return null;

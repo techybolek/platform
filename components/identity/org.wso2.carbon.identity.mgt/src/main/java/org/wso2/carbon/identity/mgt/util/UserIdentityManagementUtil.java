@@ -12,7 +12,10 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.NotificationSender;
+import org.wso2.carbon.identity.mgt.NotificationSendingModule;
 import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
+import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
+import org.wso2.carbon.identity.mgt.dto.NotificationDataDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDTO;
@@ -21,6 +24,7 @@ import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.mail.AbstractEmailSendingModule;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.identity.mgt.store.JDBCUserRecoveryDataStore;
+import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -373,6 +377,11 @@ public class UserIdentityManagementUtil {
 		//emailModule.setBean(bean);
 		NotificationSender sender = new NotificationSender();
 		//sender.sendNotification(emailModule);
+
+	}
+	
+	public static void notifyWithEmail() {
+		
 	}
 
 	// ------ other Util methods

@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.identity.mgt.services;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.captcha.mgt.beans.CaptchaInfoBean;
@@ -27,6 +29,7 @@ import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.RecoveryProcessor;
 import org.wso2.carbon.identity.mgt.beans.VerificationBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
+import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionIdsDTO;
 import org.wso2.carbon.identity.mgt.dto.NotificationDataDTO;
 import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
@@ -486,4 +489,26 @@ public class UserInformationRecoveryService {
 
 		return bean;
 	}
+	
+    /**
+     * Get all challenge questions
+     *
+     * @return array of questions
+     * @throws IdentityMgtServiceException if fails
+     */
+    public ChallengeQuestionDTO[] getAllChallengeQuestions() throws IdentityMgtServiceException {
+
+        ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
+                getRecoveryProcessor().getQuestionProcessor();
+        List<ChallengeQuestionDTO> questionDTOs = null;
+        try {
+            questionDTOs = processor.getAllChallengeQuestions();
+        } catch (IdentityException e) {
+            log.error("Error while loading user challenges", e);
+            throw new IdentityMgtServiceException("Error while loading user challenges");
+        }
+        return questionDTOs.toArray(new ChallengeQuestionDTO[questionDTOs.size()]);
+
+    }
+    
 }

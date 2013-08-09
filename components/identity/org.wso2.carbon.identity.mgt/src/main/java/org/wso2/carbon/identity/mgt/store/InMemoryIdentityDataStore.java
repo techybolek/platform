@@ -15,8 +15,13 @@
  */
 package org.wso2.carbon.identity.mgt.store;
 
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -33,16 +38,16 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 
 	private static Log log = LogFactory.getLog(InMemoryIdentityDataStore.class);
 	
-	/*protected Cache<String, UserIdentityClaimsDO> getCache() {
+	protected Cache<String, UserIdentityClaimsDO> getCache() {
     	CacheManager manager = Caching.getCacheManagerFactory().getCacheManager(InMemoryIdentityDataStore.IDENTITY_LOGIN_DATA_CACHE_MANAGER);
     	Cache<String, UserIdentityClaimsDO> cache = manager.getCache(InMemoryIdentityDataStore.IDENTITY_LOGIN_DATA_CACHE);
         return cache;
-    }*/
+    }
 
 	@Override
 	public void store(UserIdentityClaimsDO userIdentityDTO, UserStoreManager userStoreManager)
                                                                         throws IdentityException{
-		/*if (userIdentityDTO != null && userIdentityDTO.getUserName() != null) {
+		if (userIdentityDTO != null && userIdentityDTO.getUserName() != null) {
 			String key =
 			             CarbonContext.getCurrentContext().getTenantId() +
 			                     userIdentityDTO.getUserName();
@@ -54,27 +59,27 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 			if(cache != null) {
 				cache.put(key, userIdentityDTO);
 			}
-		}*/
+		}
 	}
 
 	@Override
 	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager) {
 		
-		/*Cache<String, UserIdentityClaimsDO> cache = getCache();
+		Cache<String, UserIdentityClaimsDO> cache = getCache();
 		if (userName != null && cache != null) {
 			return (UserIdentityClaimsDO) cache.get(CarbonContext.getCurrentContext().getTenantId() +
 			                                   userName);
-		}*/
+		}
 		return null;
 	}
 
 	public void remove(String userName, UserStoreManager userStoreManager)  throws IdentityException {
-//		Cache<String, UserIdentityClaimsDO> cache = getCache();
+		Cache<String, UserIdentityClaimsDO> cache = getCache();
 		if (userName == null) {
 			return;
 		}
 
-//		cache.remove(CarbonContext.getCurrentContext().getTenantId() + userName);
+		cache.remove(CarbonContext.getCurrentContext().getTenantId() + userName);
 
 //		invalidateCache(userName);
 	}

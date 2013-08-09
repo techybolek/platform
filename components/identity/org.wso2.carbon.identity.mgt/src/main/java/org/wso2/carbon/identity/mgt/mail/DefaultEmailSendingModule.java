@@ -65,6 +65,11 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 					+ notificationData.getNotificationCode();
 			userParameters.put("password-reset-link", resetLink);
 			userParameters.put("user-name", notificationData.getUserId());
+        } else if(IdentityMgtConstants.Notification.ASK_PASSWORD.equals(notification)) {
+			String resetLink = emailConfig.getTargetEpr() + "?" + CONF_STRING + "="
+					+ notificationData.getNotificationCode();
+			userParameters.put("password-reset-link", resetLink);
+			userParameters.put("user-name", notificationData.getUserId());
         }
 
 		try {

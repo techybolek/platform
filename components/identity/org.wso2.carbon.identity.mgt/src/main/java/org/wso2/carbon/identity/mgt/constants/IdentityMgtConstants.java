@@ -184,6 +184,8 @@ public class IdentityMgtConstants {
 
         public static  final String ACCOUNT_UNLOCK = "accountLock";
         
-        public static final String OTP_PASSWORD = "otpPassword";
+        public static final String OTP_PASSWORD = "otp";
+        
+        public static final String ASK_PASSWORD = "askPassword";
     }
 }

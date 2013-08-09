@@ -150,7 +150,17 @@ public class RecoveryProcessor {
             } else if(IdentityMgtConstants.Notification.ACCOUNT_UNLOCK.equals(notification) ||
                     IdentityMgtConstants.Notification.ACCOUNT_ID_RECOVERY.equals(notification)){
                 persistData = false;
-            }
+            } else if(IdentityMgtConstants.Notification.ASK_PASSWORD.equals(notification)){
+            	
+            	internalCode = generateUserCode(2, userId);
+                try {
+					confirmationKey = getUserExternalCodeStr(internalCode);
+				} catch (Exception e) {
+					throw new IdentityException(e.getMessage());
+				}
+                secretKey = UUIDGenerator.generateUUID();
+                notificationData.setNotificationCode(confirmationKey);
+            } 
         }
 
 

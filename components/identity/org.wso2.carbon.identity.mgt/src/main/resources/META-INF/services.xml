@@ -48,9 +48,12 @@
         <parameter name="ServiceClass" locked="false">
             org.wso2.carbon.identity.mgt.services.UserIdentityManagementAdminService
         </parameter>
-		<!--<operation name="updateUserSecurityQuestion">-->
-			<!--<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>-->
-		<!--</operation>-->
+		<operation name="getChallengeQuestionsOfUser">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+		</operation>
+		<operation name="setChallengeQuestionsOfUser">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+		</operation>
 		<!--<operation name="updateUserIdentityClaims">-->
 			<!--<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>-->
 		<!--</operation>-->
@@ -92,7 +95,7 @@
 		<!--</operation>-->
         <parameter name="adminService" locked="false">true</parameter>
         <parameter name="hiddenService" locked="false">false</parameter>
-        <parameter name="AuthorizationAction" locked="false">/permission/admin/security</parameter>         
+        <parameter name="AuthorizationAction" locked="false">/permission/admin/login</parameter>         
    </service>
 
 </serviceGroup>
