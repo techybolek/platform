@@ -539,26 +539,26 @@ API Definition for Swagger will not be overriden with the changes you will do to
                 </div>
 
 
-            </div>
+</div>
 
 
 
-            <input type="hidden" name="apiVersion" id="apiVersion" value="<%=<%=api.version%>%>">
-            <input type="hidden" name="resourceCount" id="resourceCount" value="<%=String(api.templates.length)%>">
-            <div id="hiddenFormElements">
-              <%if (api.templates!=null && api.templates.length > 0) {
+<input type="hidden" name="apiVersion" id="apiVersion" value="<%=<%=api.version%>%>">
+<input type="hidden" name="resourceCount" id="resourceCount" value="<%=String(api.templates.length)%>">
+<div id="hiddenFormElements">
+    <%if (api.templates!=null && api.templates.length > 0) {
               for (j = 0; j < api.templates.length; j++) {
               %>
-              <input type="hidden" name="resourceMethod-<%=String(j)%>" id="resourceMethod-<%=String(j)%>"
-                                   value="<%=api.templates[j][1]%>">
-              <input type="hidden" name="uriTemplate-<%=String(j)%>" id="uriTemplate-<%=String(j)%>"
-                                   value="<%=api.templates[j][0]%>">
-              <input type="hidden" name="resourceMethodAuthType-<%=String(j)%>" id="resourceMethodAuthType-<%=String(j)%>"
-                                   value="<%=api.templates[j][2]%>">
-               <input type="hidden" name="resourceMethodThrottlingTier-<%=String(j)%>" id="resourceMethodThrottlingTier-<%=String(j)%>"
-                                    value="<%=api.templates[j][3]%>">
-              <%}}%>
-            </div>
+    <input type="hidden" name="resourceMethod-<%=String(j)%>" id="resourceMethod-<%=String(j)%>"
+           value="<%=api.templates[j][1]%>">
+    <input type="hidden" name="uriTemplate-<%=String(j)%>" id="uriTemplate-<%=String(j)%>"
+           value="<%=api.templates[j][0]%>">
+    <input type="hidden" name="resourceMethodAuthType-<%=String(j)%>" id="resourceMethodAuthType-<%=String(j)%>"
+           value="<%=api.templates[j][2]%>">
+    <input type="hidden" name="resourceMethodThrottlingTier-<%=String(j)%>" id="resourceMethodThrottlingTier-<%=String(j)%>"
+           value="<%=api.templates[j][3]%>">
+    <%}}%>
+</div>
 
 
 
