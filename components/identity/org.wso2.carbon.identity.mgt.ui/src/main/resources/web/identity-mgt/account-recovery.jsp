@@ -33,14 +33,16 @@
 <%@ page import="org.wso2.carbon.identity.mgt.stub.dto.ChallengeQuestionDTO" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementAdminClient" %>
+<%@ page import="org.wso2.carbon.identity.mgt.ui.UserInformationRecoveryClient" %>
 <%@ page import="org.wso2.carbon.identity.mgt.stub.dto.UserChallengesDTO" %>
 
 <%
-    String username = CharacterEncoder.getSafeText(request.getParameter("username"));
+	String username = CharacterEncoder.getSafeText(request.getParameter("username"));
     String forwardTo = null;
     IdentityManagementAdminClient client = null;
+    UserInformationRecoveryClient infoClient = null;
     ChallengeQuestionDTO[] challenges;
-    UserChallengesDTO[] userChallenges;
+    UserChallengesDTO[] userChallenges = null;
     UserChallengesDTO currentUserChallenge;
     Map<String, HashSet<ChallengeQuestionDTO>> challengesMap = new HashMap<String, HashSet<ChallengeQuestionDTO>>();
     Map<String, UserChallengesDTO> userChallengesMap = new HashMap<String, UserChallengesDTO>();
@@ -54,36 +56,44 @@
 
     try {
         String cookie = (String) session
-				.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+		.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config
-				.getServletContext(), session);
+		.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config
-				.getServletContext().getAttribute(
-						CarbonConstants.CONFIGURATION_CONTEXT);
+		.getServletContext().getAttribute(
+				CarbonConstants.CONFIGURATION_CONTEXT);
         client = new IdentityManagementAdminClient(cookie,
                 backendServerURL, configContext);
-     	challenges = client.getChallengeQuestions();
-        userChallenges = client.getChallengeQuestionsOfUser(username);
-        if(challenges != null){
-            for(ChallengeQuestionDTO challenge : challenges){
-                HashSet<ChallengeQuestionDTO>  questionDTOs = challengesMap.get(challenge.getQuestionSetId());
-                if(questionDTOs == null){
-                    questionDTOs = new HashSet<ChallengeQuestionDTO>();
-                    questionDTOs.add(challenge);
-                    challengesMap.put(challenge.getQuestionSetId(), questionDTOs);
-                }
-                questionDTOs.add(challenge);
-            }
-        }
+        infoClient = new UserInformationRecoveryClient(backendServerURL, configContext);
         
-        if(userChallenges != null){
-            for(UserChallengesDTO userChallengesDTO : userChallenges){
-                userChallengesMap.put(userChallengesDTO.getId(), userChallengesDTO);
-            }
-        }
+     	challenges = infoClient.getChallengeQuestions();
+		try {
+			userChallenges = client.getChallengeQuestionsOfUser(username);
+		} catch (Exception e) {
+
+		}
+		if (challenges != null) {
+			for (ChallengeQuestionDTO challenge : challenges) {
+				HashSet<ChallengeQuestionDTO> questionDTOs = challengesMap.get(challenge
+						.getQuestionSetId());
+				if (questionDTOs == null) {
+					questionDTOs = new HashSet<ChallengeQuestionDTO>();
+					questionDTOs.add(challenge);
+					challengesMap.put(challenge.getQuestionSetId(), questionDTOs);
+				}
+				questionDTOs.add(challenge);
+			}
+		}
+
+		if (userChallenges != null) {
+			for (UserChallengesDTO userChallengesDTO : userChallenges) {
+				userChallengesMap.put(userChallengesDTO.getId(), userChallengesDTO);
+			}
+		}
 	} catch (Exception e) {
-		String message = resourceBundle.getString("error.while.loading.account.recovery.data");
-		CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
+		String message = resourceBundle
+				.getString("error.while.loading.account.recovery.data");
+		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
 		forwardTo = "../admin/error.jsp";
 	}
 %>

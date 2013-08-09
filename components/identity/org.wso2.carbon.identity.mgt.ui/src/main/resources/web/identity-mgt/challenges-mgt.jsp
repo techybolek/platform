@@ -43,7 +43,7 @@
     String setName = CharacterEncoder.getSafeText(request.getParameter("setName"));
     challenges = (List<ChallengeQuestionDTO>) session.
                                     getAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION);
-
+    
     if(challenges == null){
         try {
             String cookie = (String) session
@@ -104,9 +104,9 @@
     session.setAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION, challenges);
 %>
         
-<fmt:bundle basename="org.wso2.carbon.userstore.ui.i18n.Resources">
+<fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
 <carbon:breadcrumb label="challenge.add"
-		resourceBundle="org.wso2.carbon.userstore.ui.i18n.Resources"
+		resourceBundle="org.wso2.carbon.identity.mgt.ui.i18n.Resources"
 		topPage="true" request="<%=request%>" />
 
     <script type="text/javascript">
@@ -125,11 +125,12 @@
         function addRow(){
             var setName = document.getElementsByName("setName")[0].value;
             var question = document.getElementsByName("question0")[0].value;
-            if(question != null){
+            if(question != null && setName != ""){
                 location.href= 'challenges-mgt.jsp?addRowId=' + question + '&setName=' + setName;
             } else {
                 CARBON.CARBON.showInfoDialog('axaxaxa?dfcececec', null, null);
             }
+            
         }
 
         function cancelForm(){
@@ -167,7 +168,7 @@
                             <td> Edit Challenge Question :</td>
                             <td><input size="70" name="question0" id="question0"  value="<%=selectedChallenge%>"  /></td>
                             <td>
-                                <a onclick="addRow()" style='background-image:url(images/add.gif);' type="button" class="icon-link">Save</a>
+                                <a onclick="addRow()" style='background-image:url(images/add.gif);' type="button" class="icon-link">Update</a>
                             </td>
 
 
@@ -176,13 +177,18 @@
                        %>
                             <td> Enter New Challenge Question :</td>
                             <td><input size="70" name="question0" id="question0" /></td>
-                            <td>
+                            <td class="buttonRow">
                                 <a onclick="addRow()" style='background-image:url(images/add.gif);' type="button" class="icon-link">Add</a>
                             </td>
                        <%
                            }
                        %>
                 </tr>
+<!-- 				<tr>
+						<td class="buttonRow">
+							<input id="addRowButton" class="button" onclick="addRow()" value="Add"/>
+						</td>
+				</tr> -->
             </table>
             <p>&nbsp;</p>    
             <table class="styledLeft">
@@ -202,7 +208,7 @@
                              %>
                             <tr>
                                 <td width="60%">
-                                      <%=challenges.get(i).getQuestion()%>
+                                	<%=challenges.get(i).getQuestion()%>
                                 </td>
                                 <td width="40%">
                                     <a onclick="removeRow('<%=i%>')" style='background-image:url(images/delete.gif);' type="button" class="icon-link">Delete</a>
@@ -222,6 +228,8 @@
 %>
                                         <input type="hidden" name="setId<%=i+1%>" id="setId<%=i+1%>"
                                                size="60" value="<%=challenges.get(i).getQuestionSetId()%>"/>
+                                        <input type="hidden" name="question<%=i+1%>" id="question<%=i+1%>"
+                                               size="60" value="<%=challenges.get(i).getQuestion()%>"/>
 <%
                                     }
                                 }
@@ -232,14 +240,14 @@
                     </td>
 
                 </tr>
-                
-            </table>
-            <tr>
-                		<td class="buttonRow">
-                					<input type="submit"  value="Submit"  class="button"/>
-                					<input type="button" value="Cancel" onclick="cancelForm();"  class="button"/>
-                				</td>
-            				</tr>
+					<tr>
+						<td class="buttonRow">
+						<input type="submit" value="Finish" class="button" />
+						<input type="button" value="Cancel" onclick="cancelForm();" class="button" />
+						</td>
+					</tr>
+				</table>
+
             
         </div>
         </form>

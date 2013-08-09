@@ -76,9 +76,9 @@
 
 %>
         
-<fmt:bundle basename="org.wso2.carbon.userstore.ui.i18n.Resources">
+<fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
 <carbon:breadcrumb label="challenge.mgt"
-		resourceBundle="org.wso2.carbon.userstore.ui.i18n.Resources"
+		resourceBundle="org.wso2.carbon.identity.mgt.ui.i18n.Resources"
 		topPage="false" request="<%=request%>" />
 
     <script type="text/javascript">
@@ -129,11 +129,6 @@
                 %>
                 </tbody>
             </table>
-            <tr>
-                <td class="buttonRow">
-                <input type="button" value="Cancel" onclick="cancelForm();"  class="button"/>
-                </td>
-            </tr>
         </div>
     </div>
 </fmt:bundle>
