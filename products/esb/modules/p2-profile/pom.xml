@@ -252,7 +252,7 @@
                             <artifactRepository>file:${basedir}/target/p2-repo</artifactRepository>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--execution>
                         <id>creating-worker-profile</id>
                         <phase>package</phase>
                         <goals>
@@ -265,7 +265,7 @@
                             <targetPath>file:${basedir}/target/wso2carbon-core-${carbon.kernel.version}/repository/components</targetPath>
                             <profile>worker</profile>
                         </configuration>
-                    </execution>
+                    </execution-->
              <!--END-->
                     <!--*.feature.group should be added for multi profiles? Only a sub set from the above (feature) list?-->
                     <execution>
@@ -688,7 +688,7 @@
                             </features>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--execution>
                         <id>p2-profile-generation-for-worker-profile</id>
                         <phase>package</phase>
                         <goals>
@@ -759,19 +759,6 @@
                                     <id>org.wso2.carbon.mediation.library.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-                                <!--feature>
-                                    <id>org.wso2.carbon.mediation.library.server.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.mediation.library.connectors.linkedin.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.mediation.library.connectors.twitter.feature.group</id>
-                                    <version>${carbon.platform.patch.version.412}</version>
-                                </feature-->
-
                                 <feature>
                                     <id>org.wso2.carbon.mediation.initializer.feature.group</id>
                                     <version>${carbon.platform.version}</version>
@@ -832,11 +819,7 @@
                                     <id>org.wso2.carbon.transport.mail.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-				<!--feature>
-                                    <id>org.wso2.carbon.transport.local.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature-->
-                                <feature>
+				<feature>
                                     <id>org.wso2.carbon.transport.nhttp.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -888,10 +871,6 @@
                                     <id>org.wso2.carbon.localentry.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-                                <!--feature>
-                                    <id>org.wso2.carbon.endpoint.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-                                </feature-->
 				<feature>
                                     <id>org.wso2.carbon.endpoint.feature.group</id>
                                     <version>${carbon.platform.version}</version>
@@ -921,18 +900,6 @@
                                     <id>org.wso2.carbon.rule.mediation.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-                                <!--<feature>-->
-                                    <!--<id>org.wso2.carbon.rule.mediator.feature.group</id>-->
-                                    <!--<version>${carbon.platform.version}</version>-->
-                                <!--</feature>-->
-                                <!--<feature>-->
-                                    <!--<id>org.wso2.carbon.rule.engine.drools.feature.group</id>-->
-                                    <!--<version>${carbon.platform.version}</version>-->
-                                <!--</feature>-->
-                                <!--<feature>-->
-                                    <!--<id>org.wso2.carbon.rule.engine.jsr94.feature.group</id>-->
-                                    <!--<version>${carbon.platform.version}</version>-->
-                                <!--</feature>-->
                                 <feature>
                                     <id>org.wso2.carbon.discovery.core.feature.group</id>
                                     <version>${carbon.platform.version}</version>
@@ -1021,10 +988,6 @@
                                     <id>org.wso2.carbon.message.store.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
-				<!--feature>
-                                    <id>org.wso2.carbon.cloud.gateway.agent.feature.group</id>
-                                    <version>${carbon.platform.version}</version>
-				</feature-->
                                  <feature>
                                      <id>org.wso2.carbon.load.balance.agent.ui.feature.group</id>
                                      <version>${stratos.version}</version>
@@ -1054,7 +1017,6 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-                                <!--Start Stratos ESB features-->
 
                                 <feature>
                                     <id>org.wso2.carbon.stratos.usage.agent.feature.group</id>
@@ -1100,17 +1062,10 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-
-                                <!--feature>
-                                                        <id>org.wso2.carbon.cloud.gateway.agent.feature.group</id>
-                                                        <version>${carbon.platform.version}</version>
-                                                 </feature-->
-
-                                <!--End Stratos ESB features-->
                             </features>
                         </configuration>
                     </execution>
-                </executions>
+                </executions-->
             </plugin>
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
