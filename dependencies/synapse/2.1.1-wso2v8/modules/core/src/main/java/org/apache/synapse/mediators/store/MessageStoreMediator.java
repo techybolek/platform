@@ -25,6 +25,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.message.store.MessageStore;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
 
 /**
  * <code>MessageStoreMediator</code> will store the incoming Messages in associated MessageStore
@@ -81,7 +82,14 @@ public class MessageStoreMediator extends AbstractMediator{
                 // Ensure that the message is fully read
                 synCtx.getEnvelope().buildWithAttachments();
                 boolean result = messageStore.getProducer().storeMessage(synCtx);
-
+                if (!result) {
+                    synCtx.setProperty(NhttpConstants.HTTP_SC, 500);
+                    synCtx.setProperty(NhttpConstants.ERROR_DETAIL, "Failed to store message.");
+                    synCtx.setProperty(NhttpConstants.ERROR_MESSAGE, "Failed to store message [" + synCtx.getMessageID()
+                                                        + "] in store [" + messageStore.getName() + "].");
+                    handleException("Failed to store message [" + synCtx.getMessageID()
+                                    + "] in store [" + messageStore.getName() + "].", synCtx);
+                }
                 // with the nio transport, this causes the listener not to write a 202
                 // Accepted response, as this implies that Synapse does not yet know if
                 // a 202 or 200 response would be written back.

@@ -55,6 +55,9 @@ public class InMemoryProducer implements MessageProducer {
         if (logger.isDebugEnabled()) {
             logger.debug(getId() + " stored MessageID: " + synCtx.getMessageID());
         }
+        if (result) {
+            store.enqueued();
+        }
         return result;
     }
 

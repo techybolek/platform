@@ -388,7 +388,7 @@ public class JmsStore extends AbstractMessageStore {
     }
 
     /**
-     * Cloeses the existing JMS message producer connection.
+     * Closes the existing JMS message producer connection.
      *
      * @return true if the producer connection was closed without any error, <br/>
      * false otherwise.
@@ -437,7 +437,7 @@ public class JmsStore extends AbstractMessageStore {
      * @param connection  JMS Connection
      * @param session JMS Session associated with the given connection
      * @param error is this method called upon an error
-     * @return true if the cleanup is successful. false otherwise.
+     * @return {@code true} if the cleanup is successful. {@code false} otherwise.
      */
     public boolean cleanup(Connection connection, Session session, boolean error) {
         if (connection == null && error) {

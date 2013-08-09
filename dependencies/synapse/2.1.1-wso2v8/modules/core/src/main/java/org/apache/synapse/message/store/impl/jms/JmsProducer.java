@@ -97,6 +97,7 @@ public class JmsProducer implements MessageProducer {
         if (logger.isDebugEnabled()) {
             logger.debug(getId() + ". Stored MessageID : " + synCtx.getMessageID());
         }
+        store.enqueued();
         return true;
     }
 

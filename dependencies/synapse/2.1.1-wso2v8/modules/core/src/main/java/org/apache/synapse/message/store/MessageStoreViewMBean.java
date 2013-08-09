@@ -53,5 +53,5 @@ public interface MessageStoreViewMBean {
      *
      * @return the number of Messages stored in the store.
      */
-    public int getSize();
+    public long getSize();
 }

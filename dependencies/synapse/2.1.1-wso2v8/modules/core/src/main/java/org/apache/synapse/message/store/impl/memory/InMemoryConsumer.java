@@ -62,7 +62,10 @@ public class InMemoryConsumer implements MessageConsumer {
             logger.debug(getId() + " ack");
         }
         synchronized (queueLock) {
-            queue.poll();
+            Object o = queue.poll();
+            if (o != null) {
+                store.dequeued();
+            }
             lastMessage = null;
         }
         return true;

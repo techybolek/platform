@@ -40,8 +40,7 @@ public class MessageStoreView implements MessageStoreViewMBean {
 
 
     public void deleteAll() {
-        //messageStore.clear();
-        log.info("All messages in Message Store" + messageStoreName + " were deleted");
+        messageStore.clear();
     }
 
     public List<String> getMessageIds() {
@@ -75,9 +74,8 @@ public class MessageStoreView implements MessageStoreViewMBean {
         return null;
     }
 
-    public int getSize() {
-        //return messageStore.size();
-        return 0;
+    public long getSize() {
+        return ((AbstractMessageStore) messageStore).difference();
     }
 
 }

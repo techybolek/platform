@@ -76,6 +76,7 @@ public class InMemoryStore extends AbstractMessageStore {
             message = queue.remove();
         }
         if (message != null) {
+            dequeued();
             if (logger.isDebugEnabled()) {
                 logger.debug(nameString() + " removed MessageID:" + message.getMessageID() + " => true");
             }

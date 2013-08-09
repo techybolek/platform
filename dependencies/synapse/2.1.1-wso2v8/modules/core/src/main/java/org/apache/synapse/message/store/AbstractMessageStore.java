@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -93,6 +94,14 @@ public abstract class AbstractMessageStore implements MessageStore {
     private AtomicInteger consumerId = new AtomicInteger(0);
 
     private int maxProducerId = Integer.MAX_VALUE;
+
+    private AtomicLong enqueued = new AtomicLong(0);
+
+    private AtomicLong dequeued = new AtomicLong(0);
+
+    private static final long maxEnDequeuable = Long.MAX_VALUE;
+
+    private final Object messageCountLock = new Object();
 
     public void init(SynapseEnvironment se) {
         this.synapseEnvironment = se;
@@ -208,5 +217,27 @@ public abstract class AbstractMessageStore implements MessageStore {
     public int nextConsumerId() {
         int id = consumerId.incrementAndGet();
         return id;
+    }
+
+
+    public void enqueued() {
+        synchronized (messageCountLock) {
+            enqueued.compareAndSet(maxEnDequeuable, 0);
+            enqueued.incrementAndGet();
+        }
+    }
+
+    public void dequeued() {
+        synchronized (messageCountLock) {
+            dequeued.compareAndSet(maxEnDequeuable, 0);
+            dequeued.incrementAndGet();
+        }
+    }
+
+    public long difference() {
+        synchronized (messageCountLock) {
+            long diff = enqueued.get() - dequeued.get();
+            return diff;
+        }
     }
 }

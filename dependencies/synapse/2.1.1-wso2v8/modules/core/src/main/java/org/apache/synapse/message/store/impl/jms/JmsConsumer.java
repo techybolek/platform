@@ -89,10 +89,16 @@ public class JmsConsumer implements MessageConsumer {
             }
             if (!(message instanceof ObjectMessage)) {
                 logger.warn(getId() + ". Did not receive a javax.jms.ObjectMessage");
+                message.acknowledge(); // TODO:
                 return null;
             }
             ObjectMessage msg = (ObjectMessage) message;
             String messageId = msg.getStringProperty(Constants.OriginalMessageID);
+            if (!(msg.getObject() instanceof StorableMessage)) {
+                logger.warn(getId() + ". Did not receive a valid message.");
+                message.acknowledge();
+                return null;
+            }
             StorableMessage storableMessage = (StorableMessage) msg.getObject();
             org.apache.axis2.context.MessageContext axis2Mc = store.newAxis2Mc();
             MessageContext synapseMc = store.newSynapseMc(axis2Mc);
@@ -119,7 +125,11 @@ public class JmsConsumer implements MessageConsumer {
     }
 
     public boolean ack() {
-        return cachedMessage.ack();
+        boolean result = cachedMessage.ack();
+        if (result) {
+            store.dequeued();
+        }
+        return result;
     }
 
     public boolean cleanup() {
