@@ -33,7 +33,6 @@ import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConf
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -74,8 +73,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Provides Authentication. Clients have Username Tokens. Backend is secured using policy 8")
     public void securityPolicy1() throws Exception {
         final int policyId = 1;
-
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         SecureServiceClient secureAxisServiceClient = new SecureServiceClient();
         OMElement response;
         for (int i = 0; i < 5; i++) {
@@ -90,7 +88,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 2 and secure back end using policy 8")
     public void securityPolicy2() throws Exception {
         final int policyId = 2;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -106,7 +104,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 3 and secure back end using policy 8")
     public void securityPolicy3() throws Exception {
         final int policyId = 3;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -122,7 +120,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 4 and secure back end using policy 8")
     public void securityPolicy4() throws Exception {
         final int policyId = 4;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -138,7 +136,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 5 and secure back end using policy 8")
     public void securityPolicy5() throws Exception {
         final int policyId = 5;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -154,7 +152,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 6 and secure back end using policy 8")
     public void securityPolicy6() throws Exception {
         final int policyId = 6;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -170,7 +168,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 7 and secure back end using policy 8")
     public void securityPolicy7() throws Exception {
         final int policyId = 7;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -186,7 +184,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 8 and secure back end using policy 8")
     public void securityPolicy8() throws Exception {
         final int policyId = 8;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -202,7 +200,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 9 and secure back end using policy 8")
     public void securityPolicy9() throws Exception {
         final int policyId = 9;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -219,7 +217,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 10 and secure back end using policy 8")
     public void securityPolicy10() throws Exception {
         final int policyId = 10;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -236,7 +234,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 11 and secure back end using policy 8")
     public void securityPolicy11() throws Exception {
         final int policyId = 11;
-        this.secureService(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -254,7 +252,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 12 and secure back end using policy 8")
     public void securityPolicy12() throws Exception {
         final int policyId = 12;
-        changeServiceDef(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -271,7 +269,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 13 and secure back end using policy 8")
     public void securityPolicy13() throws Exception {
         final int policyId = 13;
-        changeServiceDef(policyId);
+        String serviceName = changeServiceDef(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -288,7 +286,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 14 and secure back end using policy 8")
     public void securityPolicy14() throws Exception {
         final int policyId = 14;
-        changeServiceDef(policyId);
+        String serviceName = changeServiceDef(policyId);
 
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
@@ -306,7 +304,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 15 and secure back end using policy 8")
     public void securityPolicy15() throws Exception {
         final int policyId = 15;
-        changeServiceDef(policyId);
+        String serviceName = changeServiceDef(policyId);
 
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
@@ -335,7 +333,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
         Assert.assertEquals(symbol, "Secured", "Symbol name mismatched");
     }
 
-    private void changeServiceDef(final int policy) throws Exception {
+    private String changeServiceDef(final int policy) throws Exception {
         String proxyStr = "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"StockQuoteSecurityTransformProxyToPolicy8_" + policy + "\" transports=\"https http\" startOnLoad=\"true\" trace=\"disable\">\n" +
                           "        <target>\n" +
                           "            <inSequence>\n" +
@@ -362,6 +360,6 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
         Thread.sleep(5000);
         isProxyDeployed(serviceName);
         applySecurity(serviceName, policy, getUserRole(userInfo.getUserId()));
-
+        return serviceName;
     }
 }
