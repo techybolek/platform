@@ -126,6 +126,9 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
                         thriftKeyValidationInfoDTO.setValidationStatus(keyValidationInfoDTO.getValidationStatus());
                         thriftKeyValidationInfoDTO.setApplicationId(keyValidationInfoDTO.getApplicationId());
                         thriftKeyValidationInfoDTO.setApplicationTier(keyValidationInfoDTO.getApplicationTier());
+                        thriftKeyValidationInfoDTO.setApiPublisher(keyValidationInfoDTO.getApiPublisher());
+                        thriftKeyValidationInfoDTO.setConsumerKey(keyValidationInfoDTO.getConsumerKey());
+                        thriftKeyValidationInfoDTO.setApiName(keyValidationInfoDTO.getApiName());
                     } finally {
                          PrivilegedCarbonContext.endTenantFlow();
                     }
