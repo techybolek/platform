@@ -89,7 +89,7 @@ public class GlobalWebappEventPublisher {
             payLoadData = StreamDefinitionCreatorUtil.addCommonPayLoadData(payLoadData);
             streamDef.setPayloadData(payLoadData);
 
-            asyncDataPublisher = new AsyncDataPublisher("tcp://localhost:7611", username, password);
+            asyncDataPublisher = new AsyncDataPublisher(url, username, password);
             asyncDataPublisher.addStreamDefinition(streamDef);
         } catch (Exception e) {
             String errorMsg = "Malformed Stream Definition";
