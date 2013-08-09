@@ -163,7 +163,7 @@
     "post" : "POST" ,
     "delete" : "DELETE" ,
     "put" : "PUT" ,
-    "validityTime":"Token valid period"
+    "validityTime":"Token valid period",
     "options" : "OPTIONS"
 
 }
