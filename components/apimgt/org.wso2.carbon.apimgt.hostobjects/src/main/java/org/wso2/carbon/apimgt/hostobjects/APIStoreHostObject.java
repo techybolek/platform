@@ -732,7 +732,7 @@ public class APIStoreHostObject extends ScriptableObject {
             for(int i=0; i<environments.size(); i++){
                 Environment environment = environments.get(i);
                 envDetails += environment.getName() + ",";
-                envDetails += filterUrls(environment.getApiEndpointURL(),api.getTransports());
+                envDetails += filterUrls(environment.getApiGatewayEndpoint(),api.getTransports());
                 if(i < environments.size() - 1){
                     envDetails += "|";
                 }
