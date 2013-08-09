@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.llom.OMElementImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -129,21 +128,25 @@ public class APIManagerConfiguration {
                     environment.setName(replaceSystemProperty(
                                         environmentElem.getFirstChildWithName(new QName("Name")).getText()));
                     environment.setServerURL(replaceSystemProperty(
-                                        environmentElem.getFirstChildWithName(new QName("ServerURL")).getText()));
+                                        environmentElem.getFirstChildWithName(new QName(
+                                                APIConstants.API_GATEWAY_SERVER_URL)).getText()));
                     environment.setUserName(replaceSystemProperty(
-                                        environmentElem.getFirstChildWithName(new QName("Username")).getText()));
+                                        environmentElem.getFirstChildWithName(new QName(
+                                                APIConstants.API_GATEWAY_USERNAME)).getText()));
 
-                    String key = "APIGateway.Password";
+                    String key = APIConstants.API_GATEWAY + APIConstants.API_GATEWAY_PASSWORD;
                     String value;
                     if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
                         value = secretResolver.resolve(key);
                     }
                     else{
-                        value = environmentElem.getFirstChildWithName(new QName("Password")).getText();
+                        value = environmentElem.getFirstChildWithName(new QName(
+                                                            APIConstants.API_GATEWAY_PASSWORD)).getText();
                     }
                     environment.setPassword(replaceSystemProperty(value));
-                    environment.setApiEndpointURL(replaceSystemProperty(
-                                        environmentElem.getFirstChildWithName(new QName("APIEndpointURL")).getText()));
+                    environment.setApiGatewayEndpoint(replaceSystemProperty(
+                            environmentElem.getFirstChildWithName(new QName(
+                                                            APIConstants.API_GATEWAY_ENDPOINT)).getText()));
                     apiGatewayEnvironments.add(environment);
                 }
             }

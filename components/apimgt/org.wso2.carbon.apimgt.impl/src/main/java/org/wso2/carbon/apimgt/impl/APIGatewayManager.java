@@ -48,7 +48,15 @@ public class APIGatewayManager {
         }
         return instance;
     }
-    
+
+    /**
+     * Publishes an API to all configured Gateways.
+     * @param api - The API to be published
+     * @param builder - The template builder
+     * @param tenantDomain - Tenant Domain of the publisher
+     * @throws Exception - Thrown when publishing to at least one Gateway fails. A single failure will stop all
+     * subsequent attempts to publish to other Gateways.
+     */
     public void publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) throws Exception{
         for(Environment environment : environments){
             RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
@@ -97,7 +105,14 @@ public class APIGatewayManager {
             }
         }
     }
-    
+
+    /**
+     * Removed an API from the configured Gateways
+     * @param api - The API to be removed
+     * @param tenantDomain - Tenant Domain of the publisher
+     * @throws Exception - Thrown if a failure occurs while removing the API from the Gateway. A single failure will
+     * stop all subsequent attempts to remove from other Gateways.
+     */
     public void removeFromGateway(API api, String tenantDomain) throws Exception{
         for(Environment environment : environments){
             RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
@@ -109,7 +124,14 @@ public class APIGatewayManager {
             }
         }
     }
-    
+
+    /**
+     * Checks whether the API has been published.
+     * @param api - The API to be cheked.
+     * @param tenantDomain - Tenant Domain of the publisher
+     * @return True if the API is available in at least one Gateway. False if available in none.
+     * @throws Exception - Thrown if a check to at least one Gateway fails.
+     */
     public boolean isAPIPublished(API api, String tenantDomain) throws Exception{
         for(Environment environment : environments){
             RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);

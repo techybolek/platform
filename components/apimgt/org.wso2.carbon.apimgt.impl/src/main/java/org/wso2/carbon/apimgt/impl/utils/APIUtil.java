@@ -1501,7 +1501,7 @@ public final class APIUtil {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         Environment environment = config.getApiGatewayEnvironments().get(0);
-        String endpoints = environment.getApiEndpointURL();
+        String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
         String version = identifier.getVersion();

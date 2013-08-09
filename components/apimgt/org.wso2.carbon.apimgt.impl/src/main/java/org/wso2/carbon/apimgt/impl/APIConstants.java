@@ -188,11 +188,11 @@ public final class APIConstants {
     }
     
     public static final String API_GATEWAY = "APIGateway.";
-    public static final String API_GATEWAY_SERVER_URL = API_GATEWAY + "ServerURL";
-    public static final String API_GATEWAY_USERNAME = API_GATEWAY + "Username";
-    public static final String API_GATEWAY_PASSWORD = API_GATEWAY + "Password";
+    public static final String API_GATEWAY_SERVER_URL = "ServerURL";
+    public static final String API_GATEWAY_USERNAME = "Username";
+    public static final String API_GATEWAY_PASSWORD = "Password";
     public static final String API_GATEWAY_KEY_CACHE_ENABLED = API_GATEWAY + "EnableGatewayKeyCache";
-    public static final String API_GATEWAY_API_ENDPOINT = API_GATEWAY + "APIEndpointURL";
+    public static final String API_GATEWAY_ENDPOINT = "GatewayEndpoint";
     public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     

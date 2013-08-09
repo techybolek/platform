@@ -30,7 +30,7 @@ public class Environment {
     
     private String password;
 
-    private String apiEndpointURL;
+    private String apiGatewayEndpoint;
 
     public String getType() {
         return type;
@@ -72,12 +72,12 @@ public class Environment {
         this.password = password;
     }
 
-    public String getApiEndpointURL() {
-        return apiEndpointURL;
+    public String getApiGatewayEndpoint() {
+        return apiGatewayEndpoint;
     }
 
-    public void setApiEndpointURL(String apiEndpointURL) {
-        this.apiEndpointURL = apiEndpointURL;
+    public void setApiGatewayEndpoint(String apiGatewayEndpoint) {
+        this.apiGatewayEndpoint = apiGatewayEndpoint;
     }
 
     @Override
