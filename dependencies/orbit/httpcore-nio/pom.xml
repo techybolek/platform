@@ -32,7 +32,7 @@
     <artifactId>httpcore-nio</artifactId>
     <packaging>bundle</packaging>
     <name>httpcore.nio.wso2</name>
-    <version>4.3.0-wso2v1</version>
+    <version>4.3.0.wso2v1</version>
     <description>
         org.wso2.carbon.httpcore.nio. This bundle will export packages from httpcore-nio.jar
     </description>
