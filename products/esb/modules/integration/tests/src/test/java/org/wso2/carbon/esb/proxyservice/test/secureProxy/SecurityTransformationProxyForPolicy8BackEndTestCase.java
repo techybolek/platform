@@ -298,8 +298,34 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 13 and secure back end using policy 8")
     public void securityPolicy13() throws Exception {
+        String proxy13 = "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"StockQuoteSecurityTransformProxyToPolicy8_13\" transports=\"https http\" startOnLoad=\"true\" trace=\"disable\">\n" +
+                         "        <target>\n" +
+                         "            <inSequence>\n" +
+                         "                <send>\n" +
+                         "                    <endpoint name=\"secure\">\n" +
+                         "                        <address uri=\"http://localhost:9007/services/SecureStockQuoteServiceScenario8\">\n" +
+                         "                            <enableAddressing/>\n" +
+                         "                            <enableSec policy=\"conf:/securityTransform/scenario8-policy.xml\"/>\n" +
+                         "                        </address>\n" +
+                         "                    </endpoint>\n" +
+                         "                </send>\n" +
+                         "            </inSequence>\n" +
+                         "            <outSequence>\n" +
+                         "                <header xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\"\n" +
+                         "                        name=\"wsse:Security\" action=\"remove\"/>\n" +
+                         "                <send/>\n" +
+                         "            </outSequence>\n" +
+                         "        </target>\n" +
+                         "    </proxy>";
+
+        String serviceName = "StockQuoteSecurityTransformProxyToPolicy8_13";
+        OMElement proxy = AXIOMUtil.stringToOM(proxy13);
+        addProxyService(proxy);
+        Thread.sleep(5000);
+        isProxyDeployed(serviceName);
+
         final int policyId = 13;
-        this.secureService(policyId);
+        //this.secureService(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -315,8 +341,34 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 14 and secure back end using policy 8")
     public void securityPolicy14() throws Exception {
+        String proxy14 = "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"StockQuoteSecurityTransformProxyToPolicy8_14\" transports=\"https http\" startOnLoad=\"true\" trace=\"disable\">\n" +
+                         "        <target>\n" +
+                         "            <inSequence>\n" +
+                         "                <send>\n" +
+                         "                    <endpoint name=\"secure\">\n" +
+                         "                        <address uri=\"http://localhost:9007/services/SecureStockQuoteServiceScenario8\">\n" +
+                         "                            <enableAddressing/>\n" +
+                         "                            <enableSec policy=\"conf:/securityTransform/scenario8-policy.xml\"/>\n" +
+                         "                        </address>\n" +
+                         "                    </endpoint>\n" +
+                         "                </send>\n" +
+                         "            </inSequence>\n" +
+                         "            <outSequence>\n" +
+                         "                <header xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\"\n" +
+                         "                        name=\"wsse:Security\" action=\"remove\"/>\n" +
+                         "                <send/>\n" +
+                         "            </outSequence>\n" +
+                         "        </target>\n" +
+                         "    </proxy>";
+
+        String serviceName = "StockQuoteSecurityTransformProxyToPolicy8_14";
+        OMElement proxy = AXIOMUtil.stringToOM(proxy14);
+        addProxyService(proxy);
+        Thread.sleep(5000);
+        isProxyDeployed(serviceName);
+
         final int policyId = 14;
-        this.secureService(policyId);
+        //this.secureService(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -332,8 +384,34 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 15 and secure back end using policy 8")
     public void securityPolicy15() throws Exception {
+        String proxy15 = "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"StockQuoteSecurityTransformProxyToPolicy8_15\" transports=\"https http\" startOnLoad=\"true\" trace=\"disable\">\n" +
+                         "        <target>\n" +
+                         "            <inSequence>\n" +
+                         "                <send>\n" +
+                         "                    <endpoint name=\"secure\">\n" +
+                         "                        <address uri=\"http://localhost:9007/services/SecureStockQuoteServiceScenario8\">\n" +
+                         "                            <enableAddressing/>\n" +
+                         "                            <enableSec policy=\"conf:/securityTransform/scenario8-policy.xml\"/>\n" +
+                         "                        </address>\n" +
+                         "                    </endpoint>\n" +
+                         "                </send>\n" +
+                         "            </inSequence>\n" +
+                         "            <outSequence>\n" +
+                         "                <header xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\"\n" +
+                         "                        name=\"wsse:Security\" action=\"remove\"/>\n" +
+                         "                <send/>\n" +
+                         "            </outSequence>\n" +
+                         "        </target>\n" +
+                         "    </proxy>";
+
+        String serviceName = "StockQuoteSecurityTransformProxyToPolicy8_15";
+        OMElement proxy = AXIOMUtil.stringToOM(proxy15);
+        addProxyService(proxy);
+        Thread.sleep(5000);
+        isProxyDeployed(serviceName);
+
         final int policyId = 15;
-        this.secureService(policyId);
+        //this.secureService(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
