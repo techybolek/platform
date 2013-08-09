@@ -765,21 +765,50 @@ public class APIStoreHostObject extends ScriptableObject {
                     tierArr.put(j, tierArr, tierObj);
                     j++;
 
-                } }
-            row.put("tiers", row, tierArr);
-            row.put("subscribed", row, isSubscribed);
-            if (api.getThumbnailUrl() == null) {
-                row.put("thumbnailurl", row, "images/api-default.png");
-            } else {
-             row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
             }
-            row.put("bizOwner", row, api.getBusinessOwner());
-            row.put("bizOwnerMail", row, api.getBusinessOwnerEmail());
-            row.put("techOwner", row, api.getTechnicalOwner());
-            row.put("techOwnerMail", row, api.getTechnicalOwnerEmail());
-            row.put("visibility", row, api.getVisibility());
-            row.put("visibleRoles", row, api.getVisibleRoles());
-            myn.put(0, myn, row);
+            }
+                row.put("tiers", row, tierArr);
+                row.put("subscribed", row, isSubscribed);
+                if (api.getThumbnailUrl() == null) {
+                    row.put("thumbnailurl", row, "images/api-default.png");
+                } else {
+                    row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                }
+                row.put("bizOwner", row, api.getBusinessOwner());
+                row.put("bizOwnerMail", row, api.getBusinessOwnerEmail());
+                row.put("techOwner", row, api.getTechnicalOwner());
+                row.put("techOwnerMail", row, api.getTechnicalOwnerEmail());
+                row.put("visibility", row, api.getVisibility());
+                row.put("visibleRoles", row, api.getVisibleRoles());
+
+                Set<URITemplate> uriTemplates = api.getUriTemplates();
+                List<NativeArray> uriTemplatesArr = new ArrayList<NativeArray>();
+                if (uriTemplates.size() != 0) {
+                    NativeArray uriTempArr = new NativeArray(uriTemplates.size());
+                    Iterator i = uriTemplates.iterator();
+
+                    while (i.hasNext()) {
+                        List<String> utArr = new ArrayList<String>();
+                        URITemplate ut = (URITemplate) i.next();
+                        utArr.add(ut.getUriTemplate());
+                        utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
+                        utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
+                        utArr.add(ut.getThrottlingTiersAsString().replaceAll("\\s", ","));
+                        NativeArray utNArr = new NativeArray(utArr.size());
+                        for (int p = 0; p < utArr.size(); p++) {
+                            utNArr.put(p, utNArr, utArr.get(p));
+                        }
+                        uriTemplatesArr.add(utNArr);
+                    }
+
+                    for (int c = 0; c < uriTemplatesArr.size(); c++) {
+                        uriTempArr.put(c, uriTempArr, uriTemplatesArr.get(c));
+                    }
+
+                    myn.put(1, myn, uriTempArr);
+                }
+                row.put("uriTemplates", row, uriTemplatesArr.toString());
+                myn.put(0, myn, row);
             }
 
 
