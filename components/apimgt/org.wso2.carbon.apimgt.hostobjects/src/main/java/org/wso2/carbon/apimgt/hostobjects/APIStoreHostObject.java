@@ -1554,6 +1554,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     NativeObject row = new NativeObject();
                     row.put("apiName", row, api.getApiId().getApiName());
                     row.put("apiVersion", row, api.getApiId().getVersion());
+                    row.put("apiProvider", row, APIUtil.replaceEmailDomainBack(api.getApiId().getProviderName()));
                     myn.put(i, myn, row);
                     i++;
                 }
