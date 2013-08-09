@@ -18,6 +18,7 @@ import org.wso2.carbon.dataservices.ui.fileupload.stub.ExceptionException;
 import org.wso2.carbon.mediation.configadmin.stub.ConfigServiceAdminStub;
 import org.wso2.carbon.webapp.mgt.stub.WebappAdminStub;
 import org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappUploadData;
+import org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappMetadata;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLStreamException;
@@ -131,10 +132,12 @@ public class ArtifactUploadClient {
     }
 
     public void uploadJaggeryApp(org.jaggeryjs.jaggery.app.mgt.stub.types.carbon.WebappUploadData[] webappUploadDataItems) throws RemoteException {
-        String serviceURL;
+         String serviceURL;
         ServiceClient client;
         Options options;
         JaggeryAppAdminStub jaggeryAppAdminStub;
+
+        WebappAdminStub webappAdminStub;
 
         serviceURL = backendServerURL + "JaggeryAppAdmin";
         jaggeryAppAdminStub = new JaggeryAppAdminStub(serviceURL);
@@ -143,6 +146,39 @@ public class ArtifactUploadClient {
         options.setManageSession(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
                 authCookie);
+
+        String serviceURLforWebappAdmin;
+        serviceURLforWebappAdmin = backendServerURL + "WebappAdmin";
+        webappAdminStub = new WebappAdminStub(serviceURLforWebappAdmin);
+        String webAppName = "";
+        for (org.jaggeryjs.jaggery.app.mgt.stub.types.carbon.WebappUploadData webappUploadDataItem :
+                webappUploadDataItems) {
+            webAppName = webappUploadDataItem.getFileName();
+            String[] tmpWebAppName = webAppName.split(".zip");
+            webAppName = tmpWebAppName[0];
+            System.out.println(webAppName);
+        }
+
+        ServiceClient webAppClient;
+        Options webAppOptions;
+         webAppClient = webappAdminStub._getServiceClient();
+        webAppOptions = webAppClient.getOptions();
+        webAppOptions.setManageSession(true);
+        webAppOptions.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
+                authCookie);
+        WebappMetadata webAppMetaData = webappAdminStub.getStartedWebapp(webAppName);
+        if(webAppMetaData == null) {
+            String[] tmpArr = webAppName.split("\\.");
+            webAppName = tmpArr[0];
+            WebappMetadata webAppMetaData1 = webappAdminStub.getStartedWebapp(webAppName);
+            if(webAppMetaData1 !=null){
+                webappAdminStub.deleteWebapp(webAppName);
+            }
+        }
+
+        if(webAppMetaData != null){
+            webappAdminStub.deleteWebapp(webAppName);
+        }
         jaggeryAppAdminStub.uploadWebapp(webappUploadDataItems);
 
     }
