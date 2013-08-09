@@ -16,20 +16,4 @@
  ~ under the License.
  -->
 <component xmlns="http://products.wso2.org/carbon">
-        <!-- sample menu configuration -->
-    <menus>
-        <menu>
-            <id>transport_menu</id>
-            <i18n-key>transport</i18n-key>
-            <i18n-bundle>org.wso2.carbon.transport.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>configure_menu</parent-menu>
-            <link>../transport-mgt/index.jsp</link>
-            <region>region1</region>
-            <order>25</order>
-            <style-class>home</style-class>
-            <icon>../transport-mgt/images/menu_transports.gif</icon>
-            <require-permission>/permission/protected/configure/transport</require-permission>
-	    <require-super-tenant>true</require-super-tenant>
-        </menu>
-    </menus>
 </component>

@@ -194,7 +194,7 @@
         <tr>
             <td colspan="2" class="buttonRow">
                 <input type="submit" value="<fmt:message key="transport.update"/>" class="button"/>
-                <input class="button" type="reset" value="<fmt:message key="transport.cancel"/>"  onclick="javascript:document.location.href='../transport-mgt/index.jsp'"/ >
+                <input class="button" type="reset" value="<fmt:message key="transport.cancel"/>"  onclick="javascript:document.location.href='../transport-mgt/service_transport.jsp?serviceName=<%=service%>'"/ >
             </td>
         </tr>
 
