@@ -4,7 +4,6 @@
 <%
 var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, deniedTiers = outputs.deniedTiers, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
 var urlPrefix;
-var log = new Log();
 var tenant=request.getParameter("tenant");
 if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
 %>

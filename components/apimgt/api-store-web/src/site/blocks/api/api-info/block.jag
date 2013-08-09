@@ -22,8 +22,7 @@ jagg.block("api/api-info", {
                 discoveryURL = inputs.discoveryURL,
                 selectedAPI=null,
                 user = jagg.getUser();
-                                            var log = new Log();
-                                            log.info(uriTemplates);
+
 
         if (user) {
             username = user.username;

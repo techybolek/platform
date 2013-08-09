@@ -13,7 +13,6 @@ var getAPIDescription = function (api, username) {
         }
         var api= api2[0];
         var uriTemplates = api2[1];
-        log.info(uriTemplates);
         return {
             error:false,
             api:api,

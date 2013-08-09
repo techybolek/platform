@@ -1,12 +1,10 @@
 <% jagg.template("api/throttling", function(inputs, outputs, jagg) {
 var discoveryUrl = outputs.discoveryURL;
 var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemplates;
-                            var log = new Log();
-                            log.info(templatesList);
                              var mod = jagg.module("api");
                              var result = mod.getTiers().tiers;
                               var tiersList = mod.getTiers().tiers;
-                            log.info(result);
+
 %>
 
 <div id="swagger-ui-container"></div>
@@ -32,8 +30,7 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
                                         <input type="text" class="input resourceTemplate" style="width:95%" name="resourceTemplate"/>
                                     </td>
                             <%
-                            var log = new Log();
-                            log.info(templatesList);
+
                             if (templatesList!=null && templatesList.length > 0) {
                             for (i = 0; i < templatesList.length; i++) {
 
@@ -82,7 +79,7 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
                                                                             <br><%
                                                                             for(var k = 0 ; k < tiersList.length ; k++){
                                                                             var l =  tiersList.length - k -1;
-                                                                            log.info(tiersList[k].tierName);
+
                                                                             %>
                                                                             <%if(tiersList[l].tierName==getThrottlingTier){%><%%><%="GET " + tiersList[l].tierDescription%>
                                                                             <% }}
