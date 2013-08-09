@@ -1781,6 +1781,52 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static NativeArray jsFunction_getAPIUsageByUser(Context cx, Scriptable thisObj,
+                                                           Object[] args, Function funObj)
+            throws APIManagementException {
+        List<APIUsageByUserDTO> list = null;
+        NativeArray myn = new NativeArray(0);
+        if(!HostObjectUtils.checkDataPublishingEnabled()){
+            return myn;
+        }
+        if (args.length == 0) {
+            handleException("Invalid number of parameters.");
+        }
+        if (!HostObjectUtils.checkDataPublishingEnabled()) {
+            return myn;
+        }
+        String providerName = (String) args[0];
+        String fromDate = (String) args[1];
+        String toDate = (String) args[2];
+
+        try {
+            APIUsageStatisticsClient client =
+                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            list = client.getAPIUsageByUser(providerName,fromDate,toDate);
+        } catch (APIMgtUsageQueryServiceClientException e) {
+            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
+        }
+
+        Iterator it = null;
+        if (list != null) {
+            it = list.iterator();
+        }
+        int i = 0;
+        if (it != null) {
+            while (it.hasNext()) {
+                NativeObject row = new NativeObject();
+                Object usageObject = it.next();
+                APIUsageByUserDTO usage = (APIUsageByUserDTO) usageObject;
+                row.put("apiName", row, usage.getApiName());
+                row.put("version", row, usage.getVersion());
+                row.put("userId", row, usage.getUserID());
+                row.put("count", row, usage.getCount());
+                myn.put(i, myn, row);
+                i++;
+            }
+        }
+        return myn;
+    }
 
     public static NativeArray jsFunction_getProviderAPIVersionUserUsage(Context cx,
                                                                         Scriptable thisObj,
