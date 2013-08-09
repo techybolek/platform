@@ -89,8 +89,11 @@ public class JaggeryAppAdmin extends WebappAdmin {
 
         for (WebappUploadData uploadData : webappUploadDataList) {
             String fName = uploadData.getFileName();
-            if (fName.contains(".")) {
-                fName = fName.split("\\.")[0];
+            if(fName.contains(".zip")){
+                fName = fName.split(".zip")[0];
+            }
+            else if (fName.contains(".")) {
+                 fName = fName.split("\\.")[0];
             }
 
             File webappsDir = new File(jaggeryAppsPath + File.separator + fName);
