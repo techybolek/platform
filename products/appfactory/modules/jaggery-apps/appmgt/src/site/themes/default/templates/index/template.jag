@@ -22,21 +22,20 @@ function createTable() {
         addTableRow(application);
     }
 
-    //If there are any Apps which are in pending state
+    // If there are any Apps which are in pending state
     if (!isAllAppCreated) {
     	reloadAppsInPendingState();
     }
 }
 
 function addTableColumnHeaders() {
-    $('#item_list').html('');
-    var columnHeaderLi = $('<li class="item item_header"></li>');
-    columnHeaderLi.append($('<div class="th_name col">Application</div>'));
-    columnHeaderLi.append($('<div class="th_type col">Type</div>'));
-    columnHeaderLi.append($('<div class="th_role col">Role</div>'));
-    columnHeaderLi.append($('<div class="th_branches col">Branches</div>'));
-    //TODO: post 1.0 columnHeaderLi.append($('<div class="th_activity col">Activity</div>'));
-    $("#item_list").append(columnHeaderLi);
+	var columnHeaderLi = '<li class="item item_header">' +
+    '<div class="th_name col">Application</div>' +
+    '<div class="th_type col">Type</div>' +
+    '<div class="th_role col">Role</div>' +
+    '<div class="th_branches col">Branches</div>' +
+    '</li>';
+	$("#item_list").append(columnHeaderLi);
 }
 
 function handlePendingApps(application){
@@ -53,66 +52,51 @@ function handlePendingApps(application){
 }
 
 function addTableRow(application) {
-	if (!(application.isPending === undefined || application.isPending === false)) {
-		 isAllAppCreated = false;
-		 handlePendingApps(application);
-		 return;
-	}
-	var anchor;
-    var url = "#";
+    if (application.isPending) {
+        isAllAppCreated = false;
+        handlePendingApps(application);
+        return;
+    }
 
-    var theLi = $('<li class="item"></li>');
-    url = "<%=jagg.getAbsoluteUrl("/site/pages/application.jag")%>?applicationName=" + application.name + "&applicationKey=" + application.key;
-    var displayName="";
-
-
-    //This logic is specific to filter
+    // This logic is specific to filter
+    var displayName = "";
     if (application.highlightedName === undefined || application.highlightedName === "") {
-        displayName=application.name;
-        anchor = $("<a>" + displayName + "</a>").attr("href", url).attr("title", application.name);
+        displayName = application.name;
     } else {
-        displayName=application.highlightedName;
-        displayName=displayName.replace("^","<b style=\"background-color:yellow;\">").replace("~","</b>");
-
-        anchor = $("<a>" + displayName + "</a>").attr("href", url).attr("title", application.name);
+        displayName = application.highlightedName;
+        displayName = displayName.replace("^", "<b style=\"background-color:yellow;\">").replace("~", "</b>");
         application.highlightedName = "";
     }
 
-    var linkCell = $('<div class="app_name col truncate"></div>');
+    application.roles = application.roles.indexOf(',') == 0 ? application.roles.substring(1) : application.roles;
+    application.roles.replace(/^\s+/, "");
+    var url = "<%=jagg.getAbsoluteUrl("/site/pages/application.jag")%>?applicationName=" + application.name + "&applicationKey=" + application.key;
 
-    //If any of the branches are in production add the green icon
+    var theLi = '<li class="item">' + '<div class="app_name col truncate">';
+
+    // If any of the branches are in production add the green icon
     if (application.inProduction == true) {
-        linkCell.append($('<img alt="Green tag" class="green_tag" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("assets/img/green_tag.png"))%>">'));
+        theLi += '<img alt="Green tag" class="green_tag" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("assets/img/green_tag.png"))%>">';
     }
-
-    linkCell.append($('<img id="'+ application.key +'_icon" height="50px" width="40px" alt="icon" src="' + application.iconUrl + '">'));
-    linkCell.append($('<h2></h2>').append(anchor));
-    theLi.append(linkCell);
-    theLi.append($('<div class="app_type col">' + application.display + '</div>'));
-
-    /* START just removing the front space and additional , whene there are multiple roles */
-    application.roles.replace(/^\s+/,"");
-    application.roles = application.roles.indexOf(',')== 0? application.roles.substring(1) : application.roles;
-    application.roles.replace(/^\s+/,"");
-    /* END just removing the front space and additional , whene there are multiple roles TODO This need to be done from back end */
-
-    theLi.append($('<div class="show_role_label"><h3>My Role:</h3></div>'));
-    theLi.append($('<div class="app_role col">' + application.roles + '</div>'));
-    //TODO: post 1.0 theLi.append($('</h3><time>Last access 5 hours ago</time></div>'));
+    theLi += '<img id="' + application.key + '_icon" height="50px" width="40px" alt="icon" src="' + application.iconUrl + '">';
+    theLi += '<h2><a href="' + url + '" title="' + application.name + '">' + displayName + '</a></h2></div>';
+    theLi += '<div class="app_type col">' + application.display + '</div>';
+    theLi += '<div class="show_role_label"><h3>My Role:</h3></div>';
+    theLi += '<div class="app_role col">' + application.roles + '</div>';
 
     if (application.branches > 1) {
-        theLi.append($('<div class="app_branches col"><h3>' + application.branches + ' Branches</h3></div>'));
+        theLi += '<div class="app_branches col"><h3>' + application.branches + ' Branches</h3></div>';
     } else {
-        theLi.append($('<div class="app_branches col"><h3>' + application.branches + ' Branch</h3></div>'));
+        theLi += '<div class="app_branches col"><h3>' + application.branches + ' Branch</h3></div>';
     }
+    theLi += '</li>';
 
-    //TODO: post 1.0 theLi.append($('<time>2.1.0 Deployed 30 mins ago</time></div>'));
-    //TODO: post 1.0 theLi.append($('<div class="app_activity col"><img alt="app activity img" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("assets/img/app_activity_img_3.png"))%>"> </div>'));
-
-
-    theLi.bind('click',function(){
-        document.location.href=url;
-    });
+    // TODO: post 1.0 theLi.append($('<time>2.1.0 Deployed 30 mins
+    // ago</time></div>'));
+    // TODO: post 1.0 theLi.append($('<div class="app_activity col"><img
+    // alt="app activity img"
+    // src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("assets/img/app_activity_img_3.png"))%>">
+    // </div>'));
 
     $("#item_list").append(theLi);
 }
@@ -123,10 +107,14 @@ function removeTableRow(appKey){
 }
 
 function reloadAppsInPendingState(){
-     /* After App creation form submitted, App Creation verification process request is polled back-end in following time order.
-      First request is send 15Sec after app created
-      If app creation process hasn't completed poll request in every 5Sec (12times)
-      If Creation hasn't succeeded after 135 Sec, display Error message as "Error Application Creation" and stop calling further*/
+     /*
+		 * After App creation form submitted, App Creation verification process
+		 * request is polled back-end in following time order. First request is
+		 * send 15Sec after app created If app creation process hasn't completed
+		 * poll request in every 5Sec (12times) If Creation hasn't succeeded
+		 * after 135 Sec, display Error message as "Error Application Creation"
+		 * and stop calling further
+		 */
 
     if (noOfRequest == 0) {
         noOfRequest++;
@@ -134,7 +122,8 @@ function reloadAppsInPendingState(){
     } else if (noOfRequest <= 12) {
         noOfRequest++;
         setPendingAppRefreshTimeOut(5000);
-    } else if (noOfRequest == 13) { // if still application creation process happens in back-end
+    } else if (noOfRequest == 13) { // if still application creation process
+									// happens in back-end
     	removeFailedPendingAppsFromSession(getPendingAppKeys());
         setPageRefreshTimeOut(60000);
     }
@@ -159,11 +148,13 @@ function removeFailedPendingAppsFromSession(appKeys) {
 
         function (result) {
         	removeFailedPendingApps();
-           // alert('Successfully removed timeout pending applications from session');
+           // alert('Successfully removed timeout pending applications from
+			// session');
         },
 
         function (jqXHR, textStatus, errorThrown) {
-           // alert('Error occured while removing timeout pending applications from session');
+           // alert('Error occured while removing timeout pending applications
+			// from session');
         });
 }
 
@@ -228,7 +219,7 @@ function populateCreationCompletedApps() {
             	var application = completedAppArray[i];
             	applicationsInProgress.pop(application);
             	addTableRow(application);
-            	//updateTableRow(application);
+            	// updateTableRow(application);
             	loadAppIcon(application.key);
             	
             	jagg.message({
@@ -254,7 +245,7 @@ function populateCreationCompletedApps() {
 function init(){
 	createTable();
 
-    //Load icons
+    // Load icons
     for (var index = 0; index < parsedAppArray.length; index++) {
          var application = parsedAppArray[index];
          loadAppIcon(application.key);
@@ -322,7 +313,7 @@ $(document).ready(function () {
             // enf of "jQuery.grep.."
 
             if ($("#item_list").children().length == 0) {
-                $("#item_list").append($('<div>"Sorry! <br/>No matches found!"</div>'));
+                $("#item_list").append($('<div>"No matches found!"</div>'));
             }
 
 
@@ -330,7 +321,7 @@ $(document).ready(function () {
     });
 });
 
-/*************************Utility Methods***********************************/
+/** ***********************Utility Methods********************************** */
 function removeFailedPendingApps(){
 	for (var i = 0; i < applicationsInProgress.length; i++) {
 		removeTableRow(applicationsInProgress[i].key);
@@ -394,7 +385,7 @@ function hideNotification() {
                                     </li>
 									<li class="screen_option_item">
 
-									<!--//TODO: post 1.0-->
+									<!--// TODO: post 1.0-->
 									<!--form class=" left fw_250 form-container filter_form">
 											<div class="input_row">
 												 <div class="select2-container select_list error" id="s2id_application_type" style="width: 248px;"><a tabindex="-1" class="select2-choice" onclick="return false;" href="javascript:void(0)">   <span>Show last accessed first</span><abbr class="select2-search-choice-close"></abbr>   <div><b></b></div></a><input type="text" class="select2-focusser select2-offscreen" id="s2id_autogen1" tabindex="0"><div class="select2-drop select2-display-none">   <div class="select2-search select2-search-hidden select2-offscreen">       <input type="text" class="select2-input" spellcheck="false" autocapitilize="off" autocorrect="off" autocomplete="off">   </div>   <ul class="select2-results">   </ul></div></div><select class="select_list select2-offscreen" id="application_type" tabindex="-1">
