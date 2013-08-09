@@ -10,7 +10,7 @@ var modManager = jagg.module("manager");
 
 
 // creates application in stratos and return svn repository path to application.
-var createApplication = function (applicationName, applicationKey, applicationDescription,
+var createApplicationBPEL = function (applicationName, applicationKey, applicationDescription,
                                   applicationType,repositoryType, userName) {
 
     var adminUserName=getProperty(ADMIN_USERNAME);
@@ -88,7 +88,7 @@ var createApplication = function (applicationName, applicationKey, applicationDe
 };
 
 // creates application in stratos and return svn repository path to application.
-var createApplicationBPEL = function (applicationName, applicationKey, applicationDescription,
+var createApplication = function (applicationName, applicationKey, applicationDescription,
 applicationType,repositoryType, userName) {
 
 var adminUserName=getProperty(ADMIN_USERNAME);
@@ -186,8 +186,17 @@ var adminUserName=getProperty(ADMIN_USERNAME);
 				</wsp:All>
 			</wsp:ExactlyOne>
 		</wsp:Policy>;
-        var payload = '<p:CreateApplicationRequest xmlns:p="http://wso2.org"><applicationId xmlns="http://wso2.org">' + applicationKey + '</applicationId><userName xmlns="http://wso2.org">' + userName + '</userName><repositoryType xmlns="http://wso2.org">' + repositoryType + '</repositoryType><adminUserName xmlns="http://wso2.org">' + adminUserName + '</adminUserName></p:CreateApplicationRequest>';
+		var loggeduser=jagg.getUser();
 
+        var tenantDomain="";
+        if (loggeduser.indexOf("@")!=-1) {
+            tenantDomain = loggeduser.substring(loggeduser.lastIndexOf('@') + 1);
+        } else {
+            tenantDomain = loggeduser;
+        }
+
+        //var payload = '<p:CreateApplicationRequest xmlns:p="http://wso2.org"><applicationId xmlns="http://wso2.org">' + applicationKey + '</applicationId><userName xmlns="http://wso2.org">' + userName + '</userName><repositoryType xmlns="http://wso2.org">' + repositoryType + '</repositoryType><adminUserName xmlns="http://wso2.org">' + adminUserName + '</adminUserName></p:CreateApplicationRequest>';
+        var payload = '<p:CreateApplicationRequest xmlns:p="http://wso2.org"><applicationId xmlns="http://wso2.org">' + applicationKey + '</applicationId><userName xmlns="http://wso2.org">' + userName + '</userName><repositoryType xmlns="http://wso2.org">' + repositoryType + '</repositoryType><adminUserName xmlns="http://wso2.org">' + adminUserName + '</adminUserName><domainName xmlns="http://wso2.org">'+ tenantDomain +'</domainName></p:CreateApplicationRequest>';
         var result;
         var endPoint = getProperty(BPS_SERVER_URL) + "CreateApplication";
         //var endPoint =  "http://localhost:8181/services/CreateApplication";
