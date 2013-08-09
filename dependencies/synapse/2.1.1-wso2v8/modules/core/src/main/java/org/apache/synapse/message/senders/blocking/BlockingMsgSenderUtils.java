@@ -314,7 +314,7 @@ public class BlockingMsgSenderUtils {
         }
     }
 
-    private static String[] allowedProperties = {"JSON_OBJECT", "JSON_STREAM", "JSON_STRING", Constants.Configuration.HTTP_METHOD, Constants.Configuration.MESSAGE_TYPE, Constants.Configuration.CONTENT_TYPE};
+    private static String[] allowedProperties = {"JSON_OBJECT", "JSON_STREAM", "JSON_STRING", Constants.Configuration.HTTP_METHOD, Constants.Configuration.MESSAGE_TYPE, Constants.Configuration.CONTENT_TYPE, NhttpConstants.REST_URL_POSTFIX};
 
     /*
      * Set transport header extracting headers from the original message context
