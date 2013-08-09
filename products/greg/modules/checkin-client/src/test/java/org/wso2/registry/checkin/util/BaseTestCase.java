@@ -20,6 +20,7 @@ package org.wso2.registry.checkin.util;
 
 import junit.framework.TestCase;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.config.RegistryConfiguration;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -75,6 +76,8 @@ public class BaseTestCase extends TestCase  {
 
         // The line below is responsible for initializing the cache.
         CarbonContext.getCurrentContext();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain("foo.com");
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(1);
 
         String carbonHome = System.getProperty("carbon.home");
         System.out.println("carbon home " + carbonHome);

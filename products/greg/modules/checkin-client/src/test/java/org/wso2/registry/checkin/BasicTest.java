@@ -19,7 +19,6 @@
 package org.wso2.registry.checkin;
 
 import junit.framework.Assert;
-import org.jgroups.util.UUID;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
