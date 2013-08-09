@@ -84,7 +84,11 @@
     <script type="text/javascript">
 
         function removeSet(row){
-            location.href= 'challenges-mgt-finish.jsp?removeSetId=' + row;
+        	function doDelete() {
+            	location.href= 'challenges-mgt-finish.jsp?removeSetId=' + row;
+        	}
+            
+            CARBON.showConfirmationDialog("<fmt:message key="confirm.delete.challenge.set"/> " + row + " ?", doDelete, null);
         }
 
         function cancelForm(){

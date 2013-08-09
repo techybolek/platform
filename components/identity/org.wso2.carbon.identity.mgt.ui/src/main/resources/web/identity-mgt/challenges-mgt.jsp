@@ -113,8 +113,12 @@
 
 
         function removeRow(row){
-            var setName = document.getElementsByName("setName")[0].value;
-            location.href= 'challenges-mgt.jsp?deleteRowId=' + row + '&setName=' + setName;
+        	function doDelete() {
+	            var setName = document.getElementsByName("setName")[0].value;
+	            location.href= 'challenges-mgt.jsp?deleteRowId=' + row + '&setName=' + setName;
+        	}
+        	
+            CARBON.showConfirmationDialog("<fmt:message key="confirm.delete.challenge.question"/> ?", doDelete, null);
         }
 
         function  editRow(row){
