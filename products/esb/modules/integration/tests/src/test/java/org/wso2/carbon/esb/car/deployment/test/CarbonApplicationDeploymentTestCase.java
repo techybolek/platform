@@ -101,7 +101,6 @@ public class CarbonApplicationDeploymentTestCase extends ESBIntegrationTest {
 
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     @Test(groups = {"wso2.esb"}, description = "test proxy service invocation"
             , dependsOnMethods = {"proxyServiceDeploymentTest", "sequenceDeploymentTest", "endpointDeploymentTest"})
     public void invokeProxyService() throws Exception {

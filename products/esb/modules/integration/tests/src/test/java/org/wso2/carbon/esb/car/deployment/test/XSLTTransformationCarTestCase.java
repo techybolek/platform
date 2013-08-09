@@ -75,7 +75,6 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
 
     }
 
-    @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_all})
     @Test(groups = {"wso2.esb"}, description = "test proxy service invocation"
             , dependsOnMethods = {"artifactDeployment"})
     public void invokeTransformProxyService() throws Exception {
