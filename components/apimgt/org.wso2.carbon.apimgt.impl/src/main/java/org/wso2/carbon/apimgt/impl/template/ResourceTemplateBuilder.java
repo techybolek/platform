@@ -19,8 +19,20 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import java.util.Map;
 
+/**
+ * The Resource Template Builder interface which will be  used to define methods to be implemented in various Resource
+ * Template Builder classes of different gateway environment types.
+ */
 public interface ResourceTemplateBuilder {
-    
+
+    /**
+     * Constructs the Resource synapse xml from the template.
+     * @param resourceAttributeMap - Attributes of the resource
+     * @param apiAttributeMap - Attributes of the API
+     * @param resourceNumber - The resource number on the API.
+     * @return - The synapse xml of the resource
+     * @throws APITemplateException - Thrown if an error occurs while constructing the xml from the template.
+     */
     public String getResourceString(Map<String, String> resourceAttributeMap,
                                     Map<String, String> apiAttributeMap,
                                     int resourceNumber) throws APITemplateException;

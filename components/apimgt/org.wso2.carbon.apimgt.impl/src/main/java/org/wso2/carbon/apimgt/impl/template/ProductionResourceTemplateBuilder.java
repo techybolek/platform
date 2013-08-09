@@ -21,6 +21,9 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import java.util.Map;
 
+/**
+ * Constructs the Production API Resource from the template.
+ */
 public class ProductionResourceTemplateBuilder implements ResourceTemplateBuilder{
 
     TemplateLoader templateLoader = TemplateLoader.getInstance();

@@ -22,6 +22,9 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import java.util.Map;
 
+/**
+ * Constructs the Production and Sandbox API Resource from the Template.
+ */
 public class HybridResourceTemplateBuilder implements ResourceTemplateBuilder{
 
     TemplateLoader templateLoader = TemplateLoader.getInstance();

@@ -30,6 +30,20 @@ public class ResourceTemplateFactory {
         return instance;
     }
 
+    /**
+     * Provides an instance of a ResourceTemplateBuilder matching the gateway environment type.
+     * <p>
+     * The Gateway environment type could be either 'production', 'sandbox' or 'hybrid'. The ResourceTemplateBuilder
+     * is created according to the given type. Following are the ResourceTemplateBuilder instances that can be returned.
+     * <ul>
+     *     <li>production - ProductionResourceTemplateBuilder</li>
+     *     <li>sandbox - SandboxResourceTemplateBuilder</li>
+     *     <li>hybrid or anything else - HybridResourceTemplateBuilder</li>
+     * </ul>
+     * </p>
+     * @param gatewayEnvironmentType - The type of gateway environment.
+     * @return An instance of the ResourceTemplateBuilder.
+     */
     public ResourceTemplateBuilder getResourceTemplateBuilder(String gatewayEnvironmentType){
 
         if(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(gatewayEnvironmentType)){
