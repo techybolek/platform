@@ -616,10 +616,9 @@ public class RestApiAdmin extends AbstractServiceBusAdmin{
 						}
 
                         if(apiTransports != null){
-                            if(apiTransports.equalsIgnoreCase(Constants.TRANSPORT_HTTP)){
+                            if(Constants.TRANSPORT_HTTP.equalsIgnoreCase(apiTransports)){
                                 api.setProtocol(RESTConstants.PROTOCOL_HTTP_ONLY);
-                            }
-                            if(apiTransports.equalsIgnoreCase(Constants.TRANSPORT_HTTPS)){
+                            }else if(Constants.TRANSPORT_HTTPS.equalsIgnoreCase(apiTransports)){
                                 api.setProtocol(RESTConstants.PROTOCOL_HTTPS_ONLY);
                             }
                         }
