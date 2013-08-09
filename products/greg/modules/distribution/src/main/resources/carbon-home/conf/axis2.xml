@@ -448,7 +448,7 @@
         <!--these phase will run irrespective of the service-->
         <phase name="PolicyDetermination"/>
 <phase name="MessageOut">
-           <handler name="PageCountHandler" class="org.wso2.carbon.registry.core.utils.PageCountHandler">
+           <handler name="PageCountHandler" class="org.wso2.carbon.registry.core.pagination.handler.PageCountHandler">
             <order phase="MessageOut"/>
             </handler>
         </phase>
