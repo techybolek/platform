@@ -59,7 +59,7 @@ public class Add {
                     SynchronizationConstants.META_FILE_PREFIX +
                     SynchronizationConstants.META_FILE_EXTENSION;
             addMetadata(metaFilePath, file.getName(), true, registryPath, root);
-            log.info("A " + path);
+            System.out.println("A " + path);
             for(String fileName : file.list(new FilenameFilter() {
                 public boolean accept(File file, String s) {
                     if(SynchronizationConstants.META_DIRECTORY.equals(s)){
