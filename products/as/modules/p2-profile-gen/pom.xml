@@ -295,6 +295,12 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature:${carbon.platform.version}
                                 </featureArtifactDef>
+				<featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.idp.mgt.server.feature:${carbon.platform.version}
+                                </featureArtifactDef>
+				<featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.idp.mgt.ui.feature:${carbon.platform.version}
+                                </featureArtifactDef>
                                 <!-- jaggery features -->
                                 <featureArtifactDef>
                                     org.jaggeryjs:org.jaggeryjs.feature:0.9.0-07262013
@@ -737,6 +743,18 @@
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+				<feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.server.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.ui.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
 
                                 <!-- jaggery feature groups -->
                                 <feature>
@@ -1070,6 +1088,12 @@
                                 <feature>
                                     <id>
                                         org.wso2.carbon.identity.authenticator.saml2.sso.server.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.server.feature.group
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -1419,6 +1443,18 @@
                                 <feature>
                                     <id>
                                         org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.server.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.ui.feature.group
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
@@ -1782,6 +1818,18 @@
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+				<feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.server.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.ui.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
 
                                 <!-- jaggery feature groups -->
                                 <!--feature>
@@ -2142,6 +2190,18 @@
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+				<feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.server.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.ui.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
 
                                 <!-- jaggery feature groups -->
                                 <!--feature>
@@ -2496,6 +2556,18 @@
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
+				<feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.server.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.ui.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
 
                                 <!-- jaggery feature groups -->
                                 <feature>
@@ -2766,6 +2838,18 @@
                                 <feature>
                                     <id>
                                         org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+				<feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.server.feature.group
+                                    </id>
+                                    <version>${carbon.platform.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>
+                                        org.wso2.carbon.idp.mgt.ui.feature.group
                                     </id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
