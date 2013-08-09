@@ -18,6 +18,7 @@
 package org.wso2.carbon.esb.proxyservice.test.secureProxy;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -248,8 +249,36 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
         log.info("SecureConversation - Sign and Encrypt - Service as STS - Bootstrap policy - Sign and Encrypt , X509 Authentication verified");
     }
 
+
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 12 and secure back end using policy 8")
     public void securityPolicy12() throws Exception {
+        String proxy12 = "<proxy name=\"StockQuoteSecurityTransformProxyToPolicy8_12\" transports=\"https http\" startOnLoad=\"true\" trace=\"disable\">\n" +
+                         "        <target>\n" +
+                         "            <inSequence>\n" +
+                         "                <send>\n" +
+                         "                    <endpoint name=\"secure\">\n" +
+                         "                        <address uri=\"http://localhost:9007/services/SecureStockQuoteServiceScenario8\">\n" +
+                         "                            <enableAddressing/>\n" +
+                         "                            <enableSec policy=\"conf:/securityTransform/scenario8-policy.xml\"/>\n" +
+                         "                        </address>\n" +
+                         "                    </endpoint>\n" +
+                         "                </send>\n" +
+                         "            </inSequence>\n" +
+                         "            <outSequence>\n" +
+                         "                <header xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\"\n" +
+                         "                        name=\"wsse:Security\" action=\"remove\"/>\n" +
+                         "                <send/>\n" +
+                         "            </outSequence>\n" +
+                         "        </target>\n" +
+                         "    </proxy>";
+
+        String serviceName = "StockQuoteSecurityTransformProxyToPolicy8_12";
+        OMElement proxy = AXIOMUtil.stringToOM(proxy12);
+        addProxyService(proxy);
+        Thread.sleep(5000);
+        isProxyDeployed(serviceName);
+
+
         final int policyId = 12;
         this.secureService(policyId);
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
