@@ -375,17 +375,8 @@ API Definition for Swagger will not be overriden with the changes you will do to
                                     var throttlingTiers = api.templates[i][3].split(",");
                                     var getVal,putVal,postVal,deleteVal,optionVal,method;
 
-                                    var log = new Log();
                                     var tiersList = mod.getTiers().tiers;
-                                    var temp;
-                                    for(var k = 0 ; k < tiersList.length ; k++){
-                                    //    log.info(tiersList[k].tierName);
 
-                                    }
-                                   // log.info(temp);
-                                    //var tiers =  mod.getTiers().tiers;
-                                    //var contact = JSON.parse(tiers.tiers);
-                                    //log.info(contact);
 
                                     var getThrottlingTier,postThrottlingTier,deleteThrottlingTier,optionsThrottlingTier,putThrottlingTier;
 
@@ -472,7 +463,6 @@ API Definition for Swagger will not be overriden with the changes you will do to
                                          <select style="width:100%" id="getThrottlingTier" class="selected getThrottlingTier" name="getThrottlingTier"><%
                                          for(var k = 0 ; k < tiersList.length ; k++){
                                          var l =  tiersList.length - k -1;
-                                         log.info(tiersList[k].tierName);
                                          %>
                                          <option <%if(tiersList[l].tierName==getThrottlingTier){%> selected="selected" <%}%>><%=tiersList[l].tierName%></option>
                                          <% }
