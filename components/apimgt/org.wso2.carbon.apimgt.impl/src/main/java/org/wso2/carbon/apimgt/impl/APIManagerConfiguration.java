@@ -132,8 +132,16 @@ public class APIManagerConfiguration {
                                         environmentElem.getFirstChildWithName(new QName("ServerURL")).getText()));
                     environment.setUserName(replaceSystemProperty(
                                         environmentElem.getFirstChildWithName(new QName("Username")).getText()));
-                    environment.setPassword(replaceSystemProperty(
-                                        environmentElem.getFirstChildWithName(new QName("Password")).getText()));
+
+                    String key = "APIGateway.Password";
+                    String value;
+                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
+                        value = secretResolver.resolve(key);
+                    }
+                    else{
+                        value = environmentElem.getFirstChildWithName(new QName("Password")).getText();
+                    }
+                    environment.setPassword(replaceSystemProperty(value));
                     environment.setApiEndpointURL(replaceSystemProperty(
                                         environmentElem.getFirstChildWithName(new QName("APIEndpointURL")).getText()));
                     apiGatewayEnvironments.add(environment);
