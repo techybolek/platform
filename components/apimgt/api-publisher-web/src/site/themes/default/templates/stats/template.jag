@@ -133,6 +133,30 @@
     </div>
 </div>
 
+<h2><%=i18n.localize("apiUsageByUser")%></h2>
+<div class="well">
+    <div class="row-fluid">
+       <div class="span6">
+                  <div id="tempLoadingSpaceUsageByUser">
+                  <div class="progress progress-striped active">
+                  <div class="bar" style="width: 10%;"></div>
+            </div>
+         </div>
+       </div>
+        <div class="span6">&nbsp;</div>
+        <div class="span11">
+            <table class="table graphTable" id="apiUsageByUserTable" style="display:none">
+                <tr>
+                    <th><%=i18n.localize("api")%></th>
+                    <th><%=i18n.localize("version")%></th>
+                    <th><%=i18n.localize("user")%></th>
+                    <th><%=i18n.localize("noOfAccess")%></th>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
 <h2><%=i18n.localize("faultyInvocationsTitle")%></h2>
 
 <div class="well">

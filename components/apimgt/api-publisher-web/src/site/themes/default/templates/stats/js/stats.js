@@ -50,6 +50,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         drawProviderAPIUsage(from,to);
                         drawProviderAPIVersionUserLastAccess(from,to);
                         drawAPIUsageByResourcePath(from,to);
+                        drawAPIUsageByUser(from,to);
                         drawAPIResponseFaultCountTable(from,to);
                         drawAPIResponseFaultCountChart(from,to);
                     });
@@ -407,6 +408,39 @@ var drawAPIUsageByResourcePath = function(from,to){
             }
             t_on['tempLoadingSpaceResourcePath'] = 0;
         }, "json");
+
+}
+
+var drawAPIUsageByUser = function(from,to){
+    var fromDate = from;
+    var toDate = to;
+    jagg.post("/site/blocks/stats/ajax/stats.jag", { action:"getAPIUsageByUser", currentLocation:currentLocation,fromDate:fromDate,toDate:toDate},
+      function (json) {
+          if (!json.error) {
+              $('#apiUsageByUserTable').find("tr:gt(0)").remove();
+              var length = json.usage.length;
+              $('#apiUsageByUserTable').show();
+              for (var i = 0; i < json.usage.length; i++) {
+                  $('#apiUsageByUserTable').append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].version + '</td><td>' + json.usage[i].userId + '</td><td width="20%"><p align="right">' + json.usage[i].count + '</td></tr>'));
+              }
+              if (length == 0) {
+                  $('#apiUsageByUserTable').hide();
+                  $('#tempLoadingSpaceUsageByUser').html('');
+                  $('#tempLoadingSpaceUsageByUser').append($('<span class="label label-info">'+i18n.t('errorMsgs.checkBAMConnectivity')+'</span>'));
+
+              }else{
+                  $('#tempLoadingSpaceUsageByUser').hide();
+              }
+
+          } else {
+              if (json.message == "AuthenticateError") {
+                  jagg.showLogin();
+              } else {
+                  jagg.message({content:json.message,type:"error"});
+              }
+          }
+          t_on['tempLoadingSpaceUsageByUser'] = 0;
+      }, "json");
 
 }
 

@@ -140,6 +140,36 @@ function getAPIUsageByResourcePath(providerName,from,to) {
     }
 }
 
+function getAPIUsageByUser(providerName,from,to) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = apiProvider.getAPIUsageByUser(providerName,from,to);
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIUsageByUser for : " + providerName);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
 function getProviderAPIVersionUserLastAccess(providerName,from,to, server) {
     var usage = [];
     try {
