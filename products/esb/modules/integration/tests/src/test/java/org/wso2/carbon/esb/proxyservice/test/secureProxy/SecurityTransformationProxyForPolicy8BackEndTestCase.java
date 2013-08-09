@@ -326,6 +326,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
         final int policyId = 13;
         //this.secureService(policyId);
+        applySecurity(serviceName, policyId, getUserRole(userInfo.getUserId()));
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -369,6 +370,8 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
         final int policyId = 14;
         //this.secureService(policyId);
+        applySecurity(serviceName, policyId, getUserRole(userInfo.getUserId()));
+
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
@@ -412,6 +415,8 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
         final int policyId = 15;
         //this.secureService(policyId);
+        applySecurity(serviceName, policyId, getUserRole(userInfo.getUserId()));
+
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
