@@ -193,22 +193,22 @@ public class TokenMgtDAO {
                                 " SELECT ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, VALIDITY_PERIOD, TOKEN_STATE " +
                                 " FROM " + accessTokenStoreTable + " WHERE CONSUMER_KEY = ? " +
                                 " AND AUTHZ_USER = ? " +
-                                " AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED') AND USER_TYPE= ? " +
+                                " AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED' OR TOKEN_STATE='INACTIVE') AND USER_TYPE= ? " +
                                 " ORDER BY TIME_CREATED DESC) " +
                                 " WHERE ROWNUM < 2 ";
                 //We set USER_TYPE as user as login request use to generate only user tokens not application tokens
                 mySQLSQL = "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, " +
                         " VALIDITY_PERIOD, TOKEN_STATE FROM " + accessTokenStoreTable  +
-                        " WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED') AND USER_TYPE= ? ORDER BY TIME_CREATED DESC " +
+                        " WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED'OR TOKEN_STATE='INACTIVE') AND USER_TYPE= ? ORDER BY TIME_CREATED DESC " +
                         " LIMIT 1";
 
                 msSQL = "SELECT TOP 1 ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, VALIDITY_PERIOD, TOKEN_STATE FROM IDN_OAUTH2_ACCESS_TOKEN " +
-                        "WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED') AND USER_TYPE= ? ORDER BY TIME_CREATED DESC";
+                        "WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED' OR TOKEN_STATE='INACTIVE') AND USER_TYPE= ? ORDER BY TIME_CREATED DESC";
 
                 postgreSQL = "SELECT * FROM(SELECT ACCESS_TOKEN, REFRESH_TOKEN, TIME_CREATED, VALIDITY_PERIOD, TOKEN_STATE " +
                              " FROM " + accessTokenStoreTable + " WHERE CONSUMER_KEY = ? " +
                              " AND AUTHZ_USER = ? " +
-                             " AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED') AND USER_TYPE= ? " +
+                             " AND (TOKEN_STATE='ACTIVE' OR TOKEN_STATE='EXPIRED' OR TOKEN_STATE='INACTIVE') AND USER_TYPE= ? " +
                              " ORDER BY TIME_CREATED DESC) AS TOKEN " +
                              " LIMIT 1 ";
             } else {
