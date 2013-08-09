@@ -324,7 +324,7 @@
                                     <td colspan="3">
                                         <a class="icon-link"
                                            style="background-image:url(../admin/images/add.gif);"
-                                           href='addOperation.jsp?param=qparam&operationName=<%=operationName%>&action=<%=action%>&selectedQueryId=<%=selectedQueryId%>' >Add Query Params as Operation Params</a>
+                                           href='addOperation.jsp?param=qparam&operationName=<%=operationName%>&operationDesc=<%=operationDesc %>&action=<%=action%>&selectedQueryId=<%=selectedQueryId%>' >Add Query Params as Operation Params</a>
                                     </td>
                                 </tr>
                                 <%
