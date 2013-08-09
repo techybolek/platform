@@ -114,7 +114,7 @@ public class HiveServiceComponent {
         hiveServerPool.submit(new HiveRunnable());
 
         try {
-             OMElement config= AnalyzerBuilder.loadConfigXML();
+            OMElement config= AnalyzerBuilder.loadConfigXML();
             AnalyzerBuilder.populateAnalyzers(config);
         } catch (AnalyzerConfigException e) {
             String errorMessage = "Error loading analyzer-config.xml";

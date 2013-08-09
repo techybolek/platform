@@ -393,8 +393,8 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
 
         private void executeAnalyzer(String trimmedCmdLine) {
-            String name = null;
-            String conf = null;
+            String name = "";
+            String conf = "";
             HashMap<String, String> parameters = new HashMap<String, String>(); // annotation execution
             String[] tokens = trimmedCmdLine.split("analyzer");
             if (tokens != null && tokens.length >= 2) {
@@ -404,6 +404,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
             String regEx = "(\\(.*\\))";
 
             String[] tokensName = conf.trim().split(regEx);
+
 
             if (tokensName != null && tokensName.length >= 2) {
                 name = tokensName[0];
@@ -429,63 +430,56 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 }
             }
 
-            Map<String, Set<String>> paramConf= AnalyzerBuilder.getAnalyzerParams();
+            Map<String, Set<String>> paramConf = AnalyzerBuilder.getAnalyzerParams();
 
-            if (paramConf.containsKey(name)) {
+            Map<String, String> analyzerConf = AnalyzerBuilder.getAnalyzerClasses();
 
 
             Set<String> paramValues = paramConf.get(name);
-            Set<String> params= parameters.keySet();
+            Set<String> params = parameters.keySet();
 
-            if (paramValues != null && params != null && paramValues.size() == params.size() && paramValues.containsAll(params)) {
-
-                Map<String, String> analyzerConf= AnalyzerBuilder.getAnalyzerClasses();
-
-                String className = analyzerConf.get(name);
-                          Class clazz = null;
-                    try {
-                          clazz = Class.forName(className, true,
-                                            this.getClass().getClassLoader());
-                        } catch (ClassNotFoundException e) {
-                            log.error("Unable to find custom analyzer class..", e);
-                        }
-
-                            if (clazz != null) {
-                           Object analyzer = null;
-                            try {
-                                    analyzer = clazz.newInstance();
-                               } catch (InstantiationException e) {
-                                   log.error("Unable to instantiate custom analyzer class..", e);
-                               } catch (IllegalAccessException e) {
-                                   log.error("Unable to instantiate custom analyzer class..", e);
-                               }
-
-                                    if (analyzer instanceof AbstractHiveAnalyzer) {
-                                    AbstractHiveAnalyzer hiveAnnotation =
-                                                    (AbstractHiveAnalyzer) analyzer;
-
-
-                                  hiveAnnotation.execute(parameters);
-                               } else {
-                                    log.error("Custom analyzers should extend AbstractHiveAnalayzer..");
-                                }
-
-                            }
-            }else {
-                log.error("Error while validating parameters");
+            if (paramValues == null || paramValues.size() != params.size() || !paramValues.containsAll(params)) {
+                log.warn("No variables defined under this analyzer or variable definition mismatch...");
             }
 
+            String className = analyzerConf.get(name);
+            Class clazz = null;
+            try {
+                clazz = Class.forName(className, true,
+                        this.getClass().getClassLoader());
+            } catch (ClassNotFoundException e) {
+                log.error("Unable to find custom analyzer class..", e);
             }
 
+            if (clazz != null) {
+                Object analyzer = null;
+                try {
+                    analyzer = clazz.newInstance();
+                } catch (InstantiationException e) {
+                    log.error("Unable to instantiate custom analyzer class..", e);
+                } catch (IllegalAccessException e) {
+                    log.error("Unable to instantiate custom analyzer class..", e);
+                }
+
+                if (analyzer instanceof AbstractHiveAnalyzer) {
+                    AbstractHiveAnalyzer hiveAnnotation =
+                            (AbstractHiveAnalyzer) analyzer;
+
+
+                    hiveAnnotation.execute(parameters);
+                } else {
+                    log.error("Custom analyzers should extend AbstractHiveAnalayzer..");
+                }
+
+            }
         }
 
         private String formatScript(String script) {
-            String scriptFormat = script;
             Pattern regex1 = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-            Matcher regexMatcher = regex1.matcher(scriptFormat);
+            Matcher regexMatcher = regex1.matcher(script);
             String formattedScript = "";
             while (regexMatcher.find()) {
-                String temp = "";
+                String temp;
                 if (regexMatcher.group(1) != null) {
                     // Add double-quoted string without the quotes
                     temp = regexMatcher.group(1).replaceAll(";", "%%");

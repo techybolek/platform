@@ -50,9 +50,7 @@ public class ResolvePathAnalyzer extends AbstractHiveAnalyzer {
 
         if (os.startsWith("Windows") ) {
             resolvedPath = filePath.replace("/", "\\");
-        } else if (os.startsWith("Linux")|| os.startsWith("Mac")) {
-            resolvedPath = filePath;
-         } else {
+        }else {
             resolvedPath = filePath;
         }
         return resolvedPath;
