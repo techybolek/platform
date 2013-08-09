@@ -179,29 +179,61 @@
     <h2><fmt:message key='userstore.config'/></h2>
 
     <div id="workArea">
-        <table style="margin-top:10px;margin-bottom:10px" width="40%">
-            <tbody>
+
+
+        <table style="border:none; margin-bottom:10px">
             <tr>
                 <td>
-                    <a style="cursor: pointer;" onclick="selectAllInThisPage(true);return false;" href="#"><fmt:message
-                            key="selectAllInPage"/></a>
-                    | <a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;"
-                         href="#"><fmt:message
-                        key="selectNone"/></a>
-                </td>
-                <td>
-                    <a onclick="deleteUserStores();return false;" href="#" class="icon-link"
-                       style="background-image: url(images/delete.gif);"><fmt:message key="delete"/></a>
-                </td>
-                <td width="10%" style="text-align:center; !important">
                     <a title="<fmt:message key='add'/>"
                        onclick="edit('0','0');"
                        href="#" style="background-image: url(images/add.gif);" class="icon-link">
                         <fmt:message key='add.user.store'/></a>
                 </td>
             </tr>
+        </table>
+
+
+        <table style="margin-top:10px;margin-bottom:10px">
+            <tbody>
+            <tr>
+                <td>
+                    <a style="cursor: pointer;" onclick="selectAllInThisPage(true);return false;" href="#">
+                        <fmt:message key="selectAllInPage"/></a>
+                    &nbsp; | &nbsp;</td><td><a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;"
+                                               href="#"><fmt:message key="selectNone"/></a>
+            </td>
+            <td width="20%">&nbsp;</td>
+                <td>
+                    <a onclick="deleteUserStores();return false;" href="#" class="icon-link"
+                       style="background-image: url(images/delete.gif);"><fmt:message key="delete"/></a>
+                </td>
+            </tr>
             </tbody>
         </table>
+
+        <%--<table style="margin-top:10px;margin-bottom:10px" width="40%">--%>
+            <%--<tbody>--%>
+            <%--<tr>--%>
+                <%--<td>--%>
+                    <%--<a style="cursor: pointer;" onclick="selectAllInThisPage(true);return false;" href="#"><fmt:message--%>
+                            <%--key="selectAllInPage"/></a>--%>
+                    <%--| <a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;"--%>
+                         <%--href="#"><fmt:message--%>
+                        <%--key="selectNone"/></a>--%>
+                <%--</td>--%>
+                <%--<td>--%>
+                    <%--<a onclick="deleteUserStores();return false;" href="#" class="icon-link"--%>
+                       <%--style="background-image: url(images/delete.gif);"><fmt:message key="delete"/></a>--%>
+                <%--</td>--%>
+                <%--<td width="10%" style="text-align:center; !important">--%>
+                    <%--<a title="<fmt:message key='add'/>"--%>
+                       <%--onclick="edit('0','0');"--%>
+                       <%--href="#" style="background-image: url(images/add.gif);" class="icon-link">--%>
+                        <%--<fmt:message key='add.user.store'/></a>--%>
+                <%--</td>--%>
+            <%--</tr>--%>
+            <%--</tbody>--%>
+        <%--</table>--%>
 
         <form id="userStoreForm" action="" name="userStoreForm" method="post">
             <table style="width: 100%" id="dataTable" class="styledLeft">
@@ -229,25 +261,21 @@
 
                 %>
                 <tr id=<%=domainId%>>
-                    <td width="5%" style="text-align:center; !important">
+                    <td style="width: 5%;margin-top:10px;">
                         <input type="checkbox" name="userStores"
                                value="<%=domainId%>"
                                onclick="resetVars()"
                                class="chkBox"/>
                     </td>
-                    <td style="width:6%" style="text-align:left;">
+                    <td style="width: 10%;margin-top:10px;">
                         <a><%=domainId%>
                         </a>
                     </td>
-                    <td style="width:35%" style="text-align:left;">
-                        <a><%=description%>
-                        </a>
-                    </td>
-                    <td style="width:25%" style="text-align:left;">
+                    <td style="width: 40%;margin-top:10px;">
                         <a><%=className%>
                         </a>
                     </td>
-                    <td width="29%" style="text-align:center; !important">
+                    <td style="width: 45%;margin-top:10px;">
                         <a title="<fmt:message key='edit.userstore'/>"
                            onclick="edit('<%=domainId%>','<%=className%>');"
                            href="#" style="background-image: url(images/edit.gif);" class="icon-link">

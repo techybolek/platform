@@ -161,7 +161,7 @@
     function doSubmit() {
     if (doValidationDomainNameOnly()) {
     //            if(doValidationMandatoryProperties()){
-    document.dataForm.action = "userstore-config-finish.jsp?domain= " +<%=domain%>;
+    document.dataForm.action = "userstore-config-finish.jsp?domain= " + "<%=domain%>";
     document.dataForm.submit();
 
     }
@@ -603,8 +603,13 @@
 
 
 <div class="buttonRow">
-    <input type="button" onclick="doSubmit();" value="<fmt:message key="finish"/>"
+    <%if(isEditing){ %>
+    <input type="button" onclick="doSubmit();" value="<fmt:message key="update"/>"
            class="button"/>
+    <%} else {%>
+    <input type="button" onclick="doSubmit();" value="<fmt:message key="add"/>"
+           class="button"/>
+    <%}%>
     <input type="button" onclick="doCancel();" value="<fmt:message key="cancel" />"
            class="button"/>
 </div>
