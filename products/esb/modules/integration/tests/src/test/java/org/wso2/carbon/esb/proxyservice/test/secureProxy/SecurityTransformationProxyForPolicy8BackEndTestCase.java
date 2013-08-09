@@ -252,7 +252,7 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
     @Test(groups = {"wso2.dss"}, description = "Secure request using policy 12 and secure back end using policy 8")
     public void securityPolicy12() throws Exception {
-        String proxy12 = "<proxy name=\"StockQuoteSecurityTransformProxyToPolicy8_12\" transports=\"https http\" startOnLoad=\"true\" trace=\"disable\">\n" +
+        String proxy12 = "<proxy xmlns=\"http://ws.apache.org/ns/synapse\" name=\"StockQuoteSecurityTransformProxyToPolicy8_12\" transports=\"https http\" startOnLoad=\"true\" trace=\"disable\">\n" +
                          "        <target>\n" +
                          "            <inSequence>\n" +
                          "                <send>\n" +
