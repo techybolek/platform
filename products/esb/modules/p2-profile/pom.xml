@@ -93,7 +93,6 @@
                             <goal>p2-repo-gen</goal>
                         </goals>
                         <configuration>
-                            <p2AgentLocation>${basedir}/target/p2-agent</p2AgentLocation>
                             <metadataRepository>file:${basedir}/target/p2-repo</metadataRepository>
                             <artifactRepository>file:${basedir}/target/p2-repo</artifactRepository>
                             <publishArtifacts>true</publishArtifacts>
@@ -277,7 +276,6 @@
                         </goals>
                         <configuration>
                             <profile>default</profile>
-                            <p2AgentLocation>${basedir}/target/p2-agent</p2AgentLocation>
                             <metadataRepository>file:${basedir}/target/p2-repo</metadataRepository>
                             <artifactRepository>file:${basedir}/target/p2-repo</artifactRepository>
                             <destination>${basedir}/target/wso2carbon-core-${carbon.kernel.version}/repository/components</destination>
