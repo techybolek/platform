@@ -299,6 +299,40 @@ public class APIUsageStatisticsClient {
     }
 
     /**
+     * Returns a list of APIUsageByUserDTO objects that contain information related to
+     * User wise API Usage, along with the number of invocations, and API Version
+     *
+     * @param providerName Name of the API provider
+     * @return a List of APIUsageByUserDTO objects, possibly empty
+     * @throws APIMgtUsageQueryServiceClientException
+     *          on error
+     */
+    public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName,String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+
+        OMElement omElement = this.queryBetweenTwoDaysForAPIUsageByUser(fromDate, toDate, null);
+        Collection<APIUsageByUserName> usageData = getUsageDataByAPIName(omElement);
+        List<API> providerAPIs = getAPIsByProvider(providerName);
+        List<APIUsageByUserDTO> usageByName = new ArrayList<APIUsageByUserDTO>();
+
+        for (APIUsageByUserName usage : usageData) {
+            for (API providerAPI : providerAPIs) {
+                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
+                        providerAPI.getId().getVersion().equals(usage.apiVersion)) {
+
+                    APIUsageByUserDTO usageDTO = new APIUsageByUserDTO();
+                    usageDTO.setApiName(usage.apiName);
+                    usageDTO.setVersion(usage.apiVersion);
+                    usageDTO.setUserID(usage.userID);
+                    usageDTO.setCount(usage.requestCount);
+                    usageByName.add(usageDTO);
+                }
+            }
+        }
+        return usageByName;
+    }
+
+    /**
      * Gets a list of APIResponseTimeDTO objects containing information related to APIs belonging
      * to a particular provider along with their average response times.
      *
@@ -1117,6 +1151,79 @@ public class APIUsageStatisticsClient {
         }
     }
 
+    private OMElement queryBetweenTwoDaysForAPIUsageByUser(String fromDate, String toDate, Integer limit)
+            throws APIMgtUsageQueryServiceClientException {
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        int resultsLimit = APIUsageStatisticsClientConstants.DEFAULT_RESULTS_LIMIT;
+        if(limit!=null){
+            resultsLimit = limit.intValue();
+        }
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+            if (fromDate != null && toDate != null) {
+                query = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "+
+                        "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
+                        "\'" + fromDate + "\' AND \'" + toDate + "\'" +"GROUP BY API, API_VERSION ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+            } else {
+                query = "SELECT API, API_VERSION, VERSION, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "+
+                        "FROM API_REQUEST_SUMMARY GROUP BY API, API_VERSION ORDER BY TOTAL_REQUEST_COUNT DESC LIMIT " + resultsLimit;
+
+            }
+            rs = statement.executeQuery(query);
+            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
+            int columnCount = rs.getMetaData().getColumnCount();
+            while (rs.next()) {
+                returnStringBuilder.append("<row>");
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = rs.getMetaData().getColumnName(i);
+                    String columnValue = rs.getString(columnName);
+                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + columnValue +
+                            "</" + columnName.toLowerCase() + ">");
+                }
+                returnStringBuilder.append("</row>");
+            }
+            returnStringBuilder.append("</rows></omElement>");
+            String returnString = returnStringBuilder.toString();
+            return AXIOMUtil.stringToOM(returnString);
+
+        } catch (Exception e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                }
+            }
+        }
+    }
+
+
 
     public boolean isTableExist(String tableName, Connection connection) throws SQLException {
         //This return all tables,use this because it is not db specific, Passing table name doesn't
@@ -1168,6 +1275,21 @@ public class APIUsageStatisticsClient {
             while (rowIterator.hasNext()) {
                 OMElement rowElement = (OMElement) rowIterator.next();
                 usageData.add(new APIUsageByResourcePath(rowElement));
+            }
+        }
+        return usageData;
+    }
+
+    private Collection<APIUsageByUserName> getUsageDataByAPIName(OMElement data) {
+        List<APIUsageByUserName> usageData = new ArrayList<APIUsageByUserName>();
+        OMElement rowsElement = data.getFirstChildWithName(new QName(
+                APIUsageStatisticsClientConstants.ROWS));
+        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
+                APIUsageStatisticsClientConstants.ROW));
+        if (rowIterator != null) {
+            while (rowIterator.hasNext()) {
+                OMElement rowElement = (OMElement) rowIterator.next();
+                usageData.add(new APIUsageByUserName(rowElement));
             }
         }
         return usageData;
@@ -1344,6 +1466,25 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.METHOD)).getText();
             context = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.CONTEXT)).getText();
+            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
+                    APIUsageStatisticsClientConstants.REQUEST)).getText());
+        }
+    }
+
+    private static class APIUsageByUserName {
+
+        private String apiName;
+        private String apiVersion;;
+        private String userID;
+        private long requestCount;
+
+        public APIUsageByUserName(OMElement row) {
+            apiName = row.getFirstChildWithName(new QName(
+                    APIUsageStatisticsClientConstants.API)).getText();
+            apiVersion = row.getFirstChildWithName(new QName(
+                    APIUsageStatisticsClientConstants.VERSION)).getText();
+            userID = row.getFirstChildWithName(new QName(
+                    APIUsageStatisticsClientConstants.USER_ID)).getText();
             requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.REQUEST)).getText());
         }

@@ -85,7 +85,8 @@ public final class APIUsageStatisticsClientConstants {
     public static final String DAY= "day";
 
     public static final String TIME= "time";
-    
+
+    public static final int DEFAULT_RESULTS_LIMIT = 10;
     
     public static final String ALL_PROVIDERS = "__all_providers__";
 
