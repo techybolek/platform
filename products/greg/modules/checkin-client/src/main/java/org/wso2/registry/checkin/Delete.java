@@ -45,7 +45,6 @@ public class Delete {
     }
 
     private void setDelete(String metaFilePath) throws SynchronizationException {
-        System.out.println(metaFilePath);
         File metaFile = new File(metaFilePath);
         XMLStreamWriter xmlWriter = null;
         try {

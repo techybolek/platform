@@ -52,6 +52,7 @@ public class Add {
     private void addResourceMetadataRecursively(String path, String parentRegistryPath, boolean root) throws SynchronizationException {
         File file = new File(path);
         String registryPath = parentRegistryPath + File.separator + file.getName();
+        System.out.println("A " + path);
         String metaFilePath;
         if(file.isDirectory()){
             metaFilePath = path + File.separator + SynchronizationConstants.META_DIRECTORY +
@@ -59,7 +60,6 @@ public class Add {
                     SynchronizationConstants.META_FILE_PREFIX +
                     SynchronizationConstants.META_FILE_EXTENSION;
             addMetadata(metaFilePath, file.getName(), true, registryPath, root);
-            System.out.println("A " + path);
             for(String fileName : file.list(new FilenameFilter() {
                 public boolean accept(File file, String s) {
                     if(SynchronizationConstants.META_DIRECTORY.equals(s)){
@@ -78,7 +78,6 @@ public class Add {
                             Utils.encodeResourceName(file.getName()) +
                             SynchronizationConstants.META_FILE_EXTENSION;
             addMetadata(metaFilePath, file.getName(), false, registryPath, root);
-            log.info("A " + path);
         }
     }
 
