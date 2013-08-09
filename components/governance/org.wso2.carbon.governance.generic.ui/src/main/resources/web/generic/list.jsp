@@ -27,12 +27,12 @@
 <%@ page import="org.wso2.carbon.governance.generic.ui.utils.UIGeneratorConstants" %>
 <%@ page import="org.wso2.carbon.governance.lcm.ui.clients.LifeCycleManagementServiceClient" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
-<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="org.wso2.carbon.registry.core.pagination.PaginationContext" %>
 
 <script type="text/javascript" src="../ajax/js/prototype.js"></script>
 <link type="text/css" rel="stylesheet" href="css/menu.css"/>

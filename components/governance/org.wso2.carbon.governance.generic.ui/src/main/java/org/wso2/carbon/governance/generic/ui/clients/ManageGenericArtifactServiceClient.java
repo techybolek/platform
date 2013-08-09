@@ -31,8 +31,8 @@ import org.wso2.carbon.governance.generic.stub.beans.xsd.StoragePathBean;
 import org.wso2.carbon.governance.generic.ui.utils.GenericUtil;
 import org.wso2.carbon.governance.generic.ui.utils.ManageGenericArtifactUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.utils.PaginationContext;
-import org.wso2.carbon.registry.core.utils.PaginationUtils;
+import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.pagination.PaginationUtils;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.utils.ServerConstants;
 

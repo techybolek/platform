@@ -33,8 +33,7 @@ import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.utils.Paginate;
-import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.pagination.Paginate;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
 import javax.xml.namespace.QName;
