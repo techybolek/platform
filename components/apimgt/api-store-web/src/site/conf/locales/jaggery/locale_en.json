@@ -164,6 +164,6 @@
     "delete" : "DELETE" ,
     "put" : "PUT" ,
     "validityTime":"Token valid period",
-    "options" : "OPTIONS"
+    "options":"OPTIONS"
 
 }
