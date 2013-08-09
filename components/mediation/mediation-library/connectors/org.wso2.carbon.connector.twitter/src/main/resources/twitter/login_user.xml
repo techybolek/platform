@@ -1,8 +1,8 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="login_user">
 	<parameter name="oauth.consumerKey"/>
-        <parameter name="oauth.consumerSecret"/>
-        <parameter name="oauth.accessToken"/>
-        <parameter name="oauth.accessTokenSecret"/>
+        <parameter name="consumerSecret"/>
+        <parameter name="accessToken"/>
+        <parameter name="accessTokenSecret"/>
         <sequence>
         	<class name="org.wso2.carbon.connector.twitter.TwitterLoginUser" />
         </sequence>

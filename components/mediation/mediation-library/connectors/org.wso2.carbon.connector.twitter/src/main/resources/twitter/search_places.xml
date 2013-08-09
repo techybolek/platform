@@ -20,14 +20,13 @@
 
 <!-- Splitter eip library function template shipped with the Apache Synapse -->
 <template xmlns="http://ws.apache.org/ns/synapse" name="search_places">
-	<parameter name="oauth.consumerKey"/>
-	<parameter name="oauth.consumerSecret"/>
-	<parameter name="oauth.accessToken"/>
-	<parameter name="oauth.accessTokenSecret"/>
+	<parameter name="consumerKey"/>
+	<parameter name="consumerSecret"/>
+	<parameter name="accessToken"/>
+	<parameter name="accessTokenSecret"/>
 	<parameter name="latitude"/>
 	<parameter name="longitude"/>
 	<sequence>
-		<!-- <class name="org.wso2.carbon.mediation.library.connectors.twitter.TwitterLoginUserMediator" /> -->
 		<class name="org.wso2.carbon.connector.twitter.TwitterSearchPlaces" />
 	</sequence>
 </template>

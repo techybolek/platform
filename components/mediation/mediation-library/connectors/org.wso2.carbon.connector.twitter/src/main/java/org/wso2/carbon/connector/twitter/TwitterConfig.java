@@ -27,10 +27,10 @@ public class TwitterConfig extends AbstractConnector {
 
 	private static Log log = LogFactory.getLog(TwitterConfig.class);
 
-	public static final String CONSUMER_KEY = "oauth.consumerKey";
-	public static final String CONSUMER_SECRET = "oauth.consumerSecret";
-	public static final String ACCESS_TOKEN = "oauth.accessToken";
-	public static final String ACCESS_TOKEN_SECRET = "oauth.accessTokenSecret";
+	public static final String CONSUMER_KEY = "consumerKey";
+	public static final String CONSUMER_SECRET = "consumerSecret";
+	public static final String ACCESS_TOKEN = "accessToken";
+	public static final String ACCESS_TOKEN_SECRET = "accessTokenSecret";
 
 	@Override
 	public void connect(MessageContext messageContext) throws ConnectException {
