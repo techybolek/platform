@@ -280,7 +280,9 @@ public class SecurityTransformationProxyForPolicy8BackEndTestCase extends ESBInt
 
 
         final int policyId = 12;
-        this.secureService(policyId);
+        //this.secureService(policyId);
+        applySecurity(serviceName, policyId, getUserRole(userInfo.getUserId()));
+
         if (!ServiceTransportUtil.isHttpTransportEnable(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName)) {
             ServiceTransportUtil.addTransportHttp(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), serviceName);
         }
