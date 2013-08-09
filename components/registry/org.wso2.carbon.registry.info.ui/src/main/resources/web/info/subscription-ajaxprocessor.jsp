@@ -30,9 +30,9 @@
 <%@ page import="org.wso2.carbon.registry.resource.stub.beans.xsd.ResourceTreeEntryBean" %>
 <%@ page import="org.wso2.carbon.context.CarbonContext" %>
 <%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
-<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
 <%@ page import="org.wso2.carbon.registry.common.ui.UIConstants" %>
+<%@ page import="org.wso2.carbon.registry.core.pagination.PaginationContext" %>
 
 <carbon:jsi18n resourceBundle="org.wso2.carbon.registry.info.ui.i18n.JSResources"
 		request="<%=request%>" namespace="org.wso2.carbon.registry.info.ui"/>

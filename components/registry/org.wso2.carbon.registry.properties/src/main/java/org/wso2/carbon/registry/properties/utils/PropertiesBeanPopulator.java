@@ -20,11 +20,11 @@ import org.apache.axis2.context.MessageContext;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.pagination.PaginationUtils;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.common.utils.UserUtil;
-import org.wso2.carbon.registry.core.utils.PaginationContext;
-import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.properties.beans.PropertiesBean;
 
 import java.util.*;

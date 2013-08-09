@@ -31,7 +31,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.LinkedList" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
+<%@ page import="org.wso2.carbon.registry.core.pagination.PaginationContext" %>
 <script type="text/javascript" src="../registry_common/js/registry_validation.js"></script>
 
 <%

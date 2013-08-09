@@ -23,8 +23,8 @@
 <%@ page import="org.wso2.carbon.registry.properties.ui.clients.PropertiesServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="java.util.HashMap" %>
-<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
+<%@ page import="org.wso2.carbon.registry.core.pagination.PaginationContext" %>
 
 
 <%

@@ -26,8 +26,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.common.beans.ActivityBean;
 import org.wso2.carbon.registry.common.utils.CommonUtil;
-import org.wso2.carbon.registry.core.utils.PaginationContext;
-import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 

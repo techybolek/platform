@@ -21,7 +21,6 @@
 
 <%@ page import="org.wso2.carbon.registry.common.ui.UIConstants" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
-<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 <%@ page import="org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient" %>
 <%@ page import="org.wso2.carbon.registry.search.stub.beans.xsd.AdvancedSearchResultsBean" %>
 <%@ page import="org.wso2.carbon.registry.search.stub.common.xsd.ResourceData" %>
@@ -32,6 +31,7 @@
 <%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.wso2.carbon.registry.core.pagination.PaginationContext" %>
 
 
 <%

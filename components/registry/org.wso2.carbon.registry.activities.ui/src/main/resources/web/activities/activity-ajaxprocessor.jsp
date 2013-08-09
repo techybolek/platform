@@ -30,7 +30,8 @@
 <%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
+<%@ page import="org.wso2.carbon.registry.core.pagination.PaginationContext" %>
+
 
 <fmt:bundle basename="org.wso2.carbon.registry.activities.ui.i18n.Resources">
 
