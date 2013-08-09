@@ -32,6 +32,7 @@ import org.wso2.carbon.appfactory.application.mgt.util.Util;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.core.queue.Executor;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.stream.XMLStreamException;
@@ -154,6 +155,9 @@ public class ApplicationExecutor implements Executor<ApplicationInfoBean> {
                 "      <repositoryType xmlns=\"http://wso2.org\">" +
                 applicationInfoBean.getRepositoryType() +
                 "</repositoryType>\n" +
+                "<domainName xmlns=\"http://wso2.org\">" +
+                        CarbonContext.getCurrentContext().getTenantDomain() +
+                "</domainName>\n" +
                 "      <adminUserName xmlns=\"http://wso2.org\">" +
                 Util.getConfiguration()
                         .getFirstProperty(AppFactoryConstants.SERVER_ADMIN_NAME) +
