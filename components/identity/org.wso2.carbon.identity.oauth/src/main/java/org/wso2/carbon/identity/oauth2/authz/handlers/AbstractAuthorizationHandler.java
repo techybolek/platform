@@ -130,7 +130,4 @@ public abstract class AbstractAuthorizationHandler implements AuthorizationHandl
         oauthAuthzMsgCtx.setApprovedScope(scopeValidationCallback.getApprovedScope());
         return scopeValidationCallback.isValidScope();
     }
-
-    public abstract OAuth2AuthorizeRespDTO issue(OAuthAuthzReqMessageContext oauthAuthzMsgCtx)
-            throws IdentityOAuth2Exception;
 }
