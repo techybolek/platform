@@ -514,6 +514,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                                 APIConstants.API_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
             GenericArtifact updateApiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
+            //Validate Transports
+            validateTransports(api);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiArtifact.getId());
             org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
             if (oldTags != null) {
@@ -662,7 +664,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "--" + api.getId().getApiName());
             apiMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
             apiMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
-            validateTransports(api, apiMappings);
+            putTransportKeyMappings(api, apiMappings);
             builder = new BasicTemplateBuilder(apiMappings);
         } else {
             builder = getTemplateBuilder(api);
@@ -676,16 +678,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void validateTransports(API api, Map<String, String> apiMappings) throws APIManagementException {
+    private void putTransportKeyMappings(API api, Map<String, String> apiMappings) throws APIManagementException{
         if (api.getTransports().contains(",")) {
             List<String> transports = new ArrayList<String>(Arrays.asList(api.getTransports().split(",")));
             if(transports.contains(Constants.TRANSPORT_HTTP) && transports.contains(Constants.TRANSPORT_HTTPS)){
                 apiMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, "");
-            }else{
-                handleException("Unsupported Transport Exception");
             }
         }else{
             apiMappings.put(APITemplateBuilder.KEY_FOR_API_TRANSPORTS, api.getTransports());
+        }
+    }
+
+    private void validateTransports(API api) throws APIManagementException {
+        if (api.getTransports().contains(",")) {
+            StringTokenizer st = new StringTokenizer(api.getTransports(), ",");
+            while (st.hasMoreTokens()) {
+                checkIfValidTransport(st.nextToken());
+            }
+        }else{
+            checkIfValidTransport(api.getTransports());
+        }
+    }
+
+    private void checkIfValidTransport(String transport) throws APIManagementException {
+        if(!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)){
+            handleException("Unsupported Transport ["+transport+"]");
         }
     }
 
@@ -727,7 +744,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_CONTEXT, api.getContext());
         testAPIMappings.put(APITemplateBuilder.KEY_FOR_API_VERSION, api.getId().getVersion());
 
-        validateTransports(api, testAPIMappings);
+        putTransportKeyMappings(api, testAPIMappings);
 
         if (api.getUriTemplates() == null || api.getUriTemplates().size() == 0) {
             throw new APIManagementException("At least one resource is required");
@@ -1126,6 +1143,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIUtil.getAPIProviderPath(api.getId());
+            //Validate Transports
+            validateTransports(api);
             //provider ------provides----> API
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
             Set<String> tagSet = api.getTags();
