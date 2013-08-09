@@ -99,6 +99,9 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setValidationStatus(thriftDTO.getValidationStatus());
         apiKeyValidationInfoDTO.setApplicationId(thriftDTO.getApplicationId());
         apiKeyValidationInfoDTO.setApplicationTier(thriftDTO.getApplicationTier());
+        apiKeyValidationInfoDTO.setApiName(thriftDTO.getApiName());
+        apiKeyValidationInfoDTO.setApiPublisher(thriftDTO.getApiPublisher());
+        apiKeyValidationInfoDTO.setConsumerKey(thriftDTO.getConsumerKey());
 
         return apiKeyValidationInfoDTO;
     }
