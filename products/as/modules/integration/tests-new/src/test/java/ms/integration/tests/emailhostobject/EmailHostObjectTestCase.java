@@ -19,6 +19,10 @@ package ms.integration.tests.emailhostobject;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterClass;
@@ -71,7 +75,7 @@ public class EmailHostObjectTestCase extends ASIntegrationTest {
         boolean serDeployedStatus = isServiceDeployed("admin/emailTest");
         assertTrue(serDeployedStatus, "Service deployment failure ");
         AxisServiceClient axisServiceClient = new AxisServiceClient();
-        OMElement response = axisServiceClient.sendReceive(createPayload(),
+        OMElement response = axisServiceClient.sendReceive(null,
                 asServer.getServiceUrl() + "/admin/emailTest", "sendEmail");
         log.info("Response :" + response);
         assertNotNull(response, "Response cannot be null");
@@ -82,8 +86,4 @@ public class EmailHostObjectTestCase extends ASIntegrationTest {
                 "Error occurred while sending the e-mail.");
     }
 
-    private OMElement createPayload() throws XMLStreamException {  // creation of request
-        String request = "<body/>";
-        return new StAXOMBuilder(new ByteArrayInputStream(request.getBytes())).getDocumentElement();
-    }
 }
