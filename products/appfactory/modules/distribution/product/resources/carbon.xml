@@ -27,7 +27,7 @@
     <!--
        Product Name
     -->
-    <Name>WSO2 AppFactory</Name>
+    <Name>WSO2 App Factory</Name>
 
 <EnableEmailUserName>true</EnableEmailUserName>
     <!--
