@@ -43,19 +43,42 @@ public class CSVUserBulkImport {
             String password = config.getDefaultPassword();
             String[] line = csvReader.readNext();
             boolean isDuplicate = false;
+            boolean fail = false;
+            boolean success = false;
+            String lastError = "UNKNOWN";
             while (line != null && line.length > 0) {
                 String userName = line[0];
-                if (!userStore.isExistingUser(userName)) {
-                    userStore.addUser(userName, password, null, null, null, true);
-                } else {
-                    isDuplicate = true;
+                if(userName != null && userName.trim().length() > 0){
+                    try{
+                        if (!userStore.isExistingUser(userName)) {
+                            userStore.addUser(userName, password, null, null, null, true);
+                            success = true;
+                        } else {
+                            isDuplicate = true;
+                        }
+                    } catch (Exception e){
+                        if(log.isDebugEnabled()) {
+                            log.debug(e);
+                        }
+                        lastError = e.getMessage();
+                        fail = true;
+                    }
                 }
                 line = csvReader.readNext();
             }
-            
-            if (isDuplicate == true) {
-                throw new UserAdminException(
-                        "Detected duplicate usernames. Failed to import duplicate users. Non-duplicate user names were successfually imported.");
+
+            if (fail && success) {
+                throw new UserAdminException("Error occurs while importing user names. " +
+                        "Some user names were successfully imported. Some were not. Last error was : " + lastError);
+            }
+
+            if(fail && !success){
+                throw new UserAdminException("Error occurs while importing user names. " +
+                        "All user names were not imported. Last error was : " + lastError);
+            }
+            if (isDuplicate) {
+                throw new UserAdminException("Detected duplicate user names. " +
+                        "Failed to import duplicate users. Non-duplicate user names were successfully imported.");
             }
         } catch (UserAdminException e) {
             throw e;
