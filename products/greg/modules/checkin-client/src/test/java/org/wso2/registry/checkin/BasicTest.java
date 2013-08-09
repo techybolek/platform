@@ -57,7 +57,7 @@ public class BasicTest extends BaseTestCase {
         }
     }
 
-    void cleanRegistry() throws RegistryException{
+    void cleanRegistry() throws RegistryException {
         // just to make sure no other stuff are there inside the registry
         if (registry.resourceExists(MYROOT)) {
             registry.delete(MYROOT);
@@ -69,7 +69,7 @@ public class BasicTest extends BaseTestCase {
     boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
-            for (int i=0; i<children.length; i++) {
+            for (int i = 0; i < children.length; i++) {
                 boolean success = deleteDir(new File(dir, children[i]));
                 if (!success) {
                     return false;
@@ -101,10 +101,10 @@ public class BasicTest extends BaseTestCase {
         registry.put(MYROOT + "/hohohooooo", r2);
 
         registry.addAssociation(MYROOT + "/bingbingpeee", MYROOT + "/hohohooooo", "peek");
-        
+
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -124,7 +124,7 @@ public class BasicTest extends BaseTestCase {
         assertTrue("checkouted file should exist", file2.exists());
         assertEquals("tare;akjfs;dkfajklfj;akfd sj;lkajs fd;klajsk;dlfj a;dfj", content2);
 
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         // the answer to only question is yes, so we are putting it here
         new Checkin(clientOptions).execute(registry);
 
@@ -138,15 +138,15 @@ public class BasicTest extends BaseTestCase {
         Comment[] comments = registry.getComments(MYROOT + "/bingbingpeee");
         assertTrue("The commments are not checkedin correctly",
                 (comments[0].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")) ||
-                (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")));
+                        comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")) ||
+                        (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
+                                comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")));
 
         // tags
         Tag[] tags = registry.getTags(MYROOT + "/bingbingpeee");
         assertTrue("The tags has not ben checkedin correctly",
                 (tags[0].getTagName().equals("abcdasfslapqdejf") && tags[1].getTagName().equals("pisfsdfosdfasdk") ||
-                   tags[1].getTagName().equals("abcdasfslapqdejf") && tags[0].getTagName().equals("pisfsdfosdfasdk")));
+                        tags[1].getTagName().equals("abcdasfslapqdejf") && tags[0].getTagName().equals("pisfsdfosdfasdk")));
 
         Association[] assocs = registry.getAllAssociations(MYROOT + "/bingbingpeee");
         assertEquals(assocs[0].getAssociationType(), "peek");
@@ -182,7 +182,7 @@ public class BasicTest extends BaseTestCase {
 
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -194,7 +194,7 @@ public class BasicTest extends BaseTestCase {
         r1.setContent("r1 content2");
         registry.put(MYROOT + "/bingbingpeee", r1);
 
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         Update update = new Update(clientOptions);
 
         update.execute(registry);
@@ -215,7 +215,7 @@ public class BasicTest extends BaseTestCase {
 
         // then we will commit it back and get a new update
         new Checkin(clientOptions).execute(registry);
-       // brand new update
+        // brand new update
         update = new Update(clientOptions);
         update.execute(registry);
         assertEquals(0, update.getAddedCount());
@@ -256,9 +256,13 @@ public class BasicTest extends BaseTestCase {
         // this should be removed when we make updatig comments, ratings, tags as an update to the resource
         //assertEquals(1, update.getUpdatedCount());
 
-        // to test we will be checkin it back to different url
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
-        // the answer to only question is yes, so we are putting it here
+        clientOptions = new ClientOptions();
+        clientOptions.setUserInteractor(new DefaultUserInteractor());
+        clientOptions.setTesting(true);
+        clientOptions.setUsername(RegistryConstants.ADMIN_USER);
+        clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
+        clientOptions.setWorkingLocation(MYCO);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         new Checkin(clientOptions).execute(registry);
 
         // checking them back
@@ -271,14 +275,14 @@ public class BasicTest extends BaseTestCase {
         Comment[] comments = registry.getComments(MYROOT + "/bingbingpeee");
         assertTrue("The commments are not checkedin correctly",
                 (comments[0].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
-                 comments[2].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
-                (comments[2].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
-                 comments[1].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
-                (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[2].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
-                 comments[0].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")));
+                        comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
+                        comments[2].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
+                        (comments[2].getText().equals("comasdfj asf;kajsdf asdf") &&
+                                comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
+                                comments[1].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
+                        (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
+                                comments[2].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
+                                comments[0].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")));
 
         // tags
         Tag[] tags = registry.getTags(MYROOT + "/bingbingpeee");
@@ -286,12 +290,12 @@ public class BasicTest extends BaseTestCase {
                 (tags[0].getTagName().equals("abcdasfslapqdejf") &&
                         tags[1].getTagName().equals("pisfsdfosdfasdk") &&
                         tags[2].getTagName().equals("hmhmhmpee")) ||
-                (tags[2].getTagName().equals("abcdasfslapqdejf") &&
-                        tags[0].getTagName().equals("pisfsdfosdfasdk") &&
-                        tags[1].getTagName().equals("hmhmhmpee")) ||
-                (tags[1].getTagName().equals("abcdasfslapqdejf") &&
-                        tags[2].getTagName().equals("pisfsdfosdfasdk") &&
-                        tags[0].getTagName().equals("hmhmhmpee")));
+                        (tags[2].getTagName().equals("abcdasfslapqdejf") &&
+                                tags[0].getTagName().equals("pisfsdfosdfasdk") &&
+                                tags[1].getTagName().equals("hmhmhmpee")) ||
+                        (tags[1].getTagName().equals("abcdasfslapqdejf") &&
+                                tags[2].getTagName().equals("pisfsdfosdfasdk") &&
+                                tags[0].getTagName().equals("hmhmhmpee")));
 
         Association[] assocs = registry.getAssociations(MYROOT + "/bingbingpeee", "peek");
         assertEquals(assocs[0].getAssociationType(), "peek");
@@ -307,7 +311,7 @@ public class BasicTest extends BaseTestCase {
         cleanRegistry();
     }
 
-    public void testSimpleResourceUpdateWithDelete() throws Exception{
+    public void testSimpleResourceUpdateWithDelete() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -318,7 +322,7 @@ public class BasicTest extends BaseTestCase {
         registry.put(MYROOT + "/bingbingpeee", r1);
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -334,14 +338,14 @@ public class BasicTest extends BaseTestCase {
         Update update = new Update(clientOptions);
         update.execute(registry);
 
-        assertEquals(0,update.getAddedCount());
-        assertEquals(0,update.getConflictedCount());
-        assertEquals(0,update.getUpdatedCount());
-        assertEquals(1,update.getDeletedCount());
+        assertEquals(0, update.getAddedCount());
+        assertEquals(0, update.getConflictedCount());
+        assertEquals(0, update.getUpdatedCount());
+        assertEquals(1, update.getDeletedCount());
         cleanRegistry();
     }
 
-    public void testSimpleCollectionUpdateWithDelete() throws Exception{
+    public void testSimpleCollectionUpdateWithDelete() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -350,7 +354,7 @@ public class BasicTest extends BaseTestCase {
         registry.put(MYROOT + "/foo/bar/bingbingpeee", r1);
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -365,10 +369,10 @@ public class BasicTest extends BaseTestCase {
         Update update = new Update(clientOptions);
         update.execute(registry);
 
-        assertEquals(0,update.getAddedCount());
-        assertEquals(0,update.getConflictedCount());
-        assertEquals(0,update.getUpdatedCount());
-        assertEquals(1,update.getDeletedCount());
+        assertEquals(0, update.getAddedCount());
+        assertEquals(0, update.getConflictedCount());
+        assertEquals(0, update.getUpdatedCount());
+        assertEquals(1, update.getDeletedCount());
         cleanRegistry();
     }
 
@@ -395,7 +399,7 @@ public class BasicTest extends BaseTestCase {
 
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -407,7 +411,7 @@ public class BasicTest extends BaseTestCase {
         r1.setProperty("xxxx", "r1 value");
         registry.put(MYROOT + "/bingbingpeee", r1);
 
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         Update update = new Update(clientOptions);
 
         update.execute(registry);
@@ -428,7 +432,7 @@ public class BasicTest extends BaseTestCase {
 
         // then we will commit it back and get a new update
         new Checkin(clientOptions).execute(registry);
-       // brand new update
+        // brand new update
         update = new Update(clientOptions);
         update.execute(registry);
         assertEquals(0, update.getAddedCount());
@@ -469,7 +473,7 @@ public class BasicTest extends BaseTestCase {
         //assertEquals(1, update.getUpdatedCount());
 
         // to test we will be checkin it back to different url
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         // the answer to only question is yes, so we are putting it here
         new Checkin(clientOptions).execute(registry);
 
@@ -483,14 +487,14 @@ public class BasicTest extends BaseTestCase {
         Comment[] comments = registry.getComments(MYROOT + "/bingbingpeee");
         assertTrue("The commments are not checkedin correctly",
                 (comments[0].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
-                 comments[2].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
-                (comments[2].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
-                 comments[1].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
-                (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[2].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
-                 comments[0].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")));
+                        comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
+                        comments[2].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
+                        (comments[2].getText().equals("comasdfj asf;kajsdf asdf") &&
+                                comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
+                                comments[1].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")) ||
+                        (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
+                                comments[2].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k") &&
+                                comments[0].getText().equals("asdfj ;dsfj dalala dalaa lsuwersf")));
 
         // tags
         Tag[] tags = registry.getTags(MYROOT + "/bingbingpeee");
@@ -498,12 +502,12 @@ public class BasicTest extends BaseTestCase {
                 (tags[0].getTagName().equals("abcdasfslapqdejf") &&
                         tags[1].getTagName().equals("pisfsdfosdfasdk") &&
                         tags[2].getTagName().equals("hmhmhmpee")) ||
-                (tags[2].getTagName().equals("abcdasfslapqdejf") &&
-                        tags[0].getTagName().equals("pisfsdfosdfasdk") &&
-                        tags[1].getTagName().equals("hmhmhmpee")) ||
-                (tags[1].getTagName().equals("abcdasfslapqdejf") &&
-                        tags[2].getTagName().equals("pisfsdfosdfasdk") &&
-                        tags[0].getTagName().equals("hmhmhmpee")));
+                        (tags[2].getTagName().equals("abcdasfslapqdejf") &&
+                                tags[0].getTagName().equals("pisfsdfosdfasdk") &&
+                                tags[1].getTagName().equals("hmhmhmpee")) ||
+                        (tags[1].getTagName().equals("abcdasfslapqdejf") &&
+                                tags[2].getTagName().equals("pisfsdfosdfasdk") &&
+                                tags[0].getTagName().equals("hmhmhmpee")));
 
         Association[] assocs = registry.getAssociations(MYROOT + "/bingbingpeee", "peek");
         assertEquals(assocs[0].getAssociationType(), "peek");
@@ -519,7 +523,7 @@ public class BasicTest extends BaseTestCase {
         cleanRegistry();
     }
 
-    public void testAddDelete() throws Exception{
+    public void testAddDelete() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -554,7 +558,7 @@ public class BasicTest extends BaseTestCase {
         clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -563,7 +567,7 @@ public class BasicTest extends BaseTestCase {
         Assert.assertEquals(registry.resourceExists(MYROOT + "/bingbingpeee/a/b/c/a.txt"), true);
 
         Resource resource = registry.get(MYROOT + "/bingbingpeee/a/b/c/a.txt");
-        Assert.assertEquals(new String((byte [])resource.getContent()), "This is the content");
+        Assert.assertEquals(new String((byte[]) resource.getContent()), "This is the content");
 
         clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
@@ -575,7 +579,7 @@ public class BasicTest extends BaseTestCase {
         clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -586,7 +590,7 @@ public class BasicTest extends BaseTestCase {
         cleanRegistry();
     }
 
-    public void testUpdate() throws Exception{
+    public void testUpdate() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -614,17 +618,17 @@ public class BasicTest extends BaseTestCase {
         clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
         new Checkin(clientOptions).execute(registry);
 
         Resource r = registry.get(MYROOT + "/bingbingpeee/abc.txt");
-        assertEquals("This is the content", new String((byte [])r.getContent()));
+        assertEquals("This is the content", new String((byte[]) r.getContent()));
     }
 
-    public void testStatus() throws Exception{
+    public void testStatus() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -698,7 +702,7 @@ public class BasicTest extends BaseTestCase {
         cleanRegistry();
     }
 
-    public void testSetProperties() throws Exception    {
+    public void testSetProperties() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -733,7 +737,7 @@ public class BasicTest extends BaseTestCase {
         clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -754,7 +758,7 @@ public class BasicTest extends BaseTestCase {
         clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -770,7 +774,7 @@ public class BasicTest extends BaseTestCase {
         cleanRegistry();
     }
 
-    public void testDeleteProperties() throws Exception    {
+    public void testDeleteProperties() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -815,7 +819,7 @@ public class BasicTest extends BaseTestCase {
         clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -853,7 +857,7 @@ public class BasicTest extends BaseTestCase {
         registry.addAssociation(MYROOT + "/bingbingpeee", MYROOT + "/hohohooooo", "peek");
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -873,7 +877,7 @@ public class BasicTest extends BaseTestCase {
         // but the client is not changed, just the same string is written.
         writeToFile(file1, "r1 content");
 
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         Update update = new Update(clientOptions);
 
         update.execute(registry);
@@ -893,7 +897,7 @@ public class BasicTest extends BaseTestCase {
         file1 = new File(MYCO + "/bingbingpeee");
         writeToFile(file1, "r1 content - same content");
 
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         update = new Update(clientOptions);
 
         update.execute(registry);
@@ -912,7 +916,7 @@ public class BasicTest extends BaseTestCase {
         file1 = new File(MYCO + "/bingbingpeee");
         writeToFile(file1, "r1 content - added to local file system");
 
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         update = new Update(clientOptions);
 
         update.execute(registry);
@@ -947,7 +951,7 @@ public class BasicTest extends BaseTestCase {
 
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -998,7 +1002,7 @@ public class BasicTest extends BaseTestCase {
 
         File file5 = new File(MYCO + "/the-local-new-file");
         writeToFile(file5, "some random stuff");
-        
+
         new Update(clientOptions).execute(registry);
 
         File file6 = new File(MYCO + "/the-local-new-file");
@@ -1007,7 +1011,7 @@ public class BasicTest extends BaseTestCase {
         assertEquals("some random stuff", content);
 
         cleanRegistry();
-    }    
+    }
 
     public void testDeleteCollections() throws Exception {
         ClientOptions clientOptions = new ClientOptions();
@@ -1028,7 +1032,7 @@ public class BasicTest extends BaseTestCase {
         assertTrue(registry.resourceExists(MYROOT + "/ldingdingdioo"));
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -1046,7 +1050,7 @@ public class BasicTest extends BaseTestCase {
         Delete delete = new Delete(deleteClientOptions);
         delete.execute();
 
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         new Checkin(clientOptions).execute(registry);
 
         // check the thing no exist?
@@ -1062,7 +1066,7 @@ public class BasicTest extends BaseTestCase {
         assertTrue(registry.resourceExists(MYROOT + "/ldingdingdioo"));
 
         // now get an up
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         new Update(clientOptions).execute(registry);
 
         // check whether the file doesn't exist
@@ -1084,7 +1088,7 @@ public class BasicTest extends BaseTestCase {
         File file6 = new File(MYCO + "/the-local-new-file");
         assertTrue("checkouted file should exist", file6.exists());
         assertTrue(file6.isDirectory());
-        
+
         cleanRegistry();
     }
 
@@ -1093,7 +1097,7 @@ public class BasicTest extends BaseTestCase {
         InputStream fileContent = new FileInputStream(file);
         StringBuffer content = new StringBuffer();
         while (fileContent.available() > 0) {
-            char c = (char)fileContent.read();
+            char c = (char) fileContent.read();
             content.append(c);
         }
         String returnValue = content.toString();
@@ -1103,7 +1107,7 @@ public class BasicTest extends BaseTestCase {
 
     void writeToFile(File file, String content) throws Exception {
         FileOutputStream stream = new FileOutputStream(file);
-        for (int i = 0; i < content.length(); i ++) {
+        for (int i = 0; i < content.length(); i++) {
             char a = content.charAt(i);
             stream.write(a);
         }
@@ -1114,7 +1118,7 @@ public class BasicTest extends BaseTestCase {
         String msg = UserInteractor.PARAMETER_PLACE_HOLDER +
                 "This is (" + UserInteractor.PARAMETER_PLACE_HOLDER + ", " +
                 UserInteractor.PARAMETER_PLACE_HOLDER + ", " +
-                UserInteractor.PARAMETER_PLACE_HOLDER + ", "  +
+                UserInteractor.PARAMETER_PLACE_HOLDER + ", " +
                 UserInteractor.PARAMETER_PLACE_HOLDER + ")";
         String[] parameters = {"aasdfa", "dsfb", "adfasdf1", "asdfsdf2", "1234"};
         String buildMsg = new DefaultUserInteractor().buildMessage(msg, parameters);
@@ -1134,12 +1138,12 @@ public class BasicTest extends BaseTestCase {
         registry.put(MYROOT + "/asdfxdf", r1);
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
         new File(MYCO).mkdirs();
-        
+
         // after setting the option we will get the checkout
         new Checkout(clientOptions).execute(registry);
 
@@ -1159,10 +1163,10 @@ public class BasicTest extends BaseTestCase {
         clientOptions2.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions2.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions2.setWorkingLocation(MYCO);
-        
+
         // after setting the option we will get the checkout
         new Update(clientOptions2).execute(registry);
-        
+
         assertEquals("r1-bang bang content", readFile(new File(MYCO + "/asdfxdf")));
 
         cleanRegistry();
@@ -1187,7 +1191,7 @@ public class BasicTest extends BaseTestCase {
 
         // now get the checkout
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -1225,9 +1229,9 @@ public class BasicTest extends BaseTestCase {
         r2 = registry.get(MYROOT + "/a/b/g/h/i");
         r3 = registry.get(MYROOT + "/a/j");
 
-        assertEquals("r1-boom", new String((byte[])r1.getContent()));
-        assertEquals("r2-boom", new String((byte[])r2.getContent()));
-        assertEquals("r3-boom", new String((byte[])r3.getContent()));
+        assertEquals("r1-boom", new String((byte[]) r1.getContent()));
+        assertEquals("r2-boom", new String((byte[]) r2.getContent()));
+        assertEquals("r3-boom", new String((byte[]) r3.getContent()));
         // so that has worked, now we gonna delete what we checkined extra
         cleanRegistry();
     }
@@ -1248,7 +1252,7 @@ public class BasicTest extends BaseTestCase {
 
         // now get the checkout
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -1273,7 +1277,7 @@ public class BasicTest extends BaseTestCase {
     public void testFileCheckinCheckout() throws Exception {
         deleteDir(new File(MYCO));
         cleanRegistry();
-        
+
         ClientOptions clientOptions = new ClientOptions();
         clientOptions.setUserInteractor(new DefaultUserInteractor());
         clientOptions.setTesting(true);
@@ -1298,7 +1302,7 @@ public class BasicTest extends BaseTestCase {
 
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
@@ -1309,7 +1313,7 @@ public class BasicTest extends BaseTestCase {
         new Checkout(clientOptions).execute(registry);
 
         // to test we will be checkin it back to different url
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         // the answer to only question is yes, so we are putting it here
         new Checkin(clientOptions).execute(registry);
 
@@ -1323,15 +1327,15 @@ public class BasicTest extends BaseTestCase {
         Comment[] comments = registry.getComments(MYROOT + "/bingbingpeee2");
         assertTrue("The commments are not checkedin correctly",
                 (comments[0].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")) ||
-                (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
-                 comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")));
+                        comments[1].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")) ||
+                        (comments[1].getText().equals("comasdfj asf;kajsdf asdf") &&
+                                comments[0].getText().equals("aj;lfdkjaskf asjdf;kajsdf;k")));
 
         // tags
         Tag[] tags = registry.getTags(MYROOT + "/bingbingpeee2");
         assertTrue("The tags has not ben checkedin correctly",
                 (tags[0].getTagName().equals("abcdasfslapqdejf") && tags[1].getTagName().equals("pisfsdfosdfasdk") ||
-                   tags[1].getTagName().equals("abcdasfslapqdejf") && tags[0].getTagName().equals("pisfsdfosdfasdk")));
+                        tags[1].getTagName().equals("abcdasfslapqdejf") && tags[0].getTagName().equals("pisfsdfosdfasdk")));
 
         Association[] assocs = registry.getAllAssociations(MYROOT + "/bingbingpeee2");
         assertEquals(assocs[0].getAssociationType(), "peek");
@@ -1347,23 +1351,23 @@ public class BasicTest extends BaseTestCase {
         deleteDir(new File(MYCO));
         cleanRegistry();
 
-        ClientOptions clientOptions = new ClientOptions();
-        clientOptions.setUserInteractor(new DefaultUserInteractor());
-        clientOptions.setTesting(true);
         Resource r1 = registry.newResource();
         r1.setContent("r1 content");
         registry.put(MYROOT + "/mydir1/lambdapampda", r1);
+        assertTrue(registry.resourceExists(MYROOT + "/mydir1/lambdapampda"));
 
+        new File(MYCO).mkdirs();
+
+        ClientOptions clientOptions = new ClientOptions();
+        clientOptions.setUserInteractor(new DefaultUserInteractor());
+        clientOptions.setTesting(true);
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
-        new File(MYCO).mkdirs();
-
         Checkout checkout = new Checkout(clientOptions);
-
         checkout.execute(registry);
 
         File file1 = new File(MYCO + "/mydir1/lambdapampda");
@@ -1371,20 +1375,28 @@ public class BasicTest extends BaseTestCase {
         String content1 = readFile(file1);
         assertEquals("r1 content", content1);
 
-        file1.delete();
-        assertFalse("deleted file should not exist", file1.exists());
+        clientOptions = new ClientOptions();
+        clientOptions.setUserInteractor(new DefaultUserInteractor());
+        clientOptions.setTesting(true);
+        clientOptions.setTargetResource(MYCO + "/mydir1/lambdapampda");
+        Delete delete = new Delete(clientOptions);
+        delete.execute();
 
+        clientOptions = new ClientOptions();
+        clientOptions.setUserInteractor(new DefaultUserInteractor());
+        clientOptions.setTesting(true);
+        clientOptions.setUsername(RegistryConstants.ADMIN_USER);
+        clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
+        clientOptions.setWorkingLocation(MYCO);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         Checkin checkin = new Checkin(clientOptions);
         checkin.execute(registry);
 
-        assertFalse(registry.resourceExists("/mydir1/lambdapampda"));
-
-        Update update = new Update(clientOptions);
-        update.execute(registry);
+        assertFalse(registry.resourceExists(MYROOT + "/mydir1/lambdapampda"));
 
         File file2 = new File(MYCO + "/mydir1/lambdapampda");
         assertFalse("deleted file should not exist", file2.exists());
-        
+
         checkin = new Checkin(clientOptions);
         checkin.execute(registry);
 
@@ -1412,7 +1424,7 @@ public class BasicTest extends BaseTestCase {
 
 
         // now we will get the checkout
-        clientOptions.setUserUrl((RR_URL == null? "": RR_URL) + MYROOT);
+        clientOptions.setUserUrl((RR_URL == null ? "" : RR_URL) + MYROOT);
         clientOptions.setUsername(RegistryConstants.ADMIN_USER);
         clientOptions.setPassword(RegistryConstants.ADMIN_PASSWORD);
         clientOptions.setWorkingLocation(MYCO);
