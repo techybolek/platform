@@ -74,9 +74,9 @@
 	
 	<fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/dbscripts/service-provider/
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/dbscripts/service-provider/
             </directory>
-            <outputDirectory>wso2is-${pom.version}/dbscripts/service-provider</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/dbscripts/service-provider</outputDirectory>
             <includes>
                 <include>**/**.sql</include>
             </includes>
@@ -625,9 +625,9 @@
         </file>
 	<file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/security/trusted-idp-config.xml
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/security/trusted-idp-config.xml
             </source>
-            <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/security</outputDirectory>
             <fileMode>644</fileMode>
         </file>
     </files>
