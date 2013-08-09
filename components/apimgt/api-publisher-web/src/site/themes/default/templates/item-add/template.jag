@@ -339,12 +339,12 @@
                 </div>
 
                 <input type="hidden" name="resourceCount" id="resourceCount" value="0"/>
-                <div id="hiddenFormElements" name="hiddenFormElements">
-                    <input id="resourceMethod-0" type="hidden" name="resourceMethod-0" value="GET,POST,PUT,DELETE,OPTIONS">
-                    <input id="resourceMethodAuthType-0" type="hidden" name="resourceMethodAuthType-0" value="Application & Application User,Application & Application User,Application & Application User,Application & Application User,None">
-                    <input id="resourceMethodThrottlingTier-0" type="hidden" name="resourceMethodThrottlingTier-0" value="Unlimited, Unlimited, Unlimited, Unlimited, Unlimited">
-                    <input type="hidden" name="uriTemplate-0" id="uriTemplate-0" value="/*"/>
-                </div>
+<div id="hiddenFormElements" name="hiddenFormElements">
+    <input id="resourceMethod-0" type="hidden" name="resourceMethod-0" value="GET,PUT,POST,DELETE,OPTIONS">
+    <input id="resourceMethodAuthType-0" type="hidden" name="resourceMethodAuthType-0" value="Application,Application,Application,Application,Application">
+    <input type="hidden" name="uriTemplate-0" id="uriTemplate-0" value="/*"/>
+    <input id="resourceMethodThrottlingTier-0" type="hidden" name="resourceMethodThrottlingTier-0" value="Unlimited, Unlimited, Unlimited, Unlimited, Unlimited">
+</div>
 
             </form>
         </div>
