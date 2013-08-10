@@ -579,6 +579,7 @@ public class ApiMgtDAO {
                         keyValidationInfoDTO.setType(type);
                         keyValidationInfoDTO.setSubscriber(subscriberName);
                         keyValidationInfoDTO.setIssuedTime(issuedTime);
+                        keyValidationInfoDTO.setAuthorizedDomains(ApiMgtDAO.getAuthorizedDomainList(accessToken));
                         keyValidationInfoDTO.setValidityPeriod(validityPeriod);
                         keyValidationInfoDTO.setUserType(userType);
                         keyValidationInfoDTO.setEndUserName(endUserName);
@@ -621,6 +622,11 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return keyValidationInfoDTO;
+    }
+    
+    //This returns the authorized client domains into a List
+    public static List<String> getAuthorizedDomainList(String apiKey) throws APIManagementException {
+    	return Arrays.asList(getAuthorizedDomains(apiKey).split(","));
     }
 
     private void updateTokenState(String accessToken, Connection conn, PreparedStatement ps)

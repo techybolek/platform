@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * This class represent the API key validation Info DTO.
@@ -43,6 +44,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private int validationStatus;
     private long validityPeriod;
     private long issuedTime;
+    private List<String> authorizedDomains;
 
     private String apiName;
 
@@ -145,8 +147,16 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public void setIssuedTime(long issuedTime) {
         this.issuedTime = issuedTime;
     }
+    
+    public List<String> getAuthorizedDomains() {
+		return authorizedDomains;
+	}
 
-    public String getUserType() {
+	public void setAuthorizedDomains(List<String> authorizedDomains) {
+		this.authorizedDomains = authorizedDomains;
+	}
+
+	public String getUserType() {
         return userType;
     }
 
