@@ -191,7 +191,7 @@ public class ServiceVersionTestForLCs {
         actions = availableActions[0].getActions();
         Assert.assertNull(actions, "Available Action found");
 
-        addRole("archrole");
+        addRole("archrole2");
         lifeCycleAdminServiceClient.invokeAspect(servicePathDev, ASPECT_NAME, ACTION_ITEM_CLICK,
                                                  new String[]{"true", "false", "false", "false", "false"});
         lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(servicePathDev);
@@ -330,8 +330,8 @@ public class ServiceVersionTestForLCs {
     private void deleteRolesIfExist()
             throws Exception {
 
-        if (userManger.roleNameExists("archrole")) {
-            userManger.deleteRole("archrole");
+        if (userManger.roleNameExists("archrole2")) {
+            userManger.deleteRole("archrole2");
         }
 
         if (userManger.roleNameExists("managerrole")) {

@@ -79,6 +79,7 @@ public class LCStateIdNameTestCase {
     private UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
     private String serviceString;
     private WSRegistryServiceClient wsRegistryServiceClient;
+    private Registry registry;
 
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
     private LifeCycleManagementClient lifeCycleManagementClient;
@@ -87,7 +88,7 @@ public class LCStateIdNameTestCase {
     private ResourceAdminServiceClient resourceAdminServiceClient;
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService1";
     private static final String LC_NAME = "StateIdNameLC";
     private static final String LC_STATE1 = "Creation";
     private static final String ACTION_PROMOTE = "Promote";
@@ -125,9 +126,9 @@ public class LCStateIdNameTestCase {
                                                environment.getGreg().getSessionCookie());
         wsRegistryServiceClient =
                 registryProviderUtil.getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME);
-	Registry reg = registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId);
-        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)reg);
-        serviceManager = new ServiceManager(reg);
+	registry = registryProviderUtil.getGovernanceRegistry(new RegistryProviderUtil().getWSRegistry(userId, ProductConstant.GREG_SERVER_NAME), userId);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)registry);
+        serviceManager = new ServiceManager(registry);
     }
 
     /**
@@ -149,14 +150,14 @@ public class LCStateIdNameTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService1.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService1");
         
         assertNotNull(data, "Service not found");
 
@@ -204,19 +205,18 @@ public class LCStateIdNameTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException, 
-					    GovernanceException {
-
-//        service = listMetadataServiceClient.listServices(null);
+                                            ResourceAdminServiceExceptionException {
 
 	Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
 	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
+            if (path.contains(SERVICE_NAME)) {
                 serviceString = path;
             }
         }
         wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
+
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)registry);
         lifeCycle =
                 lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
                                                              serviceString);
@@ -226,7 +226,7 @@ public class LCStateIdNameTestCase {
         boolean lcStatus = false;
         for (Property prop : properties) {
             if (prop.getKey().contains(LC_NAME)) {
-                lcStatus = true;
+                 lcStatus = true;
             }
         }
         assertTrue(lcStatus, "LifeCycle not added to service");
@@ -272,14 +272,14 @@ public class LCStateIdNameTestCase {
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+        /*String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
         String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }        */
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;

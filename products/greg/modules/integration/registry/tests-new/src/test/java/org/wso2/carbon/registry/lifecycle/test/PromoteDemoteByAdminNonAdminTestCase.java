@@ -93,7 +93,7 @@ public class PromoteDemoteByAdminNonAdminTestCase {
 	
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService11";
     private static final String LC_NAME = "MultiplePromoteDemoteLC";
     private static final String LC_STATE1 = "Commencement";
     private static final String LC_STATE2 = "Creation";
@@ -105,6 +105,10 @@ public class PromoteDemoteByAdminNonAdminTestCase {
     private static final String TARGET_STATE = "targetState";
     private static final String TYPE = "transition";
     private static final String ACTION_NAME = "name";
+
+    private static final String GOV_PATH = "/_system/governance";
+    private String serviceString = "/trunk/services/com/abb/IntergalacticService11";
+    private final String absPath = GOV_PATH + serviceString;
 
     private LifecycleBean lifeCycle;
     private ServiceBean service;
@@ -150,14 +154,14 @@ public class PromoteDemoteByAdminNonAdminTestCase {
                    ResourceAdminServiceExceptionException {
 
         String servicePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" + File.separator +
-                             "GREG" + File.separator + "services" + File.separator + "intergalacticService.metadata.xml";
+                             "GREG" + File.separator + "services" + File.separator + "intergalacticService11.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -189,21 +193,10 @@ public class PromoteDemoteByAdminNonAdminTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException,
-			                    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-    //    service = listMetadataServiceClient.listServices(null);
-        Service[] services = serviceManager.getAllServices();
-        String serviceString = "";
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        serviceLocation = "/_system/governance" + serviceString;
-        wsRegistryServiceClient.associateAspect(serviceLocation, LC_NAME);
-        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(serviceLocation);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
+        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
         boolean lcStatus = false;
@@ -222,8 +215,8 @@ public class PromoteDemoteByAdminNonAdminTestCase {
             throws RemoteException, CustomLifecyclesChecklistAdminServiceExceptionException,
                    LifeCycleManagementServiceExceptionException, RegistryExceptionException {
 
-        lifeCycleAdminServiceClient.invokeAspect(serviceLocation, LC_NAME, ACTION_PROMOTE, null);
-        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(serviceLocation);
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME, ACTION_PROMOTE, null);
+        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -237,7 +230,7 @@ public class PromoteDemoteByAdminNonAdminTestCase {
           dependsOnMethods = "testPromoteLC")
     public void testVerifyAuditNonAdmin() throws Exception {
 
-        String auditRecord = serviceLocation.replace("/", "_");
+        String auditRecord = absPath.replace("/", "_");
         String auditLocation = "/_system/governance/repository/components/org.wso2.carbon.governance/lifecycles/history/";
         auditPath = auditLocation.concat(auditRecord);
         assertEquals(getAuditRecords(auditPath, 0, USER, false), userInfo.getUserNameWithoutDomain(), "User is not testuser1");
@@ -278,8 +271,8 @@ public class PromoteDemoteByAdminNonAdminTestCase {
             throws RemoteException, CustomLifecyclesChecklistAdminServiceExceptionException,
                    LifeCycleManagementServiceExceptionException, RegistryExceptionException {
 
-        lifeCycleAdminServiceClient.invokeAspect(serviceLocation, LC_NAME, ACTION_DEMOTE, null);
-        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(serviceLocation);
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME, ACTION_DEMOTE, null);
+        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -326,17 +319,17 @@ public class PromoteDemoteByAdminNonAdminTestCase {
 
     @AfterClass()
     public void clear() throws Exception {
-        if (wsRegistryServiceClient.resourceExists(serviceLocation)) {
-            resourceAdminServiceClient.deleteResource(serviceLocation);
+        if (wsRegistryServiceClient.resourceExists(absPath)) {
+            resourceAdminServiceClient.deleteResource(absPath);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-        if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
-        if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+//        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+  //      if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+      //  }
+//        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+  //      if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
+      //  }
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;

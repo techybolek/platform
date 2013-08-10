@@ -78,8 +78,7 @@ import static org.testng.Assert.assertTrue;
 
 public class Registry732 {
 
-    private UserInfo userInfo;
-    private String serviceString;
+    private UserInfo userInfo;    
 
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
     private LifeCycleManagementClient lifeCycleManagementClient;
@@ -91,8 +90,9 @@ public class Registry732 {
     private WSRegistryServiceClient wsRegistryServiceClient;
 
     private ServiceManager serviceManager;	
+    private String verServiceString;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService3";
     private static final String ROOT = "/";
     private static final String DEPENDENCY_RES_NAME = "AResource";
     private static final String ASSOCIATION_COLL = "/_system";
@@ -102,7 +102,11 @@ public class Registry732 {
     private static final String LC_STATE1 = "Planned";
     private static final String ACTION_PROMOTE = "Promote";
     
-    private static final String ACTION_ITEM_CLICK = "itemClick";
+    private static final String ACTION_ITEM_CLICK = "itemClick"; 
+   
+    private String serviceString = "/trunk/services/com/abb/IntergalacticService3";
+    private final String absPath = SERVICE_LOCATION + serviceString;
+	
 
     private LifecycleBean lifeCycle;
     private String[] dependencyList;
@@ -166,29 +170,19 @@ public class Registry732 {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService3.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-
         //set the dependencies
-        dependencyList = lifeCycleAdminServiceClient.getAllDependencies("/_system/governance" +
-                                                                        serviceString);
-
+        dependencyList = lifeCycleAdminServiceClient.getAllDependencies(absPath);
 
     }
 
@@ -215,10 +209,10 @@ public class Registry732 {
         String dependencyType = "depends";
         String todo = "add";
 
-        relationServiceClient.addAssociation(SERVICE_LOCATION + serviceString,
+        relationServiceClient.addAssociation(absPath,
                                              dependencyType, ROOT + DEPENDENCY_RES_NAME, todo);
 
-        DependenciesBean bean = relationServiceClient.getDependencies(SERVICE_LOCATION + serviceString);
+        DependenciesBean bean = relationServiceClient.getDependencies(absPath);
 
         boolean dependencyTypeMatches = false;
         boolean targetDependencyMatches = false;
@@ -232,7 +226,7 @@ public class Registry732 {
                     dependencyTypeMatches = true;
                 }
 
-                if (dBean.getSourcePath().equalsIgnoreCase(SERVICE_LOCATION + serviceString)) {
+                if (dBean.getSourcePath().equalsIgnoreCase(absPath)) {
                     sourceDependencyMatches = true;
                 }
             }
@@ -255,9 +249,9 @@ public class Registry732 {
         String dependencyType = "association";
         String todo = "add";
 
-        relationServiceClient.addAssociation(SERVICE_LOCATION + serviceString, dependencyType, ASSOCIATION_COLL, todo);
+        relationServiceClient.addAssociation(absPath, dependencyType, ASSOCIATION_COLL, todo);
 
-        DependenciesBean bean = relationServiceClient.getDependencies(SERVICE_LOCATION + serviceString);
+        DependenciesBean bean = relationServiceClient.getDependencies(absPath);
 
         AssociationBean[] aBeans = bean.getAssociationBeans();
         boolean found = false;
@@ -308,10 +302,9 @@ public class Registry732 {
                                             ResourceAdminServiceExceptionException {
 
 
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -330,15 +323,15 @@ public class Registry732 {
             throws CustomLifecyclesChecklistAdminServiceExceptionException, RemoteException,
                    ResourceAdminServiceExceptionException {
 
-    	lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+    	lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
 												ACTION_ITEM_CLICK, new String[]{"true"});
         
-    	lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString,
+    	lifeCycleAdminServiceClient.invokeAspect(absPath,
                                                            LC_NAME, ACTION_PROMOTE, null);
-        serviceString = "/_system/governance/branches/testing/services/com/abb/IntergalacticService/1.0.0-SNAPSHOT/service";
+        verServiceString = "/_system/governance/branches/testing/services/com/abb/IntergalacticService3/1.0.0-SNAPSHOT/service";
 
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean(serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(verServiceString);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
         if (properties != null) {
@@ -359,7 +352,7 @@ public class Registry732 {
             throws CustomLifecyclesChecklistAdminServiceExceptionException,
                    RemoteException, AddAssociationRegistryExceptionException {
 
-        DependenciesBean bean = relationServiceClient.getDependencies(serviceString);
+        DependenciesBean bean = relationServiceClient.getDependencies(verServiceString);
 
         //search for the association
         boolean associationFound = false;
@@ -383,11 +376,11 @@ public class Registry732 {
         resourceAdminServiceClient.deleteResource(ROOT + DEPENDENCY_RES_NAME);
 
 
-        resourceAdminServiceClient.deleteResource(serviceString);
-        resourceAdminServiceClient.deleteResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        resourceAdminServiceClient.deleteResource(absPath);
+        resourceAdminServiceClient.deleteResource(verServiceString);
 
         SchemaBean schema = listMetadataServiceClient.listSchemas();
-
+     /*
         if (schema != null) {
             String schemaPathToDelete = "/_system/governance/" + schema.getPath()[0];
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
@@ -401,7 +394,7 @@ public class Registry732 {
                 resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
             }
 
-        }
+        }   */
 
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
     }

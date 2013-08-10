@@ -87,8 +87,8 @@ public class LCPromoteDemotePermissionTestCase {
 
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
-    private static final String LC_NAME = "CheckListPermissionLC";
+    private final String SERVICE_NAME = "IntergalacticService13";
+    private final String LC_NAME = "CheckListPermissionLC2";
 
     private static final String ACTION_PROMOTE = "Promote";
     private static final String ACTION_DEMOTE = "Demote";
@@ -96,6 +96,10 @@ public class LCPromoteDemotePermissionTestCase {
     private static final String LC_STATE1 = "Creation";
     
     private static final String ACTION_ITEM_CLICK = "itemClick";
+
+    private static final String GOV_PATH = "/_system/governance";
+    private String servicePath = "/trunk/services/com/abb/IntergalacticService13";
+    private final String absPath = GOV_PATH + servicePath;
 
     private LifecycleBean lifeCycle;
     private RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
@@ -158,14 +162,14 @@ public class LCPromoteDemotePermissionTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService13.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
-                "/_system/governance/service2", mediaType, description, dataHandler);
+                "/_system/governance/service13", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -183,7 +187,7 @@ public class LCPromoteDemotePermissionTestCase {
         String resourcePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "lifecycle" +
-                File.separator + "CheckListPermissionLC.xml";
+                File.separator + "CheckListPermissionLC2.xml";
         String lifeCycleContent = FileManager.readFile(resourcePath);
         lifeCycleManagementClient.addLifeCycle(lifeCycleContent);
         String[] lifeCycles = lifeCycleManagementClient.getLifecycleList();
@@ -213,22 +217,11 @@ public class LCPromoteDemotePermissionTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException,
-					    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-      //  service = listMetadataServiceClient.listServices(null);
-
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -246,12 +239,11 @@ public class LCPromoteDemotePermissionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Promote from Commencement to Creation",
           dependsOnMethods = "testAddLcToService")
-    public void testPromoteToCreation() throws Exception, 
-						GovernanceException {
+    public void testPromoteToCreation() throws Exception {
+
         addRole("managerrole", userInfo.getUserNameWithoutDomain());
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
         boolean isPermitted = false;
         for (String action : lifeCycle.getAvailableActions()[0].getActions()) {
             if (action.equalsIgnoreCase(ACTION_PROMOTE)) {
@@ -260,20 +252,19 @@ public class LCPromoteDemotePermissionTestCase {
         }
         assertTrue(isPermitted, "Not allowed to promote with permission");
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_PROMOTE, null);
 
-//        service = listMetadataServiceClient.listServices(null);
-	Service[] services = serviceManager.getAllServices();
+        Service[] services = serviceManager.getAllServices();
+
         for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
+            String path = service.getPath();
+            if (path.contains("IntergalacticService13")) {
                 serviceString = path;
             }
         }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -293,8 +284,7 @@ public class LCPromoteDemotePermissionTestCase {
     public void testDemoteFromCreation() throws Exception,
 						GovernanceException {
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH + serviceString);
         boolean isPermitted = false;
         for (String action : lifeCycle.getAvailableActions()[0].getActions()) {
             if (action.equalsIgnoreCase(ACTION_DEMOTE)) {
@@ -303,20 +293,10 @@ public class LCPromoteDemotePermissionTestCase {
         }
         assertFalse(isPermitted, "Allowed to demote without permission");
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(GOV_PATH + serviceString, LC_NAME,
                                                  ACTION_DEMOTE, null);
-
- //       service = listMetadataServiceClient.listServices(null);
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH + serviceString);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -375,8 +355,7 @@ public class LCPromoteDemotePermissionTestCase {
     public void testDemoteFromCreationAgain() throws Exception {
         addRole("archrole", user2Info.getUserNameWithoutDomain());
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
         boolean isPermitted = false;
         for (String action : lifeCycle.getAvailableActions()[0].getActions()) {
             if (action.equalsIgnoreCase(ACTION_DEMOTE)) {
@@ -385,20 +364,10 @@ public class LCPromoteDemotePermissionTestCase {
         }
         assertTrue(isPermitted, "Not allowed to demote with permission");
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_DEMOTE, null);
-
- //       service = listMetadataServiceClient.listServices(null);
-	  Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -419,8 +388,7 @@ public class LCPromoteDemotePermissionTestCase {
     public void testPromoteToCreationAgain() throws Exception, 
 							GovernanceException {
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
         boolean isPermitted = false;
         for (String action : lifeCycle.getAvailableActions()[0].getActions()) {
             if (action.equalsIgnoreCase(ACTION_PROMOTE)) {
@@ -429,24 +397,15 @@ public class LCPromoteDemotePermissionTestCase {
         }
         assertFalse(isPermitted, "Allowed to promote without permission");
         
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                 								ACTION_ITEM_CLICK, new String[]{"false", "false", "false",
                              									"false", "false", "false"});
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_PROMOTE, null);
 
-//        service = listMetadataServiceClient.listServices(null);
-	  Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -474,22 +433,26 @@ public class LCPromoteDemotePermissionTestCase {
      */
     @AfterClass()
     public void clear() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+/*        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
         String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
-        userManagementClient.deleteRole("archrole");
-        userManagementClient.deleteRole("managerrole");
+        if (userManagementClient.roleNameExists("archrole")) {
+            userManagementClient.deleteRole("archrole");
+        }
+        if (userManagementClient.roleNameExists("managerrole")) {
+            userManagementClient.deleteRole("managerrole");
+        }
 
         governanceServiceClient = null;
         wsRegistryServiceClient = null;
@@ -502,5 +465,4 @@ public class LCPromoteDemotePermissionTestCase {
         userManagementClient = null;
 
     }
-
 }

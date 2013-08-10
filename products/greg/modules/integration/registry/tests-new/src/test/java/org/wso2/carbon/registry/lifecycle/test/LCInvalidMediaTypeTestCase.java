@@ -73,7 +73,6 @@ import static org.testng.Assert.assertTrue;
 public class LCInvalidMediaTypeTestCase {
     private int userId = 2;
     private UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
-    private String serviceString;
     private WSRegistryServiceClient wsRegistryServiceClient;
 
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
@@ -84,10 +83,14 @@ public class LCInvalidMediaTypeTestCase {
 
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService4";
     private static final String LC_NAME = "InvalidTMediaTypeLC";
     private static final String LC_STATE = "Testing";
     private static final String ACTION_PROMOTE = "Promote";
+
+    private static final String GOV_PATH = "/_system/governance";
+    private String serviceString = "/trunk/services/com/abb/IntergalacticService4";
+    private final String absPath = GOV_PATH + serviceString;
 
     private LifecycleBean lifeCycle;
     private ServiceBean service;
@@ -146,14 +149,14 @@ public class LCInvalidMediaTypeTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService4.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -203,24 +206,11 @@ public class LCInvalidMediaTypeTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException,
-					    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-//        service = listMetadataServiceClient.listServices(null);
-
-	Service[] services = serviceManager.getAllServices();
-      //  String servicePathDev[] = service.getPath();
-        for (Service service : services) {
-		String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-                break;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -252,18 +242,10 @@ public class LCInvalidMediaTypeTestCase {
                                        ResourceAdminServiceExceptionException,
 				       GovernanceException {
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_PROMOTE, null);
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-    	    String path = service.getPath();
-            if (path.contains("IntergalacticService") && path.contains("trunk")) {
-                serviceString = path;
-            }
-        }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -278,7 +260,7 @@ public class LCInvalidMediaTypeTestCase {
 
     @AfterClass(alwaysRun = true)
     public void clear() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
@@ -286,10 +268,10 @@ public class LCInvalidMediaTypeTestCase {
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
-        if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+//        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+  //      if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
+      //  }
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;
@@ -299,5 +281,4 @@ public class LCInvalidMediaTypeTestCase {
         listMetadataServiceClient = null;
         resourceAdminServiceClient = null;
     }
-
 }

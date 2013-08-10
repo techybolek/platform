@@ -91,7 +91,7 @@ public class LCTransitionEventTestCase {
     private ResourceAdminServiceClient resourceAdminServiceClient; 
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService15";
     private static final String LC_NAME = "TransitionEventsLC";
 
     private static final String ACTION_PROMOTE = "Promote";
@@ -100,6 +100,11 @@ public class LCTransitionEventTestCase {
     private static final String LC_STATE0 = "Commencement";
     private static final String LC_STATE2 = "Development";
     private static final String LC_STATE5 = "Halted";
+
+    private static final String GOV_PATH = "/_system/governance";
+    private String servicePath = "/trunk/services/com/abb/IntergalacticService15";
+    private final String absPath = GOV_PATH + servicePath;
+
 
     private LifecycleBean lifeCycle;
     private RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
@@ -160,14 +165,14 @@ public class LCTransitionEventTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService15.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -215,22 +220,11 @@ public class LCTransitionEventTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException,
-  					    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-//        ServiceBean service = listMetadataServiceClient.listServices(null);
-
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -249,23 +243,19 @@ public class LCTransitionEventTestCase {
     @Test(groups = "wso2.greg", description = "Promote from Commencement to Development: not to the immediate next state",
           dependsOnMethods = "testAddLcToService")
     public void testPromoteToDevelopment() throws Exception {
-//        lifeCycle =
-//                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-//                                                             serviceString);
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_PROMOTE, null);
 
-       // service = listMetadataServiceClient.listServices(null);
 	Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
 	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
+            if (path.contains("IntergalacticService15")) {
                 serviceString = path;
             }
         }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH +
                                                              serviceString);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
@@ -285,23 +275,19 @@ public class LCTransitionEventTestCase {
                                               "immediate previous state",
           dependsOnMethods = "testPromoteToDevelopment")
     public void testDemoteFromCreation() throws Exception {
-//        lifeCycle =
-//                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-//                                                             serviceString);
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(GOV_PATH + serviceString, LC_NAME,
                                                  ACTION_DEMOTE, null);
 
-//        service = listMetadataServiceClient.listServices(null);
 	Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
 	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
+            if (path.contains("IntergalacticService15")) {
                 serviceString = path;
             }
         }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH +
                                                              serviceString);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
@@ -326,23 +312,19 @@ public class LCTransitionEventTestCase {
                                          CustomLifecyclesChecklistAdminServiceExceptionException,
                                          ResourceAdminServiceExceptionException,
   					 GovernanceException {
-//        lifeCycle =
-//                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-//                                                             serviceString);
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(GOV_PATH + serviceString, LC_NAME,
                                                  ACTION_ABORT, null);
 
-       // service = listMetadataServiceClient.listServices(null);
 	Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
 	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
+            if (path.contains("IntergalacticService15")) {
                 serviceString = path;
             }
         }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH +
                                                              serviceString);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
@@ -363,14 +345,18 @@ public class LCTransitionEventTestCase {
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+        if (wsRegistryServiceClient.resourceExists(absPath)) {
+            resourceAdminServiceClient.deleteResource(absPath);
+        }
+
+      /*  String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+        }     */
+        /*String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }        */
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;

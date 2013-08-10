@@ -43,19 +43,22 @@ import static org.testng.Assert.assertTrue;
 public class PreserveOriginalLCTestCase {
 
     private int userId = 2;
-    private String serviceStringTrunk = "/trunk/services/com/abb/IntergalacticService";
-    private String serviceStringTest = "/branches/testing/services/com/abb/1.0.0/IntergalacticService";
+    private String serviceStringTrunk = "/trunk/services/com/abb/IntergalacticService6";
+    private String serviceStringTest = "/branches/testing/services/com/abb/1.0.0/IntergalacticService6";
     private WSRegistryServiceClient wsRegistryServiceClient;
 
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
     private LifeCycleManagementClient lifeCycleManagementClient;
     private ResourceAdminServiceClient resourceAdminServiceClient;
 
-    private static final String LC_NAME = "DiffEnvironmentLC";
+    private static final String LC_NAME = "DiffEnvironmentLC3";
     private static final String ACTION_PROMOTE = "Promote";
     private LifecycleBean lifeCycle;
     private RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
     private String[] dependencyList;
+
+    private static final String GOV_PATH = "/_system/governance";
+    private final String absPath = GOV_PATH + serviceStringTrunk;
 
     /**
      *
@@ -97,14 +100,14 @@ public class PreserveOriginalLCTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService6.metadata.xml";
 
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource("/_system/governance/service1", mediaType, description, dataHandler);
 
-        ResourceData[] resourceDataArray = resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] resourceDataArray = resourceAdminServiceClient.getResource(absPath);
         assertNotNull(resourceDataArray, "Service not found");
     }
 
@@ -120,7 +123,7 @@ public class PreserveOriginalLCTestCase {
         String resourcePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "lifecycle" +
-                File.separator + "EnvironmentChangeLC.xml";
+                File.separator + "EnvironmentChangeLC3.xml";
         String lifeCycleContent = FileManager.readFile(resourcePath);
         lifeCycleManagementClient.addLifeCycle(lifeCycleContent);
         String[] lifeCycles = lifeCycleManagementClient.getLifecycleList();
@@ -191,10 +194,10 @@ public class PreserveOriginalLCTestCase {
         parameters[1].setArray(new String[]{dependencyList[1], "1.0.0"});
         parameters[2] = new ArrayOfString();
         parameters[2].setArray(new String[]{dependencyList[2], "1.0.0"});
+      //  parameters[3] = new ArrayOfString();
+      //  parameters[3].setArray(new String[]{dependencyList[3], "1.0.0"});
         parameters[3] = new ArrayOfString();
-        parameters[3].setArray(new String[]{dependencyList[3], "1.0.0"});
-        parameters[4] = new ArrayOfString();
-        parameters[4].setArray(new String[]{"preserveOriginal", "false"});
+        parameters[3].setArray(new String[]{"preserveOriginal", "false"});
         lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceStringTrunk,
                                                            LC_NAME, ACTION_PROMOTE, null,
                                                            parameters);
@@ -202,7 +205,7 @@ public class PreserveOriginalLCTestCase {
             resourceAdminServiceClient.getResource("/_system/governance" + serviceStringTrunk);
         } catch (Exception e){
             assertTrue(e.getMessage().equals
-                    ("Resource does not exist at path /_system/governance/trunk/services/com/abb/IntergalacticService"), "Resource preserved");
+                    ("Resource does not exist at path /_system/governance/trunk/services/com/abb/IntergalacticService6"), "Resource preserved");
         }
         assertNotNull(resourceAdminServiceClient.getResource("/_system/governance/branches"), "New version not created");
     }
@@ -220,7 +223,7 @@ public class PreserveOriginalLCTestCase {
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-
+/*
         String schemaPathToDelete = "/_system/governance/branches/testing/schemas/org/bar/purchasing/1.0.0/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
@@ -232,11 +235,11 @@ public class PreserveOriginalLCTestCase {
         String wsdlPathToDelete = "/_system/governance/branches/testing/wsdls/com/foo/1.0.0/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
-        wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
-        if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
+//        wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+  //      if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
+      //  }
     }
 
     /**
@@ -252,14 +255,14 @@ public class PreserveOriginalLCTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService6.metadata.xml";
 
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource("/_system/governance/service1", mediaType, description, dataHandler);
 
-        ResourceData[] resourceDataArray = resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] resourceDataArray = resourceAdminServiceClient.getResource(absPath);
         assertNotNull(resourceDataArray, "Service not found");
 
     }
@@ -317,18 +320,18 @@ public class PreserveOriginalLCTestCase {
         parameters[1].setArray(new String[]{dependencyList[1], "1.0.0"});
         parameters[2] = new ArrayOfString();
         parameters[2].setArray(new String[]{dependencyList[2], "1.0.0"});
+        //parameters[3] = new ArrayOfString();
+        //parameters[3].setArray(new String[]{dependencyList[3], "1.0.0"});
         parameters[3] = new ArrayOfString();
-        parameters[3].setArray(new String[]{dependencyList[3], "1.0.0"});
-        parameters[4] = new ArrayOfString();
-        parameters[4].setArray(new String[]{"preserveOriginal", "true"});
+        parameters[3].setArray(new String[]{"preserveOriginal", "true"});
         lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceStringTrunk,
                                                            LC_NAME, ACTION_PROMOTE, null,
                                                            parameters);
 
         assertNotNull(resourceAdminServiceClient.getResource(
-                "/_system/governance/trunk/services/com/abb/IntergalacticService"), "Original not preserved");
+                "/_system/governance/trunk/services/com/abb/IntergalacticService6"), "Original not preserved");
         assertNotNull(resourceAdminServiceClient.getResource(
-                "/_system/governance/branches/testing/services/com/abb/1.0.0/IntergalacticService"), "New version not created");
+                "/_system/governance/branches/testing/services/com/abb/1.0.0/IntergalacticService6"), "New version not created");
     }
 
     /**
@@ -349,7 +352,7 @@ public class PreserveOriginalLCTestCase {
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+     /*   String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
@@ -364,7 +367,7 @@ public class PreserveOriginalLCTestCase {
         wsdlPathToDelete = "/_system/governance/branches/testing/wsdls/com/foo/1.0.0/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
 
     }
 
@@ -381,14 +384,14 @@ public class PreserveOriginalLCTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService6.metadata.xml";
 
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource("/_system/governance/service1", mediaType, description, dataHandler);
 
-        ResourceData[] resourceDataArray = resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] resourceDataArray = resourceAdminServiceClient.getResource(absPath);
         assertNotNull(resourceDataArray, "Service not found");
 
     }
@@ -446,10 +449,10 @@ public class PreserveOriginalLCTestCase {
         parameters[1].setArray(new String[]{dependencyList[1], "1.0.0"});
         parameters[2] = new ArrayOfString();
         parameters[2].setArray(new String[]{dependencyList[2], "1.0.0"});
+        //parameters[3] = new ArrayOfString();
+        //parameters[3].setArray(new String[]{dependencyList[3], "1.0.0"});
         parameters[3] = new ArrayOfString();
-        parameters[3].setArray(new String[]{dependencyList[3], "1.0.0"});
-        parameters[4] = new ArrayOfString();
-        parameters[4].setArray(new String[]{"preserveOriginal", "false"});
+        parameters[3].setArray(new String[]{"preserveOriginal", "false"});
         lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceStringTrunk,
                                                            LC_NAME, ACTION_PROMOTE, null,
                                                            parameters);
@@ -463,7 +466,7 @@ public class PreserveOriginalLCTestCase {
         assertNotNull(resourceAdminServiceClient.getResource
                 ("/_system/governance" + serviceStringTest), "Original does not exist");
         assertNotNull(resourceAdminServiceClient.getResource
-                ("/_system/governance/branches/production/services/com/abb/1.0.0/IntergalacticService"), "New version not created");
+                ("/_system/governance/branches/production/services/com/abb/1.0.0/IntergalacticService6"), "New version not created");
 
     }
 
@@ -476,11 +479,14 @@ public class PreserveOriginalLCTestCase {
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        servicePathToDelete = "/_system/governance/branches/production/services/com/abb/1.0.0/IntergalacticService";
+        servicePathToDelete = "/_system/governance/branches/production/services/com/abb/1.0.0/IntergalacticService6";
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/branches/testing/schemas/org/bar/purchasing/1.0.0/purchasing.xsd";
+        if (wsRegistryServiceClient.resourceExists(absPath)) {
+            resourceAdminServiceClient.deleteResource(absPath);
+       } 
+/*        String schemaPathToDelete = "/_system/governance/branches/testing/schemas/org/bar/purchasing/1.0.0/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
@@ -495,7 +501,7 @@ public class PreserveOriginalLCTestCase {
         wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         wsRegistryServiceClient = null;

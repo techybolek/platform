@@ -56,7 +56,6 @@ public class LCTransitionApprovalTestCase {
 	
 	private int userId = 2;
     UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
-    private String serviceString;
     private WSRegistryServiceClient wsRegistryServiceClient;
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
     private LifeCycleManagementClient lifeCycleManagementClient;
@@ -69,6 +68,10 @@ public class LCTransitionApprovalTestCase {
     private static final String SERVICE_NAME = "IntergalacticService";
     private static final String LC_NAME = "TransitionApprovalLC";
     private static final String ACTION_PROMOTE = "Promote";
+    private static final String GOV_PATH = "/_system/governance";
+    private String serviceString = "/trunk/services/com/abb/IntergalacticService";
+    private final String absPath = GOV_PATH + serviceString;
+
 	
     private static final String ACTION_VOTE_CLICK = "voteClick";
     private LifecycleBean lifeCycle;
@@ -137,7 +140,7 @@ public class LCTransitionApprovalTestCase {
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(GOV_PATH + serviceString);
         
         assertNotNull(data, "Service not found");
 
@@ -185,21 +188,11 @@ public class LCTransitionApprovalTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException,	
- 					    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-	Service[] services = serviceManager.getAllServices();
-//        ServiceBean service = listMetadataServiceClient.listServices(null);
-        for (Service service : services) {
-		String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -218,12 +211,11 @@ public class LCTransitionApprovalTestCase {
      */
     @Test(groups = "wso2.greg", description = "LC Transition Event Approval(Tick)", dependsOnMethods = "testAddLcToService")
     public void testLCTransitionApproval() throws Exception {
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
         		ACTION_VOTE_CLICK, new String[]{"true", "true"});
 
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
         for (Property prop : lifeCycle.getLifecycleApproval()) {        	
             if (prop.getKey().contains("registry.custom_lifecycle.votes.option") &&
                 !prop.getKey().contains("permission")) {            	
@@ -237,12 +229,11 @@ public class LCTransitionApprovalTestCase {
      */
     @Test(groups = "wso2.greg", description = "Remove LC Transition Event Approval(Untick)", dependsOnMethods = "testLCTransitionApproval")
     public void testLCTransitionApprovalWithDrown() throws Exception {
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
         		ACTION_VOTE_CLICK, new String[]{"false", "false"});
 
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
         for (Property prop : lifeCycle.getLifecycleApproval()) {        	
             if (prop.getKey().contains("registry.custom_lifecycle.votes.option") &&
                 !prop.getKey().contains("permission")) {            	
@@ -257,12 +248,11 @@ public class LCTransitionApprovalTestCase {
      */
     @Test(groups = "wso2.greg", description = "Try to Promote without Votes",dependsOnMethods = "testLCTransitionApprovalWithDrown",           expectedExceptions = org.apache.axis2.AxisFault.class)
     public void testLCInvalidePromote() throws Exception {
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_PROMOTE, null);
 
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
         for (Property prop : lifeCycle.getLifecycleApproval()) {        	
             if (prop.getKey().contains("registry.custom_lifecycle.votes.option") &&
                 !prop.getKey().contains("permission")) {            	
@@ -276,18 +266,18 @@ public class LCTransitionApprovalTestCase {
      */
     @AfterClass()
     public void clear() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+   /*     String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
         String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;
@@ -299,6 +289,4 @@ public class LCTransitionApprovalTestCase {
         resourceAdminServiceClient = null;
         resourceAdminServiceClient = null;
     }
-
-
 }

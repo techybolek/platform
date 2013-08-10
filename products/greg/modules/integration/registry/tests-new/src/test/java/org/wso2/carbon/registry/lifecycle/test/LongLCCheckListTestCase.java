@@ -58,7 +58,7 @@ public class LongLCCheckListTestCase {
 
     private int userId = 2;
     UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
-    private String serviceString;
+
     private WSRegistryServiceClient wsRegistryServiceClient;
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
     private LifeCycleManagementClient lifeCycleManagementClient;
@@ -68,9 +68,12 @@ public class LongLCCheckListTestCase {
 
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService2";
     private static final String LC_NAME = "LongCheckListLC";
-
+    private static final String GOV_PATH = "/_system/governance";
+    private String serviceString = "/trunk/services/com/abb/IntergalacticService2";
+    private final String absPath = GOV_PATH + serviceString; 
+ 
     private static final String ACTION_ITEM_CLICK = "itemClick";
     private LifecycleBean lifeCycle;
     private RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
@@ -130,14 +133,14 @@ public class LongLCCheckListTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService2.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -185,21 +188,11 @@ public class LongLCCheckListTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException, 
-					    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-//        ServiceBean service = listMetadataServiceClient.listServices(null);
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -217,7 +210,7 @@ public class LongLCCheckListTestCase {
      */
     @Test(groups = "wso2.greg", description = "Tick Commencement checklist", dependsOnMethods = "testAddLcToService")
     public void testTickCheckListItem() throws Exception {
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_ITEM_CLICK, new String[]{"true", "true",
                                                                                  "true", "true",
                                                                                  "true", "true",
@@ -230,8 +223,7 @@ public class LongLCCheckListTestCase {
                                                                                  "true"});
 
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (prop.getKey().contains("registry.custom_lifecycle.checklist.option") &&
@@ -247,7 +239,7 @@ public class LongLCCheckListTestCase {
      */
     @Test(groups = "wso2.greg", description = "Untick Commencement checklist", dependsOnMethods = "testTickCheckListItem")
     public void testUnTickCheckListItem() throws Exception {
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME,
                                                  ACTION_ITEM_CLICK,
                                                  new String[]{"false", "false", "false", "false",
                                                               "false", "false", "false", "false",
@@ -256,8 +248,7 @@ public class LongLCCheckListTestCase {
                                                               "false", "false", "false"});
 
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (prop.getKey().contains("registry.custom_lifecycle.checklist.option") &&
                 !prop.getKey().contains("permission")) {
@@ -271,7 +262,7 @@ public class LongLCCheckListTestCase {
      */
     @AfterClass()
     public void clear() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
@@ -279,10 +270,10 @@ public class LongLCCheckListTestCase {
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
-        if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+ //       String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+   //     if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
+     //       resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
+       // }
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;

@@ -94,8 +94,8 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
 
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
-    private static final String LC_NAME = "DiffEnvironmentLC";
+    private static final String SERVICE_NAME = "IntergalacticService12";
+    private static final String LC_NAME = "DiffEnvironmentLC2";
     private static final String LC_STATE0 = "Development";
     private static final String LC_STATE1 = "Testing";
     private static final String ACTION_PROMOTE = "Promote";
@@ -108,7 +108,11 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
     private static final String ACTION_NAME = "name";
     private static final String auditPath =
             "/_system/governance/repository/components/org.wso2.carbon.governance/lifecycles/history/"
-            + "__system_governance_trunk_services_com_abb_IntergalacticService";
+            + "__system_governance_trunk_services_com_abb_IntergalacticService12";
+
+    private static final String GOV_PATH = "/_system/governance";
+    private String servicePath = "/trunk/services/com/abb/IntergalacticService12";
+    private final String absPath = GOV_PATH + servicePath;
 
     private LifecycleBean lifeCycle;
     private ServiceBean service;
@@ -170,14 +174,14 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService12.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -195,7 +199,7 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         String resourcePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "lifecycle" +
-                File.separator + "EnvironmentChangeLC.xml";
+                File.separator + "EnvironmentChangeLC2.xml";
         String lifeCycleContent = FileManager.readFile(resourcePath);
         lifeCycleManagementClient.addLifeCycle(lifeCycleContent);
         String[] lifeCycles = lifeCycleManagementClient.getLifecycleList();
@@ -225,22 +229,10 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException,
-					    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-        //service = listMetadataServiceClient.listServices(null);
-
-        Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-                break;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME);
-        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                                 serviceString);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
+        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -274,8 +266,7 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
 
         ArrayOfString[] parameters = new ArrayOfString[5];
         String[] dependencyList =
-                lifeCycleAdminServiceClient.getAllDependencies("/_system/governance" +
-                                                               serviceString);
+                lifeCycleAdminServiceClient.getAllDependencies(absPath);
         parameters[0] = new ArrayOfString();
         parameters[0].setArray(new String[]{dependencyList[0], "1.0.0"});
         parameters[1] = new ArrayOfString();
@@ -286,20 +277,19 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         parameters[3].setArray(new String[]{dependencyList[3], "1.0.0"});
         parameters[4] = new ArrayOfString();
         parameters[4].setArray(new String[]{"preserveOriginal", "false"});
-        lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceString,
+        lifeCycleAdminServiceClient.invokeAspectWithParams(absPath,
                                                            LC_NAME, ACTION_PROMOTE, null,
                                                            parameters);
      //   service = listMetadataServiceClient.listServices(null);
 	Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
 	    String path = service.getPath();
-            if (path.contains("IntergalacticService") && path.contains("/testing/")) {
+            if (path.contains("IntergalacticService12") && path.contains("/testing/")) {
                 serviceString = path;
             }
         }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH + serviceString);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -322,9 +312,9 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         String[] info =
                 {
                         "/_system/governance/branches/testing/schemas/org/bar/purchasing/1.0.0/purchasing.xsd created",
-                        "/_system/governance/branches/testing/wsdls/com/foo/1.0.0/IntergalacticService.wsdl created",
+                        "/_system/governance/branches/testing/wsdls/com/foo/1.0.0/IntergalacticService12.wsdl created",
                         "/_system/governance/branches/testing/endpoints/localhost/axis2/services/1.0.0/ep-BizService created",
-                        "/_system/governance/branches/testing/services/com/abb/1.0.0/IntergalacticService created"};
+                        "/_system/governance/branches/testing/services/com/abb/1.0.0/IntergalacticService12 created"};
         String INFO = "info";
 
         assertEquals(getAuditRecords(auditPath, 0, USER, 0), userInfo.getUserNameWithoutDomain(),
@@ -373,9 +363,9 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         ArrayOfString[] parameters = new ArrayOfString[1];
         parameters[0] = new ArrayOfString();
         parameters[0].setArray(new String[]{"preserveOriginal", "false"});
-        lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceString,
+        lifeCycleAdminServiceClient.invokeAspectWithParams(GOV_PATH + serviceString,
                                                            LC_NAME, ACTION_DEMOTE, null, parameters);
-//        service = listMetadataServiceClient.listServices(null);
+
 	Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
 	    String path = service.getPath();
@@ -479,6 +469,10 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
+	if (wsRegistryServiceClient.resourceExists(absPath)) {
+            resourceAdminServiceClient.deleteResource(absPath);
+        }
+
         String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
@@ -487,7 +481,7 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
             resourceAdminServiceClient.deleteResource(schemaPathToDelete);
         }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+/*        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
         }
@@ -498,7 +492,7 @@ public class PromoteDemoteDiffEnvironmentsTestCase {
         wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/1.0.0";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;

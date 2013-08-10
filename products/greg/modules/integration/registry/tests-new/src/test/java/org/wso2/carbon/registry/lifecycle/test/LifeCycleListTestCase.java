@@ -97,9 +97,13 @@ public class LifeCycleListTestCase {
     private SearchAdminServiceClient searchAdminServiceClient;
     private ServiceManager serviceManager;
 
-    private static final String[] SERVICE_NAMES = {"IntergalacticService", "abc", "def"};
+    private static final String[] SERVICE_NAMES = {"IntergalacticService10", "abc", "def"};
     private static final String[] LC_NAMES = {"StateDemoteLC", "MultiplePromoteDemoteLC",
                                               "CheckListPermissionLC"};
+
+    private static final String GOV_PATH = "/_system/governance";
+    private String serviceString = "/trunk/services/com/abb/IntergalacticService10";
+    private final String absPath = GOV_PATH + serviceString;
 
     private ServiceBean service;
     private RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
@@ -166,7 +170,7 @@ public class LifeCycleListTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService10.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service 1";
@@ -194,9 +198,7 @@ public class LifeCycleListTestCase {
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-//        ServiceBean bean = listMetadataServiceClient.listServices(null);
 	Service[] services = serviceManager.getAllServices();
-
         int serviceCount = 0;
 
         if (services.length > 0) {
@@ -208,8 +210,6 @@ public class LifeCycleListTestCase {
                 }
             }
         }
-
-
         assertEquals(serviceCount, SERVICE_NAMES.length, "Mismatching number of services");
     }
 
@@ -275,10 +275,8 @@ public class LifeCycleListTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException, 
-				 	    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-        //service = listMetadataServiceClient.listServices(null);
 	Service[] services = serviceManager.getAllServices();
         String serviceString = "";
         for (Service service : services) {
@@ -288,9 +286,9 @@ public class LifeCycleListTestCase {
                 servicePath1 = path;
             }
         }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAMES[0]);
+        wsRegistryServiceClient.associateAspect(GOV_PATH + serviceString, LC_NAMES[0]);
         LifecycleBean lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH +
                                                              serviceString);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
@@ -309,9 +307,9 @@ public class LifeCycleListTestCase {
                 servicePath2 = path;
             }
         }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAMES[0]);
+        wsRegistryServiceClient.associateAspect(GOV_PATH + serviceString, LC_NAMES[0]);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH +
                                                              serviceString);
         properties = lifeCycle.getLifecycleProperties();
 
@@ -431,14 +429,14 @@ public class LifeCycleListTestCase {
         for (Service service : services) {
 	    String path = service.getPath();
             if (path.contains(SERVICE_NAMES[0]) || path.contains(SERVICE_NAMES[1]) || path.contains(SERVICE_NAMES[2])) {
-                String servicePathToDelete = "/_system/governance/" + path;
+                String servicePathToDelete = GOV_PATH + path;
                 if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
                     resourceAdminServiceClient.deleteResource(servicePathToDelete);
                 }
             }
         }
-        SchemaBean schema = listMetadataServiceClient.listSchemas();
-        String[] schemaPath = schema.getPath();
+ /*       SchemaBean schema = listMetadataServiceClient.listSchemas();
+            String[] schemaPath = schema.getPath();
         for (String schemaDelete : schemaPath) {
             if (schemaDelete.contains("purchasing")) {
                 String schemaPathToDelete = "/_system/governance/" + schemaDelete;
@@ -447,8 +445,8 @@ public class LifeCycleListTestCase {
                 }
             }
 
-        }
-        WSDLBean wsdl = listMetadataServiceClient.listWSDLs();
+        }*/
+/*        WSDLBean wsdl = listMetadataServiceClient.listWSDLs();
         String[] wsdlPath = wsdl.getPath();
         if (wsdlPath != null) {
             for (String wsdlDelete : wsdlPath) {
@@ -459,7 +457,7 @@ public class LifeCycleListTestCase {
                     }
                 }
             }
-        }
+        }*/
 
         lifeCycleManagementClient.deleteLifeCycle(LC_NAMES[0]);
         lifeCycleManagementClient.deleteLifeCycle("LongCheckListLC");

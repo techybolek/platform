@@ -62,7 +62,6 @@ public class LCTransitionNotificationTestCase {
 
 	private int userId = 2;
 	UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
-	private String serviceString;
 	private WSRegistryServiceClient wsRegistryServiceClient;
 	private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
 	private LifeCycleManagementClient lifeCycleManagementClient;
@@ -75,11 +74,16 @@ public class LCTransitionNotificationTestCase {
 	private ManageEnvironment environment;
 	private ServiceManager serviceManager;
 
-	private static final String SERVICE_NAME = "IntergalacticService";
+	private static final String SERVICE_NAME = "IntergalacticService9";
 	private static final String LC_NAME = "TransitionApprovalLC";
 	private static final String ACTION_PROMOTE = "Promote";
 
 	private static final String ACTION_VOTE_CLICK = "voteClick";
+
+	private static final String GOV_PATH = "/_system/governance";
+	private String serviceString = "/trunk/services/com/abb/IntergalacticService9";
+        private final String absPath = GOV_PATH + serviceString;
+
 	private LifecycleBean lifeCycle;
 	private RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
 
@@ -149,14 +153,14 @@ public class LCTransitionNotificationTestCase {
 		String servicePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION
 				+ "artifacts" + File.separator + "GREG" + File.separator
 				+ "services" + File.separator
-				+ "intergalacticService.metadata.xml";
+				+ "intergalacticService9.metadata.xml";
 		DataHandler dataHandler = new DataHandler(new URL("file:///"
 				+ servicePath));
 		String mediaType = "application/vnd.wso2-service+xml";
 		String description = "This is a test service";
 		resourceAdminServiceClient.addResource("/_system/governance/service",mediaType, description, dataHandler);
 
-		ResourceData[] data = resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+		ResourceData[] data = resourceAdminServiceClient.getResource(absPath);
 
 		assertNotNull(data, "Service not found");
 
@@ -198,17 +202,7 @@ public class LCTransitionNotificationTestCase {
 	public void testSubscribeLCApprovalNeededNotification() throws Exception, GovernanceException {
 		
 		addRole();
-
-	//	ServiceBean service = listMetadataServiceClient.listServices(null);
-
-		Service[] services = serviceManager.getAllServices();
-		for (Service service : services) {
-		        String path = service.getPath();
-			if (path.contains("IntergalacticService")) {
-				serviceString = path;
-			}
-		}
-		assertTrue(consoleSubscribe("/_system/governance" + serviceString,	"LifeCycleApprovalNeeded"));
+		assertTrue(consoleSubscribe(absPath,	"LifeCycleApprovalNeeded"));
 	}
 
 	/**
@@ -218,8 +212,8 @@ public class LCTransitionNotificationTestCase {
 	@Test(groups = "wso2.greg", description = "Add lifecycle to a service", dependsOnMethods = "testSubscribeLCApprovalNeededNotification")
 	public void testAddLcToService() throws Exception {
 
-		wsRegistryServiceClient.associateAspect("/_system/governance"+ serviceString, LC_NAME);
-		lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" + serviceString);
+		wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
+		lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
 		Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -244,8 +238,8 @@ public class LCTransitionNotificationTestCase {
 	 */
 	@Test(groups = "wso2.greg", description = "Check LC Approval Needed notification is recived", dependsOnMethods = "testAddLcToService")
 	public void testLCApprovalNeededNotification() throws RemoteException, IllegalStateFault, IllegalAccessFault, IllegalArgumentFault, InterruptedException, RegistryException, RegistryExceptionException{
-		assertTrue(getNotification("The LifeCycle was created and some transitions are awating for approval, resource locate at /_system/governance" + serviceString));
-		assertTrue(managementUnsubscribe("/_system/governance" + serviceString));
+		assertTrue(getNotification("The LifeCycle was created and some transitions are awating for approval, resource locate at " + absPath));
+		assertTrue(managementUnsubscribe(absPath));
 	}
 	
 	/**
@@ -260,7 +254,7 @@ public class LCTransitionNotificationTestCase {
 	 */
 	@Test(groups = "wso2.greg", description = "Subscribe LC Approved notification ", dependsOnMethods = "testLCApprovalNeededNotification")
 	public void testSubscribeLCApprovedNotification() throws RemoteException, IllegalStateFault, IllegalAccessFault, IllegalArgumentFault, InterruptedException, RegistryException, RegistryExceptionException{
-		assertTrue(consoleSubscribe("/_system/governance" + serviceString,	"LifeCycleApproved"));
+		assertTrue(consoleSubscribe(absPath,	"LifeCycleApproved"));
 	}
 
 
@@ -269,11 +263,10 @@ public class LCTransitionNotificationTestCase {
 	 */
 	@Test(groups = "wso2.greg", description = "LifeCycle Transition Event Approval(Tick)", dependsOnMethods = "testSubscribeLCApprovedNotification")
 	public void testLCTransitionApproval() throws Exception {
-		lifeCycleAdminServiceClient.invokeAspect("/_system/governance"
-				+ serviceString, LC_NAME, ACTION_VOTE_CLICK, new String[] {
+		lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME, ACTION_VOTE_CLICK, new String[] {
 				"true", "true" });
 
-		lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" + serviceString);
+		lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 		for (Property prop : lifeCycle.getLifecycleApproval()) {
 			if (prop.getKey().contains("registry.custom_lifecycle.votes.option") && !prop.getKey().contains("permission")) {
 				System.out.println(prop.getValues());
@@ -298,8 +291,8 @@ public class LCTransitionNotificationTestCase {
 	 */
 	@Test(groups = "wso2.greg", description = "Check LifeCycle Approved notification is recived", dependsOnMethods = "testLCTransitionApproval")
 	public void testLCApprovedNotification() throws RemoteException, IllegalStateFault, IllegalAccessFault, IllegalArgumentFault, InterruptedException, RegistryException, RegistryExceptionException{
-		assertTrue(getNotification("LifeCycle State 'Commencement', transitions event 'Abort' was approved for resource at /_system/governance" + serviceString));
-		assertTrue(managementUnsubscribe("/_system/governance" + serviceString));
+		assertTrue(getNotification("LifeCycle State 'Commencement', transitions event 'Abort' was approved for resource at " +  absPath));
+		assertTrue(managementUnsubscribe(absPath));
 	}
 	
 	/**
@@ -314,7 +307,7 @@ public class LCTransitionNotificationTestCase {
 	 */
 	@Test(groups = "wso2.greg", description = "Subscribe LifeCycle Approval Withdrawn notification ", dependsOnMethods = "testLCApprovedNotification")
 	public void testSubscribeLCApprovalWithdrawnNotification() throws RemoteException, IllegalStateFault, IllegalAccessFault, IllegalArgumentFault, InterruptedException, RegistryException, RegistryExceptionException{
-		assertTrue(consoleSubscribe("/_system/governance" + serviceString,	"LifeCycleApprovalWithdrawn"));
+		assertTrue(consoleSubscribe(absPath,	"LifeCycleApprovalWithdrawn"));
 	}
 
 	/**
@@ -323,11 +316,10 @@ public class LCTransitionNotificationTestCase {
 	@Test(groups = "wso2.greg", description = "Remove LC Transition Event Approval(Untick)", dependsOnMethods = "testSubscribeLCApprovalWithdrawnNotification")
 	public void testLCTransitionApprovalWithDrawn() throws Exception {
 
-		lifeCycleAdminServiceClient.invokeAspect("/_system/governance"
-				+ serviceString, LC_NAME, ACTION_VOTE_CLICK, new String[] {
+		lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME, ACTION_VOTE_CLICK, new String[] {
 				"false", "false" });
 
-		lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" + serviceString);
+		lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 		for (Property prop : lifeCycle.getLifecycleApproval()) {
 			if (prop.getKey() .contains("registry.custom_lifecycle.votes.option") && !prop.getKey().contains("permission")) {
 				for (String value : prop.getValues()) {
@@ -351,8 +343,8 @@ public class LCTransitionNotificationTestCase {
 	 */
 	@Test(groups = "wso2.greg", description = "Check LC Approval WithDrown notification is recived", dependsOnMethods = "testLCTransitionApprovalWithDrawn")
 	public void testLCApprovalWithdrawnNotification() throws RemoteException, IllegalStateFault, IllegalAccessFault, IllegalArgumentFault, InterruptedException, RegistryException, RegistryExceptionException{
-		assertTrue(getNotification("LifeCycle State 'Commencement' transitions event 'Abort' approvel was removed for resource at /_system/governance" + serviceString));
-		assertTrue(managementUnsubscribe("/_system/governance" + serviceString));
+		assertTrue(getNotification("LifeCycle State 'Commencement' transitions event 'Abort' approvel was removed for resource at " + absPath));
+		assertTrue(managementUnsubscribe(absPath));
 	}
 
 	/**
@@ -360,18 +352,18 @@ public class LCTransitionNotificationTestCase {
 	 */
 	@AfterClass()
 	public void clear() throws Exception {
-		String servicePathToDelete = "/_system/governance/" + serviceString;
+		String servicePathToDelete = absPath;
 		if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
 			resourceAdminServiceClient.deleteResource(servicePathToDelete);
 		}
-		String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-		if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-			resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-		}
-		String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
-		if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
-			resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-		}
+//		String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+//		if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+//			resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+//		}
+//		String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+//		if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
+//			resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
+//		}
 		lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
 		wsRegistryServiceClient = null;

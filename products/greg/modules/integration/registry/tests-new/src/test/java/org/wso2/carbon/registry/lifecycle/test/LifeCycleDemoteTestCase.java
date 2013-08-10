@@ -76,8 +76,7 @@ public class LifeCycleDemoteTestCase {
 
     private int userId = 2;
     UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
-
-    private String serviceString;
+   
     private String serviceLocation;
 
     private WSRegistryServiceClient wsRegistryServiceClient;
@@ -88,7 +87,7 @@ public class LifeCycleDemoteTestCase {
     private ResourceAdminServiceClient resourceAdminServiceClient;
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService8";
     private static final String LC_NAME = "StateDemoteLC";
     private static final String ACTION_DEMOTE = "Demote";
     private static final String USER = "user";
@@ -99,6 +98,10 @@ public class LifeCycleDemoteTestCase {
     private static final String LC_STATE2 = "Development";
     private static final String LC_STATE1 = "Tested";
     private static final String TYPE = "transition";
+
+    private static final String GOV_PATH = "/_system/governance";
+    private String serviceString = "/trunk/services/com/abb/IntergalacticService8";
+    private final String absPath = GOV_PATH + serviceString;
 
     private LifecycleBean lifeCycle;
     private RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
@@ -139,14 +142,14 @@ public class LifeCycleDemoteTestCase {
                    ResourceAdminServiceExceptionException {
 
         String servicePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" + File.separator + "GREG" +
-                             File.separator + "services" + File.separator + "intergalacticService.metadata.xml";
+                             File.separator + "services" + File.separator + "intergalacticService8.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
     }
@@ -173,20 +176,11 @@ public class LifeCycleDemoteTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException, 
-					    GovernanceException{
+                                            ResourceAdminServiceExceptionException {
 
-       // ServiceBean service = listMetadataServiceClient.listServices(null);
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        serviceLocation = "/_system/governance" + serviceString;
-        wsRegistryServiceClient.associateAspect(serviceLocation, LC_NAME);
-        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(serviceLocation);
+
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME);
+        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
         boolean lcStatus = false;
@@ -205,8 +199,8 @@ public class LifeCycleDemoteTestCase {
             throws RemoteException, CustomLifecyclesChecklistAdminServiceExceptionException,
                    LifeCycleManagementServiceExceptionException, RegistryExceptionException {
 
-        lifeCycleAdminServiceClient.invokeAspect(serviceLocation, LC_NAME, ACTION_DEMOTE, null);
-        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(serviceLocation);
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME, ACTION_DEMOTE, null);
+        lifeCycle = lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -220,7 +214,7 @@ public class LifeCycleDemoteTestCase {
     @Test(groups = "wso2.greg", description = "Verify Audit records", dependsOnMethods = "testDemoteLC")
     public void testVerifyAuditAdmin() throws Exception {
 
-        String auditRecord = serviceLocation.replace("/", "_");
+        String auditRecord = absPath.replace("/", "_");
         String auditLocation = "/_system/governance/repository/components/org.wso2.carbon.governance" +
                                "/lifecycles/history/";
         String auditPath = auditLocation.concat(auditRecord);
@@ -255,18 +249,18 @@ public class LifeCycleDemoteTestCase {
 
     @AfterClass()
     public void clear() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-        if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
-        if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+//        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+  //      if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+      //  }
+      //  String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+        //if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
+          //  resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
+//        }
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME);
 
         governanceServiceClient = null;

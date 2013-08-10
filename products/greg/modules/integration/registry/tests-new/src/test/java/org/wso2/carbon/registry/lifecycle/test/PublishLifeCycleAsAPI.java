@@ -59,7 +59,7 @@ public class PublishLifeCycleAsAPI {
     private UserInfo userInfo;
 
 
-    @BeforeClass(alwaysRun = true)
+    @BeforeClass(enabled = false, alwaysRun = true)
     public void init() throws Exception {
 
         int userId = 2;
@@ -84,7 +84,7 @@ public class PublishLifeCycleAsAPI {
 
     }
 
-    @Test(groups = "wso2.greg", description = " Promote LC from Development to Testing")
+    @Test(enabled = false, groups = "wso2.greg", description = " Promote LC from Development to Testing")
     public void testPromoteToTesting()
             throws CustomLifecyclesChecklistAdminServiceExceptionException, RemoteException,
                    RegistryException {
@@ -110,7 +110,7 @@ public class PublishLifeCycleAsAPI {
 
     }
 
-    @Test(groups = "wso2.greg", description = " Promote LC from Testing to Production",
+    @Test(enabled = false, groups = "wso2.greg", description = " Promote LC from Testing to Production",
           dependsOnMethods = "testPromoteToTesting")
     public void testPromoteToProduction()
             throws CustomLifecyclesChecklistAdminServiceExceptionException,
@@ -137,7 +137,7 @@ public class PublishLifeCycleAsAPI {
 
     }
 
-    @Test(groups = "wso2.greg", description = " Promote LC from Production to Publish",
+    @Test(enabled = false, groups = "wso2.greg", description = " Promote LC from Production to Publish",
           dependsOnMethods = "testPromoteToProduction")
     public void testPromoteToPublish()
             throws CustomLifecyclesChecklistAdminServiceExceptionException,
@@ -155,7 +155,7 @@ public class PublishLifeCycleAsAPI {
     }
 
 
-    @Test(groups = "wso2.greg", description = " Testing if API Artifact created ",
+    @Test(enabled = false, groups = "wso2.greg", description = " Testing if API Artifact created ",
           dependsOnMethods = "testPromoteToPublish")
     public void testAPICreation() throws RegistryException {
 
@@ -164,7 +164,7 @@ public class PublishLifeCycleAsAPI {
                    "API Artifact doesn't exists");
     }
 
-    @AfterClass
+    @AfterClass (enabled = false)
     public void deleteLifeCycle()
             throws RegistryException, LifeCycleManagementServiceExceptionException,
                    RemoteException {

@@ -76,8 +76,7 @@ import static org.testng.Assert.assertTrue;
  */
 public class LCTransitionExecutionTestCase {
     private int userId = 2;
-    private UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
-    private String serviceString;
+    private UserInfo userInfo = UserListCsvReader.getUserInfo(userId);    
     private WSRegistryServiceClient wsRegistryServiceClient;
 
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
@@ -87,7 +86,7 @@ public class LCTransitionExecutionTestCase {
     private ResourceAdminServiceClient resourceAdminServiceClient;
     private ServiceManager serviceManager;
 
-    private static final String SERVICE_NAME = "IntergalacticService";
+    private static final String SERVICE_NAME = "IntergalacticService14";
     private static final String LC_NAME1 = "TransitionExecutionLC";
     private static final String LC_NAME2 = "EnvironmentPathLC";
     private static final String LC_NAME3 = "EnvironmentPathLC2";
@@ -95,6 +94,11 @@ public class LCTransitionExecutionTestCase {
     private static final String LC_NAME5 = "InvalidTargetEnvironmentPathLC";
     private static final String LC_STATE0 = "Testing";
     private static final String ACTION_PROMOTE = "Promote";
+
+    private String serviceString;
+    private static final String GOV_PATH = "/_system/governance";
+    private String servicePath = "/trunk/services/com/abb/IntergalacticService14";
+    private final String absPath = GOV_PATH + servicePath;
 
     private LifecycleBean lifeCycle;
     private ServiceBean service;
@@ -155,14 +159,14 @@ public class LCTransitionExecutionTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService14.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service1", mediaType, description, dataHandler);
         
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -211,22 +215,11 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService() throws RegistryException, RemoteException,
                                             CustomLifecyclesChecklistAdminServiceExceptionException,
                                             ListMetadataServiceRegistryExceptionException,
-                                            ResourceAdminServiceExceptionException,
-					    GovernanceException {
+                                            ResourceAdminServiceExceptionException {
 
-//      service = listMetadataServiceClient.listServices(null);
-
-	Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME1);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME1);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -255,7 +248,7 @@ public class LCTransitionExecutionTestCase {
                                        LifeCycleManagementServiceExceptionException,
                                        RegistryExceptionException {
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME1,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME1,
                                                  ACTION_PROMOTE, null);
 
     }
@@ -265,18 +258,18 @@ public class LCTransitionExecutionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Clear the used resources", dependsOnMethods = "testPromoteLC")
     public void clearPrevious() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-        if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+//        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+  //      if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+      //  }
+/*        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME1);
 
     }
@@ -300,14 +293,14 @@ public class LCTransitionExecutionTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService14.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service2", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -358,22 +351,11 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService2() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException,
-					     GovernanceException {
+                                             ResourceAdminServiceExceptionException {
 
-    //    service = listMetadataServiceClient.listServices(null);
-   	Service[] services = serviceManager.getAllServices();
-
-        for (Service service : services) {
-   	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME2);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME2);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -401,7 +383,7 @@ public class LCTransitionExecutionTestCase {
                                         LifeCycleManagementServiceExceptionException,
                                         RegistryExceptionException {
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME2,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME2,
                                                  ACTION_PROMOTE, null);
 
     }
@@ -411,18 +393,18 @@ public class LCTransitionExecutionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Clear the used resources", dependsOnMethods = "testPromoteLC2")
     public void clearPrevious2() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-        if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+//        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+  //      if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+      //  }
+/*        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME2);
     }
 
@@ -445,14 +427,14 @@ public class LCTransitionExecutionTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService14.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service3", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -502,21 +484,11 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService3() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException, 
-					     GovernanceException {
+                                             ResourceAdminServiceExceptionException {
 
-      //  service = listMetadataServiceClient.listServices(null);
-        Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-            String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME3);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME3);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -551,20 +523,19 @@ public class LCTransitionExecutionTestCase {
         ArrayOfString[] parameters = new ArrayOfString[1];
         parameters[0] = new ArrayOfString();
         parameters[0].setArray(new String[]{"preserveOriginal", "false"});
-        lifeCycleAdminServiceClient.invokeAspectWithParams("/_system/governance" + serviceString,
+        lifeCycleAdminServiceClient.invokeAspectWithParams(absPath,
                                                            LC_NAME3, ACTION_PROMOTE, null,
                                                            parameters);
-     //   service = listMetadataServiceClient.listServices(null);
+
 	Service[] services = serviceManager.getAllServices();
         for (Service service : services) {
 	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
+            if (path.contains("IntergalacticService14")) {
                 serviceString = path;
             }
         }
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(GOV_PATH + serviceString);
 
         for (Property prop : lifeCycle.getLifecycleProperties()) {
             if (("registry.lifecycle." + LC_NAME3 + ".state").equalsIgnoreCase(prop.getKey())) {
@@ -580,22 +551,22 @@ public class LCTransitionExecutionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Clear the used resources", dependsOnMethods = "testPromoteLC3")
     public void clearPrevious3() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = GOV_PATH + serviceString;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-        if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+//        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+  //      if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+      //  }
+/*        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
         }
         wsdlPathToDelete = "/_system/governance/wso2/branches/testing/wsdls/com/foo/1.0.0-SNAPSHOT/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME3);
     }
 
@@ -618,14 +589,14 @@ public class LCTransitionExecutionTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService14.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service4", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -675,21 +646,11 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService4() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException,
-					     GovernanceException {
+                                             ResourceAdminServiceExceptionException {
 
-//        service = listMetadataServiceClient.listServices(null);
-        Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
-  	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME4);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME4);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -717,7 +678,7 @@ public class LCTransitionExecutionTestCase {
                                         LifeCycleManagementServiceExceptionException,
                                         RegistryExceptionException {
 
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME4,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME4,
                                                  ACTION_PROMOTE, null);
 
     }
@@ -727,18 +688,18 @@ public class LCTransitionExecutionTestCase {
      */
     @Test(groups = "wso2.greg", description = "Clear the used resources", dependsOnMethods = "testPromoteLC4")
     public void clearPrevious4() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-        if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+//        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+  //      if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+    //       resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+     //   }
+/*        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME4);
     }
 
@@ -761,14 +722,14 @@ public class LCTransitionExecutionTestCase {
         String servicePath =
                 ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "artifacts" +
                 File.separator + "GREG" + File.separator + "services" +
-                File.separator + "intergalacticService.metadata.xml";
+                File.separator + "intergalacticService14.metadata.xml";
         DataHandler dataHandler = new DataHandler(new URL("file:///" + servicePath));
         String mediaType = "application/vnd.wso2-service+xml";
         String description = "This is a test service";
         resourceAdminServiceClient.addResource(
                 "/_system/governance/service5", mediaType, description, dataHandler);
 
-        ResourceData[] data =  resourceAdminServiceClient.getResource("/_system/governance/trunk/services/com/abb/IntergalacticService");
+        ResourceData[] data =  resourceAdminServiceClient.getResource(absPath);
         
         assertNotNull(data, "Service not found");
 
@@ -818,21 +779,11 @@ public class LCTransitionExecutionTestCase {
     public void testAddLcToService5() throws RegistryException, RemoteException,
                                              CustomLifecyclesChecklistAdminServiceExceptionException,
                                              ListMetadataServiceRegistryExceptionException,
-                                             ResourceAdminServiceExceptionException, 
-					     GovernanceException {
+                                             ResourceAdminServiceExceptionException {
 
-//        service = listMetadataServiceClient.listServices(null);
-        Service[] services = serviceManager.getAllServices();
-        for (Service service : services) {
- 	    String path = service.getPath();
-            if (path.contains("IntergalacticService")) {
-                serviceString = path;
-            }
-        }
-        wsRegistryServiceClient.associateAspect("/_system/governance" + serviceString, LC_NAME5);
+        wsRegistryServiceClient.associateAspect(absPath, LC_NAME5);
         lifeCycle =
-                lifeCycleAdminServiceClient.getLifecycleBean("/_system/governance" +
-                                                             serviceString);
+                lifeCycleAdminServiceClient.getLifecycleBean(absPath);
 
         Property[] properties = lifeCycle.getLifecycleProperties();
 
@@ -862,7 +813,7 @@ public class LCTransitionExecutionTestCase {
                                         LifeCycleManagementServiceExceptionException,
                                         RegistryExceptionException,
                                         ResourceAdminServiceExceptionException {
-        lifeCycleAdminServiceClient.invokeAspect("/_system/governance" + serviceString, LC_NAME5,
+        lifeCycleAdminServiceClient.invokeAspect(absPath, LC_NAME5,
                                                  ACTION_PROMOTE, null);
     }
 
@@ -871,18 +822,18 @@ public class LCTransitionExecutionTestCase {
      */
     @AfterClass()
     public void clear() throws Exception {
-        String servicePathToDelete = "/_system/governance/" + serviceString;
+        String servicePathToDelete = absPath;
         if (wsRegistryServiceClient.resourceExists(servicePathToDelete)) {
             resourceAdminServiceClient.deleteResource(servicePathToDelete);
         }
-        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
-        if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
-            resourceAdminServiceClient.deleteResource(schemaPathToDelete);
-        }
-        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
+//        String schemaPathToDelete = "/_system/governance/trunk/schemas/org/bar/purchasing/purchasing.xsd";
+  //      if (wsRegistryServiceClient.resourceExists(schemaPathToDelete)) {
+    //        resourceAdminServiceClient.deleteResource(schemaPathToDelete);
+      //  }
+/*        String wsdlPathToDelete = "/_system/governance/trunk/wsdls/com/foo/IntergalacticService.wsdl";
         if (wsRegistryServiceClient.resourceExists(wsdlPathToDelete)) {
             resourceAdminServiceClient.deleteResource(wsdlPathToDelete);
-        }
+        }*/
         lifeCycleManagementClient.deleteLifeCycle(LC_NAME5);
 
         governanceServiceClient = null;

@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.automation.api.clients.governance.LifeCycleAdminServiceClient;
 import org.wso2.carbon.automation.api.clients.governance.LifeCycleManagementClient;
 import org.wso2.carbon.automation.api.clients.registry.SearchAdminServiceClient;
+import org.wso2.carbon.automation.api.clients.registry.ResourceAdminServiceClient;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.UserInfo;
 import org.wso2.carbon.automation.core.utils.UserListCsvReader;
@@ -36,6 +37,7 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+//import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.beans.xsd.LifecycleBean;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.services.ArrayOfString;
@@ -44,10 +46,12 @@ import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionEx
 import org.wso2.carbon.integration.framework.utils.FrameworkSettings;
 import org.wso2.carbon.registry.activities.stub.RegistryExceptionException;
 import org.wso2.carbon.registry.core.Registry;
+//import org.wso2.carbon.registry.core.UserRegistry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.lifecycle.test.utils.LifeCycleUtils;
 import org.wso2.carbon.registry.search.stub.SearchAdminServiceRegistryExceptionException;
+import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.wso2.carbon.governance.client.WSRegistrySearchClient;
 import java.io.File;
@@ -65,7 +69,7 @@ public class DemoteLCTestTransition {
     private LifeCycleAdminServiceClient lifeCycleAdminServiceClient;
     private WSRegistryServiceClient wsRegistryServiceClient;
     private SearchAdminServiceClient searchAdminServiceClient;
-
+    private ResourceAdminServiceClient resourceAdminServiceClient;
 
     private Registry governance;
 
@@ -73,6 +77,8 @@ public class DemoteLCTestTransition {
     private final String ASPECT_NAME = "DiffEnvironmentLC";
     private final String ACTION_PROMOTE = "Promote";
     private final String ACTION_DEMOTE = "Demote";
+    private static final String GOV_PATH = "/_system/governance";
+	
     private String trunk;
     private String trunkTesting;
     private String trunkProduction;
@@ -91,6 +97,9 @@ public class DemoteLCTestTransition {
         lifeCycleManagementClient =
                 new LifeCycleManagementClient(environment.getGreg().getProductVariables().getBackendUrl(),
                                               environment.getGreg().getSessionCookie());
+	resourceAdminServiceClient =
+                new ResourceAdminServiceClient(environment.getGreg().getProductVariables().getBackendUrl(),
+                                               environment.getGreg().getSessionCookie());
         RegistryProviderUtil registryProviderUtil = new RegistryProviderUtil();
 
     //     String url = "https://" + FrameworkSettings.HOST_NAME + ":" + FrameworkSettings.HTTPS_PORT
@@ -302,17 +311,17 @@ public class DemoteLCTestTransition {
     @AfterClass
     public void DeleteLCResources()
             throws LifeCycleManagementServiceExceptionException, RemoteException,
-                   RegistryException {
-
+                   RegistryException, ResourceAdminServiceExceptionException {
+	//GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         ServiceManager serviceManager = new ServiceManager(governance);
         Service[] services = serviceManager.getAllServices();
         for (Service s : services) {
             if (s.getQName().getLocalPart().equals(serviceName)) {
-                serviceManager.removeService(s.getId());
+	            String path  = s.getPath();
+	            resourceAdminServiceClient.deleteResource(GOV_PATH + path);
             }
         }
-
-        LifeCycleUtils.deleteLifeCycleIfExist(ASPECT_NAME, lifeCycleManagementClient);
+            LifeCycleUtils.deleteLifeCycleIfExist(ASPECT_NAME, lifeCycleManagementClient);
 
         registry = null;
         lifeCycleAdminServiceClient = null;
