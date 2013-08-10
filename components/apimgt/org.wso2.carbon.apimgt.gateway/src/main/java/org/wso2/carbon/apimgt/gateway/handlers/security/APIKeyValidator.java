@@ -295,10 +295,8 @@ public class APIKeyValidator {
 
         String cacheKey = context + ":" + apiVersion;
         APIInfoDTO apiInfoDTO = null;
-        if (isGatewayAPIKeyValidationEnabled) {
-            apiInfoDTO = (APIInfoDTO) resourceCache.get(cacheKey);
-        }
-
+        apiInfoDTO = (APIInfoDTO) resourceCache.get(cacheKey);
+        
         if (apiInfoDTO == null) {
             apiInfoDTO = doGetAPIInfo(context, apiVersion);
             resourceCache.put(cacheKey, apiInfoDTO);
