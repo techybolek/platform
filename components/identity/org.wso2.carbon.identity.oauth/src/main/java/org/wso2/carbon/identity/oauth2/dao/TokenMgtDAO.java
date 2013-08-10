@@ -47,7 +47,7 @@ public class TokenMgtDAO {
 
     private static final Log log = LogFactory.getLog(TokenMgtDAO.class);
 
-    public void storeAuthorizationCode(String authzCode, String consumerKey,
+    public void storeAuthorizationCode(String authzCode, String consumerKey, String callbackUrl,
                                        AuthzCodeDO authzCodeDO) throws IdentityOAuth2Exception {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -56,11 +56,12 @@ public class TokenMgtDAO {
             prepStmt = connection.prepareStatement(SQLQueries.STORE_AUTHORIZATION_CODE);
             prepStmt.setString(1, authzCode);
             prepStmt.setString(2, consumerKey);
-            prepStmt.setString(3, OAuth2Util.buildScopeString(authzCodeDO.getScope()));
-            prepStmt.setString(4, authzCodeDO.getAuthorizedUser());
-            prepStmt.setTimestamp(5, authzCodeDO.getIssuedTime(),
+            prepStmt.setString(3, callbackUrl);
+            prepStmt.setString(4, OAuth2Util.buildScopeString(authzCodeDO.getScope()));
+            prepStmt.setString(5, authzCodeDO.getAuthorizedUser());
+            prepStmt.setTimestamp(6, authzCodeDO.getIssuedTime(),
                     Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-            prepStmt.setLong(6, authzCodeDO.getValidityPeriod());
+            prepStmt.setLong(7, authzCodeDO.getValidityPeriod());
             prepStmt.execute();
             connection.commit();
         } catch (IdentityException e) {
@@ -302,13 +303,14 @@ public class TokenMgtDAO {
             if (resultSet.next()) {
                 String authorizedUser = resultSet.getString(1);
                 String scopeString = resultSet.getString(2);
-                Timestamp issuedTime = resultSet.getTimestamp(3,
+                String callbackUrl = resultSet.getString(3);
+                Timestamp issuedTime = resultSet.getTimestamp(4,
                         Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-                long validityPeriod = resultSet.getLong(4);
+                long validityPeriod = resultSet.getLong(5);
 
                 return new AuthzCodeDO(authorizedUser,
                         OAuth2Util.buildScopeArray(scopeString),
-                        issuedTime, validityPeriod);
+                        issuedTime, validityPeriod, callbackUrl);
             }
 
         } catch (IdentityException e) {

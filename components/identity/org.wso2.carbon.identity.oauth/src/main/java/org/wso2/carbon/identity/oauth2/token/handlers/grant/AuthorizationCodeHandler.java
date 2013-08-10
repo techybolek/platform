@@ -87,6 +87,27 @@ public class AuthorizationCodeHandler extends AbstractAuthorizationGrantHandler 
             return false;
         }
 
+        // Validate redirect_uri if it was presented in authorization request
+        if(authzCodeDO.getCallbackUrl() != null && !authzCodeDO.getCallbackUrl().equals("")){
+            if(oAuth2AccessTokenReqDTO.getCallbackURI() == null){
+                if(log.isDebugEnabled()){
+                    log.debug("Invalid access token request with " +
+                            "Client Id : " + clientId +
+                            " , Authorization Code : " + oAuth2AccessTokenReqDTO.getAuthorizationCode() +
+                            " : redirect_uri not present in request");
+                }
+                return false;
+            } else if (!oAuth2AccessTokenReqDTO.getCallbackURI().equals(authzCodeDO.getCallbackUrl())){
+                if(log.isDebugEnabled()){
+                    log.debug("Invalid access token request with " +
+                            "Client Id : " + clientId +
+                            " , Authorization Code : " + oAuth2AccessTokenReqDTO.getAuthorizationCode() +
+                            " : redirect_uri does not match previously presented redirect_uri to authorization endpoint");
+                }
+                return false;
+            }
+        }
+
         // Check whether the grant is expired
         long issuedTimeInMillis = authzCodeDO.getIssuedTime().getTime();
         long validityPeriodInMillis = authzCodeDO.getValidityPeriod();

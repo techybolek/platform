@@ -21,10 +21,10 @@ package org.wso2.carbon.identity.oauth2.dao;
 public class SQLQueries {
     public static final String STORE_AUTHORIZATION_CODE = "INSERT INTO " +
             "IDN_OAUTH2_AUTHORIZATION_CODE " +
-            "(AUTHORIZATION_CODE, CONSUMER_KEY, SCOPE, AUTHZ_USER, TIME_CREATED, VALIDITY_PERIOD) " +
-            "VALUES (?,?,?,?,?,?)";
+            "(AUTHORIZATION_CODE, CONSUMER_KEY, CALLBACK_URL, SCOPE, AUTHZ_USER, TIME_CREATED, VALIDITY_PERIOD) " +
+            "VALUES (?,?,?,?,?,?,?)";
 
-    public static final String VALIDATE_AUTHZ_CODE = "SELECT AUTHZ_USER, SCOPE, " +
+    public static final String VALIDATE_AUTHZ_CODE = "SELECT AUTHZ_USER, SCOPE, CALLBACK_URL, " +
             "TIME_CREATED, VALIDITY_PERIOD " +
             "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
             "where CONSUMER_KEY = ? " +

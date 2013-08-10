@@ -37,12 +37,15 @@ public class AuthzCodeDO extends CacheEntry {
 
     private long validityPeriod;
 
+    private String callbackUrl;
+
     public AuthzCodeDO(String authorizedUser, String[] scope,
-                       Timestamp issuedTime, long validityPeriod) {
+                       Timestamp issuedTime, long validityPeriod, String callbackUrl) {
         this.authorizedUser = authorizedUser;
         this.scope = scope;
         this.issuedTime = issuedTime;
         this.validityPeriod = validityPeriod;
+        this.callbackUrl = callbackUrl;
     }
 
     public String getAuthorizedUser() {
@@ -59,5 +62,9 @@ public class AuthzCodeDO extends CacheEntry {
 
     public long getValidityPeriod() {
         return validityPeriod;
+    }
+
+    public String getCallbackUrl(){
+        return callbackUrl;
     }
 }

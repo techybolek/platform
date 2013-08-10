@@ -74,14 +74,14 @@ public class CodeResponseTypeHandler extends AbstractAuthorizationHandler {
         validityPeriod = validityPeriod * 1000;
 
         AuthzCodeDO authzCodeDO = new AuthzCodeDO(authorizationReqDTO.getUsername(),
-                oauthAuthzMsgCtx.getApprovedScope(), timestamp, validityPeriod );
+                oauthAuthzMsgCtx.getApprovedScope(), timestamp, validityPeriod, authorizationReqDTO.getCallbackUrl());
 
         // now get the secured version which should be persisted as well as cached.
         String preprocessedAuthzCode = tokenPersistencePreprocessor.
                 getPreprocessedToken(authorizationCode);
 
-        tokenMgtDAO.storeAuthorizationCode(preprocessedAuthzCode,
-                authorizationReqDTO.getConsumerKey(), authzCodeDO);
+        tokenMgtDAO.storeAuthorizationCode(preprocessedAuthzCode, authorizationReqDTO.getConsumerKey(),
+                authorizationReqDTO.getCallbackUrl(), authzCodeDO);
 
         if (cacheEnabled) {
             // Cache the authz Code, here we prepend the client_key to avoid collisions with
