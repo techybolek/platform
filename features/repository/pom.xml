@@ -636,7 +636,7 @@
                                 <featureArtifactDef>
                                     org.wso2.dss:org.wso2.dss.styling.nested.category.feature:${dss.version}
                                 </featureArtifactDef>
-                                <featureArtifactDef>
+                                <!--featureArtifactDef>
                                     org.wso2.bps:org.wso2.bps.attachment-mgt.nested.category.feature:${bps.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
@@ -671,7 +671,7 @@
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.bps.user-mgt.nested.category.feature:${bps.version}
-                                </featureArtifactDef>
+                                </featureArtifactDef-->
                             </featureArtifacts>
 
                             <categories>
@@ -867,7 +867,7 @@
                                     </features>
                                 </category>
                                 <!--Start of BPS feature categories-->
-                                <category>
+                                <!--category>
                                     <id>org.wso2.bps.category</id>
                                     <label>Business Process Server</label>
                                     <description>This category contains features required for WSO2 Business Process Server
@@ -922,7 +922,7 @@
                                             <version>${bps.version}</version>
                                         </catFeature>
                                     </features>
-                                </category>
+                                </category-->
                             </categories>
 
                         </configuration>
