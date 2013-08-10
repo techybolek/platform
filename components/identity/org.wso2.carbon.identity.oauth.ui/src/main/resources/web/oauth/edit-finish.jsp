@@ -38,9 +38,6 @@
 <%
 	String consumerkey = CharacterEncoder.getSafeText(request.getParameter("consumerkey"));
     String callback = CharacterEncoder.getSafeText(request.getParameter("callback"));
-    if(callback.equals("")){
-        callback = null;
-    }
     String applicationName = CharacterEncoder.getSafeText(request.getParameter("application"));
     String consumersecret = CharacterEncoder.getSafeText(request.getParameter("consumersecret"));
     String oauthVersion = CharacterEncoder.getSafeText(request.getParameter("oauthVersion"));

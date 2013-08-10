@@ -38,9 +38,6 @@
 <%
 	String applicationName = CharacterEncoder.getSafeText(request.getParameter("application"));
     String callback = CharacterEncoder.getSafeText(request.getParameter("callback"));
-    if(callback.equals("")){
-        callback = null;
-    }
     String oauthVersion = CharacterEncoder.getSafeText(request.getParameter("oauthVersion"));
     //-- start setting grants
     String grantCode = CharacterEncoder.getSafeText(request.getParameter("grant_code"));

@@ -62,6 +62,11 @@
                         CARBON.showWarningDialog('<fmt:message key="application.is.required"/>');
                         return false;
                     }
+                    value = document.getElementsByName("callback")[0].value;
+                    if (value == '') {
+                        CARBON.showWarningDialog('<fmt:message key="callback.is.required"/>');
+                        return false;
+                    }
                     document.addAppform.submit();
                 }
                 jQuery(document).ready(function(){

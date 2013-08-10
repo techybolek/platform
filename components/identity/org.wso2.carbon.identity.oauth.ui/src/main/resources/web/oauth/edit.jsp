@@ -131,6 +131,11 @@
                         CARBON.showWarningDialog('<fmt:message key="application.is.required"/>');
                         return false;
                     }
+                    var value = document.getElementsByName("callback")[0].value;
+                    if (value == '') {
+                        CARBON.showWarningDialog('<fmt:message key="callback.is.required"/>');
+                        return false;
+                    }
                     document.editAppform.submit();
                 }
             </script>
