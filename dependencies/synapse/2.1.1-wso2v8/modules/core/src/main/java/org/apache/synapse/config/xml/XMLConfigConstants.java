@@ -121,5 +121,5 @@ public class XMLConfigConstants {
     public static final String XPATH_BODY_RELATIVE = "body";
     public static final String XPATH_ENVELOPE_RELATIVE = "envelope";
     
-    public static final String CONFIG_REF = "config-ref";
+    public static final String CONFIG_REF = "configKey";
 }
