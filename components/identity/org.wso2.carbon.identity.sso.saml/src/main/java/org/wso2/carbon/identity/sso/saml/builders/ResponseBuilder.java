@@ -53,6 +53,7 @@ public class ResponseBuilder {
                     + authReqDTO.getAssertionConsumerURL() + "'");
         }
         Response response = new org.opensaml.saml2.core.impl.ResponseBuilder().buildObject();
+        response.setIssuer(SAMLSSOUtil.getIssuer());
         response.setID(SAMLSSOUtil.createID());
 	    response.setInResponseTo(authReqDTO.getId());
         response.setStatus(buildStatus(SAMLSSOConstants.StatusCodes.SUCCESS_CODE, null));
@@ -60,7 +61,8 @@ public class ResponseBuilder {
         DateTime issueInstant = new DateTime();
         DateTime notOnOrAfter = new DateTime(issueInstant.getMillis() + 5 * 60 * 1000);
         response.setIssueInstant(issueInstant);
-        response.getAssertions().add(buildSAMLAssertion(authReqDTO, notOnOrAfter, sessionId));
+        Assertion assertion = buildSAMLAssertion(authReqDTO, notOnOrAfter, sessionId);
+        response.getAssertions().add(assertion);
         if (authReqDTO.isDoSignResponse()) {
             SAMLSSOUtil.setSignature(response, XMLSignature.ALGO_ID_SIGNATURE_RSA,
                     new SignKeyDataHolder(authReqDTO.getUsername()));
