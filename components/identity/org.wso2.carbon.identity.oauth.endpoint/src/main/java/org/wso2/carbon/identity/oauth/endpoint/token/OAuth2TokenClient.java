@@ -58,6 +58,7 @@ public class OAuth2TokenClient {
         tokenReqDTO.setGrantType(grantType);
         tokenReqDTO.setClientId(oauthRequest.getClientId());
         tokenReqDTO.setClientSecret(oauthRequest.getClientSecret());
+        tokenReqDTO.setCallbackURI(oauthRequest.getRedirectURI());
         tokenReqDTO.setScope(oauthRequest.getScopes().toArray(new String[oauthRequest.getScopes().size()]));
         tokenReqDTO.setCredentialType(oauthRequest.getCredentialType());
         // Check the grant type and set the corresponding parameters
