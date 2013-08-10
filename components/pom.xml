@@ -71,6 +71,7 @@
                  <module>governance</module>
                 <!--<module>health-monitor</module>-->
                 <module>user-manager</module>
+		<module>idp-mgt</module>
 		<module>identity</module>
                 <module>jar-services</module>
                 <module>java2wsdl</module>
@@ -158,7 +159,6 @@
                 <module>appfac</module>
                 <module>hdfs</module>
                 <module>mapred</module>
-		<module>idp-mgt</module>
             </modules>
 	    <build>
 	        <plugins>
