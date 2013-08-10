@@ -25,6 +25,7 @@ import org.jaxen.Function;
 
 public class SecureVaultLookupXPathFunctionProvider implements SynapseXpathFunctionContextProvider {
 
+	private static final String NAME_SPACE_PREFIX = "wso2";
 	private static final String VAULT_LOOKUP = "vault-lookup";
 
 	public Function getInitializedExtFunction(MessageContext messageContext) {
@@ -33,6 +34,6 @@ public class SecureVaultLookupXPathFunctionProvider implements SynapseXpathFunct
 	}
 
 	public QName getResolvingQName() {
-		return new QName(VAULT_LOOKUP);
+		return new QName(null,VAULT_LOOKUP,NAME_SPACE_PREFIX);
 	}
 }
