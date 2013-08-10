@@ -32,7 +32,7 @@ import java.sql.SQLException;
 
 /**
  * This class is used for handling trusted IdP meta data persistence in a JDBC Store.
- * It reads the data source properties from the JNDI constant jdbc/WSO2_IDP_DB.
+ * It reads the data source properties from the JNDI name given in trusted-idp-config.xml.
  * During the server start-up, it checks whether the database is created, if not it creates one.
  * This is implemented as a singleton. An instance of this class can be obtained through
  * JDBCPersistenceManager.getInstance() method.
@@ -75,7 +75,7 @@ public class JDBCPersistenceManager {
             Context ctx = new InitialContext();
             dataSource = (DataSource) ctx.lookup(dataSourceName);
         }  catch (NamingException e) {
-            String errorMsg = "Error when looking up the jdbc/WSO2_IDP_DB data source";
+            String errorMsg = "Error when looking up the IdP-Mgt data source";
             log.error(errorMsg, e);
             throw new IdentityProviderMgtException(errorMsg);
         }  catch (Exception e) {
@@ -109,7 +109,7 @@ public class JDBCPersistenceManager {
             dbConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             return dbConnection;
         } catch (SQLException e) {
-            String errorMsg = "Error occurred while trying to get a database connection from jdbc/WSO2_IDP_DB data source";
+            String errorMsg = "Error occurred while trying to get a database connection from IdP-Mgt data source";
             log.error(errorMsg, e);
             throw new IdentityProviderMgtException(errorMsg);
         }
