@@ -654,6 +654,24 @@
                                 <featureArtifactDef>
                                     org.wso2.bps:org.wso2.bps.monitoring.nested.category.feature:${bps.version}
                                 </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.bps.multi-tenancy.nested.category.feature:${bps.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.bps.registry-repository.nested.category.feature:${bps.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.bps.single-sign-on.nested.category.feature:${bps.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.bps.styles.nested.category.feature:${bps.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.bps.tooling.nested.category.feature:${bps.version}
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.bps.user-mgt.nested.category.feature:${bps.version}
+                                </featureArtifactDef>
                             </featureArtifacts>
 
                             <categories>
