@@ -384,19 +384,6 @@ public class UserIdentityManagementUtil {
 		
 	}
 
-	// ------ other Util methods
-
-	public static String getLoggedInUser() {
-		MessageContext msgContext = MessageContext.getCurrentMessageContext();
-		HttpServletRequest request =
-		                             (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
-		HttpSession httpSession = request.getSession(false);
-		if (httpSession != null) {
-			return (String) httpSession.getAttribute(ServerConstants.USER_LOGGED_IN);
-		}
-		return null;
-	}
-
 	/**
 	 * Generates a random password
 	 * 

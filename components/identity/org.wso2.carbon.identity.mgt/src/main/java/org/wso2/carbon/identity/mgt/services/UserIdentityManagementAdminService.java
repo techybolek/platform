@@ -333,8 +333,8 @@ public class UserIdentityManagementAdminService {
 	 * @throws IdentityMgtServiceException
 	 */
 	public void updateUserIdentityClaims(UserIdentityClaimDTO[] userIdentityClaims)
-	                                                                               throws IdentityMgtServiceException {
-		String userName = UserIdentityManagementUtil.getLoggedInUser();
+                                                               throws IdentityMgtServiceException {
+		String userName = CarbonContext.getCurrentContext().getUsername();
 
 		try {
 			UserStoreManager userStoreManager = IdentityMgtServiceComponent.getRealmService()
@@ -372,7 +372,7 @@ public class UserIdentityManagementAdminService {
 	 * @throws IdentityMgtServiceException
 	 */
 	public UserIdentityClaimDTO[] getAllUserIdentityClaims() throws IdentityMgtServiceException {
-		String userName = UserIdentityManagementUtil.getLoggedInUser();
+		String userName = CarbonContext.getCurrentContext().getUsername();
 		return UserIdentityManagementUtil.getAllUserIdentityClaims(userName);
 	}
 
@@ -384,7 +384,7 @@ public class UserIdentityManagementAdminService {
 	 */
 	public void changeUserPassword(String newPassword, String oldPassword) throws IdentityMgtServiceException {
 
-        String userName = UserIdentityManagementUtil.getLoggedInUser();
+        String userName = CarbonContext.getCurrentContext().getUsername();
 
 		try {
 			UserStoreManager userStoreManager = IdentityMgtServiceComponent.getRealmService()
