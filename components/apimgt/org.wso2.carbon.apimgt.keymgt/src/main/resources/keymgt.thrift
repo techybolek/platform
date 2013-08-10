@@ -22,6 +22,7 @@ struct APIKeyValidationInfoDTO {
     11: optional string apiName;
     12: optional string consumerKey;
     13: optional string apiPublisher;
+    14: optional list<string> authorizedDomains;
 }
 
 struct URITemplate {

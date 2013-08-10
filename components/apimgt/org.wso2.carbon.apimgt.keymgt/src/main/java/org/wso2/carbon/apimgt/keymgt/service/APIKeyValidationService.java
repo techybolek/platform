@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -60,16 +61,6 @@ public class APIKeyValidationService extends AbstractAdmin {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         Boolean keyCacheEnabledGateway = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
 
-        // first check whether client domain is authorized
-        if (accessToken !=null && ApiMgtDAO.findConsumerKeyFromAccessToken(accessToken) != null &&
-                ApiMgtDAO.isDomainRestricted(accessToken, clientDomain)) {
-            String authorizedDomains = ApiMgtDAO.getAuthorizedDomains(accessToken);
-            log.error("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-            throw new APIManagementException("Unauthorized client domain :" + clientDomain +
-                    ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
-        }
-
         //If gateway key cache enabled only we retrieve key validation info or JWT token form cache
         if (keyCacheEnabledGateway) {
             info = (APIKeyValidationInfoDTO) cache.get(cacheKey);
@@ -78,6 +69,10 @@ public class APIKeyValidationService extends AbstractAdmin {
                 if (log.isDebugEnabled()) {
                     log.debug("Found cached access token for : " + cacheKey + " .Checking for expiration time.");
                 }
+                
+                //return if client domain is not-authorized
+                checkClientDomainAuthorized(info, clientDomain);
+                
                 //check if token has expired
                 boolean tokenExpired = APIKeyMgtUtil.hasAccessTokenExpired(info);
                 if (!tokenExpired) {
@@ -103,9 +98,13 @@ public class APIKeyValidationService extends AbstractAdmin {
         }
         //If validation info is not cached creates fresh api key validation information object and returns it
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
+        
+        //return if client domain is not-authorized
+        checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
+        
         //If key validation information is not null and key validation enabled at keyMgt we put validation
         //information into cache
-        if (apiKeyValidationInfoDTO != null && keyCacheEnabledGateway) {
+        if (apiKeyValidationInfoDTO != null) {
             cache.put(cacheKey, apiKeyValidationInfoDTO);
         }
         return apiKeyValidationInfoDTO;
@@ -125,6 +124,21 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         return ApiMgtDAO.getAllURITemplates(context, version);
 
+    }
+    
+    private void checkClientDomainAuthorized (APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain) 
+    		throws APIManagementException {
+    	if (clientDomain != null) {
+    		clientDomain = clientDomain.trim();
+    	}
+    	List<String> authorizedDomains = apiKeyValidationInfoDTO.getAuthorizedDomains();
+    	if (!(authorizedDomains.contains("ALL") || authorizedDomains.contains(clientDomain))) {
+    		log.error("Unauthorized client domain :" + clientDomain +
+    				". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+    		throw new APIManagementException("Unauthorized client domain :" + clientDomain +
+    				". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
+    	}
+    	
     }
 
 
