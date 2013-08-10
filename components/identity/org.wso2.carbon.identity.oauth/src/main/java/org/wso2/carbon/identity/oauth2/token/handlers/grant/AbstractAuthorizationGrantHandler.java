@@ -68,9 +68,6 @@ public abstract class AbstractAuthorizationGrantHandler implements Authorization
         }
     }
 
-    public abstract boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
-            throws IdentityOAuth2Exception;
-
     public OAuth2AccessTokenRespDTO issue(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
 
