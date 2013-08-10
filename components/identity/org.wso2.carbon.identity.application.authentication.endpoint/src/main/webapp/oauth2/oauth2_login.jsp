@@ -106,6 +106,7 @@
 	}
  	%>
             <form class="well form-horizontal" id="loginForm"
+                  method="POST"
                   <% if(!("failed".equals(authStatus))) { %>style="display:none"<% } %>
                   action="../oauth2endpoints/authorize" method="post">
 
