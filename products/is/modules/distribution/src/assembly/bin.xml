@@ -213,13 +213,6 @@
 
     </fileSets>
 
-	<dependencySets>
-        <dependencySet>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/components/lib</outputDirectory>
-            <includes>
-                <include>bouncycastle:bcprov-jdk15:jar</include>
-            </includes>
-        </dependencySet>
         <!--dependencySet>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/client/modules
             </outputDirectory>
