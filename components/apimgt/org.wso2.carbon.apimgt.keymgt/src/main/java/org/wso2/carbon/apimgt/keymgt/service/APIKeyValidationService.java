@@ -70,10 +70,12 @@ public class APIKeyValidationService extends AbstractAdmin {
                     log.debug("Found cached access token for : " + cacheKey + " .Checking for expiration time.");
                 }
                 
-                //return if client domain is not-authorized
-                checkClientDomainAuthorized(info, clientDomain);
-                
-                //check if token has expired
+                if (info.isAuthorized()) {
+                    //return if client domain is not-authorized
+                    checkClientDomainAuthorized(info, clientDomain);
+                }
+
+                 //check if token has expired
                 boolean tokenExpired = APIKeyMgtUtil.hasAccessTokenExpired(info);
                 if (!tokenExpired) {
                     //If key validation information is authorized then only we have to check for JWT token
@@ -99,8 +101,10 @@ public class APIKeyValidationService extends AbstractAdmin {
         //If validation info is not cached creates fresh api key validation information object and returns it
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey(context, version, accessToken,requiredAuthenticationLevel);
         
-        //return if client domain is not-authorized
-        checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
+        if (apiKeyValidationInfoDTO.isAuthorized()) {
+        	//return if client domain is not-authorized
+        	checkClientDomainAuthorized(apiKeyValidationInfoDTO, clientDomain);
+        }
         
         //If key validation information is not null and key validation enabled at keyMgt we put validation
         //information into cache
