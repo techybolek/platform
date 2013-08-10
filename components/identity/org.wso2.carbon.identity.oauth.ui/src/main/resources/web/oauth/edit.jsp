@@ -62,6 +62,9 @@
 		                                                                  .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 		OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
 		app = client.getOAuthApplicationData(consumerkey);
+        if(app.getCallbackUrl() == null){
+            app.setCallbackUrl("");
+        }
         allowedGrants = new ArrayList<String>(Arrays.asList(client.getAllowedOAuthGrantTypes()));
 		if (OAuthConstants.OAuthVersions.VERSION_2.equals(app.getOAuthVersion())) {
 			id = resourceBundle.getString("consumerkey.oauth20");
@@ -123,9 +126,9 @@
         <div id="workArea">
    			<script type="text/javascript">
                 function validate() {
-                    var value = document.getElementsByName("callback")[0].value;
+                    var value = document.getElementsByName("application")[0].value;
                     if (value == '') {
-                        CARBON.showWarningDialog('<fmt:message key="callback.is.required"/>');
+                        CARBON.showWarningDialog('<fmt:message key="application.is.required"/>');
                         return false;
                     }
                     document.editAppform.submit();
@@ -154,7 +157,7 @@
 		                                   type="text" value="<%=app.getApplicationName()%>" /></td>
 		                    </tr>
 		                    <tr>
-		                        <td class="leftCol-small"><fmt:message key='callback'/><font class="required">*</font></td>
+		                        <td class="leftCol-small"><fmt:message key='callback'/></td>
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" value="<%=app.getCallbackUrl()%>" /></td>
 		                    </tr>
