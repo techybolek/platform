@@ -873,10 +873,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             		}
             	}
         	}
-    		return false;
     	} catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("cannot retrieve user role list for tenant" + tenantDomain);
          }
+    	return false;
     }
 
     /**
