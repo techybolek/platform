@@ -2036,7 +2036,7 @@ public class ApiMgtDAO {
     }
 
   /**
-   * Update refresed ApplicationAccesstoken
+   * Update refreshed ApplicationAccesstoken's usertype
    * @param keyType
    * @param accessToken
    * @param validityPeriod
@@ -2044,7 +2044,7 @@ public class ApiMgtDAO {
    * @throws IdentityException
    * @throws APIManagementException
    */
-	public void updateRefreshedApplicationAccessToken(String oldAccessToken,String keyType, String newAccessToken,
+	public void updateRefreshedApplicationAccessToken(String keyType, String newAccessToken,
 	                                 long validityPeriod) throws IdentityException,
 	                                                     APIManagementException {
 		
@@ -2052,9 +2052,7 @@ public class ApiMgtDAO {
 		// Update Access Token
 		String sqlUpdateNewAccessToken = "UPDATE " + accessTokenStoreTable +
 		                                      " SET USER_TYPE=?, VALIDITY_PERIOD=? " +
-		                                      " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
-
-		
+		                                      " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";		
 		
 		Connection connection = null;
 		PreparedStatement prepStmt = null;
@@ -2073,19 +2071,7 @@ public class ApiMgtDAO {
 
 			prepStmt.execute();
 			prepStmt.close();
-			
-			String sqlUpdateOldAccessTokenState = "UPDATE " + accessTokenStoreTable +
-	                " SET TOKEN_STATE=? " +
-	                " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
-			
-			prepStmt = connection.prepareStatement(sqlUpdateOldAccessTokenState);
-			prepStmt.setString(1, APIConstants.TokenStatus.INACTIVE);	
-			prepStmt.setString(2, oldAccessToken);	
-			prepStmt.setString(3, keyType);	
-			
-			prepStmt.execute();
-			prepStmt.close();
-			
+									
 			connection.commit();
 
 		} catch (SQLException e) {
