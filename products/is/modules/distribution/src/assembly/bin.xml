@@ -212,7 +212,7 @@
         </fileSet>
 
     </fileSets>
-
+    <dependencySets>
         <!--dependencySet>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/client/modules
             </outputDirectory>
