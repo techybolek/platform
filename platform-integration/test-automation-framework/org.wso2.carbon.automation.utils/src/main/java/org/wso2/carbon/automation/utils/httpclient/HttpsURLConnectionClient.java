@@ -89,7 +89,7 @@ public class HttpsURLConnectionClient {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
-            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes()));
+            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes())).replaceAll("\n", "");
 
             conn.setRequestProperty("Authorization", "Basic " + encode);
             conn.setDoOutput(true);
@@ -124,8 +124,7 @@ public class HttpsURLConnectionClient {
     }
 
     public static HttpsResponse postWithBasicAuth(String uri, String requestQuery, String userName,
-                                                  String password
-    ) throws IOException {
+                                                  String password) throws IOException {
         if (uri.startsWith("https://")) {
             PlatformUtil.setKeyStoreProperties();
 
@@ -133,7 +132,8 @@ public class HttpsURLConnectionClient {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
-            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes()));
+            String encode =
+                    new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes())).replaceAll("\n", "");;
 
             conn.setRequestProperty("Authorization", "Basic " + encode);
             conn.setDoOutput(true); // Triggers POST.
@@ -171,7 +171,6 @@ public class HttpsURLConnectionClient {
                 wr.flush();
                 wr.close();
                 conn.disconnect();
-
             }
             return new HttpsResponse(sb.toString(), conn.getResponseCode());
         }
@@ -189,7 +188,7 @@ public class HttpsURLConnectionClient {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
-            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes()));
+            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes())).replaceAll("\n", "");;
 
             conn.setRequestProperty("Authorization", "Basic " + encode);
             conn.setDoOutput(true); // Triggers POST.
@@ -227,7 +226,6 @@ public class HttpsURLConnectionClient {
                 wr.flush();
                 wr.close();
                 conn.disconnect();
-
             }
             return new HttpsResponse(sb.toString(), conn.getResponseCode());
         }
@@ -244,7 +242,7 @@ public class HttpsURLConnectionClient {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
-            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes()));
+            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes())).replaceAll("\n", "");;
 
             conn.setRequestProperty("Authorization", "Basic " + encode);
             conn.setDoOutput(true); // Triggers POST.
@@ -280,7 +278,6 @@ public class HttpsURLConnectionClient {
                 wr.flush();
                 wr.close();
                 conn.disconnect();
-
             }
             return new HttpsResponse(sb.toString(), conn.getResponseCode());
         }
@@ -296,7 +293,7 @@ public class HttpsURLConnectionClient {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
 
-            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes()));
+            String encode = new String(new org.apache.commons.codec.binary.Base64().encode((userName + ":" + password).getBytes())).replaceAll("\n", "");;
 
             conn.setRequestProperty("Authorization", "Basic " + encode);
             if (contentType != null) {
@@ -327,11 +324,9 @@ public class HttpsURLConnectionClient {
                     rd.close();
                 }
                 conn.disconnect();
-
             }
             return new HttpsResponse(sb.toString(), conn.getResponseCode());
         }
         return null;
     }
-
 }
