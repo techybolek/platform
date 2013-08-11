@@ -1651,7 +1651,7 @@ public class ApiMgtDAO {
             	tierPermission.setTierName(resultSet.getString("TIER"));
             	tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
             	String roles = resultSet.getString("ROLES");
-            	if (roles != null) {
+            	if (roles != null && !roles.equals("")) {
             		String roleList[] = roles.split(",");
             		tierPermission.setRoles(roleList);
             	}
