@@ -807,7 +807,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return Set<Tier>
      */
     public Set<String> getDeniedTiers() throws APIManagementException {
-        Set<String> tiers = new HashSet<String>();
+        Set<String> deniedTiers = new HashSet<String>();
         String [] currentUserRoles = new String[0];
         try {
             if(tenantId != 0) {
@@ -818,38 +818,65 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             	Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getTierPermissions();
             	for (TierPermissionDTO tierPermission : tierPermissions) {
             			String type = tierPermission.getPermissionType();
-            			String[] roles = tierPermission.getRoles();
-            			if (type.equals(APIConstants.TIER_PERMISSION_ALLOW)) {
-            				boolean allowed = false;
-            				outerloop:for (String role : currentUserRoles) {
-            					for (String allowedRole : roles) {
-            						if (role.equals(allowedRole)) {
-            							allowed = true;
-            							break outerloop;
-            						}
-            					}
-            				}
+            			            			
+            			List<String> currentRolesList = Arrays.asList(currentUserRoles);
+                		List<String> roles = Arrays.asList(tierPermission.getRoles());
+                		currentRolesList.retainAll(roles);
+                		
+            			if (APIConstants.TIER_PERMISSION_ALLOW.equals(type)) {
             				/* Current User is not allowed for this Tier*/
-            				if (!allowed) {
-            					tiers.add(tierPermission.getTierName());
-            				}
+            				if (currentRolesList.size() == 0) {
+            					deniedTiers.add(tierPermission.getTierName());
+                			}
             			} else {
-            				outerloop:for (String role : currentUserRoles) {
-            					for (String allowedRole : roles) {
-            						if (role.equals(allowedRole)) {
-            							/* Current User is denied for this Tier*/
-            							tiers.add(tierPermission.getTierName());
-            							break outerloop;
-            						}
-            					}
-            				}
+            				/* Current User is denied for this Tier*/
+            				if (currentRolesList.size() > 0) {
+            					deniedTiers.add(tierPermission.getTierName());
+                			}
             			}
             	}
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
            log.error("cannot retrieve user role list for tenant" + tenantDomain);
         }
-        return tiers;
+        return deniedTiers;
+    }
+    
+    /**
+     * Check whether given Tier is denied for the user
+     * @param tierName
+     * @return 
+     * @throws APIManagementException if failed to get the tiers
+     */
+    public boolean isTierDeneid(String tierName)throws APIManagementException {
+    	String [] currentUserRoles = new String[0];
+    	try {
+    		if(tenantId != 0) {
+            	/* Get the roles of the Current User */
+            	currentUserRoles = ((UserRegistry) ((UserAwareAPIConsumer) this).registry).
+                    getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry)this.registry).getUserName());
+            	TierPermissionDTO tierPermission = apiMgtDAO.getTierPermission(tierName);
+            	if (tierPermission == null) {
+            		return false;
+            	} else {
+            		List<String> currentRolesList = Arrays.asList(currentUserRoles);
+            		List<String> roles = Arrays.asList(tierPermission.getRoles());
+            		currentRolesList.retainAll(roles);
+        			if (APIConstants.TIER_PERMISSION_ALLOW.equals(tierPermission.getPermissionType())) {
+            			if (currentRolesList.size() == 0) {
+            				return true;
+            			}
+            		} else {
+            			if (currentRolesList.size() > 0) {
+            				return true;
+            			}
+            		}
+            	}
+        	}
+    		return false;
+    	} catch (org.wso2.carbon.user.api.UserStoreException e) {
+            log.error("cannot retrieve user role list for tenant" + tenantDomain);
+         }
     }
 
     /**

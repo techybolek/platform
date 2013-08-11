@@ -1667,6 +1667,40 @@ public class ApiMgtDAO {
         return tierPermissions;
     }
     
+    public TierPermissionDTO getTierPermission(String tierName) throws APIManagementException {
+    	Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+        
+        TierPermissionDTO tierPermission = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getTierPermissionQuery = "SELECT PERMISSIONS_TYPE , ROLES  FROM AM_TIER_PERMISSIONS" +
+            		" WHERE TIER = ?";
+            ps = conn.prepareStatement(getTierPermissionQuery);
+            ps.setString(1, tierName);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+            	tierPermission = new TierPermissionDTO();
+            	tierPermission.setTierName(tierName);
+            	tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+            	String roles = resultSet.getString("ROLES");
+            	if (roles != null) {
+            		String roleList[] = roles.split(",");
+            		tierPermission.setRoles(roleList);
+            	}
+            }
+            resultSet.close();
+            ps.close();
+        } catch (SQLException e) {
+            handleException("Failed to get Tier permission information for Tier " + tierName , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return tierPermission;
+    }
+    
     private Set<String> getApplicationKeys(int applicationId, String getKeysSql)
             throws APIManagementException {
         Connection connection = null;
