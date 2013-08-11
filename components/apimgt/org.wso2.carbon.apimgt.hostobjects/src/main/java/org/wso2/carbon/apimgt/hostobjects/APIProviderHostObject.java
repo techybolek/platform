@@ -764,20 +764,43 @@ public class APIProviderHostObject extends ScriptableObject {
             Function funObj) {
     	 NativeArray myn = new NativeArray(0);
          APIProvider apiProvider = getAPIProvider(thisObj);
+         String everyOneRoleName = ServiceReferenceHolder.getInstance().getRealmService().
+			 		getBootstrapRealmConfiguration().getEveryOneRoleName();
          try {
-             Set<TierPermissionDTO> tiers = apiProvider.getTierPermissions();
+        	 Set<Tier> tiers = apiProvider.getTiers();
+             Set<TierPermissionDTO> tierPermissions = apiProvider.getTierPermissions();
              int i = 0;
              if (tiers != null) {
-                 for (TierPermissionDTO permission : tiers) {
-                     NativeObject row = new NativeObject();
-                     row.put("tierName", row, permission.getTierName());
-                     row.put("permissionType", row,
-                    		 permission.getPermissionType());
-                     row.put("roles", row,
-                    		 permission.getRoles());
-                     myn.put(i, myn, row);
+            	 
+            	 for (Tier tier: tiers) {
+            		 NativeObject row = new NativeObject();
+            		 boolean found = false;
+            		 for (TierPermissionDTO permission : tierPermissions) {
+            			 if (permission.getTierName().equals(tier.getName())) {
+            				 row.put("tierName", row, permission.getTierName());
+                             row.put("permissionType", row,
+                            		 permission.getPermissionType());
+                             String[] roles = permission.getRoles();
+                             if (roles == null ||  roles.length == 0) {
+                            	 row.put("roles", row, everyOneRoleName);
+                             } else {
+                            	 row.put("roles", row,
+                            		 permission.getRoles());
+                             }
+            				 found = true;
+            				 break;
+            			 }
+            		 }
+            		 /* If no permissions has defined for this tier*/
+            		 if (!found) {
+            			 row.put("tierName", row, tier.getName());
+                         row.put("permissionType", row,
+                        		 APIConstants.TIER_PERMISSION_ALLOW);
+                         row.put("roles", row, everyOneRoleName);
+                     }
+            		 myn.put(i, myn, row);
                      i++;
-                 }
+            	 } 
              }
          } catch (Exception e) {
              log.error("Error while getting available tiers", e);
