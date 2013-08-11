@@ -1023,6 +1023,9 @@ public class APIStoreHostObject extends ScriptableObject {
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         try {
+        	if (apiConsumer.isTierDeneid(tier)) {
+        		throw new APIManagementException("Tier " + tier + " is not allowed for user " + userId);
+        	}
             apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
             return true;
         } catch (APIManagementException e) {
