@@ -170,7 +170,6 @@ public class MEXTestCase extends ASIntegrationTest {
                     request = serviceClient.setupGetMetadataRequest(dialect,
                             identifier);
                     response = serviceClient.sendReceive(request);    // sending the request
-                    log.info(response);
                     responseString = response.toString();
 
                     if (serviceName.equals("HelloWorldService1")) {

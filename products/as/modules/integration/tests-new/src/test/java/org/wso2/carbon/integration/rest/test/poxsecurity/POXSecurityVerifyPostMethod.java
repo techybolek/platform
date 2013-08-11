@@ -16,26 +16,21 @@
 *under the License.
 */
 
-package org.wso2.carbon.integration.test.poxsecurity;
+package org.wso2.carbon.integration.rest.test.poxsecurity;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.automation.api.clients.security.SecurityAdminServiceClient;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.UserListCsvReader;
-import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.utils.httpclient.HttpsResponse;
 import org.wso2.carbon.automation.utils.httpclient.HttpsURLConnectionClient;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
 import org.wso2.carbon.integration.test.ASIntegrationTest;
-import org.wso2.carbon.security.mgt.stub.config.SecurityAdminServiceSecurityConfigExceptionException;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
 import java.io.IOException;
-import java.rmi.RemoteException;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;

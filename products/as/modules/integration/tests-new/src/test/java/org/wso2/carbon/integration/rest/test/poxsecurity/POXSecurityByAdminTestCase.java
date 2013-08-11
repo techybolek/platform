@@ -16,7 +16,7 @@
 *under the License.
 */
 
-package org.wso2.carbon.integration.test.poxsecurity;
+package org.wso2.carbon.integration.rest.test.poxsecurity;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

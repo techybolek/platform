@@ -16,13 +16,12 @@
 *under the License.
 */
 
-package org.wso2.carbon.integration.test.poxsecurity;
+package org.wso2.carbon.integration.rest.test.poxsecurity;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.automation.api.clients.security.SecurityAdminServiceClient;
 import org.wso2.carbon.automation.utils.httpclient.HttpsResponse;
 import org.wso2.carbon.automation.utils.httpclient.HttpsURLConnectionClient;
 import org.wso2.carbon.endpoint.stub.types.EndpointAdminEndpointAdminException;
