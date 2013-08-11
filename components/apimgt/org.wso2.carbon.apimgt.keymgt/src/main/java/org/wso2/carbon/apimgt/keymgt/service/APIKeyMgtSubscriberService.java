@@ -154,6 +154,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     
 	/**
 	 * Renew the ApplicationAccesstoken, Call Token endpoint and get parameters.
+	 * Revoke old token.
 	 * 
 	 * @param tokenType
 	 * @param oldAccessToken
@@ -174,24 +175,34 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 		// grant type.
 		
 		String tokenEndpoint = OAuthServerConfiguration.getInstance().getTokenEndPoint();
+		String revokeEndpoint = tokenEndpoint.replace("token", "revoke");
+		
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost(tokenEndpoint);
-
+		HttpPost httpTokpost = new HttpPost(tokenEndpoint);
+		HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
+		
 		// Request parameters.
-		List<NameValuePair> params = new ArrayList<NameValuePair>(3);
-		params.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
-		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
-		params.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
+		List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
+		List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
+		
+		tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
+		tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
+		tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
+		
+		revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
+		revokeParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
+		revokeParams.add(new BasicNameValuePair("token", oldAccessToken));
+		
 		try {
-			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-			HttpResponse response = httpclient.execute(httppost);
-			HttpEntity responseEntity = response.getEntity();
+			httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
+			HttpResponse tokResponse = httpclient.execute(httpTokpost);
+			HttpEntity tokEntity = tokResponse.getEntity();
 
-			if (response.getStatusLine().getStatusCode() != 200) {
+			if (tokResponse.getStatusLine().getStatusCode() != 200) {
 				throw new RuntimeException("Failed : HTTP error code : " +
-				                           response.getStatusLine().getStatusCode());
+						tokResponse.getStatusLine().getStatusCode());
 			} else {
-				String responseStr = EntityUtils.toString(responseEntity);
+				String responseStr = EntityUtils.toString(tokEntity);
 				JSONObject obj = new JSONObject(responseStr);
 				newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
 				validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
@@ -201,6 +212,18 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 				}
 
 			}
+			
+			httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
+			HttpResponse revokResponse = httpclient.execute(httpRevokepost);
+			
+			if (revokResponse.getStatusLine().getStatusCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " +
+						revokResponse.getStatusLine().getStatusCode());
+			} else{
+				if(log.isDebugEnabled()){
+					log.debug("Succesfully revoked old application access token");
+				}
+			}
 
 		} catch (Exception e2) {
 			String errMsg = "Error in getting new accessToken";
@@ -209,7 +232,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
 		}
 		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-		apiMgtDAO.updateRefreshedApplicationAccessToken(oldAccessToken,tokenType, newAccessToken,
+		apiMgtDAO.updateRefreshedApplicationAccessToken(tokenType, newAccessToken,
 		    		                                    validityPeriod);
 		return newAccessToken;
 
