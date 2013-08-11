@@ -68,10 +68,11 @@ var name = request.getParameter("apiName");
 var version = request.getParameter("version")
 var docName = request.getParameter("docName");
 var inlineUrl="inline";
+var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
 %>
-<body <% if(reqUrl.indexOf(inlineUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
+<body <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>
 >
     <div id="wrap">

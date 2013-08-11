@@ -149,8 +149,15 @@
                     <td><%=doc.docType%></td>
                     <td class="dateFull"><%=doc.docLastUpdated%></td>
                     <%if(createPermitted){%>
-                    <td id="buttonTd"><% if(doc.sourceType == "INLINE") { %>
-                        <a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a> 
+                    <td id="buttonTd"><% if(doc.sourceType == "INLINE") { 
+                    	
+                    	if (doc.docType == "API Definition") {
+                    	%>
+                    		<a href="javascript:editJSONContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
+                        <% } else { %>
+                        	<a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a>
+                        <%}%> 
+                        
                         <% }else if (doc.sourceType == "URL"){%>
                          <a href="<%=doc.sourceUrl%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a> 
                         <%}else if (doc.sourceType == "FILE"){ %>
