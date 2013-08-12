@@ -71,7 +71,7 @@ public class WebApplication {
         setLastModifiedTime(webappFile.lastModified());
 
         boolean isFaulty = checkFaultyWebappParam(context);
-        if (isFaulty) {
+        if (isFaulty || !"STARTED".equalsIgnoreCase(context.getStateName())) {
             return;
         }
 
@@ -88,17 +88,16 @@ public class WebApplication {
         }
         if ("".equals(serviceListPathParam) || serviceListPathParam == null) {
             serviceListPathParam = "/services";
+        } else {
+            serviceListPathParam = "";
         }
         setServiceListPath(serviceListPathParam);
     }
 
     private boolean checkFaultyWebappParam(Context context) {
         String param = context.findParameter(WebappsConstants.FAULTY_WEBAPP);
-        if(param != null && !"".equals(param)) {
-            return Boolean.parseBoolean(param);
-        }
+        return param != null && !"".equals(param) && Boolean.parseBoolean(param);
 
-        return false;
     }
 
     /*public WebApplication(File webappFile) {
