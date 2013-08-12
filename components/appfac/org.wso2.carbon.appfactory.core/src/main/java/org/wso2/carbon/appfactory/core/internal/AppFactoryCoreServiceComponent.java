@@ -22,11 +22,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
+import org.wso2.carbon.appfactory.common.util.AppFactoryUtil;
 import org.wso2.carbon.appfactory.core.*;
 import org.wso2.carbon.appfactory.core.util.DependencyUtil;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -105,6 +109,38 @@ public class AppFactoryCoreServiceComponent {
             DependencyUtil.createDependenciesMountPoints();
         } catch (AppFactoryException e) {
            log.error("Error while creating mount points for dependency management");
+        }
+
+        try {
+
+            Registry registry = ServiceHolder.getRegistryService().getGovernanceSystemRegistry();
+            Collection resource = registry.newCollection();
+            resource.setProperty(UserMgtConstants.DISPLAY_NAME, "appfactory");
+            registry.put("/permission/admin/appfactory", resource);
+
+            AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
+            String[] permissionList = config.getProperties("Permissions.Permission");
+            for(String permission : permissionList){
+              //  System.out.println("********************permission: " +  permission);
+                String permissionName =config.getFirstProperty("Permissions.Permission." +permission);
+              //  System.out.println("********************permissionName: " +  permissionName);
+                resource = registry.newCollection();
+                resource.setProperty(UserMgtConstants.DISPLAY_NAME, permissionName);
+                registry.put(permission, resource);
+            }
+
+
+//            String permissionList = config.getAllProperties("Permissions.Permission");
+//            String[] permissions = permissionList.split(",");
+//
+//            for (String permission : permissions) {
+//                resource = registry.newCollection();
+//                resource.setProperty(UserMgtConstants.DISPLAY_NAME, "TODO");
+//                registry.put(permission, resource);
+//            }
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
 
         try {
