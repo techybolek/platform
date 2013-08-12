@@ -155,6 +155,11 @@ public class OAuthAdminService extends AbstractAdmin {
             OAuthAppDO app = new OAuthAppDO();
             if (application != null) {
                 app.setApplicationName(application.getApplicationName());
+                if(app.getGrantTypes().contains("authorization_code") || app.getGrantTypes().contains("implicit")){
+                    if(app.getCallbackUrl() == null || app.getCallbackUrl().equals("")){
+                        throw new IdentityOAuthAdminException("Callback Url is required for Code or Implicit grant types");
+                    }
+                }
                 app.setCallbackUrl(application.getCallbackUrl());
                 if (application.getOauthConsumerKey() == null) {
                     app.setOauthConsumerKey(OAuthUtil.getRandomNumber());
