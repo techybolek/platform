@@ -327,3 +327,122 @@ article.main section.separator{
     background: transparent;
     border-left: none;
 }
+
+/* register page */
+.branding {
+    margin-top: 50px;
+}
+.branding h1 {
+    background-image: url("../assets/img/appfactory.png");
+    background-repeat: no-repeat;
+    display: block;
+    height: 77px;
+    margin: 0 auto;
+    width: 408px;
+}
+.start_content {
+    padding: 30px;
+    border-top: 1px solid #cccccc;
+    background-color: #ffffff;
+}
+.start_content .input_row {
+    margin-bottom: 15px;
+    position: relative;
+}
+.start_content .input_row_col {
+    display: inline-block;
+    width: 49%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    vertical-align: top;
+}
+.start_content .input_row_col:not(:last-child) {
+    padding-right: 10px;
+}
+.start_content .btn_row {
+    margin-bottom: 0;
+}
+.start_content label {
+    margin-bottom: 10px;
+    display: block;
+    line-height: 100%;
+    font-size: 1em;
+    color: #292E38;
+    font-weight: normal;
+}
+.start_content input {
+    width: 100%;
+    padding: 5px;
+    font-size: 1.42857143em;
+    color: #262C38;
+    border: 1px solid #D3D5DA;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+.start_content input.btn:focus {
+    background-color: #F9BFBB;
+    outline: none;
+}
+.start_content input.filled {
+    background-color: #FFF;
+}
+.start_content input.half {
+    width: 50%;
+}
+.start_content .error input {
+    border: 1px solid #EB7067;
+    background-color: #FFE0E0;
+}
+.separator {
+    margin: 0 -30px 25px -30px;
+    border-top: 1px solid #1190A7;
+    border-bottom: 1px solid #62D9EF;
+}
+.signin {
+    color: #ffffff;
+    text-align: center;
+    margin-top: 15px;
+}
+.start_content .btn {
+    margin-right: 30px;
+    padding: 0 60px;
+    line-height: 100%;
+    font-weight: 700;
+    width: 100%;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+    display: inline-block;
+    text-decoration: none;
+    height: 40px;
+    line-height: 38px;
+    background-color: #EB7067;
+    color: #FFF;
+    border: 1px solid #B51F17;
+    font-size: 1.42857143em;
+}
+
+.icon-ok-sign {
+    font-size: 18px;
+    opacity: 0.5;
+    position: absolute;
+    right: 9px;
+    top: 34px;
+}
+span.error, .alert-error {
+    color: #B51F17;
+    font-size: 12px;
+    padding-top: 5px;
+}
+input.error {
+    border-color: #B51F17;
+}
+
+.signin a{
+    color:#ffffff;
+    text-decoration: none;
+    font-weight:600;
+}

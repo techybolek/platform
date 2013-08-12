@@ -408,3 +408,24 @@ function showModal(message, action){
 			} 
 	 });
 }
+
+/* register form */
+
+	jQuery.validator.addMethod("domain", function(value, element) {
+		return this.optional(element) || /^((?:(?:(?:\w[\.\-\+]?)*)\w)+)((?:(?:(?:\w[\.\-\+]?){0,62})\w)+)\.(\w{2,6})$/.test(value);
+	}, "Invalid domain name");
+
+	$('#organization').on('keyup', function(e) {
+		// TODO: check domain availability
+		var org = $(this).val();
+		var domain = org.replace(/\s/g, "-").replace(/([^a-zA-Z0-9\-])/gi, "") + ".com";
+		if(!org) domain = "";
+		$('#domainName').val(domain);
+		$('#url-preview').text('wso2apps.com/t/' + domain);
+	});
+	
+	$('#domainName').on('keyup', function(e) {
+		// TODO: check domain availability
+		var domain = $(this).val();
+		$('#url-preview').text('wso2apps.com/t/' + domain);
+	});

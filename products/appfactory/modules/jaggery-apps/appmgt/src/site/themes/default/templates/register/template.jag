@@ -1,4 +1,29 @@
 <% jagg.template("register", function(inputs, outputs, jagg) { %>
+
+<style>
+header{
+	display:none;
+}
+body#home{
+	background:none #292E38;
+}
+.sticky-wrapper{
+	position:relative;
+	height:auto !important;
+}
+
+.warning_message{
+	background-color:#ffffff;
+}
+.info_message .close_message {
+    position: absolute;
+    right: 13px;
+    top: 7px;
+}
+.info_message{
+	background-color:#ffffff;
+}
+</style>
  
 <script type="text/javascript">
 
@@ -63,82 +88,55 @@
 
 
 
+<div class="wrapper">
+			<div class="branding">
+				<h1></h1>
+			</div>
+			<article class="start">
+				<div class="alert alert-error error" id="registerError"><% jagg.includeBlock("page/messages", null); %></div>
+				<section class="start_content">
+				 <form method='post' name="inputData" class='right_label hold' id='registerForm'>
+						<div class="input_row">
+							<div class="input_row_col">
+								<label for="firstName">First name</label>
+								<input type="text" id="firstName" name="firstName" class="required" />
+							</div>
 
+							<div class="input_row_col">
+								<label for="lastName">Last name</label>
+								<input type="text" id="lastName" name="lastName" class="required" />
+							</div>
+						</div>
+						<div class="input_row">
+							<label for="email">Email</label>
+							<input type="text" id="email" name="email" class="required email" />
+						</div>
+						<div class="input_row">
+							<label for="password">Password</label>
+							<input type="password" id="password" name="password" class="required"  />
+						</div>
+						<div class="input_row">
+							<label for="organization">Organization</label>
+							<input type="text" id="organization" name="organization" class="required" />
+						</div>
+						<div class="input_row">
+							<i class="icon-ok-sign"></i>
+							<label for="domainName">Domain</label>
+							<input type="text" id="domainName" name="domainName" class="required domain" />
+							<small id="url-preview">wso2apps.com/t/</small>
+						</div>
+						<div class="input_row btn_row">
+							
+							 <input id="submitbtn" type='submit' value='Create My Account' class='btn btn-primary' />
+						</div>
 
-
-<div class="container">
-                	<article class="main">
-                	<% jagg.includeBlock("page/messages", null); %>
-                        <header class="separator">
-                        	<div class="content">
-                                    <ol class="breadcrumb">
-                                            <li class="breadcrumb_item"><a class="breadcrumb_link" href="<%=jagg.getAbsoluteUrl("/")%>">Home</a></li>
-                                            <li class="breadcrumb_item"><h1>Sign-up for WSO2 App Factory</h1></li>
-                                    </ol>
-                            </div>
-                        </header>
-                        <section class="content push_top_40">
-
-                            <div class="form-container">
-                                <form method='post' name="inputData" class='right_label hold' id='registerForm'>
-                                  <fieldset>
-                                        <div class="input_row">
-                                            <label for="domainName" ><strong>Domain Name</strong> <em>*</em></label>
-                                            <input type="text" id="domainName" name="domainName" class="required" />
-                                        </div>
-                                        <div class="input_row">
-                                         	<label for="firstName" ><strong>First Name</strong> <em>*</em></label>
-                                            <input type="text" id="firstName" name="firstName" class="required" />
-                                        </div>
-
-                                        <div class="input_row">
-                                         	<label for="lastName"><strong>Last Name</strong> <em>*</em></label>
-                                            <input type="text" id="lastName" name="lastName" />
-                                        </div>
-
-                                        <div class="input_row">
-                                         	<label for="adminUsername"><strong>Admin Username</strong> <em>*</em></label>
-                                            <input type="text" id="adminUsername" name="adminUsername" class="required" />
-                                            <p class="note">Please make sure that you provide a valid username</p>
-                                        </div>
-                                      <div class="input_row">
-                                          <label for="email"><strong>Email</strong> <em>*</em></label>
-                                          <input type="text" id="email" name="email" class="required email" />
-                                          <p class="note">Please make sure that you provide a valid Email address. This address will be use to validate your account</p>
-                                      </div>
-
-                                        <div class="input_row">
-                                         	<label for="password"><strong>Password</strong> <em>*</em></label>
-                                            <input type="password" id="password" name="password" class="required" />
-                                            <p class="note"> For a more secure password:<br /> * - Use both letters and numbers. <br /> * - Add special characters (such as @, ?, %). <br />* - Mix capital and lowercase letters.</p>
-
-                                            <!--<p class="note">
-                                                For a more secure password:<ul><li>Use both letters and numbers</li><li>Add special characters (such as @, ?, %)</li><li>Mix capital and lowercase letters</li></ul>
-                                            </p>-->
-                                        </div>
-
-                                        <div class="input_row">
-                                         	<label for="repeatedPassword"><strong>Password (Repeat)</strong> <em>*</em></label>
-                                         	<input type="password" id="repeatedPassword" equalTo="#password" name="repeatedPassword" class="required" />
-                                        </div>
-
-
-
-                                  </fieldset>
-
-                                 <div class="buttonrow">
-                                    <input id="submitbtn" type='submit' value='Create My Organization' class='btn btn-primary' />
-                                     <a href="javascript:location.href='index.jag'">Cancel</a>
-                                </div>
-
-                                </form>
-                             </div><!-- /form-container -->
-
-                        <div class="clearfix"></div>
-                        </section>
-                        <div class="clearfix"></div>
-                      </article>
-            </div><!-- /container -->
+					</form>
+				</section>
+				<div class="signin">
+					Already have an Account? <a href="<%=jagg.getAbsoluteUrl("/")%>" class="link">Sign in</a>
+				</div>
+			</article>
+		</div><!-- /wrapper -->
 
  <!--<link rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/lib/bootstrap/css/bootstrap.css'))%>">-->
 <!-- Button to trigger modal -->
