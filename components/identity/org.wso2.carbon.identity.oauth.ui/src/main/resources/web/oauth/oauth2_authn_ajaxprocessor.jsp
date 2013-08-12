@@ -102,7 +102,7 @@ if(!"true".equals(request.getSession().getAttribute(OAuthConstants.OIDCSessionCo
 
             <form class="well form-horizontal" id="loginForm"
                   <% if(!("failed".equals(authStatus))) { %>style="display:none"<% } %>
-                  action="../../oauth2endpoints/authorize">
+                  action="../../oauth2/authorize">
 
                 <div class="alert alert-error"
                      id="errorMsg" <% if (!("failed".equals(authStatus))) { %>
