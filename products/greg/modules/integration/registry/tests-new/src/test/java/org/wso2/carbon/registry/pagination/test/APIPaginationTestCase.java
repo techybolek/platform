@@ -18,7 +18,6 @@ package org.wso2.carbon.registry.pagination.test;
 
 
 import org.apache.axis2.AxisFault;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.automation.core.ProductConstant;
@@ -28,7 +27,7 @@ import org.wso2.carbon.registry.core.LogEntry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import static org.testng.Assert.assertEquals;
