@@ -77,6 +77,29 @@ public class JMSBrokerStartupTestCase {
         }
     }
 
+    @AfterTest(alwaysRun = true)
+    public void stopJMSBrokerRevertESBConfiguration() throws Exception {
+        if (builder.getFrameworkSettings().getEnvironmentSettings().is_builderEnabled()) {
+            try {
+                //reverting the changes done to esb sever
+                Thread.sleep(10000); //let server to clear the artifact undeployment
+                if (serverManager != null) {
+                    serverManager.removeFromComponentLib(ACTIVEMQ_CORE);
+                    serverManager.removeFromComponentLib(GERONIMO_J2EE_MANAGEMENT);
+                    serverManager.removeFromComponentLib(GERONIMO_JMS);
+                    serverManager.restoreToLastConfiguration();
+                }
+
+            } finally {
+                if (activeMqBroker != null) {
+                    Assert.assertTrue(activeMqBroker.stop(), "JMS Broker(ActiveMQ) Stopping failed");
+                }
+            }
+
+
+        }
+    }
+
     @Test(groups = {"wso2.esb"}, description = "Test JMS broker queue clients with popMessage(java.lang.Class<T> clzz)")
     public void JMSBrokerQueueTest1() throws Exception {
         int numberOfMsgToExpect = 10;
@@ -200,28 +223,6 @@ public class JMSBrokerStartupTestCase {
         }
     }
 
-    @AfterTest(alwaysRun = true)
-    public void stopJMSBrokerRevertESBConfiguration() throws Exception {
-        if (builder.getFrameworkSettings().getEnvironmentSettings().is_builderEnabled()) {
-            try {
-                //reverting the changes done to esb sever
-                Thread.sleep(10000); //let server to clear the artifact undeployment
-                if (serverManager != null) {
-                    serverManager.removeFromComponentLib(ACTIVEMQ_CORE);
-                    serverManager.removeFromComponentLib(GERONIMO_J2EE_MANAGEMENT);
-                    serverManager.removeFromComponentLib(GERONIMO_JMS);
-                    serverManager.restoreToLastConfiguration();
-                }
-
-            } finally {
-                if (activeMqBroker != null) {
-                    Assert.assertTrue(activeMqBroker.stop(), "JMS Broker(ActiveMQ) Stopping failed");
-                }
-            }
-
-
-        }
-    }
 
     private JMSBrokerConfiguration getJMSBrokerConfiguration() {
         return JMSBrokerConfigurationProvider.getInstance().getBrokerConfiguration();
