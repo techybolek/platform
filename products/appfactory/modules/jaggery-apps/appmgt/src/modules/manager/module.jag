@@ -30,9 +30,6 @@ jagg.module("manager", {
     },
     getTenantDomain:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getTenantDomain.apply(this, arguments);
-    },
-    getTenantAwareUsername:function () {
-        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getTenantAwareUsername.apply(this, arguments);
     }
 
 });

@@ -25,7 +25,7 @@ var payload ='<p:CreateTenantRequest xmlns:p="http://wso2.org/bps/sample">'+
     '<active xmlns="http://wso2.org/bps/sample">true</active>'+
     '<successKey xmlns="http://wso2.org/bps/sample">key</successKey>'+
     '<createdDate xmlns="http://wso2.org/bps/sample">2001-12-31T12:00:00</createdDate>'+
-    '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 App Factory</originatedService>'+
+    '<originatedService xmlns="http://wso2.org/bps/sample">WSO2 Stratos Manager</originatedService>'+
     '<usagePlan xmlns="http://wso2.org/bps/sample">'+usagePlan+'</usagePlan>'+
     '</p:CreateTenantRequest>';
 
