@@ -31,7 +31,6 @@ import org.wso2.carbon.automation.core.utils.jmsbrokerutils.controller.config.JM
 import org.wso2.carbon.automation.core.utils.jmsbrokerutils.controller.config.JMSBrokerConfigurationProvider;
 import org.wso2.carbon.automation.core.utils.serverutils.ServerConfigurationManager;
 
-import javax.naming.NamingException;
 import java.io.File;
 
 public class JMSBrokerStartupTestCase {
