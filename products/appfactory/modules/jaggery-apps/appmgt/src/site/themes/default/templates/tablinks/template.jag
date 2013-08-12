@@ -16,37 +16,45 @@
 
     if(userName != null){
 
-    var mod = jagg.module("user");
+    var mod = jagg.module("manager");
     var result = false;
 
-    //    try {
-    //		result = mod.getAllRolesOfUser(userName);
-    //
-    //		var rolesArray = result.userRoles;
-    //
-    //		for(var i=0;i<rolesArray.length;i++){
-    //            var role = rolesArray[i];
-    //            var roleName = role.roleName;
-    //            var isSelected = role.isSelected;
 
-    //            if(roleName == "admin" && isSelected == "true"){
-    //               dashboardPath = getProperty(ADMIN_DASHBOARD_PATH);
-    //               dashboardUrl = serverUrl + dashboardPath;
-    //
-    //            }else if(roleName == "ceo" && isSelected == "true"){
-    //                dashboardPath = getProperty(CEO_DASHBOARD_PATH);
-    //                dashboardUrl = serverUrl + dashboardPath;
-    //            }
-    //            else if(roleName == "appFactoryUsers" && isSelected == "true"){
-    //                dashboardPath = getProperty(AF_USERS_DASHBOARD_PATH);
-    //                dashboardUrl = serverUrl + dashboardPath ;
-    //               //log.info(dashboardUrl);
-    //          }
-    //	    }
-    //
-    //	} catch(e) {
-    //	  throw "Error while searching the users";
-    //	}   **/
+    var carbon = require('carbon');
+    var server = carbon.server;
+    var realmService = server.osgiService('org.wso2.carbon.user.core.service.RealmService');
+
+    var tenantDomain = mod.getTenantDomain();
+
+    // var superTenantDomain =  x.getTenantManager().getSuperTenantDomain();
+    // var superTenantID = x.getTenantManager().getTenantId(superTenantDomain);
+
+    var tenantID = realmService.getTenantManager().getTenantId(tenantDomain);
+    var rolesArray = realmService.getTenantUserRealm(tenantID).getUserStoreManager().getRoleListOfUser(userName);
+
+    log.info("Role list length = " + rolesArray.length);
+    log.info("Real User Name == " + userName);
+
+        for (var i=0;i<rolesArray.length;i++){
+                var role = rolesArray[i];
+                var roleName = role.roleName;
+                var isSelected = role.isSelected;
+
+                log.info("i== " + i + ", role ==" + role);
+
+                if(roleName == "admin" && isSelected == "true"){
+                   dashboardPath = getProperty(ADMIN_DASHBOARD_PATH);
+                   dashboardUrl = serverUrl + dashboardPath;
+
+                }else if(roleName == "ceo" && isSelected == "true"){
+                    dashboardPath = getProperty(CEO_DASHBOARD_PATH);
+                    dashboardUrl = serverUrl + dashboardPath;
+                }
+                else if(roleName == "appFactoryUsers" && isSelected == "true"){
+                    dashboardPath = getProperty(AF_USERS_DASHBOARD_PATH);
+                    dashboardUrl = serverUrl + dashboardPath ;;
+              }
+        }
 
     }
 
