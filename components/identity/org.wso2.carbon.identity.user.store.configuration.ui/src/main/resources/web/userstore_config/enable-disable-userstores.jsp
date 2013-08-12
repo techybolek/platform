@@ -47,10 +47,10 @@
 
         try {
             if (action.equals("enable")) {
-                userStoreConfigAdminServiceClient.updateUserStore(domain, "false");
+                userStoreConfigAdminServiceClient.changeUserStoreState(domain, "false");
             }
             if (action.equals("disable")) {
-                userStoreConfigAdminServiceClient.updateUserStore(domain, "true");
+                userStoreConfigAdminServiceClient.changeUserStoreState(domain, "true");
             }
 
             // Session need to be update according to new user store info 

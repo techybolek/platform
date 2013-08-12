@@ -39,7 +39,7 @@
             ConfigurationContext configContext =
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             userStoreConfigAdminServiceClient = new UserStoreConfigAdminServiceClient(cookie, backendServerURL, configContext);
-            userStoreConfigAdminServiceClient.deleteUserStores(checkedList);
+            userStoreConfigAdminServiceClient.deleteUserStoresSet(checkedList);
             String message = resourceBundle.getString("successful.delete");
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
 

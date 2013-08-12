@@ -62,9 +62,9 @@ public class UserStoreConfigAdminServiceClient {
      * Get available user store implementations
      *
      * @return : available user store managers
-     * @throws java.rmi.RemoteException
+     * @throws Exception
      */
-    public String[] getAvailableUserStoreClasses() throws RemoteException {
+    public String[] getAvailableUserStoreClasses() throws Exception {
         return stub.getAvailableUserStoreClasses();
 
     }
@@ -75,9 +75,9 @@ public class UserStoreConfigAdminServiceClient {
      *
      * @param className : list of properties required by each user store manager
      * @return : list of properties(mandatory+optional)
-     * @throws java.rmi.RemoteException
+     * @throws Exception
      */
-    public Properties getUserStoreProperties(String className) throws RemoteException {
+    public Properties getUserStoreProperties(String className) throws Exception {
         return stub.getUserStoreManagerProperties(className);
 
     }
@@ -89,21 +89,61 @@ public class UserStoreConfigAdminServiceClient {
      * @param userStoreDTO : representation of new user store to be persisted
      * @throws Exception
      */
-    public void saveConfigurationToFile(UserStoreDTO userStoreDTO) throws Exception {
-         stub.saveConfigurationToFile(userStoreDTO);
+    public void addUserStore(UserStoreDTO userStoreDTO) throws Exception {
+         stub.addUserStore(userStoreDTO);
     }
 
     /**
      * Deletes a given list of user stores
      *
      * @param userStores : domain names of user stores to deleted
-     * @throws RemoteException
+     * @throws Exception
      */
-    public void deleteUserStores(String[] userStores) throws RemoteException {
-         stub.deleteUserStores(userStores);
+    public void deleteUserStoresSet(String[] userStores) throws Exception {
+         stub.deleteUserStoresSet(userStores);
     }
 
-    public void updateUserStore(String domain,String isDisabled) throws Exception {
-         stub.updateDomain(domain,isDisabled);
+    /**
+     * Deletes a given user store
+     *
+     * @param userStores : domain name of the user store to deleted
+     * @throws Exception
+     */
+    public void deleteUserStore(String userStore) throws Exception {
+         stub.deleteUserStore(userStore);
+    }
+
+    /**
+     * Toggle user store state (enable/disable)
+     * @param domain : domain name of the user store to enable/dissable
+     * @param isDisabled : set true to disable user store
+     * @throws Exception
+     */
+    public void changeUserStoreState(String domain,String isDisabled) throws Exception {
+         stub.changeUserStoreState(domain,Boolean.parseBoolean(isDisabled));
+    }
+
+    /**
+     * Rename user store including property changes
+     * @param previousDomain Previous domain name of the user store
+     * @param userStoreDTO New properties of the user store
+     * @throws Exception
+     */
+    public void updateUserStoreWithDomainName(String previousDomain,UserStoreDTO userStoreDTO) throws Exception {
+    	if(previousDomain!=null && !"".equals(previousDomain) && !previousDomain.equalsIgnoreCase(userStoreDTO.getDomainId())) {
+    		stub.editUserStoreWithDomainName(previousDomain,userStoreDTO);
+    	}
+    	else {
+    		this.updateUserStore(userStoreDTO);
+    	}
+    }
+
+    /**
+     * Update user store without changing the domain name
+     * @param userStoreDTO New properties of the user store
+     * @throws Exception
+     */
+    public void updateUserStore(UserStoreDTO userStoreDTO) throws Exception {
+    		stub.editUserStore(userStoreDTO);
     }
 }

@@ -159,14 +159,21 @@
 
     var allPropertiesSelected = false;
     function doSubmit() {
-    if (doValidationDomainNameOnly()) {
-    //            if(doValidationMandatoryProperties()){
-    document.dataForm.action = "userstore-config-finish.jsp?domain= " + "<%=domain%>";
-    document.dataForm.submit();
-
+        if (doValidationDomainNameOnly()) {
+        	//if(doValidationMandatoryProperties()){
+        	document.dataForm.action = "userstore-config-finish.jsp";
+        	document.dataForm.submit();
+			//}
+        }
     }
-
-    //        }
+    
+    function doUpdate() {
+        if (doValidationDomainNameOnly()) {
+        	//if(doValidationMandatoryProperties()){
+        	document.dataForm.action = "userstore-config-finish.jsp";
+        	document.dataForm.submit();
+			//}
+        }
     }
 
     function selectAllInThisPage(isSelected) {
@@ -294,37 +301,6 @@
 <div class="sectionSub">
     <table id="mainTable">
         <tr>
-            <td class="leftCol-med"><fmt:message key="domain.name"/><span class="required">*</span></td>
-            <%
-                if (domain != null && domain.trim().length() > 0 && !domain.equals("0")) {
-            %>
-            <td><input type="text" name="domainId" id="domainId" width="" value="<%=domain%>"/></td>
-            <%
-            } else {
-            %>
-            <td><input type="text" name="domainId" id="domainId"/></td>
-            <%
-                }
-            %>
-        </tr>
-        <tr>
-            <td><fmt:message key="description"/></td>
-            <%
-                if (description != null && description.trim().length() > 0) {
-            %>
-            <td><textarea name="description" id="description" class="text-box-big"><%=description%>
-            </textarea>
-            </td>
-            <%
-            } else {
-            %>
-            <td><textarea type="text" name="description" id="description" class="text-box-big"></textarea>
-            </td>
-            <%
-                }
-            %>
-        </tr>
-        <tr>
             <td class="leftCol-small">
                 <fmt:message key="user.store.manager.class"/>
             </td>
@@ -352,6 +328,39 @@
                     <fmt:message key="user.store.manager.properties.define"/>.
                 </div>
             </td>
+        </tr>
+        <tr>
+            <td class="leftCol-med"><fmt:message key="domain.name"/><span class="required">*</span></td>
+            <%
+                if (domain != null && domain.trim().length() > 0 && !domain.equals("0")) {
+            %>
+            <td><input type="text" name="domainId" id="domainId" width="" value="<%=domain%>"/></td>
+           	<td><input type="hidden" name="previousDomainId" id="previousDomainId" value="<%=domain%>"/></td>
+            <%
+            } else {
+            %>
+            <td><input type="text" name="domainId" id="domainId"/></td>
+           	<td><input type="hidden" name="previousDomainId" id="previousDomainId" value=""/></td>
+            <%
+                }
+            %>
+        </tr>
+        <tr>
+            <td><fmt:message key="description"/></td>
+            <%
+                if (description != null && description.trim().length() > 0) {
+            %>
+            <td><textarea name="description" id="description" class="text-box-big"><%=description%>
+            </textarea>
+            </td>
+            <%
+            } else {
+            %>
+            <td><textarea type="text" name="description" id="description" class="text-box-big"></textarea>
+            </td>
+            <%
+                }
+            %>
         </tr>
     </table>
 </div>
@@ -604,7 +613,7 @@
 
 <div class="buttonRow">
     <%if(isEditing){ %>
-    <input type="button" onclick="doSubmit();" value="<fmt:message key="update"/>"
+    <input type="button" onclick="doUpdate();" value="<fmt:message key="update"/>"
            class="button"/>
     <%} else {%>
     <input type="button" onclick="doSubmit();" value="<fmt:message key="add"/>"

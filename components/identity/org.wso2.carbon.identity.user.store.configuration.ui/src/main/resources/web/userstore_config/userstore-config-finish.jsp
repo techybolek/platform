@@ -37,6 +37,7 @@
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     String className = request.getParameterValues("classApplied")[0];
     String domain = request.getParameterValues("domainId")[0];
+    String previousDomain = request.getParameterValues("previousDomainId")[0];
     String description = request.getParameterValues("description")[0];
     int defaultProperties = Integer.parseInt(CharacterEncoder.getSafeText(request.getParameter("defaultProperties")).replaceAll("[\\D]", ""));    //number of default properties
 
@@ -85,15 +86,31 @@
             userStoreDTO.setDescription(description);
             userStoreDTO.setClassName(className);
             userStoreDTO.setProperties(propertyList.toArray(new PropertyDTO[propertyList.size()]));
-            userStoreConfigAdminServiceClient.saveConfigurationToFile(userStoreDTO);
-
-            // Session need to be update according to new user store info 
-            session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
-            session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE, null);
-            session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE, null);
             
-        String message = resourceBundle.getString("successful.update");
-        CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
+            if(domain != null && domain != "") {
+	            if(previousDomain != null && previousDomain != "" && previousDomain != domain) {
+	            	// update with domain name change
+	            	userStoreConfigAdminServiceClient.updateUserStoreWithDomainName(previousDomain, userStoreDTO);
+	            }
+	            else {
+	            	// update without domain name change or a add
+	            	userStoreConfigAdminServiceClient.addUserStore(userStoreDTO);
+	            }
+
+	            // Session need to be update according to new user store info 
+	            session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, null);
+	            session.setAttribute(UserAdminUIConstants.USER_LIST_CACHE, null);
+	            session.setAttribute(UserAdminUIConstants.ROLE_LIST_CACHE, null);
+	            
+	        	String message = resourceBundle.getString("successful.update");
+	        	CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
+            }
+            else {
+                String message = "Domain name is invalide";
+                CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+                forwardTo = "index.jsp?region=region1&item=userstores_mgt_menu";
+            }
+
     } catch (Exception e) {
         String message = resourceBundle.getString("error.update");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
