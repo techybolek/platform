@@ -98,8 +98,8 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
         Assert.assertTrue(esbUtils.isProxyUnDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "xsltTransformationProxy")
                 , "xsltTransformationProxy Proxy service deployment failed");
 
-        Assert.assertFalse(isResourceExist("/_system/config/transform.xslt"), "transform.xslt not removed on registry");
-        Assert.assertFalse(isResourceExist("/_system/config/transform_back.xslt"), "transform.xslt not removed on registry");
+        Assert.assertFalse(isResourceExist("/_system/config/transform.xslt"), "transform.xslt deployed by car file not removed on registry");
+        Assert.assertFalse(isResourceExist("/_system/config/transform_back.xslt"), "transform_back.xslt deployed by car file not removed on registry");
         super.cleanup();
     }
 
