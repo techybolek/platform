@@ -3696,26 +3696,27 @@ public class ApiMgtDAO {
      * @param connection
      * @throws APIManagementException
      */
-    public void addURLTemplates(int apiId, API api, Connection connection)
-            throws APIManagementException {
+    public void addURLTemplates(int apiId, API api, Connection connection) throws APIManagementException {
         if (apiId == -1) {
             //application addition has failed
             return;
         }
         PreparedStatement prepStmt = null;
-        String query = "INSERT INTO AM_API_URL_MAPPING (API_ID,HTTP_METHOD,AUTH_SCHEME,URL_PATTERN) VALUES (?,?,?,?)";
+
+        String query = "INSERT INTO AM_API_URL_MAPPING (API_ID,HTTP_METHOD,AUTH_SCHEME,URL_PATTERN,THROTTLING_TIER) VALUES (?,?,?,?,?)";
         try {
             //connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
 
             Iterator<URITemplate> uriTemplateIterator = api.getUriTemplates().iterator();
             URITemplate uriTemplate;
-            for (; uriTemplateIterator.hasNext();) {
+            for (; uriTemplateIterator.hasNext(); ) {
                 uriTemplate = uriTemplateIterator.next();
                 prepStmt.setInt(1, apiId);
                 prepStmt.setString(2, uriTemplate.getHTTPVerb());
                 prepStmt.setString(3, uriTemplate.getAuthType());
                 prepStmt.setString(4, uriTemplate.getUriTemplate());
+                prepStmt.setString(5, uriTemplate.getThrottlingTier());
                 prepStmt.addBatch();
             }
             prepStmt.executeBatch();
