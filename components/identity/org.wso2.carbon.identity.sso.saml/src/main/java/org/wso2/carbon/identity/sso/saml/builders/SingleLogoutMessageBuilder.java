@@ -73,7 +73,8 @@ public class SingleLogoutMessageBuilder {
         logoutResp.setInResponseTo(id);
         logoutResp.setIssuer(SAMLSSOUtil.getIssuer());
         logoutResp.setStatus(buildStatus(status, statMsg));
-
+        logoutResp.setIssueInstant(new DateTime());
+        
         return logoutResp;
     }
 
