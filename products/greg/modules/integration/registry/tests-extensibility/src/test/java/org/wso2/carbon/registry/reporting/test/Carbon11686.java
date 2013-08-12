@@ -86,6 +86,8 @@ public class Carbon11686 extends ReportingTestCaseSuper {
 
     @BeforeClass(groups = {"wso2.greg"})
     public void initializeForActivityReportTesting() throws Exception {
+        applicationName = super.applicationName + "Carbon11686";
+        artifactName = super.artifactName + "Carbon11686";
         userId = ProductConstant.ADMIN_USER_ID;
         userInfo = UserListCsvReader.getUserInfo(userId);
         EnvironmentBuilder adminBuilder = new EnvironmentBuilder().greg(userId);

@@ -58,6 +58,8 @@ import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 public class ReportingTestCaseSuper {
 
+    protected String artifactName = "testCycle";
+    protected String applicationName = "testApplication";
     protected ManageEnvironment environment;
     protected Registry governance;
     protected WSRegistryServiceClient registry;
@@ -336,7 +338,7 @@ public class ReportingTestCaseSuper {
         GenericArtifactManager artifactManager = new GenericArtifactManager(
                 governance, "testGovernance");
         GenericArtifact artifact = artifactManager
-                .newGovernanceArtifact(new QName("testCycle1"));
+                .newGovernanceArtifact(new QName(artifactName + "1"));
 
         artifact.setAttribute("details_govCycleName", "G-regTesting");
         artifact.setAttribute("details_product", "governance registry");
@@ -358,7 +360,7 @@ public class ReportingTestCaseSuper {
                 .getGenericArtifact(artifact.getId());
         artifactIDs[0] = artifact.getId();
         assertTrue(recievedArtifact.getQName().toString()
-                           .contains("testCycle1"), "artifact name not found");
+                           .contains(artifactName + "1"), "artifact name not found");
 
     }
 
@@ -372,7 +374,7 @@ public class ReportingTestCaseSuper {
         GenericArtifactManager artifactManager = new GenericArtifactManager(
                 governance, "applications");
         GenericArtifact artifact = artifactManager
-                .newGovernanceArtifact(new QName("testApplication1"));
+                .newGovernanceArtifact(new QName(applicationName + "1"));
 
         artifact.setAttribute("overview_name", "test application");
         artifact.setAttribute("overview_version", "4.5.0");
@@ -385,7 +387,7 @@ public class ReportingTestCaseSuper {
         artifactIDs[1] = artifact.getId();
         assertTrue(
                 recievedArtifact.getQName().toString()
-                        .contains("testApplication1"),
+                        .contains(applicationName + "1"),
                 "artifact name not found");
 
     }
@@ -400,7 +402,7 @@ public class ReportingTestCaseSuper {
         GenericArtifactManager artifactManager = new GenericArtifactManager(
                 governance, "applications");
         GenericArtifact artifact = artifactManager
-                .newGovernanceArtifact(new QName("testApplication2"));
+                .newGovernanceArtifact(new QName(applicationName + "2"));
 
         artifact.setAttribute("overview_name", "test application2");
         artifact.setAttribute("overview_version", "4.6.0");
@@ -413,7 +415,7 @@ public class ReportingTestCaseSuper {
         artifactIDs[2] = artifact.getId();
         assertTrue(
                 recievedArtifact.getQName().toString()
-                        .contains("testApplication2"),
+                        .contains(applicationName + "2"),
                 "artifact name not found");
 
     }
@@ -428,7 +430,7 @@ public class ReportingTestCaseSuper {
         GenericArtifactManager artifactManager = new GenericArtifactManager(
                 governance, "applications");
         GenericArtifact artifact = artifactManager
-                .newGovernanceArtifact(new QName("testApplication3"));
+                .newGovernanceArtifact(new QName(applicationName + "3"));
 
         artifact.setAttribute("overview_name", "test application3");
         artifact.setAttribute("overview_version", "4.7.0");
@@ -441,11 +443,11 @@ public class ReportingTestCaseSuper {
         artifactIDs[3] = artifact.getId();
         assertTrue(
                 recievedArtifact.getQName().toString()
-                        .contains("testApplication3"),
+                        .contains(applicationName + "3"),
                 "artifact name not found");
 
         artifact = artifactManager.newGovernanceArtifact(new QName(
-                "testApplication4"));
+                applicationName + "4"));
 
         artifact.setAttribute("overview_name", "test application4");
         artifact.setAttribute("overview_version", "4.8.0");
@@ -457,7 +459,7 @@ public class ReportingTestCaseSuper {
         artifactIDs[4] = artifact.getId();
         assertTrue(
                 recievedArtifact.getQName().toString()
-                        .contains("testApplication4"),
+                        .contains(applicationName + "4"),
                 "artifact name not found");
     }
 
@@ -587,9 +589,13 @@ public class ReportingTestCaseSuper {
      *
      */
     protected void removeResourcesLCReport() throws RemoteException,
-                                                    ResourceAdminServiceExceptionException {
-        resourceAdminServiceClient.deleteResource(testGovernanceLCtemplate);
-        resourceAdminServiceClient.deleteResource(testGovernanceLCRXT);
+            ResourceAdminServiceExceptionException, RegistryException {
+        if (registry.resourceExists(testGovernanceLCtemplate)) {
+            resourceAdminServiceClient.deleteResource(testGovernanceLCtemplate);
+        }
+        if (registry.resourceExists(testGovernanceLCRXT)) {
+            resourceAdminServiceClient.deleteResource(testGovernanceLCRXT);
+        }
         resourceAdminServiceClient.removeExtension(testGovernanceLCJAR);
     }
 
@@ -603,7 +609,9 @@ public class ReportingTestCaseSuper {
 
         GenericArtifactManager artifactManager = new GenericArtifactManager(
                 governance, "testGovernance");
-        artifactManager.removeGenericArtifact(artifactIDs[0]);
+        if (artifactIDs[0] != null) {
+            artifactManager.removeGenericArtifact(artifactIDs[0]);
+        }
     }
 
     /**
@@ -677,8 +685,10 @@ public class ReportingTestCaseSuper {
      *
      */
     protected void removeTemplateCollection() throws RemoteException,
-                                                     ResourceAdminServiceExceptionException {
-        resourceAdminServiceClient.deleteResource(testTemplateCollection);
+            ResourceAdminServiceExceptionException, RegistryException {
+        if (registry.resourceExists(testTemplateCollection)) {
+            resourceAdminServiceClient.deleteResource(testTemplateCollection);
+        }
     }
 
     /**

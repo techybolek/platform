@@ -50,6 +50,8 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
     @BeforeClass
     public void initializeForReportGenerationTesting() throws RemoteException, RegistryException,
                                                               LoginAuthenticationExceptionException {
+        applicationName = super.applicationName + "ReportGenerationTestCases";
+        artifactName = super.artifactName + "ReportGenerationTestCases";
         init();
     }
 

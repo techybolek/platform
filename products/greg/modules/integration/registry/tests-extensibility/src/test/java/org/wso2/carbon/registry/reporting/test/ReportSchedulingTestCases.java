@@ -53,6 +53,8 @@ public class ReportSchedulingTestCases extends ReportingTestCaseSuper {
     @BeforeClass
     public void initializeToTestScheduling() throws RemoteException, RegistryException,
             LoginAuthenticationExceptionException, MalformedURLException, ResourceAdminServiceExceptionException {
+        applicationName = super.applicationName + "ReportSchedulingTestCases";
+        artifactName = super.artifactName + "ReportSchedulingTestCases";
         init();
         testAddResourcesLCReport();
         testAddLCArtifact();

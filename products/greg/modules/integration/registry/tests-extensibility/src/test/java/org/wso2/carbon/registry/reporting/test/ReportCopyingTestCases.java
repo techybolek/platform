@@ -43,6 +43,8 @@ public class ReportCopyingTestCases extends ReportingTestCaseSuper {
     @BeforeClass
     public void initializeToTestCopying() throws RemoteException, RegistryException,
                                                  LoginAuthenticationExceptionException {
+        applicationName = super.applicationName + "ReportCopyingTestCases";
+        artifactName = super.artifactName + "ReportCopyingTestCases";
         init();
     }
 

@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 
 public class UTFSupportForCAPPTestCase {
 
@@ -184,8 +185,8 @@ public class UTFSupportForCAPPTestCase {
                                ApplicationAdminExceptionException, RegistryException {
 
         delete("/_system/capps");
-        applicationAdminClient.deleteApplication("text_resources");
-        applicationAdminClient.deleteApplication("Capp");
+        deleteApplication("text_resources");
+        deleteApplication("Capp");
         delete("/_system/governance/trunk/services/com/strikeiron/www/DoNotCallRegistry");
         delete("/_system/governance/trunk/services/com/example/stockquote_wsdl/StockQuoteService");
         delete("/_system/governance/trunk/wsdls/com/strikeiron/www/Automated Name With Spaces.wsdl");
@@ -208,6 +209,13 @@ public class UTFSupportForCAPPTestCase {
             throws ResourceAdminServiceExceptionException, RemoteException, RegistryException {
         if (wsRegistryServiceClient.resourceExists(destPath)) {
             resourceAdminServiceClient.deleteResource(destPath);
+        }
+    }
+
+    public void deleteApplication(String name)
+            throws ApplicationAdminExceptionException, RemoteException, RegistryException {
+        if (Arrays.asList(applicationAdminClient.listAllApplications()).contains(name)) {
+            applicationAdminClient.deleteApplication(name);
         }
     }
 
