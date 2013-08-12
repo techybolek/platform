@@ -109,7 +109,7 @@ var createHiddenForm = function(){
         var resourcesCount = index - 2;
         var resourceMethodValues = "";
         var resourceMethodAuthValues = "";
-
+        var resourceThrottlingTierValues = "";
         var tr = this;
         //read the checkbox values
         if($('.resource-get',tr).is(':checked')){
@@ -134,7 +134,7 @@ var createHiddenForm = function(){
         if($('.resource-post',tr).is(':checked')){
             if(resourceMethodValues == ""){resourceMethodValues += "POST"}else{resourceMethodValues += ",POST"}
             var selectedValue = $('.postAuthType',tr).val();
-            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue }
+            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
             <!--Throttling-fix-->
             var selectedValueThrottling = $('.putThrottlingTier',tr).val();
             console.log(selectedValueThrottling);
@@ -175,6 +175,11 @@ var createHiddenForm = function(){
            $('<input>').attr('type', 'hidden')
                    .attr('name', 'resourceMethodAuthType-' + resourcesCount).attr('id', 'resourceMethodAuthType-' + resourcesCount).attr('value', resourceMethodAuthValues)
                    .appendTo('#hiddenFormElements');
+           <!--Throttling-fix-->
+           $('<input>').attr('type', 'hidden')
+               .attr('name', 'resourceMethodThrottlingTier-' + resourcesCount).attr('id', 'resourceMethodThrottlingTier-' + resourcesCount).attr('value', resourceThrottlingTierValues)
+               .appendTo('#hiddenFormElements');
+           <!--Throttling-fix-->
        }
    });
 
