@@ -34,8 +34,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>rhino</groupId>
+            <groupId>rhino.wso2</groupId>
             <artifactId>js</artifactId>
+	    <version>1.7.0.R4.wso2v1-SNAPSHOT</version>
         </dependency>
 		<dependency>
             <groupId>commons-logging</groupId>
