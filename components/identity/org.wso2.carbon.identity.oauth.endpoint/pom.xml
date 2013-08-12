@@ -120,7 +120,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>oauth2endpoints</warName>
+                    <warName>oauth2</warName>
                 </configuration>
             </plugin>
         </plugins>

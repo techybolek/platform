@@ -272,7 +272,7 @@ public class OAuth2AuthzEndpoint {
 				}
 				if (!prompt.contains(OIDC.Prompt.LOGIN)) {
 					req.getSession().setAttribute(OAuthConstants.OAUTH2_PARAMS, params);
-					return CarbonUIUtil.getAdminConsoleURL("/") + "../oauth2endpoints/authorize";
+					return CarbonUIUtil.getAdminConsoleURL("/") + "../oauth2/authorize";
 				}
 			}
 		}
