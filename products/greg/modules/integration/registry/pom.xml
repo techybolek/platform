@@ -45,5 +45,6 @@
         <module>tests-governance-api</module>
         <module>tests-new</module>
         <module>tests-ui</module>
+        <module>reports</module>
     </modules>
 </project>
