@@ -31,6 +31,7 @@ cat $resorce_dir/configs/appfactory-invite-user-email-config.xml | sed -e "s@AF_
 cat $resorce_dir/configs/appfactory-sso-idp-config.xml  | sed -e "s@AF_HOST@$af_host_name@g" > $APPFACTORY_HOME/repository/conf/sso-idp-config.xml
 cp $resorce_dir/configs/saml2.federation.properties  $APPFACTORY_HOME/repository/conf/security
 cp $resorce_dir/configs/appfactory-humantask.xml $APPFACTORY_HOME/repository/conf/humantask.xml
+cp $resorce_dir/configs/cloud-services-desc.xml $APPFACTORY_HOME/repository/conf/multitenancy
 cp $resorce_dir/configs/carbon-console-web.xml $APPFACTORY_HOME/repository/conf/tomcat/carbon/WEB-INF/web.xml
 #cp -r $resorce_dir/patches/af/*  $APPFACTORY_HOME/repository/components/patches
 #cp -r $resorce_dir/CreateTenant.zip  $APPFACTORY_HOME/repository/deployment/server/bpel/
