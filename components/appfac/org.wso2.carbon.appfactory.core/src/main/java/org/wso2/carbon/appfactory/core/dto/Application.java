@@ -59,28 +59,17 @@ public class Application {
      */
     private boolean isProduction = false;
 
-    private String domainName;
-
-    public String getDomainName() {
-        return domainName;
-    }
-
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
-    }
-
     public Application() {
 
     }
 
     public Application(String id, String name, String appType,String repositoryType,
-                       String description,String domainName) {
+                       String description) {
         this.name = name;
         this.description = description;
         this.id = id;
         this.type = appType;
         this.repositoryType=repositoryType;
-        this.domainName=domainName;
     }
 
     public String getName() {

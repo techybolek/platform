@@ -319,9 +319,8 @@ public class ProjectUtils {
      * @throws AppFactoryException Throws error when unable
      *          to extract application information
      */
-    public static Application getApplicationInfo(String applicationId,String domainName) throws AppFactoryException {
-
-        GenericArtifactImpl artifact = getApplicationArtifact(applicationId,domainName);
+    public static Application getApplicationInfo(String applicationId, String tenantDomain) throws AppFactoryException {
+        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
 
         if (artifact == null) {
             String errorMsg =
@@ -339,7 +338,7 @@ public class ProjectUtils {
                             artifact.getAttribute("application_name"),
                             artifact.getAttribute("application_type"),
                             artifact.getAttribute("application_repositorytype"),
-                            artifact.getAttribute("application_description"),domainName);
+                            artifact.getAttribute("application_description"));
             
 			String branchCount = artifact.getAttribute("application_branchcount");
 			if (branchCount != null) {
@@ -627,52 +626,6 @@ public class ProjectUtils {
 		}
 
 	}
-    public static void updateBranchCount(String domainName,String applicationId) throws AppFactoryException {
-
-
-        GenericArtifact artifact = null;
-        try {
-            RegistryService registryService =
-                    ServiceReferenceHolder.getInstance()
-                            .getRegistryService();
-            UserRegistry userRegistry = null;
-            try {
-                userRegistry = registryService.getGovernanceSystemRegistry(ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(domainName));
-            } catch (UserStoreException e) {
-                String errorMsg =
-                        String.format("Unable to get tenant id for domain: %s",
-                                domainName);
-                log.error(errorMsg, e);
-                throw new AppFactoryException(errorMsg, e);
-            }
-            Resource resource =
-                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-                            "/" + applicationId + "/" + "appinfo");
-            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
-            GenericArtifactManager artifactManager =
-                    new GenericArtifactManager(userRegistry,
-                            "application");
-            artifact = artifactManager.getGenericArtifact(resource.getUUID());
-
-            RxtManager rxtManager = new RxtManager();
-            List<Artifact> appVersions = rxtManager.getAppVersionRxtForApplication(domainName,applicationId);
-            String newBranchCount = String.valueOf(appVersions.size());
-
-            artifact.setAttribute("application_branchcount", newBranchCount);
-
-            artifactManager.updateGenericArtifact(artifact);
-
-            log.info(String.format("Application - %s Branch count is updated to - %s", applicationId, newBranchCount));
-        } catch (RegistryException e) {
-            String errorMsg =
-                    String.format("Unable to load the application information for applicaiton id: %s",
-                            applicationId);
-            log.error(errorMsg, e);
-            throw new AppFactoryException(errorMsg, e);
-        }
-
-    }
-
 
     public static void generateBPELArchetype(String applicationKey, String absolutePath, String archetypeRequest) throws AppFactoryException {
         generateProjectArchetype(applicationKey, absolutePath, getArchetypeRequest(applicationKey, archetypeRequest));

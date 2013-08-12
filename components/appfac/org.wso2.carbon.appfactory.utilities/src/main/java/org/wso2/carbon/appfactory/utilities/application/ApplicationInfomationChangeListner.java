@@ -50,7 +50,7 @@ public class ApplicationInfomationChangeListner extends ApplicationEventsListene
 	 */
 	@Override
 	public void onCreation(Application application, String tenantDomain) throws AppFactoryException {
-		ProjectUtils.updateBranchCount(tenantDomain,application.getId());
+		ProjectUtils.updateBranchCount(application.getId());
 		log.info("On Creation is successfully handled by Application Information Change Listner.");
 
 	}

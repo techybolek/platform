@@ -44,6 +44,45 @@ import java.util.List;
 public class DefaultRolesCreatorForTenant implements TenantMgtListener {
     private static Log log = LogFactory.getLog(DefaultRolesCreatorForTenant.class);
     private static final int EXEC_ORDER = 40;
+    private static List<RoleBean> roleBeanList = null;
+
+    static {
+        try {
+            init();
+        } catch (StratosException e) {
+            log.error("Default roles creator initialization failed.", e);
+        }
+    }
+
+    public static void init() throws StratosException {
+        roleBeanList = new ArrayList<RoleBean>();
+        try {
+            AppFactoryConfiguration configuration = Util.getConfiguration();
+            String[] roles = configuration.getProperties("ApplicationRoles.Role");
+            String adminUser =
+                Util.getRealmService().getBootstrapRealm().getRealmConfiguration()
+                .getAdminUserName();
+            for (String role : roles) {
+                String resourceIdString =
+                    configuration.getFirstProperty("ApplicationRoles.Role." +
+                                                   role + ".Permission");
+                String[] resourceIds = resourceIdString.split(",");
+                RoleBean roleBean = new RoleBean(role.trim());
+                roleBean.addUser(adminUser);
+                for (String resourceId : resourceIds) {
+                    Permission permission =
+                        new Permission(resourceId.trim(),
+                                       CarbonConstants.UI_PERMISSION_ACTION);
+                    roleBean.addPermission(permission);
+                }
+                roleBeanList.add(roleBean);
+            }
+        } catch (org.wso2.carbon.user.core.UserStoreException e) {
+            String message = "Failed to read default roles from appfactory configuration.";
+            log.error(message);
+            throw new StratosException(message, e);
+        }
+    }
 
     @Override
     public void onTenantCreate(TenantInfoBean tenantInfoBean) throws StratosException {
@@ -67,7 +106,7 @@ public class DefaultRolesCreatorForTenant implements TenantMgtListener {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-        /*try {
+        try {
             String users[]={tenantInfoBean.getAdmin()};
             UserStoreManager userStoreManager =
                 Util.getRealmService()
@@ -88,7 +127,7 @@ public class DefaultRolesCreatorForTenant implements TenantMgtListener {
                 tenantInfoBean.getTenantDomain();
             log.error(message);
             throw new StratosException(message, e);
-        }*/
+        }
     }
 
     @Override

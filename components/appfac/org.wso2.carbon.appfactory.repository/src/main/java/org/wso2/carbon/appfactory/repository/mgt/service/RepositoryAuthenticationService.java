@@ -37,8 +37,8 @@ public class RepositoryAuthenticationService extends AbstractAdmin {
         try {
             String domainName=getTenantDomain();
             AppFactoryConfiguration configuration = Util.getConfiguration();
-            String repositoryType = ProjectUtils.getRepositoryType(applicationId,domainName);
-            UserRealm realm = getUserRealm();
+            String repositoryType = ProjectUtils.getRepositoryType(applicationId);
+            UserRealm realm = Util.getRealmService().getTenantUserRealm(tID);
             String permission = configuration.getFirstProperty((AppFactoryConstants.SCM_READ_WRITE_PERMISSION).replace("svn", repositoryType));
             if (realm != null && realm.getAuthorizationManager().
                     isUserAuthorized(username, permission, "ui.execute")) {
@@ -52,6 +52,8 @@ public class RepositoryAuthenticationService extends AbstractAdmin {
             String msg = "Error while getting repository type of application " + applicationId;
             log.error(msg, e);
         }
-        return false;
+        return false;*/
+        // TODO GIT repo access authorization has to fix - Earlier code has commented
+        return true;
     }
 }

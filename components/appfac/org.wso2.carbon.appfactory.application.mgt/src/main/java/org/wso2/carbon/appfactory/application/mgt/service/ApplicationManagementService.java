@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaxen.JaxenException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.appfactory.application.mgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.appfactory.application.mgt.service.applicationqueue.ApplicationCreator;
 import org.wso2.carbon.appfactory.application.mgt.util.UserApplicationCache;
 import org.wso2.carbon.appfactory.application.mgt.util.Util;
@@ -43,19 +42,16 @@ import org.wso2.carbon.appfactory.core.dto.Version;
 import org.wso2.carbon.appfactory.core.governance.RxtManager;
 import org.wso2.carbon.appfactory.core.queue.AppFactoryQueueException;
 import org.wso2.carbon.appfactory.jenkins.build.JenkinsCISystemDriver;
-import org.wso2.carbon.appfactory.tenant.roles.RoleBean;
 import org.wso2.carbon.appfactory.utilities.dataservice.DSApplicationListener;
 import org.wso2.carbon.appfactory.utilities.project.ProjectUtils;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.email.sender.api.EmailSender;
 import org.wso2.carbon.email.sender.api.EmailSenderConfiguration;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.*;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.*;
-import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -147,24 +143,18 @@ public class ApplicationManagementService extends AbstractAdmin {
 
     }
 
-    public boolean addUserToApplication(String domainName,String applicationId, String userName, String[] roles)
+    public boolean addUserToApplication(String applicationId, String userName, String[] roles, String tenantDomain)
             throws ApplicationManagementException {
-        int tenantId = 0;
+        TenantManager tenantManager = Util.getRealmService().getTenantManager();
         try {
-            tenantId=Util.getRealmService().getTenantManager().getTenantId(domainName);
-        } catch (UserStoreException e) {
-            String msg = "Error while getting tenant id for "+domainName;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        }
-        try {
-            UserRealm realm = Util.getRealmService().getTenantUserRealm(tenantId);
-            String [] carbonRoles=getCarbonRoles(roles,applicationId);
-            String[] newRolesForUser = removeRolesUserAlreadyIn(userName,carbonRoles, realm);
+            UserRealm realm =
+                    Util.getRealmService()
+                            .getTenantUserRealm(tenantManager.getTenantId(applicationId));
+            String[] newRolesForUser = removeRolesUserAlreadyIn(userName, roles, realm);
             realm.getUserStoreManager().updateRoleListOfUser(userName, null, newRolesForUser);
 
             userApplicationCache.clearFromCache(userName);
-            //clearRealmCache(applicationId);
+            clearRealmCache(applicationId);
 
         } catch (UserStoreException e) {
             String msg = "Error while adding user " + userName + " to application " + applicationId;
@@ -177,7 +167,7 @@ public class ApplicationManagementService extends AbstractAdmin {
                 Util.getApplicationEventsListeners()
                         .iterator();
         try {
-            Application app = ProjectUtils.getApplicationInfo(applicationId,domainName);
+            Application app = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
             UserInfo user = new UserInfo(userName, roles);
             while (appEventListeners.hasNext()) {
                 ApplicationEventsListener listener = appEventListeners.next();
@@ -204,7 +194,7 @@ public class ApplicationManagementService extends AbstractAdmin {
             AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
             String emailSend = config.getFirstProperty("EmailSend");
             if (emailSend.equals("true") && !roles[0].equals(AppFactoryConstants.APP_OWNER_ROLE)) {
-                sendMail(domainName,applicationId, userName, roles, "invite-user-email-config.xml");
+                sendMail(applicationId, userName, roles, "invite-user-email-config.xml", tenantDomain);
             }
         } catch (AppFactoryException e) {
             // TODO Auto-generated catch block
@@ -216,19 +206,6 @@ public class ApplicationManagementService extends AbstractAdmin {
         return true;
     }
 
-    private String[] getCarbonRoles(String[] aFRoles,String applicationId) {
-       List<String> carbonRoles=new ArrayList<String>();
-        for(String role:aFRoles){
-            carbonRoles.add(getCarbonRole(applicationId,role));
-        }
-        return carbonRoles.toArray(new String[carbonRoles.size()]);
-    }
-
-    private String getCarbonRole(String appId,String roleName) {
-        return (appId+"_"+roleName);
-    }
-
-
     /**
      * Update the user roles of a user for a given application
      *
@@ -239,7 +216,7 @@ public class ApplicationManagementService extends AbstractAdmin {
      * @throws AppFactoryException
      * @throws ApplicationManagementException
      */
-    public boolean updateUserOfApplication(String domainName,String applicationId, String userName,
+    public boolean updateUserOfApplication(String applicationId, String userName,
                                            String[] rolesToDelete, String[] rolesToAdd, String tenantDomain)
             throws ApplicationManagementException,
             UserStoreException {
@@ -262,7 +239,7 @@ public class ApplicationManagementService extends AbstractAdmin {
                 Util.getApplicationEventsListeners()
                         .iterator();
         try {
-            Application app = ProjectUtils.getApplicationInfo(applicationId,domainName);
+            Application app = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
             UserInfo user = new UserInfo(userName, finalRolesArray);
             while (appEventListeners.hasNext()) {
                 ApplicationEventsListener listener = appEventListeners.next();
@@ -363,7 +340,9 @@ public class ApplicationManagementService extends AbstractAdmin {
             throws ApplicationManagementException {
         TenantManager tenantManager = Util.getRealmService().getTenantManager();
         try {
-            UserRealm realm =getUserRealm();
+            UserRealm realm =
+                    Util.getRealmService()
+                            .getTenantUserRealm(tenantManager.getTenantId(applicationId));
             realm.getUserStoreManager().updateRoleListOfUser(userName, rolesToDelete, newRoles);
             userApplicationCache.clearFromCache(userName);
             return true;
@@ -381,7 +360,9 @@ public class ApplicationManagementService extends AbstractAdmin {
         TenantManager tenantManager = Util.getRealmService().getTenantManager();
         ArrayList<String> userList = new ArrayList<String>();
         try {
-            UserRealm realm =getUserRealm();
+            UserRealm realm =
+                    Util.getRealmService()
+                            .getTenantUserRealm(tenantManager.getTenantId(applicationId));
             String[] roles = realm.getUserStoreManager().getRoleNames();
             if (roles.length > 0) {
                 for (String roleName : roles) {
@@ -471,7 +452,7 @@ public class ApplicationManagementService extends AbstractAdmin {
         return userRoleCount;
     }
 
-    public boolean removeUserFromApplication(String domainName,String applicationId, String userName)
+    public boolean removeUserFromApplication(String applicationId, String userName, String tenantDomain)
             throws ApplicationManagementException {
         TenantManager tenantManager = Util.getRealmService().getTenantManager();
         String[] rolesOfUser = getRolesOfUserPerApplication(applicationId, userName);
@@ -501,7 +482,7 @@ public class ApplicationManagementService extends AbstractAdmin {
                     Util.getApplicationEventsListeners()
                             .iterator();
             try {
-                Application app = ProjectUtils.getApplicationInfo(applicationId,domainName);
+                Application app = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
 
                 /** Update the roles in this dto */
                 UserInfo user = new UserInfo(userName);
@@ -523,7 +504,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 
     }
 
-    public boolean revokeApplication(String domainName,String applicationId) throws ApplicationManagementException {
+    public boolean revokeApplication(String applicationId, String tenantDomain) throws ApplicationManagementException {
         TenantManager tenantManager = Util.getRealmService().getTenantManager();
         try {
             tenantManager.deleteTenant(tenantManager.getTenantId(applicationId));
@@ -540,7 +521,7 @@ public class ApplicationManagementService extends AbstractAdmin {
                         .iterator();
 
         try {
-            Application application = ProjectUtils.getApplicationInfo(applicationId,domainName);
+            Application application = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
             while (appEventListeners.hasNext()) {
                 ApplicationEventsListener listener = appEventListeners.next();
                 listener.onRevoke(application);
@@ -591,33 +572,24 @@ public class ApplicationManagementService extends AbstractAdmin {
         return Util.getUserInfoBean(userName);
     }
 
-    public String[] getAllApplications(String domainName,String userName) throws ApplicationManagementException {
-
-      String apps[] = new String[0]; /*= userApplicationCache.getValueFromCache(userName);*/
-        /*if (apps != null) {
+    /**
+     * Get all the application of given user
+     * @param userName Username
+     * @return
+     * @throws ApplicationManagementException
+     */
+    public String[] getAllApplications(String userName) throws ApplicationManagementException {
+        /*String apps[] = userApplicationCache.getValueFromCache(userName);
+        if (apps != null) {
             return apps;
         } else {
             apps = new String[0];
-        }*/
+        }
         List<String> list;
-        int tenantId = 0;
+        TenantManager manager = Util.getRealmService().getTenantManager();
         try {
-            tenantId=Util.getRealmService().getTenantManager().getTenantId(domainName);
-        } catch (UserStoreException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        UserStoreManager userStoreManager = null;
-        try {
-            userStoreManager=Util.getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
-        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (UserStoreException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        try {
-            String[] roles = userStoreManager.getRoleListOfUser(userName);
-            roles=getUniqueApplicationList(roles);
-            list = Arrays.asList(roles);
+            String[] tenantDomainStrs = manager.getAllTenantDomainStrOfUser(userName);
+            list = Arrays.asList(tenantDomainStrs);
         } catch (UserStoreException e) {
             String msg = "Error while getting all applications";
             log.error(msg, e);
@@ -626,23 +598,11 @@ public class ApplicationManagementService extends AbstractAdmin {
         if (!list.isEmpty()) {
             apps = list.toArray(new String[list.size()]);
         }
-       // userApplicationCache.addToCache(userName, apps);
+        userApplicationCache.addToCache(userName, apps); */
+        // TODO   getAllApplications for a particular user has to fix - Earlier code has commented
+        String []apps={"foo", "foo1", "foo2", "foo3", "foo4", "foo5", "foo6", "foo7", "foo8", "foo9", "foo10","foo11", "foo12", "foo13", "foo14", "foo15", "foo16", "foo17", "foo18", "foo19", "foo20"};
+
         return apps;
-    }
-    public String[] getAllApplications(String userName) throws ApplicationManagementException{
-        //TODO(ajanthan):fix it properly
-        throw new UnsupportedOperationException("Not supported yet");
-    }
-
-    private String[] getUniqueApplicationList(String[] tenantDomainStrs) {
-        Set<String> appSet=new HashSet<String>();
-        for(String role:tenantDomainStrs){
-
-            if(!(role.indexOf("_")<0)){
-                appSet.add(role.substring(0, role.lastIndexOf("_")));
-            }
-        }
-        return appSet.toArray(new String[appSet.size()]);
     }
 
     public String[] getAllCreatedApplications() throws ApplicationManagementException {
@@ -679,14 +639,14 @@ public class ApplicationManagementService extends AbstractAdmin {
      * @return {@link ApplicationInfoBean} without versions.
      * @throws AppFactoryException
      */
-    public ApplicationInfoBean getBasicApplicationInfo(String domainName,String applicationKey)
+    public ApplicationInfoBean getBasicApplicationInfo(String applicationKey, String tenantDomain)
             throws AppFactoryException {
-        Application application = ProjectUtils.getApplicationInfo(applicationKey,domainName);
+        Application application = ProjectUtils.getApplicationInfo(applicationKey, tenantDomain);
         ApplicationInfoBean applicaitonBean = new ApplicationInfoBean(application);
         return applicaitonBean;
     }
 
-   /* public ApplicationInfoBean[] getAllVersionsOfApplications()
+    public ApplicationInfoBean[] getAllVersionsOfApplications()
             throws ApplicationManagementException,
             AppFactoryException {
         ApplicationInfoBean[] arrApplicationInfo;
@@ -727,7 +687,7 @@ public class ApplicationManagementService extends AbstractAdmin {
         }
 
         return arrApplicationInfo;
-    }*/
+    }
 
     public UserApplications[] getApplicationsOfUser(String roleName)
             throws ApplicationManagementException {
@@ -814,7 +774,7 @@ public class ApplicationManagementService extends AbstractAdmin {
         }
     }
 
-    public void publishApplicationCreation(String domainName,String applicationId)
+    public void publishApplicationCreation(String applicationId, String tenantDomain)
             throws ApplicationManagementException {
         // New application is created successfully so now time to clear realm in
         // cache to reload
@@ -826,7 +786,7 @@ public class ApplicationManagementService extends AbstractAdmin {
                         .iterator();
         ApplicationEventsListener listener = null;
         try {
-            Application application = ProjectUtils.getApplicationInfo(applicationId,domainName);
+            Application application = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
             if (application == null) {
                 String errorMsg =
                         String.format("Unable to load application information for id %s",
@@ -839,11 +799,11 @@ public class ApplicationManagementService extends AbstractAdmin {
 
                 if (listener instanceof DSApplicationListener) {
                     if ("dbs".equals(application.getType())) {
-                        listener.onCreation(application, domainName);
+                        listener.onCreation(application, tenantDomain);
                         systemStatus.add((applicationId + listener.getIdentifier()).toUpperCase());
                     }
                 } else {
-                    listener.onCreation(application, domainName);
+                    listener.onCreation(application, tenantDomain);
                     systemStatus.add((applicationId + listener.getIdentifier()).toUpperCase());
                 }
             }
@@ -855,8 +815,8 @@ public class ApplicationManagementService extends AbstractAdmin {
         }
     }
 
-    public void publishApplicationVersionCreation(String domainName,String applicationId, String sourceVersion,
-                                                  String targetVersion)
+    public void publishApplicationVersionCreation(String applicationId, String sourceVersion,
+                                                  String targetVersion, String tenantDomain)
             throws ApplicationManagementException {
         try {
 
@@ -864,7 +824,7 @@ public class ApplicationManagementService extends AbstractAdmin {
                     Util.getApplicationEventsListeners()
                             .iterator();
 
-            Application application = ProjectUtils.getApplicationInfo(applicationId,domainName);
+            Application application = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
 
             Version[] versions = ProjectUtils.getVersions(applicationId);
 
@@ -1025,9 +985,9 @@ public class ApplicationManagementService extends AbstractAdmin {
         }
     }
 
-    public void publishApplicationAutoDeploymentChange(String domainName,String applicationId,
+    public void publishApplicationAutoDeploymentChange(String applicationId,
                                                        String previousVersion, String nextVersion,
-                                                       String versionStage)
+                                                       String versionStage, String tenantDomain)
             throws ApplicationManagementException {
 
         JenkinsCISystemDriver jenkinsCISystemDriver =
@@ -1037,7 +997,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 
         try {
 
-            Application application = ProjectUtils.getApplicationInfo(applicationId,domainName);
+            Application application = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
 
             Version[] versions = ProjectUtils.getVersions(applicationId);
 
@@ -1117,11 +1077,11 @@ public class ApplicationManagementService extends AbstractAdmin {
         }
     }
 
-    public boolean sendMail(String domainName,String applicationId, String userName, String roles[], String config)
+    public boolean sendMail(String applicationId, String userName, String roles[], String config, String tenantDomain)
             throws ApplicationManagementException {
         EmailSender sender = new EmailSender(loadEmailSenderConfiguration(config));
         try {
-            Application currentApp = ProjectUtils.getApplicationInfo(applicationId,domainName);
+            Application currentApp = ProjectUtils.getApplicationInfo(applicationId, tenantDomain);
             String applicationName = currentApp.getName();
             String applicationDescription = currentApp.getDescription();
             Map<String, String> userParams = new HashMap<String, String>();
@@ -1230,67 +1190,5 @@ public class ApplicationManagementService extends AbstractAdmin {
         }
         return b;
     }
-  public boolean createDefaultRoles(String domainName,String applicationId,String appOwner) throws ApplicationManagementException{
-      List<RoleBean> roleBeanList = initRoleBean();
-      int tenantId = 0;
-      try {
-          tenantId=Util.getRealmService().getTenantManager().getTenantId(domainName);
-      } catch (UserStoreException e) {
-          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-      }
-      try {
-          String[] users={appOwner};
-          UserStoreManager userStoreManager =
-                  Util.getRealmService()
-                          .getTenantUserRealm(tenantId)
-                          .getUserStoreManager();
-          for (RoleBean roleBean : roleBeanList) {
-              if (!userStoreManager.isExistingRole(roleBean.getRoleName())) {
-                  userStoreManager.addRole(getCarbonRole(applicationId, roleBean.getRoleName()),users
-                          ,
-                          roleBean.getPermissions().
-                                  toArray(new Permission[roleBean.getPermissions().
-                                          size()]));
-              }
-          }
-      } catch (UserStoreException e) {
-          String message =
-                  "Failed to create default roles of tenant:" +
-                          domainName;
-          log.error(message,e);
-          throw new ApplicationManagementException(message, e);
-      }
-      return true;
-  }
-    private List<RoleBean> initRoleBean() throws ApplicationManagementException {
-         List<RoleBean> roleBeanList = null;
-        roleBeanList = new ArrayList<RoleBean>();
-        try {
-            AppFactoryConfiguration configuration = Util.getConfiguration();
-            String[] roles = configuration.getProperties("ApplicationRoles.Role");
-            String adminUser =
-                    Util.getRealmService().getBootstrapRealm().getRealmConfiguration()
-                            .getAdminUserName();
-            for (String role : roles) {
-                String resourceIdString =
-                        configuration.getFirstProperty("ApplicationRoles.Role." +
-                                role + ".Permission");
-                String[] resourceIds = resourceIdString.split(",");
-                RoleBean roleBean = new RoleBean(role.trim());
-                roleBean.addUser(adminUser);
-                for (String resourceId : resourceIds) {
-                    Permission permission =
-                            new Permission(resourceId.trim(),
-                                    CarbonConstants.UI_PERMISSION_ACTION);
-                    roleBean.addPermission(permission);
-                }
-                roleBeanList.add(roleBean);
-            }
-        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            String message = "Failed to read default roles from appfactory configuration.";
-            log.error(message);
-            throw new ApplicationManagementException(message, e);
-        }
-        return roleBeanList;
-    }
+
 }
