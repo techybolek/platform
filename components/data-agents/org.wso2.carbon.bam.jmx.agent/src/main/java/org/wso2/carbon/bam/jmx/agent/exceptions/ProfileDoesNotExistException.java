@@ -21,11 +21,19 @@ package org.wso2.carbon.bam.jmx.agent.exceptions;
 
 public class ProfileDoesNotExistException extends Exception {
 
-    public ProfileDoesNotExistException(String message) {
-        super(message);
+    private String message;
+
+    public String getMessage() {
+        return message;
     }
 
-    public ProfileDoesNotExistException(ProfileDoesNotExistException e) {
-        super(e);
+    public ProfileDoesNotExistException(String message) {
+        super(message);
+        this.message = message;
+    }
+
+    public ProfileDoesNotExistException(String message, Throwable cause) {
+        super(message, cause);
+        this.message = message;
     }
 }

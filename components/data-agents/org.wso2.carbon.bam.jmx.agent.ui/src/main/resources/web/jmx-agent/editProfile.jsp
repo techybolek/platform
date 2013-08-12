@@ -4,10 +4,11 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.Profile" %>
-<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.ArrayOfStringE" %>
-<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.ArrayOfArrayOfString" %>
-<%@ page
-        import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileDoesNotExistExceptionException" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.MBean" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.MBeanAttribute" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.MBeanAttributeProperty" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileDoesNotExistExceptionException" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentJmxProfileExceptionException" %>
 
 <% String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
 
@@ -25,7 +26,10 @@
     try {
         profile = connector.getProfile(profileName);
     } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-        e.printStackTrace();
+        out.print(e.getMessage());
+        return;
+    }catch (JmxAgentJmxProfileExceptionException e) {
+        out.print(e.getMessage());
         return;
     }
 
@@ -82,14 +86,9 @@ function showJmxMbeans() {
                                     while (dataArr[0] == "\n") {
                                         dataArr[i] = dataArr[i].sub(1, dataArr[i].length)
                                     }
-
-
                                 }
                                 htmlText += "<option value=\"" + dataArr[i] + "\" >" + dataArr[i] + "</option>";
-
                             }
-
-
                         }
 
                         htmlText += "</select>";
@@ -144,19 +143,12 @@ function showJmxMbeanAttributes() {
                                         if (k != 0) {
                                             htmlText += "<OPTION value='" + compositeData[0] + "______" + compositeData[k] + "'> " + compositeData[0] + " - " + compositeData[k];
                                         }
-
                                     }
-
-
                                 }
                                 else {
                                     htmlText += "<OPTION value='" + compositeData[0] + "'> " + dataArr[i];
                                 }
-
-
                             }
-
-
                         }
 
                         jQuery('#mBeanAttrs').html(htmlText);
@@ -242,7 +234,6 @@ function selectAttribute() {
     var selectedAttrValue = jQuery("#mBeanAttrs option:selected").val();
     var htmlText;
     if (isComposite) {
-
         htmlText = "<tr>" +
                    "<td style='word-wrap: break-word;'>" + selectedMBean + "</td>" +
                    "<td title=\"" + selectedAttrValue + "\">" + jQuery("#mBeanAttrs option:selected").text() + " </td>" +
@@ -332,14 +323,11 @@ function saveProfile() {
                         childArray.push(splitData[0]);
                         //then the key
                         childArray.push(splitData[1]);
-                    }
-                    else {
+                    } else {
                         childArray.push(data);
                     }
 
-                }
-
-                else {
+                } else {
                     //slice is there to remove the last space of the MBean
                     childArray.push($(this).text());
                 }
@@ -361,7 +349,6 @@ function saveProfile() {
         if (!valid) {
             CARBON.showErrorDialog("Please fill all the mandatory fields");
             return;
-
         }
 
         //create the parameters string for selected attributes/mbeans/keys
@@ -622,89 +609,83 @@ function setUpPage(dPReceiverConnectionTyp, dPSecureUrlConnectionType) {
     </table>
 
 
-    <table class="styledLeft" id="selectedJMXAttrs"
-           style="word-wrap:break-word;table-layout:fixed;">
+    <table class="styledLeft" id="selectedJMXAttrs" style="word-wrap:break-word;table-layout:fixed;">
         <thead>
-        <tr>
-            <th>MBean</th>
-            <th style="width: 15%">Attribute</th>
-            <th>Alias</th>
-            <th style="width: 90px;">Actions</th>
-        </tr>
+            <tr>
+                <th>MBean</th>
+                <th style="width: 15%">Attribute</th>
+                <th>Alias</th>
+                <th style="width: 90px;">Actions</th>
+            </tr>
         </thead>
 
         <tbody>
-        <tr></tr>
-        <%--add the data--%>
-        <%
-            //traverse through the mBeans
-            for (ArrayOfArrayOfString mBeanArr : profile.getAttributes()) {
-                ArrayOfStringE[] dataArray = mBeanArr.getArray();
-                //the first array of the dataArray only conatians the mBean
-                String[] mBeanData = dataArray[0].getArray();
-                /*other arrays of the dataArray is in the following format
+            <tr></tr>
+                <%
+                    //add the data
+                    //traverse through the mBeans
+                    for (MBean mBean : profile.getSelectedMBeans()) {
+                        for(MBeanAttribute mBeanAttribute : mBean.getAttributes()){
 
-            If compositeData:
-              AttrName - keyname - Alias
-            else:
-              AttrName - Alias*/
+                                    /* If compositeData:
+                                      AttrName - keyname - Alias
+                                    else:
+                                      AttrName - Alias */
 
-                //iterate through the attributes and add them to the table
-                for (int count1 = 1; count1 < dataArray.length; count1++) {
-                    //iterate from count1=1 since we need to skip the array which
-                    //conatains just the mBean name
+                            /* If MBean is a simple type */
+                            if(mBeanAttribute.getAliasName() != null) {
+                %>
+                            <tr>
+                            <%--Add the MBean name--%>
+                                <td>
+                                    <%out.print(mBean.getMBeanName());%>
+                                </td>
+                                <td title='<%out.print(mBeanAttribute.getAttributeName());%>'>
+                                    <%out.print(mBeanAttribute.getAttributeName());%>
+                                </td>
+                                <td>
+                                    <input style="width:98%" type="text" name="alias"
+                                        value="<%out.print(mBeanAttribute.getAliasName());%>">
+                                </td>
+                                <%--Add the remove button--%>
+                                <td>
+                                    <a href="#" onclick='$(this).parent().parent().remove(); return false;'
+                                        class="icon-a"><i class="icon-delete"></i>Remove</a>
+                                </td>
+                            </tr>
+                                <%
+                            }
+                            /* If MBean is a composite type*/
+                            else {
+                                 %>
+                                        <%
+                                            for (MBeanAttributeProperty property : mBeanAttribute.getProperties()) {
+                                        %>
+                                    <tr>
+                                    <%--Add the MBean name--%>
+                                                <td>
+                                                    <%out.print(mBean.getMBeanName());%>
+                                                </td>
+                                                <td title='<%out.print(mBeanAttribute.getAttributeName());%>______<%out.print(property.getPropertyName());%>'>
+                                                    <%out.print(mBeanAttribute.getAttributeName());%> - <%out.print(property.getPropertyName());%>
+                                                </td>
+                                                <td>
+                                                    <input style="width:98%" type="text" name="alias"
+                                                            value="<%out.print(property.getAliasName());%>">
+                                                </td>
+                                                <%--Add the remove button--%>
+                                                <td>
+                                                    <a href="#" onclick='$(this).parent().parent().remove(); return false;'
+                                                    class="icon-a"><i class="icon-delete"></i>Remove</a>
+                                                </td>
+                                    </tr>
+                                        <% } %>
 
-                    String[] attributeData = dataArray[count1].getArray();
-
-        %>
-        <tr>
-            <%--Add the MBean name--%>
-
-                <%out.print("<td>"+mBeanData[0]+"</td>");%>
-
-            <%----%>
-
-            <%
-                //if composite data
-                if (attributeData.length == 3) {
-                    //Add the attribute
-                    out.print("<td title='" + attributeData[0] + "______" + attributeData[1] + "'>" + attributeData[0] + " - " + attributeData[1] + "</td>");
-                    //Add the alias
-            %>
-            <td>
-                <input style="width:98%" type="text" name="alias"
-                       value="<%out.print(attributeData[2]);%>">
-            </td>
-
-            <%
-            }
-            //else
-            else {
-                out.print("<td title='" + attributeData[0] + "'>" + attributeData[0] + "</td>");
-            %>
-            <td>
-                <input style="width:98%" type="text" name="alias"
-                       value="<%out.print(attributeData[1]);%>">
-            </td>
-
-            <%
-                }
-            %>
-
-            <%----%>
-
-            <%--Add the remove button--%>
-            <td><a href="#" onclick='$(this).parent().parent().remove(); return false;'
-                   class="icon-a"><i class="icon-delete"></i>Remove</a></td>
-
-
-        </tr>
-
-        <%
-                }
-            }
-
-        %>
+                <%
+                            }
+                          }
+                      }
+                %>
         </tbody>
     </table>
 </div>

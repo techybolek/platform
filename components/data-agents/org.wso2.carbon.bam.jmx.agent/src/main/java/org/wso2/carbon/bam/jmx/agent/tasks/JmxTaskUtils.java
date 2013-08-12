@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.bam.jmx.agent.tasks;
 
+import org.wso2.carbon.bam.jmx.agent.JmxConstant;
 import org.wso2.carbon.bam.jmx.agent.profiles.Profile;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskInfo.TriggerInfo;
@@ -33,18 +34,9 @@ public class JmxTaskUtils {
 
         triggerInfo.setCronExpression(profile.getCronExpression());
 
+        Map<String, String> props = new HashMap<String, String>(1);
+        props.put(JmxConstant.JmxTaskConstant.JMX_PROFILE_NAME, profile.getName());
 
-        Map<String, String> props = new HashMap<String, String>();
-
-
-        //props.put(JmxTaskConstants.JMX_SERVICE_NAME, profile.getName());
-        //props.put(JmxTaskConstants.JMX_SERVICE_OPERATION_NAME, "JMX_SERVICE_OPERATION_NAME");
-        //props.put(JmxTaskConstants.SERVICE_ACTION, "urn:" + "SERVICE_ACTION");
-
-
-        props.put(JmxTaskConstants.JMX_PROFILE_NAME, profile.getName());
         return new TaskInfo(profile.getName(), JmxTask.class.getName(), props, triggerInfo);
-
-
     }
 }

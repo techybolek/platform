@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.bam.jmx.agent.tasks.JmxTaskConstants;
+import org.wso2.carbon.bam.jmx.agent.JmxConstant;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -49,9 +49,6 @@ public class JmxTaskServiceComponent {
 
     private static final Log log = LogFactory.getLog(JmxTaskServiceComponent.class);
 
-    //TODO: make this class private private static in pom
-
-
     private static TaskService taskService;
     private static RegistryService registryService;
     private static TenantRegistryLoader tenantRegistryLoader;
@@ -62,10 +59,9 @@ public class JmxTaskServiceComponent {
         }
         BundleContext bundleContext = ctxt.getBundleContext();
         try {
-            getTaskService().registerTaskType(JmxTaskConstants.JMX_SERVICE_TASK_TYPE);
+            getTaskService().registerTaskType(JmxConstant.JmxTaskConstant.JMX_SERVICE_TASK_TYPE);
         } catch (TaskException e) {
-            log.error(e);
-            e.printStackTrace();
+            log.error("JmxTaskServiceComponent activation error.", e);
         }
     }
 

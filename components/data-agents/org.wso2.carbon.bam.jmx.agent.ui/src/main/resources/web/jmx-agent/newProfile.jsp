@@ -30,7 +30,6 @@ function showJmxMbeans() {
     if (!valid) {
         CARBON.showErrorDialog("Please input the JMX server details");
         return;
-
     }
 
 
@@ -63,20 +62,14 @@ function showJmxMbeans() {
                                     while (dataArr[0] == "\n") {
                                         dataArr[i] = dataArr[i].sub(1, dataArr[i].length)
                                     }
-
-
                                 }
                                 htmlText += "<option value=\"" + dataArr[i] + "\" >" + dataArr[i] + "</option>";
-
                             }
-
-
                         }
 
                         htmlText += "</select>";
 
                         jQuery('#tester').html(htmlText);
-
 
                     }
                 });
@@ -112,39 +105,25 @@ function showJmxMbeanAttributes() {
 
                         var htmlText = "";
 
-
                         for (var i = 0; i < dataArr.length; i++) {
-
                             if (dataArr[i] != "") {
-
                                 //check if this is a composite data type
                                 var compositeData = dataArr[i].split("+;+;");
                                 if (compositeData.length > 1) {
-
                                     for (var k = 0; k < compositeData.length - 1; k++) {
                                         if (k != 0) {
                                             htmlText += "<OPTION value='" + compositeData[0] + "______" + compositeData[k] + "'> " + compositeData[0] + " - " + compositeData[k];
                                         }
-
                                     }
-
-
-                                }
-                                else {
+                                }else {
                                     htmlText += "<OPTION value='" + compositeData[0] + "'> " + dataArr[i];
                                 }
-
-
                             }
-
-
                         }
 
                         jQuery('#mBeanAttrs').html(htmlText);
                         jQuery('#mBeanAttrs').show();
                         jQuery('#attrSelectionLabel').show();
-
-
                     }
                 });
 }
@@ -181,7 +160,6 @@ function checkProfileName() {
                             if (profName == dataArr[i]) {
                                 existingName = true;
                             }
-
                         }
 
                         if (existingName) {
@@ -199,7 +177,12 @@ function checkProfileName() {
                             jQuery('#profileNameFormattingErrorMsg').hide();
                         }
 
-
+                        // check profile name length
+                        if(profName.length > 30) {
+                            jQuery('#profileNameLengthErrorMsg').show();
+                        } else {
+                            jQuery('#profileNameLengthErrorMsg').hide();
+                        }
                     }
                 });
 
@@ -345,9 +328,7 @@ function selectAttribute() {
                                 if (profName == dataArr[i]) {
                                     existingName = true;
                                 }
-
                             }
-
 
                             if (existingName) {
                                 CARBON.showErrorDialog("Profile name already in use");
@@ -355,7 +336,6 @@ function selectAttribute() {
                                 profNameExists = true;
                                 return 0;
                             }
-
 
                         }
                     });
@@ -399,7 +379,6 @@ function selectAttribute() {
             var td = $(this).find('td');
             var childArray = [];
 
-
             td.each(function () {
                 //do not add the <td> with the remove attribute link
                 if ($(this).has("a").length) {
@@ -423,20 +402,14 @@ function selectAttribute() {
                     else {
                         childArray.push(data);
                     }
-
                 }
 
                 else {
                     //slice is there to remove the last space of the MBean
                     childArray.push($(this).text().slice(0, -1));
                 }
-
             });
-
-
             array.push(childArray);
-
-
         });
 
         //check for empty attributes selection. < 2 is used because always an
@@ -448,7 +421,6 @@ function selectAttribute() {
         if (!valid) {
             CARBON.showErrorDialog("Please fill all the mandatory fields");
             return;
-
         }
 
         //create the parameters string for selected attributes/mbeans/keys
@@ -472,7 +444,6 @@ function selectAttribute() {
                 parameterString += array[i][k];
                 //to get rid of the final ";"
                 if (k != array[i].length - 1) {
-
                     parameterString += ";";
                 }
             }
@@ -480,10 +451,8 @@ function selectAttribute() {
             //to get rid of the final " - "
             if (i != array.length - 1) {
                 parameterString += " - ";
-
             }
         }
-
 
         jQuery('#mBeanAttrData').val(parameterString);
 
@@ -537,6 +506,8 @@ function selectAttribute() {
                                                                                     letters and/or
                                                                                     numbers.
             </div>
+            <div id="profileNameLengthErrorMsg" style="display:none;color:red"> The profile name need to be less than 30 characters.
+            </div>
         </td>
 
 
@@ -557,8 +528,7 @@ function selectAttribute() {
                 <option value="ssl://">ssl://</option>
             </select>
 
-            <input name="pubAddress" type="text" id="pubAddress" value="127.0.0.1:7611"
-                    />
+            <input name="pubAddress" type="text" id="pubAddress" value="127.0.0.1:7611"/>
             <button type="button" onclick="testDataReceiverReceiverURLAvailability()">Check
                                                                                       Connection
             </button>
@@ -576,8 +546,7 @@ function selectAttribute() {
                 <option value="ssl://">ssl://</option>
             </select>
 
-            <input name="pubSecureAddress" type="text" id="pubSecureAddress" value="127.0.0.1:7711"
-                    />
+            <input name="pubSecureAddress" type="text" id="pubSecureAddress" value="127.0.0.1:7711" />
             <button type="button" onclick="testDataReceiverSecureURLAvailability()">Check
                                                                                     Connection
             </button>
@@ -624,13 +593,7 @@ function selectAttribute() {
 
             <input name="cronExprTxtInput" style="display:none" type="text" id="cronExprTxtInput"
                    class="required"/>
-
-
-
-
         </td>
-
-
     </tr>
 
 

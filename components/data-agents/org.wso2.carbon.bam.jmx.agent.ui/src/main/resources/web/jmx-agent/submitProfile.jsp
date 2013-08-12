@@ -1,8 +1,9 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.ArrayOfArrayOfString" %>
-<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.ArrayOfStringE" %>
 <%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.Profile" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.MBean" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.MBeanAttribute" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.MBeanAttributeProperty" %>
 <%@ page import="org.wso2.carbon.bam.jmx.agent.ui.JmxConnector" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
@@ -12,10 +13,9 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
-<%@ page
-        import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileDoesNotExistExceptionException" %>
-<%@ page
-        import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileAlreadyExistsExceptionException" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileDoesNotExistExceptionException" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileAlreadyExistsExceptionException" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentJmxProfileExceptionException" %>
 
 <%
 
@@ -32,15 +32,14 @@
     //create the profile
     Profile profile = new Profile();
 
-
     //if this is a profile update request
     if (request.getParameter("newProfile").equalsIgnoreCase("false")) {
-
 
         try {
             profile = connector.getProfile(request.getParameter("profileName"));
         } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-            e.printStackTrace();
+            return;
+        } catch (JmxAgentJmxProfileExceptionException e) {
             return;
         }
         //set Data publisher data
@@ -63,63 +62,33 @@
             profile.setVersion(profile.getVersion() + 1);
         }
 
-
-
         //set JMX data
         profile.setUserName(request.getParameter("jmxUserName"));
         profile.setPass(request.getParameter("jmxUserPass"));
         profile.setUrl(request.getParameter("jmxServerUrl"));
 
-        //get attribute data
+        // get attribute data
         String mBeanAttrData = request.getParameter("mBeanAttrData");
-        //remove new line characters
-        //mBeanAttrData = mBeanAttrData.replaceAll("\\s", "");
 
-        //we receive a string like this
-        //MBeanName__-__AttrName__-__keyname__-__Alias;MBeanName__-__AttrName__-__Alias;
-        //(    attribute with composite data   )(      normal attribute      )
+        // we receive a string like this
+        // MBeanName;AttrName;keyname;Alias__-__MBeanName;AttrName;Alias;
+        // (    attribute with composite data   )(      normal attribute      )
+
+        mBeanAttrData =  mBeanAttrData.trim();
         String[] mBeanAttrPairs = mBeanAttrData.split("__-__");
 
-        Map<String, LinkedList<String[]>> map = new HashMap<String, LinkedList<String[]>>();
-
-        for (String pair : mBeanAttrPairs) {
-            String[] data = pair.split(";");
-            //iterate over the data and add it to the map
-
-
-            //if the mBean exists
-            if (map.containsKey(data[0])) {
-                //get the attributes
-                LinkedList<String[]> list = map.get(data[0]);
-                //add the attributes to the list - don't add the MBean
-                list.add(Arrays.copyOfRange(data, 1, data.length));
-                //update the MBean entry
-                map.put(data[0], list);
-            }
-            //if the mBean does not exit
-            else {
-                LinkedList<String[]> list = new LinkedList<String[]>();
-                //add the attributes to the list
-                list.add(Arrays.copyOfRange(data, 1, data.length));
-                //add the MBean entry
-                map.put(data[0], list);
-
-            }
-
-        }
-
-        profile.setAttributes(mapToStringArr(map));
+        profile.setSelectedMBeans(getMBeanArray(getMBeanMap(mBeanAttrPairs)));
 
         //update the profile
         try {
             connector.updateProfile(profile);
         } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-            e.printStackTrace();
-            return;
+            out.print(e.getMessage());
+        } catch (JmxAgentJmxProfileExceptionException e) {
+            out.print(e.getMessage());
         }
-
     }
-    //if this is a profile creation request
+    // if this is a profile creation request
     if (request.getParameter("newProfile").equalsIgnoreCase("true")) {
 
         //get profile name
@@ -138,7 +107,7 @@
         profile.setDpSecureUrlConnectionType(request.getParameter("pubSecureConnType"));
         profile.setDpSecureAddress(request.getParameter("pubSecureAddress"));
 
-        //get the cron expression
+        // get the cron expression
         if (request.getParameter("presetCronExpr").equalsIgnoreCase("custom")) {
             profile.setCronExpression(request.getParameter("cronExprTxtInput"));
         } else {
@@ -148,53 +117,27 @@
         //set the profile version
         profile.setVersion(1);
 
-
         //get attribute data
         String mBeanAttrData = request.getParameter("mBeanAttrData");
 
-        //we receive a string like this
-        //MBeanName - AttrName - keyname - Alias;MBeanName - AttrName - Alias;
-        //(    attribute with composite data   )(      normal attribute      )
+        // we receive a string like this
+        // java.lang:type=Memory;HeapMemoryUsage;committed;java.lang:type=Memory_HeapMemoryUsage_committed - java.lang:type=Memory;HeapMemoryUsage;init;java.lang:type=Memory_HeapMemoryUsage_init - java.lang:type=Memory;HeapMemoryUsage;max;java.lang:type=Memory_HeapMemoryUsage_max - java.lang:type=Memory;HeapMemoryUsage;used;java.lang:type=Memory_HeapMemoryUsage_used - java.lang:type=OperatingSystem;ProcessCpuTime;java.lang:type=OperatingSystem_ProcessCpuTime - java.lang:type=Threading;ThreadCount;java.lang:type=Threading_ThreadCount
+        // MBeanName;AttrName;keyname;Alias - MBeanName;AttrName;Alias;
+        // (    attribute with composite data   )(      normal attribute      )
+
         String[] mBeanAttrPairs = mBeanAttrData.split(" - ");
 
-        Map<String, LinkedList<String[]>> map = new HashMap<String, LinkedList<String[]>>();
-
-        for (String pair : mBeanAttrPairs) {
-            String[] data = pair.split(";");
-            //iterate over the data and add it to the map
-
-            //if the mBean exists
-            if (map.containsKey(data[0])) {
-                //get the attributes
-                LinkedList<String[]> list = map.get(data[0]);
-                //add the attributes to the list - don't add the MBean
-                list.add(Arrays.copyOfRange(data, 1, data.length));
-                //update the MBean entry
-                map.put(data[0], list);
-            }
-            //if the mBean does not exit
-            else {
-                LinkedList<String[]> list = new LinkedList<String[]>();
-                //add the attributes to the list - don't add the MBean
-                list.add(Arrays.copyOfRange(data, 1, data.length));
-                //add the MBean entry
-                map.put(data[0], list);
-
-            }
-
-        }
-
-        profile.setAttributes(mapToStringArr(map));
+        profile.setSelectedMBeans(getMBeanArray(getMBeanMap(mBeanAttrPairs)));
 
         //create new profile
         profile.setActive(true); //since profile is automatically activated initially
         try {
             connector.addProfile(profile);
         } catch (JmxAgentProfileAlreadyExistsExceptionException e) {
-            e.printStackTrace();
+            return;
+        } catch (JmxAgentJmxProfileExceptionException e) {
             return;
         }
-
     }
 
 
@@ -209,66 +152,116 @@
 <%--functions--%>
 <%!
 
-    private ArrayOfArrayOfString[] mapToStringArr(Map<String, LinkedList<String[]>> map) {
+    private Map<String, Map<String, List<String[]>>> getMBeanMap(String[] mBeanAttrPairs){
 
-        String[][][] contents;
+        Map<String, Map<String, List<String[]>>> mBeanMap = new HashMap<String, Map<String, List<String[]>>>();
 
-        int rows = map.size();
+        for (String pair : mBeanAttrPairs) {
+            String[] data = pair.split(";");
+            //iterate over the data and add it to the map
 
-        contents = new String[rows][][];
-
-        //iterate through all the keys of the map
-
-        Set<String> keys = map.keySet();
-
-        int count = 0;
-        for (String key : keys) {
-            //create a new String array
-            Object[] objArray = map.get(key).toArray();
-
-            //to add the key to the front of the array
-            List<Object> list = Arrays.asList(objArray);
-            LinkedList<Object> llist = new LinkedList<Object>(list);
-            String[] keyArr = {key, ""};
-            llist.add(0, keyArr);
-
-            objArray = llist.toArray();
-
-
-            String[][] mBeanArr = Arrays.asList(objArray).toArray(new String[objArray.length][2]);
-
-            contents[count] = mBeanArr;
-            count++;
-        }
-        return ArrToArrayOfArrayOfString(contents);
-
-    }
-
-    private ArrayOfArrayOfString[] ArrToArrayOfArrayOfString(String[][][] arr) {
-        ArrayOfArrayOfString[] output = new ArrayOfArrayOfString[arr.length];
-
-
-        //iterate over the array
-        int count = 0;
-        for (String[][] strArr : arr) {
-
-            int count1 = 0;
-            ArrayOfStringE[] instance = new ArrayOfStringE[strArr.length];
-            for (String[] arr2 : strArr) {
-
-
-                instance[count1] = new ArrayOfStringE();
-                instance[count1].setArray(arr2);
-                count1++;
+            // trim white spaces
+            for(int i = 0; i < data.length; i++) {
+                data[i] = data[i].trim();
             }
 
-            output[count] = new ArrayOfArrayOfString();
-            output[count].setArray(instance);
-            count++;
+            //if the mBean exists
+            if (mBeanMap.containsKey(data[0])) {
+                //get the attributes
+                Map<String, List<String[]>> attr = mBeanMap.get(data[0]);
+
+                // if attribute is available
+                if (attr.containsKey(data[1])) {
+                    List<String[]> list = attr.get(data[1]);
+                    // add new property to existing list
+                    list.add(Arrays.copyOfRange(data, 2, data.length));
+                    attr.put(data[1], list);
+                    mBeanMap.put(data[0], attr);
+                } else {
+                    // create new property list
+                    List<String[]> list = new LinkedList<String[]>();
+                    // add property to list
+                    list.add(Arrays.copyOfRange(data, 2, data.length));
+                    attr.put(data[1], list);
+                    mBeanMap.put(data[0], attr);
+                }
+
+            } //if the mBean does not exit
+            else {
+                List<String[]> list = new LinkedList<String[]>();
+                list.add(Arrays.copyOfRange(data, 2, data.length));
+                Map<String, List<String[]>> prop = new HashMap<String, List<String[]>>();
+                prop.put(data[1], list);
+                mBeanMap.put(data[0], prop);
+            }
         }
 
+        return mBeanMap;
+    }
 
-        return output;
+    private MBean[] getMBeanArray(Map<String, Map<String, List<String[]>>> mBeanMap) {
+
+        if (!mBeanMap.isEmpty()) {
+
+            // MBean names set (Eg:- java.lang:type=Memory)
+            Set<String> keys = mBeanMap.keySet();
+
+            // Array for MBeans
+            MBean[] mBeansArray = new MBean[mBeanMap.size()];
+            int mBeanCount = 0;
+            for (String mBeanName : keys) {
+                MBean mBeanDTO = new MBean();
+                mBeanDTO.setMBeanName(mBeanName);
+
+                // Getting attribute map for each MBean
+                Map<String, List<String[]>> mBean = mBeanMap.get(mBeanName);
+
+                // Attribute name set (Eg:- NonHeapMemoryUsage, HeapMemoryUsage)
+                Set<String> attributes = mBean.keySet();
+
+                MBeanAttribute[] mBeanAttributesArray = new MBeanAttribute[mBean.size()];
+                int mBeanAttributeCount = 0;
+                for (String attributesName : attributes) {
+
+                    // Getting attribute properties array for each attribute
+                    List<String[]> attributeProperties = mBean.get(attributesName);
+
+                    MBeanAttribute mBeanAttribute = new MBeanAttribute();
+                    mBeanAttribute.setAttributeName(attributesName);
+
+                    if ((attributeProperties != null) && (!attributeProperties.isEmpty())) {
+
+                        // if MBean is a simple type. So only alias is available for MBean
+                        if (attributeProperties.get(0).length == 1) {
+                            // Linked list has only one element that has only single array element
+                            mBeanAttribute.setAliasName(attributeProperties.get(0)[0]);
+                        } else {
+                            // This is for composite type. Each property has property name and alias
+                            MBeanAttributeProperty[] mBeanAttributePropertiesArray = new MBeanAttributeProperty[attributeProperties.size()];
+                            int mBeanAttributePropertyCount = 0;
+                            for (String[] attributeProperty : attributeProperties) {
+                                if (attributeProperty != null) {
+                                    if (attributeProperty.length == 2) {
+                                        MBeanAttributeProperty mBeanAttributeProperty = new MBeanAttributeProperty();
+                                        mBeanAttributeProperty.setPropertyName(attributeProperty[0]);
+                                        mBeanAttributeProperty.setAliasName(attributeProperty[1]);
+                                        mBeanAttributePropertiesArray[mBeanAttributePropertyCount++] = mBeanAttributeProperty;
+                                    }
+                                }
+                            }
+                            mBeanAttribute.setProperties(mBeanAttributePropertiesArray);
+                        }
+                    }
+                    mBeanAttributesArray[mBeanAttributeCount++] = mBeanAttribute;
+                }
+                mBeanDTO.setAttributes(mBeanAttributesArray);
+                mBeansArray[mBeanCount++] = mBeanDTO;
+            }
+
+            return mBeansArray;
+        }
+
+        return null;
     }
 %>
 

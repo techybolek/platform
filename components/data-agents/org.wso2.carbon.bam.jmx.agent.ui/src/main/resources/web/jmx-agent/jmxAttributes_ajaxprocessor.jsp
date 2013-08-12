@@ -29,40 +29,29 @@
         String[][] mBeans;
         try {
             mBeans = connector.getMBeans(url, userName, password);
-
             if (mBeans != null) {
-
                 for (String[] mBean : mBeans) {
                     try {
-
                         for (int k = 0; k < mBean.length; k++) {
 
                             if (k == 0) {
                                 continue;
                             }
                             out.print(mBean[k] + "____");
-
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        out.print(e.getMessage());
                     }
-
-
                 }
             }
 
         } catch (RemoteException e) {
             //allows to propagate the exceptions to the UI layer
             out.print(e.getMessage());
-
-            e.printStackTrace();
         } catch (JmxAgentIOExceptionException e) {
             //allows to propagate the exceptions to the UI layer
             out.print(e.getMessage());
-            e.printStackTrace();
         }
-
-
     }
 
     //if attributes are needed
@@ -88,18 +77,12 @@
                         }
                         out.print("____");
                     }
-
                 }
-
             }
         } catch (RemoteException e) {
             //allows to propagate the exceptions to the UI layer
             out.print(e.getMessage());
-
-            e.printStackTrace();
         }
-
-
     }
 
     //if the profiles list is needed
@@ -111,12 +94,8 @@
                 for (Profile profile : profiles) {
                     out.print(profile.getName() + "____");
                 }
-
             }
-
         }
-
-
     }
 
 
@@ -128,7 +107,6 @@
         int port = Integer.parseInt(address.split(":")[1]);
 
         out.print(connector.checkDataPublisherAvailability(connectionType, ipAddress, port));
-
     }
 
 

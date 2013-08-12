@@ -22,6 +22,7 @@ package org.wso2.carbon.bam.jmx.agent;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.bam.jmx.agent.exceptions.JmxProfileException;
 import org.wso2.carbon.bam.jmx.agent.exceptions.ProfileAlreadyExistsException;
 import org.wso2.carbon.bam.jmx.agent.exceptions.ProfileDoesNotExistException;
 import org.wso2.carbon.bam.jmx.agent.profiles.Profile;
@@ -53,6 +54,7 @@ import java.net.SocketAddress;
 import java.rmi.UnmarshalException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -65,9 +67,7 @@ public class JmxAgentWebInterface extends AbstractAdmin {
 
 
     public JmxAgentWebInterface() {
-
         profMan = new ProfileManager();
-
         admin = new JmxTaskAdmin();
     }
 
@@ -78,18 +78,17 @@ public class JmxAgentWebInterface extends AbstractAdmin {
      * @return Whether adding was successful or not
      * @throws ProfileAlreadyExistsException
      */
-    public boolean addProfile(Profile profile) throws ProfileAlreadyExistsException {
+    public boolean addProfile(Profile profile)
+            throws ProfileAlreadyExistsException, JmxProfileException {
 
         profMan.addProfile(profile);
 
         //if the profile needs to be scheduled
         if (profile.isActive()) {
             try {
-
                 admin.scheduleProfile(profile);
             } catch (AxisFault axisFault) {
                 log.error(axisFault);
-                axisFault.printStackTrace();
             }
         }
 
@@ -101,7 +100,8 @@ public class JmxAgentWebInterface extends AbstractAdmin {
      * @return : A profile object
      * @throws ProfileDoesNotExistException
      */
-    public Profile getProfile(String profileName) throws ProfileDoesNotExistException {
+    public Profile getProfile(String profileName)
+            throws ProfileDoesNotExistException, JmxProfileException {
 
         return profMan.getProfile(profileName);
     }
@@ -113,17 +113,18 @@ public class JmxAgentWebInterface extends AbstractAdmin {
      * @return Whether updating was successful or not
      * @throws ProfileDoesNotExistException
      */
-    public boolean updateProfile(Profile profile) throws ProfileDoesNotExistException {
+    public boolean updateProfile(Profile profile)
+            throws ProfileDoesNotExistException, JmxProfileException {
         //reschedule the profile if the profile is already scheduled
         //else the profile monitoring period will not change
         //(if the cron has been changed)
+
         if (profile.isActive()) {
             try {
                 admin.removeProfile(profile.getName());
                 admin.scheduleProfile(profile);
             } catch (AxisFault axisFault) {
-                //log.error(e);
-                axisFault.printStackTrace();
+                log.error(axisFault);
             }
         }
 
@@ -137,18 +138,17 @@ public class JmxAgentWebInterface extends AbstractAdmin {
      * @return Whether delete operation was successful or not
      * @throws ProfileDoesNotExistException
      */
-    public boolean deleteProfile(String profileName) throws ProfileDoesNotExistException {
+    public boolean deleteProfile(String profileName)
+            throws ProfileDoesNotExistException, JmxProfileException {
         JmxTaskAdmin admin = new JmxTaskAdmin();
 
         //if the task is scheduled
         try {
             if (admin.profileExists(profileName)) {
                 admin.removeProfile(profileName);
-
             }
         } catch (AxisFault e) {
             log.error(e);
-            e.printStackTrace();
         }
         return profMan.deleteProfile(profileName);
     }
@@ -173,14 +173,14 @@ public class JmxAgentWebInterface extends AbstractAdmin {
                 profile.setActive(true);
                 profMan.updateProfile(profile);
             }
-
-
         } catch (ProfileDoesNotExistException e) {
             log.error(e);
-            throw new ProfileDoesNotExistException(e);
+            throw e;
         } catch (AxisFault axisFault) {
             log.error(axisFault);
             throw new AxisFault("Error Scheduling " + profileName);
+        } catch (JmxProfileException e) {
+            log.error(e);
         }
     }
 
@@ -203,24 +203,18 @@ public class JmxAgentWebInterface extends AbstractAdmin {
             }
         } catch (ProfileDoesNotExistException e) {
             log.error(e);
-            throw new ProfileDoesNotExistException(e);
+            throw e;
         } catch (AxisFault axisFault) {
             log.error(axisFault);
-            axisFault.printStackTrace();
+        } catch (JmxProfileException e) {
+            log.error(e);
         }
-    }
-
-    /**
-     * @return : An array of all the active profiles
-     */
-    public Profile[] getActiveProfiles() {
-        return profMan.getActiveProfiles();
     }
 
     /**
      * @return : An aaray of all the profiles
      */
-    public Profile[] getAllProfiles() {
+    public Profile[] getAllProfiles() throws JmxProfileException {
         return profMan.getAllProfiles();
     }
 
@@ -228,74 +222,51 @@ public class JmxAgentWebInterface extends AbstractAdmin {
     /**
      * @param url      : The URL for the JMX server
      * @param userName : The User name for the JMX server
-     * @param Password : The password for the JMX server
+     * @param password : The password for the JMX server
      * @return : The name array of the MBeans which the JMX server. The format of the array is
      *         [Domain name][MBean Canonical name]
      * @throws IOException
      */
-    public String[][] getMBeans(String url, String userName, String Password)
+    public String[][] getMBeans(String url, String userName, String password)
             throws IOException {
 
-        JMXServiceURL jmxServiceURL;
         JMXConnector jmxc = null;
-        MBeanServerConnection mbsc;
 
         try {
-            jmxServiceURL = new JMXServiceURL(url);
+            jmxc = getJmxConnector(url, userName, password);
 
-
-            HashMap map = new HashMap();
-            String[] credentials = new String[2];
-            credentials[0] = userName;
-            credentials[1] = Password;
-
-            map.put("jmx.remote.credentials", credentials);
-            jmxc = JMXConnectorFactory.connect(jmxServiceURL, map);
-
-            mbsc = jmxc.getMBeanServerConnection();
-
+            MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
 
             int count = 0;
-            Set<ObjectName> names =
-                    new TreeSet<ObjectName>(mbsc.queryNames(null, null));
+            Set<ObjectName> names = new TreeSet<ObjectName>(mbsc.queryNames(null, null));
             String[][] nameArr = new String[names.size()][2];
 
             for (ObjectName name : names) {
-
                 nameArr[count][0] = name.getDomain();
                 nameArr[count][1] = name.getCanonicalName();
-
-
                 count++;
-
             }
 
             return nameArr;
 
         } catch (MalformedURLException e) {
             log.error(e);
-            e.printStackTrace();
-            throw new MalformedURLException(e.getMessage());
+            throw e;
         } catch (IOException e) {
             log.error(e);
-            e.printStackTrace();
-            throw new IOException(e);
-
-        }finally {
+            throw e;
+        } finally {
             if (jmxc != null) {
-
                 jmxc.close();
             }
         }
-
-
     }
 
     /**
      * @param mBean    : The name of the MBean
      * @param url      : The URL for the JMX server
      * @param userName : The User name for the JMX server
-     * @param Password : The password for the JMX server
+     * @param password : The password for the JMX server
      * @return : The set of attributes in a MBean
      * @throws MalformedObjectNameException
      * @throws IntrospectionException
@@ -304,26 +275,14 @@ public class JmxAgentWebInterface extends AbstractAdmin {
      * @throws ReflectionException
      */
     public String[][] getMBeanAttributeInfo(String mBean, String url, String userName,
-                                            String Password)
+                                            String password)
             throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException,
                    IOException, ReflectionException {
 
 
-        JMXServiceURL jmxServiceURL = new JMXServiceURL(url);
+        JMXConnector jmxc = getJmxConnector(url, userName, password);
 
-        JMXConnector jmxc;
-        MBeanServerConnection mbsc;
-
-
-        HashMap map = new HashMap();
-        String[] credentials = new String[2];
-        credentials[0] = userName;
-        credentials[1] = Password;
-
-        map.put("jmx.remote.credentials", credentials);
-        jmxc = JMXConnectorFactory.connect(jmxServiceURL, map);
-        mbsc = jmxc.getMBeanServerConnection();
-
+        MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
         ObjectName mBeanName = new ObjectName(mBean);
 
         MBeanAttributeInfo[] attrs = mbsc.getMBeanInfo(mBeanName).getAttributes();
@@ -341,8 +300,8 @@ public class JmxAgentWebInterface extends AbstractAdmin {
                     result instanceof Double || result instanceof Long ||
                     result instanceof Boolean || result instanceof Float) {
                     strAttrs.add(new String[]{info.getName()});
-
                 }
+
                 //if this is a composite data type
                 if (result instanceof CompositeData) {
                     CompositeData cd = (CompositeData) result;
@@ -357,12 +316,10 @@ public class JmxAgentWebInterface extends AbstractAdmin {
                             attrValue instanceof Boolean || attrValue instanceof Float) {
                             keys.add(key);
                         }
-
                     }
                     //if this composite data object has keys which returns attributes with
                     // primary data types
                     if (keys.size() > 1) {
-
                         strAttrs.add(keys.toArray(new String[keys.size()]));
                     }
                 }
@@ -389,14 +346,21 @@ public class JmxAgentWebInterface extends AbstractAdmin {
                 log.error("Removed the attribute " + info.getName() + " of " + mBean +
                           " from the UI list due to: " + e.getMessage());
             }
-
-
         }
 
         //close the connection
         jmxc.close();
 
         return strAttrs.toArray(new String[strAttrs.size()][]);
+    }
+
+    private JMXConnector getJmxConnector(String url, String userName, String password)
+            throws IOException {
+        JMXServiceURL jmxServiceURL = new JMXServiceURL(url);
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+
+        map.put(JmxConstant.JmxConfigurationConstant.JMX_REMOTE_CREDENTIALS_STR, new String[]{userName, password});
+        return JMXConnectorFactory.connect(jmxServiceURL, map);
     }
 
     /**
@@ -419,18 +383,15 @@ public class JmxAgentWebInterface extends AbstractAdmin {
                 return true;
             } catch (IOException e) {
                 log.error(e);
-                e.printStackTrace();
             } finally {
                 if (ds != null) {
                     ds.close();
                 }
             }
-
         }
 
         //check for http and https port availability
-        if (connectionType.equalsIgnoreCase("http://") ||
-            connectionType.equalsIgnoreCase("https://")) {
+        if (connectionType.equalsIgnoreCase("http://") || connectionType.equalsIgnoreCase("https://")) {
 
             Socket socket = null;
 
@@ -440,12 +401,9 @@ public class JmxAgentWebInterface extends AbstractAdmin {
 
                 SocketAddress sa = new InetSocketAddress(url, port);
                 socket.connect(sa);
-
-
                 return true;
             } catch (IOException e) {
                 log.error(e);
-                e.printStackTrace();
             } finally {
                 if (socket != null) {
                     try {
@@ -455,7 +413,6 @@ public class JmxAgentWebInterface extends AbstractAdmin {
                     }
                 }
             }
-
         }
 
         return false;
@@ -466,20 +423,18 @@ public class JmxAgentWebInterface extends AbstractAdmin {
      *
      * @return - Whether the profile was successfully deployed or not
      */
-    public boolean addToolboxProfile(){
+    public boolean addToolboxProfile() {
 
-        boolean success=false;
+        boolean success = false;
 
         try {
             profMan.createToolboxProfile();
-            success=true;
+            success = true;
         } catch (ProfileAlreadyExistsException e) {
-            success=false;
             log.error(e);
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (JmxProfileException e) {
+            log.error(e);
         }
         return success;
     }
-
-
 }

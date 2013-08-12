@@ -21,10 +21,20 @@ package org.wso2.carbon.bam.jmx.agent.exceptions;
 
 public class ProfileAlreadyExistsException extends Exception {
 
+    private static final long serialVersionUID = 8973383552973997952L;
+    private String message;
 
-    public ProfileAlreadyExistsException(String msg) {
-        super(msg);
+    public String getMessage() {
+        return message;
     }
 
+    public ProfileAlreadyExistsException(String message) {
+        super(message);
+        this.message = message;
+    }
 
+    public ProfileAlreadyExistsException(String message, Throwable cause) {
+        super(message, cause);
+        this.message = message;
+    }
 }

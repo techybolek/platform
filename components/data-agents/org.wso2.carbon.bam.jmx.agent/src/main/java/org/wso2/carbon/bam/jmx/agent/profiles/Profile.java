@@ -19,7 +19,12 @@
 
 package org.wso2.carbon.bam.jmx.agent.profiles;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Profile {
+
     private String url;
     private String userName;
     private String pass;
@@ -34,13 +39,13 @@ public class Profile {
     private String dpSecureUrlConnectionType;
     private int version;
 
-    private String[][][] attributes;
-
+    private MBean[] selectedMBeans;
 
     public String getDpUserName() {
         return dpUserName;
     }
 
+    @XmlElement
     public void setDpUserName(String dpUserName) {
         this.dpUserName = dpUserName;
     }
@@ -49,10 +54,10 @@ public class Profile {
         return dpPassword;
     }
 
+    @XmlElement
     public void setDpPassword(String dpPassword) {
         this.dpPassword = dpPassword;
     }
-
 
     public String getUrl() {
         return url;
@@ -74,38 +79,27 @@ public class Profile {
         return active;
     }
 
-    public void activate() {
-        this.active = true;
-    }
-
-    public void deactivate() {
-        this.active = false;
-    }
-
-    public void setAttributes(String[][][] attributes) {
-        this.attributes = attributes;
-    }
-
-    public String[][][] getAttributes() {
-        return attributes;
-    }
-
+    @XmlElement
     public void setUrl(String url) {
         this.url = url;
     }
 
+    @XmlElement
     public void setUserName(String userName) {
         this.userName = userName;
     }
 
+    @XmlElement
     public void setPass(String pass) {
         this.pass = pass;
     }
 
+    @XmlElement
     public void setActive(boolean active) {
         this.active = active;
     }
 
+    @XmlElement
     public void setName(String name) {
         this.name = name;
     }
@@ -114,15 +108,16 @@ public class Profile {
         return cronExpression;
     }
 
+    @XmlElement
     public void setCronExpression(String cronExpression) {
         this.cronExpression = cronExpression;
     }
-
 
     public int getVersion() {
         return version;
     }
 
+    @XmlElement
     public void setVersion(int version) {
         this.version = version;
     }
@@ -131,6 +126,7 @@ public class Profile {
         return dpReceiverAddress;
     }
 
+    @XmlElement
     public void setDpReceiverAddress(String dpReceiverAddress) {
         this.dpReceiverAddress = dpReceiverAddress;
     }
@@ -139,6 +135,7 @@ public class Profile {
         return dpSecureAddress;
     }
 
+    @XmlElement
     public void setDpSecureAddress(String dpSecureAddress) {
         this.dpSecureAddress = dpSecureAddress;
     }
@@ -147,6 +144,7 @@ public class Profile {
         return dpReceiverConnectionType;
     }
 
+    @XmlElement
     public void setDpReceiverConnectionType(String dpReceiverConnectionType) {
         this.dpReceiverConnectionType = dpReceiverConnectionType;
     }
@@ -155,8 +153,18 @@ public class Profile {
         return dpSecureUrlConnectionType;
     }
 
+    @XmlElement
     public void setDpSecureUrlConnectionType(String dpSecureUrlConnectionType) {
         this.dpSecureUrlConnectionType = dpSecureUrlConnectionType;
+    }
+
+    public MBean[] getSelectedMBeans() {
+        return selectedMBeans;
+    }
+
+    @XmlElement
+    public void setSelectedMBeans(MBean[] selectedMBeans) {
+        this.selectedMBeans = selectedMBeans;
     }
 }
 

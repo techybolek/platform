@@ -6,8 +6,8 @@
 <%@ page import="org.wso2.carbon.bam.jmx.agent.ui.JmxConnector" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page
-        import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileDoesNotExistExceptionException" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileDoesNotExistExceptionException" %>
+<%@ page import="org.wso2.carbon.bam.jmx.agent.stub.JmxAgentJmxProfileExceptionException" %>
 
 <fmt:bundle basename="org.wso2.carbon.bam.jmx.agent.ui.i18n.Resources">
 
@@ -31,11 +31,10 @@
             try {
                 connector.deleteProfile(request.getParameter("profileName"));
             } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-                e.printStackTrace();
+                return;
+            } catch (JmxAgentJmxProfileExceptionException e) {
                 return;
             }
-
-
         }
 
         //if a profile needs to be enabled
@@ -44,11 +43,8 @@
             try {
                 connector.enableProfile(request.getParameter("profileName"));
             } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-                e.printStackTrace();
                 return;
             }
-
-
         }
 
         //if a profile needs to be disabled
@@ -57,10 +53,8 @@
             try {
                 connector.disableProfile(request.getParameter("profileName"));
             } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-                e.printStackTrace();
                 return;
             }
-
         }
 
         //if the toolbox profile needs t be added
@@ -76,13 +70,9 @@
 
             function callDelete() {
                 location.href = "index.jsp?deleteProfile=true&profileName=" + profileName
-
             }
 
-
             CARBON.showConfirmationDialog("Are you sure you want to delete " + profileName + "", callDelete, null);
-
-
         }
 
     </script>

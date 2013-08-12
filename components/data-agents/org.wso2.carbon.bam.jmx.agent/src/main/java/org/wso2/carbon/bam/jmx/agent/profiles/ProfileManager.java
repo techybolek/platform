@@ -20,11 +20,11 @@
 package org.wso2.carbon.bam.jmx.agent.profiles;
 
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.DomDriver;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.bam.jmx.agent.JmxConstant;
+import org.wso2.carbon.bam.jmx.agent.exceptions.JmxProfileException;
 import org.wso2.carbon.bam.jmx.agent.exceptions.ProfileAlreadyExistsException;
 import org.wso2.carbon.bam.jmx.agent.exceptions.ProfileDoesNotExistException;
 import org.wso2.carbon.bam.jmx.agent.tasks.internal.JmxTaskServiceComponent;
@@ -35,43 +35,35 @@ import org.wso2.carbon.registry.common.services.RegistryAbstractAdmin;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
+import org.wso2.carbon.utils.CarbonUtils;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class ProfileManager extends RegistryAbstractAdmin {
 
-
-    private static final String REG_LOCATION =
-            "repository/components/org.wso2.carbon.publish.jmx.agent/";
     private static final Log log = LogFactory.getLog(ProfileManager.class);
     private Registry registry;
-    private XStream xstream;
-
-    private RegistryService registryService;
-    private TenantRegistryLoader tenantRegistryLoader;
-    private int tenantId;
-
 
     public ProfileManager() {
-        registryService = JmxTaskServiceComponent.getRegistryService();
-        tenantRegistryLoader = JmxTaskServiceComponent.getTenantRegistryLoader();
+        RegistryService registryService = JmxTaskServiceComponent.getRegistryService();
+        TenantRegistryLoader tenantRegistryLoader = JmxTaskServiceComponent.getTenantRegistryLoader();
 
         //get the tenant's registry
-        tenantId = CarbonContext.getCurrentContext().getTenantId();
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         tenantRegistryLoader.loadTenantRegistry(tenantId);
         try {
             registry = registryService.getGovernanceSystemRegistry(tenantId);
         } catch (RegistryException e) {
-            log.error("Error obtaining the registry" + e);
-            return;
+            log.error("Error obtaining the registry " + e.getMessage(), e);
         }
-
-
-        xstream = new XStream(new DomDriver());
-        xstream.setClassLoader(Profile.class.getClassLoader());
-
-
     }
 
     /**
@@ -100,9 +92,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
                 CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(dpPassword.getBytes());
         profile.setDpPassword(dpCipherT);
 
-
         return profile;
-
 
     }
 
@@ -132,7 +122,6 @@ public class ProfileManager extends RegistryAbstractAdmin {
 
         profile.setDpPassword(dpPassword);
 
-
         return profile;
     }
 
@@ -143,111 +132,128 @@ public class ProfileManager extends RegistryAbstractAdmin {
      * @return Returns whether adding the profile was successful or not
      * @throws ProfileAlreadyExistsException
      */
-    public boolean addProfile(Profile profile) throws ProfileAlreadyExistsException {
+    public boolean addProfile(Profile profile)
+            throws ProfileAlreadyExistsException, JmxProfileException {
 
-        //check whether the profile already exists
-
-        String path = REG_LOCATION + profile.getName();
+        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profile.getName();
+        boolean resourceExist;
 
         try {
-            if (registry.resourceExists(path)) {
-                String error = "The profile " + profile.getName() + " already exists.";
-                log.error(error);
-                throw new ProfileAlreadyExistsException(error);
+            //check whether the profile already exists
+            resourceExist = registry.resourceExists(path);
+        } catch (RegistryException e) {
+            log.error("Unable to access to registry", e);
+            throw new JmxProfileException("Unable to access to registry", e);
+        }
+        // if resource already exist
+        if (resourceExist) {
+            String error = "The profile " + profile.getName() + " already exists.";
+            log.error(error);
+            throw new ProfileAlreadyExistsException(error);
 
-
-            } else {
-
-                //encrypt data
-                //TODO: What is the best approach to handle this exception?
+        } else {
+            //encrypt data
+            try {
                 profile = encryptData(profile);
-
-                //create the xml representation of the profile
-                String xmlProfile = xstream.toXML(profile);
-
-                Resource res = registry.newResource();
-                res.setContent(xmlProfile);
-
-                //save the profile
-                registry.put(path, res);
-                return true;
-
-
+            } catch (CryptoException e) {
+                log.error("Unable to encrypt profile", e);
+                throw new JmxProfileException("Unable to encrypt profile", e);
             }
 
+            JAXBContext jaxbContext;
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            try {
+                jaxbContext = JAXBContext.newInstance(Profile.class);
+                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                jaxbMarshaller.marshal(profile, byteArrayOutputStream);
+            } catch (JAXBException e) {
+                log.error("JAXB marshalling exception :" + e.getMessage(), e);
+                throw new JmxProfileException("JAXB marshalling exception :" + e.getMessage(), e);
+            }
 
-        } catch (RegistryException e) {
-            e.printStackTrace();
-            log.error(e);
+            try {
+                Resource res = registry.newResource();
+                res.setContent(byteArrayOutputStream.toString());
+                //save the profile
+                registry.put(path, res);
+            } catch (RegistryException e) {
+                log.error("Unable to save in registry", e);
+                throw new JmxProfileException("Unable to save in registry", e);
+            }
 
-        } catch (CryptoException e) {
-            log.error(e);
-            e.printStackTrace();
+            try {
+                byteArrayOutputStream.close();
+            } catch (IOException e) {
+                // Just log the exception. Do nothing.
+                log.warn("Unable to close byte stream ...", e);
+            }
+
+            return true;
         }
-
-        return false;
-
     }
 
-    public Profile getProfile(String profileName) throws ProfileDoesNotExistException {
+    public Profile getProfile(String profileName)
+            throws ProfileDoesNotExistException, JmxProfileException {
 
-        String path = REG_LOCATION + profileName;
+        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profileName;
 
         //if the profile does not exist
-
         try {
             if (!registry.resourceExists(path)) {
                 String error = "The profile " + profileName + " does not exist.";
                 log.error(error);
                 throw new ProfileDoesNotExistException(error);
-
-
             }
         } catch (RegistryException e) {
-            log.error(e);
-            e.printStackTrace();
+            log.error("Unable to access to registry", e);
+            throw new JmxProfileException("Unable to access to registry", e);
         }
 
-        //if the profile exists
+        ByteArrayInputStream byteArrayInputStream = null;
         try {
+            //if the profile exists
             Resource res = registry.get(path);
-            String xmlProfile = new String((byte[]) res.getContent());
-
-
-            //set the class loader
-            //to escape from a XStream bug
-            xstream.setClassLoader(Profile.class.getClassLoader());
-
-
-            //get the profile
-            Profile profile = (Profile) xstream.fromXML(xmlProfile);
-
-            //encrypt data
-            //TODO: What is the best approach to handle this exception?
-            profile = decryptData(profile);
-
-            //return profile
-            return profile;
-
-
+            byteArrayInputStream = new ByteArrayInputStream((byte[]) res.getContent());
         } catch (RegistryException e) {
-            log.error(e);
-            e.printStackTrace();
-        } catch (CryptoException e) {
-            log.error(e);
-            e.printStackTrace();
+            log.error("Unable to get profile :" + e.getMessage(), e);
+            throw new JmxProfileException("Unable to get profile :" + e.getMessage(), e);
         }
 
+        Profile profile;
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(Profile.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            profile = (Profile) jaxbUnmarshaller.unmarshal(byteArrayInputStream);
+        } catch (JAXBException e) {
+            log.error("JAXB unmarshalling exception :" + e.getMessage(), e);
+            throw new JmxProfileException("JAXB unmarshalling exception :" + e.getMessage(), e);
+        }
 
-        return null;
+        try {
+            profile = decryptData(profile);
+        } catch (CryptoException e) {
+            log.error("Unable to decrypt profile", e);
+            throw new JmxProfileException("Unable to decrypt profile", e);
+        }
+
+        try {
+            byteArrayInputStream.close();
+        } catch (IOException e) {
+            // Just log the exception. Do nothing.
+            log.warn("Unable to close byte stream ...", e);
+        }
+
+        //return profile
+        return profile;
     }
 
-    public boolean updateProfile(Profile profile) throws ProfileDoesNotExistException {
+    public boolean updateProfile(Profile profile)
+            throws ProfileDoesNotExistException, JmxProfileException {
 
-        String path = REG_LOCATION + profile.getName();
+        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profile.getName();
 
-        //check whether the profile already exists
         try {
+            //check whether the profile already exists
             if (!registry.resourceExists(path)) {
                 String error =
                         "Cannot Update: The profile " + profile.getName() + " does not exist.";
@@ -255,48 +261,56 @@ public class ProfileManager extends RegistryAbstractAdmin {
                 throw new ProfileDoesNotExistException(error);
             }
         } catch (RegistryException e) {
-            log.error(e);
-            e.printStackTrace();
+            log.error("Unable to access to registry", e);
+            throw new JmxProfileException("Unable to access to registry", e);
+        }
+
+        try {
+            //encrypt data
+            profile = encryptData(profile);
+        } catch (CryptoException e) {
+            log.error("Unable to encrypt profile", e);
+            throw new JmxProfileException("Unable to encrypt profile", e);
+        }
+
+        JAXBContext jaxbContext = null;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            jaxbContext = JAXBContext.newInstance(Profile.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.marshal(profile, byteArrayOutputStream);
+        } catch (JAXBException e) {
+            log.error("JAXB unmarshalling exception :" + e.getMessage(), e);
+            throw new JmxProfileException("JAXB unmarshalling exception :" + e.getMessage(), e);
         }
 
         //replace the profile if it exists
         try {
-            //encrypt data
-            //TODO: What is the best approach to handle this exception?
-            profile = encryptData(profile);
-
-
-            //create the xml representation of the profile
-            String xmlProfile = xstream.toXML(profile);
-
-
             Resource res = registry.newResource();
-            res.setContent(xmlProfile);
-
+            res.setContent(byteArrayOutputStream.toString());
             //delete the existing profile
             registry.delete(path);
-
             //save the new profile
             registry.put(path, res);
-            return true;
-
-
-        } catch (CryptoException e) {
-            log.error(e);
-            e.printStackTrace();
         } catch (RegistryException e) {
-            log.error(e);
-            e.printStackTrace();
+            log.error("Unable to save in registry", e);
+            throw new JmxProfileException("Unable to save in registry", e);
         }
 
+        try {
+            byteArrayOutputStream.close();
+        } catch (IOException e) {
+            // Just log the exception. Do nothing.
+            log.warn("Unable to close byte stream ...", e);
+        }
 
-        return false;
+        return true;
     }
 
-    public boolean deleteProfile(String profileName) throws ProfileDoesNotExistException {
+    public boolean deleteProfile(String profileName)
+            throws ProfileDoesNotExistException, JmxProfileException {
 
-        String path = REG_LOCATION + profileName;
-
+        String path = JmxConstant.JmxConfigurationConstant.REG_LOCATION + profileName;
 
         try {
             //check whether the profile already exists
@@ -304,129 +318,77 @@ public class ProfileManager extends RegistryAbstractAdmin {
                 String error = "Cannot Delete: The profile " + profileName + " does not exist.";
                 log.error(error);
                 throw new ProfileDoesNotExistException(error);
-            }
-            //if the profile exists
-            else {
-
+            } else {
+                //if the profile exists
                 registry.delete(path);
                 return true;
             }
         } catch (RegistryException e) {
-            log.error(e);
-            e.printStackTrace();
+            log.error("Unable to delete profile", e);
+            throw new JmxProfileException("Unable to to delete profile", e);
         }
-
-
-        return false;
     }
-
-    /**
-     * Returns all the active profiles.
-     *
-     * @return all the active profiles.
-     */
-    public Profile[] getActiveProfiles() {
-
-        Profile[] profiles;
-
-        //iterate through the profiles
-        try {
-            Resource folder = registry.get(REG_LOCATION);
-            String[] content = (String[]) folder.getContent();
-
-            //initiate the profiles array
-            profiles = new Profile[content.length];
-
-            //set the class loader
-            //to escape from a XStream bug
-            xstream.setClassLoader(Profile.class.getClassLoader());
-
-            int counter = 0;
-
-            for (String path : content) {
-                Resource res = registry.get(path);
-                String xmlProfile = new String((byte[]) res.getContent());
-                Profile prf = (Profile) xstream.fromXML(xmlProfile);
-
-                //if the profile is active
-                if (prf.isActive()) {
-                    //decrypt data
-                    //TODO: What is the best approach to handle this exception?
-                    prf = decryptData(prf);
-                    profiles[counter++] = prf;
-                }
-
-
-            }
-
-            return profiles;
-        } catch (RegistryException e) {
-            log.error(e);
-            e.printStackTrace();
-        } catch (CryptoException e) {
-            log.error(e);
-            e.printStackTrace();
-        }
-
-
-        return null;
-    }
-
 
     /**
      * Returns an array of all the profiles regardless of their state
      *
      * @return an array of all the profiles regardless of their state
      */
-    public Profile[] getAllProfiles() {
+    public Profile[] getAllProfiles() throws JmxProfileException {
+
         Profile[] profiles = null;
 
-        //iterate through the profiles
         try {
-            if (registry.resourceExists(REG_LOCATION)) {
-                Resource folder = registry.get(REG_LOCATION);
+            if (registry.resourceExists(JmxConstant.JmxConfigurationConstant.REG_LOCATION)) {
+
+                Resource folder = registry.get(JmxConstant.JmxConfigurationConstant.REG_LOCATION);
                 String[] content = (String[]) folder.getContent();
 
                 //initiate the profiles array
                 profiles = new Profile[content.length];
-
-
                 int counter = 0;
+                Profile profile;
+                ByteArrayInputStream byteArrayInputStream;
+                JAXBContext jaxbContext = JAXBContext.newInstance(Profile.class);
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
+                //iterate through the profiles
                 for (String path : content) {
                     Resource res = registry.get(path);
-                    String xmlProfile = new String((byte[]) res.getContent());
-                    //set the class loader
-                    //to escape from a XStream bug
-                    xstream.setClassLoader(Profile.class.getClassLoader());
+                    try {
+                        byteArrayInputStream = new ByteArrayInputStream((byte[]) res.getContent());
+                        profile = (Profile) jaxbUnmarshaller.unmarshal(byteArrayInputStream);
+                    } catch (JAXBException e) {
+                        log.error("JAXB unmarshalling exception :" + e.getMessage(), e);
+                        throw new JmxProfileException("JAXB unmarshalling exception :" + e.getMessage(), e);
+                    }
 
-                    Profile profile = (Profile) xstream.fromXML(xmlProfile);
+                    try {
+                        byteArrayInputStream.close();
+                    } catch (IOException e) {
+                        // Just log the exception. Do nothing.
+                        log.warn("Unable to close byte stream ...", e);
+                    }
 
                     //decrypt data
-                    //TODO: What is the best approach to handle this exception?
-                    profile = decryptData(profile);
+                    try {
+                        profile = decryptData(profile);
+                    } catch (CryptoException e) {
+                        log.error("Unable to decrypt profile", e);
+                        throw new JmxProfileException("Unable to decrypt profile", e);
+                    }
                     profiles[counter++] = profile;
-
                 }
             }
-
-            return profiles;
-        } catch (ResourceNotFoundException e) {
-            //handle the case when no profiles are in the registry
-            log.error("Resource does not exist", e);
-            return null;
         } catch (RegistryException e) {
-            //handle the case when no profiles are in the registry
-            log.error(e);
-            e.printStackTrace();
-            return null;
-        } catch (CryptoException e) {
-            log.error(e);
-            e.printStackTrace();
+            log.error("Unable to access to registry", e);
+            throw new JmxProfileException("Unable to access to registry", e);
+        } catch (JAXBException e) {
+            log.error("JAXB unmarshalling exception :" + e.getMessage(), e);
+            throw new JmxProfileException("JAXB unmarshalling exception :" + e.getMessage(), e);
         }
 
-
-        return null;
+        return profiles;
     }
 
     /**
@@ -434,8 +396,8 @@ public class ProfileManager extends RegistryAbstractAdmin {
      *
      * @return - Returns the created profile
      */
-    public Profile createToolboxProfile() throws ProfileAlreadyExistsException {
-
+    public Profile createToolboxProfile() throws ProfileAlreadyExistsException,
+                                                 JmxProfileException {
 
         Profile tbProfile = new Profile();
 
@@ -443,11 +405,14 @@ public class ProfileManager extends RegistryAbstractAdmin {
         tbProfile.setName("toolbox");
         tbProfile.setVersion(1);
 
+
         //set the data publisher info
         tbProfile.setDpReceiverConnectionType("tcp://");
-        tbProfile.setDpReceiverAddress("127.0.0.1:7611");
+        int receiverPort = 7611 + getPortOffset();
+        tbProfile.setDpReceiverAddress("127.0.0.1:" + receiverPort);
         tbProfile.setDpSecureUrlConnectionType("ssl://");
-        tbProfile.setDpSecureAddress("127.0.0.1:7711");
+        int secureReceiverPort = 7711 + getPortOffset();
+        tbProfile.setDpSecureAddress("127.0.0.1:" + secureReceiverPort);
 
         tbProfile.setDpUserName("admin");
         tbProfile.setDpPassword("admin");
@@ -455,285 +420,144 @@ public class ProfileManager extends RegistryAbstractAdmin {
         tbProfile.setCronExpression("0/2 * * ? * *");
 
         //set the JMX server information
-        tbProfile.setUrl("service:jmx:rmi://localhost:11111/jndi/rmi://localhost:9999/jmxrmi");
+        int rmiServerPort = 11111 + getPortOffset();
+        int rmiRegistryPort = 9999 + getPortOffset();
+        tbProfile.setUrl("service:jmx:rmi://localhost:" + rmiServerPort + "/jndi/rmi://localhost:" + rmiRegistryPort + "/jmxrmi");
         tbProfile.setUserName("admin");
         tbProfile.setPass("admin");
 
-        //set the attributes to be monitored
-        String[][][] attributes = new String[7][][];
+        MBean[] mBeans = new MBean[4];
 
-        //add the attributes of the first mbean
+        /* Memory MBean*/
+        MBean memoryMBean = new MBean();
+        memoryMBean.setMBeanName("java.lang:type=Memory");
 
-        attributes[0] = new String[9][3];
+        MBeanAttribute[] memoryMBeanAttributes = new MBeanAttribute[2];
 
-        //set the mbean name
-        attributes[0][0][0] = "java.lang:type=Memory";
+        /* Heap memory usage*/
+        MBeanAttribute heapMemoryAttribute = new MBeanAttribute();
+        heapMemoryAttribute.setAttributeName("HeapMemoryUsage");
 
-        //add an attribute
-        attributes[0][1][0] = "HeapMemoryUsage";
-        //add the keys of that attribute
-        attributes[0][1][1] = "committed";
-        //add the alias of that attribute
-        attributes[0][1][2] = "heap_mem_committed";
+        MBeanAttributeProperty[] heapMemoryMBeanAttributeProperties = new MBeanAttributeProperty[4];
 
+        MBeanAttributeProperty heapInit = new MBeanAttributeProperty();
+        heapInit.setPropertyName("init");
+        heapInit.setAliasName("heap_mem_init");
+        heapMemoryMBeanAttributeProperties[0] = heapInit;
 
-        //add an attribute
-        attributes[0][2][0] = "HeapMemoryUsage";
-        //add the key of that attribute
-        attributes[0][2][1] = "init";
-        //add the alias of that attribute
-        attributes[0][2][2] = "heap_mem_init";
+        MBeanAttributeProperty heapMax = new MBeanAttributeProperty();
+        heapMax.setPropertyName("max");
+        heapMax.setAliasName("heap_mem_max");
+        heapMemoryMBeanAttributeProperties[1] = heapMax;
 
-        //add an attribute
-        attributes[0][3][0] = "HeapMemoryUsage";
-        //add the keys of that attribute
-        attributes[0][3][1] = "max";
-        //add the alias of that attribute
-        attributes[0][3][2] = "heap_mem_max";
+        MBeanAttributeProperty heapUsed = new MBeanAttributeProperty();
+        heapUsed.setPropertyName("used");
+        heapUsed.setAliasName("heap_mem_used");
+        heapMemoryMBeanAttributeProperties[2] = heapUsed;
 
-        //add an attribute
-        attributes[0][4][0] = "HeapMemoryUsage";
-        //add the keys of that attribute
-        attributes[0][4][1] = "used";
-        //add the alias of that attribute
-        attributes[0][4][2] = "heap_mem_used";
+        MBeanAttributeProperty heapCommitted = new MBeanAttributeProperty();
+        heapCommitted.setPropertyName("committed");
+        heapCommitted.setAliasName("heap_mem_committed");
+        heapMemoryMBeanAttributeProperties[3] = heapCommitted;
 
-        //add another attribute
-        attributes[0][5][0] = "NonHeapMemoryUsage";
-        //add the keys of that attribute
-        attributes[0][5][1] = "committed";
-        //add the alias of that attribute
-        attributes[0][5][2] = "non_heap_mem_committed";
+        heapMemoryAttribute.setProperties(heapMemoryMBeanAttributeProperties);
+        memoryMBeanAttributes[0] = heapMemoryAttribute;
 
-        //add another attribute
-        attributes[0][6][0] = "NonHeapMemoryUsage";
-        //add the keys of that attribute
-        attributes[0][6][1] = "init";
-        //add the alias of that attribute
-        attributes[0][6][2] = "non_heap_mem_init";
+        /* Non Heap memory usage*/
+        MBeanAttribute nonHeapMemoryAttribute = new MBeanAttribute();
+        nonHeapMemoryAttribute.setAttributeName("NonHeapMemoryUsage");
 
-        //add another attribute
-        attributes[0][7][0] = "NonHeapMemoryUsage";
-        //add the keys of that attribute
-        attributes[0][7][1] = "max";
-        //add the alias of that attribute
-        attributes[0][7][2] = "non_heap_mem_max";
+        MBeanAttributeProperty[] nonHeapMBeanAttributeProperties = new MBeanAttributeProperty[4];
 
-        //add another attribute
-        attributes[0][8][0] = "NonHeapMemoryUsage";
-        //add the keys of that attribute
-        attributes[0][8][1] = "used";
-        //add the alias of that attribute
-        attributes[0][8][2] = "non_heap_mem_used";
+        MBeanAttributeProperty nonHeapInit = new MBeanAttributeProperty();
+        nonHeapInit.setPropertyName("init");
+        nonHeapInit.setAliasName("non_heap_mem_init");
+        nonHeapMBeanAttributeProperties[0] = nonHeapInit;
 
+        MBeanAttributeProperty nonHeapMax = new MBeanAttributeProperty();
+        nonHeapMax.setPropertyName("max");
+        nonHeapMax.setAliasName("non_heap_mem_max");
+        nonHeapMBeanAttributeProperties[1] = nonHeapMax;
 
-        attributes[1] = new String[2][2];
+        MBeanAttributeProperty nonHeapUsed = new MBeanAttributeProperty();
+        nonHeapUsed.setPropertyName("used");
+        nonHeapUsed.setAliasName("non_heap_mem_used");
+        nonHeapMBeanAttributeProperties[2] = nonHeapUsed;
 
-        //set the mbean name
-        attributes[1][0][0] = "java.lang:type=OperatingSystem";
+        MBeanAttributeProperty nonHeapCommitted = new MBeanAttributeProperty();
+        nonHeapCommitted.setPropertyName("committed");
+        nonHeapCommitted.setAliasName("non_heap_mem_committed");
+        nonHeapMBeanAttributeProperties[3] = nonHeapCommitted;
 
-        //add an attribute
-        attributes[1][1][0] = "ProcessCpuTime";
-        //add the alias of that attribute
-        attributes[1][1][1] = "processCpuTime";
+        heapMemoryAttribute.setProperties(nonHeapMBeanAttributeProperties);
+        memoryMBeanAttributes[1] = heapMemoryAttribute;
 
+        memoryMBean.setAttributes(memoryMBeanAttributes);
 
-        /*
-            PS Eden space
-        */
-        attributes[2] = new String[5][3];
+        mBeans[0] = memoryMBean;
 
-        //Mbean name
-        attributes[2][0][0] = "java.lang:name=PS Eden Space,type=MemoryPool";
+        /* Operating system MBean */
+        MBean opsMBean = new MBean();
+        opsMBean.setMBeanName("java.lang:type=OperatingSystem");
 
-        //Usage - used
-        //set attribute
-        attributes[2][1][0] = "Usage";
-        attributes[2][1][1] = "used";
-        // set alias
-        attributes[2][1][2] = "ps_eden_space_used";
+        MBeanAttribute cpuTimeAttribute = new MBeanAttribute();
+        cpuTimeAttribute.setAttributeName("ProcessCpuTime");
+        cpuTimeAttribute.setAliasName("processCpuTime");
 
-        //Usage - committed
-        //set attribute
-        attributes[2][2][0] = "Usage";
-        attributes[2][2][1] = "committed";
-        // set alias
-        attributes[2][2][2] = "ps_eden_space_committed";
+        MBeanAttribute[] opsMBeanAttributes = new MBeanAttribute[1];
+        opsMBeanAttributes[0] = cpuTimeAttribute;
 
-        //Usage - init
-        //set attribute
-        attributes[2][3][0] = "Usage";
-        attributes[2][3][1] = "init";
-        // set alias
-        attributes[2][3][2] = "ps_eden_space_init";
+        opsMBean.setAttributes(opsMBeanAttributes);
 
-        //Usage - max
-        //set attribute
-        attributes[2][4][0] = "Usage";
-        attributes[2][4][1] = "max";
-        // set alias
-        attributes[2][4][2] = "ps_eden_space_max";
+        mBeans[1] = opsMBean;
 
+        /* Class loading MBean */
+        MBean classLoadingMBean = new MBean();
+        classLoadingMBean.setMBeanName("java.lang:type=ClassLoading");
 
-        /*
-            PS Old Gen
-        */
-        attributes[3] = new String[5][3];
+        MBeanAttribute classCountAttribute = new MBeanAttribute();
+        classCountAttribute.setAttributeName("LoadedClassCount");
+        classCountAttribute.setAliasName("loadedClassCount");
 
-        //Mbean name
-        attributes[3][0][0] = "java.lang:name=PS Old Gen,type=MemoryPool";
+        MBeanAttribute[] classLoadingAttributes = new MBeanAttribute[1];
+        classLoadingAttributes[0] = classCountAttribute;
 
-        //Usage - used
-        //set attribute
-        attributes[3][1][0] = "Usage";
-        attributes[3][1][1] = "used";
-        // set alias
-        attributes[3][1][2] = "ps_old_gen_used";
+        classLoadingMBean.setAttributes(classLoadingAttributes);
 
-        //Usage - committed
-        //set attribute
-        attributes[3][2][0] = "Usage";
-        attributes[3][2][1] = "committed";
-        // set alias
-        attributes[3][2][2] = "ps_old_gen_committed";
+        mBeans[2] = classLoadingMBean;
 
-        //Usage - init
-        //set attribute
-        attributes[3][3][0] = "Usage";
-        attributes[3][3][1] = "init";
-        // set alias
-        attributes[3][3][2] = "ps_old_gen_init";
+        /* Threading MBean*/
+        MBean threadingMBean = new MBean();
+        threadingMBean.setMBeanName("java.lang:type=Threading");
 
-        //Usage - max
-        //set attribute
-        attributes[3][4][0] = "Usage";
-        attributes[3][4][1] = "max";
-        // set alias
-        attributes[3][4][2] = "ps_old_gen_max";
+        MBeanAttribute threadCountAttribute = new MBeanAttribute();
+        threadCountAttribute.setAttributeName("ThreadCount");
+        threadCountAttribute.setAliasName("threadCount");
 
+        MBeanAttribute peakCountAttribute = new MBeanAttribute();
+        peakCountAttribute.setAttributeName("PeakThreadCount");
+        peakCountAttribute.setAliasName("peakThreadCount");
 
-        /*
-            PS Survivor Space
-        */
-        attributes[4] = new String[5][3];
+        MBeanAttribute[] threadingAttributes = new MBeanAttribute[2];
+        threadingAttributes[0] = threadCountAttribute;
+        threadingAttributes[1] = peakCountAttribute;
 
-        //Mbean name
-        attributes[4][0][0] = "java.lang:name=PS Survivor Space,type=MemoryPool";
+        threadingMBean.setAttributes(threadingAttributes);
 
-        //Usage - used
-        //set attribute
-        attributes[4][1][0] = "Usage";
-        attributes[4][1][1] = "used";
-        // set alias
-        attributes[4][1][2] = "ps_survivor_space_used";
+        mBeans[3] = threadingMBean;
 
-        //Usage - committed
-        //set attribute
-        attributes[4][2][0] = "Usage";
-        attributes[4][2][1] = "committed";
-        // set alias
-        attributes[4][2][2] = "ps_survivor_space_committed";
-
-        //Usage - init
-        //set attribute
-        attributes[4][3][0] = "Usage";
-        attributes[4][3][1] = "init";
-        // set alias
-        attributes[4][3][2] = "ps_survivor_space_init";
-
-        //Usage - max
-        //set attribute
-        attributes[4][4][0] = "Usage";
-        attributes[4][4][1] = "max";
-        // set alias
-        attributes[4][4][2] = "ps_survivor_space_max";
-
-
-
-        /*
-            PS Perm Gen
-        */
-        attributes[5] = new String[5][3];
-
-        //Mbean name
-        attributes[5][0][0] = "java.lang:name=PS Perm Gen,type=MemoryPool";
-
-        //Usage - used
-        //set attribute
-        attributes[5][1][0] = "Usage";
-        attributes[5][1][1] = "used";
-        // set alias
-        attributes[5][1][2] = "ps_perm_gen_used";
-
-        //Usage - committed
-        //set attribute
-        attributes[5][2][0] = "Usage";
-        attributes[5][2][1] = "committed";
-        // set alias
-        attributes[5][2][2] = "ps_perm_gen_committed";
-
-        //Usage - init
-        //set attribute
-        attributes[5][3][0] = "Usage";
-        attributes[5][3][1] = "init";
-        // set alias
-        attributes[5][3][2] = "ps_perm_gen_init";
-
-        //Usage - max
-        //set attribute
-        attributes[5][4][0] = "Usage";
-        attributes[5][4][1] = "max";
-        // set alias
-        attributes[5][4][2] = "ps_perm_gen_max";
-
-        /*
-            Code Cache
-        */
-        attributes[6] = new String[5][3];
-
-        //Mbean name
-        attributes[6][0][0] = "java.lang:name=Code Cache,type=MemoryPool";
-
-        //Usage - used
-        //set attribute
-        attributes[6][1][0] = "Usage";
-        attributes[6][1][1] = "used";
-        // set alias
-        attributes[6][1][2] = "ps_code_cache_used";
-
-        //Usage - committed
-        //set attribute
-        attributes[6][2][0] = "Usage";
-        attributes[6][2][1] = "committed";
-        // set alias
-        attributes[6][2][2] = "ps_code_cache_committed";
-
-        //Usage - init
-        //set attribute
-        attributes[6][3][0] = "Usage";
-        attributes[6][3][1] = "init";
-        // set alias
-        attributes[6][3][2] = "ps_code_cache_init";
-
-        //Usage - max
-        //set attribute
-        attributes[6][4][0] = "Usage";
-        attributes[6][4][1] = "max";
-        // set alias
-        attributes[6][4][2] = "ps_code_cache_max";
-
-
-        tbProfile.setAttributes(attributes);
-
+        tbProfile.setSelectedMBeans(mBeans);
 
         //keep the profile deactivated at the beginning
         tbProfile.setActive(false);
 
-
         this.addProfile(tbProfile);
-
 
         return tbProfile;
 
+    }
+
+    public static int getPortOffset() {
+        return CarbonUtils.getPortFromServerConfig(JmxConstant.JmxConfigurationConstant.CARBON_CONFIG_PORT_OFFSET_NODE) + 1;
     }
 }

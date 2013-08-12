@@ -22,6 +22,7 @@ package org.wso2.carbon.bam.jmx.agent.tasks;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.bam.jmx.agent.JmxConstant;
 import org.wso2.carbon.bam.jmx.agent.profiles.Profile;
 import org.wso2.carbon.bam.jmx.agent.tasks.internal.JmxTaskServiceComponent;
 import org.wso2.carbon.ntask.common.TaskException;
@@ -34,12 +35,9 @@ public class JmxTaskAdmin {
     private static final Log log = LogFactory.getLog(JmxTaskAdmin.class);
 
     public void scheduleProfile(Profile profile) throws AxisFault {
-        TaskManager tm;
-
-
         try {
-            tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
-                    JmxTaskConstants.JMX_SERVICE_TASK_TYPE);
+            TaskManager tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
+                    JmxConstant.JmxTaskConstant.JMX_SERVICE_TASK_TYPE);
 
             TaskInfo taskInfo = JmxTaskUtils.convert(profile);
             tm.registerTask(taskInfo);
@@ -47,49 +45,35 @@ public class JmxTaskAdmin {
             log.info(profile.getName() + " enabled.");
         } catch (TaskException e) {
             log.error(e);
-            e.printStackTrace();
         }
-
-
     }
 
     public void removeProfile(String profileName) throws AxisFault {
-        TaskManager tm;
-
-
         try {
-            tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
-                    JmxTaskConstants.JMX_SERVICE_TASK_TYPE);
+            TaskManager tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
+                    JmxConstant.JmxTaskConstant.JMX_SERVICE_TASK_TYPE);
             tm.deleteTask(profileName);
             log.info(profileName + " disabled.");
         } catch (TaskException e) {
             log.error(e);
-            e.printStackTrace();
         }
-
     }
 
-    //TODO-is this needed?
     public boolean isTaskScheduled(String profileName) throws AxisFault {
-        TaskManager tm;
         try {
-            tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
-                    JmxTaskConstants.JMX_SERVICE_TASK_TYPE);
+            TaskManager tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
+                    JmxConstant.JmxTaskConstant.JMX_SERVICE_TASK_TYPE);
             return tm.isTaskScheduled(profileName);
         } catch (TaskException e) {
             log.error(e);
-            e.printStackTrace();
         }
         return false;
-
     }
 
     public boolean profileExists(String profileName) {
-        TaskManager tm;
-
         try {
-            tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
-                    JmxTaskConstants.JMX_SERVICE_TASK_TYPE);
+            TaskManager tm = JmxTaskServiceComponent.getTaskService().getTaskManager(
+                    JmxConstant.JmxTaskConstant.JMX_SERVICE_TASK_TYPE);
 
             List<TaskInfo> taskInfoList = tm.getAllTasks();
             for (TaskInfo taskInfo : taskInfoList) {
@@ -100,9 +84,7 @@ public class JmxTaskAdmin {
 
         } catch (TaskException e) {
             log.error(e);
-            e.printStackTrace();
         }
-
 
         return false;
     }

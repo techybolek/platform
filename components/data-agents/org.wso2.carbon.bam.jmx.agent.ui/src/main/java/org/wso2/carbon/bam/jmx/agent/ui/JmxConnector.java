@@ -26,15 +26,16 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.bam.jmx.agent.stub.ArrayOfString;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentIOExceptionException;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentInstanceNotFoundExceptionException;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentIntrospectionExceptionException;
+import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentJmxProfileExceptionException;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentMalformedObjectNameExceptionException;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileAlreadyExistsExceptionException;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentProfileDoesNotExistExceptionException;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentReflectionExceptionException;
 import org.wso2.carbon.bam.jmx.agent.stub.JmxAgentStub;
-import org.wso2.carbon.bam.jmx.agent.stub.ArrayOfString;
 import org.wso2.carbon.bam.jmx.agent.stub.profiles.xsd.Profile;
 
 import java.rmi.RemoteException;
@@ -56,43 +57,28 @@ public class JmxConnector {
             options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
                                 cookie);
 
-
         } catch (AxisFault axisFault) {
-            axisFault.printStackTrace();
+            log.error(axisFault);
         }
-
-
     }
-
 
     public String[][] getMBeans(String url, String userName, String Password)
             throws RemoteException, JmxAgentIOExceptionException {
-        try {
 
 
-            ArrayOfString[] arr = stub.getMBeans(url, userName, Password);
-            int width = arr[0].getArray().length;
-            int height = arr.length;
+        ArrayOfString[] arr = stub.getMBeans(url, userName, Password);
+        int width = arr[0].getArray().length;
+        int height = arr.length;
 
-            String[][] strArr = new String[height][width];
+        String[][] strArr = new String[height][width];
 
-            for (int i = 0; i < height; i++) {
-                for (int k = 0; k < width; k++) {
-                    strArr[i][k] = arr[i].getArray()[k];
-                }
+        for (int i = 0; i < height; i++) {
+            for (int k = 0; k < width; k++) {
+                strArr[i][k] = arr[i].getArray()[k];
             }
-
-
-            return strArr;
-
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            throw new RemoteException(e.getMessage());
-        } catch (JmxAgentIOExceptionException e) {
-            e.printStackTrace();
-            throw new JmxAgentIOExceptionException(e);
         }
 
+        return strArr;
     }
 
     public String[][] getMBeanAttributes(String objName, String url, String userName,
@@ -100,7 +86,6 @@ public class JmxConnector {
             throws RemoteException {
 
         try {
-
 
             ArrayOfString[] arr = stub.getMBeanAttributeInfo(objName, url, userName, Password);
             int height = arr.length;
@@ -115,115 +100,63 @@ public class JmxConnector {
                 }
             }
 
-
             return strArr;
 
-
         } catch (RemoteException e) {
-            e.printStackTrace();
+            log.error(e);
             throw new RemoteException(e.getMessage());
         } catch (JmxAgentIntrospectionExceptionException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new RemoteException(e.getMessage());
         } catch (JmxAgentReflectionExceptionException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new RemoteException(e.getMessage());
         } catch (JmxAgentMalformedObjectNameExceptionException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new RemoteException(e.getMessage());
         } catch (JmxAgentInstanceNotFoundExceptionException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new RemoteException(e.getMessage());
         } catch (JmxAgentIOExceptionException e) {
-            e.printStackTrace();
-        }
-        catch (NullPointerException e){
+            log.error(e);
+            throw new RemoteException(e.getMessage());
+        } catch (NullPointerException e) {
             //if there are no attributes in the mBean
             return null;
         }
-        return new String[0][0];
     }
 
 
     public boolean addProfile(Profile profile)
-            throws RemoteException,
-                   JmxAgentProfileAlreadyExistsExceptionException {
+            throws RemoteException, JmxAgentProfileAlreadyExistsExceptionException,
+                   JmxAgentJmxProfileExceptionException {
 
-        try {
-            return stub.addProfile(profile);
-        } catch (RemoteException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        } catch (JmxAgentProfileAlreadyExistsExceptionException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        }
+        return stub.addProfile(profile);
     }
 
-    public Profile getProfile(String profileName) throws
-                                                  JmxAgentProfileDoesNotExistExceptionException,
-                                                  RemoteException {
+    public Profile getProfile(String profileName)
+            throws JmxAgentProfileDoesNotExistExceptionException, RemoteException,
+                   JmxAgentJmxProfileExceptionException {
 
-        try {
-            return stub.getProfile(profileName);
-        } catch (RemoteException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        }
+        return stub.getProfile(profileName);
     }
 
     public boolean updateProfile(Profile profile)
-            throws RemoteException, JmxAgentProfileDoesNotExistExceptionException {
-        try {
-            return stub.updateProfile(profile);
-        } catch (RemoteException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        }
+            throws RemoteException, JmxAgentProfileDoesNotExistExceptionException,
+                   JmxAgentJmxProfileExceptionException {
+
+        return stub.updateProfile(profile);
     }
 
     public boolean deleteProfile(String profileName)
-            throws RemoteException, JmxAgentProfileDoesNotExistExceptionException {
-        try {
-            return stub.deleteProfile(profileName);
-        } catch (RemoteException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        } catch (JmxAgentProfileDoesNotExistExceptionException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        }
+            throws RemoteException, JmxAgentProfileDoesNotExistExceptionException,
+                   JmxAgentJmxProfileExceptionException {
+
+        return stub.deleteProfile(profileName);
     }
 
-    public Profile[] getActiveProfiles() throws RemoteException {
-        try {
-            return stub.getActiveProfiles();
-
-        } catch (RemoteException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    public Profile[] getAllProfiles() throws RemoteException {
-        try {
-            return stub.getAllProfiles();
-        } catch (RemoteException e) {
-            log.error(e);
-            e.printStackTrace();
-            throw e;
-        }
+    public Profile[] getAllProfiles() throws RemoteException, JmxAgentJmxProfileExceptionException {
+        return stub.getAllProfiles();
     }
 
     public void enableProfile(String profileName)
@@ -244,6 +177,5 @@ public class JmxConnector {
     public boolean addToolboxProfile() throws RemoteException {
         return stub.addToolboxProfile();
     }
-
 
 }
