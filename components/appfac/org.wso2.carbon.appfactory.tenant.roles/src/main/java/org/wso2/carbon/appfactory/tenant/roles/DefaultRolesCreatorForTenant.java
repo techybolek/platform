@@ -20,13 +20,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
+import org.wso2.carbon.appfactory.common.util.AppFactoryUtil;
+import org.wso2.carbon.appfactory.tenant.roles.internal.ServiceHolder;
 import org.wso2.carbon.appfactory.tenant.roles.util.Util;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.Permission;
+import org.wso2.carbon.user.mgt.UserMgtConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +86,26 @@ public class DefaultRolesCreatorForTenant implements TenantMgtListener {
 
     @Override
     public void onTenantCreate(TenantInfoBean tenantInfoBean) throws StratosException {
+         try {
+
+            Registry registry = ServiceHolder.getRegistryService().getGovernanceSystemRegistry();
+            Collection resource = registry.newCollection();
+            resource.setProperty(UserMgtConstants.DISPLAY_NAME, "appfactory");
+            registry.put("/permission/admin/appfactory", resource);
+
+            AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
+            String[] permissionList = config.getProperties("Permissions.Permission");
+            for(String permission : permissionList){
+                String permissionName =config.getFirstProperty("Permissions.Permission." +permission);
+                resource = registry.newCollection();
+                resource.setProperty(UserMgtConstants.DISPLAY_NAME, permissionName);
+                registry.put(permission, resource);
+            }
+
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         try {
             String users[]={tenantInfoBean.getAdmin()};
             UserStoreManager userStoreManager =
