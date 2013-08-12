@@ -58,7 +58,7 @@
 	    </modules>
     
     <properties>
-        <rhino.version>1.7.0.R1-wso2v2</rhino.version>
+        <rhino.version>1.7.0.R4.wso2v1-SNAPSHOT</rhino.version>
         <commons.scxml.wso2.version>${scxml.version}</commons.scxml.wso2.version>
         <mashup.version>${wso2carbon.version}</mashup.version>
         <event.version>${wso2carbon.version}</event.version>
