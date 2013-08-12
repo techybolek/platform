@@ -41,6 +41,8 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
+import org.wso2.carbon.utils.TenantUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class UserRegistrationService {
 	
@@ -136,9 +138,11 @@ public class UserRegistrationService {
         }
 
         UserRealm realm = null;
-        realm = IdentityTenantUtil.getRealm(null, null);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user.getUserName());
+        String tenantName = MultitenantUtils.getTenantDomain(user.getUserName());
+        realm = IdentityTenantUtil.getRealm(tenantName, null);
         Registry registry = IdentityTenantUtil.getRegistry(null, null);
-        addUser(user.getUserName(), user.getPassword(), userClaims, null, realm);
+        addUser(tenantAwareUserName, user.getPassword(), userClaims, null, realm);
 
         // OpenId Sign-Up if necessary.
         if (user.getOpenID() != null) {
