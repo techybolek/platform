@@ -4062,29 +4062,28 @@ public class ApiMgtDAO {
         return calleeToken;
     }
 
-
-    public static HashMap<String,String> getURITemplatesPerAPIAsString(APIIdentifier identifier)
+    public static HashMap<String, String> getURITemplatesPerAPIAsString(APIIdentifier identifier)
             throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         int apiId = -1;
-        HashMap<String,String> urlMappings = new LinkedHashMap<String, String>();
-
+        HashMap<String, String> urlMappings = new LinkedHashMap<String, String>();
         try {
             conn = APIMgtDBUtil.getConnection();
-            apiId = getAPIID(identifier,conn);
+            apiId = getAPIID(identifier, conn);
 
             String sqlQuery =
                     "SELECT " +
                             "URL_PATTERN" +
                             ",HTTP_METHOD" +
-                            ",AUTH_SCHEME " +
-                    "FROM " +
+                            ",AUTH_SCHEME" +
+                            ",THROTTLING_TIER " +
+                            "FROM " +
                             "AM_API_URL_MAPPING " +
-                    "WHERE " +
+                            "WHERE " +
                             "API_ID = ? " +
-                    "ORDER BY " +
+                            "ORDER BY " +
                             "URL_MAPPING_ID ASC ";
 
 
@@ -4095,7 +4094,9 @@ public class ApiMgtDAO {
                 String uriPattern = resultSet.getString("URL_PATTERN");
                 String httpMethod = resultSet.getString("HTTP_METHOD");
                 String authScheme = resultSet.getString("AUTH_SCHEME");
-                urlMappings.put(uriPattern + "::" + httpMethod + "::" + authScheme,null);
+                String throttlingTier = resultSet.getString("THROTTLING_TIER");
+                urlMappings.put(uriPattern + "::" + httpMethod + "::" + authScheme + "::" + throttlingTier, null);
+                // urlMappings.put(uriPattern + "::" + httpMethod + "::" + authScheme, null);
             }
         } catch (SQLException e) {
             if (conn != null) {
@@ -4112,7 +4113,8 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-     public static boolean isDomainRestricted(String apiKey, String clientDomain)
+
+    public static boolean isDomainRestricted(String apiKey, String clientDomain)
             throws APIManagementException {
         boolean restricted = true;
         if (clientDomain != null) {
