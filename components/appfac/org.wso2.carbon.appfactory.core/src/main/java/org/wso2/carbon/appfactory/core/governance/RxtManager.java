@@ -35,6 +35,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -323,6 +324,53 @@ public class RxtManager {
         }
         return artifactList;
     }
+    public List<Artifact> getAppVersionRxtForApplication(String domainName,final String applicationId)
+            throws AppFactoryException,
+            RegistryException {
+
+        RegistryService registryService = null;
+
+            registryService = ServiceHolder.getRegistryService();
+
+            UserRegistry userRegistry = null;
+            try {
+                userRegistry = registryService.getGovernanceSystemRegistry(ServiceHolder.getRealmService().getTenantManager().getTenantId(domainName));
+            } catch (UserStoreException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
+        GenericArtifactManager artifactManager =
+                new GenericArtifactManager(userRegistry,
+                        "appversion");
+        final List<Artifact> artifactList = new ArrayList<Artifact>();
+        List<String> versionUUID = new ArrayList<String>();
+        String applicationPath=AppFactoryConstants.REGISTRY_APPLICATION_PATH +
+                RegistryConstants.PATH_SEPARATOR + applicationId;
+        Resource appIDCollection =
+                userRegistry.get(applicationPath);
+        if (appIDCollection instanceof Collection) {
+            String[] appVersionsCollection = ((Collection) appIDCollection).getChildren();
+
+            if (appVersionsCollection != null) {
+                for (String appVersionResource : appVersionsCollection) {
+                    if (!userRegistry.resourceExists(appVersionResource)) {
+                        continue;
+                    }
+                    Resource child = userRegistry.get(appVersionResource);
+                    if (!isCollection(child) &&
+                            !child.getPath().equals(applicationPath+RegistryConstants.PATH_SEPARATOR+"appinfo")) {
+                        versionUUID.add(child.getUUID());
+                    }
+                }
+            }
+        }
+        for (String uuid : versionUUID) {
+            GenericArtifact paramGenericArtifact = artifactManager.getGenericArtifact(uuid);
+            artifactList.add(getArtifactByGenericArtifact(paramGenericArtifact));
+        }
+        return artifactList;
+    }
+
 
     private boolean isCollection(Resource res) {
         return (res instanceof Collection);
