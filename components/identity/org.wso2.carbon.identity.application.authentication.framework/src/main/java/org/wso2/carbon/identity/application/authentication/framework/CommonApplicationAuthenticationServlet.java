@@ -1,6 +1,7 @@
 package org.wso2.carbon.identity.application.authentication.framework;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -43,6 +44,9 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 		if(request.getParameter("type") != null){
 			ApplicationAuthenticationSessionDTO sessionDTO = new ApplicationAuthenticationSessionDTO();
 			sessionDTO.setRequestType(request.getParameter("type"));
+			sessionDTO.setCallerPath(URLDecoder.decode(request.getParameter("commonAuthCallerPath"), "UTF-8"));
+			
+			//TODO: Remove commonAuthCallerPath from the queryString.
 			
 			String callerSessionDataKey = request.getParameter("sessionDataKey");
 			sessionDTO.setCallerSessionKey(callerSessionDataKey);
@@ -152,16 +156,8 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 		request.setAttribute(ApplicationAuthenticatorConstants.AUTHENTICATED_USER, (String)request.getSession().getAttribute("username"));
 		request.setAttribute(ApplicationAuthenticatorConstants.SESSION_DATA_KEY, sessionDTO.getCallerSessionKey());
 		
-		String caller = null;
-		
-		if(sessionDTO.getRequestType().equals("samlsso")) {
-			caller = "../../samlsso";
-		} else if (sessionDTO.getRequestType().equals("openid")) {
-			caller = "../../openidserver";
-		} else if (sessionDTO.getRequestType().equals("oauth2")) {
-			caller = "../../oauth2endpoints";
-		} 
-		
+		String caller = sessionDTO.getCallerPath();
+				
 		if (log.isDebugEnabled()) {
 			log.debug("Sending response back to: " + caller);
 		}
