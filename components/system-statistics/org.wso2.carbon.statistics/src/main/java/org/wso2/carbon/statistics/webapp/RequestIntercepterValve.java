@@ -38,13 +38,13 @@ public class RequestIntercepterValve extends ValveBase {
     @Override
     public void invoke(Request request, Response response) throws IOException, ServletException {
 
-        if(CarbonUtils.isWorkerNode()){
-            return;
-        }
-
         Long startTime = System.currentTimeMillis();
 
         getNext().invoke(request, response);
+
+        if(CarbonUtils.isWorkerNode()){
+            return;
+        }
 
         Long responseTime = System.currentTimeMillis() - startTime;
 
