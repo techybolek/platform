@@ -84,12 +84,8 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <input type="hidden" name="keyspaceName<%=j%>" id="keyspaceName<%=j%>"
-                                           value="<%=name%>"/>
-                                    <a class="edit-icon-link" href="#"
-                                       onclick="location.href = 'add_edit_keyspace.jsp?region=region1&item=cassandra_ks_mgt_create_menu&mode=edit&name=' + '<%=name%>';"><fmt:message
-                                            key="cassandra.actions.edit"/></a>
-                                  </td>
+                                   <div>N/A</div>
+                                </td>
                             </tr>
                             <%
                                 }else{

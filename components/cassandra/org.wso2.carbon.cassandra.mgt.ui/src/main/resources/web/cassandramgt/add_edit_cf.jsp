@@ -403,48 +403,48 @@
         </select>
     </td>
 </tr>
-<tr>
-    <td><fmt:message key="cassandra.field.keyCacheSize"/></td>
-    <td align="left">
-        <input id="cf_editor_keycache_size" name="cf_editor_keycache_size" class="longInput"
-               value="<%=cfInformation.getKeyCacheSize()%>"/>
-    </td>
-</tr>
-<tr>
-    <td><fmt:message key="cassandra.field.rowCacheSize"/></td>
-    <td align="left">
-        <input id="cf_editor_rowcache_size" name="cf_editor_rowcache_size" class="longInput"
-               value="<%=cfInformation.getRowCacheSize()%>"/>
-    </td>
-</tr>
-<tr>
-    <td><fmt:message key="cassandra.field.rowcachetime"/></td>
-    <td align="left">
-        <input id="cf_editor_rowcachetime" name="cf_editor_rowcachetime" class="longInput"
-               value="<%=cfInformation.getRowCacheSavePeriodInSeconds()%>"/>
-    </td>
-</tr>
-<tr>
-    <td><fmt:message key="cassandra.field.gcgrace"/></td>
-    <td align="left">
-        <input id="cf_editor_gc_grace" name="cf_editor_gc_grace" class="longInput"
-               value="<%=cfInformation.getGcGraceSeconds()%>"/>
-    </td>
-</tr>
-<tr>
-    <td><fmt:message key="cassandra.field.minThreshold"/></td>
-    <td align="left">
-        <input id="cf_editor_min_threshold" name="cf_editor_min_threshold" class="longInput"
-               value="<%=cfInformation.getMinCompactionThreshold()%>"/>
-    </td>
-</tr>
-<tr>
-    <td><fmt:message key="cassandra.field.maxThreshold"/></td>
-    <td align="left">
-        <input id="cf_editor_max_threshold" name="cf_editor_max_threshold" class="longInput"
-               value="<%=cfInformation.getMaxCompactionThreshold()%>"/>
-    </td>
-</tr>
+<%--<tr>--%>
+    <%--<td><fmt:message key="cassandra.field.keyCacheSize"/></td>--%>
+    <%--<td align="left">--%>
+        <%--<input id="cf_editor_keycache_size" name="cf_editor_keycache_size" class="longInput"--%>
+               <%--value="<%=cfInformation.getKeyCacheSize()%>"/>--%>
+    <%--</td>--%>
+<%--</tr>--%>
+<%--<tr>--%>
+    <%--<td><fmt:message key="cassandra.field.rowCacheSize"/></td>--%>
+    <%--<td align="left">--%>
+        <%--<input id="cf_editor_rowcache_size" name="cf_editor_rowcache_size" class="longInput"--%>
+               <%--value="<%=cfInformation.getRowCacheSize()%>"/>--%>
+    <%--</td>--%>
+<%--</tr>--%>
+<%--<tr>--%>
+    <%--<td><fmt:message key="cassandra.field.rowcachetime"/></td>--%>
+    <%--<td align="left">--%>
+        <%--<input id="cf_editor_rowcachetime" name="cf_editor_rowcachetime" class="longInput"--%>
+               <%--value="<%=cfInformation.getRowCacheSavePeriodInSeconds()%>"/>--%>
+    <%--</td>--%>
+<%--</tr>--%>
+<%--<tr>--%>
+    <%--<td><fmt:message key="cassandra.field.gcgrace"/></td>--%>
+    <%--<td align="left">--%>
+        <%--<input id="cf_editor_gc_grace" name="cf_editor_gc_grace" class="longInput"--%>
+               <%--value="<%=cfInformation.getGcGraceSeconds()%>"/>--%>
+    <%--</td>--%>
+<%--</tr>--%>
+<%--<tr>--%>
+    <%--<td><fmt:message key="cassandra.field.minThreshold"/></td>--%>
+    <%--<td align="left">--%>
+        <%--<input id="cf_editor_min_threshold" name="cf_editor_min_threshold" class="longInput"--%>
+               <%--value="<%=cfInformation.getMinCompactionThreshold()%>"/>--%>
+    <%--</td>--%>
+<%--</tr>--%>
+<%--<tr>--%>
+    <%--<td><fmt:message key="cassandra.field.maxThreshold"/></td>--%>
+    <%--<td align="left">--%>
+        <%--<input id="cf_editor_max_threshold" name="cf_editor_max_threshold" class="longInput"--%>
+               <%--value="<%=cfInformation.getMaxCompactionThreshold()%>"/>--%>
+    <%--</td>--%>
+<%--</tr>--%>
 <tr>
     <td><fmt:message key="cassandra.field.defaultValidationclass"/></td>
     <td align="left">

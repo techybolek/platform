@@ -101,7 +101,7 @@
                         <table border="0" cellpadding="0" cellspacing="0" width="600" id="clTable"
                                class="styledInner">
                             <tr>
-                                <td><fmt:message key="cassandra.field.name"/><font color="red">*</font></td>
+                                <td><fmt:message key="cassandra.cl.name"/><font color="red">*</font></td>
                                 <td align="left">
                                     <% if ("edit".equals(mode)) { %>
                                     <input id="cl_editor_name" name="cl_editor_name" class="longInput"

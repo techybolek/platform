@@ -35,19 +35,21 @@ import org.wso2.carbon.ntask.core.AbstractTask;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 
-public class ClusterDataPublisher extends AbstractTask{
+public class ClusterDataPublisher extends AbstractTask {
     private static Log log = LogFactory.getLog(ClusterDataPublisher.class);
 
     private static DataPublisher dataPublisher;
-    @Override
 
-    public void execute(){
+    @Override
+    public void execute() {
         String columnFamilyStatsStreamId = null;
-        String nodeInfoStreamId=null;
+        String nodeStatsStreamId = null;
+        String keyspaceStatsStreamId = null;
         DataPublisher dataPublisher = null;
         try {
-             dataPublisher = getDataPublisher();
+            dataPublisher = getDataPublisher();
         } catch (AgentException e) {
             log.info(e);
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -63,13 +65,13 @@ public class ClusterDataPublisher extends AbstractTask{
         }
 
         try {
-            columnFamilyStatsStreamId=dataPublisher.findStream(StreamsDefinitions.COLUMN_FAMILY_STATS,StreamsDefinitions.VERSION);
+            columnFamilyStatsStreamId = dataPublisher.findStream(StreamsDefinitions.COLUMN_FAMILY_STATS, StreamsDefinitions.VERSION);
         } catch (StreamDefinitionException e) {
             log.error(e);
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (NoStreamDefinitionExistException e) {
             try {
-                columnFamilyStatsStreamId=dataPublisher.defineStream(StreamsDefinitions.COLUMN_FAMILY_STATS_STREAM_DEF);
+                columnFamilyStatsStreamId = dataPublisher.defineStream(StreamsDefinitions.COLUMN_FAMILY_STATS_STREAM_DEF);
             } catch (MalformedStreamDefinitionException e1) {
                 log.error(e);
                 e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -89,7 +91,7 @@ public class ClusterDataPublisher extends AbstractTask{
         }
 
         try {
-            nodeInfoStreamId=dataPublisher.findStream(StreamsDefinitions.NODE_STATS,StreamsDefinitions.VERSION);
+            nodeStatsStreamId = dataPublisher.findStream(StreamsDefinitions.NODE_STATS, StreamsDefinitions.VERSION);
         } catch (AgentException e) {
             log.error(e);
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -98,7 +100,7 @@ public class ClusterDataPublisher extends AbstractTask{
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (NoStreamDefinitionExistException e) {
             try {
-                nodeInfoStreamId=dataPublisher.defineStream(StreamsDefinitions.NODE_STATS_STREAM_DEF);
+                nodeStatsStreamId = dataPublisher.defineStream(StreamsDefinitions.NODE_STATS_STREAM_DEF);
             } catch (AgentException e1) {
                 log.error(e);
                 e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -114,26 +116,60 @@ public class ClusterDataPublisher extends AbstractTask{
             }
         }
 
-        if(columnFamilyStatsStreamId!=null && dataPublisher!=null)
-        {
+        try {
+            keyspaceStatsStreamId = dataPublisher.findStream(StreamsDefinitions.KS_STATS, StreamsDefinitions.VERSION);
+        } catch (AgentException e) {
+            log.error(e);
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (StreamDefinitionException e) {
+            log.error(e);
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (NoStreamDefinitionExistException e) {
             try {
-                publishCFSTats(dataPublisher,columnFamilyStatsStreamId);
+                keyspaceStatsStreamId = dataPublisher.defineStream(StreamsDefinitions.KS_STATS_STREAM_DEF);
+            } catch (AgentException e1) {
+                log.error(e);
+                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (MalformedStreamDefinitionException e1) {
+                log.error(e);
+                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (StreamDefinitionException e1) {
+                log.error(e);
+                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (DifferentStreamDefinitionAlreadyDefinedException e1) {
+                log.error(e);
+                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+
+        String timeStamp = String.valueOf(System.currentTimeMillis());
+
+        if (columnFamilyStatsStreamId != null && dataPublisher != null) {
+            try {
+                publishCFSTats(dataPublisher, columnFamilyStatsStreamId, timeStamp);
             } catch (ClusterDataAdminException e) {
-                if(log.isDebugEnabled())
-                {
-                    log.error("Error while publishing the column family stats",e);
+                if (log.isDebugEnabled()) {
+                    log.error("Error while publishing the column family stats", e);
                 }
             }
         }
 
-        if(nodeInfoStreamId!=null && dataPublisher!=null)
-        {
+        if (nodeStatsStreamId != null && dataPublisher != null) {
             try {
-                publishNodeInfoStats(dataPublisher,nodeInfoStreamId);
+                publishNodeInfoStats(dataPublisher, nodeStatsStreamId, timeStamp);
             } catch (ClusterDataAdminException e) {
-                if(log.isDebugEnabled())
-                {
-                    log.error("Error while publishing the data node info stats",e);
+                if (log.isDebugEnabled()) {
+                    log.error("Error while publishing the data node info stats", e);
+                }
+            }
+        }
+
+        if (keyspaceStatsStreamId != null && dataPublisher != null) {
+            try {
+                publishKeyspaceStats(dataPublisher, keyspaceStatsStreamId, timeStamp);
+            } catch (ClusterDataAdminException e) {
+                if (log.isDebugEnabled()) {
+                    log.error("Error while publishing keyspace stats", e);
                 }
             }
         }
@@ -142,106 +178,132 @@ public class ClusterDataPublisher extends AbstractTask{
     private static DataPublisher getDataPublisher()
             throws AgentException, MalformedURLException,
             AuthenticationException, TransportException {
-        if(null == dataPublisher){
+        if (null == dataPublisher) {
             dataPublisher = new DataPublisher(ClusterMonitorConfig.getSecureUrl(),
-                                                  ClusterMonitorConfig.getReceiverUrl(),
-                                                  ClusterMonitorConfig.getUsername(), ClusterMonitorConfig.getPassword());
+                    ClusterMonitorConfig.getReceiverUrl(),
+                    ClusterMonitorConfig.getUsername(), ClusterMonitorConfig.getPassword());
         }
         return dataPublisher;
     }
 
-    private void publishCFSTats(DataPublisher dataPublisher, String streamId)
+    private void publishCFSTats(DataPublisher dataPublisher, String streamId, String timeStamp)
             throws ClusterDataAdminException {
-        ArrayList<Object> cfstats;
-        ClusterMBeanServiceHandler clusterMBeanServiceHandler=new ClusterMBeanServiceHandler();
-        String[] nodeBasicInfo=clusterMBeanServiceHandler.getClusterBasicInfo();
-        for(KeyspaceInfo keyspaceInfo:clusterMBeanServiceHandler.getColumnFamilyStats())
-        {
-            for(ColumnFamilyInformation columnFamilyInformation:keyspaceInfo.getColumnFamilyInformations())
-            {
-                cfstats=new ArrayList<Object>();
+        ArrayList<String> cfstats;
+        ClusterMBeanServiceHandler clusterMBeanServiceHandler = new ClusterMBeanServiceHandler();
+        String[] nodeBasicInfo = clusterMBeanServiceHandler.getClusterBasicInfo();
+        for (KeyspaceInfo keyspaceInfo : clusterMBeanServiceHandler.getColumnFamilyStats()) {
+            for (ColumnFamilyInformation columnFamilyInformation : keyspaceInfo.getColumnFamilyInformations()) {
+                cfstats = new ArrayList<String>();
+                cfstats.add(timeStamp);
                 cfstats.add(ClusterMonitorConfig.getNodeId());
                 cfstats.add(nodeBasicInfo[0]);
                 cfstats.add(nodeBasicInfo[1]);
                 cfstats.add(nodeBasicInfo[2]);
                 cfstats.add(keyspaceInfo.getKeyspaceName());
                 cfstats.add(columnFamilyInformation.getColumnFamilyName());
-                cfstats.add(columnFamilyInformation.getSSTableCount());
-                cfstats.add(columnFamilyInformation.getLiveDiskSpaceUsed());
-                cfstats.add(columnFamilyInformation.getTotalDiskSpaceUsed());
-                cfstats.add(columnFamilyInformation.getMemtableColumnsCount());
-                cfstats.add(columnFamilyInformation.getMemtableDataSize());
-                cfstats.add(columnFamilyInformation.getMemtableSwitchCount());
-                cfstats.add(columnFamilyInformation.getReadCount());
-                cfstats.add(columnFamilyInformation.getReadLatency());
-                cfstats.add(columnFamilyInformation.getWriteCount());
-                cfstats.add(columnFamilyInformation.getWriteLatency());
-                cfstats.add(columnFamilyInformation.getPendingTasks());
-                cfstats.add(columnFamilyInformation.getNumberOfKeys());
-                cfstats.add(columnFamilyInformation.getBloomFilterFalsePostives());
-                cfstats.add(columnFamilyInformation.getBloomFilterFalseRatio());
-                cfstats.add(columnFamilyInformation.getBloomFilterSpaceUsed());
-                cfstats.add(columnFamilyInformation.getCompactedRowMinimumSize());
-                cfstats.add(columnFamilyInformation.getCompactedRowMaximumSize());
-                cfstats.add(columnFamilyInformation.getCompactedRowMeanSize());
-                Event cfstatsEvent = new Event(streamId, System.currentTimeMillis(), new Object[]{"external"}, null,cfstats.toArray(new Object[cfstats.size()] ));
+                cfstats.add(String.valueOf(columnFamilyInformation.getSSTableCount()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getLiveDiskSpaceUsed()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getTotalDiskSpaceUsed()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getMemtableColumnsCount()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getMemtableDataSize()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getMemtableSwitchCount()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getReadCount()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getReadLatency()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getWriteCount()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getWriteLatency()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getPendingTasks()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getNumberOfKeys()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getBloomFilterFalsePostives()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getBloomFilterFalseRatio()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getBloomFilterSpaceUsed()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getCompactedRowMinimumSize()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getCompactedRowMaximumSize()));
+                cfstats.add(String.valueOf(columnFamilyInformation.getCompactedRowMeanSize()));
+                Event cfstatsEvent = new Event(streamId, Long.valueOf(timeStamp), new Object[]{"external"}, null, cfstats.toArray(new String[cfstats.size()]));
                 try {
                     dataPublisher.publish(cfstatsEvent);
                 } catch (AgentException e) {
-                    if(log.isDebugEnabled())
-                    {
-                        log.error("Error while publishing the data column family stats",e);
+                    if (log.isDebugEnabled()) {
+                        log.error("Error while publishing the data column family stats", e);
                     }
                 }
             }
         }
 
     }
-    private void publishNodeInfoStats(DataPublisher dataPublisher,String streamId)
+
+    private void publishNodeInfoStats(DataPublisher dataPublisher, String streamId, String timeStamp)
             throws ClusterDataAdminException {
-        ArrayList<Object> nodeInfo;
-        ClusterMBeanServiceHandler clusterMBeanServiceHandler=new ClusterMBeanServiceHandler();
-        String[] nodeBasicInfo=clusterMBeanServiceHandler.getClusterBasicInfo();
-        nodeInfo=new ArrayList<Object>();
+        ArrayList<String> nodeInfo;
+        ClusterMBeanServiceHandler clusterMBeanServiceHandler = new ClusterMBeanServiceHandler();
+        String[] nodeBasicInfo = clusterMBeanServiceHandler.getClusterBasicInfo();
+        nodeInfo = new ArrayList<String>();
+        nodeInfo.add(timeStamp);
         nodeInfo.add(ClusterMonitorConfig.getNodeId());
         nodeInfo.add(nodeBasicInfo[0]);
         nodeInfo.add(nodeBasicInfo[1]);
         nodeInfo.add(nodeBasicInfo[2]);
-        NodeInformation nodeInformation=clusterMBeanServiceHandler.getNodeInfo();
+        NodeInformation nodeInformation = clusterMBeanServiceHandler.getNodeInfo();
         nodeInfo.add(nodeInformation.getLoad().split(" ")[1]);
-        nodeInfo.add(Double.parseDouble(nodeInformation.getLoad().split(" ")[0]));
+        nodeInfo.add(nodeInformation.getLoad().split(" ")[0]);
 
-        nodeInfo.add(nodeInformation.getUptime());
-        nodeInfo.add(nodeInformation.getExceptions());
-        nodeInfo.add(nodeInformation.getHeapMemory().getUseMemory());
-        nodeInfo.add(nodeInformation.getHeapMemory().getMaxMemory());
+        nodeInfo.add(String.valueOf(nodeInformation.getUptime()));
+        nodeInfo.add(String.valueOf(nodeInformation.getExceptions()));
+        nodeInfo.add(String.valueOf(nodeInformation.getHeapMemory().getUseMemory()));
+        nodeInfo.add(String.valueOf(nodeInformation.getHeapMemory().getMaxMemory()));
         nodeInfo.add(nodeInformation.getDataCenter());
 
         nodeInfo.add(nodeInformation.getRack());
-        nodeInfo.add(nodeInformation.getKeyCacheProperties().getCacheCapacity());
-        nodeInfo.add(nodeInformation.getKeyCacheProperties().getCacheSize());
-        nodeInfo.add(nodeInformation.getKeyCacheProperties().getCacheSize());
-        nodeInfo.add(nodeInformation.getKeyCacheProperties().getCacheRequests());
-        nodeInfo.add(nodeInformation.getKeyCacheProperties().getCacheHits());
+        nodeInfo.add(String.valueOf(nodeInformation.getKeyCacheProperties().getCacheCapacity()));
+        nodeInfo.add(String.valueOf(nodeInformation.getKeyCacheProperties().getCacheSize()));
+        nodeInfo.add(String.valueOf(nodeInformation.getKeyCacheProperties().getCacheRequests()));
+        nodeInfo.add(String.valueOf(nodeInformation.getKeyCacheProperties().getCacheHits()));
+        nodeInfo.add(String.valueOf(nodeInformation.getKeyCacheProperties().getCacheSavePeriodInSeconds()));
+        nodeInfo.add(String.valueOf(nodeInformation.getKeyCacheProperties().getCacheRecentHitRate()));
 
-        nodeInfo.add(nodeInformation.getKeyCacheProperties().getCacheSavePeriodInSeconds());
-        nodeInfo.add(nodeInformation.getKeyCacheProperties().getCacheRecentHitRate());
+        nodeInfo.add(String.valueOf(nodeInformation.getRowCacheProperties().getCacheCapacity()));
+        nodeInfo.add(String.valueOf(nodeInformation.getRowCacheProperties().getCacheSize()));
+        nodeInfo.add(String.valueOf(nodeInformation.getRowCacheProperties().getCacheRequests()));
+        nodeInfo.add(String.valueOf(nodeInformation.getRowCacheProperties().getCacheHits()));
+        nodeInfo.add(String.valueOf(nodeInformation.getRowCacheProperties().getCacheSavePeriodInSeconds()));
+        nodeInfo.add(String.valueOf(nodeInformation.getRowCacheProperties().getCacheRecentHitRate()));
 
-        nodeInfo.add(nodeInformation.getRowCacheProperties().getCacheCapacity());
-        nodeInfo.add(nodeInformation.getRowCacheProperties().getCacheSize());
-        nodeInfo.add(nodeInformation.getRowCacheProperties().getCacheSize());
-        nodeInfo.add(nodeInformation.getRowCacheProperties().getCacheRequests());
-        nodeInfo.add(nodeInformation.getRowCacheProperties().getCacheHits());
-        nodeInfo.add(nodeInformation.getRowCacheProperties().getCacheSavePeriodInSeconds());
-        nodeInfo.add(nodeInformation.getRowCacheProperties().getCacheRecentHitRate());
-        Event nodeInfoStats = new Event(streamId, System.currentTimeMillis(), new Object[]{"external"}, null,nodeInfo.toArray(new Object[nodeInfo.size()] ));
+        Event nodeInfoStats = new Event(streamId, Long.valueOf(timeStamp), new Object[]{"external"}, null, nodeInfo.toArray(new String[nodeInfo.size()]));
         try {
             dataPublisher.publish(nodeInfoStats);
         } catch (AgentException e) {
-            if(log.isDebugEnabled())
-            {
-                log.error("Error while publishing the data column family stats",e);
+            if (log.isDebugEnabled()) {
+                log.error("Error while publishing the data column family stats", e);
             }
         }
     }
+
+    private void publishKeyspaceStats(DataPublisher dataPublisher, String streamId, String timeStamp)
+            throws ClusterDataAdminException {
+        ArrayList<String> ksStats;
+        ClusterMBeanServiceHandler clusterMBeanServiceHandler = new ClusterMBeanServiceHandler();
+        for (KeyspaceInfo keyspaceInfo : clusterMBeanServiceHandler.getColumnFamilyStats()) {
+            ksStats = new ArrayList<String>();
+            ksStats.add(timeStamp);
+            ksStats.add(ClusterMonitorConfig.getNodeId());
+            ksStats.add(keyspaceInfo.getKeyspaceName());
+            ksStats.add(String.valueOf(keyspaceInfo.getTableReadCount()));
+            ksStats.add(String.valueOf(keyspaceInfo.getTableReadLatency()));
+            ksStats.add(String.valueOf(keyspaceInfo.getTableReadCount()*keyspaceInfo.getTableReadLatency()));
+            ksStats.add(String.valueOf(keyspaceInfo.getTableWriteCount()));
+            ksStats.add(String.valueOf(keyspaceInfo.getTableWriteLatency()));
+            ksStats.add(String.valueOf(keyspaceInfo.getTableWriteCount()*keyspaceInfo.getTableWriteLatency()));
+            ksStats.add(String.valueOf(keyspaceInfo.getTablePendingTasks()));
+            Event ksStatsEvent = new Event(streamId, Long.valueOf(timeStamp), new Object[]{"external"}, null, ksStats.toArray(new String[ksStats.size()]));
+            try {
+                dataPublisher.publish(ksStatsEvent);
+            } catch (AgentException e) {
+                if (log.isDebugEnabled()) {
+                    log.error("Error while publishing keyspace stats", e);
+                }
+            }
+
+        }
+    }
+
 }

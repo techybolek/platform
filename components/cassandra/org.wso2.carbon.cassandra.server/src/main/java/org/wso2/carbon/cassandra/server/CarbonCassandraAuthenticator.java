@@ -24,20 +24,12 @@ import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.thrift.AuthenticationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
-//import org.wso2.carbon.caching.core.CacheEntry;
-//import org.wso2.carbon.caching.core.StringCacheEntry;
-//import org.wso2.carbon.caching.core.StringCacheKey;
-//    import org.wso2.carbon.caching.internal.CacheEntry;
-//    import org.wso2.carbon.cassandra.server.cache.UserAccessKeyCache;
 import org.wso2.carbon.cassandra.server.cache.UserAccessKeyCache;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.cache.Cache;
-import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.util.Collections;
 import java.util.Map;
@@ -45,8 +37,7 @@ import java.util.Map;
 /**
  * Carbon's authentication based implementation for the Cassandra's <coe>IAuthenticator</code>
  * This can be used in both a MT environment and a normal Carbon plugin. For the former case, a user have to provide
- * his or her name in the form of name@domainname (e.g foo@bar.com)
- * TODO
+ * his or her name in the form of name@domain_name (e.g foo@bar.com)
  */
 public class CarbonCassandraAuthenticator implements IAuthenticator {
 
@@ -56,6 +47,8 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
     public static final String PASSWORD_KEY = "password";
     private static final String CASSANDRA_ACCESS_KEY_CACHE = "CASSANDRA_ACCESS_KEY_CACHE";
     private static final String CASSANDRA_ACCESS_CACHE_MANAGER = "CASSANDRA_ACCESS_CACHE_MANAGER";
+    private static final String CASSANDRA_API_CREDENTIAL_CACHE_MANAGER = "CASSANDRA_API_CREDENTIAL_CACHE_MANAGER";
+    private static final String CASSANDRA_API_CREDENTIAL_CACHE = "CASSANDRA_API_CREDENTIAL_CACHE";
     private AuthenticationService authenticationService;
 
     /**
@@ -103,17 +96,14 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
         String password = pass.toString();
 
         if (isAuthenticated(userName, password)) {
-            AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName,
+            return new AuthenticatedUser(userName,
                     Collections.<String>emptySet(), domainName);
-            return authenticatedUser;
-        } else if (authenticationService.authenticate(userName, password)) {
-            /*CarbonCassandraAuthenticator.addToCache(userName, password);
+        } else if (authenticateUser(userName, password)) {
             if (log.isDebugEnabled()) {
                 log.debug("Credentials for Username : " + userName + " added to cache");
-            } */
-            AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName,
+            }
+            return new AuthenticatedUser(userName,
                     Collections.<String>emptySet(), domainName);
-            return authenticatedUser;
         }
 
         return null;  //
@@ -136,7 +126,7 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
             cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             Cache<String, UserAccessKeyCache> cache = Caching.getCacheManagerFactory()
-                .getCacheManager(CASSANDRA_ACCESS_CACHE_MANAGER).getCache(CASSANDRA_ACCESS_KEY_CACHE);
+                    .getCacheManager(CASSANDRA_ACCESS_CACHE_MANAGER).getCache(CASSANDRA_ACCESS_KEY_CACHE);
             value = cache.get(username);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -148,8 +138,32 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
                 log.debug("Credentials for Username : " + username + " retrieved from cache");
             }
         }
-        if (keyAccess != null && value != null && keyAccess.equals(value.getAccessKey())) {
-            return true;
+        if (keyAccess != null && value != null) {
+            if (keyAccess.equals(value.getAccessKey())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean authenticateUser(String username, String password) {
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext cc = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            cc.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            cc.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            Cache<String, UserAccessKeyCache> cache = Caching.getCacheManagerFactory()
+                    .getCacheManager(CASSANDRA_API_CREDENTIAL_CACHE_MANAGER).getCache(CASSANDRA_API_CREDENTIAL_CACHE);
+
+            if (cache.get(username) != null && cache.get(username).getAccessKey().equals(password)) {
+                return true;
+            } else if (authenticationService.authenticate(username, password)) {
+                cache.put(username, new UserAccessKeyCache(password));
+                return true;
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
         return false;
     }
@@ -157,8 +171,6 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
     public void validateConfiguration() throws ConfigurationException {
         CassandraServerComponentManager manager = CassandraServerComponentManager.getInstance();
         authenticationService = manager.getAuthenticationService();
-
-
     }
 
     private void logAndAuthenticationException(String msg) throws AuthenticationException {

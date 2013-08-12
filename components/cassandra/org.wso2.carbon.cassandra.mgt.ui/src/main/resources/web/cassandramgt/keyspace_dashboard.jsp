@@ -198,7 +198,9 @@
                             <thead>
                             <tr>
                                 <th width="20%"><fmt:message key="cassandra.cf.name"/></th>
+                                <% if(!keyspace.equals("system")) {%>
                                 <th width="60%"><fmt:message key="cassandra.actions"/></th>
+                                <% } %>
                             </tr>
                             </thead>
                             <tbody id="cfBody">
@@ -216,6 +218,7 @@
                                        href="#"><%=name%>
                                     </a>
                                 </td>
+                                <% if(!keyspace.equals("system")) {%>
                                 <td>
                                      <input type="hidden" name="cfName<%=j%>" id="cfName<%=j%>"
                                            value="<%=name%>"/>
@@ -232,6 +235,7 @@
                                        href="#"><fmt:message
                                             key="cassandra.actions.delete"/></a>
                                 </td>
+                                <%}%>
                             </tr>
                             <%
                                     }
@@ -241,10 +245,12 @@
                             </tbody>
                         </table>
                     </div>
+                    <% if(!keyspace.equals("system")) {%>
                     <div style="margin-top:0px;">
                         <a class="add-icon-link" onclick="addcf('<%=keyspace%>');" href="#">
                             <fmt:message key="cassandra.add.new.cf"/></a>
                     </div>
+                    <%}%>
                 </td>
             </tr>
         </table>

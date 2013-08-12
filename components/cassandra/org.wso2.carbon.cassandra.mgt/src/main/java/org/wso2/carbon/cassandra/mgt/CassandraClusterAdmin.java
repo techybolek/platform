@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.lang.management.ManagementFactory;
 import java.text.DecimalFormat;
@@ -121,7 +122,7 @@ public class CassandraClusterAdmin extends AbstractAdmin {
 
         String keyspaceWithDomainName = keyspace;
         String domainName = CarbonContext.getCurrentContext().getTenantDomain();
-        if (domainName != null && !"".equals(domainName)) {
+        if (domainName != null && !"".equals(domainName) && !domainName.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             domainName = domainName.replace(".", "_");
             keyspaceWithDomainName = domainName + "_" + keyspace;
         }

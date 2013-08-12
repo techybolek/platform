@@ -207,67 +207,71 @@ function savecf(mode, index, keyspace, id) {
     var comment = document.getElementById("cf_editor_comment").value;
     var type = getSelectedValue("cf_editor_column_type");
     var comparator = getSelectedValue("cf_editor_column_comparator");
-    var subcomparator = getSelectedValue("cf_editor_sub_column_comparator");
-    var keycachesize = document.getElementById("cf_editor_keycache_size").value;
-    var rowcachesize = document.getElementById("cf_editor_rowcache_size").value;
-    var rowcachetime = document.getElementById("cf_editor_rowcachetime").value;
+//    var subcomparator = getSelectedValue("cf_editor_sub_column_comparator");
+//    var keycachesize = document.getElementById("cf_editor_keycache_size").value;
+//    var rowcachesize = document.getElementById("cf_editor_rowcache_size").value;
+//    var rowcachetime = document.getElementById("cf_editor_rowcachetime").value;
     var validationclass = getSelectedValue("cf_editor_validationclass");
-    var gcGrace = document.getElementById("cf_editor_gc_grace").value;
-    var minThreshold = document.getElementById("cf_editor_min_threshold").value;
-    var maxThreshold = document.getElementById("cf_editor_max_threshold").value;
+//    var gcGrace = document.getElementById("cf_editor_gc_grace").value;
+//    var minThreshold = document.getElementById("cf_editor_min_threshold").value;
+//    var maxThreshold = document.getElementById("cf_editor_max_threshold").value;
 
-    var keycachesizeAsfloat = parseFloat(keycachesize);
-    if (keycachesizeAsfloat == undefined ||  isNaN(keycachesize)) {
-        //CARBON.showErrorDialog(cassandrajsi18n["cassandra.cf.keycachesize.is.invalid"]);
-        //return false;
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.keycachesize.is.invalid"] + "</p></p>";
-    } else if (keycachesizeAsfloat < 0 || keycachesizeAsfloat > 1) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.keycachesize.is.outofrange"] + "</p></p>";
-    }
-
-    var rowcachesizeAsfloat = parseFloat(rowcachesize);
-    if (rowcachesizeAsfloat == undefined || isNaN(rowcachesize)) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.rowcachesize.is.invalid"] + "</p></p>";
-    } else if (rowcachesizeAsfloat < 0 || rowcachesizeAsfloat > 1) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.rowcachesize.is.outofrange"] + "</p></p>";
-    }
-
-    var rowcachetimeAsint = parseInt(rowcachetime);
-    if (rowcachetimeAsint == undefined || rowcachetimeAsint <= 0 || isNaN(rowcachetime)) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.rowcachetime.is.invalid"] + "</p></p>";
-    } else if (rowcachetimeAsint > 2147483647) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.rowcachetime.is.outofrange"] + "</p></p>";
-    }
-
-    var gcGraceAsint = parseInt(gcGrace);
-    if (gcGraceAsint == undefined || gcGraceAsint <= 0 || isNaN(gcGrace)) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.gcGrace.is.invalid"] + "</p></p>";
-    } else if (gcGraceAsint > 2147483647) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.gcGrace.is.outofrange"] + "</p></p>";
-    }
-
-    var minThresholdAsint = parseInt(minThreshold);
-    if (gcGraceAsint == undefined || minThresholdAsint <= 0 || isNaN(minThreshold)) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.minThreshold.is.invalid"] + "</p></p>";
-    } else if (minThresholdAsint > 2147483647) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.minThreshold.is.outofrange"] + "</p></p>";
-    }
-
-    var maxThresholdAsint = parseInt(maxThreshold);
-    if (gcGraceAsint == undefined || maxThresholdAsint <= 0 || isNaN(maxThreshold)) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.maxThreshold.is.invalid"] + "</p></p>";
-    } else if (maxThresholdAsint > 2147483647) {
-        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.maxThreshold.is.outofrange"] + "</p></p>";
-    }
+//    var keycachesizeAsfloat = parseFloat(keycachesize);
+//    if (keycachesizeAsfloat == undefined ||  isNaN(keycachesize)) {
+//        //CARBON.showErrorDialog(cassandrajsi18n["cassandra.cf.keycachesize.is.invalid"]);
+//        //return false;
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.keycachesize.is.invalid"] + "</p></p>";
+//    } else if (keycachesizeAsfloat < 0 || keycachesizeAsfloat > 1) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.keycachesize.is.outofrange"] + "</p></p>";
+//    }
+//
+//    var rowcachesizeAsfloat = parseFloat(rowcachesize);
+//    if (rowcachesizeAsfloat == undefined || isNaN(rowcachesize)) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.rowcachesize.is.invalid"] + "</p></p>";
+//    } else if (rowcachesizeAsfloat < 0 || rowcachesizeAsfloat > 1) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.rowcachesize.is.outofrange"] + "</p></p>";
+//    }
+//
+//    var rowcachetimeAsint = parseInt(rowcachetime);
+//    if (rowcachetimeAsint == undefined || rowcachetimeAsint <= 0 || isNaN(rowcachetime)) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.rowcachetime.is.invalid"] + "</p></p>";
+//    } else if (rowcachetimeAsint > 2147483647) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.rowcachetime.is.outofrange"] + "</p></p>";
+//    }
+//
+//    var gcGraceAsint = parseInt(gcGrace);
+//    if (gcGraceAsint == undefined || gcGraceAsint <= 0 || isNaN(gcGrace)) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.gcGrace.is.invalid"] + "</p></p>";
+//    } else if (gcGraceAsint > 2147483647) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.gcGrace.is.outofrange"] + "</p></p>";
+//    }
+//
+//    var minThresholdAsint = parseInt(minThreshold);
+//    if (gcGraceAsint == undefined || minThresholdAsint <= 0 || isNaN(minThreshold)) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.minThreshold.is.invalid"] + "</p></p>";
+//    } else if (minThresholdAsint > 2147483647) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.minThreshold.is.outofrange"] + "</p></p>";
+//    }
+//
+//    var maxThresholdAsint = parseInt(maxThreshold);
+//    if (gcGraceAsint == undefined || maxThresholdAsint <= 0 || isNaN(maxThreshold)) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.cf.maxThreshold.is.invalid"] + "</p></p>";
+//    } else if (maxThresholdAsint > 2147483647) {
+//        formValidaterMesg = formValidaterMesg + "<p>" + cassandrajsi18n["cassandra.maxThreshold.is.outofrange"] + "</p></p>";
+//    }
 
     if (formValidaterMesg != '') {
         CARBON.showErrorDialog(formValidaterMesg);
         return false;
     }
+//    var url = 'save_cf-ajaxprocessor.jsp?name=' + name + '&keyspace=' + keyspace + '&comment=' + comment
+//                      + '&type=' + type + "&comparator=" + comparator + '&subcomparator=' + subcomparator + "&keycachesize=" + keycachesize
+//                      + '&gcGrace=' + gcGrace + "&minThreshold=" + minThreshold + '&maxThreshold=' + maxThreshold + '&rowcachetime=' + rowcachetime
+//                      + '&rowcachesize=' + rowcachesize + '&validationclass=' + validationclass + '&id=' + id + '&mode=' + mode;
+
     var url = 'save_cf-ajaxprocessor.jsp?name=' + name + '&keyspace=' + keyspace + '&comment=' + comment
-                      + '&type=' + type + "&comparator=" + comparator + '&subcomparator=' + subcomparator + "&keycachesize=" + keycachesize
-                      + '&gcGrace=' + gcGrace + "&minThreshold=" + minThreshold + '&maxThreshold=' + maxThreshold + '&rowcachetime=' + rowcachetime
-                      + '&rowcachesize=' + rowcachesize + '&validationclass=' + validationclass + '&id=' + id + '&mode=' + mode;
+        + '&type=' + type + "&comparator=" + comparator + '&validationclass=' + validationclass + '&id=' + id + '&mode=' + mode;
+
 
     jQuery.get(url, ({}),
                function(data, status) {

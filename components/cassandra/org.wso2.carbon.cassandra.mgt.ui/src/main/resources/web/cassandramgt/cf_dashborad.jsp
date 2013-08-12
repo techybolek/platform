@@ -133,64 +133,64 @@
                 <% }%>
             </td>
         </tr>
-        <tr id="sub_column_comparator_row" style="<%=isSuperCl?"":"display:none;"%>">
-            <td><fmt:message key="cassandra.field.subComparator"/></td>
-            <td align="left">
-                <% if (CassandraAdminClientConstants.ASCIITYPE.equals(subComparator)) {%>
-                <fmt:message
-                        key="cassandra.field.comparator.ascii"/>
-                <% } else if (CassandraAdminClientConstants.UTF8TYPE.equals(subComparator)) {%>
-                <fmt:message
-                        key="cassandra.field.comparator.utf8"/>
-                <% } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(subComparator)) {%>
+        <%--<tr id="sub_column_comparator_row" style="<%=isSuperCl?"":"display:none;"%>">--%>
+            <%--<td><fmt:message key="cassandra.field.subComparator"/></td>--%>
+            <%--<td align="left">--%>
+                <%--<% if (CassandraAdminClientConstants.ASCIITYPE.equals(subComparator)) {%>--%>
+                <%--<fmt:message--%>
+                        <%--key="cassandra.field.comparator.ascii"/>--%>
+                <%--<% } else if (CassandraAdminClientConstants.UTF8TYPE.equals(subComparator)) {%>--%>
+                <%--<fmt:message--%>
+                        <%--key="cassandra.field.comparator.utf8"/>--%>
+                <%--<% } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(subComparator)) {%>--%>
 
-                <fmt:message
-                        key="cassandra.field.comparator.lexicalUUID"/>
-                <% } else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(subComparator)) {%>
-                <fmt:message
-                        key="cassandra.field.comparator.timeUUID"/>
-                <% } else if (CassandraAdminClientConstants.LONGTYPE.equals(subComparator)) {%>
-                <fmt:message
-                        key="cassandra.field.comparator.long"/>
-                <% } else if (CassandraAdminClientConstants.INTEGERTYPE.equals(subComparator)) {%>
-                <fmt:message
-                        key="cassandra.field.comparator.integer"/>
-                <% } else {%>
-                <fmt:message
-                        key="cassandra.field.comparator.bytes"/>
-                <% }%>
-            </td>
-        </tr>
-        <tr>
-            <td><fmt:message key="cassandra.field.keyCacheSize"/></td>
-            <td align="left"><%=cfInformation.getKeyCacheSize()%>
-            </td>
-        </tr>
-        <tr>
-            <td><fmt:message key="cassandra.field.rowCacheSize"/></td>
-            <td align="left"><%=cfInformation.getRowCacheSize()%>
-            </td>
-        </tr>
-        <tr>
-            <td><fmt:message key="cassandra.field.rowcachetime"/></td>
-            <td align="left"><%=cfInformation.getRowCacheSavePeriodInSeconds()%>
-            </td>
-        </tr>
-        <tr>
-            <td><fmt:message key="cassandra.field.gcgrace"/></td>
-            <td align="left"><%=cfInformation.getGcGraceSeconds()%>
-            </td>
-        </tr>
-        <tr>
-            <td><fmt:message key="cassandra.field.minThreshold"/></td>
-            <td align="left"><%=cfInformation.getMinCompactionThreshold()%>
-            </td>
-        </tr>
-        <tr>
-            <td><fmt:message key="cassandra.field.maxThreshold"/></td>
-            <td align="left"><%=cfInformation.getMaxCompactionThreshold()%>
-            </td>
-        </tr>
+                <%--<fmt:message--%>
+                        <%--key="cassandra.field.comparator.lexicalUUID"/>--%>
+                <%--<% } else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(subComparator)) {%>--%>
+                <%--<fmt:message--%>
+                        <%--key="cassandra.field.comparator.timeUUID"/>--%>
+                <%--<% } else if (CassandraAdminClientConstants.LONGTYPE.equals(subComparator)) {%>--%>
+                <%--<fmt:message--%>
+                        <%--key="cassandra.field.comparator.long"/>--%>
+                <%--<% } else if (CassandraAdminClientConstants.INTEGERTYPE.equals(subComparator)) {%>--%>
+                <%--<fmt:message--%>
+                        <%--key="cassandra.field.comparator.integer"/>--%>
+                <%--<% } else {%>--%>
+                <%--<fmt:message--%>
+                        <%--key="cassandra.field.comparator.bytes"/>--%>
+                <%--<% }%>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
+        <%--<tr>--%>
+            <%--<td><fmt:message key="cassandra.field.keyCacheSize"/></td>--%>
+            <%--<td align="left"><%=cfInformation.getKeyCacheSize()%>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
+        <%--<tr>--%>
+            <%--<td><fmt:message key="cassandra.field.rowCacheSize"/></td>--%>
+            <%--<td align="left"><%=cfInformation.getRowCacheSize()%>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
+        <%--<tr>--%>
+            <%--<td><fmt:message key="cassandra.field.rowcachetime"/></td>--%>
+            <%--<td align="left"><%=cfInformation.getRowCacheSavePeriodInSeconds()%>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
+        <%--<tr>--%>
+            <%--<td><fmt:message key="cassandra.field.gcgrace"/></td>--%>
+            <%--<td align="left"><%=cfInformation.getGcGraceSeconds()%>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
+        <%--<tr>--%>
+            <%--<td><fmt:message key="cassandra.field.minThreshold"/></td>--%>
+            <%--<td align="left"><%=cfInformation.getMinCompactionThreshold()%>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
+        <%--<tr>--%>
+            <%--<td><fmt:message key="cassandra.field.maxThreshold"/></td>--%>
+            <%--<td align="left"><%=cfInformation.getMaxCompactionThreshold()%>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
         <tr>
             <td><fmt:message key="cassandra.field.defaultValidationclass"/></td>
             <td align="left">
@@ -393,8 +393,10 @@
             </table>
         </div>
         <div style="margin-top:0px;">
+            <% if(!keyspace.equals("system")) {%>
             <a class="add-icon-link" onclick="addCL('<%=columnFamily%>','<%=keyspace%>');" href="#">
                 <fmt:message key="cassandra.new.cl"/></a>
+            <% } %>
         </div>
     </td>
 </tr>

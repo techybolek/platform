@@ -67,4 +67,17 @@ public class ClusterConstants {
     public static final String NODE_ID="nodeId";
     public static final String LOAD_TYPE="loadType";
     public static final String RACK="rack";
+
+    public static final String KS_READ_COUNT="ksReadCount";
+    public static final String KS_READ_LATENCY="ksReadLatency";
+    public static final String KS_READ_TIME="ksReadTime";
+    public static final String KS_WRITE_COUNT="ksWriteCount";
+    public static final String KS_WRITE_LATENCY="ksWriteLatency";
+    public static final String KS_WRITE_TIME="ksWriteTime";
+    public static final String KS_PENDING_TASKS="ksPendingTasks";
+
+    public static final String TIMESTAMP="timestamp";
+
+
+
 }

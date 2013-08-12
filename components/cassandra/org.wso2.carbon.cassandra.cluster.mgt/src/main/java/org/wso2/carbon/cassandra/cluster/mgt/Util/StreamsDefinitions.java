@@ -18,77 +18,102 @@
 package org.wso2.carbon.cassandra.cluster.mgt.Util;
 
 public class StreamsDefinitions {
-    public static final String VERSION="1.0.0";
-    public static final String COLUMN_FAMILY_STATS="cassandra_column_family_stats";
-    public static final String NODE_STATS="cassandra_node_stats";
-    public static final String COLUMN_FAMILY_STATS_STREAM_DEF="{" +
-                                                              "  'name':'" + COLUMN_FAMILY_STATS + "'," +
-                                                              "  'version':'" + VERSION + "'," +
-                                                              "  'nickName': 'cassandra cluster column family stats'," +
-                                                              "  'description': 'column family stats'," +
-                                                              "  'metaData':[" +
-                                                              "          {'name':'cluster','type':'STRING'}" +
-                                                              "  ]," +
-                                                              "  'payloadData':[" +
-                                                              "          {'name':'"+ClusterConstants.NODE_ID+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.HOST_ADDRESS+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.HOST_NAME+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.TOKEN+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.KEYSPACE+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.COLUMN_FAMILY+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.SS_TABLE_COUNT+"','type':'INT'}," +
-                                                              "          {'name':'"+ClusterConstants.LIVE_DISK_SPACE_USED+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.TOTAL_DISK_SPACE_USED+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.MEMTABLE_COLUMN_COUNT+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.MEMTABLE_DATA_SIZE+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.MEMTABLE_SWITCH_COUNT+"','type':'INT'}," +
-                                                              "          {'name':'"+ClusterConstants.READ_COUNT+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.READ_LATENCY+"','type':'DOUBLE'}," +
-                                                              "          {'name':'"+ClusterConstants.WRITE_COUNT+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.WRITE_LATENCY+"','type':'DOUBLE'}," +
-                                                              "          {'name':'"+ClusterConstants.PENDING_TASKS+"','type':'INT'}," +
-                                                              "          {'name':'"+ClusterConstants.NUMBER_OF_KEYS+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.BLOOM_FILTER_FALSE_POSITIVES+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.BLOOM_FILTER_FALSE_RATIO+"','type':'DOUBLE'}," +
-                                                              "          {'name':'"+ClusterConstants.BLOOM_FILTER_SPACE_USED+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.COMPACTED_ROW_MINIMUM_SIZE+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.COMPACTED_ROW_MAXIMUM_SIZE+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.COMPACTED_ROW_MEAN_SIZE+"','type':'LONG'}" +
-                                                              "  ]" +
-                                                              "}";
-    public static final String NODE_STATS_STREAM_DEF="{" +
-                                                              "  'name':'" + NODE_STATS + "'," +
-                                                              "  'version':'" + VERSION + "'," +
-                                                              "  'nickName': 'cassandra cluster node stats'," +
-                                                              "  'description': 'node stats'," +
-                                                              "  'metaData':[" +
-                                                              "          {'name':'cluster','type':'STRING'}" +
-                                                              "  ]," +
-                                                              "  'payloadData':[" +
-                                                              "          {'name':'"+ClusterConstants.NODE_ID+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.HOST_ADDRESS+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.HOST_NAME+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.TOKEN+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.LOAD_TYPE+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.LOAD+"','type':'DOUBLE'}," +
-                                                              "          {'name':'"+ClusterConstants.UP_TIME+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.EXCEPTION_COUNT+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.MIN_HEAP+"','type':'DOUBLE'}," +
-                                                              "          {'name':'"+ClusterConstants.MAX_HEAP+"','type':'DOUBLE'}," +
-                                                              "          {'name':'"+ClusterConstants.DATA_CENTER+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.RACK+"','type':'STRING'}," +
-                                                              "          {'name':'"+ClusterConstants.KEY_CACHE_CAPACITY+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.KEY_CACHE_SIZE+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.KEY_CACHE_REQUESTS+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.KEY_CACHE_HITS+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.KEY_CACHE_SAVED_PERIOD+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.KEY_HIT_CACHE_RATE+"','type':'DOUBLE'}," +
-                                                              "          {'name':'"+ClusterConstants.ROW_CACHE_CAPACITY+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.ROW_CACHE_SIZE+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.ROW_CACHE_REQUESTS+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.ROW_CACHE_HITS+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.ROW_CACHE_SAVED_PERIOD+"','type':'LONG'}," +
-                                                              "          {'name':'"+ClusterConstants.ROW_HIT_CACHE_RATE+"','type':'DOUBLE'}" +
-                                                              "  ]" +
-                                                              "}";
+    public static final String VERSION = "1.0.0";
+    public static final String COLUMN_FAMILY_STATS = "cassandra_column_family_stats";
+    public static final String NODE_STATS = "cassandra_node_stats";
+    public static final String KS_STATS = "cassandra_keyspace_stats";
+    public static final String COLUMN_FAMILY_STATS_STREAM_DEF = "{" +
+            "  'name':'" + COLUMN_FAMILY_STATS + "'," +
+            "  'version':'" + VERSION + "'," +
+            "  'nickName': 'cassandra cluster column family stats'," +
+            "  'description': 'column family stats'," +
+            "  'metaData':[" +
+            "          {'name':'cluster','type':'STRING'}" +
+            "  ]," +
+            "  'payloadData':[" +
+            "          {'name':'" + ClusterConstants.TIMESTAMP + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.NODE_ID + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.HOST_ADDRESS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.HOST_NAME + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.TOKEN + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEYSPACE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.COLUMN_FAMILY + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.SS_TABLE_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.LIVE_DISK_SPACE_USED + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.TOTAL_DISK_SPACE_USED + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.MEMTABLE_COLUMN_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.MEMTABLE_DATA_SIZE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.MEMTABLE_SWITCH_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.READ_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.READ_LATENCY + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.WRITE_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.WRITE_LATENCY + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.PENDING_TASKS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.NUMBER_OF_KEYS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.BLOOM_FILTER_FALSE_POSITIVES + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.BLOOM_FILTER_FALSE_RATIO + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.BLOOM_FILTER_SPACE_USED + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.COMPACTED_ROW_MINIMUM_SIZE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.COMPACTED_ROW_MAXIMUM_SIZE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.COMPACTED_ROW_MEAN_SIZE + "','type':'STRING'}" +
+            "  ]" +
+            "}";
+    public static final String NODE_STATS_STREAM_DEF = "{" +
+            "  'name':'" + NODE_STATS + "'," +
+            "  'version':'" + VERSION + "'," +
+            "  'nickName': 'cassandra cluster node stats'," +
+            "  'description': 'node stats'," +
+            "  'metaData':[" +
+            "          {'name':'cluster','type':'STRING'}" +
+            "  ]," +
+            "  'payloadData':[" +
+            "          {'name':'" + ClusterConstants.TIMESTAMP + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.NODE_ID + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.HOST_ADDRESS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.HOST_NAME + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.TOKEN + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.LOAD_TYPE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.LOAD + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.UP_TIME + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.EXCEPTION_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.MIN_HEAP + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.MAX_HEAP + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.DATA_CENTER + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.RACK + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEY_CACHE_CAPACITY + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEY_CACHE_SIZE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEY_CACHE_REQUESTS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEY_CACHE_HITS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEY_CACHE_SAVED_PERIOD + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEY_HIT_CACHE_RATE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.ROW_CACHE_CAPACITY + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.ROW_CACHE_SIZE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.ROW_CACHE_REQUESTS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.ROW_CACHE_HITS + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.ROW_CACHE_SAVED_PERIOD + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.ROW_HIT_CACHE_RATE + "','type':'STRING'}" +
+            "  ]" +
+            "}";
+
+    public static final String KS_STATS_STREAM_DEF = "{" +
+            "  'name':'" + KS_STATS + "'," +
+            "  'version':'" + VERSION + "'," +
+            "  'nickName': 'cassandra keyspace stats'," +
+            "  'description': 'keyspace stats'," +
+            "  'metaData':[" +
+            "          {'name':'cluster','type':'STRING'}" +
+            "  ]," +
+            "  'payloadData':[" +
+            "          {'name':'" + ClusterConstants.TIMESTAMP + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.NODE_ID + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KEYSPACE + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KS_READ_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KS_READ_LATENCY + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KS_READ_TIME + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KS_WRITE_COUNT + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KS_WRITE_LATENCY + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KS_WRITE_TIME + "','type':'STRING'}," +
+            "          {'name':'" + ClusterConstants.KS_PENDING_TASKS + "','type':'STRING'}" +
+            "  ]" +
+            "}";
 }
