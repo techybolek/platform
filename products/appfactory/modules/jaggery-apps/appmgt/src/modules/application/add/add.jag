@@ -190,11 +190,13 @@ applicationType,repositoryType, userName) {
 
         var tenantDomain=modManager.getTenantDomain();
 
+
         var payload = '<p:CreateApplicationRequest xmlns:p="http://wso2.org"><applicationId xmlns="http://wso2.org">' + applicationKey + '</applicationId><userName xmlns="http://wso2.org">' + userName + '</userName><repositoryType xmlns="http://wso2.org">' + repositoryType + '</repositoryType><adminUserName xmlns="http://wso2.org">' + adminUserName + '</adminUserName><domainName xmlns="http://wso2.org">'+ tenantDomain +'</domainName></p:CreateApplicationRequest>';
         var result;
         var endPoint = getProperty(BPS_SERVER_URL) + "CreateApplication";
         //var endPoint =  "http://localhost:8181/services/CreateApplication";
         request.open(options, endPoint, false);
+        log.info("Payload :"+payload);
         request.send(payload);
         result = request.responseE4X;
         //var resultNS = new Namespace("http://wso2.org");

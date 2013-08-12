@@ -274,7 +274,6 @@ function buildResponse(result){
  * getBackendCookie returns returns logged in user's server session string.
  */
 var getBackendCookie = function () {
-//session.put(APPFAC_BACKEND_COOKIE, cookie.toString());
 	if(session.get(APPFAC_BACKEND_COOKIE) == null){
 		var token = session.get("SAML_TOKEN");
 		var security =require("sso");
@@ -311,6 +310,16 @@ var getTenantDomain = function() {
 		session.put(TENANT_DOMAIN_NAME, tenantDomain.toString().toLowerCase());
 	}
        return session.get(TENANT_DOMAIN_NAME);
+}
+var getTenantAwareUsername = function(username) {
+         var tenantAwareUsername='null';
+        
+                if (username.indexOf("@")!=-1) {
+                    tenantAwareUsername= username.substring(0,username.lastIndexOf('@'));
+                } else {        // else assume super tenant
+                    tenantAwareUsername = SUPER_TENANT_DOMAIN_NAME;
+                }
+     return tenantAwareUsername; 
 }
 
 %>

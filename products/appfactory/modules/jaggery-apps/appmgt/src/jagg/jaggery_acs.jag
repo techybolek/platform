@@ -17,6 +17,7 @@
 
     var cookieString = xhr.getResponseHeader("Set-Cookie");
     var cookie = cookieString.split(";")[0];
+       log.info("Result "+xhr.responseText)
     session.put(APPFAC_BACKEND_COOKIE, cookie.toString());
 	session.put("LOGGED_IN_USER", username);
 	session.put("logged.user", username);
