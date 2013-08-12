@@ -173,7 +173,7 @@ public final class APIUtil {
                     String uTemplate = urlPattern.split("::")[0];
                     String method = urlPattern.split("::")[1];
                     String authType = urlPattern.split("::")[2];
-
+                    String throttlingTier = urlPattern.split("::")[3];
                     uriTemplate.setHTTPVerb(method);
                     uriTemplate.setAuthType(authType);
                     uriTemplate.setHttpVerbs(method);
@@ -181,13 +181,14 @@ public final class APIUtil {
                     uriTemplate.setUriTemplate(uTemplate);
                     uriTemplate.setResourceURI(api.getUrl());
                     uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-
+                    uriTemplate.setThrottlingTiers(throttlingTier);
                     //Checking for duplicate uri template names
                     if (uriTemplateNames.contains(uTemplate)) {
                         for (URITemplate tmp : uriTemplates) {
                             if (uTemplate.equals(tmp.getUriTemplate())) {
                                 tmp.setHttpVerbs(method);
                                 tmp.setAuthTypes(authType);
+                                tmp.setThrottlingTiers(throttlingTier);
                                 break;
                             }
                         }
