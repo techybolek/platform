@@ -43,10 +43,7 @@
                 } else if(jarinput.indexOf("#") != -1) {
                     CARBON.showWarningDialog('<fmt:message key="hash.included.webapp"/>');
                     validFileNames = false;
-                } else if(jarinput.indexOf("/") != -1 || jarinput.indexOf("\\") != -1) {
-                    CARBON.showWarningDialog('<fmt:message key="back.slashes.included.webapp"/>');
-                    validFileNames = false;
-                }  else if(validateName(jarinput)) {
+                }  else if(validateName(jarinput,true)) {
                     CARBON.showWarningDialog('<fmt:message key="unsupported.characters.webapp"/>');
                     validFileNames = false;
                 }
@@ -63,10 +60,7 @@
                     } else if(jarinput.indexOf("#") != -1) {
                         CARBON.showWarningDialog('<fmt:message key="hash.included.webapp"/>');
                         validFileNames = false; break;
-                    } else if(jarinput.indexOf("/") != -1 || jarinput.indexOf("\\") != -1) {
-                        CARBON.showWarningDialog('<fmt:message key="back.slashes.included.webapp"/>');
-                        validFileNames = false; break;
-                    } else if(validateName(jarinput)) {
+                    } else if(validateName(jarinput,true)) {
                         CARBON.showWarningDialog('<fmt:message key="unsupported.characters.webapp"/>');
                         validFileNames = false; break;
                     }
@@ -82,7 +76,7 @@
                  } else if(appVersion.indexOf("/")!=-1 || appVersion.indexOf("\\")!=-1) {
                      CARBON.showWarningDialog('<fmt:message key="back.slashes.included.version"/>');
                      validFileNames = false;
-                 } else if(validateName(appVersion)) {
+                 } else if(validateName(appVersion,false)) {
                      CARBON.showWarningDialog('<fmt:message key="unsupported.characters.version"/>');
                      validFileNames = false;
                  }
@@ -95,7 +89,7 @@
                      } else if(appVersion.indexOf("/")!=-1 || appVersion.indexOf("\\")!=-1) {
                          CARBON.showWarningDialog('<fmt:message key="back.slashes.included.version"/>');
                          validFileNames = false; break;
-                     } else if(validateName(appVersion)) {
+                     } else if(validateName(appVersion,false)) {
                          CARBON.showWarningDialog('<fmt:message key="unsupported.characters.version"/>');
                          validFileNames = false; break;
                      }
@@ -111,13 +105,16 @@
 
         }
 
-        function validateName(fileName){
-                var regex = ".*[\\]\\[!\"#$%&'()*+,/:;<=>?@~{|}^`].*";
-                if(fileName.match(regex)){
-                    return true;
-                } else {
-                    return false;
-                }
+        function validateName(fileName, val){
+            var regex = ".*[\\]\\[!\"#$%&'()*+,/:;<=>?@~{|}^`].*";
+            if(val == true){
+                regex = ".*[\\]\\[!\"#$%&'()*+,;<=>?@~{|}^`].*";
+            }
+            if(fileName.match(regex)){
+                return true;
+            } else {
+                return false;
+            }
         }
 
         var rows = 1;
