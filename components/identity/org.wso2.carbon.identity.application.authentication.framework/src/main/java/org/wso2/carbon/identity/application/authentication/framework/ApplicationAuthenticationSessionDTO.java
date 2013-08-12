@@ -5,6 +5,7 @@ public class ApplicationAuthenticationSessionDTO {
 	private String callerPath;
 	private String callerSessionKey;
 	private String queryParams;
+	private String requestType;
 
 	public String getCallerPath() {
 		return callerPath;
@@ -28,5 +29,13 @@ public class ApplicationAuthenticationSessionDTO {
 
 	public void setQueryParams(String queryParams) {
 		this.queryParams = queryParams;
+	}
+
+	public String getRequestType() {
+		return requestType;
+	}
+
+	public void setRequestType(String requestType) {
+		this.requestType = requestType;
 	}
 }

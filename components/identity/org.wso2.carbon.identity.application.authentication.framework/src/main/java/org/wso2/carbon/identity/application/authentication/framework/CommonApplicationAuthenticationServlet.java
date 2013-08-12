@@ -38,25 +38,24 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 														throws ServletException, IOException {
 		
-		if(request.getAttribute("sessionDataKey") != null){
+		//TODO: Reset session variables of the authenticators at the beginning of the authentication flow.
+		
+		if(request.getParameter("type") != null){
 			ApplicationAuthenticationSessionDTO sessionDTO = new ApplicationAuthenticationSessionDTO();
-			sessionDTO.setCallerPath((String)request.getAttribute(ApplicationAuthenticatorConstants.CALLER_PATH));
-			sessionDTO.setCallerSessionKey((String)request.getAttribute("sessionDataKey"));
+			sessionDTO.setRequestType(request.getParameter("type"));
+			
+			String callerSessionDataKey = request.getParameter("sessionDataKey");
+			sessionDTO.setCallerSessionKey(callerSessionDataKey);
 			
 			//generate a new session key to hold data of this request
 			String sessionDataKey = UUIDGenerator.generateUUID();
 			
-			String queryParams = (String)request.getAttribute("commonAuthQueryParams");
-			if(queryParams != null){
-				queryParams = queryParams + "&sessionDataKey=" + sessionDataKey;
-			} else {
-				queryParams = queryParams + "?sessionDataKey=" + sessionDataKey;
-			}
-			
-			sessionDTO.setQueryParams(queryParams);
-			request.setAttribute("commonAuthQueryParams", queryParams);
+			String queryParams = request.getQueryString();
+			queryParams = queryParams.replace(callerSessionDataKey, sessionDataKey);
+			sessionDTO.setQueryParams("?" + queryParams);
 			
 			request.getSession().setAttribute(sessionDataKey, sessionDTO);
+			request.setAttribute("commonAuthQueryParams", "?" + queryParams);
 		}
 		
 		for (ApplicationAuthenticator authenticator : authenticators) {
@@ -144,14 +143,25 @@ public class CommonApplicationAuthenticationServlet extends HttpServlet {
 		cleanUpSession(request);
 		
 		String sessionDataKey = request.getParameter(ApplicationAuthenticatorConstants.SESSION_DATA_KEY);
+		
+		//TODO handle sessionDataKey being null
+		
 		ApplicationAuthenticationSessionDTO sessionDTO = (ApplicationAuthenticationSessionDTO)request.getSession().getAttribute(sessionDataKey);
 		
 		request.setAttribute(ApplicationAuthenticatorConstants.AUTHENTICATED, isAuthenticated);
 		request.setAttribute(ApplicationAuthenticatorConstants.AUTHENTICATED_USER, (String)request.getSession().getAttribute("username"));
 		request.setAttribute(ApplicationAuthenticatorConstants.SESSION_DATA_KEY, sessionDTO.getCallerSessionKey());
 		
-		String caller = sessionDTO.getCallerPath();
-				
+		String caller = null;
+		
+		if(sessionDTO.getRequestType().equals("samlsso")) {
+			caller = "../../samlsso";
+		} else if (sessionDTO.getRequestType().equals("openid")) {
+			caller = "../../openidserver";
+		} else if (sessionDTO.getRequestType().equals("oauth2")) {
+			caller = "../../oauth2endpoints";
+		} 
+		
 		if (log.isDebugEnabled()) {
 			log.debug("Sending response back to: " + caller);
 		}
