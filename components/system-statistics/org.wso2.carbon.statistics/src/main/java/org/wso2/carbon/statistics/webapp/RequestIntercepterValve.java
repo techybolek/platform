@@ -68,12 +68,17 @@ public class RequestIntercepterValve extends ValveBase {
         }
 
         String[] requestedUriParts = requestURI.split("/");
-        if (requestURI.startsWith("/t/")) {
+        if(requestedUriParts == null){
+            return;
+        }
+        if (requestedUriParts.length >= 5 && requestURI.startsWith("/t/")) {
             statisticData.setWebappName(requestedUriParts[4]);
             statisticData.setTenantName(requestedUriParts[2]);
-        } else {
+        } else if (requestedUriParts.length >= 2 && !requestURI.startsWith("/t/")){
             statisticData.setWebappName(requestedUriParts[1]);
             statisticData.setTenantName(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        } else{
+            return;
         }
 
         //Extracting the configuration context. if tenant domain is null then main carbon server configuration is loaded
