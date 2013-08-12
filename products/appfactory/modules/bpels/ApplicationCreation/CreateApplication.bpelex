@@ -49,19 +49,51 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4/@copy.0"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6/@copy.0"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4/@copy.1"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6/@copy.1"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.5"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.7"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.10"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.10/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.10/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.10/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.10/@copy.3"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.11"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#/"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1376294756000"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.9"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
@@ -69,67 +101,19 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.8/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
     <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.8/@copy.1"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.8/@copy.2"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.8/@copy.0"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.8/@copy.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.9"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.9/@faultHandler/@catchAll/@activity"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#/"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1375798209000"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.7"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.5/@faultHandler/@catchAll/@activity"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.5/@faultHandler/@catchAll/@activity/@activities.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6/@copy.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.7/@faultHandler/@catchAll/@activity"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.7/@faultHandler/@catchAll/@activity/@activities.0"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.9/@faultHandler/@catchAll/@activity/@activities.0"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
@@ -161,11 +145,11 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.2"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.1"/>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.3"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
   </extensions>
   <extensions>
@@ -177,42 +161,6 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
   </extensions>
   <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.1"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.2"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.3"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.1/@faultHandler/@catchAll/@activity"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.1/@faultHandler/@catchAll/@activity/@activities.0"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
-  </extensions>
-  <extensions>
-    <extendedObject href="CreateApplication.bpel#//@variables/@children.11"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
-  </extensions>
-  <extensions>
     <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.2/@copy.1"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
@@ -221,7 +169,107 @@
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
   <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.2/@copy.3"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
     <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.2/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.5"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.3/@faultHandler/@catchAll/@activity"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.3/@faultHandler/@catchAll/@activity/@activities.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@variables/@children.11"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.4/@copy.3"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.5/@faultHandler/@catchAll/@activity"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.5/@faultHandler/@catchAll/@activity/@activities.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.6/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.2/@copy.4"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@variables/@children.12"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@variables/@children.13"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ActivityExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.1"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.0"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.2"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@variables/@children.14"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@variables/@children.15"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:VariableExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.0/@copy.3"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="CreateApplication.bpel#//@activity/@activities.1/@activities.8/@copy.2"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
 </extensionmodel:ExtensionMap>
