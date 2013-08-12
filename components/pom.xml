@@ -156,7 +156,7 @@
         	<module>data-bridge</module>
 		<module>ndatasource</module>
 		<module>cep-statistics</module>
-                <module>appfac</module>
+                <!--module>appfac</module-->
                 <module>hdfs</module>
                 <module>mapred</module>
             </modules>
