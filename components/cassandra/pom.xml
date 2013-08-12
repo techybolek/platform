@@ -168,7 +168,7 @@
     <modules>
         <module>org.wso2.carbon.cassandra.server</module>
         <module>org.wso2.carbon.cassandra.dataaccess</module>
-        <module>org.wso2.carbon.cassandra.mgt_dc</module>
+        <module>org.wso2.carbon.cassandra.mgt</module>
         <module>org.wso2.carbon.cassandra.mgt.ui</module>
         <module>org.wso2.carbon.cassandra.examples</module>
 	    <module>org.wso2.carbon.cassandra.sharedkey</module>
