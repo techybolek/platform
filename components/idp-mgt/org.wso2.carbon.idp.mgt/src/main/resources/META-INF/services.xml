@@ -24,7 +24,6 @@
         <parameter name="ServiceClass" locked="true">
             org.wso2.carbon.idp.mgt.IdentityProviderMgtService
         </parameter>
-        <parameter name="hiddenService" locked="true">true</parameter>
         <parameter name="adminService" locked="true">true</parameter>
         <parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
     </service>
@@ -35,8 +34,7 @@
         <parameter name="ServiceClass" locked="true">
             org.wso2.carbon.idp.mgt.IdPMetadataService
         </parameter>
-        <parameter name="hiddenService" locked="true">false</parameter>
         <parameter name="adminService" locked="true">false</parameter>
     </service>
-
+    <parameter name="hiddenService" locked="true">true</parameter>
 </serviceGroup>
