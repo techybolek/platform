@@ -1576,7 +1576,7 @@
         <gdata-spreadsheet.wso2.version>3.0.0.wso2v1</gdata-spreadsheet.wso2.version>
         <poi.wso2.version>3.9.0.wso2v1</poi.wso2.version>
         <junit.version>3.8.2</junit.version>
-        <rhino.wso2.version>1.7.0.R1-wso2v2</rhino.wso2.version>
+        <rhino.wso2.version>1.7.0.R4.wso2v1-SNAPSHOT</rhino.wso2.version>
         <xercesImpl.version>2.8.1</xercesImpl.version>
         <xercesImpl.wso2.version>2.8.1.wso2v1</xercesImpl.wso2.version>
         <uddi4j.version>1.0.1</uddi4j.version>
