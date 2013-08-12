@@ -28,8 +28,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.automation.api.clients.application.mgt.ApplicationAdminClient;
 import org.wso2.carbon.automation.api.clients.application.mgt.CarbonAppUploaderClient;
 import org.wso2.carbon.automation.api.clients.registry.ResourceAdminServiceClient;
-import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
-import org.wso2.carbon.automation.core.annotations.SetEnvironment;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.resource.stub.common.xsd.ResourceData;
@@ -48,6 +46,7 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
     private final int MAX_TIME = 120000;
     private final String carFileName = "xslt-transformation-car_1.0.0";
     private ResourceAdminServiceClient resourceAdminServiceStub;
+    private boolean isCarFileUploaded = false;
 
     @BeforeClass(alwaysRun = true)
     protected void uploadCarFileTest() throws Exception {
@@ -56,6 +55,7 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
         carbonAppUploaderClient.uploadCarbonAppArtifact("xslt-transformation-car_1.0.0.car"
                 , new DataHandler(new URL("file:" + File.separator + File.separator + getESBResourceLocation()
                                           + File.separator + "car" + File.separator + "xslt-transformation-car_1.0.0.car")));
+        isCarFileUploaded = true;
         applicationAdminClient = new ApplicationAdminClient(esbServer.getBackEndUrl(), esbServer.getSessionCookie());
         Assert.assertTrue(isCarFileDeployed(carFileName), "Car file deployment failed");
         TimeUnit.SECONDS.sleep(5);
@@ -65,7 +65,7 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
     }
 
     @Test(groups = {"wso2.esb"}, description = "test endpoint deployment from car file")
-    public void artifactDeployment() throws Exception {
+    public void artifactDeploymentAndServiceInvocation() throws Exception {
         Assert.assertTrue(esbUtils.isEndpointDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "stockQuoteServiceEndpoint")
                 , "AddressEndpoint Endpoint deployment failed");
         Assert.assertTrue(esbUtils.isProxyDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "xsltTransformationProxy")
@@ -73,39 +73,50 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
         Assert.assertTrue(isResourceExist("/_system/config/transform.xslt"), "transform.xslt not found on registry");
         Assert.assertTrue(isResourceExist("/_system/config/transform_back.xslt"), "transform.xslt not found on registry");
 
-    }
-
-    @Test(groups = {"wso2.esb"}, description = "test proxy service invocation"
-            , dependsOnMethods = {"artifactDeployment"})
-    public void invokeTransformProxyService() throws Exception {
-        OMElement response = axis2Client.sendCustomQuoteRequest(
-                getProxyServiceURL("xsltTransformationProxy"),
-                null,
-                "XSLTTransformation");
+        OMElement response = null;
+        try {
+            response = axis2Client.sendCustomQuoteRequest(
+                    getProxyServiceURL("xsltTransformationProxy"),
+                    null,
+                    "XSLTTransformation");
+        } catch (AxisFault axisFault) {
+            throw new Exception("Service Invocation Failed > " + axisFault.getMessage(), axisFault);
+        }
         Assert.assertNotNull(response, "Response message null");
         Assert.assertTrue(response.toString().contains("Code"), "Code element not found in response message");
         Assert.assertTrue(response.toString().contains("XSLTTransformation"), "Symbol not found on the response message");
+
     }
 
-
-    @AfterClass(alwaysRun = true)
+    @Test(groups = {"wso2.esb"}, description = "test proxy service invocation"
+            , dependsOnMethods = {"artifactDeploymentAndServiceInvocation"})
     public void deleteCarFileAndArtifactUnDeploymentTest() throws Exception {
         applicationAdminClient.deleteApplication(carFileName);
-        Assert.assertTrue(isCarFileUnDeployed(carFileName));
+        isCarFileUploaded = false;
+        Assert.assertTrue(isCarFileUnDeployed(carFileName), "Car file undeployment failed");
         TimeUnit.SECONDS.sleep(5);
         Assert.assertTrue(esbUtils.isEndpointUnDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "stockQuoteServiceEndpoint")
                 , "stockQuoteServiceEndpoint Endpoint deployment failed");
         Assert.assertTrue(esbUtils.isProxyUnDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "xsltTransformationProxy")
                 , "xsltTransformationProxy Proxy service deployment failed");
 
-        Assert.assertFalse(isResourceExist("/_system/config/transform.xslt"), "transform.xslt deployed by car file not removed on registry");
-        Assert.assertFalse(isResourceExist("/_system/config/transform_back.xslt"), "transform_back.xslt deployed by car file not removed on registry");
+        Assert.assertFalse(isResourceExist("/_system/config/transform.xslt"), "transform.xslt deployed by car file not removed from registry");
+        Assert.assertFalse(isResourceExist("/_system/config/transform_back.xslt"), "transform_back.xslt deployed by car file not removed from registry");
+
+    }
+
+
+    @AfterClass(alwaysRun = true)
+    public void cleanupArtifactsIfExist() throws Exception {
+        if (isCarFileUploaded) {
+            applicationAdminClient.deleteApplication(carFileName);
+        }
         super.cleanup();
     }
 
     private boolean isCarFileDeployed(String carFileName) throws Exception {
 
-        log.info("waiting " + "180000" + " millis for car deployment " + carFileName);
+        log.info("waiting " + MAX_TIME + " millis for car deployment " + carFileName);
         boolean isCarFileDeployed = false;
         Calendar startTime = Calendar.getInstance();
         long time;
@@ -131,7 +142,7 @@ public class XSLTTransformationCarTestCase extends ESBIntegrationTest {
 
     private boolean isCarFileUnDeployed(String carFileName) throws Exception {
 
-        log.info("waiting " + "180000" + " millis for car undeployment " + carFileName);
+        log.info("waiting " + MAX_TIME + " millis for car undeployment " + carFileName);
         boolean isCarFileUnDeployed = false;
         Calendar startTime = Calendar.getInstance();
         long time;
