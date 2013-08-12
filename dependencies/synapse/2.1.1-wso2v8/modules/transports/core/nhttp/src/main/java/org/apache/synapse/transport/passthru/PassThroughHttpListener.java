@@ -49,6 +49,9 @@ import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.BaseUtils;
 import org.apache.axis2.transport.base.threads.NativeThreadFactory;
 import org.apache.axis2.transport.base.threads.WorkerPool;
+import org.apache.axis2.transport.base.tracker.AxisServiceFilter;
+import org.apache.axis2.transport.base.tracker.AxisServiceTracker;
+import org.apache.axis2.transport.base.tracker.AxisServiceTrackerListener;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +70,6 @@ import org.apache.synapse.transport.passthru.jmx.PassThroughTransportMetricsColl
 import org.apache.synapse.transport.passthru.jmx.TransportView;
 
 import org.apache.synapse.transport.passthru.util.ActiveConnectionMonitor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -97,8 +99,9 @@ public class PassThroughHttpListener implements TransportListener {
     private Map<String, String> serviceNameToEPRMap = new HashMap<String, String>();
     /** The service name map for the custom URI if there are any */
     private Map<String, String> eprToServiceNameMap = new HashMap<String, String>();
+
     /** the axis observer that gets notified of service life cycle events*/
-    private final AxisObserver axisObserver = new GenericAxisObserver();
+    //private final AxisObserver axisObserver = new GenericAxisObserver();
 
     private volatile int state = BaseConstants.STOPPED;
 
@@ -110,30 +113,37 @@ public class PassThroughHttpListener implements TransportListener {
     /** Delay for ActiveConnectionMonitor **/
     public static final long ACTIVE_CONNECTION_MONITOR_DELAY = 1000;
 
+
+    /** ServiceTracker to receive updates on services for lifetime management **/
+    private AxisServiceTracker serviceTracker;
+
+    private TransportInDescription pttInDescription;
+
+
     protected Scheme initScheme() {
         return new Scheme("http", 80, false);
     }
-    
+
     protected ServerConnFactoryBuilder initConnFactoryBuilder(
             final TransportInDescription transportIn, final HttpHost host) throws AxisFault {
         return new ServerConnFactoryBuilder(transportIn, host);
-    }    
+    }
 
     public void init(ConfigurationContext cfgCtx, TransportInDescription transportInDescription)
             throws AxisFault {
 
         log.info("Initializing Pass-through HTTP/S Listener...");
-
+        pttInDescription = transportInDescription;
         namePrefix = transportInDescription.getName().toUpperCase(Locale.US);
         scheme = initScheme();
-        
+
         int portOffset = Integer.parseInt(System.getProperty("portOffset", "0"));
         Parameter portParam = transportInDescription.getParameter("port");
         int port = Integer.parseInt(portParam.getValue().toString());
         port = port + portOffset;
         portParam.setValue(String.valueOf(port));
         portParam.getParameterElement().setText(String.valueOf(port));
-        
+
         System.setProperty(transportInDescription.getName() + ".nio.port", String.valueOf(port));
 
         Object obj = cfgCtx.getProperty(PassThroughConstants.PASS_THROUGH_TRANSPORT_WORKER_POOL);
@@ -143,52 +153,73 @@ public class PassThroughHttpListener implements TransportListener {
         }
 
         PassThroughTransportMetricsCollector metrics = new PassThroughTransportMetricsCollector(
-            true, scheme.getName());
+                true, scheme.getName());
 
         TransportView view = new TransportView(this, null, metrics, null);
         MBeanRegistrar.getInstance().registerMBean(
-            view, "Transport",
-            "passthru-" + namePrefix.toLowerCase() + "-receiver");
-        
+                view, "Transport",
+                "passthru-" + namePrefix.toLowerCase() + "-receiver");
+
         sourceConfiguration = new SourceConfiguration(cfgCtx, transportInDescription, scheme, workerPool, metrics);
         sourceConfiguration.build();
 
         HttpHost host = new HttpHost(
-            sourceConfiguration.getHostname(), 
-            sourceConfiguration.getPort(), 
-            sourceConfiguration.getScheme().getName());
+                sourceConfiguration.getHostname(),
+                sourceConfiguration.getPort(),
+                sourceConfiguration.getScheme().getName());
         ServerConnFactoryBuilder connFactoryBuilder = initConnFactoryBuilder(transportInDescription, host);
         connFactory = connFactoryBuilder.build(sourceConfiguration.getHttpParams());
-        
+
         handler = new SourceHandler(sourceConfiguration);
         ioEventDispatch = new ServerIODispatch(handler, connFactory);
-        
+
         // register to receive updates on services for lifetime management
-        cfgCtx.getAxisConfiguration().addObservers(axisObserver);
+        //cfgCtx.getAxisConfiguration().addObservers(axisObserver);
 
         Map<String, String> o = (Map<String, String>) cfgCtx.getProperty(PassThroughConstants.EPR_TO_SERVICE_NAME_MAP);
         if (o != null) {
             this.eprToServiceNameMap = o;
         } else {
-                        eprToServiceNameMap = new HashMap<String, String>();
-                        cfgCtx.setProperty(PassThroughConstants.EPR_TO_SERVICE_NAME_MAP, eprToServiceNameMap);
+            eprToServiceNameMap = new HashMap<String, String>();
+            cfgCtx.setProperty(PassThroughConstants.EPR_TO_SERVICE_NAME_MAP, eprToServiceNameMap);
         }
 
         cfgCtx.setProperty(PassThroughConstants.PASS_THROUGH_TRANSPORT_WORKER_POOL,
                 sourceConfiguration.getWorkerPool());
+
+        /* register to receive updates on services */
+        serviceTracker = new AxisServiceTracker(
+                cfgCtx.getAxisConfiguration(),
+                new AxisServiceFilter() {
+                    public boolean matches(AxisService service) {
+                        return !service.getName().startsWith("__") // these are "private" services
+                                && BaseUtils.isUsingTransport(service, pttInDescription.getName());
+                    }
+                },
+                new AxisServiceTrackerListener() {
+                    public void serviceAdded(AxisService service) {
+                        addToServiceURIMap(service);
+                    }
+
+                    public void serviceRemoved(AxisService service) {
+                        removeServiceFfromURIMap(service);
+                    }
+                });
+
+
     }
 
     public void start() throws AxisFault {
-
+        serviceTracker.start();
         log.info("Starting Pass-through " + namePrefix + " Listener...");
 
         try {
             String prefix = namePrefix + "-Listener I/O dispatcher";
 
             ioReactor = new DefaultListeningIOReactor(
-                            sourceConfiguration.getIOReactorConfig(),
-                            new NativeThreadFactory(new ThreadGroup(prefix + " thread group"), prefix));
-            
+                    sourceConfiguration.getIOReactorConfig(),
+                    new NativeThreadFactory(new ThreadGroup(prefix + " thread group"), prefix));
+
             ioReactor.setExceptionHandler(new IOReactorExceptionHandler() {
 
                 public boolean handle(IOException ioException) {
@@ -211,7 +242,7 @@ public class PassThroughHttpListener implements TransportListener {
         }
 
         if(sourceConfiguration.getHttpGetRequestProcessor() != null){
-           sourceConfiguration.getHttpGetRequestProcessor().init(sourceConfiguration.getConfigurationContext(), handler);
+            sourceConfiguration.getHttpGetRequestProcessor().init(sourceConfiguration.getConfigurationContext(), handler);
         }
 
         Thread t = new Thread(new Runnable() {
@@ -228,13 +259,13 @@ public class PassThroughHttpListener implements TransportListener {
         t.start();
 
         startEndpoints();
-        
+
         state = BaseConstants.STARTED;
     }
 
     private void startEndpoints() throws AxisFault {
         Queue<ListenerEndpoint> endpoints = new LinkedList<ListenerEndpoint>();
-        
+
         Set<InetSocketAddress> addressSet = new HashSet<InetSocketAddress>();
         addressSet.addAll(connFactory.getBindAddresses());
 
@@ -243,9 +274,9 @@ public class PassThroughHttpListener implements TransportListener {
         }
 
         if (addressSet.isEmpty()) {
-            addressSet.add(new InetSocketAddress(sourceConfiguration.getPort()));
+            addressSet.add(new InetSocketAddress(Integer.parseInt((String)pttInDescription.getParameter("port").getValue())));
         }
-        
+
         // Ensure simple but stable order
         List<InetSocketAddress> addressList = new ArrayList<InetSocketAddress>(addressSet);
         Collections.sort(addressList, new Comparator<InetSocketAddress>() {
@@ -255,7 +286,7 @@ public class PassThroughHttpListener implements TransportListener {
                 String s2 = a2.toString();
                 return s1.compareTo(s2);
             }
-            
+
         });
         for (InetSocketAddress address: addressList) {
             endpoints.add(ioReactor.listen(address));
@@ -270,8 +301,8 @@ public class PassThroughHttpListener implements TransportListener {
                 if (log.isInfoEnabled()) {
                     InetSocketAddress address = (InetSocketAddress) endpoint.getAddress();
                     if (!address.isUnresolved()) {
-                        log.info("Pass-through " + namePrefix + " Listener " + "started on " + 
-                            address.getHostName() + ":" + address.getPort());
+                        log.info("Pass-through " + namePrefix + " Listener " + "started on " +
+                                address.getHostName() + ":" + address.getPort());
                     } else {
                         log.info("Pass-through " + namePrefix + " Listener " + "started on " + address);
                     }
@@ -282,7 +313,7 @@ public class PassThroughHttpListener implements TransportListener {
             }
         }
     }
-    
+
     private void handleException(String s, Exception e) throws AxisFault {
         log.error(s, e);
         throw new AxisFault(s, e);
@@ -372,9 +403,9 @@ public class PassThroughHttpListener implements TransportListener {
 
     public void destroy() {
         log.info("Destroying PassThroughHttpListener");
-        sourceConfiguration.getConfigurationContext().
-                getAxisConfiguration().getObserversList().remove(axisObserver);
-
+       /* sourceConfiguration.getConfigurationContext().
+                getAxisConfiguration().getObserversList().remove(axisObserver);*/
+        serviceTracker.stop();
         sourceConfiguration.getMetrics().destroy();
     }
 
@@ -414,27 +445,27 @@ public class PassThroughHttpListener implements TransportListener {
 
     public void reload(final TransportInDescription transportIn) throws AxisFault {
         if (state != BaseConstants.STARTED) return;
-        
+
         // Close all listener endpoints and stop accepting new connections
         Set<ListenerEndpoint> endpoints = ioReactor.getEndpoints();
         for (ListenerEndpoint endpoint: endpoints) {
             endpoint.close();
         }
-        
+
         // Rebuild connection factory
         HttpHost host = new HttpHost(
-            sourceConfiguration.getHostname(), 
-            sourceConfiguration.getPort(), 
-            sourceConfiguration.getScheme().getName());
+                sourceConfiguration.getHostname(),
+                sourceConfiguration.getPort(),
+                sourceConfiguration.getScheme().getName());
         ServerConnFactoryBuilder connFactoryBuilder = initConnFactoryBuilder(transportIn, host);
         connFactory = connFactoryBuilder.build(sourceConfiguration.getHttpParams());
         ioEventDispatch.update(connFactory);
-        
+
         startEndpoints();
-        
+
         log.info(namePrefix + " Reloaded");
     }
-    
+
     /**
      * Stop accepting new connections, and wait the maximum specified time for in-flight
      * requests to complete before a controlled shutdown for maintenance
@@ -469,15 +500,19 @@ public class PassThroughHttpListener implements TransportListener {
                 switch (event.getEventType()) {
                     case AxisEvent.SERVICE_DEPLOY :
                         addToServiceURIMap(service);
+                        System.out.println("SERVICE_DEPLOY");
                         break;
                     case AxisEvent.SERVICE_REMOVE :
                         removeServiceFfromURIMap(service);
+                        System.out.println("SERVICE_REMOVE");
                         break;
                     case AxisEvent.SERVICE_START  :
                         addToServiceURIMap(service);
+                        System.out.println("SERVICE_START");
                         break;
                     case AxisEvent.SERVICE_STOP   :
                         removeServiceFfromURIMap(service);
+                        System.out.println("SERVICE_STOP");
                         break;
                 }
             }
@@ -542,6 +577,10 @@ public class PassThroughHttpListener implements TransportListener {
         }
         serviceName = serviceName.substring(0,serviceName.lastIndexOf("."));
         return getServiceNameFromServiceWithCustomURI(serviceName);
+    }
+
+    public String getTransportName() {
+        return pttInDescription.getName();
     }
 
 }
