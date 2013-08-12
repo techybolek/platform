@@ -104,7 +104,7 @@ public class NotificationPermissionTest {
     }
 
     @Test(groups = "wso2.greg", description = "Test deny to resource notifications",
-           dependsOnMethods = "testAccessToNotifications")
+           dependsOnMethods = "testAccessToNotifications", expectedExceptions = RemoteException.class)
     @SetEnvironment(executionEnvironments = {ExecutionEnvironment.integration_user})
     public void testDenyNotifications() throws Exception {
         adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH, ROLE_NAME,
@@ -115,14 +115,13 @@ public class NotificationPermissionTest {
                                                        PermissionTestConstants.PERMISSION_DISABLED);
 
         //userId 2 has read and write permission to NEW_RESOURCE_PATH, therefore disable.
-        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,PermissionTestConstants.NON_ADMIN_ROLE
                 ,PermissionTestConstants.WRITE_ACTION,PermissionTestConstants.PERMISSION_DISABLED);
-        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,PermissionTestConstants.NON_ADMIN_ROLE
                 ,PermissionTestConstants.READ_ACTION,PermissionTestConstants.PERMISSION_DISABLED);
 
        boolean status = jmxSubscription.init(NEW_RESOURCE_PATH, "ResourceUpdated", adminEnvironment,
                              UserListCsvReader.getUserInfo(2));
-        assertFalse(status , "un-authorize user can add resource to  "+ NEW_RESOURCE_PATH);
     }
 
 
@@ -135,9 +134,9 @@ public class NotificationPermissionTest {
         adminResourceAdminClient.deleteResource(NEW_RESOURCE_PATH);
 
         //Re-set permission created at testDenyNotifications().
-        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,PermissionTestConstants.NON_ADMIN_ROLE
                 ,PermissionTestConstants.WRITE_ACTION,PermissionTestConstants.PERMISSION_ENABLED);
-        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,ROLE_USERS[0]
+        adminResourceAdminClient.addResourcePermission(NEW_RESOURCE_PATH ,PermissionTestConstants.NON_ADMIN_ROLE
                 ,PermissionTestConstants.READ_ACTION,PermissionTestConstants.PERMISSION_ENABLED);
         jmxSubscription.disconnect();
 
