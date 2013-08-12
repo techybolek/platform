@@ -26,8 +26,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.automation.api.clients.application.mgt.ApplicationAdminClient;
 import org.wso2.carbon.automation.api.clients.application.mgt.CarbonAppUploaderClient;
-import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
-import org.wso2.carbon.automation.core.annotations.SetEnvironment;
 import org.wso2.carbon.esb.ESBIntegrationTest;
 
 import javax.activation.DataHandler;
@@ -41,6 +39,7 @@ public class CarbonApplicationDeploymentTestCase extends ESBIntegrationTest {
     private ApplicationAdminClient applicationAdminClient;
     private final int MAX_TIME = 120000;
     private final String carFileName = "esb-artifacts-car_1.0.0";
+    private boolean isCarFileUploaded = false;
 
     @BeforeClass(alwaysRun = true)
     protected void uploadCarFileTest() throws Exception {
@@ -49,6 +48,7 @@ public class CarbonApplicationDeploymentTestCase extends ESBIntegrationTest {
         carbonAppUploaderClient.uploadCarbonAppArtifact("esb-artifacts-car_1.0.0.car"
                 , new DataHandler(new URL("file:" + File.separator + File.separator + getESBResourceLocation()
                                           + File.separator + "car" + File.separator + "esb-artifacts-car_1.0.0.car")));
+        isCarFileUploaded = true;
         applicationAdminClient = new ApplicationAdminClient(esbServer.getBackEndUrl(), esbServer.getSessionCookie());
         Assert.assertTrue(isCarFileDeployed(carFileName), "Car file deployment failed");
         TimeUnit.SECONDS.sleep(5);
@@ -102,18 +102,92 @@ public class CarbonApplicationDeploymentTestCase extends ESBIntegrationTest {
     }
 
     @Test(groups = {"wso2.esb"}, description = "test proxy service invocation"
-            , dependsOnMethods = {"proxyServiceDeploymentTest", "sequenceDeploymentTest", "endpointDeploymentTest"})
+            , dependsOnMethods = {"proxyServiceDeploymentTest", "sequenceDeploymentTest", "endpointDeploymentTest", "localEntryDeploymentTest"})
     public void invokeProxyService() throws Exception {
         OMElement response = axis2Client.sendSimpleStockQuoteRequest(getProxyServiceURL("sampleCustomProxy"), null, "CARDeployment");
         Assert.assertTrue(response.toString().contains("CARDeployment"), "Symbol not found on the response message");
     }
 
 
-    @AfterClass(alwaysRun = true)
+    @Test(groups = {"wso2.esb"}, description = "test proxy service invocation"
+            , dependsOnMethods = {"invokeProxyService"})
     public void deleteCarFileAndArtifactUnDeploymentTest() throws Exception {
         applicationAdminClient.deleteApplication(carFileName);
+        isCarFileUploaded = false;
         Assert.assertTrue(isCarFileUnDeployed(carFileName));
+
         TimeUnit.SECONDS.sleep(5);
+        //verify whether artifacts are undeployed successfully
+        verifyUndeployment();
+
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void cleanupArtifactsIfExist() throws Exception {
+        if (isCarFileUploaded) {
+            applicationAdminClient.deleteApplication(carFileName);
+            verifyUndeployment();
+        }
+        super.cleanup();
+    }
+
+    private boolean isCarFileDeployed(String carFileName) throws Exception {
+
+        log.info("waiting " + MAX_TIME + " millis for car deployment " + carFileName);
+        boolean isCarFileDeployed = false;
+        Calendar startTime = Calendar.getInstance();
+        long time;
+        while ((time = (Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis())) < MAX_TIME) {
+            String[] applicationList = applicationAdminClient.listAllApplications();
+            if (applicationList != null) {
+                if (ArrayUtils.contains(applicationList, carFileName)) {
+                    isCarFileDeployed = true;
+                    log.info("car file deployed in " + time + " mills");
+                    return isCarFileDeployed;
+                }
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                //ignore
+            }
+
+        }
+        return isCarFileDeployed;
+    }
+
+    private boolean isCarFileUnDeployed(String carFileName) throws Exception {
+
+        log.info("waiting " + MAX_TIME + " millis for car undeployment " + carFileName);
+        boolean isCarFileUnDeployed = false;
+        Calendar startTime = Calendar.getInstance();
+        long time;
+        while ((time = (Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis())) < MAX_TIME) {
+            String[] applicationList = applicationAdminClient.listAllApplications();
+            if (applicationList != null) {
+                if (!ArrayUtils.contains(applicationList, carFileName)) {
+                    isCarFileUnDeployed = true;
+                    log.info("car file deployed in " + time + " mills");
+                    return isCarFileUnDeployed;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    //ignore
+                }
+            } else {
+                isCarFileUnDeployed = true;
+                log.info("car file deployed in " + time + " mills");
+                return isCarFileUnDeployed;
+            }
+
+
+        }
+        return isCarFileUnDeployed;
+    }
+
+    private void verifyUndeployment() throws Exception {
         Assert.assertTrue(esbUtils.isEndpointUnDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "addressEndpoint")
                 , "AddressEndpoint Endpoint Undeployment failed");
         Assert.assertTrue(esbUtils.isEndpointUnDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "loadBalanceEndpoint")
@@ -145,62 +219,5 @@ public class CarbonApplicationDeploymentTestCase extends ESBIntegrationTest {
                 , "transform Proxy service Undeployment failed");
         Assert.assertTrue(esbUtils.isProxyUnDeployed(esbServer.getBackEndUrl(), esbServer.getSessionCookie(), "sampleCustomProxy")
                 , "Custom Proxy service Undeployment failed");
-        super.cleanup();
-    }
-
-    private boolean isCarFileDeployed(String carFileName) throws Exception {
-
-        log.info("waiting " + "180000" + " millis for car deployment " + carFileName);
-        boolean isCarFileDeployed = false;
-        Calendar startTime = Calendar.getInstance();
-        long time;
-        while ((time = (Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis())) < MAX_TIME) {
-            String[] applicationList = applicationAdminClient.listAllApplications();
-            if (applicationList != null) {
-                if (ArrayUtils.contains(applicationList, carFileName)) {
-                    isCarFileDeployed = true;
-                    log.info("car file deployed in " + time + " mills");
-                    return isCarFileDeployed;
-                }
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                //ignore
-            }
-
-        }
-        return isCarFileDeployed;
-    }
-
-    private boolean isCarFileUnDeployed(String carFileName) throws Exception {
-
-        log.info("waiting " + "180000" + " millis for car undeployment " + carFileName);
-        boolean isCarFileUnDeployed = false;
-        Calendar startTime = Calendar.getInstance();
-        long time;
-        while ((time = (Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis())) < MAX_TIME) {
-            String[] applicationList = applicationAdminClient.listAllApplications();
-            if (applicationList != null) {
-                if (!ArrayUtils.contains(applicationList, carFileName)) {
-                    isCarFileUnDeployed = true;
-                    log.info("car file deployed in " + time + " mills");
-                    return isCarFileUnDeployed;
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    //ignore
-                }
-            } else {
-                isCarFileUnDeployed = true;
-                log.info("car file deployed in " + time + " mills");
-                return isCarFileUnDeployed;
-            }
-
-
-        }
-        return isCarFileUnDeployed;
     }
 }
