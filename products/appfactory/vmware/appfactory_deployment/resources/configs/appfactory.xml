@@ -205,6 +205,7 @@
 
     <!-- BAM integration related configurations -->
     <BAM>
+	<EnableStatPublishing>false</EnableStatPublishing>
         <Server>
                 <Url>https://localhost:9446</Url>
         </Server>
