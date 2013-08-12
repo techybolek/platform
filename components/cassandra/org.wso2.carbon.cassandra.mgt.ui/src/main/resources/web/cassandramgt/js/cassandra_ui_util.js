@@ -135,6 +135,12 @@ function saveKeyspace(mode) {
         CARBON.showErrorDialog(cassandrajsi18n["cassandra.keyspace.is.empty"]);
         return false;
     }
+    var pattern=/\W/;        //checking for non-word characters
+    var match = pattern.test(name);
+    if (match == true) {
+        CARBON.showErrorDialog(cassandrajsi18n["cassandra.keyspace.name.is.invalid"]);
+        return false;
+    }
 
     var rf = document.getElementById("ks_editor_rf").value;
     var rfAsint = parseInt(rf);
@@ -203,6 +209,12 @@ function savecf(mode, index, keyspace, id) {
         formValidaterMesg = "<p>" + cassandrajsi18n["cassandra.cf.name.is.empty"] + "</p><p/>";
         //CARBON.showErrorDialog(cassandrajsi18n["cassandra.cf.name.is.empty"]);
         //return false;
+    }else{
+        var pattern=/\W/;        //checking for non-word characters
+        var match = pattern.test(name);
+        if (match == true) {
+            formValidaterMesg = "<p>" + cassandrajsi18n["cassandra.cf.name.is.invalid"] + "</p><p/>";
+        }
     }
     var comment = document.getElementById("cf_editor_comment").value;
     var type = getSelectedValue("cf_editor_column_type");
