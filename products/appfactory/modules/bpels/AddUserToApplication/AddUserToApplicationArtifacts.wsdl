@@ -19,7 +19,10 @@
                     <sequence>
                     	<element name="applicationId" type="string" />
                     	<element name="userName" type="string"></element>
-                    	<element name="roles" type="string" maxOccurs="unbounded" minOccurs="0"></element>
+                    	<element name="roles" type="string"
+                    		maxOccurs="unbounded" minOccurs="0">
+                    	</element>
+                    	<element name="ten" type="string"></element>
                     </sequence>
                 </complexType>
             </element>
