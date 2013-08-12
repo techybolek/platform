@@ -111,7 +111,7 @@
             <artifactId>gitblit-manager</artifactId>
             <version>${gitblit.version}</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/gitblit-manager-1.0.0.jar</systemPath>
+            <systemPath>${project.basedir}/lib/gitblit.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>wsdl4j</groupId>

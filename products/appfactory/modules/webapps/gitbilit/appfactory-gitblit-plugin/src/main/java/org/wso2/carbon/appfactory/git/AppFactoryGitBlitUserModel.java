@@ -16,15 +16,27 @@
 
 package org.wso2.carbon.appfactory.git;
 
+import com.gitblit.Constants;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.models.UserModel;
+import org.wso2.carbon.appfactory.gitblit.AppFactoryGitBlitUserService;
 
 /**
  * This is custom user model to implement custom repository authorization
  */
 public class AppFactoryGitBlitUserModel extends UserModel {
-   // private transient AppFactoryRepositoryAuthorizationClient appFactoryRepositoryAuthorizationClient;
+    private transient AppFactoryRepositoryAuthorizationClient appFactoryRepositoryAuthorizationClient;
     private transient GitBlitConfiguration configuration;
+    private boolean canAccess;
+    protected String adminCookie;
+
+    public String getAdminCookie() {
+        return adminCookie;
+    }
+
+    public void setAdminCookie(String adminCookie) {
+        this.adminCookie = adminCookie;
+    }
 
     public GitBlitConfiguration getConfiguration() {
         return configuration;
@@ -36,13 +48,35 @@ public class AppFactoryGitBlitUserModel extends UserModel {
 
     public AppFactoryGitBlitUserModel(String username) {
         super(username);
+
     }
 
+
+
     public AppFactoryGitBlitUserModel(String username,
-                                      GitBlitConfiguration config) {
+                                      GitBlitConfiguration config, AppFactoryRepositoryAuthorizationClient appFactoryRepositoryAuthorizationClient) {
         this(username);
+        this.appFactoryRepositoryAuthorizationClient = appFactoryRepositoryAuthorizationClient;
         this.configuration=config;
 
+    }
+
+    public void setCanAccess(boolean canAccess) {
+        this.canAccess = canAccess;
+    }
+    /* */
+
+    @Override
+    protected boolean canAccess(RepositoryModel repository, Constants.AccessRestrictionType ifRestriction, Constants.AccessPermission requirePermission) {
+        if (!username.equals(configuration.getProperty(GitBlitConstants
+                .APPFACTORY_ADMIN_USERNAME,
+                "admin@admin.com"))) {
+
+        appFactoryRepositoryAuthorizationClient.setCookie(getAdminCookie());
+        String appName= AppFactoryGitBlitUserService.getAppFactoryApplicationName(repository.name);
+        return appFactoryRepositoryAuthorizationClient.authorize(getName(),appName);
+        }
+        return true;
     }
 
     /**
@@ -52,14 +86,14 @@ public class AppFactoryGitBlitUserModel extends UserModel {
      *
      * @param repository
      * @return
-     */
+     *//*
     @Override
     public boolean canAccessRepository(RepositoryModel repository) {
         String repositoryName = repository.name;
         String applicationName = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
         return super.canAccessRepository(repository) && getAppFactoryRepositoryAuthorizationClient()
                 .authorize(super.getName(), applicationName);
-    }
+    }*/
 
 
     public AppFactoryRepositoryAuthorizationClient getAppFactoryRepositoryAuthorizationClient() {

@@ -17,6 +17,7 @@
 package org.wso2.carbon.appfactory.git;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.context.ConfigurationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,5 +94,11 @@ public class AppFactoryRepositoryAuthorizationClient {
             }
         }
         return isAuth;
+    }
+    public void setCookie(String cookie){
+        Options options = serviceStub._getServiceClient().getOptions();
+        options.setManageSession(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
+        options.setTimeOutInMilliSeconds(10000);
     }
 }

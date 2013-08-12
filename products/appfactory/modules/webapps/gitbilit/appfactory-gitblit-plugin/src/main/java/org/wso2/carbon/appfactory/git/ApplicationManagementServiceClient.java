@@ -85,7 +85,7 @@ public class ApplicationManagementServiceClient {
             return Arrays.asList(apps);
         } else {
         try {
-            apps = serviceStub.getAllApplications(userName);
+            apps = serviceStub.getAllApplications("wso6.io",userName);
             if (apps != null) {
                 holder.getCache().put(userName,apps);
                 return Arrays.asList(apps);

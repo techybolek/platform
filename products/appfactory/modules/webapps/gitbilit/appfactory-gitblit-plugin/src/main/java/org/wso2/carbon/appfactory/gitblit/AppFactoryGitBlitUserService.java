@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.appfactory.gitblit;
 
+
 import com.gitblit.IStoredSettings;
 import com.gitblit.IUserService;
 import com.gitblit.models.TeamModel;
@@ -32,10 +33,7 @@ import org.wso2.carbon.appfactory.git.UserAdminServiceClient;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A GitBlit UserService for Wso2 App Factory.
@@ -168,6 +166,7 @@ public class AppFactoryGitBlitUserService implements IUserService {
      */
     @Override
     public String getCookie(UserModel userModel) {
+
         return null;
     }
 
@@ -246,12 +245,12 @@ public class AppFactoryGitBlitUserService implements IUserService {
     @Override
     public UserModel getUserModel(String username) {
         TeamModel teamModel;
-        UserModel userModel = new AppFactoryGitBlitUserModel(username, getConfiguration());
-        for (String app : getApplicationProvider().getAllApplicationsOfUser(username)) {
+        UserModel userModel = new AppFactoryGitBlitUserModel(username, getConfiguration(),getRepositoryAuthorizationClient());
+       /* for (String app : getApplicationProvider().getAllApplicationsOfUser(username)) {
             teamModel = new TeamModel(getGitBlitRepositoryName(app));
             userModel.teams.add(teamModel);
             userModel.addRepository(getGitBlitRepositoryName(app));
-        }
+        }*/
         return userModel;
     }
 
@@ -274,6 +273,11 @@ public class AppFactoryGitBlitUserService implements IUserService {
     @Override
     public boolean updateUserModel(UserModel userModel) {
         return false;
+    }
+
+    @Override
+    public boolean updateUserModels(Collection<UserModel> userModels) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     /**
@@ -410,6 +414,11 @@ public class AppFactoryGitBlitUserService implements IUserService {
         return false;
     }
 
+    @Override
+    public boolean updateTeamModels(Collection<TeamModel> teamModels) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     /**
      * Editing team data is not supported
      *
@@ -462,8 +471,10 @@ public class AppFactoryGitBlitUserService implements IUserService {
      * @param repositoryName
      * @return
      */
-    private String getAppFactoryApplicationName(String repositoryName) {
-        String applicationName = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
+    public static String getAppFactoryApplicationName(String repositoryName) {
+        String domainAwareAppId = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
+        //google.com/app1
+        String applicationName=domainAwareAppId.substring(domainAwareAppId.lastIndexOf("/")+1);
         return applicationName;
     }
 

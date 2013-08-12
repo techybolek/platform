@@ -29,7 +29,7 @@
     <modules>
        <module>appfactory-authentication-plugin</module>
        <module>appfactory-plugin</module>
-       <!--module>gitbilit</module-->
+       <module>gitbilit/appfactory-gitblit-plugin</module>
        <module>scm-carbon-auth-plugin</module>
        <module>scm-web-app</module>
        <module>jenkins-tenant-ext</module>
