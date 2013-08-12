@@ -928,6 +928,16 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                }
 
            }
+            // If service was deployed by CApp we need to manualy undeploy the service when deleting service group
+            // since the artifact is not inside hot deployment directory
+           if (fileName.contains("carbonapps")) {
+               // if its a proxy deployed using CApp it can be removed form above check
+               if (axisConfig.getService(axisService.getName()) != null){
+                   axisConfig.removeService(axisService.getName());
+                   //adding log per service in order to notify user about the service's state when viewing logs.
+                   log.info("Undeploying Axis2 Service: " + axisService.getName());
+               }
+           }
 
 
 
