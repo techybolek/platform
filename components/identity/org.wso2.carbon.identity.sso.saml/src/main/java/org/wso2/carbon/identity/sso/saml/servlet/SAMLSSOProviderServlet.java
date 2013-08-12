@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.sso.saml.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -293,13 +294,16 @@ public class SAMLSSOProviderServlet extends HttpServlet {
 		String sessionDataKey = UUIDGenerator.generateUUID();
 		HttpSession session = req.getSession();
 		session.setAttribute(sessionDataKey, sessionDTO);
-		
-        req.setAttribute(SAMLSSOProviderConstants.SESSION_DATA_KEY, sessionDataKey);
-        req.setAttribute("commonAuthCallerPath", "../../samlsso");
-        req.setAttribute("commonAuthQueryParams", "?type=samlsso");
         
-        RequestDispatcher dispatcher = req.getRequestDispatcher("../../commonauth");
-        dispatcher.forward(req, resp);
+        String commonAuthURL = CarbonUIUtil.getAdminConsoleURL(req);
+        commonAuthURL = commonAuthURL.replace("samlsso/carbon/", "commonauth");
+        
+        String selfPath = URLEncoder.encode("../../samlsso","UTF-8");
+        
+		String queryParams = "?" + SAMLSSOProviderConstants.SESSION_DATA_KEY + "=" + sessionDataKey + 
+		                             "&type=samlsso" + "&commonAuthCallerPath=" + selfPath;
+		
+		resp.sendRedirect(commonAuthURL + queryParams);
 	}
 
 	/**
