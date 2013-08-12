@@ -19,12 +19,12 @@
         <parameter name="ServiceClass">org.wso2.appserver.sample.mail.service.MailTestService</parameter>
 
         <!--mail related parameters-->
-        <parameter name="transport.mail.Address">synapse.demo.1@gmail.com</parameter>
+        <parameter name="transport.mail.Address">wso2demomail@gmail.com</parameter>
         <parameter name="transport.mail.Protocol">pop3</parameter>
         <parameter name="transport.PollInterval">5</parameter>
         <parameter name="mail.pop3.host">pop.gmail.com</parameter>
         <parameter name="mail.pop3.port">995</parameter>
-        <parameter name="mail.pop3.user">synapse.demo.1</parameter>
+        <parameter name="mail.pop3.user">wso2demomail</parameter>
         <parameter name="mail.pop3.password">mailpassword</parameter>
 
         <parameter name="mail.pop3.socketFactory.class">javax.net.ssl.SSLSocketFactory</parameter>

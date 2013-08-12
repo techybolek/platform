@@ -25,7 +25,7 @@ public class MailClient {
                             null, configFile.getAbsolutePath());
             ServiceClient serviceClient = new ServiceClient(configurationContext, null);
 
-            serviceClient.setTargetEPR(new EndpointReference("mailto:synapse.demo.1@gmail.com"));
+            serviceClient.setTargetEPR(new EndpointReference("mailto:wso2demomail@gmail.com"));
             serviceClient.engageModule("addressing");
 
             // ping invocation
@@ -36,11 +36,11 @@ public class MailClient {
 
             // these are the mail transport parameters that should be set to receive the response
             serviceClient.getAxisService().addParameter("transport.mail.Address",
-                    "synapse.demo.0@gmail.com");
+                    "wso2demomail@gmail.com");
             serviceClient.getAxisService().addParameter("transport.mail.Protocol", "pop3");
             serviceClient.getAxisService().addParameter("transport.PollInterval", "5");
             serviceClient.getAxisService().addParameter("mail.pop3.host", "pop.gmail.com");
-            serviceClient.getAxisService().addParameter("mail.pop3.user", "synapse.demo.0");
+            serviceClient.getAxisService().addParameter("mail.pop3.user", "wso2demomail");
             serviceClient.getAxisService().addParameter("mail.pop3.password", "mailpassword");
             serviceClient.getAxisService().addParameter("mail.pop3.port", "995");
 
