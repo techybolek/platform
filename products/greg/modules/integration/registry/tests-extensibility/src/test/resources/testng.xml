@@ -35,8 +35,8 @@
 
 
         <classes>
-            <class name="org.wso2.carbon.registry.reporting.test.ReportGenerationTestCases"/>
             <class name="org.wso2.carbon.registry.reporting.test.ReportNameAndTemplateTestCases"/>
+            <class name="org.wso2.carbon.registry.reporting.test.ReportGenerationTestCases"/>
             <class name="org.wso2.carbon.registry.reporting.test.Carbon11686"/>
             <class name="org.wso2.carbon.registry.reporting.test.ReportCopyingTestCases"/>
             <class name="org.wso2.carbon.registry.reporting.test.ReportSchedulingTestCases"/>

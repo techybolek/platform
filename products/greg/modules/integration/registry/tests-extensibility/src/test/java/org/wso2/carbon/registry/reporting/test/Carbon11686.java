@@ -401,7 +401,7 @@ public class Carbon11686 extends ReportingTestCaseSuper {
             throws Exception, ResourceAdminServiceExceptionException {
         resourceAdminServiceClient.deleteResource(testGovernanceLCtemplate);
         resourceAdminServiceClient.deleteResource(testGovernanceLCRXT);
-        removeTemplateCollection();
+        resourceAdminServiceClient.deleteResource(testTemplateCollection);
         deleteDestiationFile();
         userManagementClient = new UserManagementClient(adminEnvironment.getGreg().getBackEndUrl(),
                                                         userInfo.getUserName(), userInfo.getPassword());
