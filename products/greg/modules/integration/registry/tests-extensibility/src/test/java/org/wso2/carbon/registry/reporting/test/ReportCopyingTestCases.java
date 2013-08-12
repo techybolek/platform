@@ -149,7 +149,7 @@ public class ReportCopyingTestCases extends ReportingTestCaseSuper {
             assertTrue(customCell.getStringCellValue().equals("G-regTesting"));
 
             customCell = customRow.getCell(5);
-            assertTrue(customCell.getStringCellValue().equals("testCycle1"));
+            assertTrue(customCell.getStringCellValue().equals(artifactName + "1"));
 
             customCell = customRow.getCell(8);
             assertTrue(customCell.getStringCellValue().equals("4.5.0"));
@@ -219,7 +219,7 @@ public class ReportCopyingTestCases extends ReportingTestCaseSuper {
 
         result = readInputStreamAsString(report.getInputStream());
 
-        assertTrue(result.contains("testApplication1"));
+        assertTrue(result.contains(applicationName + "1"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Description"));
     }

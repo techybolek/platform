@@ -97,7 +97,7 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
         assertTrue(result.contains("G-regTesting"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Smoke test"));
-        assertTrue(result.contains("testCycle1"));
+        assertTrue(result.contains(artifactName + "1"));
     }
 
     /**
@@ -132,7 +132,7 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
             assertTrue(customCell.getStringCellValue().equals("G-regTesting"));
 
             customCell = customRow.getCell(5);
-            assertTrue(customCell.getStringCellValue().equals("testCycle1"));
+            assertTrue(customCell.getStringCellValue().equals(artifactName + "1"));
 
             customCell = customRow.getCell(8);
             assertTrue(customCell.getStringCellValue().equals("4.5.0"));
@@ -207,7 +207,7 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
             }
         }
 
-        assertTrue(parsedText.contains("testCycle1"));
+        assertTrue(parsedText.contains(artifactName + "1"));
         assertTrue(parsedText.contains("G-regTesting"));
         assertTrue(parsedText.contains("4.5.0"));
         assertTrue(parsedText.contains("Smoke test"));
@@ -235,7 +235,7 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
 
         assertTrue(result.contains("Edited_heading"));
         assertTrue(result.contains("Version_Edited"));
-        assertTrue(result.contains("testCycle1"));
+        assertTrue(result.contains(artifactName + "1"));
         assertTrue(result.contains("G-regTesting"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Smoke test"));
@@ -263,7 +263,7 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
 
         String result = readInputStreamAsString(report.getInputStream());
 
-        assertTrue(result.contains("testApplication1"));
+        assertTrue(result.contains(applicationName + "1"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Description"));
     }
@@ -285,10 +285,10 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
 
         String result = readInputStreamAsString(report.getInputStream());
 
-        assertTrue(result.contains("testApplication1"));
+        assertTrue(result.contains(applicationName + "1"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Description"));
-        assertTrue(result.contains("testApplication2"));
+        assertTrue(result.contains(applicationName + "2"));
         assertTrue(result.contains("4.6.0"));
         assertTrue(result.contains("Description2"));
     }
@@ -310,16 +310,16 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
 
         String result = readInputStreamAsString(report.getInputStream());
 
-        assertTrue(result.contains("testApplication1"));
+        assertTrue(result.contains(applicationName + "1"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Description"));
-        assertTrue(result.contains("testApplication2"));
+        assertTrue(result.contains(applicationName + "2"));
         assertTrue(result.contains("4.6.0"));
         assertTrue(result.contains("Description2"));
-        assertTrue(result.contains("testApplication3"));
+        assertTrue(result.contains(applicationName + "3"));
         assertTrue(result.contains("4.7.0"));
         assertTrue(result.contains("Description3"));
-        assertTrue(result.contains("testApplication4"));
+        assertTrue(result.contains(applicationName + "4"));
         assertTrue(result.contains("4.8.0"));
         assertTrue(result.contains("Description4"));
     }
@@ -342,16 +342,16 @@ public class ReportGenerationTestCases extends ReportingTestCaseSuper {
 
         String result = readInputStreamAsString(report.getInputStream());
 
-        assertTrue(result.contains("testApplication1"));
+        assertTrue(result.contains(applicationName + "1"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Description"));
-        assertTrue(!result.contains("testApplication2"));
+        assertTrue(!result.contains(applicationName + "2"));
         assertTrue(!result.contains("4.6.0"));
         assertTrue(!result.contains("Description2"));
-        assertTrue(result.contains("testApplication3"));
+        assertTrue(result.contains(applicationName + "3"));
         assertTrue(result.contains("4.7.0"));
         assertTrue(result.contains("Description3"));
-        assertTrue(!result.contains("testApplication4"));
+        assertTrue(!result.contains(applicationName + "4"));
         assertTrue(!result.contains("4.8.0"));
         assertTrue(!result.contains("Description4"));
     }

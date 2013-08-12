@@ -31,11 +31,16 @@
     </test>
     <test name="Test4" preserve-order="true" parallel="false">
         <packages>
-            <package name="org.wso2.carbon.registry.reporting.test"/>
         </packages>
 
 
         <classes>
+            <class name="org.wso2.carbon.registry.reporting.test.ReportGenerationTestCases"/>
+            <class name="org.wso2.carbon.registry.reporting.test.ReportNameAndTemplateTestCases"/>
+            <class name="org.wso2.carbon.registry.reporting.test.Carbon11686"/>
+            <class name="org.wso2.carbon.registry.reporting.test.ReportCopyingTestCases"/>
+            <class name="org.wso2.carbon.registry.reporting.test.ReportSchedulingTestCases"/>
+            <class name="org.wso2.carbon.registry.reporting.test.ReportClassTestCases"/>
         </classes>
     </test>
 </suite>

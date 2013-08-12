@@ -141,7 +141,7 @@ public class ReportSchedulingTestCases extends ReportingTestCaseSuper {
         }
 
         String reportData = convertResourceToString(report);
-        assertTrue(reportData.contains("testCycle1"));
+        assertTrue(reportData.contains(artifactName + "1"));
         assertTrue(reportData.contains("G-regTesting"));
         assertTrue(reportData.contains("4.5.0"));
         assertTrue(reportData.contains("Smoke test"));

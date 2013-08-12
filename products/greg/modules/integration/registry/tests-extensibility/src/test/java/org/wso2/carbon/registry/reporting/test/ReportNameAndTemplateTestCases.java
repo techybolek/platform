@@ -231,7 +231,7 @@ public class ReportNameAndTemplateTestCases extends ReportingTestCaseSuper {
 
         String result = readInputStreamAsString(report.getInputStream());
 
-        assertTrue(result.contains("testCycle1"));
+        assertTrue(result.contains(artifactName + "1"));
         assertTrue(result.contains("G-regTesting"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Smoke test"));
@@ -267,7 +267,7 @@ public class ReportNameAndTemplateTestCases extends ReportingTestCaseSuper {
 
         assertTrue(result.contains("Edited_heading"));
         assertTrue(result.contains("Version_Edited"));
-        assertTrue(result.contains("testCycle1"));
+        assertTrue(result.contains(artifactName + "1"));
         assertTrue(result.contains("G-regTesting"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Smoke test"));
@@ -407,7 +407,7 @@ public class ReportNameAndTemplateTestCases extends ReportingTestCaseSuper {
 
         String result = readInputStreamAsString(report.getInputStream());
 
-        assertTrue(result.contains("testApplication1"));
+        assertTrue(result.contains(applicationName + "1"));
         assertTrue(result.contains("4.5.0"));
         assertTrue(result.contains("Description"));
     }
