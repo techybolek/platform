@@ -52,14 +52,10 @@ var getAPISubscriptionsForApplication = function (username,appname) {
 
     try {
 
-	log.info("=== getAPISubscriptionsForApplication : "+ username);
-	log.info("=== getAPISubscriptionsForApplication : "+ appname);
         subscriptions = store.getSubscriptionsByApplication(appname, username);
         if (log.isDebugEnabled()) {
             log.debug("getSubscriptions : " + stringify(subscriptions));
         }
-
-	log.info("==== Subscription : "+stringify(subscriptions));
 
         return {
             error:false,
