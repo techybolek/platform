@@ -46,6 +46,7 @@ $(document).ready(function() {
     });
 
 
+            createHiddenForm();
     $('#resourceTable tr.resourceRow').each(function(){
         $('input',this).unbind('change');
         $('input:checkbox',this).change(function(){
