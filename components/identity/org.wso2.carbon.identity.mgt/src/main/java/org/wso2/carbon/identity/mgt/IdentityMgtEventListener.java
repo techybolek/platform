@@ -87,15 +87,17 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 			IdentityMgtConfig config = IdentityMgtConfig.getInstance();
 
 			// Get the policy registry with the loaded policies.
-            policyRegistry = config.getPolicyRegistry();
+			policyRegistry = config.getPolicyRegistry();
 
 			if (config.isListenerEnable()) {
-				IdentityMgtServiceComponent.getRealmService()
-				                           .getBootstrapRealm()
-				                           .getUserStoreManager()
-				                           .setUserClaimValue(adminUserName,
-				                                              UserIdentityDataStore.ACCOUNT_LOCK,
-				                                              Boolean.toString(false), null);
+
+				UserStoreManager userStoreMng = IdentityMgtServiceComponent.getRealmService()
+						.getBootstrapRealm().getUserStoreManager();
+				if (!userStoreMng.isReadOnly()) {
+
+					userStoreMng.setUserClaimValue(adminUserName,
+							UserIdentityDataStore.ACCOUNT_LOCK, Boolean.toString(false), null);
+				}
 			}
 		} catch (UserStoreException e) {
 			log.error("Error while init identity listener", e);
