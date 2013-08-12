@@ -23,10 +23,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.core.utils.fileutils.ArchiveExtractor;
+import org.wso2.carbon.automation.core.utils.fileutils.CustomFileFilter;
+import org.wso2.carbon.automation.core.utils.fileutils.SuffixFilter;
+import org.wso2.carbon.automation.core.utils.fileutils.TypeFilter;
 import org.wso2.carbon.utils.ArchiveManipulator;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileManipulator;
-import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,6 +35,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -242,16 +244,24 @@ public final class CodeCoverageUtils {
         cmd.run();
     }
 
-    public static void generateReports(String carbonHome) {       //-r html -in coverage.em,coverage.ec
-        log.info("Generate code coverage report ...");
+    public static void generateReports(
+            List<File> carbonHomeDirs) {       //-r html -in coverage.em,coverage.ec
+        log.info("Generating code coverage report ...");
+
         String emmaHome = System.getProperty("emma.home");
         if (emmaHome == null) {
+            log.error("Emma home not set properly");
             return;
         }
 
-        String basedir = System.getProperty("basedir");
-        String coverageEm = new File(basedir + File.separator + "" +
-                                     "target" + File.separator + "coverage.em").getAbsolutePath();
+        String baseDir = System.getProperty("basedir");
+        List<File> emmaEmFiles2 = getAllCoverageEmFiles(new File(baseDir));
+        //If coverage em file not found, go one level up and search coverage em in all subdirectories
+        if (emmaEmFiles2.size() == 0) {
+            emmaEmFiles2 =
+                    getAllCoverageEmFiles(new File(baseDir.substring(0, baseDir.lastIndexOf(File.separator))));
+        }
+
         try {
             Thread.sleep(15000); //wait for coverage data dump
         } catch (InterruptedException e) {
@@ -259,21 +269,37 @@ public final class CodeCoverageUtils {
         }
 
         // find all coverage.ec files, and generate the report
-        File[] coverageDataFiles = getCoverageDataFiles(carbonHome);
-
+        List<File> coverageDataFiles = new ArrayList<File>();
+        for (File carbonHome : carbonHomeDirs) {
+            if (carbonHome != null) {
+                File[] coverageFiles = getCoverageDataFiles(carbonHome.getAbsolutePath());
+                Collections.addAll(coverageDataFiles, coverageFiles);
+            }
+        }
 
 //        Collection<File> ecFiles = FileUtils.listFiles(new File(basedir), new String[]{"ec"}, true);
         StringBuilder ecFilesString = new StringBuilder();
+        StringBuilder emFilesString = new StringBuilder();
 
         for (File ecFile : coverageDataFiles) {
-            ecFilesString.append(ecFile.getAbsolutePath()).append(",");
-
+            if (ecFile != null) {
+                log.info("Including Coverage EC file -" + ecFile.getAbsolutePath());
+                ecFilesString.append(ecFile.getAbsolutePath()).append(",");
+            }
         }
+
+        for (File emFile : emmaEmFiles2) {
+            if (emFile != null) {
+                log.info("Including coverage EM file -" + emFile.getAbsolutePath());
+                emFilesString.append(emFile.getAbsolutePath()).append(",");
+            }
+        }
+
         Command cmd = Command.create("report", "emmarun",
                                      new String[]{"-r", "html", "-in",
-                                                  coverageEm + "," + ecFilesString});
+                                                  emFilesString + "," + ecFilesString});
         cmd.run();
-        log.info("Generated Emma reports");
+        log.info("Emma report generation completed");
     }
 
     private static File[] getCoverageDataFiles(String carbonHome) {
@@ -285,7 +311,6 @@ public final class CodeCoverageUtils {
     }
 
     public static boolean renameCoverageDataFile(String carbonHome) {
-//        String carbonHome = CarbonUtils.getCarbonHome();
         //get all .ec fies and then find coverage.ec, after that rename those files
         File[] coverageDataFiles = getCoverageDataFiles(carbonHome);
 
@@ -297,6 +322,14 @@ public final class CodeCoverageUtils {
             }
         }
         return false;
+    }
+
+    public static List<File> getAllCoverageEmFiles(File directory) {
+        if (directory.exists()) {
+            return CustomFileFilter.getFilesRecursive(directory,
+                                                      new SuffixFilter(TypeFilter.FILE, ".em"));
+        }
+        return null;
     }
 }
 

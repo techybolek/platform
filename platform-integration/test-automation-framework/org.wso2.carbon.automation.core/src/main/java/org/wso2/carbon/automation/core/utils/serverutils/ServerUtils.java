@@ -33,6 +33,8 @@ import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -196,7 +198,9 @@ public class ServerUtils {
             process.destroy();
             process = null;
             if (isCoverageEnable) {
-                CodeCoverageUtils.generateReports(carbonHome);
+                List<File> list = new ArrayList<File>();
+                list.add(new File(carbonHome));
+                CodeCoverageUtils.generateReports(list);
             }
 
             if (portOffset == 0) {

@@ -170,7 +170,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.server.admin.stub</artifactId>
-            <version>${stub.version}</version>
+            <version>${carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -340,7 +340,7 @@
             <version>2.3</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.axis2</groupId>
+            <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2-json</artifactId>
             <version>${version.axis2.json}</version>
         </dependency>
@@ -568,6 +568,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.1.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.axis2.wso2</groupId>
+            <artifactId>axis2-client</artifactId>
+            <version>${version.axis2.client}</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -589,11 +594,12 @@
     <properties>
         <orbit.version.axiom>1.2.11.wso2v3</orbit.version.axiom>
         <opensaml.versoin>2.4.1.wso2v1</opensaml.versoin>
-        <rampart.version>1.6.1.wso2v8</rampart.version>
+        <rampart.version>1.6.1.wso2v9</rampart.version>
         <wss4j.version>1.5.11.wso2v5</wss4j.version>
         <qpid.build.version>0.12</qpid.build.version>
         <qpid.version>0.12-wso2v1</qpid.version>
-        <version.axis2.json>1.6.1-wso2v7</version.axis2.json>
+        <version.axis2.json>1.6.1.wso2v10</version.axis2.json>
+        <version.axis2.client>1.6.1.wso2v10</version.axis2.client>
         <operadriver.version>0.8.1</operadriver.version>
         <selenium.version>2.31.0</selenium.version>
         <testng.version>6.8</testng.version>
