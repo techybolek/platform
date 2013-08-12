@@ -56,6 +56,7 @@ public class ResponseBuilder {
         response.setIssuer(SAMLSSOUtil.getIssuer());
         response.setID(SAMLSSOUtil.createID());
 	    response.setInResponseTo(authReqDTO.getId());
+	    response.setDestination(authReqDTO.getAssertionConsumerURL());
         response.setStatus(buildStatus(SAMLSSOConstants.StatusCodes.SUCCESS_CODE, null));
         response.setVersion(SAMLVersion.VERSION_20);
         DateTime issueInstant = new DateTime();
