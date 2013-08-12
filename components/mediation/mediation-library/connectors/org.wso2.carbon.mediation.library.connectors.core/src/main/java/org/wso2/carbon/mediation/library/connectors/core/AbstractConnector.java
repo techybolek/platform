@@ -37,6 +37,6 @@ public abstract class AbstractConnector extends AbstractMediator implements Conn
 	}
 
 	protected Object getParameter(MessageContext messageContext ,String paramName) {
-		return ConnectorUtils.lookupFunctionParam(messageContext, paramName);
+		return ConnectorUtils.lookupTemplateParamater(messageContext, paramName);
 	}
 }
