@@ -16,13 +16,19 @@
 
 package org.wso2.carbon.identity.mgt.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.captcha.mgt.beans.CaptchaInfoBean;
 import org.wso2.carbon.captcha.mgt.util.CaptchaUtil;
+import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.core.IdentityClaimManager;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.mgt.ChallengeQuestionProcessor;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
@@ -36,13 +42,17 @@ import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
 import org.wso2.carbon.identity.mgt.dto.UserDTO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDTO;
-import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.UserIdentityManagementUtil;
 import org.wso2.carbon.identity.mgt.util.Utils;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.user.core.Permission;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.claim.Claim;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.mgt.UserMgtConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * This service provides the services needed to recover user password and user
@@ -510,5 +520,307 @@ public class UserInformationRecoveryService {
         return questionDTOs.toArray(new ChallengeQuestionDTO[questionDTOs.size()]);
 
     }
+    
+	/**
+	 * This returns the user supported claims.
+	 * 
+	 * @param dialect
+	 * @return
+	 * @throws IdentityException
+	 */
+	public UserIdentityClaimDTO[] getUserIdentitySupportedClaims(String dialect)
+			throws IdentityException {
+		IdentityClaimManager claimManager = null;
+		Claim[] claims = null;
+		UserRealm realm = null;
+
+		claimManager = IdentityClaimManager.getInstance();
+		realm = IdentityTenantUtil.getRealm(null, null);
+		claims = claimManager.getAllSupportedClaims(dialect, realm);
+
+		if (claims == null || claims.length == 0) {
+			return new UserIdentityClaimDTO[0];
+		}
+
+		UserIdentityClaimDTO[] claimList = new UserIdentityClaimDTO[claims.length];
+
+		for (int i = 0; i < claims.length; i++) {
+			if (claims[i].getDisplayTag() != null
+					&& !IdentityConstants.PPID_DISPLAY_VALUE.equals(claims[i].getDisplayTag())) {
+				if (UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS.equals(claims[i].getClaimUri())) {
+					continue;
+				}
+				if (claims[i].isSupportedByDefault() && (!claims[i].isReadOnly())) {
+
+					UserIdentityClaimDTO claimDto = new UserIdentityClaimDTO();
+					claimDto.setClaimUri(claims[i].getClaimUri());
+					claimDto.setClaimValue(claims[i].getValue());
+					claimList[i] = claimDto;
+				}
+			}
+		}
+
+		return claimList;
+	}
+
+	/**
+	 * Verifies the user against the provided claims and captcha information.
+	 * 
+	 * @param claims
+	 * @param captcha
+	 * @param tenantDomain
+	 * @return
+	 * @throws IdentityMgtServiceException
+	 */
+	public VerificationBean verifyAccount(UserIdentityClaimDTO[] claims, CaptchaInfoBean captcha,
+			String tenantDomain) throws IdentityMgtServiceException {
+
+		VerificationBean vBean = new VerificationBean();
+
+		if (IdentityMgtConfig.getInstance().isCaptchaVerificationInternallyManaged()) {
+			try {
+				CaptchaUtil.processCaptchaInfoBean(captcha);
+			} catch (Exception e) {
+				if (log.isDebugEnabled()) {
+					log.debug(e.getMessage());
+				}
+				vBean.setError(VerificationBean.ERROR_CODE_INVALID_CAPTCHA + " " + e.getMessage());
+				vBean.setVerified(false);
+				return vBean;
+			}
+		}
+
+		if (tenantDomain == null || tenantDomain.equals("")) {
+			tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+		}
+		try {
+			int tenantId = Utils.getTenantId(tenantDomain);
+			String userName = UserIdentityManagementUtil.getUsernameByClaims(claims, tenantId);
+
+			if (userName != null) {
+				UserDTO userDTO = new UserDTO(userName);
+				userDTO.setTenantId(tenantId);
+
+				UserRecoveryDTO dto = new UserRecoveryDTO(userDTO);
+				dto.setNotification(IdentityMgtConstants.Notification.ACCOUNT_ID_RECOVERY);
+				dto.setNotificationType("EMAIL");
+
+				RecoveryProcessor processor = IdentityMgtServiceComponent.getRecoveryProcessor();
+				NotificationDataDTO notificationDto = processor.notifyWithEmail(dto);
+
+				vBean.setVerified(notificationDto.isNotificationSent());
+
+			} else {
+				vBean.setError("User not found");
+				vBean.setVerified(false);
+			}
+		} catch (Exception e) {
+			if (log.isDebugEnabled()) {
+				log.debug(e.getMessage());
+			}
+			vBean.setError(e.getMessage());
+			vBean.setVerified(false);
+			return vBean;
+		}
+
+		return vBean;
+	}
+	
+	/**
+	 * This method is used to register an user in the system. The account will be locked if the
+	 * Authentication.Policy.Account.Lock.On.Creation is set to true. Else user will be able to
+	 * login after registration.
+	 * 
+	 * @param userName
+	 * @param password
+	 * @param claims
+	 * @param profileName
+	 * @param tenantDomain
+	 * @return
+	 * @throws IdentityMgtServiceException
+	 */
+	public VerificationBean registerUser(String userName, String password,
+			UserIdentityClaimDTO[] claims, String profileName, String tenantDomain)
+			throws IdentityMgtServiceException {
+
+		VerificationBean vBean = new VerificationBean();
+
+		org.wso2.carbon.user.core.UserStoreManager userStoreManager = null;
+		Permission permission = null;
+
+		if (tenantDomain == null || tenantDomain.equals("")) {
+			tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+		}
+
+		RealmService realmService = IdentityMgtServiceComponent.getRealmService();
+		int tenantId;
+
+		try {
+
+			tenantId = Utils.getTenantId(tenantDomain);
+			if (realmService.getTenantUserRealm(tenantId) != null) {
+				userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) realmService
+						.getTenantUserRealm(tenantId).getUserStoreManager();
+			}
+
+		} catch (Exception e) {
+			String msg = "Error retrieving the user store manager for the tenant";
+			vBean.setVerified(false);
+			throw new IdentityMgtServiceException(msg, e);
+		}
+
+		try {
+
+			Map<String, String> claimsMap = new HashMap<String, String>();
+			for (UserIdentityClaimDTO userIdentityClaimDTO : claims) {
+				claimsMap.put(userIdentityClaimDTO.getClaimUri(),
+						userIdentityClaimDTO.getClaimValue());
+			}
+
+			userStoreManager.addUser(userName, password, null, claimsMap, profileName);
+
+			String identityRoleName = UserCoreConstants.INTERNAL_DOMAIN
+					+ CarbonConstants.DOMAIN_SEPARATOR + IdentityConstants.IDENTITY_DEFAULT_ROLE;
+
+			try {
+				if (!userStoreManager.isExistingRole(identityRoleName, false)) {
+					permission = new Permission("/permission/admin/login",
+							UserMgtConstants.EXECUTE_ACTION);
+					userStoreManager.addRole(identityRoleName, new String[] { userName },
+							new Permission[] { permission }, false);
+				} else {
+					userStoreManager.updateUserListOfRole(identityRoleName, new String[] {},
+							new String[] { userName });
+				}
+			} catch (org.wso2.carbon.user.api.UserStoreException e) {
+				userStoreManager.deleteUser(userName);
+				throw new IdentityMgtServiceException("Error occurred while adding user : "
+						+ userName, e);
+			}
+		} catch (UserStoreException e) {
+			throw new IdentityMgtServiceException("Error occurred while adding user : " + userName,
+					e);
+		}
+
+		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+
+		if (config.isListenerEnable() && config.isAuthPolicyAccountLockOnCreation()) {
+			UserDTO userDTO = new UserDTO(userName);
+			userDTO.setTenantId(tenantId);
+
+			UserRecoveryDTO dto = new UserRecoveryDTO(userDTO);
+			dto.setNotification(IdentityMgtConstants.Notification.ACCOUNT_CONFORM);
+			dto.setNotificationType("EMAIL");
+
+			RecoveryProcessor processor = IdentityMgtServiceComponent.getRecoveryProcessor();
+			try {
+				vBean = processor.updateConfirmationCode(1, userName, tenantId);
+
+				dto.setConfirmationCode(vBean.getKey());
+				NotificationDataDTO notificationDto = processor.notifyWithEmail(dto);
+				vBean.setVerified(notificationDto.isNotificationSent());
+
+			} catch (IdentityException e) {
+				vBean.setVerified(false);
+				vBean.setError("Failed to complete notification sending");
+				vBean.setKey("");
+			}
+
+		} else {
+			vBean.setVerified(true);
+		}
+
+		return vBean;
+	}
+
+	/**
+	 * This method used to confirm the self registered user account and unlock it.
+	 * 
+	 * @param username
+	 * @param code
+	 * @param captcha
+	 * @param tenantDomain
+	 * @return
+	 * @throws IdentityMgtServiceException
+	 */
+	public VerificationBean confirmUserSelfRegistration(String username, String code,
+			CaptchaInfoBean captcha, String tenantDomain) throws IdentityMgtServiceException {
+
+		VerificationBean bean = new VerificationBean();
+
+		if (log.isDebugEnabled()) {
+			log.debug("User registration verification request received with username :" + username);
+		}
+		if (IdentityMgtConfig.getInstance().isCaptchaVerificationInternallyManaged()) {
+			try {
+				CaptchaUtil.processCaptchaInfoBean(captcha);
+			} catch (Exception e) {
+				if (log.isDebugEnabled()) {
+					log.debug(e.getMessage());
+				}
+				bean.setError(VerificationBean.ERROR_CODE_INVALID_CAPTCHA);
+				bean.setVerified(false);
+				return bean;
+			}
+		}
+
+		try {
+			Utils.processUserId(username);
+			
+		} catch (IdentityException e) {
+			if (log.isDebugEnabled()) {
+				log.debug(e.getMessage());
+			}
+			bean.setError(VerificationBean.ERROR_CODE_INVALID_USER);
+			bean.setVerified(false);
+			return bean;
+		}
+
+		RecoveryProcessor processor = IdentityMgtServiceComponent.getRecoveryProcessor();
+
+		org.wso2.carbon.user.core.UserStoreManager userStoreManager = null;
+
+		if (tenantDomain == null || tenantDomain.equals("")) {
+			tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+		}
+
+		RealmService realmService = IdentityMgtServiceComponent.getRealmService();
+		int tenantId;
+
+		try {
+
+			tenantId = Utils.getTenantId(tenantDomain);
+			if (realmService.getTenantUserRealm(tenantId) != null) {
+				userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) realmService
+						.getTenantUserRealm(tenantId).getUserStoreManager();
+			}
+
+		} catch (Exception e) {
+			String msg = "Error retrieving the user store manager for the tenant";
+			bean.setVerified(false);
+			throw new IdentityMgtServiceException(msg, e);
+		}
+
+		try {
+			bean = processor.verifyConfirmationCode(1, username, code);
+			if (bean.isVerified()) {
+				UserIdentityManagementUtil.unlockUserAccount(username, userStoreManager);
+				bean.setVerified(true);
+
+			} else {
+				bean.setVerified(false);
+				bean.setKey("");
+				log.error("User verification failed against the given confirmation code");
+			}
+		} catch (IdentityException e) {
+			bean.setError("Error while validating confirmation code");
+			if (log.isDebugEnabled()) {
+				log.debug(e.getMessage());
+			}
+			throw new IdentityMgtServiceException("Error while validating given confirmation code");
+		}
+
+		return bean;
+	}
     
 }

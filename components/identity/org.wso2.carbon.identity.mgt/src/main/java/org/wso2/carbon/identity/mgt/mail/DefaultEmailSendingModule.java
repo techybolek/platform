@@ -49,52 +49,65 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 
 		String emailAddress = notificationData.getNotificationAddress();
 		userParameters.put("user-id", notificationData.getUserId());
-        if(notificationData.getFirstName() == null){
-            userParameters.put("first-name", notificationData.getUserId());
-        } else {
-            userParameters.put("first-name", notificationData.getFirstName());
-        }
-        String notification = notificationData.getNotification();
-        if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)){
-		    userParameters.put("temporary-password", notificationData.getNotificationCode());
-        } else if (IdentityMgtConstants.Notification.OTP_PASSWORD.equals(notification)) {
-        	userParameters.put("otp-password", notificationData.getNotificationCode());
-        } else if (IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)) {
+		if (notificationData.getFirstName() == null) {
+			userParameters.put("first-name", notificationData.getUserId());
+		} else {
+			userParameters.put("first-name", notificationData.getFirstName());
+		}
+		String notification = notificationData.getNotification();
+		if (IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)) {
+			userParameters.put("temporary-password", notificationData.getNotificationCode());
 
+		} else if (IdentityMgtConstants.Notification.OTP_PASSWORD.equals(notification)) {
+			userParameters.put("otp-password", notificationData.getNotificationCode());
+
+		} else if (IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)) {
 			String resetLink = emailConfig.getTargetEpr() + "?" + CONF_STRING + "="
 					+ notificationData.getNotificationCode();
 			userParameters.put("password-reset-link", resetLink);
 			userParameters.put("user-name", notificationData.getUserId());
-        } else if(IdentityMgtConstants.Notification.ASK_PASSWORD.equals(notification)) {
+
+		} else if (IdentityMgtConstants.Notification.ASK_PASSWORD.equals(notification)) {
 			String resetLink = emailConfig.getTargetEpr() + "?" + CONF_STRING + "="
 					+ notificationData.getNotificationCode();
 			userParameters.put("password-reset-link", resetLink);
 			userParameters.put("user-name", notificationData.getUserId());
-        }
+
+		} else if (IdentityMgtConstants.Notification.ACCOUNT_ID_RECOVERY.equals(notification)) {
+			userParameters.put("user-name", notificationData.getNotificationCode());
+
+		} else if (IdentityMgtConstants.Notification.ACCOUNT_CONFORM.equals(notification)) {
+			String confirmationLink = emailConfig.getTargetEpr() + "?" + CONF_STRING + "="
+					+ notificationData.getNotificationCode() + "&" + "userName="
+					+ notificationData.getUserId();
+			userParameters.put("user-name", notificationData.getUserId());
+			userParameters.put("confirmation-link", confirmationLink);
+		}
 
 		try {
 			PrivilegedCarbonContext.startTenantFlow();
 
 			if (notificationData.getNotificationSubject() == null) {
-				if(emailConfig.getSubject() != null) {
+				if (emailConfig.getSubject() != null) {
 					headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, emailConfig.getSubject());
 				} else {
-					headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, EmailConfig.DEFAULT_VALUE_SUBJECT);
-				}				
+					headerMap.put(MailConstants.MAIL_HEADER_SUBJECT,
+							EmailConfig.DEFAULT_VALUE_SUBJECT);
+				}
 			} else {
-				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, notificationData.getNotificationSubject());
+				headerMap.put(MailConstants.MAIL_HEADER_SUBJECT,
+						notificationData.getNotificationSubject());
 			}
 
-            String requestMessage = replacePlaceHolders(getRequestMessage(emailConfig), userParameters);
+			String requestMessage = replacePlaceHolders(getRequestMessage(emailConfig),
+					userParameters);
 
-			OMElement payload =
-			                    OMAbstractFactory.getOMFactory()
-			                                     .createOMElement(BaseConstants.DEFAULT_TEXT_WRAPPER,
-			                                                      null);
+			OMElement payload = OMAbstractFactory.getOMFactory().createOMElement(
+					BaseConstants.DEFAULT_TEXT_WRAPPER, null);
 			payload.setText(requestMessage);
 			ServiceClient serviceClient;
-			ConfigurationContext configContext =
-			                                     CarbonConfigurationContextFactory.getConfigurationContext();
+			ConfigurationContext configContext = CarbonConfigurationContextFactory
+					.getConfigurationContext();
 			if (configContext != null) {
 				serviceClient = new ServiceClient(configContext, null);
 			} else {
@@ -104,7 +117,7 @@ public class DefaultEmailSendingModule extends AbstractEmailSendingModule {
 			options.setProperty(Constants.Configuration.ENABLE_REST, Constants.VALUE_TRUE);
 			options.setProperty(MessageContext.TRANSPORT_HEADERS, headerMap);
 			options.setProperty(MailConstants.TRANSPORT_MAIL_FORMAT,
-			                    MailConstants.TRANSPORT_FORMAT_TEXT);
+					MailConstants.TRANSPORT_FORMAT_TEXT);
 			options.setTo(new EndpointReference("mailto:" + emailAddress));
 			serviceClient.setOptions(options);
 			serviceClient.fireAndForget(payload);

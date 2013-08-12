@@ -34,8 +34,6 @@ import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDTO;
 import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
-import org.wso2.carbon.identity.mgt.mail.DefaultEmailSendingModule;
-import org.wso2.carbon.identity.mgt.mail.EmailConfig;
 import org.wso2.carbon.identity.mgt.policy.PolicyRegistry;
 import org.wso2.carbon.identity.mgt.policy.PolicyViolationException;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
@@ -46,7 +44,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.claim.ClaimMapping;
 import org.wso2.carbon.user.core.common.AbstractUserOperationEventListener;
 
 

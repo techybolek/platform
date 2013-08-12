@@ -180,7 +180,7 @@ public class IdentityMgtConstants {
 
         public static  final String TEMPORARY_PASSWORD = "temporaryPassword";
 
-        public static  final String ACCOUNT_CONFORM = "accountConformation";
+        public static  final String ACCOUNT_CONFORM = "accountConfirmation";
 
         public static  final String ACCOUNT_UNLOCK = "accountLock";
         

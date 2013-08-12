@@ -348,6 +348,78 @@ public class RecoveryProcessor {
         return questionProcessor;
     }
     
+    public NotificationDataDTO notifyWithEmail(UserRecoveryDTO notificationBean){
+
+    	if(!IdentityMgtConfig.getInstance().isNotificationSending()){
+//          return new NotificationDataDTO("Email sending is disabled");
+      }
+
+      String notificationAddress;
+
+      String confirmationKey = null;
+      NotificationSendingModule module = null;
+
+      String userId = notificationBean.getUserId();
+      String domainName = notificationBean.getTenantDomain();
+      int tenantId = notificationBean.getTenantId();
+      confirmationKey = notificationBean.getConfirmationCode();
+      
+      NotificationDataDTO notificationData = new NotificationDataDTO();
+
+      
+      String type = notificationBean.getNotificationType();
+      if(type != null){
+          module =  modules.get(type);
+      }
+
+      if(module == null){
+          module = defaultModule;
+      }
+
+      notificationAddress = module.getNotificationAddress(userId, tenantId);
+
+      if ((notificationAddress == null) || (notificationAddress.trim().length() < 0)) {
+          log.warn("Notification sending failure. Notification address is not defined for user " + userId);
+      }
+
+      if(notificationBean.getNotification() != null){
+          String notification = notificationBean.getNotification().trim();
+          notificationData.setNotification(notification);
+          if(IdentityMgtConstants.Notification.PASSWORD_RESET_RECOVERY.equals(notification)){
+              notificationData.setNotificationCode(confirmationKey);
+              
+          } else if(IdentityMgtConstants.Notification.ACCOUNT_CONFORM.equals(notification)){
+              notificationData.setNotificationCode(confirmationKey);
+              
+          } else if(IdentityMgtConstants.Notification.TEMPORARY_PASSWORD.equals(notification)){
+              String temporaryPassword = notificationBean.getTemporaryPassword();  // TODO
+              notificationData.setNotificationCode(temporaryPassword);
+
+          } else if(IdentityMgtConstants.Notification.ACCOUNT_UNLOCK.equals(notification) ||
+                  IdentityMgtConstants.Notification.ACCOUNT_ID_RECOVERY.equals(notification)){
+        	  notificationData.setNotificationCode(userId);
+        	  
+          } else if(IdentityMgtConstants.Notification.ASK_PASSWORD.equals(notification)){          	
+              notificationData.setNotificationCode(confirmationKey);
+              
+          } 
+      }
+
+      notificationData.setNotificationAddress(notificationAddress);
+      notificationData.setUserId(userId);
+      notificationData.setDomainName(domainName);
+
+      if(IdentityMgtConfig.getInstance().isNotificationInternallyManaged()){ 
+          module.setNotificationData(notificationData);
+          notificationSender.sendNotification(module);
+          notificationData.setNotificationSent(true);
+      } else {
+          notificationData.setNotificationSent(false);
+      }
+
+      return notificationData; 
+    }
+    
     /**
      * Generates the code specific to user and operations sequence value.
      * @param sequence

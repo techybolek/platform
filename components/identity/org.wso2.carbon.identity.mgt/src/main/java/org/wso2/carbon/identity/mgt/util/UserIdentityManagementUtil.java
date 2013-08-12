@@ -29,6 +29,7 @@ import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -378,10 +379,13 @@ public class UserIdentityManagementUtil {
 		NotificationSender sender = new NotificationSender();
 		//sender.sendNotification(emailModule);
 
+		
 	}
 	
-	public static void notifyWithEmail() {
+	public static void notifyWithEmail(UserRecoveryDTO notificationBean) {
 		
+
+        
 	}
 
 	/**
@@ -403,4 +407,87 @@ public class UserIdentityManagementUtil {
 	public static String generateRandomConfirmationCode() {
 		return new String(generateTemporaryPassword());
 	}
+
+	/**
+	 * 
+	 * @param claims
+	 * @param tenantId
+	 * @return 
+	 * @throws IdentityMgtServiceException - If user cannot be retrieved using the provided claims.
+	 */
+	public static String getUsernameByClaims(UserIdentityClaimDTO[] claims, int tenantId)
+			throws IdentityMgtServiceException {
+
+		if (claims == null || claims.length < 1) {
+			throw new IdentityMgtServiceException("No fields found for user search");
+		}
+
+		String userName = null;
+		String[] tempUserList = null;
+
+		// Need to populate the claim email as the first element in the
+		// passed array.
+		for (int i = 0; i < claims.length; i++) {
+
+			UserIdentityClaimDTO claim = claims[i];
+			if (claim.getClaimUri() != null && claim.getClaimValue() != null) {
+
+				String[] userList = getUserList(tenantId, claim.getClaimUri(),
+						claim.getClaimValue());
+
+				if (userList != null && userList.length > 0) {
+					if (userList.length == 1) {
+						return userList[0];
+					} else {
+						//If more than one user find the first matching user. Hence need to define unique claims
+						if (tempUserList != null) {
+							for (int j = 0; j < tempUserList.length; j++) {
+								for (int x = 0; x < userList.length; x++) {
+									if (tempUserList[j].equals(userList[x])) {
+										return userList[x];
+									}
+								}
+							}
+						}
+						tempUserList = new String[userList.length];
+						tempUserList = userList;
+						continue;
+					}
+				} else {
+					throw new IdentityMgtServiceException(
+							"No associated user is found for given claim values");
+
+				}
+			}
+		}
+
+		return userName;
+	}
+    
+    private static String[] getUserList(int tenantId, String claim, String value) throws IdentityMgtServiceException {
+
+    	org.wso2.carbon.user.core.UserStoreManager userStoreManager = null;
+        String[] userList = null;
+        RealmService realmService = IdentityMgtServiceComponent.getRealmService();
+        
+        try {
+            if (realmService.getTenantUserRealm(tenantId) != null) {
+                userStoreManager = (org.wso2.carbon.user.core.UserStoreManager) realmService.getTenantUserRealm(tenantId).
+                        getUserStoreManager();
+            }
+
+        } catch (Exception e) {
+            String msg = "Error retrieving the user store manager for the tenant";
+            throw new IdentityMgtServiceException(msg, e);
+        }
+        try {
+            if (userStoreManager != null) {
+                userList = userStoreManager.getUserList(claim, value, null);
+            }
+            return userList;
+        } catch (Exception e) {
+            String msg = "Unable to retrieve the claim for the given tenant";
+            throw new IdentityMgtServiceException(msg, e);
+        }
+    }
 }
