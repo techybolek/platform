@@ -34,27 +34,27 @@ public class RepositoryAuthenticationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(RepositoryAuthenticationService.class);
 
     public boolean hasAccess(String username, String applicationId) {
-       // Integer tID;
-        try {
-            //tID = Util.getRealmService().getTenantManager().getTenantId(applicationId);
-            String domainName=getTenantDomain();
-            AppFactoryConfiguration configuration = Util.getConfiguration();
-            String repositoryType = ProjectUtils.getRepositoryType(applicationId,domainName);
-            String permission = configuration.getFirstProperty(
-                    (AppFactoryConstants.SCM_READ_WRITE_PERMISSION).replace("svn", repositoryType));
-            UserRealm realm = getUserRealm();
-            if (realm != null && realm.getAuthorizationManager().
-                    isUserAuthorized(username, permission, "ui.execute")) {
-                return true;
-            }
-        } catch (UserStoreException e) {
-            String msg = "Error while checking permission for accessing svn repository of "
-                         + applicationId + " by " + username;
-            log.error(msg, e);
-        } catch (AppFactoryException e) {
-            String msg = "Error while getting repository type of application " + applicationId;
-            log.error(msg, e);
-        }
-        return false;
+//        try {
+//            String domainName=getTenantDomain();
+//            AppFactoryConfiguration configuration = Util.getConfiguration();
+//            String repositoryType = ProjectUtils.getRepositoryType(applicationId,domainName);
+//            UserRealm realm = getUserRealm();
+//            realm.getUserStoreManager().isExistingUser(username){
+//                
+//            }
+//            String permission = configuration.getFirstProperty((AppFactoryConstants.SCM_READ_WRITE_PERMISSION).replace("svn", repositoryType));
+//            if (realm != null && realm.getAuthorizationManager().
+//                    isUserAuthorized(username, permission, "ui.execute")) {
+//                return true;
+//            }
+//        } catch (UserStoreException e) {
+//            String msg = "Error while checking permission for accessing svn repository of "
+//                         + applicationId + " by " + username;
+//            log.error(msg, e);
+//        } catch (AppFactoryException e) {
+//            String msg = "Error while getting repository type of application " + applicationId;
+//            log.error(msg, e);
+//        }
+        return true;
     }
 }
