@@ -46,7 +46,7 @@ public class AppFactoryApplicationEventListener extends ApplicationEventsListene
     }
 
     @Override
-    public void onCreation(Application application) throws AppFactoryException {
+    public void onCreation(Application application, String tenantDomain) throws AppFactoryException {
         try {
             log.info("On creation event received for redmine application listener.");
             Project project = new Project();

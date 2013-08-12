@@ -44,9 +44,7 @@ public class SCMManagerBasedGITRepositoryProvider extends AbstractRepositoryProv
     public static final String TYPE = "git";
 
     /**
-     * @param applicationKey for the creating app
-     * @return URL for the created app repository
-     * @throws RepositoryMgtException if repository creation fails
+     * {@inheritDoc}
      */
     @Override
     public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
@@ -83,7 +81,7 @@ public class SCMManagerBasedGITRepositoryProvider extends AbstractRepositoryProv
             post.releaseConnection();
         }
         if (post.getStatusCode() == HttpStatus.SC_CREATED) {
-            url = getAppRepositoryURL(applicationKey);
+            url = getAppRepositoryURL(applicationKey, tenantDomain);
         } else {
             String msg = "Repository creation is failed for " + applicationKey +
                          " server returned status " + post.getStatusText();
@@ -95,12 +93,10 @@ public class SCMManagerBasedGITRepositoryProvider extends AbstractRepositoryProv
     }
 
     /**
-     * @param applicationKey for the created app
-     * @return URL for the repo
-     * @throws RepositoryMgtException in an error
+     * {@inheritDoc}
      */
     @Override
-    public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
+    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         HttpClient client = getClient();
         GetMethod get = new GetMethod(getServerURL() + REST_BASE_URI + REST_GET_REPOSITORY_URI
                                       + applicationKey);
@@ -132,11 +128,6 @@ public class SCMManagerBasedGITRepositoryProvider extends AbstractRepositoryProv
             }
         }
         return repository;
-    }
-
-    @Override
-    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     /**

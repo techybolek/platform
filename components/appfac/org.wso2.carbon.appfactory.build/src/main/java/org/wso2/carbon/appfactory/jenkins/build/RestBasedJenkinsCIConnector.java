@@ -115,6 +115,7 @@ public class RestBasedJenkinsCIConnector {
      *
      * @param roleName Name of the role.
      * @param pattern  a regular expression to match jobs (e.g. app1.*)
+     * @param permissions
      * @throws AppFactoryException if an error occurs
      */
     public void createRole(String roleName, String pattern,
@@ -211,16 +212,16 @@ public class RestBasedJenkinsCIConnector {
         }
 
     }
-    
+
     /**
      * Assign set of users to the application given.
      * <p>
      * <b>NOTE: this method assumes a modified version (by WSO2) of
      * 'role-strategy' plugin is installed in jenkins server</b>
      * </p>
-     * 
-     * @param appicationKey
-     * @param users
+     *
+     * @param appicationKey Application ID
+     * @param users         Users List
      * @throws AppFactoryException
      */
 	public void unAssignUsers(String appicationKey, String[] users) throws AppFactoryException {
@@ -378,6 +379,7 @@ public class RestBasedJenkinsCIConnector {
      *
      * @param jobName   name of the job
      * @param jobParams Job configuration parameters
+     * @param tenantDomain Tenant domain of applicatoin
      * @throws AppFactoryException if an error occures.
      */
     public void createJob(String jobName, Map<String, String> jobParams, String tenantDomain) throws AppFactoryException {
@@ -738,7 +740,7 @@ public class RestBasedJenkinsCIConnector {
      * @throws AppFactoryException
      */
     public String getJsonTree(String jobName,String treeStructure) throws AppFactoryException {
-        
+
         String buildUrl = null;
         String buildsInfo = null;
         log.info(String.format("getJsonTree - for %s > %s",jobName, treeStructure));
@@ -1307,6 +1309,7 @@ public class RestBasedJenkinsCIConnector {
      * @param urlFragment     Url fragments.
      * @param queryParameters Query parameters.
      * @param requestEntity   A request entity
+     * @param tenantDomain Tenant domain of application
      * @return a {@link PostMethod}
      */
     private PostMethod createPost(String urlFragment, NameValuePair[] queryParameters,
@@ -1315,9 +1318,15 @@ public class RestBasedJenkinsCIConnector {
     }
 
 
+    /**
+     * Get Jenkins URL for a given Tenant Domain
+     * @param urlFragment     Url fragments
+     * @param tenantDomain    Tenant domain of the application
+     * @return Jenkins URL
+     */
     private String getJenkinsUrlByTenantDomain(String urlFragment, String tenantDomain){
         if(tenantDomain!=null && !tenantDomain.equals(""))
-            return getJenkinsUrl() + File.separator + "t" + File.separator + tenantDomain + "/webapps/jenkins"+urlFragment;
+            return getJenkinsUrl() + File.separator + Constants.TENANT_SPACE + File.separator + tenantDomain + Constants.JENKINS_WEBAPPS + urlFragment;
         else
             return getJenkinsUrl() + urlFragment;
     }
@@ -1329,6 +1338,7 @@ public class RestBasedJenkinsCIConnector {
      * @param queryParameters Query parameters.
      * @param postParameters  Post parameters.
      * @param requestEntity   A request entity
+     * @param tenantDomain    Tenant Domain of application
      * @return a {@link PostMethod}
      */
     private PostMethod createPost(String urlFragment, NameValuePair[] queryParameters,
@@ -1351,7 +1361,7 @@ public class RestBasedJenkinsCIConnector {
         if ( postParameters != null){
             post.addParameters(postParameters);
         }
-        
+
         return post;
     }
     private String getValueUsingXpath(OMElement template, String selector)

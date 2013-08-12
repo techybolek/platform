@@ -40,7 +40,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -281,15 +280,15 @@ public class ProjectUtils {
     }
 
     /**
-     * Returns the type of the application given the application Id
+     * Returns the type of the application for a given the application Id and tenant name
      *
      * @param applicationId Id of the application
-     * @return the type
-     * @throws AppFactoryException if an error occurs.
+     * @param tenantDomain Tenant domain of the application
+     * @return the application type
+     * @throws AppFactoryException If invalid application or application type is not available
      */
-    public static String getApplicationType(String applicationId) throws AppFactoryException {
-
-        GenericArtifactImpl artifact = getApplicationArtifact(applicationId);
+    public static String getApplicationType(String applicationId, String tenantDomain) throws AppFactoryException {
+        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
 
         if (artifact == null) {
             String errorMsg =
@@ -297,7 +296,6 @@ public class ProjectUtils {
                             applicationId);
             log.error(errorMsg);
             throw new AppFactoryException(errorMsg);
-
         }
 
         try {
@@ -312,40 +310,17 @@ public class ProjectUtils {
         }
     }
 
-    public static String getRepositoryType(String applicationId) throws AppFactoryException {
-
-        GenericArtifactImpl artifact = getApplicationArtifact(applicationId);
-
-        if (artifact == null) {
-            String errorMsg =
-                    String.format("Unable to find applcation information for id : %s",
-                            applicationId);
-            log.error(errorMsg);
-            throw new AppFactoryException(errorMsg);
-
-        }
-
-        try {
-            return artifact.getAttribute("application_repositorytype");
-        } catch (RegistryException e) {
-            String errorMsg =
-                    String.format("Unable to find the repository type for application id: %s",
-                            applicationId);
-            log.error(errorMsg, e);
-            throw new AppFactoryException(errorMsg, e);
-        }
-    }
-
     /**
      * Provides information about an application.
      *
      * @param applicationId id of the application
+     * @param tenantDomain the tenant name of the application
      * @return {@link Application}
-     * @throws AppFactoryException if an error occurs
+     * @throws AppFactoryException Throws error when unable
+     *          to extract application information
      */
-    public static Application getApplicationInfo(String applicationId) throws AppFactoryException {
-
-        GenericArtifactImpl artifact = getApplicationArtifact(applicationId);
+    public static Application getApplicationInfo(String applicationId, String tenantDomain) throws AppFactoryException {
+        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
 
         if (artifact == null) {
             String errorMsg =
@@ -511,46 +486,7 @@ public class ProjectUtils {
      * A Util method to load an Application artifact from the registry.
      *
      * @param applicationId the application Id
-     * @return a {@link GenericArtifactImpl} representing the application or
-     *         null if application (by the id is not in registry)
-     * @throws AppFactoryException if an error occurs.
-     */
-    private static GenericArtifactImpl getApplicationArtifact(String applicationId)
-            throws AppFactoryException {
-        GenericArtifact artifact = null;
-        try {
-
-            RegistryService registryService =
-                    ServiceReferenceHolder.getInstance()
-                            .getRegistryService();
-            UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
-            Resource resource =
-                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-                            "/" + applicationId + "/" +
-                            "appinfo");
-            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
-            GenericArtifactManager artifactManager =
-                    new GenericArtifactManager(userRegistry,
-                            "application");
-            // GenericArtifact artifact =
-            // artifactManager.getGenericArtifact(resource.getUUID());
-            artifact = artifactManager.getGenericArtifact(resource.getUUID());
-
-        } catch (RegistryException e) {
-            String errorMsg =
-                    String.format("Unable to load the application information for applicaiton id: %s",
-                            applicationId);
-            log.error(errorMsg, e);
-            throw new AppFactoryException(errorMsg, e);
-        }
-
-        return (GenericArtifactImpl) artifact;
-    }
-
-    /**
-     * A Util method to load an Application artifact from the registry.
-     *
-     * @param applicationId the application Id
+     * @param tenantDomain the tenant name of the application
      * @return a {@link GenericArtifactImpl} representing the application or
      *         null if application (by the id is not in registry)
      * @throws AppFactoryException if an error occurs.
@@ -572,8 +508,6 @@ public class ProjectUtils {
             GenericArtifactManager artifactManager =
                     new GenericArtifactManager(userRegistry,
                             "application");
-            // GenericArtifact artifact =
-            // artifactManager.getGenericArtifact(resource.getUUID());
             artifact = artifactManager.getGenericArtifact(resource.getUUID());
 
         } catch (RegistryException e) {
@@ -583,39 +517,23 @@ public class ProjectUtils {
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         } catch (UserStoreException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            String errorMsg =
+                    String.format("User Registration Error for applicaiton id: %s",
+                            applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
         }
 
         return (GenericArtifactImpl) artifact;
     }
 
-    public static String getApplicationType(String applicationId, String tenantDomain) throws AppFactoryException {
-
-        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
-
-        if (artifact == null) {
-            String errorMsg =
-                    String.format("Unable to find applcation information for id : %s",
-                            applicationId);
-            log.error(errorMsg);
-            throw new AppFactoryException(errorMsg);
-
-        }
-
-        try {
-            return artifact.getAttribute("application_type");
-        } catch (RegistryException e) {
-            String errorMsg =
-                    String.format("Unable to find the application type for application " +
-                            "id: %s",
-                            applicationId);
-            log.error(errorMsg, e);
-            throw new AppFactoryException(errorMsg, e);
-        }
-    }
-
-
-
+    /**
+     * Returns the type of the repository for a given application id and tenant
+     * @param applicationId Id of the application
+     * @param tenantDomain Tenant name of the application
+     * @return Repository Type
+     * @throws AppFactoryException If Unable to find Application or Repository Type
+     */
     public static String getRepositoryType(String applicationId, String tenantDomain) throws AppFactoryException {
 
         GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
@@ -626,7 +544,6 @@ public class ProjectUtils {
                             applicationId);
             log.error(errorMsg);
             throw new AppFactoryException(errorMsg);
-
         }
 
         try {

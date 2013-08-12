@@ -27,7 +27,7 @@ import org.wso2.carbon.core.AbstractAdmin;
  */
 public class ArtifactCreator extends AbstractAdmin {
 
-    public void createArtifact(String applicationId, String version, String revision, boolean doDeploy, String deployStage, String tagName)
+    public void createArtifact(String applicationId, String version, String revision, boolean doDeploy, String deployStage, String tagName, String tenantDomain)
                                                                                      throws AppFactoryException {
         if (ServiceHolder.getContinuousIntegrationSystemDriver() != null) {
             // Since the CI system is enabled appfactory will give the preference to it. Appfactory will start
@@ -44,7 +44,7 @@ public class ArtifactCreator extends AbstractAdmin {
             DefaultRevisionControlDriverListener listener =
                                                             new DefaultRevisionControlDriverListener();
             RevisionControlDriver revisionControlDriver = ServiceHolder.getRevisionControlDriver();
-            revisionControlDriver.getSource(applicationId, version, revision, listener);
+            revisionControlDriver.getSource(applicationId, version, revision, listener, tenantDomain);
         }
     }
 }

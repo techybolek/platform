@@ -44,9 +44,12 @@ import java.util.UUID;
 public class MavenBuildDriver implements BuildDriver {
     private static final Log log = LogFactory.getLog(MavenBuildDriver.class);
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void buildArtifact(String applicationId, String version, String revision,
-                              BuildDriverListener listener) throws AppFactoryException {
+                              BuildDriverListener listener, String tenantDomain) throws AppFactoryException {
     	log.info("Build started for " + applicationId);
         File workDir = AppFactoryUtil.getApplicationWorkDirectory(applicationId, version, revision);
         String pomFilePath = workDir.getAbsolutePath() + File.separator+ "pom.xml";
@@ -62,11 +65,11 @@ public class MavenBuildDriver implements BuildDriver {
 			}
 			return;
         }
-        executeMavenGoal(workDir.getAbsolutePath(), applicationId, version, listener);
+        executeMavenGoal(workDir.getAbsolutePath(), applicationId, version, listener, tenantDomain);
     }
 
     // TODO : Run in a thread pool
-    private void executeMavenGoal(String applicationPath, final String appId, String version, BuildDriverListener listener)
+    private void executeMavenGoal(String applicationPath, final String appId, String version, BuildDriverListener listener, String tenantDomain)
             throws AppFactoryException {
         InvocationRequest request = new DefaultInvocationRequest();
         String MAVEN_HOME;
@@ -103,7 +106,7 @@ public class MavenBuildDriver implements BuildDriver {
 			if (result != null && result.getExitCode() == 0) {
 				log.info("Build successful");
 				File targetDir = new File(applicationPath);
-                String applicationType = ProjectUtils.getApplicationType(appId);
+                String applicationType = ProjectUtils.getApplicationType(appId, tenantDomain);
                 String[] fileExtension = { applicationType };
 				List<File> fileList = (List<File>) FileUtils.listFiles(targetDir, fileExtension, true);
 				File builtArtifact = fileList.get(0);

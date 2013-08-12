@@ -59,7 +59,7 @@ public class DSApplicationListener extends ApplicationEventsListener {
         }
     }
     @Override
-    public void onCreation(Application application) {
+    public void onCreation(Application application, String tenantDomain) {
         createSampleDataSource(application);
     }
 

@@ -41,12 +41,12 @@ public class AppfactoryRevisionControlDriver implements RevisionControlDriver {
 
     @Deprecated
     public void getSource(String applicationId, String version, String revision,
-                          RevisionControlDriverListener listener)
+                          RevisionControlDriverListener listener, String tenantDomain)
             throws AppFactoryException {
         String checkoutUrl = null;
         String repositoryType = Util.getConfiguration().getFirstProperty(AppFactoryConstants.PREFERRED_REPOSITORY_TYPE);
         try {
-            checkoutUrl = repositoryManager.getAppRepositoryURL(applicationId, repositoryType);
+            checkoutUrl = repositoryManager.getAppRepositoryURL(applicationId, repositoryType, tenantDomain);
 
         } catch (RepositoryMgtException e) {
             String msg = "Error while getting repository url";
@@ -83,7 +83,7 @@ public class AppfactoryRevisionControlDriver implements RevisionControlDriver {
             log.error(msg, e);
             throw new AppFactoryException(msg, e);
         }
-        listener.onGetSourceCompleted(applicationId, version, revision);
+        listener.onGetSourceCompleted(applicationId, version, revision, tenantDomain);
     }
 
 

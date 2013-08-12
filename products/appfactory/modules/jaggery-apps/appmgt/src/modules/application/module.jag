@@ -16,6 +16,9 @@ jagg.module("application", {
     createApplication:function () {
         return jagg.require(jagg.getModulesDir() + "application/add/add.jag").createApplication.apply(this, arguments);
     },
+    createApplicationBPEL:function () {
+        return jagg.require(jagg.getModulesDir() + "application/add/add.jag").createApplicationBPEL.apply(this, arguments);
+    },
     
     createRepository:function () {
         return jagg.require(jagg.getModulesDir() + "application/add/add.jag").createRepository.apply(this, arguments);

@@ -27,7 +27,10 @@ jagg.module("manager", {
    },
     getBackendCookie:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getBackendCookie.apply(this, arguments);
-        }
+    },
+    getTenantDomain:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getTenantDomain.apply(this, arguments);
+    }
 
 });
 %>

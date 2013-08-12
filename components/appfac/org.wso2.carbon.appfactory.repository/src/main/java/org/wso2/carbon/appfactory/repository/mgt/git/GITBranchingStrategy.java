@@ -83,11 +83,11 @@ public class GITBranchingStrategy implements BranchingStrategy {
      */
     @Override
     public void doRepositoryBranch(String appId, String currentVersion, String targetVersion,
-                                   String currentRevision) throws RepositoryMgtException {
-        String sourceURL = provider.getAppRepositoryURL(appId);
+                                   String currentRevision, String tenantDomain) throws RepositoryMgtException {
+        String sourceURL = provider.getAppRepositoryURL(appId, tenantDomain);
         String applicationType;
         try {
-            applicationType = ProjectUtils.getApplicationType(appId);
+            applicationType = ProjectUtils.getApplicationType(appId, tenantDomain);
         } catch (AppFactoryException e1) {
             String msg = "Error while getting application type for " + appId;
             log.error(msg, e1);
@@ -137,12 +137,12 @@ public class GITBranchingStrategy implements BranchingStrategy {
      */
     @Override
     public void doRepositoryTag(String appId, String currentVersion, String targetVersion,
-                                String currentRevision) throws RepositoryMgtException {
-        String sourceURL = provider.getAppRepositoryURL(appId);
+                                String currentRevision, String tenantDomain) throws RepositoryMgtException {
+        String sourceURL = provider.getAppRepositoryURL(appId, tenantDomain);
 
         String applicationType;
         try {
-            applicationType = ProjectUtils.getApplicationType(appId);
+            applicationType = ProjectUtils.getApplicationType(appId, tenantDomain);
         } catch (AppFactoryException e1) {
             throw new RepositoryMgtException(e1);
         }
@@ -199,9 +199,9 @@ public class GITBranchingStrategy implements BranchingStrategy {
      * {@inheritDoc}
      */
     @Override
-    public String getURLForAppVersion(String applicationKey, String version)
+    public String getURLForAppVersion(String applicationKey, String version, String tenantDomain)
             throws RepositoryMgtException {
-        return getRepositoryProvider().getAppRepositoryURL(applicationKey);
+        return getRepositoryProvider().getAppRepositoryURL(applicationKey, tenantDomain);
     }
 
     private void generateGitIgnoreRecursively(File workDir) throws RepositoryMgtException {

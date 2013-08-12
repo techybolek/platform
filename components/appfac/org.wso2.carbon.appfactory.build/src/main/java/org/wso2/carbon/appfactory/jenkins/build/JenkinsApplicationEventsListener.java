@@ -62,7 +62,7 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
      * {@inheritDoc}
      */
     @Override
-    public void onCreation(Application application) throws AppFactoryException {
+    public void onCreation(Application application, String tenantDomain) throws AppFactoryException {
 
         log.info("Application Creation event recieved for : " + application.getId() + " " +
                 application.getName());
@@ -73,7 +73,7 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
         String stage=rxtManager.getStage(application.getId(),versions[0].getId());
         if (ArrayUtils.isNotEmpty(versions)) {
             jenkinsCISystemDriver.createJob(application.getId(),
-                    versions[0].getId(), "", null);
+                    versions[0].getId(), "", tenantDomain);
             jenkinsCISystemDriver.startBuild(jenkinsCISystemDriver.getJobName(application.getId(),
                    versions[0].getId(),""),true,stage,"");
         }

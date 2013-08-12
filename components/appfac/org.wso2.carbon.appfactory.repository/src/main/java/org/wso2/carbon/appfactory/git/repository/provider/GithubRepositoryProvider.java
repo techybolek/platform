@@ -64,9 +64,7 @@ public class GithubRepositoryProvider extends AbstractRepositoryProvider {
     private String ORG_NAME = appFactoryConfiguration.getFirstProperty(GITHUB_ORG);
 
     /**
-     * @param applicationKey for the creating app
-     * @return URL for the created app repository
-     * @throws RepositoryMgtException if repository creation fails
+     * {@inheritDoc}
      */
     @Override
     public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
@@ -131,22 +129,18 @@ public class GithubRepositoryProvider extends AbstractRepositoryProvider {
         }
 
         createTeam(applicationKey);
-        return getAppRepositoryURL(applicationKey);
+        return getAppRepositoryURL(applicationKey, tenantDomain);
     }
 
     /**
      * @param applicationKey for the created app
+     * @param tenantDomain Tenant domain of application
      * @return URL for the repo
      * @throws RepositoryMgtException in an error
      */
     @Override
-    public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
-        return "https://github.com/" + ORG_NAME + "/" + applicationKey + ".git";
-    }
-
-    @Override
     public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return "https://github.com/" + ORG_NAME + "/" + tenantDomain + "/" + applicationKey + ".git";
     }
 
     /**

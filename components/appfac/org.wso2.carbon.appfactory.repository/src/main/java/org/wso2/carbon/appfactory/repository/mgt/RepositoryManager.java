@@ -28,6 +28,14 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 public class RepositoryManager {
     private static final Log log = LogFactory.getLog(RepositoryManager.class);
 
+    /**
+     * Create a repository
+     * @param applicationKey Application key
+     * @param type Repository type
+     * @param tenantDomain  Tenant domain of repository
+     * @return url for created repository
+     * @throws RepositoryMgtException
+     */
     public String createRepository(String applicationKey, String type, String tenantDomain)
             throws RepositoryMgtException {        
         String url = null;
@@ -50,10 +58,10 @@ public class RepositoryManager {
         throw new RepositoryMgtException(msg);
     }
 
-    public String getAppRepositoryURL(String appId, String type) throws RepositoryMgtException {
+    public String getAppRepositoryURL(String appId, String type, String tenantName) throws RepositoryMgtException {
         RepositoryProvider provider = Util.getRepositoryProvider(type);
         if (provider != null) {
-            return provider.getAppRepositoryURL(appId);
+            return provider.getAppRepositoryURL(appId, tenantName);
         } else {
             handleException((new StringBuilder()).
                     append("Repository provider for the type ").
@@ -63,12 +71,12 @@ public class RepositoryManager {
         return null;
     }
 
-    public String getURLForAppversion(String applicationKey, String version, String type)
+    public String getURLForAppversion(String applicationKey, String version, String type, String tenantName)
             throws RepositoryMgtException {
         RepositoryProvider provider = Util.getRepositoryProvider(type);
 
         if (provider != null) {
-            return provider.getBranchingStrategy().getURLForAppVersion(applicationKey, version);
+            return provider.getBranchingStrategy().getURLForAppVersion(applicationKey, version, tenantName);
         } else {
             handleException((new StringBuilder()).
                     append("Repository provider for the type ").
@@ -79,11 +87,11 @@ public class RepositoryManager {
     }
 
     public void branch(String appId, String type, String currentVersion, String targetVersion,
-                       String currentRevision) throws RepositoryMgtException {
+                       String currentRevision, String tenantDomain) throws RepositoryMgtException {
         RepositoryProvider provider = Util.getRepositoryProvider(type);
         if (provider != null) {
             provider.getBranchingStrategy().doRepositoryBranch(appId, currentVersion, targetVersion,
-                                                               currentRevision);
+                                                               currentRevision, tenantDomain);
         } else {
             handleException((new StringBuilder()).
                     append("Repository provider for the type ").
@@ -94,10 +102,10 @@ public class RepositoryManager {
     }
 
     public void tag(String appId, String type, String currentVersion, String targetVersion,
-                    String currentRevision) throws RepositoryMgtException {
+                    String currentRevision, String tenantDomain) throws RepositoryMgtException {
         RepositoryProvider provider = Util.getRepositoryProvider(type);
         if (provider != null) {
-            Util.getRepositoryProvider(type).getBranchingStrategy().doRepositoryTag(appId, currentVersion, targetVersion, currentRevision);
+            Util.getRepositoryProvider(type).getBranchingStrategy().doRepositoryTag(appId, currentVersion, targetVersion, currentRevision, tenantDomain);
         } else {
             handleException((new StringBuilder()).
                     append("Repository provider for the type ").

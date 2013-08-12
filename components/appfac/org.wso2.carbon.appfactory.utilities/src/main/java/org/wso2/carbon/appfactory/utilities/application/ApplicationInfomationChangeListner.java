@@ -49,7 +49,7 @@ public class ApplicationInfomationChangeListner extends ApplicationEventsListene
 	 * org.wso2.carbon.appfactory.core.dto.Application)
 	 */
 	@Override
-	public void onCreation(Application application) throws AppFactoryException {
+	public void onCreation(Application application, String tenantDomain) throws AppFactoryException {
 		ProjectUtils.updateBranchCount(application.getId());
 		log.info("On Creation is successfully handled by Application Information Change Listner.");
 

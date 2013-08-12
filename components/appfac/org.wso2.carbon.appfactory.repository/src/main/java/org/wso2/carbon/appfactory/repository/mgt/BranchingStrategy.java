@@ -26,6 +26,7 @@ public interface BranchingStrategy {
      *
      * @param appId applicationKey
      * @param url   Repository URL
+     * @param tenantDomain Tenant domain of the application
      * @throws RepositoryMgtException
      */
     public void prepareRepository(String appId, String url, String tenantDomain)
@@ -38,10 +39,11 @@ public interface BranchingStrategy {
      * @param currentVersion  current version from which to branch
      * @param targetVersion   target version
      * @param currentRevision Revision to branch
+     * @param tenantDomain the tenant name of the application
      * @throws RepositoryMgtException
      */
     public void doRepositoryBranch(String appId, String currentVersion, String targetVersion,
-                                   String currentRevision) throws RepositoryMgtException;
+                                   String currentRevision, String tenantDomain) throws RepositoryMgtException;
 
     /**
      * This method will be executed while creating new tag
@@ -50,10 +52,11 @@ public interface BranchingStrategy {
      * @param currentVersion  current version from which to tag
      * @param targetVersion   target version
      * @param currentRevision Revision to tag
+     * @param tenantDomain    the tenant name of the application
      * @throws RepositoryMgtException
      */
     public void doRepositoryTag(String appId, String currentVersion, String targetVersion,
-                                String currentRevision) throws RepositoryMgtException;
+                                String currentRevision, String tenantDomain) throws RepositoryMgtException;
 
     /**
      * Setter for RepositoryProvider
@@ -72,12 +75,13 @@ public interface BranchingStrategy {
     /**
      * Method to retrieve repository url for Application version
      *
-     * @param applicationKey
-     * @param version
-     * @return
+     * @param applicationKey Application key
+     * @param version Application Version
+     * @param tenantDomain Tenant of the application
+     * @return Return URL of application version
      * @throws RepositoryMgtException
      */
-    public String getURLForAppVersion(String applicationKey, String version)
+    public String getURLForAppVersion(String applicationKey, String version, String tenantDomain)
             throws RepositoryMgtException;
 
 

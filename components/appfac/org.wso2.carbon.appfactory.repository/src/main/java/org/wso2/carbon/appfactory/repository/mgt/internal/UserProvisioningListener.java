@@ -32,7 +32,7 @@ public class UserProvisioningListener extends ApplicationEventsListener {
     public static final String GITHUB_ACCOUNT_CLAIM = "http://wso2.org/github_account_name";
 
     @Override
-    public void onCreation(Application application) throws AppFactoryException {
+    public void onCreation(Application application, String tenantDomain) throws AppFactoryException {
         //Do nothing
     }
 

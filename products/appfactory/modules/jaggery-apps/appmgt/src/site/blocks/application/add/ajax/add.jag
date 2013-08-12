@@ -90,9 +90,12 @@ var log=new Log();
 	
 						for (var provider in repositoryProviders) {
 							if (repositoryType == repositoryProviders[provider]) {
-	
-								result = mod.createApplication(applicationName, applicationKey,
-										applicationDescription, applicationType, repositoryType, userName);
+
+	                            result = mod.createApplicationBPEL(applicationName, applicationKey,
+    							    applicationDescription, applicationType, repositoryType, userName);
+
+								//result = mod.createApplication(applicationName, applicationKey,
+								//		applicationDescription, applicationType, repositoryType, userName);
 								message = "Application was created under Repository type ".concat(repositoryType);
 								response.message = message;
 								response.result = 1;

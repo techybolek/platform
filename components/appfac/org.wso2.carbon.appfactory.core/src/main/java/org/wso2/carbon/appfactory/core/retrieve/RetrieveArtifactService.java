@@ -36,13 +36,21 @@ import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 public class RetrieveArtifactService {
     private static final Log log = LogFactory.getLog(RetrieveArtifactService.class);
 
-    public DataHandler retrieveArtifact(String applicationId, String version, String revision) {
+    /**
+     *
+     * @param applicationId Application ID
+     * @param version Application Version
+     * @param revision Application revision
+     * @param tenantDomain Tenant domain of application
+     * @return {@link DataHandler}
+     */
+    public DataHandler retrieveArtifact(String applicationId, String version, String revision, String tenantDomain) {
         String fileName = null;
         File file = null;
         ArtifactStorage storage = ServiceHolder.getArtifactStorage();
 
         try {
-            file = storage.retrieveArtifact(applicationId, version, revision);
+            file = storage.retrieveArtifact(applicationId, version, revision, tenantDomain);
             fileName = file.getAbsolutePath();
 
         } catch (AppFactoryException e) {
@@ -54,7 +62,15 @@ public class RetrieveArtifactService {
         return fileDataHandler;
     }
 
-    public String retrieveArtifactId(String applicationId, String version, String revision) {
+    /**
+     *
+     * @param applicationId Application ID
+     * @param version Application Version
+     * @param revision Application revision
+     * @param tenantDomain Tenant domain of application
+     * @return Arifact details
+     */
+    public String retrieveArtifactId(String applicationId, String version, String revision, String tenantDomain) {
         String fileName = null;
         String entryName = null;
         File file = null;
@@ -63,7 +79,7 @@ public class RetrieveArtifactService {
 
 
         try {
-            file = storage.retrieveArtifact(applicationId, version, revision);
+            file = storage.retrieveArtifact(applicationId, version, revision, tenantDomain);
               if (file == null) {
                 return "Not Found";
             } else if ((file.getName()).endsWith(".war")) {

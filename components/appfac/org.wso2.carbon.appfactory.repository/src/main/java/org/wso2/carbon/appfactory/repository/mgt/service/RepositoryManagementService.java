@@ -41,22 +41,6 @@ public class RepositoryManagementService extends AbstractAdmin {
     }
 
     /**
-     * Create a repository for an application with type{svn,git}
-     *
-     * @param applicationKey
-     * @param type
-     * @return
-     * @throws RepositoryMgtException
-     */
-    /*public String createRepository(String applicationKey, String type)
-            throws RepositoryMgtException {
-        long s = new Date().getTime();
-        String ss = repositoryManager.createRepository(applicationKey, type);
-        log.info("Repo Time : " + ((new Date().getTime()) - s));
-        return ss;
-    }*/
-
-    /**
      * @param applicationKey
      * @param type
      * @param username
@@ -70,13 +54,14 @@ public class RepositoryManagementService extends AbstractAdmin {
     /**
      * Gives the repository url of application
      *
-     * @param applicationKey
-     * @return
+     * @param applicationKey  Application ID
+     * @param tenantDomain    Tenant domain of application
+     * @return  Repository URL
      * @throws RepositoryMgtException
      */
-    public String getURL(String applicationKey) throws RepositoryMgtException {
+    public String getURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         return repositoryManager.getAppRepositoryURL(applicationKey,
-                                                     getRepositoryType(applicationKey));
+                                                     getRepositoryType(applicationKey, tenantDomain), tenantDomain);
     }
 
     /**
@@ -84,13 +69,14 @@ public class RepositoryManagementService extends AbstractAdmin {
      *
      * @param applicationKey
      * @param version
+     * @param tenantDomain    Tenant Domain of application
      * @return
      * @throws RepositoryMgtException
      */
-    public String getURLForAppVersion(String applicationKey, String version)
+    public String getURLForAppVersion(String applicationKey, String version, String tenantDomain)
             throws RepositoryMgtException {
         return repositoryManager.getURLForAppversion(applicationKey, version,
-                                                     getRepositoryType(applicationKey));
+                                                     getRepositoryType(applicationKey, tenantDomain), tenantDomain);
     }
 
     /**
@@ -100,14 +86,15 @@ public class RepositoryManagementService extends AbstractAdmin {
      * @param currentVersion
      * @param targetVersion
      * @param currentRevision
+     * @param tenantDomain      Tenant domain of application
      * @throws RepositoryMgtException
      */
     public void branch(String appId, String currentVersion, String targetVersion,
-                       String currentRevision) throws RepositoryMgtException {
+                       String currentRevision, String tenantDomain) throws RepositoryMgtException {
         AppVersionCache cache = AppVersionCache.getAppVersionCache();
         cache.clearCacheForAppId(appId);
-        repositoryManager.branch(appId, getRepositoryType(appId), currentVersion, targetVersion,
-                                 currentRevision);
+        repositoryManager.branch(appId, getRepositoryType(appId, tenantDomain), currentVersion, targetVersion,
+                                 currentRevision, tenantDomain);
 
     }
 
@@ -118,19 +105,27 @@ public class RepositoryManagementService extends AbstractAdmin {
      * @param currentVersion
      * @param targetVersion
      * @param currentRevision
+     * @param tenantDomain
      * @throws AppFactoryException
      * @throws RepositoryMgtException
      */
     public void tag(String appId, String currentVersion, String targetVersion,
-                    String currentRevision) throws AppFactoryException, RepositoryMgtException {
-        repositoryManager.tag(appId, getRepositoryType(appId), currentVersion, targetVersion,
-                              currentRevision);
+                    String currentRevision, String tenantDomain) throws AppFactoryException, RepositoryMgtException {
+        repositoryManager.tag(appId, getRepositoryType(appId, tenantDomain), currentVersion, targetVersion,
+                              currentRevision, tenantDomain);
     }
 
-    private String getRepositoryType(String applicationId) throws RepositoryMgtException {
+    /**
+     * Get repository type
+     * @param applicationId     Application ID
+     * @param tenantDomain      Tenant domain of application
+     * @return
+     * @throws RepositoryMgtException
+     */
+    private String getRepositoryType(String applicationId, String tenantDomain) throws RepositoryMgtException {
         String type;
         try {
-            type = ProjectUtils.getRepositoryType(applicationId);
+            type = ProjectUtils.getRepositoryType(applicationId, tenantDomain);
         } catch (AppFactoryException e) {
             String msg = "Error while getting repository type of application " + applicationId;
             log.error(msg, e);

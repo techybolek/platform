@@ -274,7 +274,7 @@ function buildResponse(result){
  * getBackendCookie returns returns logged in user's server session string.
  */
 var getBackendCookie = function () {
-session.put(APPFAC_BACKEND_COOKIE, cookie.toString());
+//session.put(APPFAC_BACKEND_COOKIE, cookie.toString());
 	if(session.get(APPFAC_BACKEND_COOKIE) == null){
 		var token = session.get("SAML_TOKEN");
 		var security =require("sso");
@@ -293,24 +293,24 @@ session.put(APPFAC_BACKEND_COOKIE, cookie.toString());
    	return session.get(APPFAC_BACKEND_COOKIE);   
 }
 
-/*var getTenantDomain = function(username){
-	if(session.get(SUPER_TENANT_DOMAIN_NAME) == null){
-		String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-		var isEmailUserName = getProperty(EnableEmailUserName);
-		if (username.indexOf("@")!=-1 && !isEmailUserName) {
+/*
+ *   getTenantDomain is used to logged user's domain name.
+ */
+var getTenantDomain = function() {
+
+	if(session.get(TENANT_DOMAIN_NAME) == null){
+	    var username=jagg.getUser();
+		var tenantDomain = SUPER_TENANT_DOMAIN_NAME;
+
+		if (username.indexOf("@")!=-1) {
 		    tenantDomain = username.substring(username.lastIndexOf('@') + 1);
-		} else if (isEmailUserName) {
-		    if (username.indexOf("@") != username.lastIndexOf("@")) {
-		        tenantDomain = username.substring(username.lastIndexOf('@') + 1);
-		    } // else this is super tenant login
+		} else {	// else assume super tenant
+		    tenantDomain = SUPER_TENANT_DOMAIN_NAME;
 		}
-		if (tenantDomain == null || tenantDomain.trim().length() == 0) {
-		    // if the tenant domain is null, assume super tenant 
-		    tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-		}
-		session.put(SUPER_TENANT_DOMAIN_NAME, tenantDomain.toString().toLowerCase());
+
+		session.put(TENANT_DOMAIN_NAME, tenantDomain.toString().toLowerCase());
 	}
-       return session.get(SUPER_TENANT_DOMAIN_NAME);   
+       return session.get(TENANT_DOMAIN_NAME);
 }
-*/
+
 %>

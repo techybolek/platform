@@ -58,7 +58,7 @@ public class SVNBranchingStrategy implements BranchingStrategy {
                 log.error("Error creating work directory at location" + trunk.getAbsolutePath());
             }
             try {
-                String applicationType = ProjectUtils.getApplicationType(applicationKey);
+                String applicationType = ProjectUtils.getApplicationType(applicationKey, tenantDomain);
 
                 Util.getApplicationTypeManager().getApplicationTypeProcessor(applicationType).generateApplicationSkeleton(applicationKey, trunk.getAbsolutePath());
             } catch (AppFactoryException e) {
@@ -101,18 +101,18 @@ public class SVNBranchingStrategy implements BranchingStrategy {
      */
     @Override
     public void doRepositoryBranch(String appId, String currentVersion, String targetVersion,
-                                   String currentRevision) throws RepositoryMgtException {
+                                   String currentRevision, String tenantDomain) throws RepositoryMgtException {
 
         String applicationType;
         try {
-            applicationType = ProjectUtils.getApplicationType(appId);
+            applicationType = ProjectUtils.getApplicationType(appId, tenantDomain);
         } catch (AppFactoryException e1) {
             String msg = "Error while getting application type for " + appId;
             log.error(msg, e1);
             throw new RepositoryMgtException(msg, e1);
         }
 
-        String sourceURL = provider.getAppRepositoryURL(appId);
+        String sourceURL = provider.getAppRepositoryURL(appId, tenantDomain);
         String destURL = sourceURL;
 
         File workDir = new File(CarbonUtils.getTmpDir() + File.separator + appId);
@@ -174,13 +174,13 @@ public class SVNBranchingStrategy implements BranchingStrategy {
      */
     @Override
     public void doRepositoryTag(String appId, String currentVersion, String targetVersion,
-                                String currentRevision) throws RepositoryMgtException {
+                                String currentRevision, String tenantDomain) throws RepositoryMgtException {
 
-        String sourceURL = provider.getAppRepositoryURL(appId);
+        String sourceURL = provider.getAppRepositoryURL(appId, tenantDomain);
 
         String applicationType;
         try {
-            applicationType = ProjectUtils.getApplicationType(appId);
+            applicationType = ProjectUtils.getApplicationType(appId, tenantDomain);
         } catch (AppFactoryException e1) {
             throw new RepositoryMgtException(e1);
         }
@@ -227,9 +227,9 @@ public class SVNBranchingStrategy implements BranchingStrategy {
      * {@inheritDoc}
      */
     @Override
-    public String getURLForAppVersion(String applicationKey, String version)
+    public String getURLForAppVersion(String applicationKey, String version, String tenantDomain)
             throws RepositoryMgtException {
-        StringBuilder builder = new StringBuilder(getRepositoryProvider().getAppRepositoryURL(applicationKey)).append('/');
+        StringBuilder builder = new StringBuilder(getRepositoryProvider().getAppRepositoryURL(applicationKey, tenantDomain)).append('/');
 
         if (AppFactoryConstants.TRUNK.equals(version)) {
             builder.append(version);

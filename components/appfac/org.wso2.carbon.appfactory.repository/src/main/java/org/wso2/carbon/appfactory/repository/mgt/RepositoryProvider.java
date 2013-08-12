@@ -28,6 +28,7 @@ public interface RepositoryProvider {
      * Create a repository for a application key
      *
      * @param applicationKey for the creating app
+     * @param tenantDomain   Tenant domain of application
      * @return url for created repository
      * @throws RepositoryMgtException when repository creation fails
      */
@@ -37,11 +38,10 @@ public interface RepositoryProvider {
      * Return the repository url if exists or return null
      *
      * @param applicationKey for the created app
+     * @param tenantDomain Tenant domain of the application
      * @return repository url or null
      * @throws RepositoryMgtException when getting repo URL
      */
-    public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException;
-
     public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException;
 
     /**

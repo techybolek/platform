@@ -29,8 +29,9 @@ public interface RevisionControlDriver {
 	 * @param applicationId
 	 * @param version
 	 * @param revision
+     * @param tenantDomain
 	 */
 	public void getSource(String applicationId,String version, String revision,
-	                      RevisionControlDriverListener listener) throws AppFactoryException;
+	                      RevisionControlDriverListener listener, String tenantDomain) throws AppFactoryException;
 
   }

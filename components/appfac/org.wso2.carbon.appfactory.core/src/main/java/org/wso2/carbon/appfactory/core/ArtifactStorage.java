@@ -35,9 +35,10 @@ public interface ArtifactStorage {
      * @param applicationId Application Id
      * @param version Version of the artifact
      * @param revision The revision of the artifacct
+     * @param tenantDomain Tenant domain of application
      * @return
      */
-    public File retrieveArtifact(String applicationId, String version, String revision) throws AppFactoryException;
+    public File retrieveArtifact(String applicationId, String version, String revision, String tenantDomain) throws AppFactoryException;
 
     /**
      *
@@ -45,10 +46,11 @@ public interface ArtifactStorage {
      * @param version
      * @param revision
      * @param buildId
+     * @param tenantDomain
      * @return
      * @throws AppFactoryException
      */
-    public File retrieveArtifact(String applicationId, String version, String revision, String buildId) throws AppFactoryException;
+    public File retrieveArtifact(String applicationId, String version, String revision, String buildId, String tenantDomain) throws AppFactoryException;
 
     /**
      * This will store the artifact in the artifact storage.

@@ -38,10 +38,11 @@ public abstract class ApplicationEventsListener implements Comparable<Applicatio
     /**
      * Invoked after a application is created
      * 
-     * @param application
+     * @param application  {@link Application}
+     * @param tenantDomain Tenant domain of application
      * @throws AppFactoryException
      */
-    public abstract void onCreation(Application application) throws AppFactoryException;
+    public abstract void onCreation(Application application, String tenantDomain) throws AppFactoryException;
 
     /**
      * Invoked after adding a user to a application

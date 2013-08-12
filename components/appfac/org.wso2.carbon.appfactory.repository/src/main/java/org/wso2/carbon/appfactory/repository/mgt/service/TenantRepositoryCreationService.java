@@ -30,9 +30,10 @@ public class TenantRepositoryCreationService {
     /**
      * Create a repository for an application with type{svn,git}
      *
-     * @param applicationKey
-     * @param type
-     * @return
+     * @param applicationKey  Application ID
+     * @param type Repository type
+     * @param tenantDomain Tenant domain of application
+     * @return url for created repository
      * @throws RepositoryMgtException
      */
     public String createRepository(String applicationKey, String type, String tenantDomain)

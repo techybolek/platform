@@ -36,12 +36,15 @@ public class FileArtifactStorage implements ArtifactStorage {
     private static final Log log = LogFactory.getLog(FileArtifactStorage.class);
     private static final String ARTIFACT_STORAGE = "artifactdb";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public File retrieveArtifact(String applicationId, String version, String revision) throws AppFactoryException {
+    public File retrieveArtifact(String applicationId, String version, String revision, String tenantDomain) throws AppFactoryException {
         File targetDir = null;
         List<File> artifactFiles = null;
         File workDir = new File(getApplicationStorageDirectoryPath(applicationId, version, revision));
-        String applicationType = ProjectUtils.getApplicationType(applicationId);
+        String applicationType = ProjectUtils.getApplicationType(applicationId, tenantDomain);
         String[] fileExtension = {applicationType};
 
         if (workDir.isDirectory()) {
@@ -53,12 +56,15 @@ public class FileArtifactStorage implements ArtifactStorage {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public File retrieveArtifact(String applicationId, String version, String revision, String buildId) throws AppFactoryException {
+    public File retrieveArtifact(String applicationId, String version, String revision, String buildId, String tenantDomain) throws AppFactoryException {
         File targetDir = null;
         List<File> artifactFiles = null;
         File workDir = new File(getStoragePathForArtifact(applicationId, version, buildId));
-        String applicationType = ProjectUtils.getApplicationType(applicationId);
+        String applicationType = ProjectUtils.getApplicationType(applicationId, tenantDomain);
         String[] fileExtension = {applicationType};
         artifactFiles = (List<File>) FileUtils.listFiles(workDir, fileExtension, false);
         targetDir = artifactFiles.get(0);

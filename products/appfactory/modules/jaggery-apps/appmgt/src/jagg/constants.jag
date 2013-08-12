@@ -106,6 +106,8 @@ var USER_SEARCH_STATUS = "EnableUserSearch";
 
 var COOKIE_REFRESH_INTERVAL = "CookieRefreshInterval";
 var APPFAC_BACKEND_COOKIE = "APPFAC.backendCookie";
+var SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+var TENANT_DOMAIN_NAME = "APPFAC.domainName";
 
 //Rss related
 var RSS_CREATION_ERROR_HEADING = "RSSCreationError";

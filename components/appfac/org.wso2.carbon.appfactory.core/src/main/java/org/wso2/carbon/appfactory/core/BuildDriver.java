@@ -30,8 +30,9 @@ public interface BuildDriver {
 	 * @param applicationId
 	 * @param version
 	 * @param revision
+     * @param tenantDomain
 	 */
 	public void buildArtifact(String applicationId, String version, String revision,
-	                          BuildDriverListener listener) throws AppFactoryException;
+	                          BuildDriverListener listener, String tenantDomain) throws AppFactoryException;
 
 }

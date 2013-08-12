@@ -50,6 +50,9 @@ public static final String REMOTE_HOST_SUPER_USER_PASSWORD="RemoteHostSuperUserP
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         /*String fullRepositoryPath=configuration.getFirstProperty(getPropertyKey(REMOTE_PARENT_REPO_LOCATION))+"/"+applicationKey;
@@ -71,7 +74,7 @@ public static final String REMOTE_HOST_SUPER_USER_PASSWORD="RemoteHostSuperUserP
         try {
             client.executeMethod(get);
             if (get.getStatusCode() == HttpStatus.SC_CREATED) {
-                return getAppRepositoryURL(applicationKey);
+                return getAppRepositoryURL(applicationKey, tenantDomain);
             } else {
                 String msg = "Repository creation is failed for " + applicationKey
                              + " server returned status " +
@@ -89,14 +92,9 @@ public static final String REMOTE_HOST_SUPER_USER_PASSWORD="RemoteHostSuperUserP
     }
 
     @Override
-    public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
-        return getConfig().getFirstProperty(getPropertyKey(BASE_URL)) + "/" + REPO_TYPE +
-               "/" + applicationKey;
-    }
-
-    @Override
     public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return getConfig().getFirstProperty(getPropertyKey(BASE_URL)) + "/" + REPO_TYPE +
+                "/" + tenantDomain + "/" +applicationKey;
     }
 
     protected String getPropertyKey(String name) {

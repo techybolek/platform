@@ -77,7 +77,7 @@ public class SCMManagerBasedSVNRepositoryProvider extends AbstractRepositoryProv
             post.releaseConnection();
         }
         if (post.getStatusCode() == HttpStatus.SC_CREATED) {
-            url = getAppRepositoryURL(applicationKey);
+            url = getAppRepositoryURL(applicationKey, tenantDomain);
         } else {
             String msg = "Repository creation is failed for " + applicationKey + " server returned status " +
                          post.getStatusText();
@@ -87,9 +87,11 @@ public class SCMManagerBasedSVNRepositoryProvider extends AbstractRepositoryProv
         return url;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
+    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         HttpClient client = getClient();
         GetMethod get = new GetMethod(getServerURL() + REST_BASE_URI + REST_GET_REPOSITORY_URI
                                       + applicationKey);
@@ -123,10 +125,6 @@ public class SCMManagerBasedSVNRepositoryProvider extends AbstractRepositoryProv
         return repository;
     }
 
-    @Override
-    public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 
 //    No need to override. The abstract class has the implementation
 /*    @Override

@@ -44,6 +44,8 @@ public interface ContinuousIntegrationSystemDriver {
      * @param revision
      *            revision (This parameters is deprecated and need to be removed
      *            in future)
+     * @param tenantDomain
+     *            Tenant domain of application
      * @throws AppFactoryException
      *             if a error occurs
      */

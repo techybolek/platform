@@ -23,11 +23,11 @@ import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 
 public class DefaultRevisionControlDriverListener implements RevisionControlDriverListener {
 
-    public void onGetSourceCompleted(String applicationId, String version, String revision)
+    public void onGetSourceCompleted(String applicationId, String version, String revision, String tenantDomain)
                                                                                            throws AppFactoryException {
         BuildDriver buildDriver = ServiceHolder.getBuildDriver();
         DefaultBuildDriverListener listener = new DefaultBuildDriverListener();
-        buildDriver.buildArtifact(applicationId, version, revision, listener);
+        buildDriver.buildArtifact(applicationId, version, revision, listener, tenantDomain);
     }
 
 }

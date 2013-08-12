@@ -50,17 +50,16 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
     @Override
     public String createRepository(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         CarbonContext ct=CarbonContext.getCurrentContext();
-        //String tenantDomain= ct.getTenantDomain();
         String repoName=tenantDomain+"/"+applicationKey;
         String repoCreateUrl = config.getFirstProperty(BASE_URL);
         String adminUsername = config.getFirstProperty(GITBLIT_ADMIN_USERNAME);
         String adminPassword = config.getFirstProperty(GITBLIT_ADMIN_PASS);
-        //Create the gfitblit repository model
+        //Create the gftblit repository model
         RepositoryModel model = new RepositoryModel();
         model.name = repoName;
         //authenticated users can clone, push and view the repository
         model.accessRestriction = Constants.AccessRestrictionType.VIEW;
-        model.isBare=true;
+        model.isBare=true; // TODO: temporaryly added for demo purpose, need to fixed with new gitblit
         try {
             isCreated = RpcUtils.createRepository(model, repoCreateUrl, adminUsername,
                                                   adminPassword.toCharArray());           
@@ -83,11 +82,6 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
     /**
      * {@inheritDoc}
      */
-    @Override
-    public String getAppRepositoryURL(String applicationKey) throws RepositoryMgtException {
-        return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + applicationKey + ".git";
-    }
-
     @Override
     public String getAppRepositoryURL(String applicationKey, String tenantDomain) throws RepositoryMgtException {
         return config.getFirstProperty(BASE_URL) + REPO_TYPE + "/" + tenantDomain + "/" +applicationKey + ".git";
@@ -125,10 +119,10 @@ public class GITBlitBasedGITRepositoryProvider extends AbstractRepositoryProvide
                                                   adminPassword.toCharArray());
 
             if (isCreated) {
-                String url = getAppRepositoryURL(defaultTenantRepo);
+                //String url = getAppRepositoryURL(defaultTenantRepo);
                 RpcUtils.deleteRepository(model, repoDeleteUrl, adminUsername,
                                           adminPassword.toCharArray());
-                
+
                 return true;
             } else {
                 String msg =
