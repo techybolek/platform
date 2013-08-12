@@ -210,7 +210,7 @@ public class RolePermissionAsAdminTestCase {
         DataHandler dataHandler = new DataHandler(new URL("file:///" + resourcePath));
         adminResourceAdminClient.addResource(NEW_RESOURCE_PATH, "text/plain", "", dataHandler);
 
-        //old permission shouldn't be reset(discussed with Prabath.)
+        //old permission shouldn't be reset.
         assertNotNull(nonAdminResourceAdminClient.getResource(NEW_RESOURCE_PATH));
     }
 
