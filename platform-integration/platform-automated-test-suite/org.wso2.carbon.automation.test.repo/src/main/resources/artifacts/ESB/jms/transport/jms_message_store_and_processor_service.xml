@@ -40,7 +40,7 @@
       </out>
       <description>The main sequence for the message mediation</description>
    </sequence>
-   <messageStore class="org.wso2.carbon.message.store.persistence.jms.JMSMessageStore"
+   <messageStore class="org.apache.synapse.message.store.impl.jms.JmsStore"
                  name="JMSTestMessageStore">
       <parameter name="java.naming.factory.initial">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
       <parameter name="store.jms.cache.connection">false</parameter>
@@ -48,7 +48,7 @@
        <parameter name="store.jms.destination">JMSTestMessageStore</parameter>
       <parameter name="store.jms.JMSSpecVersion">1.1</parameter>
    </messageStore>
-   <messageProcessor class="org.apache.synapse.message.processors.forward.ScheduledMessageForwardingProcessor"
+   <messageProcessor class="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"
                      name="JMSTestMessageProcessor"
                      messageStore="JMSTestMessageStore">
       <parameter name="max.delivery.attempts">4</parameter>

@@ -62,7 +62,7 @@
       <description>The main sequence for the message mediation</description>
    </sequence>
 
-   <messageStore class="org.wso2.carbon.message.store.persistence.jms.JMSMessageStore"
+   <messageStore class="org.apache.synapse.message.store.impl.jms.JmsStore"
                  name="RESTMessageStore">
       <parameter name="java.naming.factory.initial">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
       <parameter name="store.jms.cache.connection">false</parameter>
@@ -71,7 +71,7 @@
       <parameter name="store.jms.JMSSpecVersion">1.1</parameter>
    </messageStore>
 
-   <messageProcessor class="org.apache.synapse.message.processors.sampler.SamplingProcessor"
+   <messageProcessor class="org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor"
                      name="SamplingProcessor1"
                      messageStore="RESTMessageStore">
       <parameter name="interval">4000</parameter>
