@@ -64,8 +64,14 @@
                     }
                     value = document.getElementsByName("callback")[0].value;
                     if (value == '') {
-                        CARBON.showWarningDialog('<fmt:message key="callback.is.required"/>');
-                        return false;
+                        if($(jQuery("#grant_code"))[0].checked || $(jQuery("#grant_implicit"))[0].checked){
+                            CARBON.showWarningDialog('<fmt:message key="callback.is.required"/>');
+                            return false;
+                        }
+                    } else {
+                        if(!$(jQuery("#grant_code"))[0].checked && !$(jQuery("#grant_implicit"))[0].checked){
+                            document.getElementsByName("callback")[0].value = '';
+                        }
                     }
                     document.addAppform.submit();
                 }
@@ -79,6 +85,13 @@
                         $(jQuery('#grant_row')).toggle();
                     })
                 })
+                function toggleCallback(){
+                    if(!$(jQuery("#grant_code"))[0].checked && !$(jQuery("#grant_implicit"))[0].checked){
+                        $(jQuery('#callback_row')).attr('style','display:none');
+                    } else {
+                        $(jQuery('#callback_row')).attr('style','');
+                    }
+                }
             </script>
 
             <form method="post" name="addAppform" action="add-finish.jsp"
@@ -103,7 +116,7 @@
 		                        <td><input class="text-box-big" id="application" name="application"
 		                                   type="text" /></td>
 		                    </tr>
-		                    <tr>
+		                    <tr id="callback_row">
 		                        <td class="leftCol-small"><fmt:message key='callback'/></td>
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" /></td>
@@ -123,10 +136,10 @@
                                             OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
                                             List<String> allowedGrants = new ArrayList<String>(Arrays.asList(client.getAllowedOAuthGrantTypes()));
                                             if(allowedGrants.contains("authorization_code")){
-                                                %><tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code" checked="checked"/>Code</label></tr><%
+                                                %><tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code" checked="checked" onclick="toggleCallback()"/>Code</label></tr><%
                                             }
                                             if(allowedGrants.contains("implicit")){
-                                                %><tr><label><input type="checkbox" id="grant_implicit" name="grant_implicit" value="implicit" checked="checked"/>Implicit</label></tr><%
+                                                %><tr><label><input type="checkbox" id="grant_implicit" name="grant_implicit" value="implicit" checked="checked" onclick="toggleCallback()"/>Implicit</label></tr><%
                                             }
                                             if(allowedGrants.contains("password")){
                                                 %><tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password" checked="checked"/>Password</lable></tr><%

@@ -133,10 +133,23 @@
                     }
                     var value = document.getElementsByName("callback")[0].value;
                     if (value == '') {
-                        CARBON.showWarningDialog('<fmt:message key="callback.is.required"/>');
-                        return false;
+                        if($(jQuery("#grant_code"))[0].checked || $(jQuery("#grant_implicit"))[0].checked){
+                            CARBON.showWarningDialog('<fmt:message key="callback.is.required"/>');
+                            return false;
+                        }
+                    } else {
+                        if(!$(jQuery("#grant_code"))[0].checked && !$(jQuery("#grant_implicit"))[0].checked){
+                            document.getElementsByName("callback")[0].value = '';
+                        }
                     }
                     document.editAppform.submit();
+                }
+                function toggleCallback(){
+                    if(!$(jQuery("#grant_code"))[0].checked && !$(jQuery("#grant_implicit"))[0].checked){
+                        $(jQuery('#callback_row')).attr('style','display:none');
+                    } else {
+                        $(jQuery('#callback_row')).attr('style','');
+                    }
                 }
             </script>
 
@@ -161,11 +174,18 @@
 		                        <td><input class="text-box-big" id="application" name="application"
 		                                   type="text" value="<%=app.getApplicationName()%>" /></td>
 		                    </tr>
-		                    <tr>
+		                    <tr id="callback_row">
 		                        <td class="leftCol-small"><fmt:message key='callback'/></td>
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" value="<%=app.getCallbackUrl()%>" /></td>
 		                    </tr>
+                            <script>
+                                if(<%=codeGrant%> || <%=implicitGrant%>){
+                                    $(jQuery('#callback_row')).attr('style','');
+                                } else {
+                                    $(jQuery('#callback_row')).attr('style','display:none');
+                                }
+                            </script>
                             <% if(app.getOAuthVersion().equals(OAuthConstants.OAuthVersions.VERSION_2)){ %>
                                  <tr id="grant_row" name="grant_row">
                                     <td class="leftCol-small"><fmt:message key='grantTypes'/></td>
@@ -174,10 +194,10 @@
                                     <%
                                         try{
                                             if(allowedGrants.contains("authorization_code")){
-                                                %><tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code"  <%=(codeGrant ? "checked=\"checked\"" : "")%>/>Code</label></tr><%
+                                                %><tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code" onclick="toggleCallback()" <%=(codeGrant ? "checked=\"checked\"" : "")%>/>Code</label></tr><%
                                             }
                                             if(allowedGrants.contains("implicit")){
-                                                %><tr><label><input type="checkbox" id="grant_implicit" name="grant_implicit" value="implicit"  <%=(implicitGrant ? "checked=\"checked\"" : "")%>/>Implicit</label></tr><%
+                                                %><tr><label><input type="checkbox" id="grant_implicit" name="grant_implicit" value="implicit" onclick="toggleCallback()" <%=(implicitGrant ? "checked=\"checked\"" : "")%>/>Implicit</label></tr><%
                                             }
                                             if(allowedGrants.contains("password")){
                                                 %><tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password"  <%=(passowrdGrant ? "checked=\"checked\"" : "")%>/>Password</lable></tr><%
