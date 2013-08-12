@@ -64,8 +64,6 @@
 		                    <includes>
 		                        <include>email-admin-config.xml</include>
 					<include>claim-config.xml</include>
-					<include>axis2.xml</include>
-					<include>user-mgt.xml</include>
 		                        <include>p2.inf</include>
 		                        <include>build.properties</include>                                        
 		                        <include>identity-mgt.properties</include>                                        
