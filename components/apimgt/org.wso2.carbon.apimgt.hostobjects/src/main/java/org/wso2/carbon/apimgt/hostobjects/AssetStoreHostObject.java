@@ -106,7 +106,7 @@ public class AssetStoreHostObject extends ScriptableObject {
 
     // The zero-argument constructor used for create instances for runtime
     public AssetStoreHostObject() throws APIManagementException {
-        this(null);
+        //this(null);
     }
 
     private void createRegistry(String username) throws RegistryException {
@@ -233,7 +233,7 @@ public class AssetStoreHostObject extends ScriptableObject {
             String username = (String) args[0];
             return new AssetStoreHostObject(username);
         }
-        return new AssetStoreHostObject();
+        return new AssetStoreHostObject(null);
     }
 
     private static String getUsernameFromObject(Scriptable obj) {

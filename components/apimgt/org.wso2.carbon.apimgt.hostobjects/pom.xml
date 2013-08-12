@@ -16,6 +16,17 @@
     <url>http://wso2.org</url>
 
     <dependencies>
+    	<dependency>
+           <groupId>rhino.wso2</groupId>
+           <artifactId>js</artifactId>
+           <version>1.7.0.R4.wso2v1-SNAPSHOT</version>
+       </dependency>
+       <dependency>
+           <groupId>com.google.code.gson</groupId>
+           <artifactId>gson</artifactId>
+           <version>2.1</version>
+           <scope>compile</scope>
+       </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
@@ -24,12 +35,12 @@
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.scriptengine</artifactId>
-            <version>0.9.0.ALPHA2-wso2v3</version>
+            <version>0.9.0-07262013</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-			<version>${wso2carbon.version}</version>			
+            <version>${wso2carbon.version}</version>			
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -39,28 +50,19 @@
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.hostobjects.web</artifactId>  
-			<version>0.9.0.ALPHA2-wso2v3</version>			
+	   <version>0.9.0-07262013</version>			
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.hostobjects.file</artifactId>
-            <version>0.9.0.ALPHA2-wso2v3</version>
+            <version>0.9.0-07262013</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.usage.client</artifactId>   
-			<version>${wso2carbon.version}</version>			
+	    <version>${wso2carbon.version}</version>			
         </dependency>
-        <dependency>
-            <groupId>rhino</groupId>
-            <artifactId>js</artifactId>
-            <version>1.7R1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20090211</version>
-        </dependency>
+         
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
@@ -121,4 +123,4 @@
     <properties>
     </properties>
 </project>
-
+:

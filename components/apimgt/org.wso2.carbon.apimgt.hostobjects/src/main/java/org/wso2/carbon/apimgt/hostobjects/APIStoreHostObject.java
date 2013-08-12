@@ -94,12 +94,16 @@ public class APIStoreHostObject extends ScriptableObject {
 
     // The zero-argument constructor used for create instances for runtime
     public APIStoreHostObject() throws APIManagementException {
-        apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
+        //apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
     }
 
     public APIStoreHostObject(String loggedUser) throws APIManagementException {
-        this.username = loggedUser;
-        apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+    	if (loggedUser != null) {
+    		this.username = loggedUser;
+    		apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+    	} else {
+    		apiConsumer = APIManagerFactory.getInstance().getAPIConsumer();
+    	}
     }
 
     public static Scriptable jsConstructor(Context cx, Object[] args, Function Obj,
@@ -110,7 +114,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String username = (String) args[0];
             return new APIStoreHostObject(username);
         }
-        return new APIStoreHostObject();
+        return new APIStoreHostObject(null);
     }
 
     private static String getUsernameFromObject(Scriptable obj) {
