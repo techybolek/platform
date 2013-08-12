@@ -79,7 +79,7 @@ public class ServicePasswordCallbackHandler implements CallbackHandler {
     }
 
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-        try {
+        try { 
             for (int i = 0; i < callbacks.length; i++) {
                 if (callbacks[i] instanceof WSPasswordCallback) {
                     WSPasswordCallback passwordCallback = (WSPasswordCallback) callbacks[i];
@@ -206,9 +206,9 @@ public class ServicePasswordCallbackHandler implements CallbackHandler {
         String tenantAwareUserName = TenantUtils.getTenantAwareUsername(user);
         try {
 
-			UserRealm realm = AnonymousSessionUtil.getRealmByUserName(
-					SecurityServiceHolder.getRegistryService(),
-					SecurityServiceHolder.getRealmService(), user);
+//			UserRealm realm = AnonymousSessionUtil.getRealmByUserName(
+//					SecurityServiceHolder.getRegistryService(),
+//					SecurityServiceHolder.getRealmService(), user);
 
 			isAuthenticated = realm.getUserStoreManager().authenticate(
 					tenantAwareUserName, password);
