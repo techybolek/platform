@@ -24,7 +24,7 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.user.mgt.common.FlaggedName" %>
+<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <jsp:include page="../dialog/display_messages.jsp"/>
@@ -129,7 +129,7 @@
 
     try {
         client = new UserAdminClient(cookie, backendServerURL, configContext);
-        userRoles = client.getAllRolesNames();
+        userRoles = client.getAllRolesNames("*", -1);
     } catch (Exception e) {
         e.printStackTrace();
     }

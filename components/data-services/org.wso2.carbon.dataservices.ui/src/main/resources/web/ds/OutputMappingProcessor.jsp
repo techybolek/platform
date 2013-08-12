@@ -20,7 +20,7 @@
 <%@ page import="org.wso2.carbon.dataservices.ui.beans.*" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.wso2.carbon.user.mgt.common.FlaggedName" %>
+<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName" %>
 <%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminClient" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.util.ArrayList" %>
@@ -231,7 +231,7 @@
     ConfigurationContext configContext = (ConfigurationContext) config.getServletContext()
             .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
     UserAdminClient client = new UserAdminClient(cookie, backendServerURL, configContext);
-    userRoles = client.getAllRolesNames();
+    userRoles = client.getAllRolesNames("*", -1);
 
 
 
