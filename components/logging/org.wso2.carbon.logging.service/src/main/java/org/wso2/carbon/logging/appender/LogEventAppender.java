@@ -30,6 +30,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.LogRecord;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -39,6 +41,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.bootstrap.logging.LoggingBridge;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
@@ -50,6 +53,7 @@ import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlr
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
+import org.wso2.carbon.logging.appenders.LoggingUtils;
 import org.wso2.carbon.logging.internal.LoggingServiceComponent;
 import org.wso2.carbon.logging.util.LoggingConstants;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -62,7 +66,7 @@ import org.wso2.carbon.utils.logging.handler.TenantDomainSetter;
 /**
  * BAMLogEventAppender - appends logs to BAM
  */
-public class LogEventAppender extends AppenderSkeleton implements Appender {
+public class LogEventAppender extends AppenderSkeleton implements Appender, LoggingBridge {
     private final List<TenantAwareLoggingEvent> loggingEvents = new CopyOnWriteArrayList<TenantAwareLoggingEvent>();
     private String url;
     private String password;
@@ -109,6 +113,12 @@ public class LogEventAppender extends AppenderSkeleton implements Appender {
 
     public void close() {
 
+    }
+
+    @Override
+    public void push(LogRecord record) {
+        LoggingEvent loggingEvent = LoggingUtils.getLogEvent(record);
+        append(loggingEvent);
     }
 
     @Override
