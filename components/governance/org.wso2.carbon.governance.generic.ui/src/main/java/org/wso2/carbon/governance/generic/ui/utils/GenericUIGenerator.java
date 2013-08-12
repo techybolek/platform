@@ -918,7 +918,7 @@ public class GenericUIGenerator {
 	                            text.setText(input);
 	                            widgetData.addChild(text);	
 	                        } else {
-	                            if (name.equals("Name")) {
+	                            if (name.equals("Name") && widgetName.equalsIgnoreCase("overview")) {
 	                                text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
 	                                text.setText(GovernanceConstants.DEFAULT_SERVICE_NAME);
 	                                widgetData.addChild(text);
