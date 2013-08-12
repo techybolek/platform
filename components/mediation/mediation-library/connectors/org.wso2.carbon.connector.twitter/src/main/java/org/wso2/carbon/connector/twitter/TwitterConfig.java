@@ -35,13 +35,13 @@ public class TwitterConfig extends AbstractConnector {
 	@Override
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
-			String consumerKey = TwitterUtils.lookupFunctionParam(messageContext,
+			String consumerKey = TwitterUtils.lookupTemplateParamater(messageContext,
 					CONSUMER_KEY);
-			String consumerSecret = TwitterUtils.lookupFunctionParam(messageContext,
+			String consumerSecret = TwitterUtils.lookupTemplateParamater(messageContext,
 					CONSUMER_SECRET);
-			String accessToken = TwitterUtils.lookupFunctionParam(messageContext,
+			String accessToken = TwitterUtils.lookupTemplateParamater(messageContext,
 					ACCESS_TOKEN);
-			String accessTokenSecret = TwitterUtils.lookupFunctionParam(messageContext,
+			String accessTokenSecret = TwitterUtils.lookupTemplateParamater(messageContext,
 					ACCESS_TOKEN_SECRET);
 
 			TwitterUtils.storeLoginUser(messageContext, consumerKey, consumerSecret,

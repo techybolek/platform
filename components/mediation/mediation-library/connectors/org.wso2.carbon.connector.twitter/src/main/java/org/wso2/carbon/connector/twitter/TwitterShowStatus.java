@@ -36,7 +36,7 @@ public class TwitterShowStatus extends AbstractConnector {
 
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
-			String id = TwitterUtils.lookupFunctionParam(messageContext, ID);
+			String id = TwitterUtils.lookupTemplateParamater(messageContext, ID);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			Status status = twitter.showStatus(Long.parseLong(id));
 			TwitterUtils.storeResponseStatus(messageContext, status);

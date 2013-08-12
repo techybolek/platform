@@ -56,9 +56,9 @@ public class TwitterGetUserTimeLine extends AbstractTwitterConnector {
 		}
 
 		try {
-			String userID = TwitterUtils.lookupFunctionParam(messageContext,
+			String userID = TwitterUtils.lookupTemplateParamater(messageContext,
 					USER_ID);
-			String page = TwitterUtils.lookupFunctionParam(messageContext, PAGE);
+			String page = TwitterUtils.lookupTemplateParamater(messageContext, PAGE);
 
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 

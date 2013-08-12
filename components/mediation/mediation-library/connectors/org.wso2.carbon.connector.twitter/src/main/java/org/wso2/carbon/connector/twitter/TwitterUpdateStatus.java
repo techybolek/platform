@@ -36,7 +36,7 @@ public class TwitterUpdateStatus extends AbstractConnector {
 
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
-			String statusStr = TwitterUtils.lookupFunctionParam(messageContext, STATUS);
+			String statusStr = TwitterUtils.lookupTemplateParamater(messageContext, STATUS);
 			if (statusStr == null || "".equals(statusStr.trim())) {
 				return;
 			}

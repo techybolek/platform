@@ -55,11 +55,11 @@ public class TwitterSearchPlaces extends AbstractTwitterConnector {
 			log.info("executing twitter search places");
 		}
 		try {
-			String latitude = TwitterUtils.lookupFunctionParam(messageContext,
+			String latitude = TwitterUtils.lookupTemplateParamater(messageContext,
 					SEARCH_BY_LATITUDE);
-			String longitude = TwitterUtils.lookupFunctionParam(messageContext,
+			String longitude = TwitterUtils.lookupTemplateParamater(messageContext,
 					SEARCH_LONGITUDE);
-			String ip = TwitterUtils.lookupFunctionParam(messageContext, SEARCH_IP);
+			String ip = TwitterUtils.lookupTemplateParamater(messageContext, SEARCH_IP);
 			GeoQuery query = new GeoQuery(new GeoLocation(Double.parseDouble(latitude),
 					Double.parseDouble(longitude)));
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();

@@ -65,7 +65,7 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
 
-			Query query = new Query(TwitterUtils.lookupFunctionParam(messageContext,
+			Query query = new Query(TwitterUtils.lookupTemplateParamater(messageContext,
 					SEARCH_STRING));
 			polulateOptionalParamters(messageContext, query);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
@@ -91,15 +91,15 @@ public class TwitterSearch extends AbstractTwitterConnector {
 	 */
 	private void polulateOptionalParamters(MessageContext messageContext, Query query) {
 
-		String lang = TwitterUtils.lookupFunctionParam(messageContext, LANG);
-		String locale = TwitterUtils.lookupFunctionParam(messageContext, LOCALE);
-		String maxID = TwitterUtils.lookupFunctionParam(messageContext, MAX_ID);
-		String since = TwitterUtils.lookupFunctionParam(messageContext, SINCE);
-		String sinceID = TwitterUtils.lookupFunctionParam(messageContext, SINCE_ID);
-		String geocode = TwitterUtils.lookupFunctionParam(messageContext, GEO_CODE);
-		String radius = TwitterUtils.lookupFunctionParam(messageContext, RADIUS);
-		String unit = TwitterUtils.lookupFunctionParam(messageContext, UNIT);
-		String until = TwitterUtils.lookupFunctionParam(messageContext, UNITL);
+		String lang = TwitterUtils.lookupTemplateParamater(messageContext, LANG);
+		String locale = TwitterUtils.lookupTemplateParamater(messageContext, LOCALE);
+		String maxID = TwitterUtils.lookupTemplateParamater(messageContext, MAX_ID);
+		String since = TwitterUtils.lookupTemplateParamater(messageContext, SINCE);
+		String sinceID = TwitterUtils.lookupTemplateParamater(messageContext, SINCE_ID);
+		String geocode = TwitterUtils.lookupTemplateParamater(messageContext, GEO_CODE);
+		String radius = TwitterUtils.lookupTemplateParamater(messageContext, RADIUS);
+		String unit = TwitterUtils.lookupTemplateParamater(messageContext, UNIT);
+		String until = TwitterUtils.lookupTemplateParamater(messageContext, UNITL);
 
 		if (lang != null && !lang.isEmpty()) {
 			query.setLang(lang);

@@ -26,8 +26,8 @@ import twitter4j.Status;
 
 public class TwitterUtils {
 
-	public static String lookupFunctionParam(MessageContext ctxt, String paramName) {
-		return (String) ConnectorUtils.lookupFunctionParam(ctxt, paramName);
+	public static String lookupTemplateParamater(MessageContext ctxt, String paramName) {
+		return (String) ConnectorUtils.lookupTemplateParamater(ctxt, paramName);
 
 	}
 

@@ -37,10 +37,10 @@ public class TwitterSendDirectMesage extends AbstractConnector {
 	@Override
 	public void connect(MessageContext messageContext) throws ConnectException {
 		try {
-			String userID = TwitterUtils.lookupFunctionParam(messageContext, USER_ID);
-			String screenName = TwitterUtils.lookupFunctionParam(messageContext,
+			String userID = TwitterUtils.lookupTemplateParamater(messageContext, USER_ID);
+			String screenName = TwitterUtils.lookupTemplateParamater(messageContext,
 					SCREEN_NAME);
-			String message = TwitterUtils.lookupFunctionParam(messageContext, MESSAGE);
+			String message = TwitterUtils.lookupTemplateParamater(messageContext, MESSAGE);
 			Twitter twitter = new TwitterClientLoader(messageContext).loadApiClient();
 			if (userID != null && userID.isEmpty()) {
 				twitter.sendDirectMessage(Long.parseLong(userID), message);
