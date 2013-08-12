@@ -42,7 +42,6 @@ public class WARCappDeployer implements AppDeploymentHandler {
     public static final String WAR_TYPE = "web/application";
     public static final String JAX_WAR_TYPE = "webapp/jaxws";
     public static final String WAR_DIR = "webapps";
-    public static final String JAX_WAR_DIR = "jaxwebapps";
 
     private Map<String, Boolean> acceptanceList = null;
 
@@ -71,11 +70,9 @@ public class WARCappDeployer implements AppDeploymentHandler {
                 continue;
             }
 
-            // for each service type, select the correct deployer
-            if (WAR_TYPE.equals(artifact.getType())) {
+            // for each service type, select the deployer
+            if (WAR_TYPE.equals(artifact.getType()) || JAX_WAR_TYPE.equals(artifact.getType())) {
                 deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, WAR_DIR, "war");
-            } else if (JAX_WAR_TYPE.equals(artifact.getType())) {
-                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, JAX_WAR_DIR, "war");
             } else {
                 continue;
             }
@@ -122,11 +119,9 @@ public class WARCappDeployer implements AppDeploymentHandler {
                 continue;
             }
 
-            // for each service type, select the correct deployer
-            if (WAR_TYPE.equals(artifact.getType())) {
+            // for each service type, select the deployer
+            if (WAR_TYPE.equals(artifact.getType()) || JAX_WAR_TYPE.equals(artifact.getType())) {
                 deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, WAR_DIR, "war");
-            } else if (JAX_WAR_TYPE.equals(artifact.getType())) {
-                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, JAX_WAR_DIR, "war");
             } else {
                 continue;
             }
