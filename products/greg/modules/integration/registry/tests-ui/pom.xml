@@ -243,7 +243,7 @@
         <dependency>
             <groupId>org.codehaus.jettison.wso2</groupId>
             <artifactId>jettison</artifactId>
-            <version>${version.jettison}</version>
+            <version>${orbit.version.jettison}</version>
         </dependency>
         <dependency>
             <groupId>emma</groupId>
