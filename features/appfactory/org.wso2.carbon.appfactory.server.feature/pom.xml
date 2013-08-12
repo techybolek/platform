@@ -65,13 +65,16 @@
             <artifactId>org.wso2.carbon.appfactory.user.registration</artifactId>
             <version>${appfactory.version}</version>
         </dependency>
-<!-- api manager integration -->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.appfactory.apiManager.integration</artifactId>
             <version>${appfactory.version}</version>
         </dependency>
-<!-- end of api manager integration -->
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.appfactory.bam.integration</artifactId>
+            <version>${appfactory.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.appfactory.common</artifactId>
@@ -260,6 +263,7 @@
                                 <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.events.notification.stub</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.buildserver.teanant.mgt.stub</bundleDef>
                                 <bundleDef> org.wso2.carbon:org.wso2.carbon.appfactory.apiManager.integration</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.appfactory.bam.integration</bundleDef>
                                 <bundleDef>org.apache.maven.wso2:maven-model</bundleDef>
                                 <bundleDef>org.apache.maven.wso2:maven-core</bundleDef>
                                 <bundleDef>com.gitblit:gitblit</bundleDef>
