@@ -798,6 +798,31 @@ public class WebappAdmin extends AbstractAdmin {
         return getAxisConfig().getRepository().getPath() + File.separator + webappDeploymentDir;
     }
 
+    /**
+     * Return the location of the actual webapp file
+     * @param fileName name of the webapp file
+     * @param webappType type of the webapp
+     * @return
+     */
+    protected String getWebappDeploymentFile(String fileName, String webappType) {
+        String webappDeploymentDir;
+        WebApplicationsHolder webappsHolder = getWebappsHolder();
+        File webappFile = webappsHolder.getStartedWebapps().get(fileName).getWebappFile();
+
+        // if webapp deployed using CApp this give the actual webapp file
+        // since its not inside repository/deployment/webapps directory
+        if (webappFile.getAbsolutePath().contains("carbonapps")) {
+            return webappFile.getAbsolutePath();
+        } else {
+            if(WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
+                webappDeploymentDir = WebappsConstants.JAGGERY_WEBAPP_REPO;
+            } else {
+                webappDeploymentDir = WebappsConstants.WEBAPP_DEPLOYMENT_FOLDER;
+            }
+            return getAxisConfig().getRepository().getPath() + File.separator + webappDeploymentDir + File.separator + fileName;
+        }
+    }
+
     private void handleException(String msg, Exception e) throws AxisFault {
         log.error(msg, e);
         throw new AxisFault(msg, e);
@@ -811,7 +836,7 @@ public class WebappAdmin extends AbstractAdmin {
      */
     public DataHandler downloadWarFileHandler(String fileName, String webappType) {
         String repoPath = getAxisConfig().getRepository().getPath();
-        String appsPath = getWebappDeploymentDirPath(webappType) + File.separator + fileName;
+        String appsPath = getWebappDeploymentFile(fileName, webappType);
 
         File webAppFile = new File(appsPath);
         DataHandler handler = null;
