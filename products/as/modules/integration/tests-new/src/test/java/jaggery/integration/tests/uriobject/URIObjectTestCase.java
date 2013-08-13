@@ -109,25 +109,4 @@ public class URIObjectTestCase extends ASIntegrationTest {
                 "element " + "is : aa " + ",dir3 element is : bb");
     }
 
-    @Test(groups = {"wso2.as"}, description = "Test URI operations for PathInfo in request",
-            dependsOnMethods = "testURIOperationsDir")
-    public void testURIOperationsPathInfo() throws Exception {
-
-        String response = null;
-        URL jaggeryURL = new URL(asServer.getWebAppURL() + "/testapp/uri/test");
-        URLConnection jaggeryServerConnection = Utility.openConnection(jaggeryURL);
-        assertNotNull(jaggeryServerConnection, "Connection establishment failure");
-
-        BufferedReader in = Utility.inputReader(jaggeryServerConnection);
-        assertNotNull(in, "Input stream failure");
-
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            response = inputLine;
-        }
-
-        in.close();
-        log.info("Response: " + response);
-        assertEquals(response, "request getPathInfo : /test");
-    }
 }
