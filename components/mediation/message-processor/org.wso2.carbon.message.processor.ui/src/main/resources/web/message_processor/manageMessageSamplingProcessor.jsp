@@ -132,6 +132,7 @@
         addServiceParameter("quartz.conf", document.getElementById('quartz_conf').value);
         addServiceParameter("cronExpression", document.getElementById('cron_expression').value);
         addServiceParameter("pinnedServers", document.getElementById('pinnedServers').value);
+        addServiceParameter("is.active", document.getElementById('mp_state').value);
     }
 
     function addServiceParameter(parameter, value) {
@@ -364,6 +365,24 @@
                         <td colspan="2" class="sub-header"><fmt:message
                                 key="message.sampling.processor.parameters"/></td>
                     </tr>
+                    <td><fmt:message key="message.processor.state"/><span class="required"> *</span></td>
+                    <td>
+                        <select id="mp_state" name="mp_state">
+                            <% if (null!=processorData && processorData.getParams() != null) {
+                                if (!processorData.getParams().isEmpty()&&(processorData.getParams().get("is.active")!=null)
+                                        && Boolean.valueOf(processorData.getParams().get("is.active"))) { %>
+                                <option value="false">Deactivate</option>
+                                <option value="true" selected>Activate</option>
+                            <% } else { %>
+                                <option value="false" selected>Deactivate</option>
+                                <option value="true">Activate</option>
+                            <% } %>
+                            <% } else { %>
+                                <option value="false">Deactivate</option>
+                                <option value="true" selected>Activate</option>
+                            <% } %>
+                        </select>
+                    </td>
                     <tr>
                         <td><fmt:message key="sampling.interval"/></td>
                         <td><input type="text" id="retry_interval" name="retry_interval"
