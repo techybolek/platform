@@ -39,7 +39,7 @@
 	   <fileset dir="${wso2appserver.home}/repository/components/plugins/">
                 <include name="commons-httpclient_3.1.0.wso2v2.jar"/>
                 <include name="commons-codec_1.4.0.wso2v1.jar"/>
-		<include name="jettison_1.1.0.wso2v1.jar"/>
+		<include name="jettison_1.3.4.wso2v1.jar"/>
             </fileset>
 	    <fileset dir="${wso2appserver.home}/lib/runtimes/cxf/">
                 <include name="*.jar"/>
