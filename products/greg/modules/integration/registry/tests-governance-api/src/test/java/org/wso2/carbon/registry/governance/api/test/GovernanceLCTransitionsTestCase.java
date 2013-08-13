@@ -17,9 +17,11 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceFilter;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import javax.xml.namespace.QName;
@@ -62,7 +64,8 @@ public class GovernanceLCTransitionsTestCase  {
     }
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition")
-    public void testAttachLifecycle() throws GovernanceException {
+    public void testAttachLifecycle() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         Service[] services = serviceManager.getAllServices();
         Service service = services[0];
         service.attachLifecycle(LIFE_CYCLE_NAME);
@@ -74,7 +77,8 @@ public class GovernanceLCTransitionsTestCase  {
     }
 
     @Test(groups = {"wso2.greg"}, description = "LC Transition", dependsOnMethods = "testAttachLifecycle")
-    public void testGetCheckListItems() throws GovernanceException {
+    public void testGetCheckListItems() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         Service[] services = serviceManager.getAllServices();
         Service service = services[0];
         String[] checklistItems = service.getAllCheckListItemNames();
