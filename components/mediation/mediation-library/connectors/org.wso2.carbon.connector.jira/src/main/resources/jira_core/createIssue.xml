@@ -1,9 +1,14 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="createIssue">
 
-	<parameter name="jira.issueFields"
-		description="a list of required issue fields in JSON format needed to create the issue" />
-
 	<sequence>
+		<property name="messageType" value="application/json" scope="axis2" />
+		<property name="Accept-Encoding" action="remove" scope="transport" />
 
+		<send continuation="true">
+			<endpoint>
+				<http method="POST"
+					uri-template="{uri.var.jira.url}/rest/api/2/issue" />
+			</endpoint>
+		</send>
 	</sequence>
 </template>

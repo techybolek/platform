@@ -23,7 +23,7 @@
 		<send continuation="true">
 			<endpoint>
 				<http method="get"
-					uri-template="https://{uri.var.jira.url}/{uri.var.jira.context}/rest/api/2/search?jql={uri.var.jira.jqlQuery}&amp;maxResults={uri.var.jira.max.result}&amp;startAt={uri.var.jira.start.from}" />
+					uri-template="{uri.var.jira.url}/rest/api/2/search?jql={uri.var.jira.jqlQuery}&amp;maxResults={uri.var.jira.max.result}&amp;startAt={uri.var.jira.start.from}" />
 			</endpoint>
 		</send>
 

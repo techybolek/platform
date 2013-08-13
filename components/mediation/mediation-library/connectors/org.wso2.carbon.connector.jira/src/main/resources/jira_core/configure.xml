@@ -5,7 +5,7 @@
 		description="username of the user used to log in to JIRA." />
 	<parameter name="uri"
 		description="password of the user used to log in to JIRA." />
-    <parameter name="context" />
+
 
 	<sequence>
 		<property name="jira.username" expression="$func:username" />
@@ -16,6 +16,6 @@
 		<property name="Authorization"
 			expression="fn:concat('Basic ', base64Encode($ctx:jira.for.auth))"
 			scope="transport" />
-		<property name="uri.var.jira.context" expression="$func:context" />
+	
 	</sequence>
 </template>

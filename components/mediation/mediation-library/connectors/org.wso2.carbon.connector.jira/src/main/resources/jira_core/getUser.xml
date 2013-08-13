@@ -9,7 +9,7 @@
 		<send continuation="true">
 			<endpoint>
 				<http method="get"
-					uri-template="https://{uri.var.jira.url}/{uri.var.jira.context}/rest/api/2/user?username={uri.var.username}" />
+					uri-template="{uri.var.jira.url}/rest/api/2/user?username={uri.var.username}" />
 			</endpoint>
 		</send>
 		

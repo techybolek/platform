@@ -7,7 +7,7 @@
 		 <property name="messageType" value="application/json" scope="axis2" />
 		<send continuation="true">
 			<endpoint>
-				<http method="get" uri-template="https://{uri.var.jira.url}/{uri.var.jira.context}/rest/api/2/project/{uri.var.projectKey}" />
+				<http method="get" uri-template="{uri.var.jira.url}/rest/api/2/project/{uri.var.projectKey}" />
 			</endpoint>
 		</send>
 	</sequence>
