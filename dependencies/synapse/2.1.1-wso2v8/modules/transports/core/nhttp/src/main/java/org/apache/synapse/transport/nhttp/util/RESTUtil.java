@@ -230,8 +230,15 @@ public class RESTUtil {
         // This method does not cause any performance issue ...
         // Proper fix should be refractoring axis2 RestUtil in a proper way
 
-        RequestURIBasedDispatcher requestDispatcher = new RequestURIBasedDispatcher();
-        AxisService axisService = requestDispatcher.findService(msgContext);
+        /**
+         * This reverseProxyMode was introduce to avoid the LB exposing it's own web service when REST call was initiated
+         */
+        boolean reverseProxyMode = Boolean.parseBoolean(System.getProperty("reverseProxyMode"));
+        AxisService axisService = null;
+        if(!reverseProxyMode){
+            RequestURIBasedDispatcher requestDispatcher = new RequestURIBasedDispatcher();
+            axisService = requestDispatcher.findService(msgContext);
+        }
 
         boolean isCustomRESTDispatcher = false;
         if (requestURI.matches(NHttpConfiguration.getInstance().getRestUriApiRegex())
