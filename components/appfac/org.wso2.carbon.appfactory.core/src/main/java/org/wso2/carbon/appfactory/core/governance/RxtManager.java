@@ -23,7 +23,6 @@ import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.deploy.Artifact;
 import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
@@ -34,15 +33,11 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 public class RxtManager {
     /*
@@ -71,7 +66,7 @@ public class RxtManager {
         if (artifact == null) {
             String errorMsg =
                     String.format("Unable to find appversion information for id : %s",
-                                  applicationId);
+                            applicationId);
             log.error(errorMsg);
             throw new AppFactoryException(errorMsg);
         }
@@ -89,7 +84,7 @@ public class RxtManager {
             GovernanceUtils.loadGovernanceArtifacts(userRegistry);
             GenericArtifactManager artifactManager =
                     new GenericArtifactManager(userRegistry,
-                                               "appversion");
+                            "appversion");
             artifactManager.updateGenericArtifact(artifact);
         } catch (RegistryException e) {
             String errorMsg = "Error while updating the artifact " + applicationId;
@@ -111,11 +106,11 @@ public class RxtManager {
                                     String[] newValues) throws AppFactoryException {
         GenericArtifactImpl artifact = getAppVersionArtifact(applicationId, version);
         log.info("=============== updating rxt =============== key:" + key + " with " +
-                 newValues.length + " values");
+                newValues.length + " values");
         if (artifact == null) {
             String errorMsg =
                     String.format("Unable to find appversion information for id : %s",
-                                  applicationId);
+                            applicationId);
             log.error(errorMsg);
             throw new AppFactoryException(errorMsg);
         }
@@ -129,7 +124,7 @@ public class RxtManager {
             GovernanceUtils.loadGovernanceArtifacts(userRegistry);
             GenericArtifactManager artifactManager =
                     new GenericArtifactManager(userRegistry,
-                                               "appversion");
+                            "appversion");
             artifactManager.updateGenericArtifact(artifact);
         } catch (RegistryException e) {
             String errorMsg = "Error while updating the artifact " + applicationId;
@@ -150,7 +145,7 @@ public class RxtManager {
         //String[] versionPaths = getVersionPaths(applicationId);
         String stage;
         /*// path to a version is in the structure .../<appid>/<lifecycle>/1.0.1 )
-		if (versionPaths != null) {
+        if (versionPaths != null) {
 			for (String path : versionPaths) {
 				String[] s = path.trim().split(RegistryConstants.PATH_SEPARATOR);
 				if (appVersion.equals(s[s.length - 1])) {
@@ -231,18 +226,18 @@ public class RxtManager {
             UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
             Resource resource =
                     userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-                                     RegistryConstants.PATH_SEPARATOR + applicationId +
-                                     RegistryConstants.PATH_SEPARATOR + version);
+                            RegistryConstants.PATH_SEPARATOR + applicationId +
+                            RegistryConstants.PATH_SEPARATOR + version);
             GovernanceUtils.loadGovernanceArtifacts(userRegistry);
             GenericArtifactManager artifactManager =
                     new GenericArtifactManager(userRegistry,
-                                               "appversion");
+                            "appversion");
             artifact = (GenericArtifactImpl) artifactManager.getGenericArtifact(resource.getUUID());
 
         } catch (RegistryException e) {
             String errorMsg =
                     String.format("Unable to load the application information for applicaiton id: %s",
-                                  applicationId);
+                            applicationId);
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
@@ -260,7 +255,7 @@ public class RxtManager {
     public String getAppVersionRxtValue(String applicationId, String version,
                                         String key) throws AppFactoryException {
         GenericArtifactImpl artifact;
-        String keyValue = null;
+        String keyValue;
         try {
             artifact = getAppVersionArtifact(applicationId, version);
             keyValue = artifact.getAttribute(key);
@@ -268,7 +263,7 @@ public class RxtManager {
         } catch (RegistryException e) {
             String errorMsg =
                     String.format("Unable to load the application information for applicaiton id: %s",
-                                  applicationId);
+                            applicationId);
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
@@ -277,28 +272,37 @@ public class RxtManager {
     }
 
     /**
-     * Retrieves artifact infomration related to all the versions of the given
+     * Retrieves artifact information related to all the versions of the given
      * {@code applicationId}
      *
-     * @param applicationId
+     * @param applicationId {@code applicationId}
      * @return list of {@link Artifact}
      * @throws AppFactoryException
      * @throws RegistryException
      */
     public List<Artifact> getAppVersionRxtForApplication(final String applicationId)
             throws AppFactoryException,
-                   RegistryException {
+            RegistryException {
 
         RegistryService registryService = ServiceHolder.getRegistryService();
         UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
+
+        return getAppVersionRXTFromRegistry(userRegistry, applicationId);
+    }
+
+    /**
+     * Private method to get App Version from given User registry
+     */
+    private List<Artifact> getAppVersionRXTFromRegistry(UserRegistry userRegistry, String applicationId) throws AppFactoryException,
+            RegistryException {
         GovernanceUtils.loadGovernanceArtifacts(userRegistry);
         GenericArtifactManager artifactManager =
                 new GenericArtifactManager(userRegistry,
-                                           "appversion");
+                        "appversion");
         final List<Artifact> artifactList = new ArrayList<Artifact>();
         List<String> versionUUID = new ArrayList<String>();
-        String applicationPath=AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-                               RegistryConstants.PATH_SEPARATOR + applicationId;
+        String applicationPath = AppFactoryConstants.REGISTRY_APPLICATION_PATH +
+                RegistryConstants.PATH_SEPARATOR + applicationId;
         Resource appIDCollection =
                 userRegistry.get(applicationPath);
         if (appIDCollection instanceof Collection) {
@@ -311,7 +315,7 @@ public class RxtManager {
                     }
                     Resource child = userRegistry.get(appVersionResource);
                     if (!isCollection(child) &&
-                        !child.getPath().equals(applicationPath+RegistryConstants.PATH_SEPARATOR+"appinfo")) {
+                            !child.getPath().equals(applicationPath + RegistryConstants.PATH_SEPARATOR + "appinfo")) {
                         versionUUID.add(child.getUUID());
                     }
                 }
@@ -323,6 +327,37 @@ public class RxtManager {
         }
         return artifactList;
     }
+
+    /**
+     * Retrieves App Version RXTs from tenant's registry
+     *
+     * @param domainName    tenant domain of the application
+     * @param applicationId {@code applicationId}
+     * @return list of  Artifact
+     * @throws AppFactoryException
+     * @throws RegistryException
+     */
+    public List<Artifact> getAppVersionRxtForApplication(String domainName, final String applicationId)
+            throws AppFactoryException,
+            RegistryException {
+
+        RegistryService registryService;
+
+        registryService = ServiceHolder.getRegistryService();
+
+        UserRegistry userRegistry;
+        try {
+            userRegistry = registryService.getGovernanceSystemRegistry(
+                    ServiceHolder.getRealmService().getTenantManager().getTenantId(domainName));
+        } catch (UserStoreException e) {
+            String errorMsg = String.format("Unable to get tenant id for %s", domainName);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+
+        return getAppVersionRXTFromRegistry(userRegistry, applicationId);
+    }
+
 
     private boolean isCollection(Resource res) {
         return (res instanceof Collection);
@@ -344,7 +379,7 @@ public class RxtManager {
         boolean isAutoBuild = autoBuildStr == null ? false : Boolean.valueOf(autoBuildStr);
 
         return new Artifact(applicationKey, lastBuildStatus, version, isAutoBuild, isAutoDeploy,
-                            lastDeployedId, stage);
+                lastDeployedId, stage);
     }
 
     /**
@@ -400,7 +435,7 @@ public class RxtManager {
 
                 GenericArtifactManager artifactManager =
                         new GenericArtifactManager(userRegistry,
-                                                   rxt);
+                                rxt);
 
                 return artifactManager.getGenericArtifact(resource.getUUID());
             }
@@ -409,7 +444,7 @@ public class RxtManager {
         } catch (RegistryException e) {
             String errorMsg =
                     String.format("Unable to load the artidact information for recource path: %s for rxt: %s",
-                                  resourcePath, rxt);
+                            resourcePath, rxt);
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
@@ -461,7 +496,7 @@ public class RxtManager {
         } catch (RegistryException e) {
             String errorMsg =
                     String.format("Error While updating existing resgistry artifact: %s",
-                                  rxt);
+                            rxt);
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
@@ -486,10 +521,10 @@ public class RxtManager {
             GovernanceUtils.loadGovernanceArtifacts(userRegistry);
 
             String resourcePath = AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-                                  RegistryConstants.PATH_SEPARATOR + applicationKey +
-                                  RegistryConstants.PATH_SEPARATOR + "eta" +
-                                  RegistryConstants.PATH_SEPARATOR + stage +
-                                  RegistryConstants.PATH_SEPARATOR + version;
+                    RegistryConstants.PATH_SEPARATOR + applicationKey +
+                    RegistryConstants.PATH_SEPARATOR + "eta" +
+                    RegistryConstants.PATH_SEPARATOR + stage +
+                    RegistryConstants.PATH_SEPARATOR + version;
 
             List<GenericArtifact> etaArtifacts = new ArrayList<GenericArtifact>();
             if (!userRegistry.resourceExists(resourcePath)) {
@@ -527,7 +562,7 @@ public class RxtManager {
         } catch (RegistryException e) {
             String errorMsg =
                     String.format("Error While retrieving eta information for : %s version : %s",
-                                  applicationKey, version);
+                            applicationKey, version);
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
@@ -535,18 +570,18 @@ public class RxtManager {
 
     public List<Artifact> getAppVersionRxtsInStage(final String applicationId, final String stage)
             throws RegistryException, AppFactoryException {
-        List<Artifact> artifactList = new ArrayList<Artifact>();
+        List<Artifact> artifactList;
         List<Artifact> artifactsInStageList = new ArrayList<Artifact>();
         try {
-            artifactList=getAppVersionRxtForApplication(applicationId);
+            artifactList = getAppVersionRxtForApplication(applicationId);
         } catch (AppFactoryException e) {
-            String errorMsg ="Error While getting versions of application "+applicationId;
+            String errorMsg = "Error While getting versions of application " + applicationId;
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
-        for(Artifact artifact:artifactList){
-            if(stage.equals(artifact.getStage())){
-                 artifactsInStageList.add(artifact);
+        for (Artifact artifact : artifactList) {
+            if (stage.equals(artifact.getStage())) {
+                artifactsInStageList.add(artifact);
             }
 
         }
