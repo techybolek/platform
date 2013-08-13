@@ -31,7 +31,6 @@ import org.wso2.carbon.user.api.Properties;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.core.UserStoreConfigConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.tracker.UserStoreManagerRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -336,7 +335,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
     /**
      * Deletes the user store specified
      *
-     * @param userStores: domain name of the user stores to be deleted
+     * @param domainName: domain name of the user stores to be deleted
      */
     public void deleteUserStore(String domainName) throws UserStoreException {
     	if(!isAuthorized()) {
@@ -348,7 +347,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
     /**
      * Delete the given list of user stores
      *
-     * @param userStores: domain names of user stores to be deleted
+     * @param domains: domain names of user stores to be deleted
      */
     public void deleteUserStoresSet(String[] domains) throws UserStoreException {
     	boolean isDebugEnabled = log.isDebugEnabled();
@@ -439,7 +438,7 @@ public class UserStoreConfigAdminService extends AbstractAdmin {
      * Update a domain to be disabled/enabled
      *
      * @param domain: Name of the domain to be updated
-     * @param disable : Whether to disable/enable domain(true/false)
+     * @param isDisable : Whether to disable/enable domain(true/false)
      */
     public void changeUserStoreState(String domain, Boolean isDisable) throws UserStoreException {
 	    // Not editing primary store

@@ -160,11 +160,11 @@
     var allPropertiesSelected = false;
     function doSubmit() {
         if (doValidationDomainNameOnly()) {
-        	//if(doValidationMandatoryProperties()){
+//        	if(doValidationMandatoryProperties()){
         	document.dataForm.action = "userstore-config-finish.jsp";
         	document.dataForm.submit();
-			//}
-        }
+			}
+//        }
     }
     
     function doUpdate() {
@@ -283,6 +283,10 @@
         var value = document.getElementsByName("domainId")[0].value;
         if (value == '') {
             CARBON.showWarningDialog('<fmt:message key="domain.name.is.required"/>');
+            return false;
+        }
+        if (value.contains("_")) {
+            CARBON.showWarningDialog('<fmt:message key="cannot.contain.character"/>');
             return false;
         }
 
