@@ -178,6 +178,7 @@ public class IdentityConstants {
         public static final String SSO_TENANT_PARTITIONING_ENABLED = "SSOService.TenantPartitioningEnabled";
         public static final String SSO_SESSION_TIMEOUT = "SSOService.SessionTimeout";
 	    public static final String ACCEPT_OPENID_LOGIN = "SSOService.AcceptOpenIDLogin";
+        public static final String SAML_RESPONSE_VALIDITY_PERIOD = "SSOService.SAMLResponseValidityPeriod";
 
         //Identity Persistence Manager
         public static final String SKIP_DB_SCHEMA_CREATION = "JDBCPersistenceManager.SkipDBSchemaCreation";
