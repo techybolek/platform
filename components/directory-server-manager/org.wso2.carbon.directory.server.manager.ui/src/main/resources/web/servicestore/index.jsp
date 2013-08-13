@@ -26,8 +26,8 @@
 <%@ page import="org.wso2.carbon.directory.server.manager.ui.DirectoryServerManagerClient" %>
 <%@ page import="org.wso2.carbon.directory.common.stub.types.ServerPrinciple" %>
 
-<script type="text/javascript" src="extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
+
 <jsp:include page="../dialog/display_messages.jsp"/>
 
 <fmt:bundle basename="org.wso2.carbon.directory.server.manager.ui.i18n.Resources">
