@@ -1510,6 +1510,12 @@ public final class APIUtil {
         }
     }
 
+    public static boolean isTenantMode() throws UserStoreException {
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants().length!=0;
+
+    }
+
+
     /**
      * Retrieves the role list of system
 
