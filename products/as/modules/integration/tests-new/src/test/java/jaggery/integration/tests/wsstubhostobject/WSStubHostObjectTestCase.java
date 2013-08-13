@@ -28,6 +28,7 @@ import java.net.URLConnection;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This class sends requests to wsstub.jag and validates the response
@@ -54,20 +55,17 @@ public class WSStubHostObjectTestCase extends ASIntegrationTest {
 
         String inputLine;
         while ((inputLine = in.readLine()) != null) {
-            response = inputLine;
+            response += inputLine;
         }
 
         in.close();
         log.info("Response :" + response);
         assertNotNull(response, "Result cannot be null");
 
-        boolean responseContains = false;
-        if (response != null && response.contains(
-                "<ns:getVersionResponse xmlns:ns=\"http://version.services.core.carbon.wso2.org\">" +
-                        "<return>")) {
-            responseContains = true;
-        }
-        assertEquals(responseContains, true);
+        assertTrue(response.contains("<ns:getVersionResponse xmlns:ns=\"http://version.services.core.carbon.wso2.org\">"));
+        assertTrue(response.contains("<return>"));
+        assertTrue(response.contains("</ns:getVersionResponse>"));
+
     }
 }
 
