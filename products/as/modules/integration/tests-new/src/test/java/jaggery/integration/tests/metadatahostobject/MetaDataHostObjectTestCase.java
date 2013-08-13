@@ -28,6 +28,7 @@ import java.net.URLConnection;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This class sends requests to metadata.jag and validates the response
@@ -81,8 +82,8 @@ public class MetaDataHostObjectTestCase extends ASIntegrationTest {
 
         in.close();
         log.info("Response: " + response);
-        assertEquals(response, "{\"content\" : \"<a>Hello Jaggery</a>\", \""
-                + "props\" : {\"company\" : \"WSO2 Inc.\", \"url\" : \"http://wso2.com\"}}");
+        assertTrue(response.contains("content") && response.contains("Hello Jaggery") && response.contains("props") &&
+                response.contains("company") && response.contains("WSO2 Inc.") && response.contains("http://wso2.com")) ;
     }
 
     @Test(groups = {"wso2.as"}, description = "Test MetaData exists operations",
