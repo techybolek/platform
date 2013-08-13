@@ -172,7 +172,7 @@ Installation and Running
 3. Once the server starts, point your Web browser to https://localhost:9443/carbon/
 4. For more information, see the Installation Guide:
      Locally    : INSTALL.txt
-     On the web : http://docs.wso2.org/wiki/display/@product.version.docs@/Installation
+     On the web : http://docs.wso2.org/wiki/display/@product.version.docs@/Getting+Started
 
 
 Known issues of @product.name@ @product.version@
@@ -361,7 +361,7 @@ Crypto Notice
    Bouncycastle     : http://www.bouncycastle.org/
 
 For further details, see the WSO2 Carbon documentation at
-http://wso2.org/project/carbon/@carbon.version@/docs/
+http://docs.wso2.org/wiki/display/@carbon.version@/WSO2+Carbon+Documentation
 
 ---------------------------------------------------------------------------
 (c) @copyright.year@, WSO2 Inc.
