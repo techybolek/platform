@@ -42,7 +42,7 @@ public class getApplicationList extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: get application list");
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		Map<String, String> param = new HashMap<String, String>();
 

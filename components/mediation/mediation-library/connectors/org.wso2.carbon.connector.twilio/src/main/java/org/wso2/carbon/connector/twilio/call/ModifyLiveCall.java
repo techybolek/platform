@@ -46,7 +46,7 @@ public class ModifyLiveCall extends AbstractConnector {
 
 		// Must be provided
 		String callSid =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_CALL_SID);
 		Map<String, String> params = getParameters(messageContext);
 		try {
@@ -70,26 +70,26 @@ public class ModifyLiveCall extends AbstractConnector {
 		// http://www.twilio.com/docs/api/rest/change-call-state
 		// Available parameters to be modified (Optional)
 		String url =
-		             (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		             (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                         TwilioUtil.PARAM_URL);
 		String status =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_STATUS);
 		String method =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_METHOD);
 
 		String fallbackUrl =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_FALLBACKURL);
 		String fallbackMethod =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_FALLBACK_METHOD);
 		String statusCallback =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_STATUS_CALLBACK);
 		String statusCallbackMethod =
-		                              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                          TwilioUtil.PARAM_STATUS_CALLBACK_METHOD);
 
 		// Map for optional parameters

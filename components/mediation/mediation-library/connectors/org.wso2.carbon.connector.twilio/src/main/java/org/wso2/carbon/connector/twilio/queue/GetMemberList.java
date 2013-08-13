@@ -40,7 +40,7 @@ public class GetMemberList extends AbstractConnector {
 		log.auditLog("Start: get member list");
 
 		String queueSid =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_QUEUE_SID);
 
 		try {

@@ -54,7 +54,7 @@ public class GetAvailableLocalNumbers extends AbstractConnector {
 		log.auditLog("Start: get available local numbers");
 		Map<String, String> params = getParameter(messageContext);
 		String country =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_COUNTRY);
 		try {
 
@@ -83,31 +83,31 @@ public class GetAvailableLocalNumbers extends AbstractConnector {
 
 	private Map<String, String> getParameter(MessageContext messageContext) {
 		String areaCode =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_AREACODE);
 		String contains =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_CONTAINS);
 		String region =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_IN_REGION);
 		String postalCode =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_IN_POSTAL_CODE);
 		String nearLat =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_NEAR_LAT_LONG);
 		String nearNumber =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_NEAR_NUMBER);
 		String inLata =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_IN_LATA);
 		String inRateCenter =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_IN_RATE_CENTER);
 		String distance =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_DISTANCE);
 
 		Map<String, String> params = new HashMap<String, String>();

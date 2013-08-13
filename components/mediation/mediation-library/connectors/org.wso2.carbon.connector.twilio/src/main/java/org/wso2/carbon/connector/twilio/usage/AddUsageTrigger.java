@@ -63,13 +63,13 @@ public class AddUsageTrigger extends AbstractConnector {
 
 	private Map<String, String> getParams(MessageContext messageContext) {
 		
-		String usageCategory = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_USAGE_CATEGORY);
-		String triggerValue = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_TRIGGER_VALUE);
-		String callbackUrl = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_CALLBACK_URL);
-		String friendlyName = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_FRIENDLY_NAME);
-		String triggerBy = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_TRIGGERBY);
-		String recurring = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_RECURRING);
-		String callbackMethod = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_CALLBACK_METHOD);
+		String usageCategory = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_USAGE_CATEGORY);
+		String triggerValue = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_TRIGGER_VALUE);
+		String callbackUrl = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_CALLBACK_URL);
+		String friendlyName = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_FRIENDLY_NAME);
+		String triggerBy = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_TRIGGERBY);
+		String recurring = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_RECURRING);
+		String callbackMethod = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_CALLBACK_METHOD);
 
 		
 		Map<String, String> params = new HashMap<String, String>();

@@ -45,10 +45,10 @@ public class CreateQueue extends AbstractConnector {
 		log.auditLog("Start: create queue");
 
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		String maxSize =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_MAX_SIZE);
 
 		Map<String, String> params = new HashMap<String, String>();

@@ -67,22 +67,22 @@ public class AddOutgoingPhoneNumber extends AbstractConnector {
 	private Map<String, String> getParameter(MessageContext messageContext) {
 
 		String phoneNumber =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_PHONENUMBER);
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		String callDelay =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_CALL_DELAY);
 		String extension =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_EXTENSION);
 		String callback =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_STATUS_CALLBACK);
 		String callbackMethod =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_STATUS_CALLBACK_METHOD);
 
 		Map<String, String> params = new HashMap<String, String>();

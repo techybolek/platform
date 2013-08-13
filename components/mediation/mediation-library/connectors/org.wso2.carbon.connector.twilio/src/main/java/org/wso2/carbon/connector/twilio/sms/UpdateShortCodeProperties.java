@@ -44,25 +44,25 @@ public class UpdateShortCodeProperties extends AbstractConnector {
 		log.auditLog("Start: update short code properties");
 
 		String shortCodeSid =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_SHORTCODE_SID);
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		String apiVersion =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_API_VERSION);
 		String smsUrl =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_SMS_URL);
 		String smsMethod =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_SMS_METHOD);
 		String smsFallBackMethod =
-		                           (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                           (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                       TwilioUtil.PARAM_SMS_FALLBACKMETHOD);
 		String smsFallBackUrl =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_SMS_FALLBACKURL);
 
 		// optional parameters passed through this map

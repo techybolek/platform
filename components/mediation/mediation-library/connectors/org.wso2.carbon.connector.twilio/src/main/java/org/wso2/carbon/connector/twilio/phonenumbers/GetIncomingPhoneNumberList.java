@@ -46,10 +46,10 @@ public class GetIncomingPhoneNumberList extends AbstractConnector {
 		log.auditLog("Start: get incoming phone list");
 		// Parameters for the filters
 		String phoneNumber =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_PHONENUMBER);
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 
 		Map<String, String> params = new HashMap<String, String>();

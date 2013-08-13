@@ -41,7 +41,7 @@ public class GetShortCode extends AbstractConnector {
 		log.auditLog("Start: get Short Code");
 
 		String shortCodeSid =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_SHORTCODE_SID);
 
 		try {

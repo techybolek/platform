@@ -44,16 +44,16 @@ public class UpdateUsageTrigger extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: update usage trigger");
 		String triggerSid =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_USAGE_TRIGGER_SID);
 		String friendlyName =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_FRIENDLY_NAME);
 		String callbackUrl =
-            (String) ConnectorUtils.lookupFunctionParam(messageContext,
+            (String) ConnectorUtils.lookupTemplateParamater(messageContext,
                                                         TwilioUtil.PARAM_CALLBACK_URL);
 		String callbackMethod =
-            (String) ConnectorUtils.lookupFunctionParam(messageContext,
+            (String) ConnectorUtils.lookupTemplateParamater(messageContext,
                                                         TwilioUtil.PARAM_CALLBACK_METHOD);		
 		Map<String, String> params = new HashMap<String, String>();
 		if (friendlyName != null) {

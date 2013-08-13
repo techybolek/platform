@@ -41,7 +41,7 @@ public class GetRecording extends AbstractConnector {
 		log.auditLog("Start: get recording");
 		// Get parameters from the messageContext
 		String recordingSid =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_RECORDING_SID);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);

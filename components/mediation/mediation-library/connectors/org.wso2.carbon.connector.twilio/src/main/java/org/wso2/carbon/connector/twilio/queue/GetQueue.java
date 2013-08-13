@@ -40,7 +40,7 @@ public class GetQueue extends AbstractConnector {
 		log.auditLog("Start: get queue");
 
 		String queueSid =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_QUEUE_SID);
 
 		try {

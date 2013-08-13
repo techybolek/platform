@@ -41,7 +41,7 @@ public class RemoveUsageTrigger extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: remove usage trigger");
 		String triggerSid =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_USAGE_TRIGGER_SID);
 	
 		try {

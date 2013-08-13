@@ -41,7 +41,7 @@ public class GetTranscription extends AbstractConnector {
 		log.auditLog("Start: get transcription");
 		// Get parameters from the messageContext
 		String transcriptionSid =
-		                          (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                          (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                      TwilioUtil.PARAM_TRANSCRIPTION_SID);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);

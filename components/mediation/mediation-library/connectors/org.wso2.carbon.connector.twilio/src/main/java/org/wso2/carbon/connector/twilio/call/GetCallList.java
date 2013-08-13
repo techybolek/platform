@@ -69,18 +69,18 @@ public class GetCallList extends AbstractConnector {
 
 	private Map<String, String> getParameters(MessageContext messageContext) {
 		String to =
-		            (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_TO);
+		            (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_TO);
 		String from =
-		              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                          TwilioUtil.PARAM_FROM);
 		String status =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_STATUS);
 		String startTime =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_STARTTIME);
 		String parentCallSid =
-		                       (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                       (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                   TwilioUtil.PARAM_PARENT_CALL_SID);
 
 		Map<String, String> params = new HashMap<String, String>();

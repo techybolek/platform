@@ -41,7 +41,7 @@ public class GetAccount extends AbstractConnector {
 		log.auditLog("Start: get account");
 
 		String subAccountSid =
-		                       (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                       (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                   TwilioUtil.PARAM_SUB_ACCOUNT_SID);
 
 		try {

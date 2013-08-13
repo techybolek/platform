@@ -7,7 +7,9 @@
     <parameter name="accountSid"/>
     <parameter name="authToken"/>
     <sequence>
-        <property expression="$func:accountSid" name="TwilioAccountSid"/>
-        <property expression="$func:authToken" name="TwilioAuthToken"/>
+        <property expression="$func:accountSid" name="twilio.accountSid"
+            scope="operation" type="STRING"/>
+        <property expression="$func:authToken" name="twilio.authToken"
+            scope="operation" type="STRING"/>
     </sequence>
 </template>

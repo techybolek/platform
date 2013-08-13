@@ -45,10 +45,10 @@ public class UpdateOutgoingPhoneNumber extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: update outgoing phone number");
 		String outgoingCallerId =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_OUTGOING_CALLERID);
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		Map<String, String> params = new HashMap<String, String>();
 		if (friendlyName != null) {

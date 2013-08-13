@@ -51,7 +51,7 @@ public class RemoveIncomingPhoneNumber extends AbstractConnector {
 
 		// Must be provided
 		String incomingPhoneNumberSid =
-		                                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                            TwilioUtil.PARAM_INCOMING_PHONE_SID);
 
 		try {

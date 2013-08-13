@@ -45,7 +45,7 @@ public class updateConnectApp extends AbstractConnector {
 		log.auditLog("Start: update connect application");
 		Map<String, String> params = createParameterMap(messageContext);
 		String connectSid =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_CONNECT_APP_SID);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);
@@ -72,28 +72,28 @@ public class updateConnectApp extends AbstractConnector {
 	private Map<String, String> createParameterMap(MessageContext messageContext) {
 		// Required
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		String authorizedRedirectUrl =
-		                               (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                               (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                           TwilioUtil.PARAM_AUTHORIZED_REDIRECT_URL);
 		String deauthorizedCallbackUrl =
-		                                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                             TwilioUtil.PARAM_DEAUTHORIZE_CALLBACK_URL);
 		String deauthorizedCallbackMethod =
-		                                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                                TwilioUtil.PARAM_DEAUTHORIZE_CALLBACK_METHOD);
 		String permissions =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_PERMISSIONS);
 		String description =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_DESCRIPTION);
 		String companyName =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_COMPANY_NAME);
 		String homepageUrl =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_HOMEPAGE_URL);
 
 		// creating the map for optional parameters

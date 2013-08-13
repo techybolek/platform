@@ -74,44 +74,44 @@ public class MakeCall extends AbstractConnector {
 
 		// These are compulsory
 		String to =
-		            (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_TO);
+		            (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_TO);
 		String from =
-		              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                          TwilioUtil.PARAM_FROM);
 		// One of the below
 		String callUrl =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_URL);
 		String applicationSid =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_APPLICATION_SID);
 		// Optional parameters
 		String method =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_METHOD);
 		String fallbackUrl =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_FALLBACKURL);
 		String fallbackMethod =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_FALLBACK_METHOD);
 		String statusCallback =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_STATUS_CALLBACK);
 		String statusCallbackMethod =
-		                              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                          TwilioUtil.PARAM_STATUS_CALLBACK_METHOD);
 		String sendDigits =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_SEND_DIGITS);
 		String ifMachine =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_IF_MACHINE);
 		String timeout =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_IF_TIMEOUT);
 		String record =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_IF_RECORD);
 
 		Map<String, String> callParams = new HashMap<String, String>();

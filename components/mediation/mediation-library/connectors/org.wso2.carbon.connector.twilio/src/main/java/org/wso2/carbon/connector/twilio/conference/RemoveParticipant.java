@@ -42,10 +42,10 @@ public class RemoveParticipant extends AbstractConnector {
 		log.auditLog("Start: remove participant");
 
 		String conferenceSid =
-		                       (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                       (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                   TwilioUtil.PARAM_CONFERENCE_SID);
 		String callSidOfParticipant =
-		                              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                          TwilioUtil.PARAM_CALL_SID);
 
 		try {

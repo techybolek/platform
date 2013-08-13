@@ -45,10 +45,10 @@ public class GetAccountsList extends AbstractConnector {
 		// Optional parameters. For more information, see
 		// http://www.twilio.com/docs/api/rest/account#list-get-filters
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		String status =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_STATUS);
 
 		// Build a filter for the AccountList, i.e. filter parameters are passed

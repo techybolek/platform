@@ -28,6 +28,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.mediation.library.connectors.core.ConnectException;
 
 import com.twilio.sdk.TwilioRestClient;
@@ -58,7 +59,7 @@ public class TwilioUtil {
 	public static final String API_USAGE = "Usage";
 	public static final String API_USAGE_RECORDS = "Records";
 	public static final String API_USAGE_TRIGGERS = "Triggers";
-	
+
 	public static final String PARAM_FRIENDLY_NAME = "friendlyName";
 	public static final String PARAM_STATUS = "status";
 	public static final String PARAM_SUB_ACCOUNT_SID = "subAccountSid";
@@ -143,7 +144,7 @@ public class TwilioUtil {
 	public static final String PARAM_CALLBACK_URL = "callbackUrl";
 	public static final String PARAM_CALLBACK_METHOD = "callbackMethod";
 	public static final String PARAM_TRIGGER_VALUE = "triggerValue";
-	
+
 	public static final String TWILIO_FRIENDLY_NAME = "FriendlyName";
 	public static final String TWILIO_MAX_SIZE = "MaxSize";
 	public static final String TWILIO_STATUS = "Status";
@@ -211,7 +212,7 @@ public class TwilioUtil {
 	public static final String TWILIO_CALLBACK_URL = "CallbackUrl";
 	public static final String TWILIO_CALLBACK_METHOD = "CallbackMethod";
 	public static final String TWILIO_TRIGGER_VALUE = "TriggerValue";
-	
+
 	private static final OMFactory fac = OMAbstractFactory.getOMFactory();
 	private static final OMNamespace omNs = fac.createOMNamespace("http://wso2.org/twilio/adaptor",
 	                                                              "twilio");
@@ -220,8 +221,15 @@ public class TwilioUtil {
 	                                                                                              throws ConnectException {
 		// Authorization details
 		// Get parameters from the messageContext
-		String accountSid = (String) messageContext.getProperty("TwilioAccountSid");
-		String authToken = (String) messageContext.getProperty("TwilioAuthToken");
+		// Getting Transport Headers
+		Axis2MessageContext axis2smc = (Axis2MessageContext) messageContext;
+		axis2smc.getAxis2MessageContext();
+		String accountSid =
+		                    (String) axis2smc.getAxis2MessageContext().getOperationContext()
+		                                     .getProperty("twilio.accountSid");
+		String authToken =
+		                   (String) axis2smc.getAxis2MessageContext().getOperationContext()
+		                                    .getProperty("twilio.authToken");
 		return new TwilioRestClient(accountSid, authToken);
 	}
 

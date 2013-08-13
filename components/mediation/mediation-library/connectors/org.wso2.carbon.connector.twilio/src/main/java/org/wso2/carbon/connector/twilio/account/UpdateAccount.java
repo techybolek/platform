@@ -48,13 +48,13 @@ public class UpdateAccount extends AbstractConnector {
 		// account will be updated.
 		// Only friendly name of main account can be updated.
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		String status =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_STATUS);
 		String subAccountSid =
-		                       (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                       (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                   TwilioUtil.PARAM_SUB_ACCOUNT_SID);
 
 		// Creates a Map containing the parameters which are needed to be

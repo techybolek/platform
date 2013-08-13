@@ -40,7 +40,7 @@ public class GetConference extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: get conference");
 		// Get the conference Sid
-		String conferenceSid = (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_CONFERENCE_SID);		
+		String conferenceSid = (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_CONFERENCE_SID);		
 
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);

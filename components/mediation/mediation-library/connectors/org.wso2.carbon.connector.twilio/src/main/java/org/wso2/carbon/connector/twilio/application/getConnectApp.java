@@ -42,7 +42,7 @@ public class getConnectApp extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: get connect app");
 		String connectId =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_CONNECT_APP_SID);
 
 		try {

@@ -44,12 +44,12 @@ public class GetSmsList extends AbstractConnector {
 		log.auditLog("Start: get SMS Status List");
 
 		String to =
-		            (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_TO);
+		            (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_TO);
 		String from =
-		              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                          TwilioUtil.PARAM_FROM);
 		String dateSent =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_DATESENT);
 
 		try {

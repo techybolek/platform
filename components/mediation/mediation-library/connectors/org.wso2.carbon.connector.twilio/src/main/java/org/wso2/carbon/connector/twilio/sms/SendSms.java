@@ -44,22 +44,22 @@ public class SendSms extends AbstractConnector {
 		log.auditLog("Start: send SMS");
 
 		String to =
-		            (String) ConnectorUtils.lookupFunctionParam(messageContext, TwilioUtil.PARAM_TO);
+		            (String) ConnectorUtils.lookupTemplateParamater(messageContext, TwilioUtil.PARAM_TO);
 		String from =
-		              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                          TwilioUtil.PARAM_FROM);
 		String body =
-		              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                          TwilioUtil.PARAM_BODY);
 		// optional parameters
 		// see
 		// http://www.twilio.com/docs/api/rest/sending-sms#post-parameters-optional
 		// for more details.
 		String statusCallBackUrl =
-		                           (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                           (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                       TwilioUtil.PARAM_STATUS_CALLBACK_URL);
 		String applicationSid =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_APPLICATION_SID);
 
 		// the map used for passing parameters

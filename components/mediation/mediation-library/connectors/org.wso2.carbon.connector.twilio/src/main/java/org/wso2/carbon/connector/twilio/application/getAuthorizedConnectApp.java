@@ -38,7 +38,7 @@ public class getAuthorizedConnectApp extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: get authorized connect app");
 		String applicationId =
-		                       (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                       (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                   TwilioUtil.PARAM_AUTHORIZED_CONNECT_APP_SID);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);

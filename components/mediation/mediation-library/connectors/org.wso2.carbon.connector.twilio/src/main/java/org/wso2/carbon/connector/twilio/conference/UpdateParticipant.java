@@ -46,13 +46,13 @@ public class UpdateParticipant extends AbstractConnector {
 		log.auditLog("Start: update participant");
 
 		String conferenceSid =
-		                       (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                       (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                   TwilioUtil.PARAM_CONFERENCE_SID);
 		String callSidOfParticipant =
-		                              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                          TwilioUtil.PARAM_CALL_SID);
 		String muted =
-		               (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		               (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                           TwilioUtil.PARAM_MUTED);
 
 		Map<String, String> params = new HashMap<String, String>();

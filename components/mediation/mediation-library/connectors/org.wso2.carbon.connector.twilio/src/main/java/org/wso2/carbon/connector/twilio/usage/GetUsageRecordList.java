@@ -43,13 +43,13 @@ public class GetUsageRecordList extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: get usage record List");
 		String category =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_CATEGORY);
 		String startDate =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_START_DATE);
 		String endDate =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_END_DATE);
 		Map<String, String> params = new HashMap<String, String>();
 		if (category != null) {

@@ -41,7 +41,7 @@ public class GetCall extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: get call");
 		String callSid =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_CALL_SID);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);

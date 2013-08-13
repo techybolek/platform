@@ -41,7 +41,7 @@ public class GetSms extends AbstractConnector {
 		log.auditLog("Start: get SMS Status");
 
 		String messageSid =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_MESSAGE_SID);
 
 		try {

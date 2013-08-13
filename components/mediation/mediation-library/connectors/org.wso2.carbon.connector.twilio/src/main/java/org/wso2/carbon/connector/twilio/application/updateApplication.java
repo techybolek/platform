@@ -45,7 +45,7 @@ public class updateApplication extends AbstractConnector {
 		log.auditLog("Start: update application");
 		Map<String, String> params = createParameterMap(messageContext);
 		String applicationSid =
-            (String) ConnectorUtils.lookupFunctionParam(messageContext,
+            (String) ConnectorUtils.lookupTemplateParamater(messageContext,
                                                         TwilioUtil.PARAM_APPLICATION_SID);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);
@@ -73,49 +73,49 @@ public class updateApplication extends AbstractConnector {
 	private Map<String, String> createParameterMap(MessageContext messageContext) {
 		// Required
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		// optional parameters for creating the application retrieved by the
 		// Sid. See
 		// http://www.twilio.com/docs/api/rest/applications#list-post-optional-parameters
 		String apiVersion =
-		                    (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                    (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                TwilioUtil.PARAM_API_VERSION);
 		String voiceUrl =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_VOICEURL);
 		String voiceMethod =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_VOICEMETHOD);
 		String voiceFallbackUrl =
-		                          (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                          (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                      TwilioUtil.PARAM_VOICEFALLBACKURL);
 		String voiceFallbackMethod =
-		                             (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                             (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                         TwilioUtil.PARAM_VOICEFALLBACKMETHOD);
 		String statusCallback =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_STATUS_CALLBACK);
 		String statusCallbackMethod =
-		                              (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                              (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                          TwilioUtil.PARAM_STATUS_CALLBACK_METHOD);
 		String voiceCallerIdLookup =
-		                             (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                             (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                         TwilioUtil.PARAM_VOICE_CALLERID_LOOKUP);
 		String smsUrl =
-		                (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                            TwilioUtil.PARAM_SMS_URL);
 		String smsMethod =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_SMS_METHOD);
 		String smsFallbackUrl =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_SMS_FALLBACK_URL);
 		String smsFallbackMethod =
-		                           (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                           (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                       TwilioUtil.PARAM_SMS_FALLBACKMETHOD);
 		String smsStatusCallback =
-		                           (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                           (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                       TwilioUtil.PARAM_SMS_STATUS_CALLBACK);
 
 		// creating the map for optional parameters

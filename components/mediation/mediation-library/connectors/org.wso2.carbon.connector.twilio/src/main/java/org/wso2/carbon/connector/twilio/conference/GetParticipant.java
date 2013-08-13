@@ -43,10 +43,10 @@ public class GetParticipant extends AbstractConnector {
 		log.auditLog("Start: get conference participant");
 		// Get the conference Sid
 		String conferenceSid =
-		                       (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                       (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                   TwilioUtil.PARAM_CONFERENCE_SID);
 		String callSid =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_CALL_SID);
 
 		try {

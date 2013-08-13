@@ -54,13 +54,13 @@ public class GetAvailableTollFreeNumbers extends AbstractConnector {
 		log.auditLog("Start: get available toll free numbers");
 
 		String country =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_COUNTRY);
 		String areaCode =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_AREACODE);
 		String contains =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_CONTAINS);
 
 		Map<String, String> params = new HashMap<String, String>();

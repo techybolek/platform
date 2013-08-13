@@ -71,10 +71,10 @@ public class GetOutgoingPhoneNumberList extends AbstractConnector {
 
 	private Map<String, String> getParameter(MessageContext messageContext) {
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
 		String phoneNumber =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_PHONENUMBER);
 
 		Map<String, String> params = new HashMap<String, String>();

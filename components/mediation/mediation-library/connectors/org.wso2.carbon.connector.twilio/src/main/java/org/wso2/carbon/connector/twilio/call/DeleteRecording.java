@@ -43,7 +43,7 @@ public class DeleteRecording extends AbstractConnector {
 		log.auditLog("Start: delete recording");
 		// The Sid of the recording, must be provided
 		String recordingSid =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                  TwilioUtil.PARAM_RECORDING_SID);
 		try {
 			TwilioRestClient twilioRestClient = TwilioUtil.getTwilioRestClient(messageContext);

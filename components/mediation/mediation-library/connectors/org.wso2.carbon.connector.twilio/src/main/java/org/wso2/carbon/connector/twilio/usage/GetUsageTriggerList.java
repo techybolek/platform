@@ -43,13 +43,13 @@ public class GetUsageTriggerList extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: get usage trigger List");
 		String recurring =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_RECURRING);
 		String usageCategory =
-		                   (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                   (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                               TwilioUtil.PARAM_USAGE_CATEGORY);
 		String triggeredBy =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_TRIGGERBY);
 		Map<String, String> params = new HashMap<String, String>();
 		if (recurring != null) {

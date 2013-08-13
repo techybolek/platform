@@ -43,8 +43,8 @@ public class CreateSubAccount extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: create account");
 		String friendlyName =
-		                      (String) ConnectorUtils.lookupFunctionParam(messageContext,
-		                                                                  TwilioUtil.PARAM_FRIENDLY_NAME);
+		                      (String) ConnectorUtils.lookupTemplateParamater(messageContext,
+		                                                                      TwilioUtil.PARAM_FRIENDLY_NAME);
 
 		// Build a filter for the AccountList
 		Map<String, String> params = new HashMap<String, String>();
@@ -63,7 +63,7 @@ public class CreateSubAccount extends AbstractConnector {
 
 			OMElement omResponse = TwilioUtil.parseResponse("account.create.success");
 			TwilioUtil.addElement(omResponse, TwilioUtil.TWILIO_ACCOUNT_SID, account.getSid());
-			TwilioUtil.preparePayload(messageContext, omResponse);			
+			TwilioUtil.preparePayload(messageContext, omResponse);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new SynapseException(e);

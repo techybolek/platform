@@ -42,7 +42,7 @@ public class RemoveOutgoingPhoneNumber extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: remove outgoing phone number");
 		String outgoingCallerId =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_OUTGOING_CALLERID);
 
 		try {

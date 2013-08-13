@@ -38,7 +38,7 @@ public class RemoveApplication extends AbstractConnector {
 		SynapseLog log = getLog(messageContext);
 		log.auditLog("Start: remove application");
 		String applicationSid =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_APPLICATION_SID);
 
 		try {

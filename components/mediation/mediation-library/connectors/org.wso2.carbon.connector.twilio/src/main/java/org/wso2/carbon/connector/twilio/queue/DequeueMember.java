@@ -44,13 +44,13 @@ public class DequeueMember extends AbstractConnector {
 		log.auditLog("Start: dequeue member");
 
 		String queueSid =
-		                  (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                  (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                              TwilioUtil.PARAM_QUEUE_SID);
 		String callSid =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_CALL_SID);
 		String url =
-		             (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		             (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                         TwilioUtil.PARAM_URL);
 
 		try {

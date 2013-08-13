@@ -45,10 +45,10 @@ public class GetRecordingList extends AbstractConnector {
 		log.auditLog("Start: get recording list");
 		// Get parameters from the messageContext
 		String callSid =
-		                 (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                 (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                             TwilioUtil.PARAM_CALL_SID);
 		String dateCreated =
-		                     (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                     (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                 TwilioUtil.PARAM_DATE_CREATED);
 
 		Map<String, String> params = new HashMap<String, String>();

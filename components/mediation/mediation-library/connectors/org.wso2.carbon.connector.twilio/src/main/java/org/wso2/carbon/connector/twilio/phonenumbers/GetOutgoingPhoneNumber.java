@@ -43,7 +43,7 @@ public class GetOutgoingPhoneNumber extends AbstractConnector {
 		log.auditLog("Start: get outgoing phone");
 		// Parameters for the filters
 		String phoneNumberSid =
-		                        (String) ConnectorUtils.lookupFunctionParam(messageContext,
+		                        (String) ConnectorUtils.lookupTemplateParamater(messageContext,
 		                                                                    TwilioUtil.PARAM_OUTGOING_PHONE_SID);
 
 		try {
