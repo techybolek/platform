@@ -1,37 +1,17 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getUser">
-    <documentation>
-        <description>
-            Retrieve information for a given username (if the current user has permission to retrieve user details).
-            Configure template(org.wso2.carbon.jira.configure) must be called before calling this template.
-        </description>
-        <output>
-            <varable>jira.user</varable>
-            <description>
-                <a href="http://docs.atlassian.com/jira-rest-java-client-api/2.0.0-m13/jira-rest-java-client-api/apidocs/com/atlassian/jira/rest/client/api/domain/User.html">
-                    User
-                </a>
-                <span>object representing the user referenced by the given username.</span>
-            </description>
-        </output>
-        <sample>
-            &lt;call-template target="org.wso2.carbon.jira.configure"&gt;
-                &lt;with-param name="jira.uri" value="http://myjira.com:8080/jira/"/&gt;
-                &lt;with-param name="jira.username" value="admin"/&gt;
-                &lt;with-param name="jira.password" value="admin"/&gt;
-            &lt;/call-template&gt;
-            &lt;call-template target="org.wso2.carbon.jira.getUser"&gt;
-                &lt;with-param name="jira.requiredUsername" value="manuranga"/&gt;
-            &lt;/call-template&gt;
-        </sample>
-    </documentation>
-    <parameter name="jira.requiredUsername" description="the username of the user for whom we require details"/>
+	<parameter name="username"
+		description="the username of the user for whom we require details" />
 
-    <sequence>
-        <class name="org.wso2.carbon.connector.jira.template.JiraGetIssueTemplate">	
-	        <!--  property name="jira.username" expression="$func:jira.username" />
-	        <property name="jira.password" expression="$func:jira.password" />
-	        <property name="jira.uri" expression="$func:jira.uri" />
-	        <property name="jira.requiredUsername" expression="$func:jira.requiredUsername" /-->
-        </class>
-    </sequence>
+	<sequence>
+		<property name="uri.var.username" expression="$func:username" />
+		<property name="messageType" value="application/json" scope="axis2" />
+		<property name="Accept-Encoding" action="remove" scope="transport" />
+		<send buildmessage="true" contiunation="true">
+			<endpoint>
+				<http method="get"
+					uri-template="https://{uri.var.jira.url}/{uri.var.jira.context}/rest/api/2/user?username={uri.var.username}" />
+			</endpoint>
+		</send>
+		
+	</sequence>
 </template>

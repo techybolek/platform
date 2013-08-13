@@ -26,5 +26,12 @@
 			<description>search jira tasks</description>
 		</artifact>
 
+		<artifact name="getTransitions">
+			<file>getTransitions.xml</file>
+			<description>Get a list of the transitions possible for this issue by
+				the current user, along with fields that are required and their
+				types.</description>
+		</artifact>
+
 	</subArtifacts>
 </artifact>

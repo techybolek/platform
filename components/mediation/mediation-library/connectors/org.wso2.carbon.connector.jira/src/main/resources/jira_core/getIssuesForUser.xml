@@ -1,10 +1,6 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getIssuesForUser">
 
-    <sequence>
-        <class name="org.wso2.carbon.connector.jira.template.JiraGetIssueForUserTemplate">		
-	        <!--  property name="jira.username" expression="$func:jira.username" />
-	        <property name="jira.password" expression="$func:jira.password" />
-	        <property name="jira.uri" expression="$func:jira.uri" /-->
-        </class>
-    </sequence>
+	<sequence>
+
+	</sequence>
 </template>
