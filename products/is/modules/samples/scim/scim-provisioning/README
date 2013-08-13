@@ -21,7 +21,7 @@ and observe the output in the commandline.
 
 Sample for creating a group:
 ----------------------------
-5. Run the command: 'ant create-user' at this directory level in command line and observe the json message sent to
+5. Run the command: 'ant create-group' at this directory level in command line and observe the json message sent to
 the SCIM endpoint, the response status and the SCIM response are printed in the command line output.
 
 You will notice that the new group is created in the Identity Server and the user created in step 4 is added to the group.
