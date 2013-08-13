@@ -17,8 +17,7 @@ Standalone Mode
 
 4. Some of the commands that can be used to start @product.name@:
       i)  ./wso2server.sh {console|start|stop|restart|status|dump|version}
-     ii)  ./daemon.sh {console|start|stop|restart|status|dump}
-    iii)  wso2server.bat {start|stop|version}
+     ii)  wso2server.bat {start|stop|version}
 
             Usage: wso2server.sh [commands] [system-properties]
 
@@ -73,11 +72,11 @@ Standalone Mode
                                 Note: Use this property if you want to have chroot
                                 behavior when sharing the database between
                                 multiple products.
-                -Dwso2.transports.xml
-                                Location of the transports.xml file.
-                -Dweb.location    
-                                The directory into which the UI artifacts
-                                included in an Axis2 AAR file are extracted to.
+
+                -DapplyPatches	Use this system property when there are patches to be applied/reverted to/from the system.
+                                Drop the patches to $CARBON_HOME/repository/componenets/patches directory and restart
+                                the system with this property.When you want to revert a patch, delete it from the
+                                patches directory and restart the system with this property
 
 
 System Requirements
@@ -93,7 +92,7 @@ System Requirements
    with IE. This can be achieved by setting your security level to medium or lower.
   
 5. To build @product.name@ from the Source distribution, it is also necessary that you
-   have Maven 2.1.0 or later.
+   have Maven 3.0.3 or later.
 
 For more details see
     http://wso2.org/wiki/display/carbon/System+Requirements
