@@ -157,6 +157,8 @@
                 <AttributesClaimDialect>http://wso2.org/claims</AttributesClaimDialect>
 		<AcceptOpenIDLogin>false</AcceptOpenIDLogin>
 		<ClaimsRetrieverImplClass>org.wso2.carbon.identity.sso.saml.builders.claims.DefaultClaimsRetriever</ClaimsRetrieverImplClass>
+		<!-- SAML Token validity period in minutes -->
+                <SAMLResponseValidityPeriod>5</SAMLResponseValidityPeriod>
 	</SSOService>
 
 	<EntitlementSettings>
