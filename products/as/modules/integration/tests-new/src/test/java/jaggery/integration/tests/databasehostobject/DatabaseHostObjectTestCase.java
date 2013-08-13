@@ -29,6 +29,7 @@ import java.net.URLConnection;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This class sends requests to database.jag and validates the response
@@ -61,7 +62,7 @@ public class DatabaseHostObjectTestCase extends ASIntegrationTest {
         in.close();
         log.info("Response: " + response);
         assertNotNull(response, "Result cannot be null");
-        assertEquals(response, "[{\"ADDRESS\" : \"WSO2\", \"NAME\" : \"1\"}," +
-                " {\"ADDRESS\" : \"59 Flower Rd\", \"NAME\" : \"2\"}]");
+        assertTrue(response.contains("ADDRESS") && response.contains("WSO2") && response.contains("NAME") &&
+                response.contains("59 Flower Rd") && response.contains("NAME") && response.contains("2"));
     }
 }
