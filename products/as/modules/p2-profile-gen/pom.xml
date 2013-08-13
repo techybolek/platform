@@ -1214,12 +1214,12 @@
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-                                <!--feature>
+                                <feature>
                                     <id>org.wso2.carbon.security.mgt.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
 
-                                <feature>
+                                <!--feature>
                                     <id>org.wso2.carbon.aarservices.feature.group</id>
                                     <version>${carbon.platform.version}</version>
                                 </feature>
