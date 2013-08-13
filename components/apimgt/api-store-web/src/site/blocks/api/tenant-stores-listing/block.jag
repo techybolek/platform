@@ -1,0 +1,14 @@
+<%
+include("/jagg/jagg.jag");
+jagg.block("api/tenant-stores-listing", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+
+    }
+
+
+});
+%>

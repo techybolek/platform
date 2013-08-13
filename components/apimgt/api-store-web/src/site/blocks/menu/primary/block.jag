@@ -20,6 +20,10 @@ jagg.block("menu/primary", {
                 path = inputs.pagePath;
                 var tenant=inputs.tenant;
                 if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+
+        var mod = jagg.module("manager");
+        var isTenantMode = mod.isTenantMode().isTenantMode;
+
        links.push({
             "title":i18n.localize("apis"),
             "url":jagg.getMappedUrl("/"+urlPrefix),
@@ -60,7 +64,8 @@ jagg.block("menu/primary", {
         }
 
         return {
-            "links":links
+            "links":links,
+            "isTenantMode":isTenantMode
         };
     },
 

@@ -25,7 +25,7 @@
                   <div class="menu-content">
                       <div class="navbar">
                           <div class="navbar-inner">
-
+                              <%if(!outputs.isTenantMode){%>
                               <ul class="nav orderFix">
                                   <%
                                   var i, link, links = outputs.links, length = links.length;
@@ -53,7 +53,7 @@
                                   </li>
                               </ul>
                               <% jagg.includeBlock("user/login", null); %>
-
+                              <%}%>
                           </div>
                       </div>
                   </div>

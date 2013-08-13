@@ -24,6 +24,9 @@ jagg.module("manager", {
 
      invokeService:function () {
        return jagg.require(jagg.getModulesDir() + "manager/client.jag").invokeService.apply(this, arguments);
+     },
+     isTenantMode:function () {
+       return jagg.require(jagg.getModulesDir() + "manager/manager.jag").isTenantMode.apply(this, arguments);
      }
 
  });

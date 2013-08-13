@@ -1,0 +1,52 @@
+<% jagg.template("api/tenant-stores-listing", function(inputs, outputs, jagg) { %>
+<div class="thumbnail-custom">
+
+    <ul>
+
+
+        <li>
+            <div><h3>Tenant WSO2's APIStore</h3>
+                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
+                    <b>https://localhost:9443/store?tenant=wso2.com</b>
+                </a>
+
+
+            </div>
+        </li>
+        <li>
+            <div><h3>Tenant Apache's APIStore</h3>
+                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
+                    <b>https://localhost:9443/store?tenant=apache</b>
+                </a>
+
+
+            </div>
+        </li>
+        <li>
+            <div><h3>Tenant Lalaji's APIStore</h3>
+                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
+                    <b>https://localhost:9443/store?tenant=lalaji</b>
+                </a>
+
+
+            </div>
+        </li>
+        <li>
+            <div><h3>Tenant Lakmali's APIStore</h3>
+                <a href="/store/apis/info?name=api19&amp;version=1.2.3&amp;provider=admin">
+                    <b>https://localhost:9443/store?tenant=lakmali</b>
+                </a>
+
+
+            </div>
+        </li>
+
+    </ul>
+
+
+
+
+</div>
+
+
+<% }); %>

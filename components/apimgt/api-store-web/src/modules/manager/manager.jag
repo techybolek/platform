@@ -43,4 +43,31 @@ var getAPIStoreObj = function() {
     }
 };
 
+var isTenantMode=function(){
+    var isTenantMode,
+    		log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+
+	try {
+		isTenantMode = store.isTenantMode();
+
+        if (log.isDebugEnabled()) {
+            log.debug("isTenantMode : " + stringify(api));
+        }
+
+        return {
+            error:false,
+            isTenantMode:isTenantMode
+        };
+    } catch (e) {
+        //log.error(e.message);
+        return {
+            error:true,
+            isTenantMode:null,
+            message:e.message
+        };
+    }
+
+};
+
 %>
