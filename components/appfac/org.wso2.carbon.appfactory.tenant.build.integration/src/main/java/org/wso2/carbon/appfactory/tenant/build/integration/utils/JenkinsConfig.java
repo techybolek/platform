@@ -22,7 +22,7 @@ import java.io.IOException;
 
 
 /**
- * Class represents the configurations related to Jenkins.
+ * Singleton Class represents the configurations related to Jenkins.
  */
 public class JenkinsConfig {
 
@@ -36,13 +36,21 @@ public class JenkinsConfig {
 	
 	private final String jenkinsTenantsLocation;
 	
-
+	/**
+	 * Constructor to initiate Jenkins configurations.
+	 * @exception NullPointerException if no JENKINS_TENANT_HOME can be found.
+	 * @throws IOException if unable to create jenkins tenant folder .
+	 */
 	private JenkinsConfig() throws IOException{
 		jenkinsHome = checkJenkinsTenantHome();
 		jenkinsTenantsLocation = checkJenkinsTenantsLocation();
 	}
 	
-
+    /**
+     * Checks whether the JENKINS_TENANT_HOME is properly set as a env variable.
+     * @exception NullPointerException if no JENKINS_TENANT_HOME can be found.
+     * @return JENKINS_TENANT_HOME path
+     */
 	private String checkJenkinsTenantHome() {	   
 		String home = System.getenv(JENKINS_TENANT_HOME_ENV);
 		if(home == null){
@@ -51,6 +59,12 @@ public class JenkinsConfig {
 		return home;
     }
 	
+	/**
+	 * Checks whether the Jenkins tenant's folder exists. i.e <JENKINS_HOME>/tenants 
+	 * If not creates the folder. 
+	 * @return path to jenkin's tenants folder
+	 * @throws IOException - if unable to create jenkins tenant folder 
+	 */
 	private String checkJenkinsTenantsLocation() throws IOException {
 		File tenantSpace = new File(jenkinsHome, TENANTS_FOLDER_NAME);
 		if(!tenantSpace.exists()){
@@ -76,7 +90,6 @@ public class JenkinsConfig {
 		}
 		return INSTANCE;
 	}
-	
-	
+		
 
 }

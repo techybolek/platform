@@ -83,7 +83,7 @@ public class DirectUploader implements BuildServerUploader {
 
 	}
 
-	public static WebappUploadData getWebAppUploadDataItem(File fileToDeploy) {
+	private static WebappUploadData getWebAppUploadDataItem(File fileToDeploy) {
 		DataHandler dataHandler = new DataHandler(new FileDataSource(
 				fileToDeploy));
 
