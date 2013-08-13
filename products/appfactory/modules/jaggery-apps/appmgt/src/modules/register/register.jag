@@ -69,7 +69,6 @@ var registerOrg = function (organizationDomain,adminUsername,adminPassword, firs
             '<firstname xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + firstName + '</firstname>' +
             '<lastname xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + lastName + '</lastname>' +
             '<originatedService xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">WSO2 Stratos Manager</originatedService>' +
-            '<successKey xmlns="http://beans.common.stratos.carbon.wso2.org/xsd"></successKey>' +
             '<tenantDomain xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + organizationDomain + '</tenantDomain>' +
             '<tenantId xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">-1</tenantId>' +
             '<usagePlan xmlns="http://beans.common.stratos.carbon.wso2.org/xsd">' + usagePlan + '</usagePlan>' +
