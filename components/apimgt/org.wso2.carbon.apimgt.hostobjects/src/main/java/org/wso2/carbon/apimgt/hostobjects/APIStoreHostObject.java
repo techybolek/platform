@@ -2178,5 +2178,19 @@ public class APIStoreHostObject extends ScriptableObject {
         return OAuthServerConfiguration.getInstance().getDefaultApplicationAccessTokenValidityPeriodInSeconds();
     }
 
+    public static boolean jsFunction_isTenantMode(Context cx, Scriptable thisObj,
+                                                  Object[] args, Function funObj)
+            throws APIManagementException {
+
+        try {
+            return APIUtil.isTenantMode();
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new APIManagementException("Error while checking the APIStore is running in tenant mode or not.", e);
+        }
+
+
+    }
+
+
 
 }
