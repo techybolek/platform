@@ -19,6 +19,7 @@ package demo.jaxrs.client;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.FileRequestEntity;
@@ -48,7 +49,9 @@ public final class Client {
         System.out.println("Sent HTTP GET request to query customer info");
         //URL url = new URL("http://localhost:9000/customerservice/customers/123");
         URL url = new URL(serviceURL + "/customers/123");
-        InputStream in = url.openStream();
+        URLConnection connection = url.openConnection();
+        connection.setRequestProperty("accept", "text/xml");
+        InputStream in = connection.getInputStream();
         System.out.println(getStringFromInputStream(in));
 
         // Sent HTTP GET request to query sub resource product info
@@ -56,7 +59,9 @@ public final class Client {
         System.out.println("Sent HTTP GET request to query sub resource product info");
         //url = new URL("http://localhost:9000/customerservice/orders/223/products/323");
         url = new URL(serviceURL + "/orders/223/products/323");
-        in = url.openStream();
+        connection = url.openConnection();
+        connection.setRequestProperty("accept", "text/xml");
+        in = connection.getInputStream();
         System.out.println(getStringFromInputStream(in));
 
         // Sent HTTP PUT request to update customer info
