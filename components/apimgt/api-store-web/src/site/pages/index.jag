@@ -12,7 +12,7 @@ i18n.init(request,localeResourcesBasePath);
      var mod = jagg.module("manager");
      var isTenantMode = mod.isTenantMode().isTenantMode;
 
-    if(!isTenantMode){
+    if(!isTenantMode ||  (tenantStore!=null && tenantStore.indexOf("tenant")==0 )){
     response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/list-apis.jag"));
 
     }else{

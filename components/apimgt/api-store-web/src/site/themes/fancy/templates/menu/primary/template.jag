@@ -25,7 +25,9 @@
                   <div class="menu-content">
                       <div class="navbar">
                           <div class="navbar-inner">
-                              <%if(!outputs.isTenantMode){%>
+                              <%
+                              var tenantStore=request.getQueryString();
+                              if(!outputs.isTenantMode ||  (tenantStore!=null && tenantStore.indexOf("tenant")==0 )){%>
                               <ul class="nav orderFix">
                                   <%
                                   var i, link, links = outputs.links, length = links.length;
