@@ -64,8 +64,8 @@ public class EntryHostObjectTestCase extends ASIntegrationTest {
         assertNotNull(response, "Result cannot be null");
         assertTrue(response.contains("<author><name>madhuka</name></author>"));
         assertTrue(response.contains("<author><name>nuwan</name>"));
-        assertTrue(response.contains("<link href=\"http://jaggeryjs.org/\"/>"));
-        assertTrue(response.contains("<link href=\"madhukaudantha.blogspot.com\"/>"));
+        assertTrue(response.contains("http://jaggeryjs.org/"));
+        assertTrue(response.contains("madhukaudantha.blogspot.com"));
         assertTrue(response.startsWith("String : <feed"));
 /*        response - "String : <feed xmlns=\"http://www.w3.org/2005/Atom\"><entry>" +
                 "<id>1</id><title type=\"text\">Jaggery Sample Entry</title><content type=" +
@@ -86,7 +86,7 @@ public class EntryHostObjectTestCase extends ASIntegrationTest {
             dependsOnMethods = "testFeed")
     public void testFeedXML() throws Exception {
 
-        String response = null;
+        String response = "";
         URL jaggeryURL = new URL(asServer.getWebAppURL() + "/testapp/entry.jag?action=xml");
         URLConnection jaggeryServerConnection = Utility.openConnection(jaggeryURL);
         assertNotNull(jaggeryServerConnection, "Connection establishment failure");
@@ -96,15 +96,19 @@ public class EntryHostObjectTestCase extends ASIntegrationTest {
 
         String inputLine;
         while ((inputLine = in.readLine()) != null) {
-            response = inputLine;
+            response += inputLine;
         }
 
         in.close();
         log.info("Response: " + response);
         assertNotNull(response, "Result cannot be null");
         assertTrue(response.startsWith("XML : <feed"));
-        assertTrue(response.contains("<author><name>madhuka</name></author>"));
-        assertTrue(response.contains("<author><name>nuwan</name></author>"));
+        assertTrue(response.contains("<name>madhuka</name>"));
+        assertTrue(response.contains("<author>"));
+        assertTrue(response.contains("</author>"));
+        assertTrue(response.contains("<name>nuwan</name>"));
+        assertTrue(response.contains("<author>"));
+        assertTrue(response.contains("</author>"));
         assertTrue(response.contains("<link href=\"http://jaggeryjs.org/\"/>"));
         assertTrue(response.contains("<link href=\"madhukaudantha.blogspot.com\"/>"));
 /*        response - "XML : <feed xmlns=\"http://www.w3.org/2005/Atom\">" +
