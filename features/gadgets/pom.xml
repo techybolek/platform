@@ -146,7 +146,7 @@
         <shindig.version>2.5.0.wso2v1</shindig.version>
         <joda-time.version>1.6.0.wso2v1</joda-time.version>
         <jdom.version>1.0.0.wso2v1</jdom.version>
-        <rhino.version>1.7.0.R1-wso2v2</rhino.version>
+        <rhino.version>1.7.0.R4.wso2v1-SNAPSHOT</rhino.version>
 	<p2.plugin.version>${carbon.p2.plugin.version}</p2.plugin.version>
 	<guice.version>${google.guice.wso2.version}</guice.version>
 	<!--guava.version>11.0.1.wso2v1</guava.version-->
