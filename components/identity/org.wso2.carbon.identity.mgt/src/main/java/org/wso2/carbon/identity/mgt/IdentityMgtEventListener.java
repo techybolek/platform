@@ -499,6 +499,41 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 	}
 
 	/**
+	 * This method is used to check pre conditions when changing the user
+	 * password.
+	 * 
+	 */
+	public boolean doPreUpdateCredential(String userName, Object newCredential,
+			Object oldCredential, UserStoreManager userStoreManager) throws UserStoreException {
+
+		if (log.isDebugEnabled()) {
+			log.debug("Pre update credential is called in IdentityMgtEventListener");
+		}
+		
+		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+		if (!config.isListenerEnable()) {
+			return true;
+		}
+		
+		try {
+			// Enforcing the password policies.
+			if (newCredential != null
+					&& (newCredential instanceof String && (newCredential.toString().trim()
+							.length() > 0))) {
+				policyRegistry.enforcePasswordPolicies(newCredential.toString(), userName);
+
+			}
+
+		} catch (PolicyViolationException pe) {
+			log.error(pe.getMessage());
+			throw new UserStoreException(pe.getMessage());
+
+		}
+
+		return true;
+	}
+	
+	/**
 	 * This method is used when the admin is updating the credentials with an
 	 * empty credential. A random password will be generated and will be mailed
 	 * to the user. 
@@ -509,12 +544,26 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 	                                                                              throws UserStoreException {
 
 		if (log.isDebugEnabled()) {
-			log.debug("Pre add user is called in IdentityMgtEventListener");
+			log.debug("Pre update credential by admin is called in IdentityMgtEventListener");
 		}
 		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
 		if (!config.isListenerEnable()) {
 			return true;
 		}
+		
+		try {
+			// Enforcing the password policies.
+			if (newCredential != null
+					&& (newCredential instanceof StringBuffer && (newCredential.toString().trim()
+							.length() > 0))) {
+				policyRegistry.enforcePasswordPolicies(newCredential.toString(), userName);
+			}
+
+		} catch (PolicyViolationException pe) {
+			log.error(pe.getMessage());
+			throw new UserStoreException(pe.getMessage());
+		}
+        
 		if (newCredential == null ||
 		    (newCredential instanceof StringBuffer && ((StringBuffer) newCredential).toString()
 		                                                                            .trim()
