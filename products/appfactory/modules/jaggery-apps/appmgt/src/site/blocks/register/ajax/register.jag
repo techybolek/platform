@@ -28,8 +28,46 @@ throw "Error while registering an organization "+organizationDomain;
 throw "Error while registering an organization "+organizationDomain;
 }
 
-}else {
-throw new Error("No action specified");
+} else if (action == "registerOrg") {
+    mod = jagg.module("register");
+    var organizationDomain = request.getParameter("organizationDomain");
+    var adminUsername = request.getParameter("adminUsername");
+    var adminPassword = request.getParameter("adminPassword");
+    var firstName = request.getParameter("firstName");
+    var lastName = request.getParameter("lastName");
+    var email = request.getParameter("email");
+    var usagePlan = request.getParameter("usagePlan");
+    var imagePath = request.getParameter("imagePath");
+    var secretKey = request.getParameter("secretKey");
+    var userAnswer = request.getParameter("userAnswer");
+    try {
+        var result = mod.registerOrg(organizationDomain, adminUsername, adminPassword, firstName, lastName, email, usagePlan, imagePath, secretKey, userAnswer);
+
+        if (result != null) {
+            print(result);
+        } else {
+            throw "Error while registering an organization " + organizationDomain;
+        }
+    } catch (e) {
+        throw "Error while registering an organization " + organizationDomain;
+    }
+
+} else if (action == "generateCaptcha") {
+    mod = jagg.module("register");
+
+    try {
+        var result = mod.generateCaptcha();
+		if(result != null ) {
+			print(result);
+		} else {
+			throw "Error while generating captcha";
+		}
+    } catch (e) {
+        throw "Error while generating captcha";
+    }
+
+} else {
+    throw new Error("No action specified");
 }
 
 }());

@@ -29,7 +29,7 @@ body#home{
 
 
     function doSubmit() {
-            jagg.post("../blocks/register/ajax/register.jag", {
+          /*  jagg.post("../blocks/register/ajax/register.jag", {
             		action:"registerOrganization",
             		firstName:$("#firstName").attr('value'),
             		lastName:$("#lastName").attr('value'),
@@ -43,18 +43,44 @@ body#home{
 		jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
             		window.location.href = "index.jag";
      			}
-		});        
+		});
               },
               function (jqXHR, textStatus, errorThrown) {
                   jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted.',type:'info', cbk:function(){
             		window.location.href = "index.jag";
                   	}
                   });
-        });
+        }); */
+        jagg.post("../blocks/register/ajax/register.jag", {
+            action:"registerOrg",
+            firstName:$("#firstName").attr('value'),
+            lastName:$("#lastName").attr('value'),
+            email:$("#email").attr('value'),
+            adminUsername:$("#adminUsername").attr('value'),
+            adminPassword:$("#password").attr('value') ,
+            organizationDomain:$("#domainName").attr('value'),
+            usagePlan:'Demo',
+            imagePath:document.getElementById("imagePath").val,
+            secretKey:document.getElementById("secretKey").val,
+            userAnswer:$("#captcha-user-answer").attr('value')
+
+              },
+              function (result) {
+		            jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
+            		    window.location.href = "index.jag";
+     			    }
+		        });
+              },
+              function (jqXHR, textStatus, errorThrown) {
+                  jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted.',type:'info', cbk:function(){
+            		window.location.href = "index.jag";
+                  	}
+                  });
+                });
     }
-    
+
     function validateEmail(){
-    	  jagg.post("../blocks/application/users/get/ajax/list.jag", { 
+    	  jagg.post("../blocks/application/users/get/ajax/list.jag", {
     		action:"validateUser",
     		userName:$("#email").attr('value')
 	      },
@@ -70,11 +96,41 @@ body#home{
               jagg.message({content:jqXHR+textStatus+errorThrown,type:'error',id:'myuniqeid' });
 	    	  return false ;
 	      });
-    	  
+
     }
 
+function generateCaptcha() {
+
+            jagg.post("../blocks/register/ajax/register.jag", {
+            		action:"generateCaptcha"
+              },
+              function (result) {
+            		showKaptcha(result);
+              },
+              function (jqXHR, textStatus, errorThrown) {
+                  jagg.message({content:'getting captcha - ERROR.',type:'info', cbk:function(){
+            		window.location.href = "#";
+                  	}
+                  });
+        });
+    }
+
+function showKaptcha(captcha) {
+    var captchaInfo = jQuery.parseJSON(captcha);
+    var captchaPath = captchaInfo.path;
+    document.getElementById("secretKey").val = captchaInfo.secretKey;
+    document.getElementById("imagePath").val = captchaPath;
+
+    var captchaURL = "https://milestones.appfactory.wso2.com/"+captchaPath;
+    var captchaImg = document.getElementById("captchaImgDiv");
+    captchaImg.innerHTML = '<img src= "' + captchaURL + '" alt="If you can not see the captcha image please refresh the page."/>';
+
+    // TODO so this part.........   >>  setTimeout("showKaptchaTimely()", 4000);
+
+}
 
     $(document).ready(function($){
+        generateCaptcha();
         jQuery.validator.setDefaults({
                 errorElement:'span'
             });
@@ -112,6 +168,10 @@ body#home{
 							<input type="text" id="email" name="email" class="required email" />
 						</div>
 						<div class="input_row">
+                            <label for="adminUsername">Admin Username</label>
+                            <input type="text" id="adminUsername" name="adminUsername" class="required" />
+                        </div>
+						<div class="input_row">
 							<label for="password">Password</label>
 							<input type="password" id="password" name="password" class="required"  />
 						</div>
@@ -125,12 +185,22 @@ body#home{
 							<input type="text" id="domainName" name="domainName" class="required domain" />
 							<small id="url-preview">wso2apps.com/t/</small>
 						</div>
+						<div class="input_row">
+							<label for="captcha-user-answer">Word Verification</label>
+							<div id="captchaImgDiv"></div>
+							<input type="text" id="captcha-user-answer" name="captcha-user-answer" class="required" />
+						</div>
+						
 						<div class="input_row btn_row">
 							
 							 <input id="submitbtn" type='submit' value='Create My Account' class='btn btn-primary' />
 						</div>
 
 					</form>
+
+                    <input type="hidden" name="secretKey" id="secretKey" value=""/>
+                     <input type="hidden" name="imagePath" id="imagePath" value=""/>
+
 				</section>
 				<div class="signin">
 					Already have an Account? <a href="<%=jagg.getAbsoluteUrl("/")%>" class="link">Sign in</a>
@@ -159,5 +229,5 @@ body#home{
 <!--</div>-->
 
 
-        
+
 <% }); %>
