@@ -369,20 +369,43 @@
     </WorkFlowExtensions>
 
     <!-- 
-	Use this configuration Publish APIs at the Server startup
+	Use this configuration Create APIs at the Server startup
     -->
-    <!--StartupAPIPublisher-->
+    <StartupAPIPublisher>
 
-	<!--Define many API elements as below to publish many APIs -->
-	<!--API>	
+	<!--
+            Enable/Disable the API Startup Publisher
+        -->
+	
+	<Enabled>false</Enabled>
+	
+	<!--
+	Configuration to create APIs for local endpoints. 
+	Endpoint will be computed as http://${carbon.local.ip}:${mgt.transport.http.port}/Context.
+	Define many LocalAPI elements as below to create many APIs
+	for local Endpoints
+	-->
+
+	<LocalAPI>	
 		<Context>/resource</Context>
 		<Provider>admin</Provider>
-		<Endpoint>http://localhost:9763/resource</Endpoint>
+		<Version>1.0.0</Version>
+	</LocalAPI>
+		
+	<!--
+	Configuration to create APIs for remote endpoints.
+	When Endpoint need to be defined use this configuration.  
+	Define many API elements as below to create many APIs
+	for external Endpoints
+	-->
+	<!--API>	
+		<Context>/resource</Context>
+		<Endpoint>http://localhost:9764/resource</Endpoint>
+		<Provider>admin</Provider>
 		<Version>1.0.0</Version>
 	</API-->
-
 		
-    <!--/StartupAPIPublisher-->
+    </StartupAPIPublisher>
 
     <!--
 	Below are set of external APIStores which can be configured to publish an API from current running
