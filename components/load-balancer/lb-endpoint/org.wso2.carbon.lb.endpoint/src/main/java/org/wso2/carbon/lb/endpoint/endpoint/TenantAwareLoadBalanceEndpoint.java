@@ -235,7 +235,9 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             if (domainMapping != null) {
                 actualHost = domainMapping.getActualHost();
 
-                if(containsPort){
+                if(actualHost.contains("/t")) {
+                	 transportHeaders.put(HTTP.TARGET_HOST, actualHost);
+                } else if(containsPort){
                     transportHeaders.put(HTTP.TARGET_HOST, actualHost + ":" + port);
                 } else {
                     transportHeaders.put(HTTP.TARGET_HOST, actualHost);
