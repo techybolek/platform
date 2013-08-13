@@ -14,9 +14,11 @@ import org.wso2.carbon.automation.utils.registry.RegistryProviderUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
 import javax.xml.namespace.QName;
@@ -51,7 +53,8 @@ public class GenericArtifactsByLifecycleTestCase {
     }
 
     @Test(groups = {"wso2.greg"}, description = "Artifacts by LC")
-    public void testAttachLifecycle() throws GovernanceException {
+    public void testAttachLifecycle() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         GenericArtifact[] genericArtifacts = genericArtifactManager.getAllGenericArtifacts();
         GenericArtifact genericArtifact = genericArtifacts[0];
         genericArtifact.attachLifecycle(LIFE_CYCLE_NAME);
@@ -77,7 +80,8 @@ public class GenericArtifactsByLifecycleTestCase {
     }
 
     @Test(groups = {"wso2.greg"}, description = "Artifacts by LC")
-    public void testGetArtifactsAfterPromoting() throws GovernanceException {
+    public void testGetArtifactsAfterPromoting() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
         GenericArtifact[] artifacts = genericArtifactManager.getAllGenericArtifacts();
         GenericArtifact artifact = artifacts[0];
         Map<String, String> map = new HashMap<String, String>();
@@ -103,7 +107,8 @@ public class GenericArtifactsByLifecycleTestCase {
     }
 
     @AfterClass(alwaysRun = true)
-    public void cleanUp() throws GovernanceException {
+    public void cleanUp() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         GenericArtifact[] genericArtifacts = genericArtifactManager.getAllGenericArtifacts();
         for (GenericArtifact artifact : genericArtifacts) {
             genericArtifactManager.removeGenericArtifact(artifact.getId());
