@@ -17,12 +17,6 @@
 package org.wso2.carbon.appfactory.application.mgt.util;
 
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.appfactory.application.mgt.service.ApplicationManagementException;
 import org.wso2.carbon.appfactory.application.mgt.service.UserInfoBean;
@@ -34,6 +28,8 @@ import org.wso2.carbon.registry.api.RegistryService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+
+import java.util.*;
 
 /**
  *
@@ -48,7 +44,7 @@ public class Util {
     public static String FIRST_NAME_CLAIM_URI = "http://wso2.org/claims/givenname";
     public static String LAST_NAME_CLAIM_URI = "http://wso2.org/claims/lastname";
     public static UserApplicationCache userApplicationCache = UserApplicationCache.getUserApplicationCache();
-    
+
     /**
      * This set needs be a {@link SortedSet} ( e.g.{@link TreeSet} ) to preserve natural
      * ordering among {@link ApplicationEventsListener}s.
@@ -57,7 +53,7 @@ public class Util {
      * how natural ordering occurs
      */
     private static Set<ApplicationEventsListener> applicationEventsListeners =
-                                                                               Collections.synchronizedSet(new TreeSet<ApplicationEventsListener>());
+            Collections.synchronizedSet(new TreeSet<ApplicationEventsListener>());
 
     public static AppFactoryConfiguration getConfiguration() {
         return configuration;
@@ -76,16 +72,15 @@ public class Util {
     }
 
 
-
     public static synchronized void setRegistryService(RegistryService reg) {
 
-            registryService=reg;
+        registryService = reg;
 
     }
 
     public static synchronized void setRealmService(RealmService realmSer) {
 
-           realmService=realmSer;
+        realmService = realmSer;
 
     }
 
@@ -98,10 +93,10 @@ public class Util {
     }
 
 
-    public static void addApplicationEventsListener(ApplicationEventsListener applicationEventsListener){
-    	applicationEventsListeners.add(applicationEventsListener);
+    public static void addApplicationEventsListener(ApplicationEventsListener applicationEventsListener) {
+        applicationEventsListeners.add(applicationEventsListener);
     }
-    
+
     public static void removeApplicationEventsListener(ApplicationEventsListener applicationEventsListener) {
         applicationEventsListeners.remove(applicationEventsListener);
     }
@@ -109,7 +104,7 @@ public class Util {
     public static Set<ApplicationEventsListener> getApplicationEventsListeners() {
         return applicationEventsListeners;
     }
-    
+
     public static UserInfoBean getUserInfoBean(String userName) throws ApplicationManagementException {
 
         try {
@@ -117,7 +112,7 @@ public class Util {
                     Util.getRealmService()
                             .getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID);
             String[] claims = {EMAIL_CLAIM_URI, FIRST_NAME_CLAIM_URI, LAST_NAME_CLAIM_URI};
-            Map<String, String> userClaims= realm.getUserStoreManager().getUserClaimValues(userName, claims,null);
+            Map<String, String> userClaims = realm.getUserStoreManager().getUserClaimValues(userName, claims, null);
             
             /*String email =
                     realm.getUserStoreManager().getUserClaimValue(userName, EMAIL_CLAIM_URI,
@@ -131,29 +126,41 @@ public class Util {
                             LAST_NAME_CLAIM_URI,
                             null);
             */
-            
+
             String firstName = userClaims.get(FIRST_NAME_CLAIM_URI);
             String lastName = userClaims.get(LAST_NAME_CLAIM_URI);
-            String email= userClaims.get(EMAIL_CLAIM_URI);
+            String email = userClaims.get(EMAIL_CLAIM_URI);
             StringBuilder displayNameBuilder = new StringBuilder();
 
             //Display name is constructed by concatenating first name and the last name of the user.
-            if (StringUtils.isNotEmpty(firstName)){
+            if (StringUtils.isNotEmpty(firstName)) {
                 displayNameBuilder.append(firstName);
             }
-            
-            if (StringUtils.isNotEmpty(lastName)){
+
+            if (StringUtils.isNotEmpty(lastName)) {
                 displayNameBuilder.append(' ').append(lastName);
             }
-            
-            return new UserInfoBean(email,  firstName, 
-                                               lastName, 
-                                               email, displayNameBuilder.toString());
+
+            return new UserInfoBean(email, firstName,
+                    lastName,
+                    email, displayNameBuilder.toString());
 
             /*return new UserInfoBean(userName, firstName, lastName, email);*/
         } catch (UserStoreException e) {
-            String msg = "Error while getting info for user " + userName;;
+            String msg = "Error while getting info for user " + userName;
+            ;
             throw new ApplicationManagementException(msg, e);
         }
+    }
+
+    public static String[] getUniqueApplicationList(String[] roles) {
+        Set<String> appSet = new HashSet<String>();
+        for (String role : roles) {
+
+            if (!(role.indexOf("_") < 0)) {
+                appSet.add(role.substring(0, role.lastIndexOf("_")));
+            }
+        }
+        return appSet.toArray(new String[appSet.size()]);
     }
 }
