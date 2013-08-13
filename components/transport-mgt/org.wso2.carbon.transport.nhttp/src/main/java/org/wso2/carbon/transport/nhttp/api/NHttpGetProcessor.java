@@ -251,18 +251,27 @@ public class NHttpGetProcessor extends DefaultHttpGetProcessor {
                 if (requestUri.indexOf(contextPath) != -1) {
                     beginIndex = requestUri.indexOf(contextPath) + contextPath.length() + 1;
                 }
-                AxisService axisService = null;
-                if (!(beginIndex < 0 || beginIndex > requestUri.length())) {
-                    serviceName = requestUri.substring(beginIndex);
-                    axisService = cfgCtx.getAxisConfiguration().getServiceForActivation(serviceName);
-                }
 
-                if (axisService == null && !loadBalancer && serviceName != null) {
-                    // Try to see whether the service is available in a tenant
-                    try {
-                        axisService = TenantAxisUtils.getAxisService(serviceName, cfgCtx);
-                    } catch (AxisFault axisFault) {
-                        axisFault.printStackTrace();
+                /**
+                 * This   reverseProxyMode was introduce to avoid LB exposing it's own services when invoked through rest call.
+                 * For a soap call this works well. But for a rest call this does not work as intended. in LB it has to set system property "reverseProxyMode"
+                 *
+                 */
+                boolean reverseProxyMode = Boolean.parseBoolean(System.getProperty("reverseProxyMode"));
+                AxisService axisService = null;
+                if (!reverseProxyMode) {
+                    if (!(beginIndex < 0 || beginIndex > requestUri.length())) {
+                        serviceName = requestUri.substring(beginIndex);
+                        axisService = cfgCtx.getAxisConfiguration().getServiceForActivation(serviceName);
+                    }
+
+                    if (axisService == null && !loadBalancer && serviceName != null) {
+                        // Try to see whether the service is available in a tenant
+                        try {
+                            axisService = TenantAxisUtils.getAxisService(serviceName, cfgCtx);
+                        } catch (AxisFault axisFault) {
+                            axisFault.printStackTrace();
+                        }
                     }
                 }
 
