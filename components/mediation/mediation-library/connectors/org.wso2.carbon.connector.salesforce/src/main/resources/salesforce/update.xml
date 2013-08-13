@@ -5,7 +5,8 @@
     <parameter name="sobjects"/>
     <sequence>
         <class name="org.wso2.carbon.connector.salesforce.SetupCRUDParams"/>
-        <header expression="get-property('salesforce.serviceUrl')" name="To"/>
+        <header
+            expression="get-property('operation','salesforce.serviceUrl')" name="To"/>
         <payloadFactory>
             <format>
                 <soapenv:Envelope
@@ -29,7 +30,7 @@
             <args>
                 <arg expression="get-property('salesforce.crud.allOrNone')"/>
                 <arg expression="get-property('salesforce.crud.allowFieldTruncate')"/>
-                <arg expression="get-property('salesforce.sessionId')"/>
+                <arg expression="get-property('operation','salesforce.sessionId')"/>
             </args>
         </payloadFactory>
         <class name="org.wso2.carbon.connector.salesforce.SetupUpdateSobjects"/>

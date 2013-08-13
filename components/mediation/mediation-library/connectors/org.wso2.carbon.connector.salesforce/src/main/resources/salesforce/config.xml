@@ -3,12 +3,14 @@
     <parameter name="username"/>
     <parameter name="password"/>
     <parameter name="loginUrl"/>
+    <parameter name="forceLogin"/>
     <sequence>
-        <filter xpath="get-property('salesforce.login.done') = 'true'">
+        <class name="org.wso2.carbon.connector.salesforce.SetupLoginParams"/>
+        <filter xpath="get-property('operation','salesforce.login.done') = 'true'">
             <then>
                 <property name="Connection" value="Already login to Salesforce ....."/>
             </then>
-            <else>
+            <else>                 
                 <enrich>
                     <source clone="true" type="body"/>
                     <target property="ORIGINAL_MSG_PAYLOAD" type="property"/>
@@ -46,24 +48,23 @@
                 </callout>
                 <property
                     expression="//ns:loginResponse/ns:result/ns:sessionId/text()"
-                    name="salesforce.sessionId" scope="default"
+                    name="salesforce.sessionId" scope="operation"
                     type="STRING" xmlns:ns="urn:partner.soap.sforce.com"/>
                 <property
                     expression="//ns:loginResponse/ns:result/ns:serverUrl/text()"
-                    name="salesforce.serviceUrl" scope="default"
+                    name="salesforce.serviceUrl" scope="operation"
                     type="STRING" xmlns:ns="urn:partner.soap.sforce.com"/>
-                <property name="salesforce.login.done" scope="default"
+                <property name="salesforce.login.done" scope="operation"
                     type="STRING" value="true"/>
                 <enrich>
                     <source clone="true" type="body"/>
                     <target property="SALESFORCE_LOGIN_RESPONSE" type="property"/>
-                </enrich>
+                </enrich>              
                 <enrich>
                     <source clone="true" property="ORIGINAL_MSG_PAYLOAD" type="property"/>
                     <target type="body"/>
-                </enrich>
+                </enrich>		                
             </else>
         </filter>
-        <property name="query.batchSize" value="200"/>
     </sequence>
 </template>

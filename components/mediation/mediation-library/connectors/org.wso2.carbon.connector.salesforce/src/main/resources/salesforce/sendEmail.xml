@@ -2,7 +2,8 @@
 <template name="sendEmail" xmlns="http://ws.apache.org/ns/synapse">
     <parameter name="sendEmail"/>
     <sequence>
-        <header expression="get-property('salesforce.serviceUrl')" name="To"/>
+        <header
+            expression="get-property('operation','salesforce.serviceUrl')" name="To"/>
         <payloadFactory>
             <format>
                 <soapenv:Envelope
@@ -18,7 +19,7 @@
                 </soapenv:Envelope>
             </format>
             <args>
-                <arg expression="get-property('salesforce.sessionId')"/>
+                <arg expression="get-property('operation','salesforce.sessionId')"/>
             </args>
         </payloadFactory>
         <class name="org.wso2.carbon.connector.salesforce.SetupSendEmail"/>

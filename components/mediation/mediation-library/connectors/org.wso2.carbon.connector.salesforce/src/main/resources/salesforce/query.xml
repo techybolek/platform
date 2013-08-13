@@ -3,7 +3,8 @@
     <parameter name="batchSize"/>
     <parameter name="queryString"/>
     <sequence>
-        <header expression="get-property('salesforce.serviceUrl')" name="To"/>
+        <header
+            expression="get-property('operation','salesforce.serviceUrl')" name="To"/>
         <payloadFactory>
             <format>
                 <soapenv:Envelope
@@ -25,7 +26,7 @@
             </format>
             <args>
                 <arg expression="$func:batchSize"/>
-                <arg expression="get-property('salesforce.sessionId')"/>
+                <arg expression="get-property('operation','salesforce.sessionId')"/>
                 <arg expression="$func:queryString"/>
             </args>
         </payloadFactory>

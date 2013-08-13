@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <template name="describeGlobal" xmlns="http://ws.apache.org/ns/synapse">
     <sequence>
-        <header expression="get-property('salesforce.serviceUrl')" name="To"/>
+        <header
+            expression="get-property('operation','salesforce.serviceUrl')" name="To"/>
         <payloadFactory>
             <format>
                 <soapenv:Envelope
@@ -17,7 +18,7 @@
                 </soapenv:Envelope>
             </format>
             <args>
-                <arg expression="get-property('salesforce.sessionId')"/>
+                <arg expression="get-property('operation','salesforce.sessionId')"/>
             </args>
         </payloadFactory>
         <callout action="urn:partner.soap.sforce.com/Soap/describeGlobalRequest">

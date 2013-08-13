@@ -1,17 +1,17 @@
 /*
- *  Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * 
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -31,11 +31,11 @@ import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.mediation.library.connectors.core.util.ConnectorUtils;
 
 public final class SalesforceUtil {
 
-	public static final String SALESFORCE_CRUD_PREFIX = "salesforce.crud.";
 	public static final String SALESFORCE_CRUD_ALLORNONE = "allOrNone";
 	public static final String SALESFORCE_CRUD_ALLOWFIELDTRUNCATE = "allowFieldTruncate";
 	public static final String SALESFORCE_EXTERNALID = "externalId";
@@ -44,13 +44,16 @@ public final class SalesforceUtil {
 	public static final String SALESFORCE_EMAIL_SENDEMAIL = "sendEmail";
 	public static final String SALESFORCE_RETRIVE_OBJECTIDS = "objectIDS";
 	public static final String SALESFORCE_CREATE_SOBJECTTYPE = "type";
-
+	public static final String SALESFORCE_LOGIN_FORCE = "forceLogin";
+	public static final String SALESFORCE_LOGIN_DONE = "salesforce.login.done";
+	public static final String SALESFORCE_CRUD_PREFIX = "salesforce.crud.";
+	
 	public static synchronized SalesforceUtil getSalesforceUtil() {
 		return new SalesforceUtil();
 	}
 
 	public void addSobjects(String strOperation, String strParamName, MessageContext synCtx,
-			SynapseLog synLog, String strExternalId) {
+	                        SynapseLog synLog, String strExternalId) {
 		SOAPEnvelope envelope = synCtx.getEnvelope();
 		OMFactory fac = OMAbstractFactory.getOMFactory();
 		SOAPBody body = envelope.getBody();
@@ -64,16 +67,19 @@ public final class SalesforceUtil {
 					value.addChild(fac.createOMText(strExternalId));
 					bodyElement.addChild(value);
 				}
-				String strSobject = (String) ConnectorUtils.lookupFunctionParam(synCtx,
-						strParamName);
+				String strSobject =
+				                    (String) ConnectorUtils.lookupTemplateParamater(synCtx,
+				                                                                    strParamName);
 				OMElement sObjects = AXIOMUtil.stringToOM(strSobject);
 				Iterator<OMElement> sObject = sObjects.getChildElements();
-				String strType = sObjects.getAttributeValue(new QName(
-						SalesforceUtil.SALESFORCE_CREATE_SOBJECTTYPE));
+				String strType =
+				                 sObjects.getAttributeValue(new QName(
+				                                                      SalesforceUtil.SALESFORCE_CREATE_SOBJECTTYPE));
 				OMElement tmpElement = null;
 				OMNamespace omNsurn = fac.createOMNamespace("urn:partner.soap.sforce.com", "urn");
-				OMNamespace omNsurn1 = fac.createOMNamespace("urn:sobject.partner.soap.sforce.com",
-						"urn1");
+				OMNamespace omNsurn1 =
+				                       fac.createOMNamespace("urn:sobject.partner.soap.sforce.com",
+				                                             "urn1");
 				// Loops sObject
 				while (sObject.hasNext()) {
 					OMElement currentElement = sObject.next();
@@ -100,8 +106,9 @@ public final class SalesforceUtil {
 			}
 		}
 	}
+
 	public void addIds(String strOperation, String strParamName, MessageContext synCtx,
-			SynapseLog synLog) {
+	                   SynapseLog synLog) {
 		SOAPEnvelope envelope = synCtx.getEnvelope();
 		OMFactory fac = OMAbstractFactory.getOMFactory();
 		SOAPBody body = envelope.getBody();
@@ -113,8 +120,9 @@ public final class SalesforceUtil {
 				if (cElements != null && cElements.hasNext()) {
 					cElements.next();
 				}
-				String strSobject = (String) ConnectorUtils.lookupFunctionParam(synCtx,
-						strParamName);
+				String strSobject =
+				                    (String) ConnectorUtils.lookupTemplateParamater(synCtx,
+				                                                                    strParamName);
 				OMElement sObjects = AXIOMUtil.stringToOM(strSobject);
 				Iterator<OMElement> sObject = sObjects.getChildElements();
 				OMNamespace omNsurn = fac.createOMNamespace("urn:partner.soap.sforce.com", "urn");
