@@ -48,10 +48,11 @@ public class AppServerBasedBuildServerManager extends AbstractAdmin implements
 			String appPath = Util.getCarbonResourcesPath() + File.separator
 					+ JenkinsBuildSeverApp.DEFAULT_JENKINS_APP_NAME;
 			BuildServerApp serverApp = new JenkinsBuildSeverApp(appPath);
+			
+			//modify the app according to tenant.
 			String modifiedAppPath = serverApp.getModifiedAppPath(tenantDomain);
 
-			ServiceContainer.getInstance().getTenantManager()
-					.getTenantId(tenantDomain);
+			//upload the app to app server
 			BuildServerUploader uploader = new DirectUploader(tenantDomain);
 			uploader.uploadBuildServerApp(new File(modifiedAppPath));
 
