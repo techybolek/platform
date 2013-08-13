@@ -35,12 +35,14 @@
     "moveUp" : "Move Up" ,
     "moveDown" : "Move Down" ,
     "deleteMethod" : "Delete" ,
-    
-    "public": "Public",
+
+    "public": "Allowed Anonymous Access",
     "restricted": "Restricted By Roles",
     "controlled": "Restricted By Tenants",
     "roles": "Visible to Roles",
     "tenants": "Visible to Tenants",
+
+    "publishToExternalAPIStores":"Publish To External Stores",
 
     "all":"All",
     "apis":"APIs",

@@ -21,6 +21,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
@@ -49,6 +50,7 @@ public class APIManagerConfiguration {
     private boolean initialized;
 
     private List<Environment> apiGatewayEnvironments = new ArrayList<Environment>();
+    private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     /**
      * Populate this configuration by reading an XML file at the given location. This method
@@ -149,6 +151,40 @@ public class APIManagerConfiguration {
                                                             APIConstants.API_GATEWAY_ENDPOINT)).getText()));
                     apiGatewayEnvironments.add(environment);
                 }
+            }else if("ExternalAPIStores".equals(localName)){  //Initialize 'externalAPIStores' config elements
+                Iterator apistoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
+                externalAPIStores = new HashSet<APIStore>();
+                while(apistoreIterator.hasNext()){
+                    APIStore store=new APIStore();
+                    OMElement storeElem = (OMElement)apistoreIterator.next();
+                    String type=storeElem.getAttributeValue(new QName("type"));
+                    store.setType(type); //Set Store type [eg:wso2]
+                    store.setName(replaceSystemProperty(
+                                        storeElem.getFirstChildWithName(new QName(APIConstants.PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_NAME)).getText())); //Set store name
+                    store.setDisplayName(replaceSystemProperty(
+                            storeElem.getFirstChildWithName(new QName(
+                                    APIConstants.PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_DISPLAY_NAME)).getText()));//Set store display name
+                    store.setEndpoint(replaceSystemProperty(
+                            storeElem.getFirstChildWithName(new QName(
+                                    APIConstants.PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_ENDPOINT)).getText())); //Set store endpoint,which is used to publish APIs
+                    store.setPublished(false);
+                    if(APIConstants.WSO2_API_STORE_TYPE.equals(type)){
+                    String key = APIConstants.PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_PASSWORD; //Set store login password [optional]
+                    String value;
+                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
+                        value = secretResolver.resolve(key);
+                    }
+                    else{
+                        value = storeElem.getFirstChildWithName(new QName(
+                                APIConstants.PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_PASSWORD)).getText();
+                    }
+                    store.setPassword(replaceSystemProperty(value));
+                    store.setUsername(replaceSystemProperty(
+                            storeElem.getFirstChildWithName(new QName(
+                                    APIConstants.PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
+                    }
+                    externalAPIStores.add(store);
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -213,6 +249,19 @@ public class APIManagerConfiguration {
 
     public List<Environment> getApiGatewayEnvironments() {
         return apiGatewayEnvironments;
+    }
+
+    public Set<APIStore> getExternalAPIStores() {  //Return set of APIStores
+        return externalAPIStores;
+    }
+
+    public APIStore getExternalAPIStore(String storeName) { //Return APIStore object,based on store name/Here we assume store name is unique.
+        for (APIStore apiStore : externalAPIStores) {
+            if (apiStore.getName().equals(storeName)) {
+                return apiStore;
+            }
+        }
+        return null;
     }
 
 }

@@ -33,6 +33,22 @@ $(document).ready(function() {
             }
         });
 
+    $('.storeCheck').change(function () {
+        var checkedStores = $('#externalAPIStores').val();
+        if ($(this).is(":checked")) {
+            $('#externalAPIStores').val(checkedStores + "::" + $(this).val());
+        } else {
+            var storeValsWithoutUnchecked = "";
+            var checkStoresArray = checkedStores.split("::");
+            for (var k = 0; k < checkStoresArray.length; k++) {
+                if (!checkStoresArray[k] == $(this).val()) {
+                    storeValsWithoutUnchecked += checkStoresArray[k] + "::";
+                }
+            }
+            $('#externalAPIStores').val(storeValsWithoutUnchecked);
+        }
+    });
+
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
     });
@@ -356,7 +372,7 @@ function showUTProductionURL(){
 	else{
 		$('#credentials').hide();
 	}
-	
+
 }
 
 

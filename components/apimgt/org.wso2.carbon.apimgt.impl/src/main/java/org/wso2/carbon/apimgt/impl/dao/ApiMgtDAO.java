@@ -4505,5 +4505,259 @@ public class ApiMgtDAO {
 
     }
 
+    /**
+     * Store external APIStore details to which APIs successfully published
+     * @param apiId APIIdentifier
+     * @param apiStoreSet APIStores set
+     * @return   added/failed
+     * @throws APIManagementException
+     */
+    public boolean addExternalAPIStoresDetails(APIIdentifier apiId,Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            addExternalAPIStoresDetails(apiId,apiStoreSet, conn);
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback storing external apistore details ", e);
+                }
+            }
+            log.error("Failed to store external apistore details", e);
+            return false;
+        } catch (APIManagementException e) {
+            log.error("Failed to store external apistore details", e);
+            return false;
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+
+    }
+
+    /**
+     * Save external APIStores details to which APIs published
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException if failed to add Application
+     */
+    public void addExternalAPIStoresDetails(APIIdentifier apiIdentifier,
+                                               Set<APIStore> apiStoreSet, Connection conn)
+            throws APIManagementException, SQLException {
+        PreparedStatement ps;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            //This query to add external APIStores to database table
+            String sqlQuery = "INSERT" +
+                              " INTO AM_PUBLISHED_EXTERNAL_STORES (API_ID, STORE_ID,STORE_DISPLAY_NAME, STORE_ENDPOINT,STORE_TYPE)" +
+                              " VALUES (?,?,?,?,?)";
+
+            ps = conn.prepareStatement(sqlQuery);
+            //Get API Id
+            int apiId;
+            apiId = getAPIID(apiIdentifier, conn);
+            if (apiId==-1) {
+                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+
+            Iterator it = apiStoreSet.iterator();
+            while (it.hasNext()) {
+                Object storeObject = it.next();
+                APIStore store = (APIStore) storeObject;
+                ps.setInt(1, apiId);
+                ps.setString(2, store.getName());
+                ps.setString(3, store.getDisplayName());
+                ps.setString(4, store.getEndpoint());
+                ps.setString(5, store.getType());
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+            ps.clearBatch();
+
+
+        } catch (SQLException e) {
+            log.error("Error while adding External APIStore details to the database for API : ", e);
+
+        }
+
+    }
+
+    public void updateExternalAPIStoresDetails(APIIdentifier apiId,Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            updateExternalAPIStoresDetails(apiId,apiStoreSet, conn);
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback updating external apistore details ", e);
+                }
+            }
+            log.error("Failed to update external apistore details", e);
+
+        } catch (APIManagementException e) {
+            log.error("Failed to updating external apistore details", e);
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+
+    }
+
+    /**
+     * Updateexternal APIStores details to which APIs published
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException if failed to add Application
+     */
+    public void updateExternalAPIStoresDetails(APIIdentifier apiIdentifier,
+                                               Set<APIStore> apiStoreSet, Connection conn)
+            throws APIManagementException, SQLException {
+        PreparedStatement ps;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            //This query to add external APIStores to database table
+            String sqlQuery = "UPDATE " +
+                              "AM_PUBLISHED_EXTERNAL_STORES"  +
+                              " SET " +
+                              "   STORE_ENDPOINT = ? " +
+                              "   ,STORE_TYPE = ? " +
+                              "WHERE " +
+                              "   API_ID = ? AND STORE_ID=?";
+
+
+
+            ps = conn.prepareStatement(sqlQuery);
+            //Get API Id
+            int apiId;
+            apiId = getAPIID(apiIdentifier, conn);
+            if (apiId==-1) {
+                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+
+            Iterator it = apiStoreSet.iterator();
+            while (it.hasNext()) {
+                Object storeObject = it.next();
+                APIStore store = (APIStore) storeObject;
+                ps.setString(1, store.getEndpoint());
+                ps.setString(2, store.getType());
+                ps.setInt(3, apiId);
+                ps.setString(4, store.getName());
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+            ps.clearBatch();
+
+
+        } catch (SQLException e) {
+            log.error("Error while updating External APIStore details to the database for API : ", e);
+
+        }
+
+    }
+
+    /**
+     * Return external APIStore details on successfully APIs published
+     * @param apiId  APIIdentifier
+     * @return  Set of APIStore
+     * @throws APIManagementException
+     */
+    public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiId)
+            throws APIManagementException {
+        Connection conn = null;
+        Set<APIStore> storesSet = new HashSet<APIStore>();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            storesSet=getExternalAPIStoresDetails(apiId, conn);
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback getting external apistore details ", e);
+                }
+            }
+            log.error("Failed to get external apistore details", e);
+        } catch (APIManagementException e) {
+            log.error("Failed to get external apistore details", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+        return storesSet;
+
+    }
+
+    /**
+     * Get external APIStores details which are stored in database
+     *
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException if failed to get external APIStores
+     */
+    public Set<APIStore> getExternalAPIStoresDetails(APIIdentifier apiIdentifier
+            , Connection conn)
+            throws APIManagementException, SQLException {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Set<APIStore> storesSet = new HashSet<APIStore>();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            //This query to add external APIStores to database table
+            String sqlQuery = "SELECT " +
+                              "   ES.STORE_ID, " +
+                              "   ES.STORE_DISPLAY_NAME, " +
+                              "   ES.STORE_ENDPOINT, " +
+                              "   ES.STORE_TYPE " +
+                              "FROM " +
+                              "   AM_PUBLISHED_EXTERNAL_STORES ES " +
+                              "WHERE " +
+                              "   ES.API_ID = ? ";
+
+
+            ps = conn.prepareStatement(sqlQuery);
+            //Get API Id
+            int apiId;
+            apiId = getAPIID(apiIdentifier, conn);
+            if (apiId == -1) {
+                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                APIStore store = new APIStore();
+                store.setName(rs.getString("STORE_ID"));
+                store.setDisplayName(rs.getString("STORE_DISPLAY_NAME"));
+                store.setEndpoint(rs.getString("STORE_ENDPOINT"));
+                store.setType(rs.getString("STORE_TYPE"));
+                store.setPublished(true);
+                storesSet.add(store);
+            }
+
+
+        } catch (SQLException e) {
+            handleException("Error while getting External APIStore details from the database for  the API : " + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion(), e);
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return storesSet;
+    }
+
 
 }

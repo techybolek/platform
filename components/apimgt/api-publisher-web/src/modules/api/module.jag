@@ -57,6 +57,9 @@ jagg.module("api", {
     },
     validateRoles:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").validateRoles.apply(this, arguments);
+    },
+    getExternalAPIStores:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getExternalAPIStores.apply(this, arguments);
     }
  
 

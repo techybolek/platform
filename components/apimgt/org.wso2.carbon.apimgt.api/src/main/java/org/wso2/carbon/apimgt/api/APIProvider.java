@@ -311,4 +311,50 @@ public interface APIProvider extends APIManager {
      */
     public Set getTierPermissions() throws APIManagementException;
 
+    /**
+     * When enabled publishing to external APIStores support,publish the API to external APIStores
+     * @param api The API which need to published
+     * @param apiStoreSet The APIStores set to which need to publish API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public void publishToExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException;
+
+    /**
+     * When enabled publishing to external APIStores support,updating the API existing in external APIStores
+     * @param api The API which need to published
+     * @param apiStoreSet The APIStores set to which need to publish API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public void updateAPIInExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException;
+
+    /**
+     * When enabled publishing to external APIStores support,update external apistores data in db
+     * @param apiId The API Identifier which need to update in db
+     * @param apiStoreSet The APIStores set which need to update in db
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public void updateExternalAPIStoresDetails(APIIdentifier apiId,Set<APIStore> apiStoreSet) throws APIManagementException;
+
+    /**
+     * When enabled publishing to external APIStores support,get all the external apistore details which are
+     * published and stored in db and which are not unpublished
+     * @param apiId The API Identifier which need to update in db
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+
+    public Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * When enabled publishing to external APIStores support,get only the published external apistore details which are
+     * stored in db
+     * @param apiId The API Identifier which need to update in db
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
+
 }

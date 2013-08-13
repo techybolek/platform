@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStore;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -312,7 +313,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
-
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
@@ -421,6 +421,18 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
                 apiProvider.updateAPI(api);
             }
+            NativeArray externalAPIStores = (NativeArray) apiData.get("externalAPIStores", apiData);
+            if (externalAPIStores.getLength() != 0) {
+                Set<APIStore> apiStores = new HashSet<APIStore>();
+                for (int k = 0; k < externalAPIStores.getLength(); k++) {
+                    String apiStoreName = externalAPIStores.get(k, externalAPIStores).toString();
+                    APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                            getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                    APIStore apiStore = config.getExternalAPIStore(apiStoreName);
+                    apiStores.add(apiStore);
+                }
+            apiProvider.publishToExternalAPIStores(api, apiStores);
+            }
             success = true;
 
         } catch (Exception e) {
@@ -441,6 +453,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return transport;
     }
+
 
     public static boolean jsFunction_updateAPI(Context cx, Scriptable thisObj,
                                                Object[] args,
@@ -628,6 +641,47 @@ public class APIProviderHostObject extends ScriptableObject {
                 api.setThumbnailUrl(oldApi.getThumbnailUrl());
             }
             apiProvider.updateAPI(api);
+
+            //Getting selected external API stores from UI and publish API to thhem.
+            NativeArray externalAPIStores = (NativeArray) apiData.get("externalAPIStores", apiData);
+            Set<APIStore> publishedStores=apiProvider.getPublishedExternalAPIStores(apiId);
+            //If no external APIStore selected from UI
+            if (externalAPIStores!=null && externalAPIStores.getLength() != 0) {
+                Set<APIStore> apiStores = new HashSet<APIStore>();
+                Set<APIStore> modifiedPublishedApiStores = new HashSet<APIStore>();
+                Set<APIStore> updateApiStores = new HashSet<APIStore>();
+
+                for (int k = 0; k < externalAPIStores.getLength(); k++) {
+                    String apiStoreName = externalAPIStores.get(k, externalAPIStores).toString();
+                    APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                            getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                    APIStore apiStore = config.getExternalAPIStore(apiStoreName); //Get full details of Store
+                    boolean updateAPI=false;
+                    boolean updateDB=false;
+                    boolean publishedToStore=false;
+                    for (APIStore store : publishedStores) {  //If selected external store in edit page is already saved in db
+                        if (store.getName().equals(apiStore.getName())) { //Check if there's a modification happened in config file external store definition
+                            if (!store.getEndpoint().equals(apiStore.getEndpoint()) || !store.getType().equals((apiStore.getType()))||!store.getDisplayName().equals(apiStore.getDisplayName())) {
+                                //Include the store definition to update the db stored APIStore set
+                                modifiedPublishedApiStores.add(store);
+                                updateDB = true;
+                            }
+                            publishedToStore=true; //Already the API has published to external APIStore
+
+                        }
+                        //In this case,the API is already added to external APIStore,thus we don't need to publish it again.We need to update the API in external Store.
+                        //Include to update API in external APIStore
+                        updateApiStores.add(store);
+                    }
+                    if (!publishedToStore) {  //If the API has not yet published to selected external APIStore
+                        apiStores.add(apiStore);
+                    }
+                }
+                apiProvider.publishToExternalAPIStores(api, apiStores); //Publish API to external APIStore
+                apiProvider.updateAPIInExternalAPIStores(api,updateApiStores); //Update the API already exists in the external APIStore
+                apiProvider.updateExternalAPIStoresDetails(api.getId(),modifiedPublishedApiStores); //Update database saved published APIStore details,if there are any
+                                                                                                    //modifications in api-manager.xml
+            }
             success = true;
         } catch (Exception e) {
             handleException("Error while updating the API- " + name + "-" + version, e);
@@ -843,7 +897,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(2, myn, checkValue(api.getUrl()));
                 myn.put(3, myn, checkValue(api.getWsdlUrl()));
                 myn.put(4, myn, checkValue(api.getId().getVersion()));
-                StringBuffer tagsSet = new StringBuffer("");
+                StringBuilder tagsSet = new StringBuilder("");
                 for (int k = 0; k < api.getTags().toArray().length; k++) {
                     tagsSet.append(api.getTags().toArray()[k].toString());
                     if (k != api.getTags().toArray().length - 1) {
@@ -851,8 +905,8 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
                 }
                 myn.put(5, myn, checkValue(tagsSet.toString()));
-                StringBuffer tiersSet = new StringBuffer("");
-                StringBuffer tiersDescSet = new StringBuffer("");
+                StringBuilder tiersSet = new StringBuilder("");
+                StringBuilder tiersDescSet = new StringBuilder("");
                 Set<Tier> tierSet = api.getAvailableTiers();
                 Iterator it = tierSet.iterator();
                 int j = 0;
@@ -916,6 +970,18 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(26, myn, APIUtil.replaceEmailDomainBack(checkValue(api.getId().getProviderName())));
                 myn.put(27, myn, checkTransport("http",api.getTransports()));
                 myn.put(28, myn, checkTransport("https",api.getTransports()));
+                Set<APIStore> storesSet=apiProvider.getExternalAPIStores(api.getId());
+                if(storesSet!=null && storesSet.size()!=0){
+                NativeArray apiStoresArray=new NativeArray(0);
+                for(APIStore store:storesSet){
+                    NativeObject storeObject=new NativeObject();
+                    storeObject.put("name",storeObject,store.getName());
+                    storeObject.put("displayName",storeObject,store.getDisplayName());
+                    storeObject.put("published",storeObject,store.isPublished());
+                    apiStoresArray.put(0,apiStoresArray,storeObject);
+                }
+                myn.put(29, myn, apiStoresArray);
+                }
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                                 "-" + version);
@@ -1135,7 +1201,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     Object apiObject = it.next();
                     API api = (API) apiObject;
                     APIIdentifier apiIdentifier = api.getId();
-                    row.put("apiName", row, apiIdentifier.getApiName());
+                    row.put("name", row, apiIdentifier.getApiName());
                     row.put("version", row, apiIdentifier.getVersion());
                     row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     row.put("status", row, checkValue(api.getStatus().toString()));
@@ -1183,10 +1249,10 @@ public class APIProviderHostObject extends ScriptableObject {
                         Object apiObject = it.next();
                         API api = (API) apiObject;
                         APIIdentifier apiIdentifier = api.getId();
-                        row.put("apiName", row, apiIdentifier.getApiName());
+                        row.put("name", row, apiIdentifier.getApiName());
                         row.put("version", row, apiIdentifier.getVersion());
                         row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                        row.put("updatedDate", row, api.getLastUpdated().toString());
+                        row.put("lastUpdatedDate", row, api.getLastUpdated().toString());
                         myn.put(i, myn, row);
                         i++;
                     }
@@ -1261,7 +1327,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     row.put("tokenStatus", row, apiUsages[i].getAccessTokenStatus());
                     row.put("subStatus", row, apiUsages[i].getSubStatus());
 
-                    StringBuffer apiSet = new StringBuffer("");
+                    StringBuilder apiSet = new StringBuilder("");
                     for (int k = 0; k < apiUsages[i].getApiSubscriptions().length; k++) {
                         apiSet.append(apiUsages[i].getApiSubscriptions()[k].getSubStatus());
                         apiSet.append("::");
@@ -2285,7 +2351,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String inputLine;
         boolean isWsdl2 = false;
         boolean isWsdl10 = false;
-        StringBuffer urlContent = new StringBuffer();
+        StringBuilder urlContent = new StringBuilder();
         while ((inputLine = in.readLine()) != null) {
             String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
             String wsdl10NameSpace = "http://schemas.xmlsoap.org/wsdl/";
@@ -2576,6 +2642,34 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         return valid;
+    }
+
+    public static NativeArray jsFunction_getExternalAPIStores(Context cx,
+                                                              Scriptable thisObj, Object[] args,
+                                                              Function funObj)
+            throws APIManagementException {
+        Set<APIStore> apistoresList = APIUtil.getExternalAPIStores();
+        NativeArray myn = new NativeArray(0);
+        if (apistoresList == null) {
+            return null;
+        } else {
+            Iterator it = apistoresList.iterator();
+            int i = 0;
+            while (it.hasNext()) {
+                NativeObject row = new NativeObject();
+                Object apistoreObject = it.next();
+                APIStore apiStore = (APIStore) apistoreObject;
+                row.put("displayName", row, apiStore.getDisplayName());
+                row.put("name", row, apiStore.getName());
+                row.put("endpoint", row, apiStore.getEndpoint());
+
+                myn.put(i, myn, row);
+                i++;
+
+            }
+            return myn;
+        }
+
     }
 
 

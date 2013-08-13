@@ -1,6 +1,7 @@
 <% jagg.template("item-add", function(inputs, outputs, jagg) { %>
 <% 
 	var isSuperTenant = jagg.getUser().isSuperTenant;
+	var externalAPIStores=outputs.externalAPIStores;
 %>
 
 <div id="item-add">
@@ -67,7 +68,6 @@
 		                	<select class="select required" id="visibility" name="visibility" onchange="showHideRoles()">
 			                	<option value="public"><%=i18n.localize("public")%></option>
 			                	<option value="restricted"><%=i18n.localize("restricted")%></option>
-								<option value="controlled"><%=i18n.localize("controlled")%></option>
 		                	</select>
                         		<a class="icon-plus tierHelp" style="margin-top:-1px;" onclick="javascript:$('#rolePara').toggle()"></a>
                         		<p id="rolePara" class="rolePara" style="display:none;">
@@ -75,7 +75,7 @@
 	                	</div>
 					<% } %>
 	            </div>
-	            
+
 	            <div class="control-group" id="rolesDiv" style="display: none;">
 	                <label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">
 	                	<%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
@@ -86,16 +86,23 @@
                         <p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
 	                </div>
 	            </div>
-		
-				<div class="control-group" id="allowTenantsDiv" style="display: none;">
-					<label class="control-label" for="allowTenants" id="allowTenantsLabel">
-						<%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
-					</label>
-					<div class="controls">
-						<input type="text" class="input required" id="allowTenants" name="allowTenants"/>
-						<p class="help-block" id="allowTenantsHelp"><%=i18n.localize("allowTenantsHelpMsg")%></p>
-					</div>
-				</div>
+                <%if(externalAPIStores!=null){%>
+                <input type="hidden" id="externalAPIStores" name="externalAPIStores" />
+                <div class="control-group">
+                    <label class="control-label"><%=i18n.localize("publishToExternalAPIStores")%>:</label>
+                    <div class="controls">
+                        <div class="checkbox">
+                            <%for(var i=0;i<externalAPIStores.length;i++){%>
+                            <label>
+                                <input type="checkbox"  id="store<%=i%>" name="store<%=i%>" class="storeCheck" value="<%=externalAPIStores[i].name%>" />
+                                <%=externalAPIStores[i].displayName%>
+                            </label>
+                             <%}%>
+                        </div>
+
+                    </div>
+                </div>
+                <%}%>
 
                 <div class="control-group">
                     <label class="control-label" for="apiThumb"><%=i18n.localize("thumbnail")%>:</label>

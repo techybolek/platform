@@ -37,7 +37,8 @@ var getAPI = function (api) {
             endpointTypeSecured:result[25],
             provider:result[26],
             transport_http:result[27],
-            transport_https:result[28]
+            transport_https:result[28],
+            apiStores:result[29]
         };
         return {
             error:false,
@@ -64,19 +65,9 @@ var getAPIsByProvider = function (username) {
         if (log.isDebugEnabled()) {
             log.debug("getAPIsByProvider : " + stringify(apis));
         }
-        length = apis.length;
-        for (i = 0; i < length; i++) {
-            api = apis[i];
-            list.push({
-                name:api.apiName,
-                version:api.version,
-                provider:api.provider,
-                lastUpdatedDate:api.updatedDate
-            });
-        }
         return {
             error:false,
-            apis:list
+            apis:apis
         };
 
     } catch (e) {
@@ -98,16 +89,37 @@ var getAllAPIs = function () {
     try {
         apis = provider.getAllAPIs();
         length = apis.length;
+        return {
+            error:false,
+            apis:apis
+        };
+
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            apis:null,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var getAllAPIDetails = function () {
+    var i, length, api, apis,result,resultAPI,
+    list = [],
+    log = new Log(),
+    provider = jagg.module("manager").getAPIProviderObj();
+
+    try {
+        apis = provider.getAllAPIs();
+        length = apis.length;
         for (i = 0; i < length; i++) {
             api = apis[i];
-            list.push({
-                name:api.apiName,
-                provider:api.provider,
-                version:api.version,
-                status:api.status,
-                thumb:api.thumb,
-                subs:api.subs
-            });
+            resultAPI=getAPI({name:apiName, version:version, provider:provider});
+
+           
+            result=resultAPI.api;
+            list.push(result);
         }
         return {
             error:false,

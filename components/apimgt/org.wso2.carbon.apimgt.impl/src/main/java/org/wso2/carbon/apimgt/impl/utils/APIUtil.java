@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStore;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -1447,6 +1448,55 @@ public final class APIUtil {
     public static boolean isLoadAPIContextsAtStartup() {
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.LoadAPIContextsInServerStartup"));
     }
+
+    public static Set<APIStore> getExternalAPIStores() throws APIManagementException {
+        Set<APIStore> apistoreSet;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        apistoreSet = config.getExternalAPIStores();
+        if (apistoreSet.size() != 0) {
+            return apistoreSet;
+        } else {
+            return null;
+        }
+
+    }
+
+    public static Set<APIStore> getExternalAPIStores(Set<APIStore> inputStores)
+            throws APIManagementException {
+        Set<APIStore> apiStores;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        apiStores = config.getExternalAPIStores();
+        boolean exists = false;
+        if (apiStores.size() != 0) {
+            for (APIStore store : apiStores) {
+                for (APIStore inputStore : inputStores) {
+                    if (inputStore.getName().equals(store.getName())) { //If the configured apistore already stored in db,ignore adding it again
+                        exists = true;
+                    }
+                }
+                if (!exists) {
+                    inputStores.add(store);
+                }
+            }
+
+        }
+        return inputStores;
+
+
+    }
+
+    public static boolean isAPIsPublishToExternalAPIStores()
+            throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return config.getExternalAPIStores().size() != 0;
+
+
+    }
+
 
     public static Cache getAPIContextCache() {
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).

@@ -73,6 +73,22 @@ $(document).ready(function() {
         }
     });
 
+    $('.storeCheck').change(function () {
+        var checkedStores = $('#externalAPIStores').val();
+        if ($(this).is(":checked")) {
+            $('#externalAPIStores').val(checkedStores + "::" + $(this).val());
+        } else {
+            var storeValsWithoutUnchecked = "";
+            var checkStoresArray = checkedStores.split("::");
+            for (var k = 0; k < checkStoresArray.length; k++) {
+                if (!checkStoresArray[k] == $(this).val()) {
+                    storeValsWithoutUnchecked += checkStoresArray[k] + "::";
+                }
+            }
+            $('#externalAPIStores').val(storeValsWithoutUnchecked);
+        }
+    });
+
     $("select[name='tier']").change(function() {
         // multipleValues will be an array
         var multipleValues = $(this).val() || [];
@@ -170,11 +186,6 @@ function showHideRoles(){
         $('#rolesDiv').hide();
     } else{
         $('#rolesDiv').show();
-    }
-    if (visibility == "controlled") {
-        $('#allowTenantsDiv').show();
-    } else {
-        $('#allowTenantsDiv').hide();
     }
 }
 

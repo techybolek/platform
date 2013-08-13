@@ -224,6 +224,19 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_MULTIPLE_VERSIONS = API_STORE + "DisplayMultipleVersions";
 	public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
 	public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
+
+    public static final String WSO2_API_STORE_TYPE = "wso2";
+
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES = "ExternalAPIStores.";
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE = PUBLISH_TO_EXTERNAL_API_STORES+"ExternalAPIStore.";
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_TYPE = PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE+"Type";
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_NAME = "Name";
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_DISPLAY_NAME = "DisplayName";
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_ENDPOINT = "Endpoint";
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_USERNAME = "Username";
+    public static final String PUBLISH_TO_EXTERNAL_API_STORES_EXTERNAL_API_STORE_PASSWORD ="Password";
+
+
  
     public static final String AUTH_MANAGER = "AuthManager.";
     public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
@@ -324,7 +337,14 @@ public final class APIConstants {
     public static final String DELETE_ACTION = "4";
     public static final String PERMISSION_ENABLED = "1";
     public static final String PERMISSION_DISABLED = "0";
-    
+
+    public static final String API_ACTION="action";
+    public static final String API_ADD_ACTION="addAPI";
+    public static final String API_UPDATE_ACTION="updateAPI";
+    public static final String API_LOGIN_ACTION="login";
+    public static final String APISTORE_LOGIN_USERNAME="username";
+    public static final String APISTORE_LOGIN_PASSWORD="password";
+
     public static final String SWAGGER_VERSION = "1.1";
     
     public static class OperationParameter {

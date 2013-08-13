@@ -6,11 +6,14 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ExternalAPIStore;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -1440,6 +1443,106 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getTierPermissions();
 		return tierPermissions;
 	}
+
+    /**
+     * When enabled publishing to external APIStores support,publish the API to external APIStores
+     * @param api The API which need to published
+     * @param apiStoreSet The APIStores set to which need to publish API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    @Override
+    public void publishToExternalAPIStores(API api,Set<APIStore> apiStoreSet) throws APIManagementException {
+        Set<APIStore> publishedStores=new HashSet<APIStore>();
+        for (APIStore store:apiStoreSet){
+            if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {
+                boolean published=new APIPublisher().publishToWSO2Store(api,store); //First trying to publish the API to external APIStore
+                if(published){ //If published,then save to database.
+                    publishedStores.add(store);
+                }
+            }else{ //When the external APIStore is not a WSO2 APIStore
+                log.warn("The configured external APIStore type is currently not supported.Hence ignoring publishing the API to - "+store.getDisplayName());
+            }
+        }
+        if(publishedStores.size() != 0){
+            addExternalAPIStoresDetails(api.getId(),publishedStores);
+        }
+
+    }
+    /**
+     * When enabled publishing to external APIStores support,updating the API existing in external APIStores
+     * @param api The API which need to published
+     * @param apiStoreSet The APIStores set to which need to publish API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    @Override
+    public void updateAPIInExternalAPIStores(API api, Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+
+        for (APIStore store : apiStoreSet) {
+            if (APIConstants.WSO2_API_STORE_TYPE.equals(store.getType())) {//Check external APIStore type is wso2 or not
+                new APIPublisher().updateWSO2Store(api, store);
+            } else { //When the external APIStore is not a WSO2 APIStore
+                log.warn("The configured external APIStore type is currently not supported.Hence ignoring updating the API in - " + store.getDisplayName());
+            }
+        }
+
+
+    }
+    /**
+     * When enabled publishing to external APIStores support,update external apistores data in db
+     * @param apiId The API Identifier which need to update in db
+     * @param apiStoreSet The APIStores set which need to update in db
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    @Override
+    public void updateExternalAPIStoresDetails(APIIdentifier apiId, Set<APIStore> apiStoreSet)
+            throws APIManagementException {
+        apiMgtDAO.updateExternalAPIStoresDetails(apiId, apiStoreSet);
+
+
+    }
+
+
+    private boolean addExternalAPIStoresDetails(APIIdentifier apiId,Set<APIStore> apiStoreSet) throws APIManagementException {
+        return apiMgtDAO.addExternalAPIStoresDetails(apiId,apiStoreSet);
+    }
+    /**
+     * When enabled publishing to external APIStores support,get all the external apistore details which are
+     * published and stored in db and which are not unpublished
+     * @param apiId The API Identifier which need to update in db
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    @Override
+    public Set<APIStore> getExternalAPIStores(APIIdentifier apiId)
+            throws APIManagementException {
+        if (APIUtil.isAPIsPublishToExternalAPIStores()) {
+            Set<APIStore> publishedStores = apiMgtDAO.getExternalAPIStoresDetails(apiId);
+            return APIUtil.getExternalAPIStores(publishedStores);
+        } else {
+            return null;
+        }
+    }
+    /**
+     * When enabled publishing to external APIStores support,get only the published external apistore details which are
+     * stored in db
+     * @param apiId The API Identifier which need to update in db
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    @Override
+    public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId)
+            throws APIManagementException {
+        if (APIUtil.isAPIsPublishToExternalAPIStores()) {
+            return apiMgtDAO.getExternalAPIStoresDetails(apiId);
+
+        } else {
+            return null;
+        }
+    }
 
 }
 
