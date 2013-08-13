@@ -28,11 +28,11 @@ import org.apache.synapse.config.xml.MessageProcessorFactory;
 import org.apache.synapse.config.xml.MessageProcessorSerializer;
 import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.message.processor.impl.ScheduledMessageProcessor;
-import org.apache.synapse.message.processor.impl.forwarder.BlockingMessageSender;
 import org.apache.synapse.message.processor.impl.forwarder.MessageForwardingProcessorView;
 import org.apache.synapse.message.processor.impl.forwarder.ScheduledMessageForwardingProcessor;
 import org.apache.synapse.message.processor.impl.sampler.SamplingProcessor;
 import org.apache.synapse.message.processor.impl.sampler.SamplingProcessorView;
+import org.apache.synapse.message.senders.blocking.BlockingMsgSender;
 import org.apache.synapse.message.store.MessageStore;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
@@ -44,14 +44,10 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
-
     private static Log log = LogFactory.getLog(MessageProcessorAdminService.class);
-
 
     public static final int MSGS_PER_PAGE = 10;
 
@@ -303,37 +299,18 @@ public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
     }
 
     /**
-     * Delete first messages from the Message Store assocated with the Processor
+     * Delete first messages from the Message Store associated with the Processor
      *
      * @param processorName Message Processor Name
      * @throws AxisFault
      */
     public void deleteFirstMessages(String processorName) throws AxisFault {
         SynapseConfiguration configuration = getSynapseConfiguration();
-//        try {
-//            assert configuration != null;
-//            if (configuration.getMessageProcessors().containsKey(processorName)) {
-//                MessageProcessor processor =
-//                        configuration.getMessageProcessors().get(processorName);
-//
-//                if (processor instanceof ScheduledMessageProcessor) {
-//                    MessageForwardingProcessorView view =
-//                            ((ScheduledMessageForwardingProcessor) processor).getView();
-//                    if (!view.isActive()) {
-//                        configuration.getMessageStore(processor.getMessageStoreName()).remove();
-//                        log.warn("Can't access Scheduled Message Forwarding Processor - Processor is active");
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error("Error While accessing MessageProcessor");
-//            throw new AxisFault(e.getMessage());
-//        }
-
+        throw new AxisFault("Unsupported operation.");
     }
 
     /**
-     * Delete all messages from the Message Store assocated with the Processor
+     * Delete all messages from the Message Store associated with the Processor
      *
      * @param processorName Message Processor Name
      * @throws AxisFault
@@ -341,7 +318,6 @@ public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
     public void deleteAllMessages(String processorName) throws AxisFault {
         SynapseConfiguration configuration = getSynapseConfiguration();
         try {
-            //configuration.getMessageStore();
             assert configuration != null;
             if (configuration.getMessageProcessors().containsKey(processorName)) {
                 MessageProcessor processor =
@@ -407,36 +383,7 @@ public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
      */
     public void resendFirstMessage(String processorName, String messageId) throws AxisFault {
         SynapseConfiguration configuration = getSynapseConfiguration();
-//        try {
-//
-//            assert configuration != null;
-//            if (configuration.getMessageProcessors().containsKey(processorName)) {
-//                MessageProcessor processor =
-//                        configuration.getMessageProcessors().get(processorName);
-//
-//                if (processor instanceof ScheduledMessageProcessor) {
-//                    MessageForwardingProcessorView view =
-//                            ((ScheduledMessageForwardingProcessor) processor).getView();
-//                    BlockingMessageSender sender = ((ScheduledMessageForwardingProcessor) processor).getSender();
-//                    if (!view.isActive()) {
-//                        if (messageId != null && !"".equals(messageId.trim())) {
-//                            MessageStore messageStore = configuration.getMessageStore(processor.getMessageStoreName());
-//                            MessageContext msgCtx = messageStore.get(messageId);
-//                            if (msgCtx != null) {
-//                                sendMessage(msgCtx, false, messageStore, sender);
-//                                messageStore.remove();
-//                            }
-//                        }
-//                    } else {
-//                        log.warn("Can't access Scheduled Message Forwarding Processor - Processor is active");
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error("Error While accessing MessageProcessor view ");
-//            throw new AxisFault(e.getMessage());
-//        }
-
+        throw new AxisFault("Unsupported operation.");
     }
 
 
@@ -560,6 +507,8 @@ public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
                             ((ScheduledMessageForwardingProcessor) processor).getView();
                     if (!view.isActive()) {
                         view.activate();
+                        getMediationPersistenceManager()
+                                .saveItem(processor.getName(), ServiceBusConstants.ITEM_TYPE_MESSAGE_PROCESSOR);
                     } else {
                         log.warn("Scheduled Message Forwarding Processor is already active");
                     }
@@ -596,6 +545,8 @@ public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
                             ((ScheduledMessageForwardingProcessor) processor).getView();
                     if (view.isActive()) {
                         view.deactivate();
+                        getMediationPersistenceManager()
+                                .saveItem(processor.getName(), ServiceBusConstants.ITEM_TYPE_MESSAGE_PROCESSOR);
                     } else {
                         log.warn("Scheduled Message Forwarding Processor - already deActive");
                     }
@@ -615,69 +566,8 @@ public class MessageProcessorAdminService extends AbstractServiceBusAdmin {
         }
     }
 
-    private void sendMessage(MessageContext messageContext, boolean delete, MessageStore messageStore, BlockingMessageSender sender) throws Exception {
-//        if (messageContext != null) {
-//            Set proSet = messageContext.getPropertyKeySet();
-//
-//            if (proSet != null) {
-//                if (proSet.contains(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR)) {
-//                    proSet.remove(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR);
-//                }
-//            }
-//
-//            String targetEp =
-//                    (String) messageContext.getProperty(ForwardingProcessorConstants.TARGET_ENDPOINT);
-//
-//            if (targetEp != null) {
-//                Endpoint ep = messageContext.getEndpoint(targetEp);
-//
-//                if (ep instanceof AddressEndpoint) {
-//                    AddressEndpoint addEp = (AddressEndpoint) ep;
-//                    String addressUrl = addEp.getDefinition().getAddress();
-//
-//                    try {
-//                        MessageContext outCtx = sender.send(addEp.getDefinition(), messageContext);
-//                        // If no Exception Occurred We remove the Message
-//                        if (delete) {
-//                            messageStore.poll();
-//                        }
-//                    } catch (Exception e) {
-//                        log.error("Error Forwarding Message ", e);
-//                        throw new Exception(e);
-//                    }
-//                } else {
-//                    // Currently only Address Endpoint delivery is supported
-//                    String logMsg = "Address Endpoint Named " + targetEp +
-//                            " not found.Hence removing " +
-//                            "the message form store";
-//                    log.warn(logMsg);
-//                    if (delete) {
-//                        messageStore.poll();
-//                    }
-//                    throw new Exception(logMsg);
-//                }
-//
-//
-//            } else {
-//                //No Target Endpoint defined for the Message
-//                //So we do not have a place to deliver.
-//                //Here we log a warning and remove the message
-//                //todo: we can improve this by implementing a target inferring mechanism
-//
-//                String logMsg = "Property " + ForwardingProcessorConstants.TARGET_ENDPOINT +
-//                        " not found in the message context , Hence removing the message ";
-//                log.warn(logMsg);
-//                if (delete) {
-//                    messageStore.poll();
-//                }
-//                throw new Exception(logMsg);
-//
-//            }
-//
-//        } else {
-//            throw new Exception("Error! Cant send Message Context : " + messageContext);
-//        }
-    }
+    private void sendMessage(MessageContext messageContext, boolean delete, MessageStore messageStore, BlockingMsgSender sender)
+            throws Exception { throw new Exception("Unsupported operation."); }
 
 
     /**
