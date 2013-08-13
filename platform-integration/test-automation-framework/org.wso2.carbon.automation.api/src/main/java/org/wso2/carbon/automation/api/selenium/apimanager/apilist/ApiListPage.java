@@ -37,6 +37,7 @@ public class ApiListPage {
 
 
         log.info(apiName);
+        driver.navigate().refresh();
         String firstElementXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/" +
                                    "form[4]/table/tbody/tr/td/a";
         String apiNameOnServer = driver.findElement(By.xpath(firstElementXpath)).getText();
@@ -85,11 +86,11 @@ public class ApiListPage {
               log.info("lifecycle is at the Testing stage");
 
             driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option"))).click();
-            Thread.sleep(1000);
+            Thread.sleep(1500);
             driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option1"))).click();
-            Thread.sleep(2000);
+            Thread.sleep(3000);
             driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option2"))).click();
-            Thread.sleep(1000);
+            Thread.sleep(1500);
 
             //promoting the lifecycle
             driver.findElement(By.id(uiElementMapper.getElement("life.cycle.promote"))).click();

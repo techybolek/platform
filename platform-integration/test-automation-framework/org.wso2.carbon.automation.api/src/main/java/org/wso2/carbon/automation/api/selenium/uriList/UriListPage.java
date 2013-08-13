@@ -34,7 +34,7 @@ public class UriListPage {
         driver.findElement(By.linkText(uiElementMapper.getElement("uri.add.list.id"))).click();
 
         Thread.sleep(5000);
-
+        driver.navigate().refresh();
         String uriNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]" +
                                                              "/table/tbody/tr[2]/td/div/div/form[4]/table/tbody/tr/td")).getText();
         log.info(uriNameOnServer);

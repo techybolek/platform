@@ -32,6 +32,7 @@ public class SchemaListPage {
     public boolean checkOnUploadSchema(String wsdlName) throws InterruptedException {
         log.info(wsdlName);
         Thread.sleep(5000);
+        driver.navigate().refresh();
         // driver.findElement(By.xpath(uiElementMapper.getElement("service.check.save.service"))).click();
         String ServiceNameOnServer = driver.findElement(By.xpath(" /html/body/table/tbody/tr[2]/td[3]" +
                                  "/table/tbody/tr[2]/td/div/div/form[4]/table/tbody/tr/td/a")).getText();

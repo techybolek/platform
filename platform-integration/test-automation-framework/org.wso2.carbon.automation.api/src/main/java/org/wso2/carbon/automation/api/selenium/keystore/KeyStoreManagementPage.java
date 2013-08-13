@@ -22,7 +22,7 @@ public class KeyStoreManagementPage {
         driver.findElement(By.linkText(uiElementMapper.getElement("key.store.add.link"))).click();
         log.info("key store add page");
         if (!driver.findElement(By.id(uiElementMapper.getElement("key.store.dashboard.middle.text"))).
-                getText().contains("Key Store Management")) {
+                getText().contains("KeyStore Management")) {
             throw new IllegalStateException("This is not the correct Page");
         }
     }

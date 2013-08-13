@@ -35,6 +35,7 @@ public class ManageNotificationPage {
 
         log.info("---------------------------->>>> " + notificationSubscribe);
         Thread.sleep(5000);
+        driver.navigate().refresh();
         String notificationNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/" +
                                                                       "td[3]/table/tbody/tr[2]/td/div/div/table/tbody/tr/td[5]")).getText();
         log.info(notificationNameOnServer);
