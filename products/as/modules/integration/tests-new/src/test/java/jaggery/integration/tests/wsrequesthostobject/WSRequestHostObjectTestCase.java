@@ -28,6 +28,7 @@ import java.net.URLConnection;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This class sends requests to wsrequest.jag and validates the response
@@ -54,27 +55,24 @@ public class WSRequestHostObjectTestCase extends ASIntegrationTest {
 
         String inputLine;
         while ((inputLine = in.readLine()) != null) {
-            response = inputLine;
+            response += inputLine;
         }
         log.info("Response: " + response);
 
         in.close();
         assertNotNull(response, "Result cannot be null");
 
-        boolean responseContains = false;
-        if (response != null && response.contains(
-                "<ns:getVersionResponse xmlns:ns=\"http://version.services.core.carbon.wso2.org\">" +
-                        "<return>")) {
-            responseContains = true;
-        }
-        assertEquals(responseContains, true);
+        assertTrue(response.contains("<ns:getVersionResponse xmlns:ns=\"http://version.services.core.carbon.wso2.org\">"));
+        assertTrue(response.contains("<return>"));
+        assertTrue(response.contains("</ns:getVersionResponse>"));
+
     }
 
     @Test(groups = {"wso2.as"}, description = "Test WSRequest status",
             dependsOnMethods = "testWSRequestExist")
     public void testWSRequestOperations() throws Exception {
 
-        String response = null;
+        String response = "";
         URL jaggeryURL = new URL(asServer.getWebAppURL() + "/testapp/wsrequest.jag?action=state");
         URLConnection jaggeryServerConnection = Utility.openConnection(jaggeryURL);
         assertNotNull(jaggeryServerConnection, "Connection establishment failure");
@@ -84,7 +82,7 @@ public class WSRequestHostObjectTestCase extends ASIntegrationTest {
 
         String inputLine;
         while ((inputLine = in.readLine()) != null) {
-            response = inputLine;
+            response += inputLine;
         }
 
         in.close();
