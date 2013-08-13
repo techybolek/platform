@@ -60,7 +60,7 @@ public class ResponseBuilder {
         response.setStatus(buildStatus(SAMLSSOConstants.StatusCodes.SUCCESS_CODE, null));
         response.setVersion(SAMLVersion.VERSION_20);
         DateTime issueInstant = new DateTime();
-        DateTime notOnOrAfter = new DateTime(issueInstant.getMillis() + 5 * 60 * 1000);
+        DateTime notOnOrAfter = new DateTime(issueInstant.getMillis() + SAMLSSOUtil.getSAMLResponseValidityPeriod() * 60 * 1000);
         response.setIssueInstant(issueInstant);
         Assertion assertion = buildSAMLAssertion(authReqDTO, notOnOrAfter, sessionId);
         response.getAssertions().add(assertion);

@@ -148,7 +148,7 @@ public class SAMLSSOService {
      * @return timeout for SSO session
      */
     public static int getSSOSessionTimeout() {
-        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT).trim() != null &&
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT) != null &&
                 !IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT).trim().equals("")){
             return Integer.parseInt(IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT).trim());
         } else {
@@ -157,7 +157,7 @@ public class SAMLSSOService {
     }
 
     public static boolean isOpenIDLoginAccepted(){
-        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_OPENID_LOGIN).trim() != null &&
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_OPENID_LOGIN) != null &&
                 !IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_OPENID_LOGIN).trim().equals("")){
             return Boolean.parseBoolean(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_OPENID_LOGIN).trim());
         } else {
@@ -166,7 +166,7 @@ public class SAMLSSOService {
     }
 
     public static boolean isSAMLSSOLoginAccepted(){
-        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_SAMLSSO_LOGIN).trim() != null &&
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_SAMLSSO_LOGIN) != null &&
                 !IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_SAMLSSO_LOGIN).trim().equals("")){
             return Boolean.parseBoolean(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_SAMLSSO_LOGIN).trim());
         } else {

@@ -726,4 +726,14 @@ public class SAMLSSOUtil {
        return SAMLSSOUtil.encode(SAMLSSOUtil.marshall(response));
     }
 
+    public static int getSAMLResponseValidityPeriod(){
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.SAML_RESPONSE_VALIDITY_PERIOD) != null &&
+                !IdentityUtil.getProperty(IdentityConstants.ServerConfig.SAML_RESPONSE_VALIDITY_PERIOD).trim().equals("")){
+            return Integer.parseInt(IdentityUtil.getProperty(
+                    IdentityConstants.ServerConfig.SAML_RESPONSE_VALIDITY_PERIOD).trim());
+        } else {
+            return 5;
+        }
+    }
+
 }
