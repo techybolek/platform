@@ -283,7 +283,7 @@ public class ProjectUtils {
      * Returns the type of the application for a given the application Id and tenant name
      *
      * @param applicationId Id of the application
-     * @param tenantDomain Tenant domain of the application
+     * @param tenantDomain  Tenant domain of the application
      * @return the application type
      * @throws AppFactoryException If invalid application or application type is not available
      */
@@ -314,13 +314,13 @@ public class ProjectUtils {
      * Provides information about an application.
      *
      * @param applicationId id of the application
-     * @param tenantDomain the tenant name of the application
      * @return {@link Application}
      * @throws AppFactoryException Throws error when unable
-     *          to extract application information
+     *                             to extract application information
      */
-    public static Application getApplicationInfo(String applicationId, String tenantDomain) throws AppFactoryException {
-        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, tenantDomain);
+    public static Application getApplicationInfo(String applicationId, String domainName) throws AppFactoryException {
+
+        GenericArtifactImpl artifact = getApplicationArtifact(applicationId, domainName);
 
         if (artifact == null) {
             String errorMsg =
@@ -328,9 +328,13 @@ public class ProjectUtils {
                             applicationId);
             log.error(errorMsg);
             throw new AppFactoryException(errorMsg);
-
         }
-        Application appInfo = null;
+        return getAppInfoFromRXT(artifact);
+    }
+
+    public static Application getAppInfoFromRXT(GenericArtifact artifact) throws
+            AppFactoryException {
+        Application appInfo;
 
         try {
             appInfo =
@@ -339,21 +343,21 @@ public class ProjectUtils {
                             artifact.getAttribute("application_type"),
                             artifact.getAttribute("application_repositorytype"),
                             artifact.getAttribute("application_description"));
-            
-			String branchCount = artifact.getAttribute("application_branchcount");
-			if (branchCount != null) {
-				appInfo.setBranchCount(Integer.valueOf(branchCount));
-			}
 
-			String[] prodVersions = artifact.getAttributes("application_prodVersions");
-			if (prodVersions != null && prodVersions.length > 0) {
-				appInfo.setProduction(Boolean.TRUE);
-			}
-            
+            String branchCount = artifact.getAttribute("application_branchcount");
+            if (branchCount != null) {
+                appInfo.setBranchCount(Integer.valueOf(branchCount));
+            }
+
+            String[] prodVersions = artifact.getAttributes("application_prodVersions");
+            if (prodVersions != null && prodVersions.length > 0) {
+                appInfo.setProduction(Boolean.TRUE);
+            }
+
         } catch (GovernanceException e) {
             String errorMsg =
-                    String.format("Unable to extract information for application id : %s",
-                            applicationId);
+                    String.format("Unable to extract information from RXT: %s",
+                            artifact.getId());
             log.error(errorMsg);
             throw new AppFactoryException(errorMsg);
         }
@@ -371,7 +375,7 @@ public class ProjectUtils {
     public static Version[] getVersions(String applicationId) throws AppFactoryException {
         List<Version> versions = new ArrayList<Version>();
 
-        RxtManager rxtManager=new RxtManager();
+        RxtManager rxtManager = new RxtManager();
         /*try {
             RegistryService registryService =
                                               ServiceReferenceHolder.getInstance()
@@ -397,13 +401,13 @@ public class ProjectUtils {
                         // contains paths to a versions (e.g.
                         // .../<appid>/<lifecycle>/trunk,
                         // .../<appid>/<lifecycle>/1.0.1 )*/
-        List<Artifact>  artifactList;
+        List<Artifact> artifactList;
         try {
-            artifactList=rxtManager.getAppVersionRxtForApplication(applicationId);
+            artifactList = rxtManager.getAppVersionRxtForApplication(applicationId);
         } catch (RegistryException e) {
             String errorMsg =
                     String.format("Unable to load the application version information for applicaiton id: %s",
-                                  applicationId);
+                            applicationId);
             log.error(errorMsg, e);
             throw new AppFactoryException(errorMsg, e);
         }
@@ -486,7 +490,7 @@ public class ProjectUtils {
      * A Util method to load an Application artifact from the registry.
      *
      * @param applicationId the application Id
-     * @param tenantDomain the tenant name of the application
+     * @param tenantDomain  the tenant name of the application
      * @return a {@link GenericArtifactImpl} representing the application or
      *         null if application (by the id is not in registry)
      * @throws AppFactoryException if an error occurs.
@@ -504,11 +508,7 @@ public class ProjectUtils {
                     userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
                             "/" + applicationId + "/" +
                             "appinfo");
-            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
-            GenericArtifactManager artifactManager =
-                    new GenericArtifactManager(userRegistry,
-                            "application");
-            artifact = artifactManager.getGenericArtifact(resource.getUUID());
+            artifact = getApplicationRXTManager(tenantDomain).getGenericArtifact(resource.getUUID());
 
         } catch (RegistryException e) {
             String errorMsg =
@@ -528,9 +528,47 @@ public class ProjectUtils {
     }
 
     /**
+     * Return App Info RXT Manager for a tenant
+     *
+     * @param tenantDomain
+     * @return
+     * @throws AppFactoryException
+     */
+    public static GenericArtifactManager getApplicationRXTManager(String tenantDomain) throws AppFactoryException {
+
+        RegistryService registryService =
+                ServiceReferenceHolder.getInstance()
+                        .getRegistryService();
+        UserRegistry userRegistry = null;
+        GenericArtifactManager artifactManager;
+        try {
+            userRegistry = registryService.getGovernanceSystemRegistry(ServiceReferenceHolder.getInstance().
+                    getRealmService().getTenantManager().getTenantId(tenantDomain));
+            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
+            artifactManager =
+                    new GenericArtifactManager(userRegistry,
+                            "application");
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Error while getting application RXT for: %s in tenant: %s", tenantDomain);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        } catch (UserStoreException e) {
+            String errorMsg =
+                    String.format("Error while getting tenant id for %s",
+                            tenantDomain);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+
+        return artifactManager;
+    }
+
+    /**
      * Returns the type of the repository for a given application id and tenant
+     *
      * @param applicationId Id of the application
-     * @param tenantDomain Tenant name of the application
+     * @param tenantDomain  Tenant name of the application
      * @return Repository Type
      * @throws AppFactoryException If Unable to find Application or Repository Type
      */
@@ -556,7 +594,7 @@ public class ProjectUtils {
             throw new AppFactoryException(errorMsg, e);
         }
     }
-    
+
     public static void generateGitIgnore(String absolutePath) throws AppFactoryException {
         File path = new File(absolutePath + File.separator + ".gitignore");
         String ignoreContent = "*\n" +
@@ -584,48 +622,84 @@ public class ProjectUtils {
         }
 
     }
-    
+
     /**
      * Updates appinfo rxt the no branch count by retrieving all the branches created for the given application.
+     *
      * @param applicationId
      * @throws AppFactoryException
      */
-	public static void updateBranchCount(String applicationId) throws AppFactoryException {
+    public static void updateBranchCount(String applicationId) throws AppFactoryException {
 
-		
-		GenericArtifact artifact = null;
-		try {
-			RegistryService registryService =
-			                                  ServiceReferenceHolder.getInstance()
-			                                                        .getRegistryService();
-			UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
-			Resource resource =
-			                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-			                                     "/" + applicationId + "/" + "appinfo");
-			GovernanceUtils.loadGovernanceArtifacts(userRegistry);
-			GenericArtifactManager artifactManager =
-			                                         new GenericArtifactManager(userRegistry,
-			                                                                    "application");
-			artifact = artifactManager.getGenericArtifact(resource.getUUID());
-			
-			RxtManager rxtManager = new RxtManager();
-			List<Artifact> appVersions = rxtManager.getAppVersionRxtForApplication(applicationId);
-			String newBranchCount = String.valueOf(appVersions.size());
-			
-			artifact.setAttribute("application_branchcount", newBranchCount);
-			
-			artifactManager.updateGenericArtifact(artifact);
-			
-			log.info(String.format("Application - %s Branch count is updated to - %s", applicationId, newBranchCount));
-		} catch (RegistryException e) {
-			String errorMsg =
-			                  String.format("Unable to load the application information for applicaiton id: %s",
-			                                applicationId);
-			log.error(errorMsg, e);
-			throw new AppFactoryException(errorMsg, e);
-		}
 
-	}
+        RegistryService registryService =
+                ServiceReferenceHolder.getInstance()
+                        .getRegistryService();
+        UserRegistry userRegistry;
+        try {
+            userRegistry = registryService.getGovernanceSystemRegistry();
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to load userRegistry");
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+        updateBranchCount(userRegistry, applicationId);
+    }
+
+    private static void updateBranchCount(UserRegistry userRegistry, String applicationId) throws AppFactoryException {
+        GenericArtifact artifact = null;
+        try {
+            Resource resource =
+                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
+                            "/" + applicationId + "/" + "appinfo");
+            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
+            GenericArtifactManager artifactManager =
+                    new GenericArtifactManager(userRegistry,
+                            "application");
+            artifact = artifactManager.getGenericArtifact(resource.getUUID());
+
+            RxtManager rxtManager = new RxtManager();
+            List<Artifact> appVersions = rxtManager.getAppVersionRxtForApplication(applicationId);
+            String newBranchCount = String.valueOf(appVersions.size());
+
+            artifact.setAttribute("application_branchcount", newBranchCount);
+
+            artifactManager.updateGenericArtifact(artifact);
+            updateBranchCount(userRegistry, applicationId);
+
+            log.info(String.format("Application - %s Branch count is updated to - %s", applicationId, newBranchCount));
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to load the application information for applicaiton id: %s",
+                            applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+    }
+
+    public static void updateBranchCount(String domainName, String applicationId) throws AppFactoryException {
+        RegistryService registryService =
+                ServiceReferenceHolder.getInstance()
+                        .getRegistryService();
+        UserRegistry userRegistry = null;
+        try {
+            userRegistry = registryService.getGovernanceSystemRegistry(
+                    ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(domainName));
+            updateBranchCount(userRegistry, applicationId);
+        } catch (UserStoreException e) {
+            String errorMsg =
+                    String.format("Unable to get tenant id for domain: %s",
+                            domainName);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to load userRegistry");
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+    }
 
     public static void generateBPELArchetype(String applicationKey, String absolutePath, String archetypeRequest) throws AppFactoryException {
         generateProjectArchetype(applicationKey, absolutePath, getArchetypeRequest(applicationKey, archetypeRequest));
@@ -646,89 +720,91 @@ public class ProjectUtils {
     /**
      * Adds given version as a production version for the given application.
      * Updates appinfo rxt
+     *
      * @param applicationId
      * @param version
      * @throws AppFactoryException
      */
-	public static void addProductionVersion(String applicationId, String version)
-	                                                                             throws AppFactoryException {
-		GenericArtifact artifact = null;
-		try {
-			RegistryService registryService =
-			                                  ServiceReferenceHolder.getInstance()
-			                                                        .getRegistryService();
-			UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
-			Resource resource =
-			                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-			                                     "/" + applicationId + "/" + "appinfo");
-			GovernanceUtils.loadGovernanceArtifacts(userRegistry);
-			GenericArtifactManager artifactManager =
-			                                         new GenericArtifactManager(userRegistry,
-			                                                                    "application");
-			artifact = artifactManager.getGenericArtifact(resource.getUUID());
+    public static void addProductionVersion(String applicationId, String version)
+            throws AppFactoryException {
+        GenericArtifact artifact = null;
+        try {
+            RegistryService registryService =
+                    ServiceReferenceHolder.getInstance()
+                            .getRegistryService();
+            UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
+            Resource resource =
+                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
+                            "/" + applicationId + "/" + "appinfo");
+            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
+            GenericArtifactManager artifactManager =
+                    new GenericArtifactManager(userRegistry,
+                            "application");
+            artifact = artifactManager.getGenericArtifact(resource.getUUID());
 
-			String[] prodVersionsArr = artifact.getAttributes("application_productionVersions");
-			List<String> prodVersions = Arrays.asList(prodVersionsArr);
+            String[] prodVersionsArr = artifact.getAttributes("application_productionVersions");
+            List<String> prodVersions = Arrays.asList(prodVersionsArr);
 
-			if (!prodVersions.contains(version)) {
-				prodVersions.add(version);
-				artifact.setAttributes("application_prodVersions",
-				                       prodVersions.toArray(new String[prodVersions.size()]));
-				artifactManager.updateGenericArtifact(artifact);
-				log.info(String.format("Application - %s updated with new production version - %s",
-				                       applicationId, version));
-			}
-		} catch (RegistryException e) {
-			String errorMsg =
-			                  String.format("Unable to load the application information for applicaiton id: %s",
-			                                applicationId);
-			log.error(errorMsg, e);
-			throw new AppFactoryException(errorMsg, e);
-		}
+            if (!prodVersions.contains(version)) {
+                prodVersions.add(version);
+                artifact.setAttributes("application_prodVersions",
+                        prodVersions.toArray(new String[prodVersions.size()]));
+                artifactManager.updateGenericArtifact(artifact);
+                log.info(String.format("Application - %s updated with new production version - %s",
+                        applicationId, version));
+            }
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to load the application information for applicaiton id: %s",
+                            applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
 
-	}
+    }
 
-	/**
-	 * Removes given version from  production versions of given application.
-	 * Updates appinfo rxt.
-	 * @param applicationId
-	 * @param version
-	 * @throws AppFactoryException
-	 */
-	public static void removeProductionVersion(String applicationId, String version) throws AppFactoryException {
-		GenericArtifact artifact = null;
-		try {
-			RegistryService registryService =
-			                                  ServiceReferenceHolder.getInstance()
-			                                                        .getRegistryService();
-			UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
-			Resource resource =
-			                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
-			                                     "/" + applicationId + "/" + "appinfo");
-			GovernanceUtils.loadGovernanceArtifacts(userRegistry);
-			GenericArtifactManager artifactManager =
-			                                         new GenericArtifactManager(userRegistry,
-			                                                                    "application");
-			artifact = artifactManager.getGenericArtifact(resource.getUUID());
+    /**
+     * Removes given version from  production versions of given application.
+     * Updates appinfo rxt.
+     *
+     * @param applicationId
+     * @param version
+     * @throws AppFactoryException
+     */
+    public static void removeProductionVersion(String applicationId, String version) throws AppFactoryException {
+        GenericArtifact artifact = null;
+        try {
+            RegistryService registryService =
+                    ServiceReferenceHolder.getInstance()
+                            .getRegistryService();
+            UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
+            Resource resource =
+                    userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
+                            "/" + applicationId + "/" + "appinfo");
+            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
+            GenericArtifactManager artifactManager =
+                    new GenericArtifactManager(userRegistry,
+                            "application");
+            artifact = artifactManager.getGenericArtifact(resource.getUUID());
 
-			String[] prodVersionsArr = artifact.getAttributes("application_productionVersions");
-			List<String> prodVersions = Arrays.asList(prodVersionsArr);
+            String[] prodVersionsArr = artifact.getAttributes("application_productionVersions");
+            List<String> prodVersions = Arrays.asList(prodVersionsArr);
 
-			if (!prodVersions.contains(version)) {
-				prodVersions.remove(version);
-				artifact.setAttributes("application_prodVersions",
-				                       prodVersions.toArray(new String[prodVersions.size()]));
-				artifactManager.updateGenericArtifact(artifact);
-				log.info(String.format("Application - %s updated with new production version - %s",
-				                       applicationId, version));
-			}
-		} catch (RegistryException e) {
-			String errorMsg =
-			                  String.format("Unable to load the application information for applicaiton id: %s",
-			                                applicationId);
-			log.error(errorMsg, e);
-			throw new AppFactoryException(errorMsg, e);
-		}
-	    
+            if (!prodVersions.contains(version)) {
+                prodVersions.remove(version);
+                artifact.setAttributes("application_prodVersions",
+                        prodVersions.toArray(new String[prodVersions.size()]));
+                artifactManager.updateGenericArtifact(artifact);
+                log.info(String.format("Application - %s updated with new production version - %s",
+                        applicationId, version));
+            }
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to load the application information for applicaiton id: %s",
+                            applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
+
     }
 }

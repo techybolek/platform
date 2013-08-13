@@ -32,138 +32,138 @@ import org.wso2.carbon.appfactory.utilities.project.ProjectUtils;
  */
 public class ApplicationInfomationChangeListner extends ApplicationEventsListener {
 
-	private static final Log log = LogFactory.getLog(ApplicationInfomationChangeListner.class);
+    private static final Log log = LogFactory.getLog(ApplicationInfomationChangeListner.class);
 
-	private int priority = 0;
+    private int priority = 0;
 
-	public ApplicationInfomationChangeListner(int priority) {
-		super();
-		this.priority = priority;
-	}
+    public ApplicationInfomationChangeListner(int priority) {
+        super();
+        this.priority = priority;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onCreation(
-	 * org.wso2.carbon.appfactory.core.dto.Application)
-	 */
-	@Override
-	public void onCreation(Application application, String tenantDomain) throws AppFactoryException {
-		ProjectUtils.updateBranchCount(application.getId());
-		log.info("On Creation is successfully handled by Application Information Change Listner.");
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onCreation(
+     * org.wso2.carbon.appfactory.core.dto.Application)
+     */
+    @Override
+    public void onCreation(Application application, String tenantDomain) throws AppFactoryException {
+        ProjectUtils.updateBranchCount(tenantDomain, application.getId());
+        log.info("On Creation is successfully handled by Application Information Change Listner.");
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onUserAddition
-	 * (org.wso2.carbon.appfactory.core.dto.Application,
-	 * org.wso2.carbon.appfactory.core.dto.UserInfo)
-	 */
-	@Override
-	public void onUserAddition(Application application, UserInfo user) throws AppFactoryException {
-		// TODO Auto-generated method stub
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onUserAddition
+     * (org.wso2.carbon.appfactory.core.dto.Application,
+     * org.wso2.carbon.appfactory.core.dto.UserInfo)
+     */
+    @Override
+    public void onUserAddition(Application application, UserInfo user) throws AppFactoryException {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onUserDeletion
-	 * (org.wso2.carbon.appfactory.core.dto.Application,
-	 * org.wso2.carbon.appfactory.core.dto.UserInfo)
-	 */
-	@Override
-	public void onUserDeletion(Application application, UserInfo user) throws AppFactoryException {
-		// TODO Auto-generated method stub
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onUserDeletion
+     * (org.wso2.carbon.appfactory.core.dto.Application,
+     * org.wso2.carbon.appfactory.core.dto.UserInfo)
+     */
+    @Override
+    public void onUserDeletion(Application application, UserInfo user) throws AppFactoryException {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onUserUpdate
-	 * (org.wso2.carbon.appfactory.core.dto.Application,
-	 * org.wso2.carbon.appfactory.core.dto.UserInfo)
-	 */
-	@Override
-	public void onUserUpdate(Application application, UserInfo user) throws AppFactoryException {
-		// TODO Auto-generated method stub
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onUserUpdate
+     * (org.wso2.carbon.appfactory.core.dto.Application,
+     * org.wso2.carbon.appfactory.core.dto.UserInfo)
+     */
+    @Override
+    public void onUserUpdate(Application application, UserInfo user) throws AppFactoryException {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onRevoke(org
-	 * .wso2.carbon.appfactory.core.dto.Application)
-	 */
-	@Override
-	public void onRevoke(Application application) throws AppFactoryException {
-		// TODO Auto-generated method stub
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onRevoke(org
+     * .wso2.carbon.appfactory.core.dto.Application)
+     */
+    @Override
+    public void onRevoke(Application application) throws AppFactoryException {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onVersionCreation
-	 * (org.wso2.carbon.appfactory.core.dto.Application,
-	 * org.wso2.carbon.appfactory.core.dto.Version,
-	 * org.wso2.carbon.appfactory.core.dto.Version)
-	 */
-	@Override
-	public void onVersionCreation(Application application, Version source, Version target)
-	                                                                                      throws AppFactoryException {
-		ProjectUtils.updateBranchCount(application.getId());
-		log.info("On version creation is successfully handled by Application Information Change Listner.");
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.wso2.carbon.appfactory.core.ApplicationEventsListener#onVersionCreation
+     * (org.wso2.carbon.appfactory.core.dto.Application,
+     * org.wso2.carbon.appfactory.core.dto.Version,
+     * org.wso2.carbon.appfactory.core.dto.Version)
+     */
+    @Override
+    public void onVersionCreation(Application application, Version source, Version target)
+            throws AppFactoryException {
+        ProjectUtils.updateBranchCount(application.getId());
+        log.info("On version creation is successfully handled by Application Information Change Listner.");
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.wso2.carbon.appfactory.core.ApplicationEventsListener#
-	 * onLifeCycleStageChange(org.wso2.carbon.appfactory.core.dto.Application,
-	 * org.wso2.carbon.appfactory.core.dto.Version, java.lang.String,
-	 * java.lang.String)
-	 */
-	@Override
-	public void onLifeCycleStageChange(Application application, Version version,
-	                                   String previosStage, String nextStage)
-	                                                                         throws AppFactoryException {
-		if (log.isDebugEnabled()) {
-			log.debug("onLifeCycleStageChange is successfully handled by Application Information Change Listner.");
-		}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.wso2.carbon.appfactory.core.ApplicationEventsListener#
+     * onLifeCycleStageChange(org.wso2.carbon.appfactory.core.dto.Application,
+     * org.wso2.carbon.appfactory.core.dto.Version, java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public void onLifeCycleStageChange(Application application, Version version,
+                                       String previosStage, String nextStage)
+            throws AppFactoryException {
+        if (log.isDebugEnabled()) {
+            log.debug("onLifeCycleStageChange is successfully handled by Application Information Change Listner.");
+        }
 
-		if (AppFactoryConstants.ApplicationStage.PRODUCTION.getStageStrValue()
-		                                                   .equalsIgnoreCase(nextStage)) {
-			log.debug("adding production version");
-			ProjectUtils.addProductionVersion(application.getId(), version.getId());
-		} else if (AppFactoryConstants.ApplicationStage.PRODUCTION.getStageStrValue()
-		                                                          .equalsIgnoreCase(previosStage)) {
-			log.debug("removing production version");
-			ProjectUtils.removeProductionVersion(application.getId(), version.getId());
-		}
-		log.info("onLifeCycleStageChange is successfully handled by Application Information Change Listner.");
-	}
+        if (AppFactoryConstants.ApplicationStage.PRODUCTION.getStageStrValue()
+                .equalsIgnoreCase(nextStage)) {
+            log.debug("adding production version");
+            ProjectUtils.addProductionVersion(application.getId(), version.getId());
+        } else if (AppFactoryConstants.ApplicationStage.PRODUCTION.getStageStrValue()
+                .equalsIgnoreCase(previosStage)) {
+            log.debug("removing production version");
+            ProjectUtils.removeProductionVersion(application.getId(), version.getId());
+        }
+        log.info("onLifeCycleStageChange is successfully handled by Application Information Change Listner.");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.wso2.carbon.appfactory.core.ApplicationEventsListener#getPriority()
-	 */
-	@Override
-	public int getPriority() {
-		return priority;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.wso2.carbon.appfactory.core.ApplicationEventsListener#getPriority()
+     */
+    @Override
+    public int getPriority() {
+        return priority;
+    }
 
 }
