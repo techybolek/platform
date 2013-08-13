@@ -28,7 +28,7 @@ public class RoleCreationTestCase extends GregUiIntegrationTest{
         test.loginAs(userInfo.getUserName(), userInfo.getPassword());
         RoleHomePage roleHomePage = new RoleHomePage(driver);
         //Add role Name here
-        String roleName = "PRIMARY/SeleniumRole";
+        String roleName = "SeleniumRole";
         roleHomePage.addRole(roleName);
         roleHomePage.checkOnUploadRole(roleName);
         driver.close();

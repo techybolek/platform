@@ -39,7 +39,7 @@ public class UriTestCase extends GregUiIntegrationTest{
         //-------------------------adding uri as Gerneric--------------
 
         addUri.uploadGenericUri(uriLink, uriName);
-        Thread.sleep(6000);
+        Thread.sleep(8000);
         UriListPage uriListPage = new UriListPage(driver);
         uriListPage.checkOnUploadUri(uriName);
 

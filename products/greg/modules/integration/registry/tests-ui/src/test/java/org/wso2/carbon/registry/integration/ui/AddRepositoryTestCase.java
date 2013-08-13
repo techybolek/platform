@@ -31,6 +31,7 @@ public class AddRepositoryTestCase extends GregUiIntegrationTest{
         String repositoryUrl = "http://dist.wso2.org/p2/carbon/releases/3.0.0";
         String repositoryName = "TestingRepo";
         addRepositoryPage.addRepository(repositoryUrl, repositoryName);
+        Thread.sleep(5000);
         addRepositoryPage.checkOnUploadRepository(repositoryName);
         driver.close();
 
