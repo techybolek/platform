@@ -133,6 +133,12 @@
         document.addServiceProvider.logoutURL.disabled = (chkbx.checked) ? false
                 : true;
     }
+    
+    function disableFullQualifiedUsername(chkbx) {
+        document.addServiceProvider.useFullQualifiedUsername.value = (chkbx.checked) ? true
+                : false;
+    }
+    
     function disableResponseSignature(chkbx) {
         document.addServiceProvider.enableResponseSignature.value = (chkbx.checked) ? true
                 : false;
@@ -399,6 +405,7 @@
 <tr>
     <td colspan="2">
         <input type="checkbox" name="useFullQualifiedUsername" value="true"
+                onclick="disableFullQualifiedUsername(this);"
                 <%=(isEditSP && provider.getUseFullyQualifiedUsername() ? "checked=\"checked\"" : "")%> />
         <fmt:message key="use.fullqualified.username"/>
     </td>
