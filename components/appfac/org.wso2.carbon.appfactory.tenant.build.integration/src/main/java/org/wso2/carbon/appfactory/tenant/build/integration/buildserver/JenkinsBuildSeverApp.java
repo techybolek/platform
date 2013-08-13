@@ -122,9 +122,6 @@ public class JenkinsBuildSeverApp extends BuildServerApp {
 		log.info("Context.xml is created at  " + contextFile.getParent() +
 		         ". Updating war file with context.xml");
 
-		System.out.println("jar -uf " + jenkinsWebApp + " -C " + tmpLocation +
-		                                      "META-INF" + File.separator + "context.xml");
-		
 		Process p =
 		            Runtime.getRuntime().exec("jar -uf " + jenkinsWebApp + " -C " + tmpLocation +
 		                                      " META-INF" + File.separator + "context.xml");
