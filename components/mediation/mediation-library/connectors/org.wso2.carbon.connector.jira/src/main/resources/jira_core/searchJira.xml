@@ -19,16 +19,8 @@
 				<property name="uri.var.jira.start.from" value="0" />
 			</then>
 		</filter>
-		<log level="custom">
-			<property name="uri.var.jira.jqlQuery" expression="$func:query" />
-			<property name="uri.var.jira.max.result" expression="$func:maxResult" />
-			<property name="uri.var.jira.start.from" expression="$func:startFrom" />
-			<property name="Authorization" expression="$trp:Authorization" />
-			<property name="uri.var.jira.url" expression="$ctx:uri.var.jira.url" />
-			<property name="uri.var.jira.start.from" expression="$func:maxResult" />
-			<property name="uri.var.jira.max.result" expression="$func:startFrom" />
-		</log>
-		<send buildmessage="true" contiunation="true">
+
+		<send continuation="true">
 			<endpoint>
 				<http method="get"
 					uri-template="https://{uri.var.jira.url}/{uri.var.jira.context}/rest/api/2/search?jql={uri.var.jira.jqlQuery}&amp;maxResults={uri.var.jira.max.result}&amp;startAt={uri.var.jira.start.from}" />

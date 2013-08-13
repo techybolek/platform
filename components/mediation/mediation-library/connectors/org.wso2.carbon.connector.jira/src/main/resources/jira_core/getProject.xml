@@ -5,7 +5,7 @@
 	<sequence>
 		 <property name="uri.var.projectKey" expression="$func:projectKey" />
 		 <property name="messageType" value="application/json" scope="axis2" />
-		<send  buildmessage="true" contiunation="true">
+		<send continuation="true">
 			<endpoint>
 				<http method="get" uri-template="https://{uri.var.jira.url}/{uri.var.jira.context}/rest/api/2/project/{uri.var.projectKey}" />
 			</endpoint>

@@ -6,7 +6,7 @@
 		<property name="uri.var.username" expression="$func:username" />
 		<property name="messageType" value="application/json" scope="axis2" />
 		<property name="Accept-Encoding" action="remove" scope="transport" />
-		<send buildmessage="true" contiunation="true">
+		<send continuation="true">
 			<endpoint>
 				<http method="get"
 					uri-template="https://{uri.var.jira.url}/{uri.var.jira.context}/rest/api/2/user?username={uri.var.username}" />
