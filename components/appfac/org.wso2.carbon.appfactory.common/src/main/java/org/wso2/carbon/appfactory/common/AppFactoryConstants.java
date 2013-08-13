@@ -77,7 +77,7 @@ public class AppFactoryConstants {
     public static final String FILE_TYPE_PHP = "php";
     public static final String FILE_TYPE_ESB = "esb";
 
-    public static final String SCM_READ_WRITE_PERMISSION = "RepositoryProviderConfig.svn.Property.ReadWritePermission";
+    public static final String SCM_READ_WRITE_PERMISSION = "RepositoryProviderConfig.%s.Property.ReadWritePermission";
 
     /**
      * Defines the property name for maven archetype generation parameters
