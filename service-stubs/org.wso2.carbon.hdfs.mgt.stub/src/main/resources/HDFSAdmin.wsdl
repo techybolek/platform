@@ -1,8 +1,30 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://mgt.hdfs.carbon.wso2.org" xmlns:ax292="http://mgt.hdfs.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mgt.hdfs.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://mgt.hdfs.carbon.wso2.org" xmlns:ax23="http://internal.mgt.hdfs.carbon.wso2.org/xsd" xmlns:ax292="http://mgt.hdfs.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mgt.hdfs.carbon.wso2.org">
     <wsdl:documentation>HDFSAdmin</wsdl:documentation>
     <wsdl:types>
+	
+      <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mgt.hdfs.carbon.wso2.org/xsd">
+            <xs:complexType name="HDFSServerManagementException">
+                <xs:sequence />
+            </xs:complexType>
+            <xs:complexType name="FolderInformation">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="folder" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="folderPath" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="group" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="owner" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="permissions" nillable="true" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+			 <xs:complexType name="HDFSFileContent">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="dataHandler" nillable="true" type="xs:base64Binary"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
         <xs:schema xmlns:ax293="http://mgt.hdfs.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
             <xs:import namespace="http://mgt.hdfs.carbon.wso2.org/xsd" />
+	
             <xs:element name="HDFSAdminHDFSServerManagementException">
                 <xs:complexType>
                     <xs:sequence>
@@ -107,6 +129,20 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+ 			<xs:element name="downloadFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="downloadFileResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax292:HDFSFileContent"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="getCurrentUserFSObjects">
                 <xs:complexType>
                     <xs:sequence>
@@ -173,22 +209,14 @@
                 </xs:complexType>
             </xs:element>
         </xs:schema>
-        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mgt.hdfs.carbon.wso2.org/xsd">
-            <xs:complexType name="HDFSServerManagementException">
-                <xs:sequence />
-            </xs:complexType>
-            <xs:complexType name="FolderInformation">
-                <xs:sequence>
-                    <xs:element minOccurs="0" name="folder" type="xs:boolean" />
-                    <xs:element minOccurs="0" name="folderPath" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="group" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="owner" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="permissions" nillable="true" type="xs:string" />
-                </xs:sequence>
-            </xs:complexType>
-        </xs:schema>
+  
     </wsdl:types>
+<wsdl:message name="downloadFileRequest">
+        <wsdl:part name="parameters" element="ns1:downloadFile"/>
+    </wsdl:message>
+    <wsdl:message name="downloadFileResponse">
+        <wsdl:part name="parameters" element="ns1:downloadFileResponse"/>
+    </wsdl:message>
     <wsdl:message name="setPermissionRequest">
         <wsdl:part name="parameters" element="ns1:setPermission" />
     </wsdl:message>
@@ -262,6 +290,11 @@
         <wsdl:operation name="setPermission">
             <wsdl:input message="tns:setPermissionRequest" wsaw:Action="urn:setPermission" />
             <wsdl:fault message="tns:HDFSAdminHDFSServerManagementException" name="HDFSAdminHDFSServerManagementException" wsaw:Action="urn:setPermissionHDFSAdminHDFSServerManagementException" />
+        </wsdl:operation>
+<wsdl:operation name="downloadFile">
+            <wsdl:input message="tns:downloadFileRequest" wsaw:Action="urn:downloadFile"/>
+            <wsdl:output message="tns:downloadFileResponse" wsaw:Action="urn:downloadFileResponse"/>
+            <wsdl:fault message="tns:HDFSAdminHDFSServerManagementException" name="HDFSAdminHDFSServerManagementException" wsaw:Action="urn:downloadFileHDFSAdminHDFSServerManagementException"/>
         </wsdl:operation>
         <wsdl:operation name="setGroup">
             <wsdl:input message="tns:setGroupRequest" wsaw:Action="urn:setGroup" />
@@ -339,6 +372,18 @@
             </wsdl:input>
             <wsdl:fault name="HDFSAdminHDFSServerManagementException">
                 <soap:fault use="literal" name="HDFSAdminHDFSServerManagementException" />
+            </wsdl:fault>
+        </wsdl:operation>
+   <wsdl:operation name="downloadFile">
+            <soap:operation soapAction="urn:downloadFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="HDFSAdminHDFSServerManagementException">
+                <soap:fault use="literal" name="HDFSAdminHDFSServerManagementException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="renameFile">
@@ -477,6 +522,18 @@
             </wsdl:input>
             <wsdl:fault name="HDFSAdminHDFSServerManagementException">
                 <soap12:fault use="literal" name="HDFSAdminHDFSServerManagementException" />
+            </wsdl:fault>
+        </wsdl:operation>
+    <wsdl:operation name="downloadFile">
+            <soap12:operation soapAction="urn:downloadFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="HDFSAdminHDFSServerManagementException">
+                <soap12:fault use="literal" name="HDFSAdminHDFSServerManagementException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="setGroup">
@@ -629,6 +686,15 @@
                 <mime:content type="text/xml" part="parameters" />
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="downloadFile">
+            <http:operation location="downloadFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="renameFile">
             <http:operation location="renameFile" />
             <wsdl:input>
@@ -734,4 +800,5 @@
             <http:address location="https://192.168.122.1:9443/services/HDFSAdmin.HDFSAdminHttpsEndpoint/" />
         </wsdl:port>
     </wsdl:service>
+    
 </wsdl:definitions>

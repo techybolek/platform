@@ -37,6 +37,28 @@
         </messageReceivers>
         <parameter name="AuthorizationAction" locked="true">/permission/admin/configure/hdfs</parameter>
     </service>
+        
+    <!-- Admin service for file upload and download -->
+	<service name="HdfsFileUploadDownloader">
+		 <schema schemaNamespace="http://org.apache.axis2/xsd" elementFormDefaultQualified="true"/>
+		<transports>
+			<transport>https</transport>
+		</transports>
+		<parameter name="ServiceClass" locked="false">
+			org.wso2.carbon.hdfs.mgt.HDFSFileOperationAdmin
+		</parameter>
+		<messageReceivers>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/robust-in-only"
+                             class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-only"
+                             class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver"/>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out"
+                             class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+        </messageReceivers>
+		<parameter name="enableMTOM" locked="false">true</parameter>
+		<!--<operation name="uploadService"></operation>-->		
+	</service>
+	
 
     <!--&lt;!&ndash; Admin service for cassandra cluster administration &ndash;&gt;-->
     <!--<service name="CassandraClusterAdmin" scope="transportsession">-->

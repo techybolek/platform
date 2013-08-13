@@ -9,20 +9,31 @@
 <%@ page import="org.wso2.carbon.hdfs.mgt.stub.fs.HDFSAdminHDFSServerManagementException" %>
 
 <%  /*read the full path to folder to create*/
-    String filePath = request.getParameter("filePath");
+    String srcPath = request.getParameter("srcPath");
+    String dstPath = request.getParameter("dstPath");
+    boolean isFolder = Boolean.parseBoolean(request.getParameter("isFolder"));
 
-    if (filePath == null || "".equals(filePath.trim())) {
-        throw new RuntimeException("File Path is null or empty");
+    if (srcPath == null || "".equals(srcPath.trim())) {
+        throw new RuntimeException("Src Path is null or empty");
+    }
+
+    if (dstPath == null || "".equals(dstPath.trim())) {
+        throw new RuntimeException("Src Path is null or empty");
     }
 
     HDFSAdminClient hdfsAdminClient = null;
     try {
         hdfsAdminClient = new HDFSAdminClient(config.getServletContext(), session);
-        hdfsAdminClient.createFile(filePath,null);
-    } catch (Exception e) {
+        if(isFolder){
+        	hdfsAdminClient.renameFolder(srcPath,dstPath);
+        }else{
+        	hdfsAdminClient.renameFile(srcPath, dstPath);
+        }
+    }
+   	catch (Exception e) {
    	 response.setStatus(500);
      %><%=e.getMessage()%><%
      return;
-    }
+   	}
 %>
 

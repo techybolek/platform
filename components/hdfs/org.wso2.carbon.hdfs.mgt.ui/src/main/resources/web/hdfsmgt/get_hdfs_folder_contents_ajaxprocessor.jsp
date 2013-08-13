@@ -26,7 +26,7 @@
                     JSONObject folder = new JSONObject();
                     JSONObject dataList = new JSONObject();
                     dataList.put("title",folderList[i].getName());
-                    dataList.put("icon","images/folder.gif");
+                    dataList.put("icon","images/folder.png");
                     folder.put("data", dataList);
                     JSONObject attrList = new JSONObject();
                     attrList.put("path",folderList[i].getFolderPath());

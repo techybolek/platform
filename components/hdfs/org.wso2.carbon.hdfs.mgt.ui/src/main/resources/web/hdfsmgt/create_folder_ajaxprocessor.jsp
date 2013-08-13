@@ -1,3 +1,5 @@
+<%@page import="java.io.PrintWriter"%>
+<%@page import="org.wso2.carbon.hdfs.mgt.stub.fs.HDFSFileOperationAdminHDFSServerManagementException"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -23,8 +25,7 @@
         boolean fsOperationStatus;
 
         if (hdfsAdminClient != null) {
-            try {
-                fsOperationStatus = hdfsAdminClient.createFolder(folderPath);
+           fsOperationStatus = hdfsAdminClient.createFolder(folderPath);
                 if (fsOperationStatus) {
                     out.print("File creation success ..!!!");
                     fsOpStatus.put("CREATE","SUCCESS");
@@ -33,18 +34,17 @@
                     fsOpStatus.put("CREATE","FAIL");
 
                 }
-            } catch (HDFSAdminHDFSServerManagementException e) {
-                e.getFaultMessage();
-            }
         }
-
-    } catch (Exception e) {
-        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-        session.setAttribute(CarbonUIMessage.ID, uiMsg);
+    }catch (Exception e) {
+    	 response.setStatus(500);
+         %><%=e.getMessage()%><%
+         return;
+    }  
 %>
-<script type="text/javascript">
-    window.location.href = "../admin/error.jsp";
-</script>
+
+<!-- <script type="text/javascript"> -->
+<!--      window.location.href = "../admin/error.jsp"; -->
+<!-- </script> -->
 <%
-    }
+
 %>

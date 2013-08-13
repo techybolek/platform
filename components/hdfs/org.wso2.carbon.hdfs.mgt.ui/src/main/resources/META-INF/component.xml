@@ -36,7 +36,8 @@
             <i18n-key>hdfs.list.menu.text</i18n-key>
             <i18n-bundle>org.wso2.carbon.hdfs.mgt.ui.i18n.Resources</i18n-bundle>
             <parent-menu>hdfs_mgt_menu</parent-menu>
-            <link>../hdfsmgt/hdfs_dashboard.jsp</link>
+			<link>../hdfsmgt/hdfs_dashboard.jsp</link>
+            <url-params>path=/</url-params>
             <region>region1</region>
             <order>35</order>
             <style-class>manage</style-class>
@@ -70,4 +71,21 @@
             <!--<require-super-tenant>true</require-super-tenant>            -->
         <!--</menu>-->
     </menus>
+    <FileUploadConfig>
+        <Mapping>
+            <Actions>
+                <Action>hdfs</Action>
+            </Actions>
+            <Class>org.wso2.carbon.hdfs.mgt.ui.HDFSFileUploadExecutor</Class>
+        </Mapping>
+     </FileUploadConfig>
+     <servlets>
+        <servlet id="testservlet">
+            <servlet-name>HdfsContentServlet</servlet-name>
+            <url-pattern>/hdfsmgt/hdfsContent</url-pattern>
+            <display-name>Hdfs Content Servlet</display-name>
+
+            <servlet-class>org.wso2.carbon.hdfs.mgt.ui.HDFSFileDownloadServlet</servlet-class>
+        </servlet>
+    </servlets>
 </component>

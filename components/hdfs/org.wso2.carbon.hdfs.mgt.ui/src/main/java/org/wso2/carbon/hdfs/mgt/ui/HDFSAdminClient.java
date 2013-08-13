@@ -18,7 +18,7 @@
 package org.wso2.carbon.hdfs.mgt.ui;
 
 
-import org.apache.axiom.om.ds.ByteArrayDataSource;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
@@ -29,12 +29,16 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.hdfs.mgt.stub.fs.HDFSAdminHDFSServerManagementException;
 import org.wso2.carbon.hdfs.mgt.stub.fs.HDFSAdminStub;
+import org.wso2.carbon.hdfs.mgt.stub.fs.HDFSFileOperationAdminStub;
 import org.wso2.carbon.hdfs.mgt.stub.fs.xsd.FolderInformation;
+import org.wso2.carbon.hdfs.mgt.stub.fs.xsd.HDFSFileContent;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.utils.ServerConstants;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.util.ByteArrayDataSource;
+
 import java.rmi.RemoteException;
 
 
@@ -79,7 +83,7 @@ public class HDFSAdminClient {
             throws HDFSAdminHDFSServerManagementException, RemoteException {
 
         try {
-            return hdfsAdminStub.getCurrentUserFSObjects(fsObjectPath);
+           return Utils.sortFolderInfomationList(hdfsAdminStub.getCurrentUserFSObjects(fsObjectPath));
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (HDFSAdminHDFSServerManagementException e) {
@@ -102,13 +106,13 @@ public class HDFSAdminClient {
             throws HDFSAdminHDFSServerManagementException, RemoteException {
         return hdfsAdminStub.makeDirectory(folderPath);
     }
-
-    public boolean createFile(String filePath, byte [] fileContent)
-            throws HDFSAdminHDFSServerManagementException, RemoteException {
-        DataSource dataSource = (DataSource) new ByteArrayDataSource(fileContent,"application/octet-stream");
-        DataHandler dataHandler = new DataHandler(dataSource);
-        return  hdfsAdminStub.createFile(filePath, dataHandler);
-    }
+//
+//    public boolean createFile(String filePath, byte [] fileContent)
+//            throws HDFSAdminHDFSServerManagementException, RemoteException {
+//        DataSource dataSource = (DataSource) new ByteArrayDataSource(fileContent,"application/octet-stream");
+//        DataHandler dataHandler = new DataHandler(dataSource);
+//        return  hdfsAdminStub.createFile(filePath, dataHandler);
+//    }
 
     public boolean renameFolder(String srcPath, String dstPath)
             throws HDFSAdminHDFSServerManagementException, RemoteException {
@@ -145,5 +149,21 @@ public class HDFSAdminClient {
             throws HDFSAdminHDFSServerManagementException, RemoteException {
         hdfsAdminStub.copy(srcFolder,dstFolder);
     }
+    
+//    public HDFSFileContent downloadFile(String srcFolder)
+//            throws HDFSAdminHDFSServerManagementException, RemoteException {
+//        return hdfsAdminStub.downloadFile(srcFolder);
+//    }
+    public void addSymbolicLink(String parentPath,String name,String targetPath) 
+    		throws Exception{
+		try {
+		//	hdfsAdminStub.addSymbolicLink(parentPath, name, targetPath);
+		} catch (Exception e) {
+			String msg = "Failed to add symbolic link with name " + name +
+			" to the parent collection " + parentPath + ". " + e.getMessage();
+			log.error(msg, e);
+			throw e;
+		}
+	}
 
 }

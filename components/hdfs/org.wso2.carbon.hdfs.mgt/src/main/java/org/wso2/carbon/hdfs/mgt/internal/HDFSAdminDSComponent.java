@@ -19,10 +19,12 @@ package org.wso2.carbon.hdfs.mgt.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.hdfs.dataaccess.DataAccessService;
 import org.wso2.carbon.hdfs.mgt.HDFSAdminComponentManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 /**
  * @scr.component name="org.wso2.carbon.hdfs.mgt.component" immediate="true"
@@ -40,12 +42,16 @@ public class HDFSAdminDSComponent {
      private RealmService realmService;
 
     protected void activate(ComponentContext componentContext) {
+    	 BundleContext bundleContext = componentContext.getBundleContext();
         if (log.isDebugEnabled()) {
             log.debug("HDFS Admin bundle is activated.");
         }
         try {
         //HDFSAdminComponentManager hdfsAdminComponentManager = new HDFSAdminComponentManager();
         HDFSAdminComponentManager.getInstance().init(dataAccessService, realmService);
+        /* Loading tenant specific data */
+   //     bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
+     //           new HDFSAdminAxis2ConfigContextObserver(), null);
         //hdfsAdminComponentManager.init(dataAccessService, realmService);
         } catch(Throwable e) {
             e.printStackTrace();

@@ -1,0 +1,167 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://mgt.hdfs.carbon.wso2.org" xmlns:ax23="http://internal.mgt.hdfs.carbon.wso2.org/xsd" xmlns:ax292="http://mgt.hdfs.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mgt.hdfs.carbon.wso2.org">
+    <wsdl:documentation></wsdl:documentation>
+<wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mgt.hdfs.carbon.wso2.org/xsd">
+            <xs:complexType name="HDFSServerManagementException">
+                <xs:sequence/>
+            </xs:complexType>
+            <xs:complexType name="HDFSFileContent">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="dataHandler" nillable="true" type="xs:base64Binary"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema xmlns:ax22="http://mgt.hdfs.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+            <xs:import namespace="http://mgt.hdfs.carbon.wso2.org/xsd"/>
+            <xs:element name="HDFSFileOperationAdminHDFSServerManagementException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="HDFSServerManagementException" nillable="true" type="ax292:HDFSServerManagementException"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="downloadFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="downloadFileResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax292:HDFSFileContent"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="createFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="fileContent" nillable="true" type="xs:base64Binary"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="createFileResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="downloadFileRequest">
+        <wsdl:part name="parameters" element="ns1:downloadFile"/>
+    </wsdl:message>
+    <wsdl:message name="downloadFileResponse">
+        <wsdl:part name="parameters" element="ns1:downloadFileResponse"/>
+    </wsdl:message>
+    <wsdl:message name="HDFSFileOperationAdminHDFSServerManagementException">
+        <wsdl:part name="parameters" element="ns1:HDFSFileOperationAdminHDFSServerManagementException"/>
+    </wsdl:message>
+    <wsdl:message name="createFileRequest">
+        <wsdl:part name="parameters" element="ns1:createFile"/>
+    </wsdl:message>
+    <wsdl:message name="createFileResponse">
+        <wsdl:part name="parameters" element="ns1:createFileResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="HDFSFileOperationAdminPortType">
+        <wsdl:operation name="downloadFile">
+            <wsdl:input message="tns:downloadFileRequest" wsaw:Action="urn:downloadFile"/>
+            <wsdl:output message="tns:downloadFileResponse" wsaw:Action="urn:downloadFileResponse"/>
+            <wsdl:fault message="tns:HDFSFileOperationAdminHDFSServerManagementException" name="HDFSFileOperationAdminHDFSServerManagementException" wsaw:Action="urn:downloadFileHDFSFileOperationAdminHDFSServerManagementException"/>
+        </wsdl:operation>
+        <wsdl:operation name="createFile">
+            <wsdl:input message="tns:createFileRequest" wsaw:Action="urn:createFile"/>
+            <wsdl:output message="tns:createFileResponse" wsaw:Action="urn:createFileResponse"/>
+            <wsdl:fault message="tns:HDFSFileOperationAdminHDFSServerManagementException" name="HDFSFileOperationAdminHDFSServerManagementException" wsaw:Action="urn:createFileHDFSFileOperationAdminHDFSServerManagementException"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="HDFSFileOperationAdminSoap11Binding" type="tns:HDFSFileOperationAdminPortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="downloadFile">
+            <soap:operation soapAction="urn:downloadFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="HDFSFileOperationAdminHDFSServerManagementException">
+                <soap:fault use="literal" name="HDFSFileOperationAdminHDFSServerManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="createFile">
+            <soap:operation soapAction="urn:createFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="HDFSFileOperationAdminHDFSServerManagementException">
+                <soap:fault use="literal" name="HDFSFileOperationAdminHDFSServerManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="HDFSFileOperationAdminSoap12Binding" type="tns:HDFSFileOperationAdminPortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="downloadFile">
+            <soap12:operation soapAction="urn:downloadFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="HDFSFileOperationAdminHDFSServerManagementException">
+                <soap12:fault use="literal" name="HDFSFileOperationAdminHDFSServerManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="createFile">
+            <soap12:operation soapAction="urn:createFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="HDFSFileOperationAdminHDFSServerManagementException">
+                <soap12:fault use="literal" name="HDFSFileOperationAdminHDFSServerManagementException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="HDFSFileOperationAdminHttpBinding" type="tns:HDFSFileOperationAdminPortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="downloadFile">
+            <http:operation location="downloadFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="createFile">
+            <http:operation location="createFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="HDFSFileOperationAdmin">
+        <wsdl:port name="HDFSFileOperationAdminHttpSoap11Endpoint" binding="tns:HDFSFileOperationAdminSoap11Binding">
+            <soap:address location="https://192.168.122.1:9443/services/HdfsFileUploadDownloader.HDFSFileOperationAdminHttpsSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="HDFSFileOperationAdminHttpSoap12Endpoint" binding="tns:HDFSFileOperationAdminSoap12Binding">
+            <soap12:address location="https://192.168.122.1:9443/services/HdfsFileUploadDownloader.HDFSFileOperationAdminHttpsSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="HDFSFileOperationAdminHttpEndpoint" binding="tns:HDFSFileOperationAdminHttpBinding">
+            <http:address location="https://192.168.122.1:9443/services/HdfsFileUploadDownloader.HDFSFileOperationAdminHttpsEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
