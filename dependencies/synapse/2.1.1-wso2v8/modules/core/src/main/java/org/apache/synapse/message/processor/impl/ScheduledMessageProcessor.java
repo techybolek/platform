@@ -18,10 +18,14 @@
  */
 package org.apache.synapse.message.processor.impl;
 
+import org.apache.axis2.deployment.Deployer;
+import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.deployers.MessageProcessorDeployer;
+import org.apache.synapse.deployers.MessageStoreDeployer;
 import org.apache.synapse.message.processor.MessageProcessorConstants;
 import org.apache.synapse.message.processor.impl.forwarder.ForwardingService;
 import org.apache.synapse.message.processor.impl.sampler.SamplingProcessor;
@@ -62,7 +66,13 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
      */
     protected String cronExpression = null;
 
+    /**
+     * This only needed for the associated service. This value could not be changed manually. Moving to this state
+     * only happens when the service reaches the maximum retry limit
+     */
     protected AtomicBoolean isPaused = new AtomicBoolean(false);
+
+    private AtomicBoolean isActivated = new AtomicBoolean(true);
 
     public void init(SynapseEnvironment se) {
         super.init(se);
@@ -89,6 +99,9 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         }
 
         this.start();
+        if (!isActivated.get()) {
+            deactivate();
+        }
     }
 
     public boolean start() {
@@ -160,6 +173,10 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
             o = parameters.get(MessageProcessorConstants.QUARTZ_CONF);
             if (o != null) {
                 quartzConfig = o.toString();
+            }
+            o = parameters.get(MessageProcessorConstants.IS_ACTIVATED);
+            if (o != null) {
+                isActivated.set(Boolean.valueOf(o.toString()));
             }
         }
     }
@@ -259,6 +276,22 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                     logger.debug("Successfully deactivated the message processor [" + getName() + "]");
                 }
 
+                setActivated(isActive());
+
+                // This means the deactivation has happened automatically. So we have to persist the
+                // deactivation manually.
+                if (isPaused()) {
+                    try {
+                        // TODO: Need to make sure if this is the best way.
+                        String directory = configuration.getPathToConfigFile() + "/message-processors";
+                        DeploymentEngine deploymentEngine = (DeploymentEngine) configuration.getAxisConfiguration().getConfigurator();
+                        MessageProcessorDeployer dep = (MessageProcessorDeployer) deploymentEngine.getDeployer(directory, "xml");
+                        dep.restoreSynapseArtifact(name);
+                    } catch (Exception e) {
+                        logger.warn("Couldn't persist the state of the message processor [" + name + "]");
+                    }
+                }
+
                 return true;
             }
             else {
@@ -285,6 +318,8 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
                 if (logger.isDebugEnabled()) {
                     logger.debug("Successfully re-activated the message processor [" + getName() + "]");
                 }
+
+                setActivated(isActive());
 
                 return true;
             }
@@ -314,8 +349,21 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         }
     }
 
+    public boolean isActive() {
+        return !isDeactivated();
+    }
+
     public boolean isPaused() {
         return isPaused.get();
+    }
+
+    public boolean getActivated() {
+        return isActivated.get();
+    }
+
+    public void setActivated(boolean activated) {
+        isActivated.set(activated);
+        parameters.put(MessageProcessorConstants.IS_ACTIVATED, String.valueOf(getActivated()));
     }
 
     private Properties getSchedulerProperties(String name) {

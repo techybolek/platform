@@ -39,6 +39,8 @@ public final class MessageProcessorConstants {
      */
     public static final String RETRY_INTERVAL = "client.retry.interval";
 
+    public static final String IS_ACTIVATED = "is.active";
+
     /**
      * These configurations are belong to quartz scheduler. More information about these scheduler parameters
      * can be found in http://quartz-scheduler.org/

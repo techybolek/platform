@@ -73,10 +73,6 @@ public class SamplingProcessor extends ScheduledMessageProcessor {
         return jdm;
     }
 
-    public boolean isActive() {
-        return !isDeactivated();
-    }
-
     public SamplingProcessorView getView() {
         return view;
     }

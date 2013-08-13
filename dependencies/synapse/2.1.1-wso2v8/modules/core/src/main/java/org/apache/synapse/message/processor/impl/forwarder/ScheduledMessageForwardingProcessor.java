@@ -106,10 +106,6 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
         return sender;
     }
 
-    public boolean isActive() {
-        return !isDeactivated();
-    }
-
     /**
      * This method is used by back end of the message processor
      * @return
