@@ -42,6 +42,9 @@ public class QueryConstructor {
                 }
             }
         }
+        if (!isFirstFieldAppended) {
+            return null;
+        }
         query.append(" WHERE ");
         for (int primaryKeyCount = 0; primaryKeyCount < primaryFields.length; primaryKeyCount++) {
             if (primaryKeyCount == 0) {

@@ -79,6 +79,7 @@ public class DBOperation {
         } catch (SQLException e) {
             log.error("Failed to write data to database", e);
         } finally {
+            if(null != statement)
             statement.close();
         }
     }
@@ -109,13 +110,18 @@ public class DBOperation {
         QueryConstructor queryConstructor = new QueryConstructor();
         String sqlQuery = queryConstructor.constructUpdateQuery(dbProperties.getTableName(),
                                                                 fieldNames, dbProperties.getPrimaryFields());
-        statement = connection.prepareStatement(sqlQuery);
-        statement = setValuesForUpdateStatement(statement);
-        if(log.isDebugEnabled()){
-            log.debug("Executing query: " + sqlQuery);
+        if (null != sqlQuery) {
+            statement = connection.prepareStatement(sqlQuery);
+            statement = setValuesForUpdateStatement(statement);
+            if (log.isDebugEnabled()) {
+                log.debug("Executing query: " + sqlQuery);
+            }
+            statement.executeUpdate();
+            return statement;
+        }else {
+            return null;
         }
-        statement.executeUpdate();
-        return statement;
+
     }
 
     private ResultSet selectData(PreparedStatement statement) throws SQLException {
