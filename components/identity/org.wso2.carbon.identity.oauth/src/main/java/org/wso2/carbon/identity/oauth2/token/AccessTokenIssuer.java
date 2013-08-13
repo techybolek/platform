@@ -133,11 +133,11 @@ public class AccessTokenIssuer {
     public OAuth2AccessTokenRespDTO issue(OAuth2AccessTokenReqDTO tokenReqDTO)
             throws IdentityException, InvalidOAuthClientException {
 
-    	 if (tokenReqDTO.getResourceOwnerUsername() !=null) {
-	        //identify,whether the ResourceOwner used ordinal username/email
-	        String resourceOwner = getResourceOwnerName(tokenReqDTO.getResourceOwnerUsername());
-	        tokenReqDTO.setResourceOwnerUsername(resourceOwner);
-        }
+//    	if (tokenReqDTO.getResourceOwnerUsername() !=null) {
+//	       //identify,whether the ResourceOwner used ordinal username/email
+//	       String resourceOwner = getResourceOwnerName(tokenReqDTO.getResourceOwnerUsername());
+//	       tokenReqDTO.setResourceOwnerUsername(resourceOwner);
+//        }
 		String grantType = tokenReqDTO.getGrantType();
         String clientAssertionType = tokenReqDTO.getClientAssertionType();
         String clientAssertion = tokenReqDTO.getClientAssertion();
@@ -176,7 +176,7 @@ public class AccessTokenIssuer {
         if(clientAuthMethod == null || !supportedClientAuthenticationMethods.contains(clientAuthMethod)){
             log.debug("Unsupported Client Authentication Method : " + clientAuthMethod +
                     " for client id : " + tokenReqDTO.getClientId());
-            tokenRespDTO = handleError(OAuth2Constants.OAuthError.TokenResponse.UNSUPPRTED_CLIENT_AUTHENTICATION_METHOD,
+            tokenRespDTO = handleError(OAuth2Constants.OAuthError.TokenResponse.UNSUPPORTED_CLIENT_AUTHENTICATION_METHOD,
                     "Unsupported Client Authentication Method!", tokenReqDTO);
             return tokenRespDTO;
         }

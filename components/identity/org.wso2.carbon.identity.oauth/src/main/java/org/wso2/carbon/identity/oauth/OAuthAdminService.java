@@ -23,11 +23,11 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
@@ -70,7 +70,7 @@ public class OAuthAdminService extends AbstractAdmin {
         }
 
         String tenantUser = MultitenantUtils.getTenantAwareUsername(loggedInUser);
-        int tenantId = IdentityUtil.getTenantIdOFUser(loggedInUser);
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         OAuthAppDAO dao = new OAuthAppDAO();
         return dao.addOAuthConsumer(tenantUser, tenantId);
     }
@@ -95,7 +95,7 @@ public class OAuthAdminService extends AbstractAdmin {
         }
 
         String tenantUser = MultitenantUtils.getTenantAwareUsername(userName);
-        int tenantId = IdentityUtil.getTenantIdOFUser(userName);
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         OAuthAppDAO dao = new OAuthAppDAO();
         OAuthAppDO[] apps = dao.getOAuthConsumerAppsOfUser(tenantUser, tenantId);
         if (apps != null && apps.length > 0) {
@@ -149,7 +149,7 @@ public class OAuthAdminService extends AbstractAdmin {
         String userName = getLoggedInUser();
         if (userName != null) {
             String tenantUser = MultitenantUtils.getTenantAwareUsername(userName);
-            int tenantId = IdentityUtil.getTenantIdOFUser(userName);
+            int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
             OAuthAppDAO dao = new OAuthAppDAO();
             OAuthAppDO app = new OAuthAppDO();
@@ -199,7 +199,7 @@ public class OAuthAdminService extends AbstractAdmin {
     public void updateConsumerApplication(OAuthConsumerAppDTO consumerAppDTO) throws Exception {
         String userName = getLoggedInUser();
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userName);
-        int tenantId = IdentityUtil.getTenantIdOFUser(userName);
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         OAuthAppDAO dao = new OAuthAppDAO();
         OAuthAppDO oauthappdo = new OAuthAppDO();
         oauthappdo.setUserName(tenantAwareUsername);

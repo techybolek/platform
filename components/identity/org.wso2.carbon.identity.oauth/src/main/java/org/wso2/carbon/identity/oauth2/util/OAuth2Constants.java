@@ -40,7 +40,7 @@ public class OAuth2Constants {
 
     public static class OAuthError{
         public static class TokenResponse{
-            public static final String UNSUPPRTED_CLIENT_AUTHENTICATION_METHOD = "unsupported_client_authentication_method";
+            public static final String UNSUPPORTED_CLIENT_AUTHENTICATION_METHOD = "unsupported_client_authentication_method";
         }
     }
 
