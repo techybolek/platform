@@ -79,11 +79,12 @@ public class EmailHostObjectTestCase extends ASIntegrationTest {
                 asServer.getServiceUrl() + "/admin/emailTest", "sendEmail");
         log.info("Response :" + response);
         assertNotNull(response, "Response cannot be null");
-        assertEquals(response.toString().trim(),
+        /*assertEquals(response.toString().trim(),
                 "<ws:sendEmailResponse xmlns:ws=\"http://services.mashup.wso2."
                         + "org/emailTest?xsd\"><return>Successfully sent an e-mail.</return>"
                         + "</ws:sendEmailResponse>",
-                "Error occurred while sending the e-mail.");
+                "Error occurred while sending the e-mail.");*/
+        assertTrue(response.toString().contains("Successfully sent an e-mail"));
     }
 
 }
