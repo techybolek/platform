@@ -46,7 +46,7 @@ public class POXSecurityBasicAuthChallenge extends ASIntegrationTest {
     }
 
 
-    @Test(groups = {"wso2.as"}, description = "GET request without basic auth")
+    @Test(enabled=false, groups = {"wso2.as"}, description = "GET request without basic auth")
     public void testPOSTRequestBySuperAdmin()
             throws IOException, EndpointAdminEndpointAdminException,
                    LoginAuthenticationExceptionException,
