@@ -461,19 +461,22 @@ public class DynamicLoadbalanceEndpoint extends LoadbalanceEndpoint {
 
         Map headerMap = (Map) msgCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         int port = -1;
-        if (headerMap != null) {
-            String hostHeader = (String) headerMap.get(HTTP.TARGET_HOST);
-            int index = hostHeader.indexOf(':');
-            if (index != -1) {
-                port = Integer.parseInt(hostHeader.trim().substring(index + 1));
-            } else {
-                if ("http".equals(transport)) {
-                    port = 80;
-                } else if ("https".equals(transport)) {
-                    port = 443;
-                }
-            }
-        }
+		if (headerMap != null) {
+			String hostHeader = (String) headerMap.get(HTTP.TARGET_HOST);
+			int preIndex = hostHeader.indexOf(":");
+			int postIndex = hostHeader.indexOf("/");
+			if (preIndex != -1 && postIndex != -1) {
+				port = Integer.parseInt(hostHeader.trim().substring(preIndex + 1, postIndex));
+			} else if (preIndex != -1) {
+				port = Integer.parseInt(hostHeader.trim().substring(preIndex + 1));
+			} else {
+				if ("http".equals(transport)) {
+					port = 80;
+				} else if ("https".equals(transport)) {
+					port = 443;
+				}
+			}
+		}
         return port;
     }
 
