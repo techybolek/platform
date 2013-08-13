@@ -17,6 +17,7 @@ package org.wso2.carbon.appfactory.repository.mgt.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
@@ -35,25 +36,24 @@ public class RepositoryAuthenticationService extends AbstractAdmin {
 
     public boolean hasAccess(String username, String applicationId) {
         try {
-            String domainName=getTenantDomain();
+            String domainName = getTenantDomain();
             AppFactoryConfiguration configuration = Util.getConfiguration();
-            String repositoryType = ProjectUtils.getRepositoryType(applicationId);
-            UserRealm realm = Util.getRealmService().getTenantUserRealm(tID);
-            String permission = configuration.getFirstProperty((AppFactoryConstants.SCM_READ_WRITE_PERMISSION).replace("svn", repositoryType));
+            String repositoryType = ProjectUtils.getRepositoryType(applicationId, domainName);
+            UserRealm realm = getUserRealm();
+            String permission = configuration.getFirstProperty(String.format(
+                    AppFactoryConstants.SCM_READ_WRITE_PERMISSION, repositoryType));
             if (realm != null && realm.getAuthorizationManager().
-                    isUserAuthorized(username, permission, "ui.execute")) {
+                    isUserAuthorized(username, permission, CarbonConstants.UI_PERMISSION_ACTION)) {
                 return true;
             }
         } catch (UserStoreException e) {
-            String msg = "Error while checking permission for accessing svn repository of "
-                         + applicationId + " by " + username;
+            String msg = "Error while checking permission for accessing repository of "
+                    + applicationId + " by " + username;
             log.error(msg, e);
         } catch (AppFactoryException e) {
             String msg = "Error while getting repository type of application " + applicationId;
             log.error(msg, e);
         }
-        return false;*/
-        // TODO GIT repo access authorization has to fix - Earlier code has commented
-        return true;
+        return false;
     }
 }
