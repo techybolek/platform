@@ -297,6 +297,14 @@
             </includes>
         </fileSet>
 	<fileSet>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/modules</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/modules/</outputDirectory>
+	    <excludes>
+               <exclude>**/carbon/**</exclude>
+	       <exclude>**/process/**</exclude>
+            </excludes>
+        </fileSet>
+	<fileSet>
             <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf</directory>
             <outputDirectory>${pom.artifactId}-${build.version}/repository/conf</outputDirectory>
 	    <includes>
