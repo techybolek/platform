@@ -18,40 +18,15 @@
  */
 package org.apache.synapse.message.processor.impl.forwarder;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.message.store.MessageStore;
-
 import java.util.List;
 
 public class MessageForwardingProcessorView implements MessageForwardingProcessorViewMBean {
-    private static final Log log = LogFactory.getLog(MessageForwardingProcessorView.class);
 
-    private MessageStore messageStore;
-
-    private BlockingMessageSender sender;
     private ScheduledMessageForwardingProcessor processor;
 
-
-    public MessageForwardingProcessorView(MessageStore messageStore, BlockingMessageSender sender,
-                                          ScheduledMessageForwardingProcessor processor)
+    public MessageForwardingProcessorView(ScheduledMessageForwardingProcessor processor)
             throws Exception {
-        if (messageStore != null) {
-            this.messageStore = messageStore;
-        } else {
-            throw new Exception("Error , Can not create Message Forwarding Processor " +
-                    "view with null " + "message store");
-        }
-
-        if (sender != null) {
-            this.sender = sender;
-        } else {
-            throw new Exception("Error , Can not create Message Forwarding Processor " +
-                    "view with null " + "Message Sender");
-        }
-
 
         if (processor != null) {
             this.processor = processor;
@@ -59,102 +34,24 @@ public class MessageForwardingProcessorView implements MessageForwardingProcesso
             throw new SynapseException("Error , Can not create Message Forwarding Processor " +
                     "view with null " + "Message Processor");
         }
-
     }
 
-    // TODO : Check the following commented files
-    public void resendAll() throws Exception {
-//        if (!processor.isActive()) {
-//
-//            while (messageStore.peek() != null) {
-//                sendMessage(messageStore.peek() , true);
-//            }
-//        } else {
-//            throw new Exception("Message Processor is Active, Manual operations are " +
-//                    "not supported!");
-//        }
-    }
+    public void resendAll() throws Exception { throw new Exception("Manual operations are not supported!"); }
 
-    public void deleteAll() throws Exception {
-//        if (!processor.isActive()) {
-//            messageStore.clear();
-//        } else {
-//            throw new Exception("Message Processor is Active, Manual operations are " +
-//                    "not supported!");
-//        }
-    }
+    public void deleteAll() throws Exception { throw new Exception("Manual operations are not supported!"); }
 
-    public List<String> messageIdList() throws Exception {
-//        if (!processor.isActive()) {
-//            int size = messageStore.size();
-//            List<String> idList = new ArrayList<String>();
-//            for (int i = 0; i < size; i++) {
-//                MessageContext context = messageStore.get(i);
-//                if (context != null) {
-//                    idList.add(context.getMessageID());
-//                } else {
-//                    break;
-//                }
-//            }
-//            return idList;
-//        } else {
-//            throw new Exception("Message Processor is Active, Manual operations are " +
-//                    "not supported!");
-//        }
-        return null;
-    }
+    public List<String> messageIdList() throws Exception { throw new Exception("Manual operations are not supported!"); }
 
-    public void resend(String messageID) throws Exception {
-//        if (!processor.isActive()) {
-//            if (messageID != null && !"".equals(messageID.trim())) {
-//                MessageContext msgCtx = messageStore.get(messageID);
-//                if (msgCtx != null) {
-//                    sendMessage(msgCtx ,false);
-//                    messageStore.remove(messageID);
-//                }
-//            }
-//        } else {
-//            throw new Exception("Message Processor is Active, Manual operations are " +
-//                    "not supported!");
-//        }
-    }
+    public void resend(String messageID) throws Exception { throw new Exception("Manual operations are not supported!"); }
 
-    public void delete(String messageID) throws Exception {
-//        if (!processor.isActive()) {
-//             if (messageID != null && !"".equals(messageID.trim())) {
-//               messageStore.remove(messageID);
-//            }
-//        } else {
-//            throw new Exception("Message Processor is Active, Manual operations are " +
-//                    "not supported!");
-//        }
-    }
+    public void delete(String messageID) throws Exception { throw new Exception("Manual operations are not supported!"); }
 
-    public String getEnvelope(String messageID) throws Exception {
-//        if (!processor.isActive()) {
-//             if (messageID != null && !"".equals(messageID.trim())) {
-//                MessageContext msgCtx = messageStore.get(messageID);
-//                if (msgCtx != null) {
-//                   SOAPEnvelope env =
-//                           ((Axis2MessageContext) msgCtx).getAxis2MessageContext().getEnvelope();
-//                   if(env != null) {
-//                       return env.toString();
-//                   }
-//                }
-//            }
-//        } else {
-//            throw new Exception("Message Processor is Active, Manual operations are " +
-//                    "not supported!");
-//        }
-
-        return null;
-    }
+    public String getEnvelope(String messageID) throws Exception { throw new Exception("Manual operations are not supported!"); }
 
     public int getSize() {
-//        return messageStore.size();
+        // This function is not supported anymore.
         return -1;
     }
-
 
     public boolean isActive() {
         assert processor != null;
@@ -163,7 +60,6 @@ public class MessageForwardingProcessorView implements MessageForwardingProcesso
 
     public void activate() {
         assert processor != null;
-//        processor.resetSentAttemptCount();
         processor.activate();
     }
 
@@ -171,68 +67,4 @@ public class MessageForwardingProcessorView implements MessageForwardingProcesso
         assert processor != null;
         processor.deactivate();
     }
-
-    private void sendMessage(MessageContext messageContext, boolean delete) throws Exception {
-//        if (messageContext != null) {
-//            Set proSet = messageContext.getPropertyKeySet();
-//
-//            if (proSet != null) {
-//                if (proSet.contains(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR)) {
-//                    proSet.remove(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR);
-//                }
-//            }
-//
-//            String targetEp =
-//                    (String) messageContext.getProperty(ForwardingProcessorConstants.TARGET_ENDPOINT);
-//
-//            if (targetEp != null) {
-//                Endpoint ep = messageContext.getEndpoint(targetEp);
-//
-//                if (ep instanceof AddressEndpoint) {
-//
-//                    try {
-//                        MessageContext outCtx = sender.send(
-//                                ((AddressEndpoint) ep).getDefinition(), messageContext);
-//                        // If no Exception Occurred We remove the Message
-//                        if (delete) {
-//                            messageStore.poll();
-//                        }
-//                    } catch (Exception e) {
-//                        log.error("Error Forwarding Message ", e);
-//                        throw new Exception(e);
-//                    }
-//                } else {
-//                    // Currently only Address Endpoint delivery is supported
-//                    String logMsg = "Address Endpoint Named " + targetEp +
-//                            " not found.Hence removing " +
-//                            "the message form store";
-//                    log.warn(logMsg);
-//                    if (delete) {
-//                        messageStore.poll();
-//                    }
-//                    throw new Exception(logMsg);
-//                }
-//
-//
-//            } else {
-//                //No Target Endpoint defined for the Message
-//                //So we do not have a place to deliver.
-//                //Here we log a warning and remove the message
-//                //todo: we can improve this by implementing a target inferring mechanism
-//
-//                String logMsg = "Property " + ForwardingProcessorConstants.TARGET_ENDPOINT +
-//                        " not found in the message context , Hence removing the message ";
-//                log.warn(logMsg);
-//                if (delete) {
-//                    messageStore.poll();
-//                }
-//                throw new Exception(logMsg);
-//
-//            }
-//
-//        } else {
-//            throw new Exception("Error! Cant send Message Context : " + messageContext);
-//        }
-    }
-
 }

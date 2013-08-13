@@ -156,7 +156,7 @@ public class BlockingMsgSender {
                 }
                 return synapseInMsgCtx;
             }
-            handleException("Error sending Message to url", ex);
+            handleException("Error sending Message to url : " + ((AbstractEndpoint) endpoint).getDefinition().getAddress());
         }
         return null;
     }

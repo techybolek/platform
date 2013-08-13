@@ -27,7 +27,7 @@ import org.quartz.JobDataMap;
 
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.synapse.message.senders.blocking.BlockingMsgSender;
 
 /**
  * Redelivery processor is the Message processor which implements the Dead letter channel EIP
@@ -38,7 +38,7 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
 
     public static final String BLOCKING_SENDER = "blocking.sender";
 
-    private BlockingMessageSender sender = null;
+    private BlockingMsgSender sender = null;
 
     private MessageForwardingProcessorView view;
 
@@ -70,8 +70,7 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
         super.init(se);
 
         try {
-            view = new MessageForwardingProcessorView(
-                    se.getSynapseConfiguration().getMessageStore(messageStore), sender, this);
+            view = new MessageForwardingProcessorView(this);
         } catch (Exception e) {
             throw new SynapseException(e);
         }
@@ -90,12 +89,12 @@ public class ScheduledMessageForwardingProcessor extends ScheduledMessageProcess
         return jdm;
     }
 
-    private BlockingMessageSender initMessageSender(Map<String, Object> params) {
+    private BlockingMsgSender initMessageSender(Map<String, Object> params) {
 
         String axis2repo = (String) params.get(ForwardingProcessorConstants.AXIS2_REPO);
         String axis2Config = (String) params.get(ForwardingProcessorConstants.AXIS2_CONFIG);
 
-        sender = new BlockingMessageSender();
+        sender = new BlockingMsgSender();
         if (axis2repo != null) {
             sender.setClientRepository(axis2repo);
         }

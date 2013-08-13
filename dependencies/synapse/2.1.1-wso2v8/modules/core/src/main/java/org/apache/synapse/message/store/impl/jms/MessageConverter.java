@@ -80,7 +80,12 @@ public final class MessageConverter {
             logger.error("Cannot create Message Context. Message is null.");
             return null;
         }
+
         AxisConfiguration axisConfig = axis2Ctx.getConfigurationContext().getAxisConfiguration();
+        if (axisConfig == null) {
+            logger.warn("Cannot create AxisConfiguration. AxisConfiguration is null.");
+            return null;
+        }
         Axis2Message axis2Msg = message.getAxis2message();
         SOAPEnvelope envelope = getSoapEnvelope(axis2Msg.getSoapEnvelope());
         try {

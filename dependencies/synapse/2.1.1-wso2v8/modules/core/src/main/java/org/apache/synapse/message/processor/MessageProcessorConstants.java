@@ -19,7 +19,7 @@
 package org.apache.synapse.message.processor;
 
 public final class MessageProcessorConstants {
-    public static final String MESSAGE_STORE = "message.store";
+
     public static final String PARAMETERS = "parameters";
 
     /**
@@ -38,4 +38,30 @@ public final class MessageProcessorConstants {
      * This is used to control the retry rate when the front end client is not reachable.
      */
     public static final String RETRY_INTERVAL = "client.retry.interval";
+
+    /**
+     * These configurations are belong to quartz scheduler. More information about these scheduler parameters
+     * can be found in http://quartz-scheduler.org/
+     */
+    public static final String SCHEDULER_INSTANCE_NAME = "org.quartz.scheduler.instanceName";
+
+    public static final String SCHEDULER_RMI_EXPORT = "org.quartz.scheduler.rmi.export";
+
+    public static final String SCHEDULER_RMI_PROXY = "org.quartz.scheduler.rmi.proxy";
+
+    public static final String SCHEDULER_WRAP_JOB_EXE_IN_USER_TRANSACTION =
+                                                              "org.quartz.scheduler.wrapJobExecutionInUserTransaction";
+
+    public static final String THREAD_POOL_CLASS = "org.quartz.threadPool.class";
+
+    public static final String THREAD_POOL_THREAD_COUNT = "org.quartz.threadPool.threadCount";
+
+    public static final String THREAD_POOL_THREAD_PRIORITY = "org.quartz.threadPool.threadPriority";
+
+    public static final String JOB_STORE_MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
+
+    public static final String THREAD_INHERIT_CONTEXT_CLASSLOADER_OF_INIT_THREAD =
+            "org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread";
+
+    public static final String JOB_STORE_CLASS = "org.quartz.jobStore.class";
 }

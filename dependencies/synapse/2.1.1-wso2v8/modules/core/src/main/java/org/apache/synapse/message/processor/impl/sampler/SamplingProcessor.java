@@ -30,7 +30,6 @@ public class SamplingProcessor extends ScheduledMessageProcessor {
     private static final Log log = LogFactory.getLog(SamplingProcessor.class);
 
     public static final String CONCURRENCY = "concurrency";
-
     public static final String SEQUENCE = "sequence";
 
     private SamplingProcessorView view;

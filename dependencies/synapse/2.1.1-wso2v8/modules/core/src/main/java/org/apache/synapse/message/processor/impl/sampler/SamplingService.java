@@ -50,7 +50,7 @@ public class SamplingService implements InterruptableJob, Service {
     private int concurrency = 1;
 
     /** Represents the send sequence of a message */
-    private String sequence = "send_seq";
+    private String sequence;
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
@@ -108,7 +108,9 @@ public class SamplingService implements InterruptableJob, Service {
 
     public MessageContext fetch(MessageConsumer msgConsumer) {
         MessageContext newMsg = messageConsumer.receive();
-        messageConsumer.ack();
+        if (newMsg != null) {
+            messageConsumer.ack();
+        }
 
         return newMsg;
     }

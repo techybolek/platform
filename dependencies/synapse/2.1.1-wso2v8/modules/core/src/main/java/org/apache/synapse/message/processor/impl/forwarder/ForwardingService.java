@@ -26,12 +26,12 @@ import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.endpoints.AddressEndpoint;
 import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.message.MessageConsumer;
 import org.apache.synapse.message.processor.MessageProcessor;
 import org.apache.synapse.message.processor.MessageProcessorConstants;
 import org.apache.synapse.message.processor.Service;
+import org.apache.synapse.message.senders.blocking.BlockingMsgSender;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -51,7 +51,7 @@ public class ForwardingService implements InterruptableJob, Service {
     private MessageProcessor messageProcessor;
 
     /** This is the client which sends messages to the end point */
-    private BlockingMessageSender sender;
+    private BlockingMsgSender sender;
 
     /** Number of retries before shutting-down the processor. -1 default value indicates that
      * retry should happen forever */
@@ -71,7 +71,6 @@ public class ForwardingService implements InterruptableJob, Service {
 
     private boolean isSuccessful = false;
     private volatile boolean isTerminated = false;
-    private volatile boolean isPaused = false;
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
@@ -161,7 +160,7 @@ public class ForwardingService implements InterruptableJob, Service {
         JobDataMap jdm = jobExecutionContext.getMergedJobDataMap();
         Map<String, Object> parameters = (Map<String, Object>) jdm.get(MessageProcessorConstants.PARAMETERS);
         sender =
-                (BlockingMessageSender) jdm.get(ScheduledMessageForwardingProcessor.BLOCKING_SENDER);
+                (BlockingMsgSender) jdm.get(ScheduledMessageForwardingProcessor.BLOCKING_SENDER);
 
         String mdaParam = (String) parameters.get(MessageProcessorConstants.MAX_DELIVER_ATTEMPTS);
         if (mdaParam != null) {
@@ -221,92 +220,89 @@ public class ForwardingService implements InterruptableJob, Service {
         if (targetEndpoint != null) {
             Endpoint ep = messageContext.getEndpoint(targetEndpoint);
 
-            if (ep instanceof AddressEndpoint) {
-                try {
+            try {
 
-                    // Send message to the client
-                    while (!isSuccessful && !isTerminated) {
-                        try {
-                            outCtx = sender.send(
-                                    ((AddressEndpoint) ep).getDefinition(), messageContext);
-                            isSuccessful = true;
+                // Send message to the client
+                while (!isSuccessful && !isTerminated) {
+                    try {
+                        outCtx = sender.send(ep, messageContext);
+                        isSuccessful = true;
 
-                        } catch (Exception e) {
+                    } catch (Exception e) {
 
-                            // this means send has failed due to some reason so we have to retry it
-                            isSuccessful = false;
+                        // this means send has failed due to some reason so we have to retry it
+                        isSuccessful = false;
 
-                            log.error("BlockingMessageSender of message processor ["+ this.messageProcessor.getName()
-                                    + "] failed to send message to the endpoint. ");
-                        }
+                        log.error("BlockingMessageSender of message processor ["+ this.messageProcessor.getName()
+                                + "] failed to send message to the endpoint. ");
+                    }
 
-                        if (isSuccessful) {
-                            if (outCtx != null) {
-                                if ("true".equals(outCtx.
-                                        getProperty(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR))) {
+                    if (isSuccessful) {
+                        if (outCtx != null) {
+                            if ("true".equals(outCtx.
+                                    getProperty(ForwardingProcessorConstants.BLOCKING_SENDER_ERROR))) {
 
-                                    // This means some error has occurred so must try to send down the fault sequence.
-                                    sendThroughFaultSeq(outCtx);
+                                // This means some error has occurred so must try to send down the fault sequence.
+                                sendThroughFaultSeq(outCtx);
 
-                                    // this means send has failed due to some reason so we have to retry it
-                                    isSuccessful = false;
-                                }
-                                else {
-                                    // Send the message down the reply sequence if there is one
-                                    sendThroughReplySeq(outCtx);
-                                    messageConsumer.ack();
-                                    attemptCount = 0;
-                                    isSuccessful = true;
-
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Successfully sent the message to endpoint [" + ep.getName() +"]"
-                                                          + " with message processor [" + messageProcessor.getName() + "]");
-                                    }
-                                }
+                                // this means send has failed due to some reason so we have to retry it
+                                isSuccessful = false;
                             }
                             else {
-                                // This Means we have invoked an out only operation
-                                // remove the message and reset the count
+                                // Send the message down the reply sequence if there is one
+                                sendThroughReplySeq(outCtx);
                                 messageConsumer.ack();
                                 attemptCount = 0;
                                 isSuccessful = true;
 
                                 if (log.isDebugEnabled()) {
                                     log.debug("Successfully sent the message to endpoint [" + ep.getName() +"]"
-                                                          + " with message processor [" + messageProcessor.getName() + "]");
+                                                      + " with message processor [" + messageProcessor.getName() + "]");
                                 }
                             }
                         }
-
-                        if (!isSuccessful) {
-                            // Then we have to retry sending the message to the client.
-                            prepareToRetry();
-                        }
                         else {
-                            if (messageProcessor.isPaused()) {
-                                this.messageProcessor.resumeService();
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Resuming message processor [" + messageProcessor.getName() + "]");
-                                }
+                            // This Means we have invoked an out only operation
+                            // remove the message and reset the count
+                            messageConsumer.ack();
+                            attemptCount = 0;
+                            isSuccessful = true;
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("Successfully sent the message to endpoint [" + ep.getName() +"]"
+                                                      + " with message processor [" + messageProcessor.getName() + "]");
                             }
                         }
                     }
-                } catch (Exception e) {
-                    log.error("Message processor [" + messageProcessor.getName() + "] failed to send the message to" +
-                            "client.", e);
+
+                    if (!isSuccessful) {
+                        // Then we have to retry sending the message to the client.
+                        prepareToRetry();
+                    }
+                    else {
+                        if (messageProcessor.isPaused()) {
+                            this.messageProcessor.resumeService();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Resuming message processor [" + messageProcessor.getName() + "]");
+                            }
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                log.error("Message processor [" + messageProcessor.getName() + "] failed to send the message to" +
+                        "client.", e);
             }
-            else {
-                //No Target Endpoint defined for the Message
-                //So we do not have a place to deliver.
-                //Here we log a warning and remove the message
-                //todo: we can improve this by implementing a target inferring mechanism
+        }
+        else {
+            //No Target Endpoint defined for the Message
+            //So we do not have a place to deliver.
+            //Here we log a warning and remove the message
+            //todo: we can improve this by implementing a target inferring mechanism
 
-                log.warn("Property " + ForwardingProcessorConstants.TARGET_ENDPOINT +
-                        " not found in the message context , Hence removing the message ");
+            log.warn("Property " + ForwardingProcessorConstants.TARGET_ENDPOINT +
+                    " not found in the message context , Hence removing the message ");
 
-                messageConsumer.ack();
-            }
+            messageConsumer.ack();
         }
 
         return true;

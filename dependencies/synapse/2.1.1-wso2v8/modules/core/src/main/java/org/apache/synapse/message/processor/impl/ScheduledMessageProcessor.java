@@ -136,14 +136,6 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
         return true;
     }
 
-//    public boolean isStarted() {
-//        try {
-//            return scheduler.isStarted();
-//        } catch (SchedulerException e) {
-//            throw new SynapseException("Error Standing-by Message processor scheduler ", e);
-//        }
-//    }
-
     public boolean isDeactivated() {
         try {
             return scheduler.isInStandbyMode();
@@ -174,12 +166,12 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
 
     private JobBuilder getJobBuilder() {
         // This is just to set the default one
-        JobBuilder jobBuilder = JobBuilder.newJob(SamplingService.class);
+        JobBuilder jobBuilder;
 
         if (this instanceof SamplingProcessor) {
             jobBuilder = JobBuilder.newJob(SamplingService.class);
         }
-        else if (this instanceof ScheduledMessageProcessor) {
+        else {
             jobBuilder = JobBuilder.newJob(ForwardingService.class);
         }
 
@@ -329,16 +321,19 @@ public abstract class ScheduledMessageProcessor extends AbstractMessageProcessor
     private Properties getSchedulerProperties(String name) {
         Properties config = new Properties();
 
-        config.put("org.quartz.scheduler.instanceName", name);
-        config.put("org.quartz.scheduler.rmi.export", "false");
-        config.put("org.quartz.scheduler.rmi.proxy", "false");
-        config.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", "false");
-        config.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-        config.put("org.quartz.threadPool.threadCount", "1");
-        config.put("org.quartz.threadPool.threadPriority", "5");
-        config.put("org.quartz.jobStore.misfireThreshold", "60000");
-        config.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "true");
-        config.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+        // This is important to have a separate scheduler for each message processor.
+        config.put(MessageProcessorConstants.SCHEDULER_INSTANCE_NAME, name);
+        config.put(MessageProcessorConstants.SCHEDULER_RMI_EXPORT, "false");
+        config.put(MessageProcessorConstants.SCHEDULER_RMI_PROXY, "false");
+        config.put(MessageProcessorConstants.SCHEDULER_WRAP_JOB_EXE_IN_USER_TRANSACTION, "false");
+        config.put(MessageProcessorConstants.THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
+        // This is set to one because according to the current implementation one scheduler
+        // only have one job
+        config.put(MessageProcessorConstants.THREAD_POOL_THREAD_COUNT, "1");
+        config.put(MessageProcessorConstants.THREAD_POOL_THREAD_PRIORITY, "5");
+        config.put(MessageProcessorConstants.JOB_STORE_MISFIRE_THRESHOLD, "60000");
+        config.put(MessageProcessorConstants.THREAD_INHERIT_CONTEXT_CLASSLOADER_OF_INIT_THREAD, "true");
+        config.put(MessageProcessorConstants.JOB_STORE_CLASS, "org.quartz.simpl.RAMJobStore");
 
         return config;
     }
