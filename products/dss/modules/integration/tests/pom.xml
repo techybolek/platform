@@ -33,7 +33,7 @@
                             <value>false</value>
                         </property>
                         <property>
-                            <name>dss.carbon.zip</name>
+                            <name>carbon.zip</name>
                             <value>
                                 ${basedir}/../../distribution/target/wso2dss-${project.version}.zip
                             </value>
@@ -276,7 +276,7 @@
         </dependency>
     </dependencies>
     <properties>
-        <clarity.version>4.1.0</clarity.version>
+        <clarity.version>4.2.0-SNAPSHOT</clarity.version>
         <json.version>2.0.0.wso2v1</json.version>
     </properties>
 </project>

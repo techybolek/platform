@@ -44,10 +44,8 @@ import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -84,7 +82,7 @@ public class EditFaultyDataServiceTest extends DSSIntegrationTest {
 
     @Test(groups = "wso2.dss", dependsOnMethods = {"isServiceFaulty"}, description = "Fix the fault and redeploy")
     public void editFaultyService()
-            throws IOException, XMLStreamException, ClassNotFoundException, SQLException {
+            throws Exception {
         DataServiceAdminClient dataServiceAdminService =
                 new DataServiceAdminClient(dssServer.getBackEndUrl(),
                                            dssServer.getSessionCookie());

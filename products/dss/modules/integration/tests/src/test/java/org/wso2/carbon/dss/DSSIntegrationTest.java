@@ -33,11 +33,8 @@ import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkProperties;
 import org.wso2.carbon.automation.utils.dss.DSSTestCaseUtils;
 
 import javax.activation.DataHandler;
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
-import java.io.IOException;
 import java.rmi.RemoteException;
-import java.sql.SQLException;
 import java.util.List;
 
 public abstract class DSSIntegrationTest {
@@ -98,7 +95,7 @@ public abstract class DSSIntegrationTest {
     }
 
     protected DataHandler createArtifact(String path, List<File> sqlFile)
-            throws XMLStreamException, IOException, ClassNotFoundException, SQLException {
+            throws Exception {
         SqlDataSourceUtil dataSource = new SqlDataSourceUtil(dssServer.getSessionCookie(), dssServer.getBackEndUrl(),
                                                              FrameworkFactory.getFrameworkProperties(ProductConstant.DSS_SERVER_NAME),
                                                              Integer.parseInt(userInfo.getUserId()));
