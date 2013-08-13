@@ -120,9 +120,10 @@ public class EventNotificationService extends AbstractAdmin{
      * @return the events for the given application
      */
     @SuppressWarnings("UnusedDeclaration")
-    public EventBean[] getEventsForApplications(String[] appIDs, String userName) {
+    public EventBean[] getEventsForApplications(String domainName,String[] appIDs,
+                                                String userName) {
         List<EventBean> eventList = new ArrayList<EventBean>();
-        ArrayList userApps = getAppsOfUser(userName);
+        ArrayList userApps = getAppsOfUser(domainName,userName);
         for(String appID : appIDs) {
             // this is to ensure that we give events of the applications of which user has access
             if(userApps.contains(appID)) {
@@ -156,11 +157,11 @@ public class EventNotificationService extends AbstractAdmin{
      * @param userName logged in user
      * @return application list that the given user has access to
      */
-    private ArrayList getAppsOfUser(String userName) {
+    private ArrayList getAppsOfUser(String domainName,String userName) {
         ArrayList appList = new ArrayList();
         try {
             String[] userApps = AppFactoryEventNotificationComponent
-                    .getApplicationManagementService().getAllApplications(userName);
+                    .getApplicationManagementService().getAllApplications(domainName,userName);
             Collections.addAll(appList, userApps);
         } catch (ApplicationManagementException e) {
             log.error("Error while retrieving the application of user "+userName);

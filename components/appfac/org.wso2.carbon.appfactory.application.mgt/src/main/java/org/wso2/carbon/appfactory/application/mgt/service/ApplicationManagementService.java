@@ -612,10 +612,10 @@ public class ApplicationManagementService extends AbstractAdmin {
         return apps;
     }
 
-    public String[] getAllApplications(String userName) throws ApplicationManagementException {
+   /* public String[] getAllApplications(String userName) throws ApplicationManagementException {
         //TODO(ajanthan):fix it properly
         throw new UnsupportedOperationException("Not supported yet");
-    }
+    }*/
 
    /* public Application[] getAllApplicationInfos(String domainName) throws ApplicationManagementException {
         List<Application> applications = new ArrayList<Application>();
