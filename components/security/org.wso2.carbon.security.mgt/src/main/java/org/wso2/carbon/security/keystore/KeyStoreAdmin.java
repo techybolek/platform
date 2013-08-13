@@ -482,7 +482,7 @@ public class KeyStoreAdmin {
 
 			KeyStore keyStore;
 			String keyStoreType;
-			String privateKeyPassowrd;
+			String privateKeyPassowrd = null;
 			if (KeyStoreUtil.isPrimaryStore(keyStoreName)) {
 				KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
 				keyStore = keyMan.getPrimaryKeyStore();
@@ -502,10 +502,10 @@ public class KeyStoreAdmin {
 				keyStoreType = resource.getProperty(SecurityConstants.PROP_TYPE);
 
 				String encpass = resource.getProperty(SecurityConstants.PROP_PRIVATE_KEY_PASS);
-
-				CryptoUtil util = CryptoUtil.getDefaultCryptoUtil();
-				privateKeyPassowrd = new String(util.base64DecodeAndDecrypt(encpass));
-
+                if(encpass != null){
+                    CryptoUtil util = CryptoUtil.getDefaultCryptoUtil();
+                    privateKeyPassowrd = new String(util.base64DecodeAndDecrypt(encpass));
+                }
 			}
 			// Fill the information about the certificates
 			Enumeration<String> aliases = keyStore.aliases();
@@ -705,7 +705,7 @@ public class KeyStoreAdmin {
 
               KeyStore keyStore;
               String keyStoreType;
-              String privateKeyPassowrd;
+              String privateKeyPassowrd = null;
               if (KeyStoreUtil.isPrimaryStore(keyStoreName)) {
                   KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
                   keyStore = keyMan.getPrimaryKeyStore();
@@ -725,10 +725,10 @@ public class KeyStoreAdmin {
                   keyStoreType = resource.getProperty(SecurityConstants.PROP_TYPE);
 
                   String encpass = resource.getProperty(SecurityConstants.PROP_PRIVATE_KEY_PASS);
-
-                  CryptoUtil util = CryptoUtil.getDefaultCryptoUtil();
-                  privateKeyPassowrd = new String(util.base64DecodeAndDecrypt(encpass));
-
+                  if(encpass != null){
+                      CryptoUtil util = CryptoUtil.getDefaultCryptoUtil();
+                      privateKeyPassowrd = new String(util.base64DecodeAndDecrypt(encpass));
+                  }
               }
               // Fill the information about the certificates
               Enumeration<String> aliases = keyStore.aliases();
