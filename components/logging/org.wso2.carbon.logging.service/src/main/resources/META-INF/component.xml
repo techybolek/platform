@@ -22,10 +22,10 @@
             <DisplayName>Configure</DisplayName>
             <ResourceId>/permission/protected/configure</ResourceId>
         </ManagementPermission>
-        <!--ManagementPermission>
+        <ManagementPermission>
             <DisplayName>Logging</DisplayName>
             <ResourceId>/permission/protected/configure/logging</ResourceId>
-        </ManagementPermission-->
+        </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Monitor</DisplayName>
             <ResourceId>/permission/admin/monitor</ResourceId>
