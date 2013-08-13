@@ -385,6 +385,31 @@
     <!--/StartupAPIPublisher-->
 
     <!--
+	Below are set of external APIStores which can be configured to publish an API from current running
+	APIM server.
+    -->
+    <!--ExternalAPIStores>
+       <ExternalAPIStore type="wso2">
+         <Name>Store1</Name>
+         <Endpoint>http://localhost:9763/store</Endpoint>
+         <Username>admin</Username>
+         <Password>admin</Password>
+       </ExternalAPIStore>
+
+       <ExternalAPIStore type="wso2">
+       <Name>ProgrammableWeb</Name>
+       <Endpoint>xxxxx</Endpoint>
+       </ExternalAPIStore>
+
+      <ExternalAPIStore type="wso2">
+       <Name>Store2</Name>
+       <Endpoint>http://localhost:9763/store?tenant=wso2</Endpoint>
+       <Username>admin</Username>
+       <Password>admin</Password>
+     </ExternalAPIStore>
+    </ExternalAPIStores-->
+
+    <!--
 	When an API is invoked, a list of handlers get engaged to its execution flow. This
 	property defines the position of the Extension Handler.
 	Supported values: top, bottom
