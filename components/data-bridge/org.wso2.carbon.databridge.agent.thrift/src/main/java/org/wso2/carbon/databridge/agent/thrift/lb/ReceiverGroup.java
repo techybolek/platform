@@ -89,7 +89,7 @@ public class ReceiverGroup implements ReceiverStateObserver {
         long reconnectionInterval = agent.
                 getAgentConfiguration().getReconnectionInterval();
         scheduledExecutorService
-                .scheduleAtFixedRate(new ReconnectionTask(), 0,
+                .scheduleAtFixedRate(new ReconnectionTask(), reconnectionInterval,
                                      reconnectionInterval, TimeUnit.SECONDS);
 
 
