@@ -18,75 +18,27 @@ package org.wso2.carbon.appfactory.tenant.roles;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.util.AppFactoryUtil;
 import org.wso2.carbon.appfactory.tenant.roles.internal.ServiceHolder;
-import org.wso2.carbon.appfactory.tenant.roles.util.Util;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adds roles such as developer,devOps,qa,appOwner,admin,ceo
  * to "User Manager Database" on Tenant(application) creation
- * 
  */
 public class DefaultRolesCreatorForTenant implements TenantMgtListener {
     private static Log log = LogFactory.getLog(DefaultRolesCreatorForTenant.class);
     private static final int EXEC_ORDER = 40;
-    private static List<RoleBean> roleBeanList = null;
-
-    static {
-        try {
-            init();
-        } catch (StratosException e) {
-            log.error("Default roles creator initialization failed.", e);
-        }
-    }
-
-    public static void init() throws StratosException {
-        roleBeanList = new ArrayList<RoleBean>();
-        try {
-            AppFactoryConfiguration configuration = Util.getConfiguration();
-            String[] roles = configuration.getProperties("ApplicationRoles.Role");
-            String adminUser =
-                Util.getRealmService().getBootstrapRealm().getRealmConfiguration()
-                .getAdminUserName();
-            for (String role : roles) {
-                String resourceIdString =
-                    configuration.getFirstProperty("ApplicationRoles.Role." +
-                                                   role + ".Permission");
-                String[] resourceIds = resourceIdString.split(",");
-                RoleBean roleBean = new RoleBean(role.trim());
-                roleBean.addUser(adminUser);
-                for (String resourceId : resourceIds) {
-                    Permission permission =
-                        new Permission(resourceId.trim(),
-                                       CarbonConstants.UI_PERMISSION_ACTION);
-                    roleBean.addPermission(permission);
-                }
-                roleBeanList.add(roleBean);
-            }
-        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            String message = "Failed to read default roles from appfactory configuration.";
-            log.error(message);
-            throw new StratosException(message, e);
-        }
-    }
 
     @Override
     public void onTenantCreate(TenantInfoBean tenantInfoBean) throws StratosException {
-         try {
+        try {
 
             Registry registry = ServiceHolder.getRegistryService().getGovernanceSystemRegistry();
             Collection resource = registry.newCollection();
@@ -95,8 +47,8 @@ public class DefaultRolesCreatorForTenant implements TenantMgtListener {
 
             AppFactoryConfiguration config = AppFactoryUtil.getAppfactoryConfiguration();
             String[] permissionList = config.getProperties("Permissions.Permission");
-            for(String permission : permissionList){
-                String permissionName =config.getFirstProperty("Permissions.Permission." +permission);
+            for (String permission : permissionList) {
+                String permissionName = config.getFirstProperty("Permissions.Permission." + permission);
                 resource = registry.newCollection();
                 resource.setProperty(UserMgtConstants.DISPLAY_NAME, permissionName);
                 registry.put(permission, resource);
@@ -105,28 +57,6 @@ public class DefaultRolesCreatorForTenant implements TenantMgtListener {
         } catch (Exception e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
-        }
-        try {
-            String users[]={tenantInfoBean.getAdmin()};
-            UserStoreManager userStoreManager =
-                Util.getRealmService()
-                .getTenantUserRealm(tenantInfoBean.getTenantId())
-                .getUserStoreManager();
-            for (RoleBean roleBean : roleBeanList) {
-                if (!userStoreManager.isExistingRole(roleBean.getRoleName())) {
-                    userStoreManager.addRole(roleBean.getRoleName(),users
-                                             ,
-                                             roleBean.getPermissions().
-                                             toArray(new Permission[roleBean.getPermissions().
-                                                                    size()]));
-                }
-            }
-        } catch (UserStoreException e) {
-            String message =
-                "Failed to create default roles of tenant:" +
-                tenantInfoBean.getTenantDomain();
-            log.error(message);
-            throw new StratosException(message, e);
         }
     }
 
