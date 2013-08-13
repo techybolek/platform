@@ -130,6 +130,9 @@ public class HTTPEndpoint extends AbstractEndpoint {
         String evaluatedUri = "";
         try {
             evaluatedUri = uriTemplate.expand();
+            evaluatedUri=evaluatedUri.replace("%3A", ":");
+            evaluatedUri=evaluatedUri.replace("%2F", "/");
+            
         } catch(ExpressionParseException e) {
             log.debug("No URI Template variables defined in HTTP Endpoint: " + this.getName());
             evaluatedUri = uriTemplate.getTemplate();
