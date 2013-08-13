@@ -143,12 +143,16 @@
                 <version>2.0.4.wso2v4</version>
             </dependency>
 
-           <dependency>
+           <!--dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
                 <version>4.1.3-wso2v3</version>
-            </dependency>
-
+            </dependency-->
+		<dependency>
+		    <groupId>org.apache.httpcomponents.wso2</groupId>
+		    <artifactId>httpcore</artifactId>
+		    <version>4.3.0.wso2v1</version>
+		</dependency>
             <dependency>
                 <groupId>backport-util-concurrent.wso2</groupId>
                 <artifactId>backport-util-concurrent</artifactId>
@@ -228,7 +232,7 @@
         </dependency>
 
         <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
+                <groupId>org.apache.httpcomponents.wso2</groupId>
                 <artifactId>httpcore</artifactId>
             </dependency>
 	    
