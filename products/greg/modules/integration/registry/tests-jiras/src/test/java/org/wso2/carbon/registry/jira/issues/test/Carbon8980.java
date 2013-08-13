@@ -53,7 +53,7 @@ public class Carbon8980 {
 
     @BeforeClass(alwaysRun = true)
     public void init() throws Exception {
-        int userId = 2;
+        int userId = 1;
         UserInfo userInfo = UserListCsvReader.getUserInfo(userId);
         EnvironmentBuilder builderAdmin = new EnvironmentBuilder().greg(ProductConstant.ADMIN_USER_ID);
         ManageEnvironment adminEnvironment = builderAdmin.build();
@@ -77,7 +77,7 @@ public class Carbon8980 {
         user1UserManagementClient.addUser(NEW_USER, NEW_USER_PW, new String[]{PermissionTestConstants.EVERYONE_ROLE}, "testUserAProfile");
         FlaggedName[] flaggedNames = adminUserManagementClient.getRolesOfUser(NEW_USER, "*", 100);
         for (FlaggedName name : flaggedNames) {
-            if (name.getItemName().equals(PermissionTestConstants.EVERYONE_ROLE)) {
+            if (PermissionTestConstants.EVERYONE_ROLE.equalsIgnoreCase(name.getItemName())) {
                 found = true;
             }
         }
