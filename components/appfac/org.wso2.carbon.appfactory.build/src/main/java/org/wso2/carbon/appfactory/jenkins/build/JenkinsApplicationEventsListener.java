@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
-import org.wso2.carbon.appfactory.common.AppFactoryConstants.ApplicationStage;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.ApplicationEventsListener;
 import org.wso2.carbon.appfactory.core.dto.Application;
@@ -45,17 +44,12 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
      * Creates a listener instance with given priority.
      *
      * @param priority The Priority
-     * @scr.reference name="appfactory.configuration" interface=
-     * "org.wso2.carbon.appfactory.common.AppFactoryConfiguration"
-     * cardinality="1..1" policy="dynamic"
-     * bind="setAppFactoryConfiguration"
-     * unbind="unsetAppFactoryConfiguration"
      */
     public JenkinsApplicationEventsListener(int priority) {
 
-    	this.identifier = AppFactoryConstants.JENKINS;
+        this.identifier = AppFactoryConstants.JENKINS;
         this.priority = priority;
-        this.rxtManager=new RxtManager();
+        this.rxtManager = new RxtManager();
     }
 
     /**
@@ -66,16 +60,14 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
 
         log.info("Application Creation event recieved for : " + application.getId() + " " +
                 application.getName());
-        JenkinsCISystemDriver jenkinsCISystemDriver=ServiceContainer.getJenkinsCISystemDriver();
+        JenkinsCISystemDriver jenkinsCISystemDriver = ServiceContainer.getJenkinsCISystemDriver();
         jenkinsCISystemDriver.setupApplicationAccount(application.getId());
         Version[] versions = ProjectUtils.getVersions(application.getId());
-        String tagName = "tag"+(Math.random()*100);
-        String stage=rxtManager.getStage(application.getId(),versions[0].getId());
+        String stage = rxtManager.getStage(application.getId(), versions[0].getId());
         if (ArrayUtils.isNotEmpty(versions)) {
-            jenkinsCISystemDriver.createJob(application.getId(),
-                    versions[0].getId(), "", tenantDomain);
+            //No need to create job.
             jenkinsCISystemDriver.startBuild(jenkinsCISystemDriver.getJobName(application.getId(),
-                   versions[0].getId(),""),true,stage,"");
+                    versions[0].getId(), ""), true, stage, "");
         }
 
     }
@@ -118,7 +110,7 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
                 "", null);
         String jobName = ServiceContainer.getJenkinsCISystemDriver().getJobName(application.getId(), target.getId(), "");
         log.info("Job created successfully in jenkins. Job name - " + jobName);
-        ServiceContainer.getJenkinsCISystemDriver().startBuild(jobName, true, rxtManager.getStage(application.getId(),target.getId()), "");
+        ServiceContainer.getJenkinsCISystemDriver().startBuild(jobName, true, rxtManager.getStage(application.getId(), target.getId()), "");
         log.info("Started the build for the newly created version. jobname - " + jobName);
 
     }
@@ -126,16 +118,16 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
     /**
      * onLifeCycleStateChange update the job configuration if needed
      *
-     * @param application application of which LC stage got changed
-     * @param version version of which the LC stage got changed
+     * @param application   application of which LC stage got changed
+     * @param version       version of which the LC stage got changed
      * @param previousStage previous LC stage
-     * @param nextStage new LC stage
+     * @param nextStage     new LC stage
      * @throws AppFactoryException
      */
 
     public void onLifeCycleStageChange(Application application, Version version,
                                        String previousStage, String nextStage) throws
-                                                                               AppFactoryException {
+            AppFactoryException {
 
         String deploymentState = "";
         int pollingPeriod = 0;
@@ -143,14 +135,14 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
         AppFactoryConfiguration configuration = ServiceContainer.getAppFactoryConfiguration();
         boolean previousDeploymentStage = Boolean.parseBoolean(configuration.getFirstProperty(
                 "ApplicationDeployment.DeploymentStage." + previousStage +
-                ".AutomaticDeployment.Enabled"));
+                        ".AutomaticDeployment.Enabled"));
         boolean nextDeploymentStage = Boolean.parseBoolean(configuration.getFirstProperty(
                 "ApplicationDeployment.DeploymentStage." + nextStage +
-                ".AutomaticDeployment.Enabled"));
+                        ".AutomaticDeployment.Enabled"));
         if (!previousDeploymentStage && nextDeploymentStage) {
             pollingPeriod = Integer.parseInt(configuration.getFirstProperty(
                     "ApplicationDeployment.DeploymentStage."
-                    + previousStage + ".AutomaticDeployment.PollingPeriod"));
+                            + previousStage + ".AutomaticDeployment.PollingPeriod"));
             deploymentState = "addAD";
 
         } else if (previousDeploymentStage && !nextDeploymentStage) {
@@ -168,8 +160,8 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
             throws AppFactoryException {
 
         log.info("AutoDeployment Version Change event recieved for : " + application.getId() + " " +
-                 application.getName() + " From Version : " + previousVersion.getId() +
-                 " To Version : " + newVersion.getId());
+                application.getName() + " From Version : " + previousVersion.getId() +
+                " To Version : " + newVersion.getId());
         int pollingPeriod = 0;
 
         //noinspection ConstantConditions
@@ -183,7 +175,7 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
             AppFactoryConfiguration configuration = ServiceContainer.getAppFactoryConfiguration();
             pollingPeriod = Integer.parseInt(configuration.getFirstProperty(
                     "ApplicationDeployment.DeploymentStage." + newStage +
-                    ".AutomaticDeployment.PollingPeriod"));
+                            ".AutomaticDeployment.PollingPeriod"));
             ServiceContainer.getJenkinsCISystemDriver().editADJobConfiguration(
                     application.getId(), newVersion.getId(), "addAD", pollingPeriod);
 
@@ -193,15 +185,15 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
 
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void onUserDeletion(Application application, UserInfo user) throws AppFactoryException {
-		ServiceContainer.getJenkinsCISystemDriver()
-		                .removeUsersFromApplication(application.getId(),
-		                                            new String[] { user.getUserName() });
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onUserDeletion(Application application, UserInfo user) throws AppFactoryException {
+        ServiceContainer.getJenkinsCISystemDriver()
+                .removeUsersFromApplication(application.getId(),
+                        new String[]{user.getUserName()});
+    }
 
     /**
      * {@inheritDoc}.
@@ -209,9 +201,10 @@ public class JenkinsApplicationEventsListener extends ApplicationEventsListener 
     public int getPriority() {
         return priority;
     }
-	@Override
-	public void onUserUpdate(Application application, UserInfo user) throws AppFactoryException {
-		// TODO update user roles in jenkins
 
-	}
+    @Override
+    public void onUserUpdate(Application application, UserInfo user) throws AppFactoryException {
+        // TODO update user roles in jenkins
+
+    }
 }
