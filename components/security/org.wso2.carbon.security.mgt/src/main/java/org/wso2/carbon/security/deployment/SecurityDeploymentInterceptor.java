@@ -48,6 +48,7 @@ import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.utils.Transaction;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -55,6 +56,7 @@ import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.SecurityScenario;
 import org.wso2.carbon.security.SecurityScenarioDatabase;
 import org.wso2.carbon.security.SecurityServiceHolder;
+import org.wso2.carbon.security.config.SecurityConfigAdmin;
 import org.wso2.carbon.security.util.RahasUtil;
 import org.wso2.carbon.security.util.ServerCrypto;
 import org.wso2.carbon.security.util.ServicePasswordCallbackHandler;
@@ -68,6 +70,7 @@ import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -271,7 +274,27 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
                 serviceGroupFilePM.rollbackTransaction(serviceGroupId);
                 throw new RuntimeException(msg, e);
             }
-        }
+		} else if (eventType == AxisEvent.SERVICE_REMOVE) {
+			PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext
+					.getCurrentContext(axisService);
+			int tenantId = carbonContext.getTenantId();
+			try {
+				UserRealm userRealm = SecurityServiceHolder.getRegistryService().getUserRealm(
+						tenantId);
+				AuthorizationManager acAdmin = userRealm.getAuthorizationManager();
+				String resourceName = serviceGroupId + "/" + axisService.getName();
+				String[] roles = acAdmin.getAllowedRolesForResource(resourceName,
+						UserCoreConstants.INVOKE_SERVICE_PERMISSION);
+				for (int i = 0; i < roles.length; i++) {
+					acAdmin.clearRoleAuthorization(roles[i], resourceName,
+							UserCoreConstants.INVOKE_SERVICE_PERMISSION);
+				}
+			} catch (Exception e) {
+				throw new RuntimeException(
+						"Error while removing security while undeploying the service "
+								+ axisService.getName(), e);
+			}
+		}
 
     }
 
