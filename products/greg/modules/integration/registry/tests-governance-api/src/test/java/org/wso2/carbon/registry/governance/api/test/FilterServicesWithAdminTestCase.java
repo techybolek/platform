@@ -37,11 +37,13 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceFilter;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.CustomLifecyclesChecklistAdminServiceExceptionException;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.services.ArrayOfString;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
@@ -190,7 +192,8 @@ public class FilterServicesWithAdminTestCase {
      * @throws GovernanceException
      */
     @Test(groups = {"wso2.greg"}, description = "Filter Services")
-    public void testFilterServices() throws GovernanceException {
+    public void testFilterServices() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         Service searchResult = serviceManager.findServices(new ServiceFilter() {
 
             public boolean matches(Service service) throws GovernanceException {
@@ -212,7 +215,8 @@ public class FilterServicesWithAdminTestCase {
      * @throws GovernanceException
      */
     @Test(groups = {"wso2.greg"}, description = "Filter Services", dependsOnMethods = "testFilterServices")
-    public void testAdvFilterServices() throws GovernanceException {
+    public void testAdvFilterServices() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         Service searchResult = serviceManager.findServices(new ServiceFilter() {
 
             public boolean matches(Service service) throws GovernanceException {
@@ -262,7 +266,8 @@ public class FilterServicesWithAdminTestCase {
      * basic and advanced search
      */
     @Test(groups = {"wso2.greg"}, description = "Filter Edited Services", dependsOnMethods = "testAdvFilterServices")
-    public void testFilterEditedServices() throws GovernanceException {
+    public void testFilterEditedServices() throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
         serviceForSearching2.addAttribute("test-att", "test-val");
         serviceManager.updateService(serviceForSearching2);
         Service[] searchResult = serviceManager.findServices(new ServiceFilter() {
@@ -391,24 +396,19 @@ public class FilterServicesWithAdminTestCase {
      */
     @Test(groups = {"wso2.greg"}, description = "Try out wild card search from the basic filter", dependsOnMethods = "testSearchForDeletedService")
     public void testWildCardSearch()
-            throws RemoteException, ResourceAdminServiceExceptionException {
-        String criteria =
-                "<serviceMetaData xmlns=\"http://www.wso2.org/governance/metadata\">" +
-                "<overview><name>serviceForSea[A-Za-z1-9]+</name></overview><serviceLifecycle/>" +
-                "<contacts /><interface /><security /><endpoints /><docLinks />" +
-                "<operation xmlns=\"\">Add</operation><currentName xmlns=\"\">" +
-                "</currentName><currentNamespace xmlns=\"\"></currentNamespace></serviceMetaData>";
-
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames().length, 4,
-                            "Expect only 4 Search result");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[0],
-                            "serviceForSearching1");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[1],
-                            "serviceForSearching2");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[2],
-                            "serviceForSearching3");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[3],
-                            "serviceForSearching4");
+            throws RemoteException, ResourceAdminServiceExceptionException, RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) governance);
+        Service searchResult[] = serviceManager.findServices(new ServiceFilter() {
+            public boolean matches(Service service) throws GovernanceException {
+                String attributeVal = service.getAttribute("overview_name");
+                return attributeVal != null && attributeVal.startsWith("serviceForSea");
+            }
+        });
+        Assert.assertEquals(searchResult.length, 4, "Expect only 4 Search result");
+        Assert.assertEquals(searchResult[0].getAttribute("overview_name"), "serviceForSearching1");
+        Assert.assertEquals(searchResult[1].getAttribute("overview_name"), "serviceForSearching2");
+        Assert.assertEquals(searchResult[2].getAttribute("overview_name"), "serviceForSearching3");
+        Assert.assertEquals(searchResult[3].getAttribute("overview_name"), "serviceForSearching4");
 
     }
 
@@ -418,23 +418,27 @@ public class FilterServicesWithAdminTestCase {
      */
     @Test(groups = {"wso2.greg"}, description = "Try out wild card search from the basic filter", dependsOnMethods = "testWildCardSearch")
     public void testAdvWildCardSearch() throws RemoteException,
-                                               ResourceAdminServiceExceptionException {
-        String criteria =
-                "<serviceMetaData xmlns=\"http://www.wso2.org/governance/metadata\">" +
-                "<overview><name>serviceForSea[A-Za-z1-9]+</name><description>Tes[A-Za-z1-9]</description>" +
-                "</overview><serviceLifecycle /><contacts /><interface><messageFormats>SOAP 1.2</messageFormats>" +
-                "<messageExchangePatterns>Request Res[A-Za-z1-9]+</messageExchangePatterns></interface><security />" +
-                "<endpoints /><docLinks /><operation xmlns=\"\">Add</operation><currentName xmlns=\"\"></currentName>" +
-                "<currentNamespace xmlns=\"\"></currentNamespace></serviceMetaData>";
+            ResourceAdminServiceExceptionException, RegistryException {
 
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames().length, 3,
-                            "Expect only 3 Search result");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[0],
-                            "serviceForSearching1");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[1],
-                            "serviceForSearching2");
-        Assert.assertEquals(listMetaDataServiceClient.listServices(criteria).getNames()[2],
-                            "serviceForSearching4");
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry)governance);
+        Service searchResult[] = serviceManager.findServices(new ServiceFilter() {
+            public boolean matches(Service service) throws GovernanceException {
+                String attributeVal_name = service.getAttribute("overview_name");
+                String attributeVal_description = service.getAttribute("overview_description");
+                String attributeVal_messageFormats = service.getAttribute("interface_messageFormats");
+                String attributeVal_messageExchangePatterns = service.getAttribute("interface_messageExchangePatterns");
+
+                return attributeVal_name != null && attributeVal_name.startsWith("serviceForSea") &&
+                        attributeVal_description != null && attributeVal_description.startsWith("Tes") &&
+                        attributeVal_messageFormats != null && attributeVal_messageFormats.equals("SOAP 1.2") &&
+                        attributeVal_messageExchangePatterns != null && attributeVal_messageExchangePatterns.startsWith("Request Res");
+            }
+        });
+
+        Assert.assertEquals(searchResult.length, 3, "Expect only 3 Search result");
+        Assert.assertEquals(searchResult[0].getAttribute("overview_name"), "serviceForSearching1");
+        Assert.assertEquals(searchResult[1].getAttribute("overview_name"), "serviceForSearching2");
+        Assert.assertEquals(searchResult[2].getAttribute("overview_name"), "serviceForSearching4");
 
     }
 
