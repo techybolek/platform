@@ -52,6 +52,10 @@
                     <groupId>commons-codec</groupId>
                     <artifactId>commons-codec</artifactId>
                 </exclusion>
+		<exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
     </dependencies>
@@ -68,7 +72,7 @@
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${pom.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.apache.http.*;version="${orbit.patch.version.httpcore}"
+                            org.apache.http.*;
                         </Export-Package>
                         <Import-Package>
                             !org.apache.http.*,
@@ -81,8 +85,8 @@
     </build>
 
     <properties>
-        <orbit.patch.version.httpcore>4.2.5.wso2v1</orbit.patch.version.httpcore>
-        <httpcore.patch.version>4.2.5</httpcore.patch.version>
+        <orbit.patch.version.httpcore>4.3.0.wso2v1</orbit.patch.version.httpcore>
+        <httpcore.patch.version>4.3</httpcore.patch.version>
     </properties>
 
 </project>

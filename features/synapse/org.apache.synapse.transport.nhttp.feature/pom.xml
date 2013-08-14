@@ -55,6 +55,12 @@
             <artifactId>httpcore-nio</artifactId>
             <version>4.2.3.wso2v1</version>
         </dependency>
+	<dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.5.wso2v1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -83,6 +89,7 @@
                                 <bundleDef>org.apache.synapse:synapse-nhttp-transport</bundleDef>
                                 <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
                                 <bundleDef>org.apache.httpcomponents.wso2:httpcore-nio</bundleDef>
+                                <!--bundleDef>org.apache.httpcomponents.wso2:httpclient</bundleDef-->
                             </bundles>
                         </configuration>
                     </execution>
