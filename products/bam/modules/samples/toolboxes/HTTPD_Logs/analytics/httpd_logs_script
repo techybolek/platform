@@ -21,7 +21,7 @@ insert overwrite table  ProcessedLogs
 	split(log, "\\s")[3], split(log, "\\s")[6], 
 	split(log, "\\s")[8],split(log, "\\s")[9], version 
 	from HttpLogTable;
-class org.wso2.carbon.analytics.hive.extension.ResolvePathAnalyzer;
+analyzer resolvePath(path="file://${CARBON_HOME}/repository/components/lib/CustomUDF_Country.jar");
 set hive.aux.jars.path=${hiveconf:FILE_PATH};
 create temporary function getCountryName as 'org.wso2.carbon.bam.country.mapping.IPCountryNameMap';
 create temporary function getCountryCode as 'org.wso2.carbon.bam.country.mapping.IPCountryCodeMap';  
