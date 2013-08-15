@@ -359,8 +359,10 @@
             <table class="styledLeft" id="clTable" style="margin-left: 0px;" width="100%">
                 <thead>
                 <tr>
-                    <th width="20%"><fmt:message key="cassandra.cl.name"/></th>
-                    <th width="60%"><fmt:message key="cassandra.actions"/></th>
+                    <th width="20%"><fmt:message key="cassandra.cl.index.name"/></th>
+                    <% if(!keyspace.equals("system")) {%>
+                        <th width="60%"><fmt:message key="cassandra.actions"/></th>
+                    <% } %>
                 </tr>
                 </thead>
                 <tbody id="clBody">
@@ -374,14 +376,16 @@
                 <tr id="clRaw<%=j%>">
                     <td id="clTD<%=j%>"><%=name%>
                     </td>
-                    <td>
-                        <input type="hidden" name="clName<%=j%>" id="clName<%=j%>"
-                               value="<%=name%>"/>
-                        <a class="delete-icon-link"
-                           onclick="deleteCL('<%=columnFamily%>','<%=j%>');"
-                           href="#"><fmt:message
-                                key="cassandra.actions.delete"/></a>
-                    </td>
+                    <% if(!keyspace.equals("system")) {%>
+                        <td>
+                            <input type="hidden" name="clName<%=j%>" id="clName<%=j%>"
+                                   value="<%=name%>"/>
+                            <a class="delete-icon-link"
+                               onclick="deleteCL('<%=columnFamily%>','<%=j%>');"
+                               href="#"><fmt:message
+                                    key="cassandra.actions.delete"/></a>
+                        </td>
+                    <% } %>
                 </tr>
                 <%
                         }
