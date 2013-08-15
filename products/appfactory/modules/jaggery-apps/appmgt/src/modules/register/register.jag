@@ -168,5 +168,13 @@ var sendRegisterOrganizationEmail = function (organizationDomain,firstName,email
                         throw "Error while checking for application key";
                     }
                     return captchaInfo;
-        };
+        }
+
+    var storeSubscription = function(aPaaS, iPaaS, domain) {
+        var registry = new MetadataStore(getProperty(ADMIN_USERNAME), getProperty(ADMIN_PASSWORD));
+        var resource = registry.newResource();
+        resource.addProperty("aPaaS", aPaaS);
+        resource.addProperty("iPaaS", iPaaS);
+        registry.put("subscriptions/"+domain, resource);
+    };
 %>

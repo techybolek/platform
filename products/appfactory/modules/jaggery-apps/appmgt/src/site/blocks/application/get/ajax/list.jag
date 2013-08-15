@@ -342,6 +342,19 @@ var log=new Log();
     }else if (action === "getBuildableStages") {
         mod = jagg.module("application");
         print(mod.getBuildableStages());
+    } else if (action === "getSubscriptions") {
+        var domainName = request.getParameter("domainName");
+        var subscriptionInfoPath = "subscriptions/"+domainName;
+        mod = jagg.module("resource");
+
+        var subscriptionInfoResource = mod.getResource(subscriptionInfoPath);
+        var aPaaS = subscriptionInfoResource.getProperty("aPaaS");
+        var iPaaS = subscriptionInfoResource.getProperty("iPaaS");
+
+        var subscriptionInfo = {};
+        subscriptionInfo.aPaaS = aPaaS;
+        subscriptionInfo.iPaaS = iPaaS;
+        print(subscriptionInfo);
     }
 
     else {

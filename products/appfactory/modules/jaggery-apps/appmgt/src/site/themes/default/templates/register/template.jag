@@ -66,14 +66,29 @@ body#home{
 
               },
               function (result) {
-		            jagg.message({content:'You have successfully registered to WSO2 AppFactory.',type:'info',cbk:function(){
+		            jagg.message({content:'You have successfully registered to cloud platform.',type:'info',cbk:function(){
+
+		            jagg.post("../blocks/register/ajax/register.jag", {
+                        action:"storeSubscription",
+                        iPaaS:document.getElementById("iPaaS").checked, //$("#iPaaS").attr('checked')
+                        aPaaS:document.getElementById("aPaaS").checked, //	$("#aPaaS").attr('checked')
+                        domainName:$("#domainName").attr('value')
+                  },
+                  function (result) {
+
+                  },
+                  function (jqXHR, textStatus, errorThrown) {
+
+                  });
             		    window.location.href = "index.jag";
      			    }
 		        });
               },
               function (jqXHR, textStatus, errorThrown) {
-                  jagg.message({content:'Your request to register in WSO2 AppFactory has been submitted.',type:'info', cbk:function(){
-            		window.location.href = "index.jag";
+					// TODO should show a proper error message
+                  jagg.message({content:'Error occured while creating the organization. Please try with different domain.',type:'error', cbk:function(){
+            		//window.location.href = "index.jag";
+					window.location.href = "register.jag";
                   	}
                   });
                 });*/
@@ -190,7 +205,10 @@ function showKaptcha(captcha) {
 							<div id="captchaImgDiv"></div>
 							<input type="text" id="captcha-user-answer" name="captcha-user-answer" class="required" />
 						</div>
-						
+						<div class="input_row">
+							<div><input type="checkbox" name="aPaaS" id="aPaaS">aPaaS</div>
+							<div><input type="checkbox" name="iPaaS" id="iPaaS">iPaaS</div>
+						</div>
 						<div class="input_row btn_row">
 							
 							 <input id="submitbtn" type='submit' value='Create My Account' class='btn btn-primary' />

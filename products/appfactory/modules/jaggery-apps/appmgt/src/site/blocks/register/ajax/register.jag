@@ -66,6 +66,18 @@ throw "Error while registering an organization "+organizationDomain;
         throw "Error while generating captcha";
     }
 
+} else if (action == "storeSubscription") {
+    mod = jagg.module("register");
+    var aPaaS = request.getParameter("aPaaS");
+    var iPaaS = request.getParameter("iPaaS");
+    var domainName = request.getParameter("domainName");
+
+    try {
+        var result = mod.storeSubscription(aPaaS, iPaaS, domainName);
+    } catch (e) {
+        throw "Error while generating captcha";
+    }
+
 } else {
     throw new Error("No action specified");
 }

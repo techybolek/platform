@@ -9,6 +9,9 @@ return jagg.require(jagg.getModulesDir() + "register/register.jag").registerOrg.
 },
 generateCaptcha:function () {
 return jagg.require(jagg.getModulesDir() + "register/register.jag").generateCaptcha.apply(this, arguments);
+},
+storeSubscription:function () {
+return jagg.require(jagg.getModulesDir() + "register/register.jag").storeSubscription.apply(this, arguments);
 }
 });
 %>

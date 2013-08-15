@@ -200,6 +200,7 @@
     }());
     $(document).ready(function($){
     	// function get trigger when clear button clicked.
+    	getSubscriptions();
     	$("#clear").click(function(e){
             $('#iconContainer').html('<input id="icon" type="file" name="appIcon" value="Browse..." />');
         });
@@ -323,6 +324,45 @@
         });
 
     });
+
+    function getSubscriptions() {
+        var userName = $("#userName").attr('value');
+        var domain = userName.split("@")[1];
+
+         jagg.post("../blocks/application/get/ajax/list.jag", {
+                        action:"getSubscriptions",
+                        domainName:domain
+                  },
+                  function (result) {
+                        var subscriptions = jQuery.parseJSON(result);
+                        var aPaaS = subscriptions.aPaaS;
+                        var iPaaS = subscriptions.iPaaS;
+
+                        document.getElementById("aPaaS").value = aPaaS;
+                        document.getElementById("iPaaS").value = iPaaS;
+
+ $('#applicationType option').each(function(){
+                            if(aPaaS == "false") {
+                                if( $(this).attr('availableSub')== "aPaaS"){
+                                    $(this).remove() ;
+                                }
+                            }
+                            if(iPaaS == "false") {
+                                if( $(this).attr('availableSub')== "iPaaS"){
+                                    $(this).remove() ;
+                                }
+                            }
+                            
+                        });
+
+$('#applicationType').addClass('select_list').select2();
+                  },
+                  function (jqXHR, textStatus, errorThrown) {
+                      jagg.message({content:'Could not retrieve organization subscription info.',type:'error', cbk:function(){
+                      }
+                  });
+                  });
+    }
    
 </script>
 
@@ -383,11 +423,13 @@
 
                                 }else{
 
-                                    mainHTML='<select id="applicationType" name="applicationType" class="select_list">';
+                                    mainHTML='<select id="applicationType" name="applicationType">';
 
                                     var applicationTypesCount=applicationTypes.length;
 
                                     for(var i=0 ; i < applicationTypesCount ; i++ ) {
+                                        var SubscriptionAvailability = getProperty("ApplicationType."+applicationTypes[i]+".Property.SubscriptionAvailability");
+
                                         var displayName=getProperty("ApplicationType."+applicationTypes[i]+".Property.DisplayName");
                                         var description=getProperty("ApplicationType."+applicationTypes[i]+".Property.Description");
                                         var enabled = getProperty("ApplicationType."+applicationTypes[i]+".Property.Enable");
@@ -395,9 +437,9 @@
                                         var applicationType=applicationTypes[i];
 
                                         if(comment){
-                                            mainHTML+='<option value="'+applicationType +'"'+ enabled +'>'+displayName +" "+ comment + '</option>';
+                                            mainHTML+='<option availableSub="'+SubscriptionAvailability+'" value="'+applicationType +'"'+ enabled +'>'+displayName +" "+ comment + '</option>';
                                         }else{
-                                            mainHTML+='<option value="'+applicationType +'"'+ enabled +'>'+displayName+'</option>';
+                                            mainHTML+='<option availableSub="'+SubscriptionAvailability+'"value="'+applicationType +'"'+ enabled +'>'+displayName+'</option>';
                                         }
                                         supportiveHTML+='<li>'+applicationType+':'+description+'</li>';
                                     }
@@ -436,6 +478,8 @@
 <a href="#" onclick="location.href='index.jag?'" >Cancel</a>
 </div>
 <input type="hidden" name="userName"  id="userName" value='<%= session.get("LOGGED_IN_USER") %>'/>
+<input type="hidden" name="aPaaS" id="aPaaS" value='false'/>
+<input type="hidden" name="iPaaS" id="iPaaS" value='false'/>
 
 </form>
 </div><!-- /form-container -->

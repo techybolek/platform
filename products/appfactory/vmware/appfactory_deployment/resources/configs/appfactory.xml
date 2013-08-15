@@ -597,6 +597,7 @@
         <Property name="ServerDeploymentPaths">webapps</Property>
 	<Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+	<Property name="SubscriptionAvailability">aPaaS</Property>
     </ApplicationType>
     <ApplicationType name="jaxrs">
         <DisplayName>JAX-RS Application</DisplayName>
@@ -616,6 +617,7 @@
         <Property name="ServerDeploymentPaths">jaxwebapps</Property>
 	<Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+        <Property name="SubscriptionAvailability">aPaaS</Property>
     </ApplicationType>
     <ApplicationType name="jaxws">
         <Property name="ProcessorClassName">
@@ -632,6 +634,7 @@
         <Property name="ServerDeploymentPaths">jaxwebapps</Property>
 	<Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+        <Property name="SubscriptionAvailability">aPaaS</Property>
     </ApplicationType>
     <ApplicationType name="jaggery">
         <Property name="ProcessorClassName">
@@ -650,6 +653,7 @@
 	<Property name="ServerDeploymentPaths">jaggeryapps</Property>
         <Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+        <Property name="SubscriptionAvailability">aPaaS</Property>
     </ApplicationType>
     <ApplicationType name="dbs">
         <Property name="ProcessorClassName">
@@ -666,6 +670,7 @@
         <Property name="ServerDeploymentPaths">dataservices,servicemetafiles</Property>
 	<Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+        <Property name="SubscriptionAvailability">aPaaS</Property>
     </ApplicationType>
     <ApplicationType name="bpel">
         <Property name="ProcessorClassName">
@@ -681,6 +686,7 @@
         </Property>
 	<Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+        <Property name="SubscriptionAvailability">iPaaS</Property>
     </ApplicationType>
     <ApplicationType name="php">
         <Property name="ProcessorClassName">
@@ -696,6 +702,7 @@
         </Property>
 	<Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+        <Property name="SubscriptionAvailability">aPaaS</Property>
     </ApplicationType>
     <ApplicationType name="esb">
         <Property name="ProcessorClassName">
@@ -711,6 +718,7 @@
         </Property>
 	<Property name="Enable">enabled</Property>
 	<Property name="Comment">test</Property>
+        <Property name="SubscriptionAvailability">iPaaS</Property>
     </ApplicationType>
     <!-- API-Token should be set according to the running instance of Jenkins-->
     <ContinuousIntegrationProvider name="jenkins" enabled="true">
