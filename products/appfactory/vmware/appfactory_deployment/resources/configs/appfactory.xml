@@ -203,12 +203,30 @@
         </Keys>
     </ApiManager>
 
+
     <!-- BAM integration related configurations -->
     <BAM>
-	<EnableStatPublishing>false</EnableStatPublishing>
-        <Server>
+        <EnableStatPublishing>false</EnableStatPublishing>
+
+        <!--
+            Server URL of the remote BAM server used to collect statistics. Must
+            be specified in protocol://hostname:port/ format.
+        -->
+        <BAMServerURL>tcp://localhost:7614/</BAMServerURL>
+
+        <!--
+            Administrator username to login to the remote BAM server.
+        -->
+        <BAMUserName>admin</BAMUserName>
+
+        <!--
+            Administrator password to login to the remote BAM server.
+        -->
+        <BAMPassword>admin</BAMPassword>
+
+        <DashboardServer>
                 <Url>https://localhost:9446</Url>
-        </Server>
+        </DashboardServer>
         <Dashboards>
                 <AdminDashboard>
                         <Path>/AdminDashboard</Path>
@@ -217,10 +235,11 @@
                         <Path>/CEODashboard</Path>
                 </CEODashboard>
                 <AppFactoryUsersDashboard>
-                        <Path>/DevelperDashboard</Path>
+                        <Path>/DeveloperDashboard</Path>
                 </AppFactoryUsersDashboard>
         </Dashboards>
     </BAM>
+
 
     <!--Application repository related configurations-->
 
